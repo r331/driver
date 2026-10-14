@@ -6,6 +6,7 @@
 #include "../../game/ported15.h"
 #include "../../game/ported16.h"
 #include "../../game/ported17.h"
+#include "../../game/ported18.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1100,4 +1101,5 @@ void re_install_all(void) {
     re_hook(0x0051bd09, (void*)P17_SlotFindIndex, "P17_SlotFindIndex");
     re_hook(0x00528e12, (void*)P17_ISqrt, "P17_ISqrt");
     re_hook(0x005104ed, (void*)P17_PushScreenState, "P17_PushScreenState");
+    re_hook(0x0052840c, (void*)P18_ClearFlag, "P18_ClearFlag");
 }

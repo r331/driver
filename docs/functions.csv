@@ -3248,7 +3248,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 005282e1,FUN_005282e1,,,,,,76,todo
 005283b5,FUN_005283b5,,,,,,45,todo
 005283e2,FUN_005283e2,InitFpuCw_005283E2,manual,Misc,,,42,ported
-0052840c,FUN_0052840c,,,,,,24,todo
+0052840c,FUN_0052840c,P18_ClearFlag,manual,ported18,,,24,ported
 00528455,FUN_00528455,NoopFn00528455,manual,Ported6,,,12,ported
 00528461,FUN_00528461,,,,,,75,todo
 005284ac,FUN_005284ac,Mat3MulT_005284AC,manual,Ported8,,,238,ported
