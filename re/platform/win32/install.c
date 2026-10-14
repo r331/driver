@@ -5,6 +5,7 @@
 #include "../../game/dirnodes.h"
 #include "../../game/menustate.h"
 #include "../../game/noop.h"
+#include "../../game/uihandlers.h"
 #include "../../game/menuselect.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
@@ -65,6 +66,66 @@ void re_install_all(void) {
     re_hook(0x0041e456, (void*)NoopFn0041e456, "NoopFn0041e456");
     re_hook(0x0041ed21, (void*)NoopFn0041ed21, "NoopFn0041ed21");
     re_hook(0x0041ed39, (void*)NoopFn0041ed39, "NoopFn0041ed39");
+    re_hook(0x00408699, (void*)Ui00408699, "Ui00408699");
+    re_hook(0x0040c867, (void*)Ui0040C867, "Ui0040C867");
+    re_hook(0x0040c87a, (void*)Ui0040C87A, "Ui0040C87A");
+    re_hook(0x0040c88d, (void*)Ui0040C88D, "Ui0040C88D");
+    re_hook(0x004120ee, (void*)Ui004120EE, "Ui004120EE");
+    re_hook(0x004120fe, (void*)Ui004120FE, "Ui004120FE");
+    re_hook(0x00412112, (void*)Ui00412112, "Ui00412112");
+    re_hook(0x00412126, (void*)Ui00412126, "Ui00412126");
+    re_hook(0x0041213a, (void*)Ui0041213A, "Ui0041213A");
+    re_hook(0x0041214e, (void*)Ui0041214E, "Ui0041214E");
+    re_hook(0x00412162, (void*)Ui00412162, "Ui00412162");
+    re_hook(0x00412176, (void*)Ui00412176, "Ui00412176");
+    re_hook(0x0041218a, (void*)Ui0041218A, "Ui0041218A");
+    re_hook(0x004122e7, (void*)Ui004122E7, "Ui004122E7");
+    re_hook(0x00412509, (void*)Ui00412509, "Ui00412509");
+    re_hook(0x00412519, (void*)Ui00412519, "Ui00412519");
+    re_hook(0x0041252d, (void*)Ui0041252D, "Ui0041252D");
+    re_hook(0x00412541, (void*)Ui00412541, "Ui00412541");
+    re_hook(0x00412555, (void*)Ui00412555, "Ui00412555");
+    re_hook(0x00412569, (void*)Ui00412569, "Ui00412569");
+    re_hook(0x0041257d, (void*)Ui0041257D, "Ui0041257D");
+    re_hook(0x00412591, (void*)Ui00412591, "Ui00412591");
+    re_hook(0x004125a5, (void*)Ui004125A5, "Ui004125A5");
+    re_hook(0x00412702, (void*)Ui00412702, "Ui00412702");
+    re_hook(0x00412f3a, (void*)Ui00412F3A, "Ui00412F3A");
+    re_hook(0x00412f56, (void*)Ui00412F56, "Ui00412F56");
+    re_hook(0x00412f62, (void*)Ui00412F62, "Ui00412F62");
+    re_hook(0x00412f74, (void*)Ui00412F74, "Ui00412F74");
+    re_hook(0x00412f90, (void*)Ui00412F90, "Ui00412F90");
+    re_hook(0x00412f9c, (void*)Ui00412F9C, "Ui00412F9C");
+    re_hook(0x00413543, (void*)Ui00413543, "Ui00413543");
+    re_hook(0x0041354f, (void*)Ui0041354F, "Ui0041354F");
+    re_hook(0x0041355b, (void*)Ui0041355B, "Ui0041355B");
+    re_hook(0x0041357e, (void*)Ui0041357E, "Ui0041357E");
+    re_hook(0x0041358a, (void*)Ui0041358A, "Ui0041358A");
+    re_hook(0x004136ce, (void*)Ui004136CE, "Ui004136CE");
+    re_hook(0x0041371c, (void*)Ui0041371C, "Ui0041371C");
+    re_hook(0x0041376a, (void*)Ui0041376A, "Ui0041376A");
+    re_hook(0x004137b8, (void*)Ui004137B8, "Ui004137B8");
+    re_hook(0x00413955, (void*)Ui00413955, "Ui00413955");
+    re_hook(0x004139a3, (void*)Ui004139A3, "Ui004139A3");
+    re_hook(0x004139c1, (void*)Ui004139C1, "Ui004139C1");
+    re_hook(0x004139da, (void*)Ui004139DA, "Ui004139DA");
+    re_hook(0x004139f8, (void*)Ui004139F8, "Ui004139F8");
+    re_hook(0x00413a11, (void*)Ui00413A11, "Ui00413A11");
+    re_hook(0x00413a2f, (void*)Ui00413A2F, "Ui00413A2F");
+    re_hook(0x00413a48, (void*)Ui00413A48, "Ui00413A48");
+    re_hook(0x00413a66, (void*)Ui00413A66, "Ui00413A66");
+    re_hook(0x00413bc5, (void*)Ui00413BC5, "Ui00413BC5");
+    re_hook(0x00413bf7, (void*)Ui00413BF7, "Ui00413BF7");
+    re_hook(0x00413c29, (void*)Ui00413C29, "Ui00413C29");
+    re_hook(0x00413c5b, (void*)Ui00413C5B, "Ui00413C5B");
+    re_hook(0x00413c8d, (void*)Ui00413C8D, "Ui00413C8D");
+    re_hook(0x004157a9, (void*)Ui004157A9, "Ui004157A9");
+    re_hook(0x00415841, (void*)Ui00415841, "Ui00415841");
+    re_hook(0x00417a89, (void*)Ui00417A89, "Ui00417A89");
+    re_hook(0x00417a98, (void*)Ui00417A98, "Ui00417A98");
+    re_hook(0x00417ad6, (void*)Ui00417AD6, "Ui00417AD6");
+    re_hook(0x00417aea, (void*)Ui00417AEA, "Ui00417AEA");
+    re_hook(0x00417af9, (void*)Ui00417AF9, "Ui00417AF9");
     re_hook(0x0040831c, (void*)MenuCopyPos, "MenuCopyPos");
     re_hook(0x004c379d, (void*)GetWaypointForFrame, "GetWaypointForFrame");
     re_hook(0x004c4151, (void*)FindNodeById, "FindNodeById");

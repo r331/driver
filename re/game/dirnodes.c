@@ -115,7 +115,7 @@ void DrawNode(DIR_NODE *n) {
     if (n->unk24 == 0) { DrawRect(x, y, 45.0f, 45.0f, col); return; }
 #ifdef RE_HOOK_BUILD
     const uint8_t *icon = (const uint8_t *)(uintptr_t)(uint32_t)n->unk24;
-    DrawIcon(x, y, 45.0f / (float)icon[0xb], 45.0f / (float)icon[0xc], (uint32_t)n->unk24, col);
+    GameDrawIcon(x, y, 45.0f / (float)icon[0xb], 45.0f / (float)icon[0xc], (uint32_t)n->unk24, col);
 #endif
 }
 /* 004c3e6a — маркер узла: иконка (по unk00) в углу клетки; серый (0x40) если узел выключен, бит 1 — нижний правый угол */

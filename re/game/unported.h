@@ -7,6 +7,17 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    V(UiCall0040C455, 0x0040c455, (int32_t a0, int32_t a1), (a0, a1)) \
+    V(UiCall00523E50, 0x00523e50, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
+    V(UiCall00412254, 0x00412254, (void), ()) \
+    V(UiCall00412228, 0x00412228, (void), ()) \
+    V(UiCall00412087, 0x00412087, (void), ()) \
+    V(UiCall0041266F, 0x0041266f, (void), ()) \
+    V(UiCall00412643, 0x00412643, (void), ()) \
+    V(UiCall00412487, 0x00412487, (void), ()) \
+    V(UiCall0040C480, 0x0040c480, (int32_t a0), (a0)) \
+    V(UiCall00408600, 0x00408600, (int32_t a0), (a0)) \
+    V(UiCall00417AA2, 0x00417aa2, (void), ()) \
     V(MenuAction40CD17, 0x0040cd17, (void), ()) \
     V(MenuRedraw, 0x00409622, (void), ()) \
     V(MenuRefresh, 0x0040500d, (void), ()) \
@@ -18,7 +29,7 @@
     R(uint32_t, LoadIconByName, 0x004ec91e, (const char *name), (name)) \
     V(DrawSprite, 0x0051755e, (int x, int y, uint32_t tex, int a, int b, int c, int d, int e), (x, y, tex, a, b, c, d, e)) \
     V(DrawRect, 0x004d7c46, (float x, float y, float w, float h, uint32_t color), (x, y, w, h, color)) \
-    V(DrawIcon, 0x004e72f8, (float x, float y, float sx, float sy, uint32_t icon, uint32_t color), (x, y, sx, sy, icon, color)) \
+    V(GameDrawIcon, 0x004e72f8, (float x, float y, float sx, float sy, uint32_t icon, uint32_t color), (x, y, sx, sy, icon, color)) \
     R(int, GetMarkerYAdjust, 0x004023c9, (int a), (a)) \
     R(int, IsKeyDown, 0x004e383a, (int sc), (sc)) \
     R(int, GetGroundHeight, 0x004dd039, (int *pos), (pos)) \

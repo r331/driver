@@ -4,6 +4,7 @@
 #include "../game/directorstorage.h"
 #include "../game/dirnodes.h"
 #include "../game/menustate.h"
+#include "../game/uihandlers.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -189,8 +190,15 @@ static int test_menu5(void) {
     return (MenuByte54ACD4 != 2 || MenuByte54ACE4 != 2);
 }
 
+static int test_ui(void) {
+    UiVar005FE84C = 0; UiVar005FE84C = 0;
+    Ui00412F62(); CHECK(Ui00412F9C() == 1);
+    CHECK(Ui00412F62() == -1);
+    CHECK(Ui004157A9() == 0);
+    return 0;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
