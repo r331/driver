@@ -15,6 +15,7 @@
 #include "../../game/menuselect.h"
 #include "../../game/widgets.h"
 #include "../../game/ported4.h"
+#include "../../game/ported5.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
     re_hook(0x004c622c, (void*)RenumberCameras,   "RenumberCameras");
@@ -762,4 +763,55 @@ void re_install_all(void) {
     re_hook(0x004ef997, (void*)FillOnes4EF997, "FillOnes4EF997");
     re_hook(0x004a2c5b, (void*)ReleaseSlot4A2C5B, "ReleaseSlot4A2C5B");
     re_hook(0x004f5d67, (void*)TickTimer4F5D67, "TickTimer4F5D67");
+    re_hook(0x0040fea0, (void*)MenuPick0040FEA0, "MenuPick0040FEA0");
+    re_hook(0x0040ff5a, (void*)MenuPick0040FF5A, "MenuPick0040FF5A");
+    re_hook(0x00410014, (void*)MenuPick00410014, "MenuPick00410014");
+    re_hook(0x004100ce, (void*)MenuPick004100CE, "MenuPick004100CE");
+    re_hook(0x00410188, (void*)MenuPick00410188, "MenuPick00410188");
+    re_hook(0x00410242, (void*)MenuPick00410242, "MenuPick00410242");
+    re_hook(0x004102fc, (void*)MenuPick004102FC, "MenuPick004102FC");
+    re_hook(0x004103b6, (void*)MenuPick004103B6, "MenuPick004103B6");
+    re_hook(0x00410470, (void*)MenuPick00410470, "MenuPick00410470");
+    re_hook(0x0041052a, (void*)MenuPick0041052A, "MenuPick0041052A");
+    re_hook(0x004105e4, (void*)MenuPick004105E4, "MenuPick004105E4");
+    re_hook(0x0041069e, (void*)MenuPick0041069E, "MenuPick0041069E");
+    re_hook(0x0041074d, (void*)MenuHiliteWhite0041074D, "MenuHiliteWhite0041074D");
+    re_hook(0x004106e1, (void*)MenuHiliteRed004106E1, "MenuHiliteRed004106E1");
+    re_hook(0x00411a31, (void*)MenuHiliteRed00411A31, "MenuHiliteRed00411A31");
+    re_hook(0x00411a9d, (void*)MenuHiliteWhite00411A9D, "MenuHiliteWhite00411A9D");
+    re_hook(0x00412a0d, (void*)SetIconIdx00412A0D, "SetIconIdx00412A0D");
+    re_hook(0x00412a7b, (void*)SetIconIdx00412A7B, "SetIconIdx00412A7B");
+    re_hook(0x00412ae9, (void*)SetIconIdx00412AE9, "SetIconIdx00412AE9");
+    re_hook(0x00412b57, (void*)SetIconIdx00412B57, "SetIconIdx00412B57");
+    re_hook(0x00412bc5, (void*)SetIconIdx00412BC5, "SetIconIdx00412BC5");
+    re_hook(0x00412c33, (void*)SetIconIdx00412C33, "SetIconIdx00412C33");
+    re_hook(0x00412ca1, (void*)SetIconIdx00412CA1, "SetIconIdx00412CA1");
+    re_hook(0x00412d0f, (void*)SetIconIdx00412D0F, "SetIconIdx00412D0F");
+    re_hook(0x00409a91, (void*)FloatStep00409A91, "FloatStep00409A91");
+    re_hook(0x00409aca, (void*)FloatStep00409ACA, "FloatStep00409ACA");
+    re_hook(0x00409b03, (void*)FloatStep00409B03, "FloatStep00409B03");
+    re_hook(0x00409b3c, (void*)FloatStep00409B3C, "FloatStep00409B3C");
+    re_hook(0x00404721, (void*)PrevPcar00404721, "PrevPcar00404721");
+    re_hook(0x0040475e, (void*)NextPcar0040475E, "NextPcar0040475E");
+    re_hook(0x0040479b, (void*)SetPcarName0040479B, "SetPcarName0040479B");
+    re_hook(0x00412087, (void*)SetupMenuTable00412087, "SetupMenuTable00412087");
+    re_hook(0x00412487, (void*)SetupMenuTable00412487, "SetupMenuTable00412487");
+    re_hook(0x004154cd, (void*)ToggleOpt004154CD, "ToggleOpt004154CD");
+    re_hook(0x0041542a, (void*)ToggleOpt0041542A, "ToggleOpt0041542A");
+    re_hook(0x00416040, (void*)SetupMiami00416040, "SetupMiami00416040");
+    re_hook(0x00417353, (void*)LoadArrowIcons00417353, "LoadArrowIcons00417353");
+    re_hook(0x00417620, (void*)LoadSliderIcons00417620, "LoadSliderIcons00417620");
+    re_hook(0x00407636, (void*)ToggleVar00407636, "ToggleVar00407636");
+    re_hook(0x004086b4, (void*)StartTimer004086B4, "StartTimer004086B4");
+    re_hook(0x0040c455, (void*)Call3_0040C455, "Call3_0040C455");
+    re_hook(0x0048ac0d, (void*)Chain0048AC0D, "Chain0048AC0D");
+    re_hook(0x004d5ffc, (void*)Chain004D5FFC, "Chain004D5FFC");
+    re_hook(0x004d7b60, (void*)PlayTrack004D7B60, "PlayTrack004D7B60");
+    re_hook(0x004bf452, (void*)Pack565Bytes004BF452, "Pack565Bytes004BF452");
+    re_hook(0x004d262c, (void*)Fwd004D262C, "Fwd004D262C");
+    re_hook(0x004eafcf, (void*)Fwd004EAFCF, "Fwd004EAFCF");
+    re_hook(0x00513cf9, (void*)Fwd00513CF9, "Fwd00513CF9");
+    re_hook(0x00407c27, (void*)Copy400_00407C27, "Copy400_00407C27");
+    re_hook(0x004fbe96, (void*)LoadTrail004FBE96, "LoadTrail004FBE96");
+    re_hook(0x004fc0c7, (void*)Fwd004FC0C7, "Fwd004FC0C7");
 }

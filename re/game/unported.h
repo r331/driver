@@ -7,6 +7,30 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    V(Call004E3391, 0x004e3391, (void), ()) \
+    V(Call0052A910, 0x0052a910, (uint32_t a0, uint32_t a1, int32_t a2), (a0, a1, a2)) \
+    V(Call0041219E, 0x0041219e, (void), ()) \
+    V(Call004125B9, 0x004125b9, (void), ()) \
+    V(Call0052369B, 0x0052369b, (int32_t a0), (a0)) \
+    V(Call00524873, 0x00524873, (void), ()) \
+    V(Call00524763, 0x00524763, (void), ()) \
+    V(Call00408770, 0x00408770, (void), ()) \
+    V(Call004072BE, 0x004072be, (void), ()) \
+    R(int32_t, Call00528221, 0x00528221, (int32_t a0, int32_t a1, uint32_t a2), (a0, a1, a2)) \
+    V(Call0040C165, 0x0040c165, (void), ()) \
+    V(Call0040C20B, 0x0040c20b, (int32_t a0), (a0)) \
+    V(Call0040BF50, 0x0040bf50, (void), ()) \
+    V(Call0048B65D, 0x0048b65d, (void), ()) \
+    V(Call0048B568, 0x0048b568, (void), ()) \
+    V(Call005237B1, 0x005237b1, (void), ()) \
+    V(Call0052436A, 0x0052436a, (void), ()) \
+    V(Call0052479E, 0x0052479e, (int32_t a0), (a0)) \
+    V(Call004D28A3, 0x004d28a3, (int32_t a0), (a0)) \
+    V(Call004EAFE0, 0x004eafe0, (int32_t a0), (a0)) \
+    V(Call00514A47, 0x00514a47, (int32_t a0), (a0)) \
+    V(Call005283B5, 0x005283b5, (uint32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
+    R(int32_t, Call0052ADB0, 0x0052adb0, (uint32_t a0, uint32_t a1), (a0, a1)) \
+    V(Call004FBBFC, 0x004fbbfc, (uint32_t a0), (a0)) \
     V(Call0040EA70, 0x0040ea70, (void), ()) \
     V(Call00419B35, 0x00419b35, (void), ()) \
     V(Call00414D1F, 0x00414d1f, (void), ()) \

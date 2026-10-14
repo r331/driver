@@ -8,6 +8,7 @@
 #include "../game/menustate.h"
 #include "../game/uihandlers.h"
 #include "../game/ported4.h"
+#include "../game/ported5.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -230,8 +231,23 @@ static int test_p4(void) {
     D_00c81494 = 0; TickTimer4F5D67(); CHECK(D_00c81494 == 0); D_00c81494 = 3; TickTimer4F5D67(); CHECK(D_00c81494 == 2);
     return 0;
 }
+static int test_p5(void) {
+    CHECK(MenuPick0040FEA0() == 0 && Q005FE768 == 2 && MenuI005FE770 == 2 && MenuI005FE774 == -1 && Q00B87F00 == 1);
+    MenuPick0041069E(); CHECK(Q005FE768 == 0x10 && Q005FE764 == 0xd04a7a);
+    Q0057B56C = 0; PrevPcar00404721(); CHECK(Q0057B56C == 0x11);
+    Q0057B56C = 0x10; NextPcar0040475E(); CHECK(Q0057B56C == 0x11);
+    Q0057B56C = 0x11; NextPcar0040475E(); CHECK(Q0057B56C == 0);
+    Q0057B56C = 0x10; PrevPcar00404721(); CHECK(Q0057B56C == 0xe + 0 || Q0057B56C == 0xf);
+    Q01270C24 = 1.0f; Q00546030 = 5.0f; Q0054604C = 0.5f; FloatStep00409A91(); CHECK(Q01270C24 == 1.5f);
+    Q00546030 = 1.0f; FloatStep00409A91(); CHECK(Q01270C24 == 1.5f);
+    Q00B87EF0 = 0; Q0057B72C = 0; ToggleVar00407636(); CHECK(Q00B87EF0 == 0);
+    Q00B87E94 = 0; ToggleOpt004154CD(); CHECK(Q00B87E94 == 1);
+    SetupMiami00416040(); CHECK(UiVar00B87E38 == 0x2e && 1);
+    SetIconIdx00412A0D(0); CHECK(WU0054CBB0 == 0x54cdf0);
+    return 0;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

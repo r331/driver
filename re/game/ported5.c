@@ -1,0 +1,252 @@
+#include "ported5.h"
+GAME_VAR_DEF(float, Q00546028, 0x00546028)
+GAME_VAR_DEF(float, Q0054602C, 0x0054602c)
+GAME_VAR_DEF(float, Q00546030, 0x00546030)
+GAME_VAR_DEF(float, Q0054604C, 0x0054604c)
+GAME_VAR_DEF(uint32_t, Q00549A34, 0x00549a34)
+GAME_VAR_DEF(int32_t, Q00549A60, 0x00549a60)
+GAME_VAR_DEF(p5_bytes_t, Q0054C03C, 0x0054c03c)
+GAME_VAR_DEF(p5_bytes_t, Q0054C03D, 0x0054c03d)
+GAME_VAR_DEF(p5_bytes_t, Q0054C03E, 0x0054c03e)
+GAME_VAR_DEF(p5_bytes_t, Q0054C35C, 0x0054c35c)
+GAME_VAR_DEF(p5_bytes_t, Q0054C35D, 0x0054c35d)
+GAME_VAR_DEF(p5_bytes_t, Q0054C35E, 0x0054c35e)
+GAME_VAR_DEF(int32_t, Q0054C6D8, 0x0054c6d8)
+GAME_VAR_DEF(int32_t, Q0054C948, 0x0054c948)
+GAME_VAR_DEF(int32_t, Q0054CC58, 0x0054cc58)
+GAME_VAR_DEF(uint16_t, Q0054DF98, 0x0054df98)
+GAME_VAR_DEF(uint16_t, Q0054DF9A, 0x0054df9a)
+GAME_VAR_DEF(uint32_t, Q0054DF9C, 0x0054df9c)
+GAME_VAR_DEF(int32_t, Q0054E308, 0x0054e308)
+GAME_VAR_DEF(int32_t, Q0057B56C, 0x0057b56c)
+GAME_VAR_DEF(int32_t, Q0057B72C, 0x0057b72c)
+GAME_VAR_DEF(uint32_t, Q005FE764, 0x005fe764)
+GAME_VAR_DEF(int32_t, Q005FE768, 0x005fe768)
+GAME_VAR_DEF(int32_t, Q005FEA0C, 0x005fea0c)
+GAME_VAR_DEF(int32_t, Q005FEA10, 0x005fea10)
+GAME_VAR_DEF(int32_t, Q005FEA20, 0x005fea20)
+GAME_VAR_DEF(int32_t, Q005FEA24, 0x005fea24)
+GAME_VAR_DEF(int32_t, Q00B31E2C, 0x00b31e2c)
+GAME_VAR_DEF(int32_t, Q00B87E90, 0x00b87e90)
+GAME_VAR_DEF(int32_t, Q00B87E94, 0x00b87e94)
+GAME_VAR_DEF(int32_t, Q00B87EF0, 0x00b87ef0)
+GAME_VAR_DEF(int32_t, Q00B87F00, 0x00b87f00)
+GAME_VAR_DEF(int32_t, Q00B91D3C, 0x00b91d3c)
+GAME_VAR_DEF(int32_t, Q00C55858, 0x00c55858)
+GAME_VAR_DEF(int32_t, Q00C5585C, 0x00c5585c)
+GAME_VAR_DEF(int32_t, Q00C55860, 0x00c55860)
+GAME_VAR_DEF(int32_t, Q00C55864, 0x00c55864)
+GAME_VAR_DEF(int32_t, Q00C55868, 0x00c55868)
+GAME_VAR_DEF(int32_t, Q00C5586C, 0x00c5586c)
+GAME_VAR_DEF(int32_t, Q00C55870, 0x00c55870)
+GAME_VAR_DEF(int32_t, Q00C55874, 0x00c55874)
+GAME_VAR_DEF(int32_t, Q00C559F8, 0x00c559f8)
+GAME_VAR_DEF(int32_t, Q00C559FC, 0x00c559fc)
+GAME_VAR_DEF(int32_t, Q00C55A74, 0x00c55a74)
+GAME_VAR_DEF(int32_t, Q00C812F0, 0x00c812f0)
+GAME_VAR_DEF(float, Q0125F3F8, 0x0125f3f8)
+GAME_VAR_DEF(float, Q01270C24, 0x01270c24)
+int32_t MenuPick0040FEA0(void) {
+    Q00B87F00 = 1; Q005FE764 = 0x00d04a70; Q005FE768 = 2;
+    Call004E3391(); MenuHiliteWhite0041074D();
+    MenuI005FE770 = Q005FE768; MenuI005FE774 = -1; return 0;
+}
+int32_t MenuPick0040FF5A(void) {
+    Q00B87F00 = 1; Q005FE764 = 0x00d04a71; Q005FE768 = 4;
+    Call004E3391(); MenuHiliteWhite0041074D();
+    MenuI005FE770 = Q005FE768; MenuI005FE774 = -1; return 0;
+}
+int32_t MenuPick00410014(void) {
+    Q00B87F00 = 1; Q005FE764 = 0x00d04a72; Q005FE768 = 16;
+    Call004E3391(); MenuHiliteWhite0041074D();
+    MenuI005FE770 = Q005FE768; MenuI005FE774 = -1; return 0;
+}
+int32_t MenuPick004100CE(void) {
+    Q00B87F00 = 1; Q005FE764 = 0x00d04a74; Q005FE768 = 6;
+    Call004E3391(); MenuHiliteWhite0041074D();
+    MenuI005FE770 = Q005FE768; MenuI005FE774 = -1; return 0;
+}
+int32_t MenuPick00410188(void) {
+    Q00B87F00 = 1; Q005FE764 = 0x00d04a73; Q005FE768 = 8;
+    Call004E3391(); MenuHiliteWhite0041074D();
+    MenuI005FE770 = Q005FE768; MenuI005FE774 = -1; return 0;
+}
+int32_t MenuPick00410242(void) {
+    Q00B87F00 = 1; Q005FE764 = 0x00d04a76; Q005FE768 = 20;
+    Call004E3391(); MenuHiliteWhite0041074D();
+    MenuI005FE770 = Q005FE768; MenuI005FE774 = -1; return 0;
+}
+int32_t MenuPick004102FC(void) {
+    Q00B87F00 = 1; Q005FE764 = 0x00d04a77; Q005FE768 = 22;
+    Call004E3391(); MenuHiliteWhite0041074D();
+    MenuI005FE770 = Q005FE768; MenuI005FE774 = -1; return 0;
+}
+int32_t MenuPick004103B6(void) {
+    Q00B87F00 = 1; Q005FE764 = 0x00d04a75; Q005FE768 = 24;
+    Call004E3391(); MenuHiliteWhite0041074D();
+    MenuI005FE770 = Q005FE768; MenuI005FE774 = -1; return 0;
+}
+int32_t MenuPick00410470(void) {
+    Q00B87F00 = 1; Q005FE764 = 0x00d04a7b; Q005FE768 = 18;
+    Call004E3391(); MenuHiliteWhite0041074D();
+    MenuI005FE770 = Q005FE768; MenuI005FE774 = -1; return 0;
+}
+int32_t MenuPick0041052A(void) {
+    Q00B87F00 = 1; Q005FE764 = 0x00d04a78; Q005FE768 = 12;
+    Call004E3391(); MenuHiliteWhite0041074D();
+    MenuI005FE770 = Q005FE768; MenuI005FE774 = -1; return 0;
+}
+int32_t MenuPick004105E4(void) {
+    Q00B87F00 = 1; Q005FE764 = 0x00d04a79; Q005FE768 = 14;
+    Call004E3391(); MenuHiliteWhite0041074D();
+    MenuI005FE770 = Q005FE768; MenuI005FE774 = -1; return 0;
+}
+int32_t MenuPick0041069E(void) {
+    Q00B87F00 = 1; Q005FE764 = 0x00d04a7a; Q005FE768 = 16;
+    Call004E3391(); MenuHiliteWhite0041074D();
+    MenuI005FE770 = Q005FE768; MenuI005FE774 = -1; return 0;
+}
+void MenuHiliteWhite0041074D(void) {
+    Q0054C03C[MenuI005FE770 * 0x10] = 0xff; Q0054C03D[MenuI005FE770 * 0x10] = 255; Q0054C03E[MenuI005FE770 * 0x10] = 255;
+    if (MenuI005FE774 != -1) { Q0054C03C[MenuI005FE774 * 0x10] = 0xff; Q0054C03D[MenuI005FE774 * 0x10] = 255; Q0054C03E[MenuI005FE774 * 0x10] = 255; }
+}
+void MenuHiliteRed004106E1(void) {
+    Q0054C03C[MenuI005FE770 * 0x10] = 0xff; Q0054C03D[MenuI005FE770 * 0x10] = 0; Q0054C03E[MenuI005FE770 * 0x10] = 0;
+    if (MenuI005FE774 != -1) { Q0054C03C[MenuI005FE774 * 0x10] = 0xff; Q0054C03D[MenuI005FE774 * 0x10] = 0; Q0054C03E[MenuI005FE774 * 0x10] = 0; }
+}
+void MenuHiliteRed00411A31(void) {
+    Q0054C35C[MenuI005FE798 * 0x10] = 0xff; Q0054C35D[MenuI005FE798 * 0x10] = 0; Q0054C35E[MenuI005FE798 * 0x10] = 0;
+    if (MenuI005FE79C != -1) { Q0054C35C[MenuI005FE79C * 0x10] = 0xff; Q0054C35D[MenuI005FE79C * 0x10] = 0; Q0054C35E[MenuI005FE79C * 0x10] = 0; }
+}
+void MenuHiliteWhite00411A9D(void) {
+    Q0054C35C[MenuI005FE798 * 0x10] = 0xff; Q0054C35D[MenuI005FE798 * 0x10] = 255; Q0054C35E[MenuI005FE798 * 0x10] = 255;
+    if (MenuI005FE79C != -1) { Q0054C35C[MenuI005FE79C * 0x10] = 0xff; Q0054C35D[MenuI005FE79C * 0x10] = 255; Q0054C35E[MenuI005FE79C * 0x10] = 255; }
+}
+void SetIconIdx00412A0D(int32_t reset) {
+    WU0054CBB0 = 0x54cdf0; Q0054CC58 = Q00C5585C; if (reset == 0) MenuCounter5D577C = 0;
+}
+void SetIconIdx00412A7B(int32_t reset) {
+    WU0054CBC4 = 0x54ce08; Q0054CC58 = Q00C55858; if (reset == 0) MenuCounter5D577C = 0;
+}
+void SetIconIdx00412AE9(int32_t reset) {
+    WU0054CBD8 = 0x54ce20; Q0054CC58 = Q00C55874; if (reset == 0) MenuCounter5D577C = 0;
+}
+void SetIconIdx00412B57(int32_t reset) {
+    WU0054CBEC = 0x54ce38; Q0054CC58 = Q00C55870; if (reset == 0) MenuCounter5D577C = 0;
+}
+void SetIconIdx00412BC5(int32_t reset) {
+    WU0054CC00 = 0x54ce50; Q0054CC58 = Q00C55868; if (reset == 0) MenuCounter5D577C = 0;
+}
+void SetIconIdx00412C33(int32_t reset) {
+    WU0054CC14 = 0x54ce68; Q0054CC58 = Q00C5586C; if (reset == 0) MenuCounter5D577C = 0;
+}
+void SetIconIdx00412CA1(int32_t reset) {
+    WU0054CC28 = 0x54ce80; Q0054CC58 = Q00C55864; if (reset == 0) MenuCounter5D577C = 0;
+}
+void SetIconIdx00412D0F(int32_t reset) {
+    WU0054CC28 = 0x54ce98; Q0054CC58 = Q00C55860; if (reset == 0) MenuCounter5D577C = 0;
+}
+void FloatStep00409A91(void) {
+    if (Q01270C24 < Q00546030) { Q01270C24 = Q01270C24 + Q0054604C; MenuVar575EF8 = 4; MenuRedraw(); }
+}
+void FloatStep00409ACA(void) {
+    if (Q0054602C < Q01270C24) { Q01270C24 = Q01270C24 - Q0054604C; MenuVar575EF8 = 4; MenuRedraw(); }
+}
+void FloatStep00409B03(void) {
+    if (Q0125F3F8 < Q00546028) { Q0125F3F8 = Q0125F3F8 + Q0054604C; MenuVar575EF8 = 4; MenuRedraw(); }
+}
+void FloatStep00409B3C(void) {
+    if (Q0054602C < Q0125F3F8) { Q0125F3F8 = Q0125F3F8 - Q0054604C; MenuVar575EF8 = 4; MenuRedraw(); }
+}
+void PrevPcar00404721(void) {
+    Q0057B56C = Q0057B56C - 1;
+    if (Q0057B56C < 0) Q0057B56C = 0x11;
+    if (Q0057B56C == 0xf) Q0057B56C = 0xe;
+    SetPcarName0040479B();
+}
+void NextPcar0040475E(void) {
+    Q0057B56C = Q0057B56C + 1;
+    if (0x11 < Q0057B56C) Q0057B56C = 0;
+    if (Q0057B56C == 0xf) Q0057B56C = 0x10;
+    SetPcarName0040479B();
+}
+void SetPcarName0040479B(void) {
+    Q00549A60 = Q00C55A74;
+    Call0052A910(0x57b560, 0x549ac0, Q0057B56C + 1);
+    Q00549A34 = 0x57b560;
+}
+void SetupMenuTable00412087(void) {
+    Q0054C6D8 = Q00C559F8; G0054C6E8 = 0x5fe858; G0054C6F8 = 0x5fe85c;
+    Call0041219E();
+}
+void SetupMenuTable00412487(void) {
+    Q0054C948 = Q00C559FC; G0054C958 = 0x5fe934; G0054C968 = 0x5fe938;
+    Call004125B9();
+}
+int32_t ToggleOpt004154CD(void) {
+    Q00B87E94 ^= 1; Call0052369B(Q00B87E94); Call00414D1F(); return 0;
+}
+int32_t ToggleOpt0041542A(void) {
+    Q00B87E90 ^= 1;
+    if (Q00B87E90 == 0) { Call00524873(); Call00524763(); }
+    Call00414D1F(); return 0;
+}
+void SetupMiami00416040(void) {
+    Q0054DF9C = 0x54e104; Q0054DF98 = 0x147; Q0054DF9A = 0xb6;
+    MenuB0054DFD4 = 1; UiVar00B87E38 = 0x2e;
+}
+void LoadArrowIcons00417353(void) {
+    Q005FEA0C = LoadIconByName("LEFTARRO");
+    Q005FEA10 = LoadIconByName("RIGHTARR");
+    Q0054E308 = Q00C55A74;
+}
+int32_t LoadSliderIcons00417620(void) {
+    Q005FEA24 = LoadIconByName("SLIDER"); Q005FEA20 = LoadIconByName("SLIDERBA");
+    Call00408770(); return -1;
+}
+int32_t ToggleVar00407636(void) {
+    if (Q0057B72C != 0) {
+        if (Q00B31E2C == 0) Q00B87EF0 = 0; else Q00B87EF0 ^= 1;
+        Call004072BE();
+    }
+    return 0;
+}
+void StartTimer004086B4(void) {
+    if (D_0054a144 != -1) StopTimer4086EA();
+    MenuCounter5D577C = 0;
+    D_0054a144 = Call00528221(1000, 1, 0x408710);
+}
+void Call3_0040C455(int32_t a, int32_t b) {
+    Call0040C165(); if (a == 0) UiVar00B87E38 = 0;
+    Call0040C20B(b); Call0040BF50();
+}
+void Chain0048AC0D(void) {
+    Call0048B65D(); Call0048B568();
+}
+void Chain004D5FFC(void) {
+    Call005237B1(); Call0052436A();
+}
+void PlayTrack004D7B60(void) {
+    Call0052479E(Q00B91D3C);
+}
+void Pack565Bytes004BF452(uint8_t r, uint8_t g, uint8_t b) {
+    Pack565_004D950F(r, g, b);
+}
+void Fwd004D262C(int32_t a) {
+    Call004D28A3(a);
+}
+void Fwd004EAFCF(int32_t a) {
+    Call004EAFE0(a);
+}
+void Fwd00513CF9(int32_t a) {
+    Call00514A47(a);
+}
+void Copy400_00407C27(int32_t a) {
+    Call005283B5(0x1271a80, a, 0x400);
+}
+void LoadTrail004FBE96(void) {
+    Q00C812F0 = Call0052ADB0(0x5701d8, 0x5701d4);
+}
+void Fwd004FC0C7(void) {
+    Call004FBBFC(0x570248);
+}
