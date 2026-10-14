@@ -2,7 +2,13 @@
 #include "director.h"
 #include "unported.h"
 #include <string.h>
+#include <stdio.h>
+#include "engine.h"
+#include "unported.h"
 GAME_VAR_DEF(DIR_NODE*, DirNodeTable, 0x00d17c58)
+GAME_VAR_DEF(int32_t, DirIndicatorOn, 0x00d17bac)
+GAME_VAR_DEF(int32_t, DirIndicatorCnt, 0x00d17b80)
+GAME_VAR_DEF(uint32_t, IndicatorTex, 0x00c55c58)
 /* 004c5367 — пустая функция */
 void DirNopStub(void) {}
 /* 004c379d — запись буфера для кадра (frame-2 кратно 150) */
@@ -73,4 +79,28 @@ DIR_NODE *GetNodeParent(int id) {
     if (!id) return 0;
     DIR_NODE *n = FindNodeById(id);
     return n ? FindNodeById(n->unk18) : 0;
+}
+/* 004c37f6 — пишет в лог все путевые точки повтора (запись 12 байт: x, z, кадр) */
+void DumpWaypoints(void) {
+    char buf[64];
+    if (DirectorBufferCount == 0) return;
+    snprintf(buf, sizeof buf, "The game contains %d replay waypoints.", (int)DirectorBufferCount);
+    DebugLog(buf);
+    const int32_t *w = (const int32_t *)DirectorBuffer;
+    for (int i = 0; i < DirectorBufferCount; i++) {
+        snprintf(buf, sizeof buf, "Waypoint number %d, dump information:", i); DebugLog(buf);
+        snprintf(buf, sizeof buf, "Frame index: %d", (int)w[i * 3 + 2]); DebugLog(buf);
+        snprintf(buf, sizeof buf, "X position: %d\nZ position: %d", (int)w[i * 3], (int)w[i * 3 + 1]); DebugLog(buf);
+    }
+}
+/* 004c42a9 — рисует индикатор в углу экрана (0..3 углы, 4 центр) пока счётчик < 0x20 */
+void DrawCornerIndicator(void) {
+    if (!DirIndicatorOn || DirIndicatorCnt >= 0x20) return;
+    switch (DirectorUnk84) {
+    case 0: DrawSprite(0x10,  0x10,  IndicatorTex, 0, 0,    0xff, 0, 0); break;
+    case 1: DrawSprite(0x270, 0x10,  IndicatorTex, 0, 2,    0xff, 0, 0); break;
+    case 2: DrawSprite(0x10,  0x1d0, IndicatorTex, 0, 0x20, 0xff, 0, 0); break;
+    case 3: DrawSprite(0x270, 0x1d0, IndicatorTex, 0, 0x22, 0xff, 0, 0); break;
+    case 4: DrawSprite(0x140, 0xf0,  IndicatorTex, 0, 1,    0xff, 0, 0); break;
+    }
 }

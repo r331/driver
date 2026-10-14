@@ -58,3 +58,4 @@
 | v0.7 | Director +4 (всего 35) |
 | v0.8 | DirNodes +6 |
 | v0.9 | DirNodes +4 (всего 45) |
+- v0.10: DumpWaypoints, DrawCornerIndicator (47 всего)

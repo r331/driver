@@ -42,6 +42,8 @@ void re_install_all(void) {
     re_hook(0x004c379d, (void*)GetWaypointForFrame, "GetWaypointForFrame");
     re_hook(0x004c4151, (void*)FindNodeById, "FindNodeById");
     re_hook(0x004c419e, (void*)FindNodeByLink, "FindNodeByLink");
+    re_hook(0x004c37f6, (void*)DumpWaypoints, "DumpWaypoints");
+    re_hook(0x004c42a9, (void*)DrawCornerIndicator, "DrawCornerIndicator");
     re_hook(0x004c36da, (void*)ClearDirectorTable, "ClearDirectorTable");
     re_hook(0x004c3c94, (void*)DrawNodeChain, "DrawNodeChain");
     re_hook(0x004c3cf1, (void*)DrawNodeMarkersChain, "DrawNodeMarkersChain");

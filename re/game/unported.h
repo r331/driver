@@ -13,6 +13,7 @@
     R(int, FindAutoCamera, 0x004c6740, (void **out), (out))   /* выбирает автокамеру в *out, 0 — не нашлось */ \
     V(InitNewCamera, 0x004c32c1, (void *cam), (cam)) \
     R(uint32_t, LoadIconByName, 0x004ec91e, (const char *name), (name)) \
+    V(DrawSprite, 0x0051755e, (int x, int y, uint32_t tex, int a, int b, int c, int d, int e), (x, y, tex, a, b, c, d, e)) \
     V(DrawNode, 0x004c3d5c, (void *node), (node)) \
     V(DrawNodeMarker, 0x004c3e6a, (void *node), (node)) \
     V(SetCameraPosition, 0x00523c99, (float x, float y, float z), (x, y, z))

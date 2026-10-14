@@ -131,6 +131,7 @@ static int test_nodes(void) {
     WAYPOINT_REC w[2]; DirectorBuffer = w; DirectorBufferCount = 2;
     CHECK(GetWaypointForFrame(2) == &w[0] && GetWaypointForFrame(152) == &w[1]);
     CHECK(!GetWaypointForFrame(302) && !GetWaypointForFrame(3));
+    DumpWaypoints(); DirIndicatorOn = 1; DirIndicatorCnt = 0; DirectorUnk84 = 4; DrawCornerIndicator(); DirIndicatorOn = 0;
     return 0;
 }
 int re_selftest(void) {

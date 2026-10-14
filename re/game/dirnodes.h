@@ -28,3 +28,11 @@ void ClearDirectorTable(DIR_NODE *tbl);          /* 004c36da */
 void DrawNodeChain(DIR_NODE *start);             /* 004c3c94 */
 void DrawNodeMarkersChain(DIR_NODE *start);      /* 004c3cf1 */
 DIR_NODE *GetNodeParent(int id);                 /* 004c41ec */
+void DumpWaypoints(void);                         /* 004c37f6 */
+void DrawCornerIndicator(void);                  /* 004c42a9 */
+#define DirIndicatorOn  GAME_VAR(int32_t,  DirIndicatorOn,  0x00d17bac)
+#define DirIndicatorCnt GAME_VAR(int32_t,  DirIndicatorCnt, 0x00d17b80)
+#define IndicatorTex    GAME_VAR(uint32_t, IndicatorTex,    0x00c55c58)
+#ifndef RE_HOOK_BUILD
+extern int32_t DirIndicatorOn, DirIndicatorCnt; extern uint32_t IndicatorTex;
+#endif

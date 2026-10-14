@@ -2396,7 +2396,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c372a,FUN_004c372a,FreeDirectorBuffer,manual,Director,,,48,ported
 004c375a,FUN_004c375a,GetWaypointAfterFrame,manual,Director,,,67,ported
 004c379d,FUN_004c379d,GetWaypointForFrame,manual,DirNodes.c,,,89,ported
-004c37f6,FUN_004c37f6,,,,,,236,todo
+004c37f6,FUN_004c37f6,DumpWaypoints,manual,DirNodes,,,236,ported
 004c38e2,FUN_004c38e2,ReplayMenuHandler,debug_string,,,,195,named
 004c3c94,FUN_004c3c94,DrawNodeChain,manual,DirNodes.c,,,93,ported
 004c3cf1,FUN_004c3cf1,DrawNodeMarkersChain,manual,DirNodes.c,,,107,ported
@@ -2408,7 +2408,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c419e,FUN_004c419e,FindNodeByLink,manual,DirNodes.c,,,78,ported
 004c41ec,FUN_004c41ec,GetNodeParent,manual,DirNodes.c,,,58,ported
 004c4226,FUN_004c4226,FindNodeAtPixel,manual,DirNodes.c,,,131,ported
-004c42a9,FUN_004c42a9,,,,,,62,todo
+004c42a9,FUN_004c42a9,DrawCornerIndicator,manual,DirNodes,,,62,ported
 004c459f,FUN_004c459f,AddCamera,debug_string,,,,118,named
 004c483e,FUN_004c483e,ChangeCamera,debug_string,,,,118,named
 004c4ef9,FUN_004c4ef9,,,,,,809,todo
