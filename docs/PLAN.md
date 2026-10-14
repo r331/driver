@@ -57,3 +57,4 @@
 - v0.6: +SyncCameraFromList (004c52d9), IsCameraCarFarEnough (004c60b2); всего 31
 | v0.7 | Director +4 (всего 35) |
 | v0.8 | DirNodes +6 |
+| v0.9 | DirNodes +4 (всего 45) |

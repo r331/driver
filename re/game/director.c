@@ -2,6 +2,7 @@
 #include "director.h"
 #include "engine.h"
 #include "unported.h"
+#include "dirnodes.h"
 #include "crt.h"
 #include "directorstorage.h"
 #include <string.h>
@@ -260,6 +261,6 @@ int CountNearbyCars(void) {
 }
 /* 004c810f */
 void ClearDirectorTables(void) {
-    ClearDirectorTable(&DirTableA);
-    ClearDirectorTable(&DirTableB);
+    ClearDirectorTable((DIR_NODE *)&DirTableA);
+    ClearDirectorTable((DIR_NODE *)&DirTableB);
 }

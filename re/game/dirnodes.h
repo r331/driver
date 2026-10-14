@@ -24,3 +24,7 @@ DIR_NODE *FindNodeById(int id);
 DIR_NODE *FindNodeByLink(int id);
 int FindNodeAtPixel(int x, int y);
 int SetNodeEnabled(int id, int enable);
+void ClearDirectorTable(DIR_NODE *tbl);          /* 004c36da */
+void DrawNodeChain(DIR_NODE *start);             /* 004c3c94 */
+void DrawNodeMarkersChain(DIR_NODE *start);      /* 004c3cf1 */
+DIR_NODE *GetNodeParent(int id);                 /* 004c41ec */

@@ -12,7 +12,9 @@
     R(void *, FindCameraRecordForFrame, 0x004c61b2, (int frame), (frame)) \
     R(int, FindAutoCamera, 0x004c6740, (void **out), (out))   /* выбирает автокамеру в *out, 0 — не нашлось */ \
     V(InitNewCamera, 0x004c32c1, (void *cam), (cam)) \
-    V(ClearDirectorTable, 0x004c36da, (void *tbl), (tbl)) \
+    R(uint32_t, LoadIconByName, 0x004ec91e, (const char *name), (name)) \
+    V(DrawNode, 0x004c3d5c, (void *node), (node)) \
+    V(DrawNodeMarker, 0x004c3e6a, (void *node), (node)) \
     V(SetCameraPosition, 0x00523c99, (float x, float y, float z), (x, y, z))
 
 #ifdef RE_HOOK_BUILD
