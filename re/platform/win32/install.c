@@ -9,6 +9,7 @@
 #include "../../game/uihandlers2.h"
 #include "../../game/uihandlers3.h"
 #include "../../game/uihandlers4.h"
+#include "../../game/globalsets.h"
 #include "../../game/menuselect.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
@@ -516,4 +517,35 @@ void re_install_all(void) {
     re_hook(0x0040a44f, (void*)MenuSet54A844Off, "MenuSet54A844Off");
     re_hook(0x0040a495, (void*)MenuSet54A854On, "MenuSet54A854On");
     re_hook(0x0040a4a1, (void*)MenuSet54A854Off, "MenuSet54A854Off");
+    re_hook(0x0040a5c6, (void*)GlobalSet0040A5C6, "GlobalSet0040A5C6");
+    re_hook(0x0040b0a4, (void*)GlobalSet0040B0A4, "GlobalSet0040B0A4");
+    re_hook(0x004122c4, (void*)GlobalSet004122C4, "GlobalSet004122C4");
+    re_hook(0x004126df, (void*)GlobalSet004126DF, "GlobalSet004126DF");
+    re_hook(0x0041351c, (void*)GlobalSet0041351C, "GlobalSet0041351C");
+    re_hook(0x00413691, (void*)GlobalSet00413691, "GlobalSet00413691");
+    re_hook(0x0041390c, (void*)GlobalSet0041390C, "GlobalSet0041390C");
+    re_hook(0x00413b7c, (void*)GlobalSet00413B7C, "GlobalSet00413B7C");
+    re_hook(0x0041640c, (void*)GlobalSet0041640C, "GlobalSet0041640C");
+    re_hook(0x00416433, (void*)GlobalSet00416433, "GlobalSet00416433");
+    re_hook(0x0041648a, (void*)GlobalSet0041648A, "GlobalSet0041648A");
+    re_hook(0x00417a2e, (void*)GlobalSet00417A2E, "GlobalSet00417A2E");
+    re_hook(0x00419f80, (void*)GlobalSet00419F80, "GlobalSet00419F80");
+    re_hook(0x004964e2, (void*)GlobalSet004964E2, "GlobalSet004964E2");
+    re_hook(0x004aaddf, (void*)GlobalSet004AADDF, "GlobalSet004AADDF");
+    re_hook(0x004c09b9, (void*)GlobalSet004C09B9, "GlobalSet004C09B9");
+    re_hook(0x004ca0c0, (void*)GlobalSet004CA0C0, "GlobalSet004CA0C0");
+    re_hook(0x004cf100, (void*)GlobalSet004CF100, "GlobalSet004CF100");
+    re_hook(0x004e38fe, (void*)GlobalSet004E38FE, "GlobalSet004E38FE");
+    re_hook(0x004e3911, (void*)GlobalSet004E3911, "GlobalSet004E3911");
+    re_hook(0x00510349, (void*)GlobalSet00510349, "GlobalSet00510349");
+    re_hook(0x0051040f, (void*)GlobalSet0051040F, "GlobalSet0051040F");
+    re_hook(0x00510550, (void*)GlobalSet00510550, "GlobalSet00510550");
+    re_hook(0x00510595, (void*)GlobalSet00510595, "GlobalSet00510595");
+    re_hook(0x0051065b, (void*)GlobalSet0051065B, "GlobalSet0051065B");
+    re_hook(0x00511378, (void*)GlobalSet00511378, "GlobalSet00511378");
+    re_hook(0x005113b1, (void*)GlobalSet005113B1, "GlobalSet005113B1");
+    re_hook(0x00519ddb, (void*)GlobalSet00519DDB, "GlobalSet00519DDB");
+    re_hook(0x00519de7, (void*)GlobalSet00519DE7, "GlobalSet00519DE7");
+    re_hook(0x0051bd78, (void*)GlobalSet0051BD78, "GlobalSet0051BD78");
+    re_hook(0x0051d811, (void*)GlobalSet0051D811, "GlobalSet0051D811");
 }

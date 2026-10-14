@@ -1244,7 +1244,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040a4a1,FUN_0040a4a1,Set54A854_0,manual,UIMisc,,,12,ported
 0040a4ad,FUN_0040a4ad,,,,,,58,todo
 0040a540,FUN_0040a540,,,,,,134,todo
-0040a5c6,FUN_0040a5c6,,,,,,95,todo
+0040a5c6,FUN_0040a5c6,GlobalSet0040A5C6,manual,GlobalSets,,,95,ported
 0040a625,FUN_0040a625,Select54A90C_Mode2,manual,UIMisc,,,22,ported
 0040a63b,FUN_0040a63b,Clear54A90C_IfZero,manual,UIMisc,,,18,ported
 0040a64d,FUN_0040a64d,Select54A91C_Mode1,manual,UIMisc,,,22,ported
@@ -1268,7 +1268,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040ab6f,FUN_0040ab6f,MenuSetVals5D77C0,manual,MenuState,,,48,ported
 0040ab9f,FUN_0040ab9f,MenuSetByte5D77C1,manual,MenuState,,,13,ported
 0040abac,FUN_0040abac,,,,,,1272,todo
-0040b0a4,FUN_0040b0a4,,,,,,90,todo
+0040b0a4,FUN_0040b0a4,GlobalSet0040B0A4,manual,GlobalSets,,,90,ported
 0040b0fe,FUN_0040b0fe,,,,,,206,todo
 0040b1cc,FUN_0040b1cc,,,,,,186,todo
 0040b286,FUN_0040b286,,,,,,1143,todo
@@ -1436,7 +1436,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00412228,FUN_00412228,,,,,,44,todo
 00412254,FUN_00412254,,,,,,44,todo
 00412280,FUN_00412280,,,,,,68,todo
-004122c4,FUN_004122c4,,,,,,35,todo
+004122c4,FUN_004122c4,GlobalSet004122C4,manual,GlobalSets,,,35,ported
 004122e7,FUN_004122e7,Ui004122E7,manual,MenuState,,,20,ported
 004123d0,FUN_004123d0,,,,,,183,todo
 00412487,FUN_00412487,,,,,,40,todo
@@ -1454,7 +1454,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00412643,FUN_00412643,,,,,,44,todo
 0041266f,FUN_0041266f,,,,,,44,todo
 0041269b,FUN_0041269b,,,,,,68,todo
-004126df,FUN_004126df,,,,,,35,todo
+004126df,FUN_004126df,GlobalSet004126DF,manual,GlobalSets,,,35,ported
 00412702,FUN_00412702,Ui00412702,manual,MenuState,,,20,ported
 004127f0,FUN_004127f0,,,,,,495,todo
 004129df,FUN_004129df,,,,,,46,todo
@@ -1493,7 +1493,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00413381,FUN_00413381,,,,,,51,todo
 004133b4,FUN_004133b4,,,,,,73,todo
 004134a0,FUN_004134a0,,,,,,124,todo
-0041351c,FUN_0041351c,,,,,,39,todo
+0041351c,FUN_0041351c,GlobalSet0041351C,manual,GlobalSets,,,39,ported
 00413543,FUN_00413543,Ui00413543,manual,MenuState,,,12,ported
 0041354f,FUN_0041354f,Ui0041354F,manual,MenuState,,,12,ported
 0041355b,FUN_0041355b,Ui0041355B,manual,MenuState,,,35,ported
@@ -1501,7 +1501,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041358a,FUN_0041358a,Ui0041358A,manual,MenuState,,,12,ported
 00413596,FUN_00413596,,,,,,48,todo
 00413610,FUN_00413610,,,,,,129,todo
-00413691,FUN_00413691,,,,,,61,todo
+00413691,FUN_00413691,GlobalSet00413691,manual,GlobalSets,,,61,ported
 004136ce,FUN_004136ce,Ui004136CE,manual,MenuState,,,12,ported
 004136da,FUN_004136da,MenuLeave004136DA,manual,MenuState,,,18,ported
 004136ec,FUN_004136ec,,,,,,48,todo
@@ -1515,7 +1515,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004137c4,FUN_004137c4,MenuLeave004137C4,manual,MenuState,,,18,ported
 004137d6,FUN_004137d6,,,,,,48,todo
 00413890,FUN_00413890,,,,,,124,todo
-0041390c,FUN_0041390c,,,,,,73,todo
+0041390c,FUN_0041390c,GlobalSet0041390C,manual,GlobalSets,,,73,ported
 00413955,FUN_00413955,Ui00413955,manual,MenuState,,,12,ported
 00413961,FUN_00413961,MenuLeave00413961,manual,MenuState,,,18,ported
 00413973,FUN_00413973,,,,,,48,todo
@@ -1532,7 +1532,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00413a54,FUN_00413a54,MenuLeave00413A54,manual,MenuState,,,18,ported
 00413a66,FUN_00413a66,Ui00413A66,manual,MenuState,,,25,ported
 00413b00,FUN_00413b00,,,,,,124,todo
-00413b7c,FUN_00413b7c,,,,,,73,todo
+00413b7c,FUN_00413b7c,GlobalSet00413B7C,manual,GlobalSets,,,73,ported
 00413bc5,FUN_00413bc5,Ui00413BC5,manual,MenuState,,,32,ported
 00413be5,FUN_00413be5,MenuLeave00413BE5,manual,MenuState,,,18,ported
 00413bf7,FUN_00413bf7,Ui00413BF7,manual,MenuState,,,32,ported
@@ -1619,11 +1619,11 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004161b3,FUN_004161b3,,,,,,105,todo
 0041621c,FUN_0041621c,,,,,,115,todo
 00416390,FUN_00416390,,,,,,124,todo
-0041640c,FUN_0041640c,,,,,,39,todo
-00416433,FUN_00416433,,,,,,22,todo
+0041640c,FUN_0041640c,GlobalSet0041640C,manual,GlobalSets,,,39,ported
+00416433,FUN_00416433,GlobalSet00416433,manual,GlobalSets,,,22,ported
 00416449,FUN_00416449,MenuLeave00416449,manual,MenuState,,,18,ported
 0041645b,FUN_0041645b,,,,,,47,todo
-0041648a,FUN_0041648a,,,,,,22,todo
+0041648a,FUN_0041648a,GlobalSet0041648A,manual,GlobalSets,,,22,ported
 004164a0,FUN_004164a0,MenuLeave004164A0,manual,MenuState,,,18,ported
 004164b2,FUN_004164b2,,,,,,47,todo
 00416540,FUN_00416540,,,,,,107,todo
@@ -1638,7 +1638,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00417620,FUN_00417620,,,,,,49,todo
 00417651,FUN_00417651,,,,,,628,todo
 00417970,FUN_00417970,,,,,,190,todo
-00417a2e,FUN_00417a2e,,,,,,39,todo
+00417a2e,FUN_00417a2e,GlobalSet00417A2E,manual,GlobalSets,,,39,ported
 00417a55,FUN_00417a55,,,,,,52,todo
 00417a89,FUN_00417a89,Ui00417A89,manual,MenuState,,,15,ported
 00417a98,FUN_00417a98,Ui00417A98,manual,MenuState,,,10,ported
@@ -1687,7 +1687,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00419d3e,FUN_00419d3e,,,,,,117,todo
 00419db3,FUN_00419db3,,,,,,108,todo
 00419f00,FUN_00419f00,,,,,,128,todo
-00419f80,FUN_00419f80,,,,,,61,todo
+00419f80,FUN_00419f80,GlobalSet00419F80,manual,GlobalSets,,,61,ported
 00419fbd,FUN_00419fbd,Ui00419FBD,manual,MenuUI,,,15,ported
 00419fcc,FUN_00419fcc,Ui00419FCC,manual,MenuUI,,,10,ported
 00419fd6,FUN_00419fd6,Ui00419FD6,manual,MenuUI,,,12,ported
@@ -2145,7 +2145,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004958b7,FUN_004958b7,,,,,,2459,todo
 00496372,FUN_00496372,,,,,,341,todo
 004964c7,FUN_004964c7,Dec145934,manual,UIMisc,,,27,ported
-004964e2,FUN_004964e2,,,,,,35,todo
+004964e2,FUN_004964e2,GlobalSet004964E2,manual,GlobalSets,,,35,ported
 00496505,FUN_00496505,,,,,,100,todo
 00496569,FUN_00496569,,,,,,404,todo
 004966fd,FUN_004966fd,,,,,,213,todo
@@ -2269,7 +2269,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004aa4ea,FUN_004aa4ea,,,,,,1078,todo
 004aad60,FUN_004aad60,NoopFn004aad60,manual,Noop,,,5,ported
 004aad65,FUN_004aad65,,,,,,122,todo
-004aaddf,FUN_004aaddf,,,,,,85,todo
+004aaddf,FUN_004aaddf,GlobalSet004AADDF,manual,GlobalSets,,,85,ported
 004aae34,FUN_004aae34,,,,,,114,todo
 004aaea6,FUN_004aaea6,,,,,,148,todo
 004aaf3a,FUN_004aaf3a,,,,,,421,todo
@@ -2372,7 +2372,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c0218,FUN_004c0218,,,,,,274,todo
 004c032a,FUN_004c032a,,,,,,1425,todo
 004c08bb,FUN_004c08bb,,,,,,254,todo
-004c09b9,FUN_004c09b9,,,,,,45,todo
+004c09b9,FUN_004c09b9,GlobalSet004C09B9,manual,GlobalSets,,,45,ported
 004c09e6,FUN_004c09e6,,,,,,649,todo
 004c0c6f,FUN_004c0c6f,,,,,,2642,todo
 004c16c1,FUN_004c16c1,CopyWords8000,manual,UIMisc,,,24,ported
@@ -2462,7 +2462,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c9bf4,FUN_004c9bf4,LogWaypoint,manual,DirectorStorage,range,,172,ported
 004c9ca0,FUN_004c9ca0,LoadWaypoints,manual,DirectorStorage,assert,,300,ported
 004c9dcc,FUN_004c9dcc,DeleteWaypointFile,manual,DirectorStorage,,,38,ported
-004ca0c0,FUN_004ca0c0,,,,,,117,todo
+004ca0c0,FUN_004ca0c0,GlobalSet004CA0C0,manual,GlobalSets,,,117,ported
 004ca135,FUN_004ca135,,,,,,1741,todo
 004ca802,FUN_004ca802,,,,,,395,todo
 004ca98d,FUN_004ca98d,,,,,,675,todo
@@ -2490,7 +2490,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004cd994,FUN_004cd994,,,,,,401,todo
 004cdb25,FUN_004cdb25,,,,,,641,todo
 004cdda6,FUN_004cdda6,,,,,,842,todo
-004cf100,FUN_004cf100,,,,,,35,todo
+004cf100,FUN_004cf100,GlobalSet004CF100,manual,GlobalSets,,,35,ported
 004cf123,FUN_004cf123,,,,,,428,todo
 004cf2cf,FUN_004cf2cf,,,,,,995,todo
 004cf6b2,FUN_004cf6b2,,,,,,192,todo
@@ -2661,8 +2661,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004e3871,FUN_004e3871,,,,,,67,todo
 004e38b4,FUN_004e38b4,,,,,,37,todo
 004e38d9,FUN_004e38d9,,,,,,37,todo
-004e38fe,FUN_004e38fe,,,,,,19,todo
-004e3911,FUN_004e3911,,,,,,19,todo
+004e38fe,FUN_004e38fe,GlobalSet004E38FE,manual,GlobalSets,,,19,ported
+004e3911,FUN_004e3911,GlobalSet004E3911,manual,GlobalSets,,,19,ported
 004e3924,FUN_004e3924,,,,,,136,todo
 004e39ac,FUN_004e39ac,,,,,,365,todo
 004e3b19,FUN_004e3b19,,,,,,7,todo
@@ -2966,19 +2966,19 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0051017e,FUN_0051017e,,,,,,57,todo
 005101b7,FUN_005101b7,,,,,,57,todo
 005101f0,FUN_005101f0,,,,,,118,todo
-00510349,FUN_00510349,,,,,,57,todo
+00510349,FUN_00510349,GlobalSet00510349,manual,GlobalSets,,,57,ported
 00510382,FUN_00510382,,,,,,66,todo
 005103c4,FUN_005103c4,,,,,,40,todo
 005103ec,FUN_005103ec,,,,,,35,todo
-0051040f,FUN_0051040f,,,,,,57,todo
+0051040f,FUN_0051040f,GlobalSet0051040F,manual,GlobalSets,,,57,ported
 00510448,FUN_00510448,,,,,,86,todo
 0051049e,FUN_0051049e,,,,,,27,todo
 005104b9,FUN_005104b9,,,,,,52,todo
 005104ed,FUN_005104ed,,,,,,99,todo
-00510550,FUN_00510550,,,,,,69,todo
-00510595,FUN_00510595,,,,,,69,todo
+00510550,FUN_00510550,GlobalSet00510550,manual,GlobalSets,,,69,ported
+00510595,FUN_00510595,GlobalSet00510595,manual,GlobalSets,,,69,ported
 005105da,FUN_005105da,,,,,,129,todo
-0051065b,FUN_0051065b,,,,,,15,todo
+0051065b,FUN_0051065b,GlobalSet0051065B,manual,GlobalSets,,,15,ported
 0051066a,FUN_0051066a,,,,,,52,todo
 0051069e,FUN_0051069e,,,,,,52,todo
 005106d2,FUN_005106d2,,,,,,86,todo
@@ -2988,8 +2988,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0051082a,FUN_0051082a,,,,,,35,todo
 0051084d,FUN_0051084d,,,,,,1332,todo
 00510e1d,FUN_00510e1d,,,,,,1215,todo
-00511378,FUN_00511378,,,,,,57,todo
-005113b1,FUN_005113b1,,,,,,15,todo
+00511378,FUN_00511378,GlobalSet00511378,manual,GlobalSets,,,57,ported
+005113b1,FUN_005113b1,GlobalSet005113B1,manual,GlobalSets,,,15,ported
 00511e60,FUN_00511e60,,,,,,344,todo
 00511fb8,FUN_00511fb8,,,,,,87,todo
 0051200f,FUN_0051200f,,,,,,152,todo
@@ -3077,8 +3077,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00519d22,FUN_00519d22,,,,,,10,todo
 00519d2c,FUN_00519d2c,,,,,,68,todo
 00519d70,FUN_00519d70,,,,,,107,todo
-00519ddb,FUN_00519ddb,,,,,,12,todo
-00519de7,FUN_00519de7,,,,,,12,todo
+00519ddb,FUN_00519ddb,GlobalSet00519DDB,manual,GlobalSets,,,12,ported
+00519de7,FUN_00519de7,GlobalSet00519DE7,manual,GlobalSets,,,12,ported
 00519df3,FUN_00519df3,,,,,,48,todo
 00519e23,FUN_00519e23,NoopFn00519e23,manual,Noop,,,5,ported
 00519e28,FUN_00519e28,NoopFn00519e28,manual,Noop,,,5,ported
@@ -3099,7 +3099,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0051b974,FUN_0051b974,,,,,,671,todo
 0051bcc0,FUN_0051bcc0,,,,,,73,todo
 0051bd09,FUN_0051bd09,,,,,,111,todo
-0051bd78,FUN_0051bd78,,,,,,36,todo
+0051bd78,FUN_0051bd78,GlobalSet0051BD78,manual,GlobalSets,,,36,ported
 0051bd9c,FUN_0051bd9c,,,,,,160,todo
 0051be3c,FUN_0051be3c,,,,,,153,todo
 0051bed5,FUN_0051bed5,,,,,,173,todo
@@ -3119,7 +3119,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0051d1a3,FUN_0051d1a3,,,,,,90,todo
 0051d440,FUN_0051d440,,,,,,220,todo
 0051d51c,FUN_0051d51c,,,,,,757,todo
-0051d811,FUN_0051d811,,,,,,185,todo
+0051d811,FUN_0051d811,GlobalSet0051D811,manual,GlobalSets,,,185,ported
 0051d8ca,FUN_0051d8ca,,,,,,180,todo
 0051d97e,FUN_0051d97e,,,,,,666,todo
 0051dc18,FUN_0051dc18,,,,,,259,todo
