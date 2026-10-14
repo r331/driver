@@ -10,6 +10,7 @@
 #include "../../game/uihandlers3.h"
 #include "../../game/uihandlers4.h"
 #include "../../game/globalsets.h"
+#include "../../game/smallfuncs.h"
 #include "../../game/menuselect.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
@@ -548,4 +549,64 @@ void re_install_all(void) {
     re_hook(0x00519de7, (void*)GlobalSet00519DE7, "GlobalSet00519DE7");
     re_hook(0x0051bd78, (void*)GlobalSet0051BD78, "GlobalSet0051BD78");
     re_hook(0x0051d811, (void*)GlobalSet0051D811, "GlobalSet0051D811");
+    re_hook(0x0041f81e, (void*)NoopFn0041F81E, "NoopFn0041F81E");
+    re_hook(0x0041fa49, (void*)NoopFn0041FA49, "NoopFn0041FA49");
+    re_hook(0x0041fa50, (void*)NoopFn0041FA50, "NoopFn0041FA50");
+    re_hook(0x0041fa57, (void*)NoopFn0041FA57, "NoopFn0041FA57");
+    re_hook(0x0041fa7d, (void*)NoopFn0041FA7D, "NoopFn0041FA7D");
+    re_hook(0x0041fa8b, (void*)NoopFn0041FA8B, "NoopFn0041FA8B");
+    re_hook(0x0041fa92, (void*)NoopFn0041FA92, "NoopFn0041FA92");
+    re_hook(0x0041fab9, (void*)NoopFn0041FAB9, "NoopFn0041FAB9");
+    re_hook(0x004d03fd, (void*)ReturnZero004D03FD, "ReturnZero004D03FD");
+    re_hook(0x004e3b19, (void*)ReturnZero004E3B19, "ReturnZero004E3B19");
+    re_hook(0x00519d22, (void*)ReturnOne00519D22, "ReturnOne00519D22");
+    re_hook(0x00502779, (void*)SetField24_00502779, "SetField24_00502779");
+    re_hook(0x00502680, (void*)ClearField2C_00502680, "ClearField2C_00502680");
+    re_hook(0x00519d09, (void*)AddToCounter00519D09, "AddToCounter00519D09");
+    re_hook(0x0048fbba, (void*)ClearFlagByte0048FBBA, "ClearFlagByte0048FBBA");
+    re_hook(0x004f5c72, (void*)ScriptSetWait004F5C72, "ScriptSetWait004F5C72");
+    re_hook(0x004f5c58, (void*)ScriptSetWaitX50_004F5C58, "ScriptSetWaitX50_004F5C58");
+    re_hook(0x0051049e, (void*)ToggleBit0051049E, "ToggleBit0051049E");
+    re_hook(0x00514e4c, (void*)IsFlag80_00514E4C, "IsFlag80_00514E4C");
+    re_hook(0x0041e1e4, (void*)SetFlagFromArg0041E1E4, "SetFlagFromArg0041E1E4");
+    re_hook(0x0050e940, (void*)SetLatchValue0050E940, "SetLatchValue0050E940");
+    re_hook(0x00524473, (void*)IsSlotActive00524473, "IsSlotActive00524473");
+    re_hook(0x0041b7ad, (void*)TestBit0041B7AD, "TestBit0041B7AD");
+    re_hook(0x00516eb4, (void*)SetRGB00516EB4, "SetRGB00516EB4");
+    re_hook(0x0052432a, (void*)SlotSetOn0052432A, "SlotSetOn0052432A");
+    re_hook(0x0052434a, (void*)SlotSetOff0052434A, "SlotSetOff0052434A");
+    re_hook(0x004ac6ac, (void*)PoolPush004AC6AC, "PoolPush004AC6AC");
+    re_hook(0x004ac702, (void*)PoolPush004AC702, "PoolPush004AC702");
+    re_hook(0x004ac755, (void*)PoolPush004AC755, "PoolPush004AC755");
+    re_hook(0x004ac726, (void*)PoolPop004AC726, "PoolPop004AC726");
+    re_hook(0x004ac6d0, (void*)PoolPop004AC6D0, "PoolPop004AC6D0");
+    re_hook(0x004d97b8, (void*)CounterDecrement004D97B8, "CounterDecrement004D97B8");
+    re_hook(0x00492508, (void*)AllocSlot00492508, "AllocSlot00492508");
+    re_hook(0x00503ecc, (void*)PackRGB00503ECC, "PackRGB00503ECC");
+    re_hook(0x004e38b4, (void*)IsKeyOnly004E38B4, "IsKeyOnly004E38B4");
+    re_hook(0x004e38d9, (void*)IsKeyOnly004E38D9, "IsKeyOnly004E38D9");
+    re_hook(0x00522f2a, (void*)ExchangeTable00522F2A, "ExchangeTable00522F2A");
+    re_hook(0x004946da, (void*)InitFlags004946DA, "InitFlags004946DA");
+    re_hook(0x004a3a80, (void*)WrapCounter004A3A80, "WrapCounter004A3A80");
+    re_hook(0x005265bc, (void*)CopyVec3_005265BC, "CopyVec3_005265BC");
+    re_hook(0x0052797a, (void*)CopyVec3_0052797A, "CopyVec3_0052797A");
+    re_hook(0x00526fb6, (void*)NegateVec3_00526FB6, "NegateVec3_00526FB6");
+    re_hook(0x005270f6, (void*)NegateVec3_005270F6, "NegateVec3_005270F6");
+    re_hook(0x00526fe3, (void*)NegateVec3To_00526FE3, "NegateVec3To_00526FE3");
+    re_hook(0x005272c6, (void*)ResetVec_005272C6, "ResetVec_005272C6");
+    re_hook(0x004a1010, (void*)CopySlotTemplate004A1010, "CopySlotTemplate004A1010");
+    re_hook(0x004d1111, (void*)ScriptOpSkipClear004D1111, "ScriptOpSkipClear004D1111");
+    re_hook(0x004d13d8, (void*)ScriptOpSetBit4_004D13D8, "ScriptOpSetBit4_004D13D8");
+    re_hook(0x004d1402, (void*)ScriptOpClearBit2_004D1402, "ScriptOpClearBit2_004D1402");
+    re_hook(0x004d03d0, (void*)ScriptOpSetBit200_004D03D0, "ScriptOpSetBit200_004D03D0");
+    re_hook(0x004d0404, (void*)ScriptOpSetBit2_004D0404, "ScriptOpSetBit2_004D0404");
+    re_hook(0x004d1737, (void*)ScriptOpToggle10_004D1737, "ScriptOpToggle10_004D1737");
+    re_hook(0x004d1601, (void*)ScriptOpSkip4_004D1601, "ScriptOpSkip4_004D1601");
+    re_hook(0x004d7b36, (void*)RingAdvance004D7B36, "RingAdvance004D7B36");
+    re_hook(0x00404e52, (void*)MenuRowsTo3_00404E52, "MenuRowsTo3_00404E52");
+    re_hook(0x00404e7e, (void*)MenuRowsIf0To2_00404E7E, "MenuRowsIf0To2_00404E7E");
+    re_hook(0x00417a55, (void*)SetColorRed00417A55, "SetColorRed00417A55");
+    re_hook(0x00417aa2, (void*)SetColorWhite00417AA2, "SetColorWhite00417AA2");
+    re_hook(0x0041a051, (void*)SetColorRed0041A051, "SetColorRed0041A051");
+    re_hook(0x0041a085, (void*)SetColorWhite0041A085, "SetColorWhite0041A085");
 }
