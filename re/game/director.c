@@ -195,3 +195,26 @@ void ResetDirectorState(void) {
         g_remove("REPLAYDATA\\USER\\$TEMP$.CAMS");
     }
 }
+
+#ifndef RE_HOOK_BUILD
+CAR_OBJ *CarObjTable[64]; float CarMinDist;
+#endif
+/* 004c52d9 — текущая камера <- запись списка для текущего кадра; при смене камеры двигает позицию */
+void SyncCameraFromList(void) {
+    int32_t old = DirectorUnk64;
+    DIRECTOR_CAMERA *c = (DIRECTOR_CAMERA *)FindCameraRecordForFrame(DirectorUnk6C);
+    if (!c) return;
+    CurCamera = c;
+    DirectorCam = *c;
+    DirectorUnk64 = CurCamera->index;
+    if (DirectorUnk64 != old) {
+        const int32_t *w = (const int32_t *)c;
+        SetCameraPosition((float)w[0x13], (float)w[0x14], (float)w[0x15]);
+    }
+}
+/* 004c60b2 — 1, если у машины камеры нет флага 0x400 и её дальность >= порога */
+int IsCameraCarFarEnough(const DIRECTOR_CAMERA *cam) {
+    const CAR_OBJ *car = CarObjTable[cam->index];
+    if (car->flags & 0x400) return 0;
+    return CarMinDist <= car->dist ? 1 : 0;
+}

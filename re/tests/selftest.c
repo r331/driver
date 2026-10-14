@@ -100,6 +100,13 @@ static int test_read(void) {
     ResetDirectorState();
     CHECK(WaypointCount == 0 && WaypointDirty == 0 && CurCamera == NULL && DirectorCam.index == -1 && DirectorUnk6C == 0);
     CHECK(DirectorUnk8C == 0xffff00 && DirectorUnk7C == 1 && DirectorUnk84 == 4 && DirectorUnk88 == 0x20);
+    {
+        static CAR_OBJ car = {{0}, 0, {0}, 5.0f}; DIRECTOR_CAMERA c; memset(&c, 0, sizeof c); c.index = 3;
+        CarObjTable[3] = &car; CarMinDist = 2.0f;
+        CHECK(IsCameraCarFarEnough(&c) == 1);
+        car.flags = 0x400; CHECK(IsCameraCarFarEnough(&c) == 0);
+        car.flags = 0; CarMinDist = 9.0f; CHECK(IsCameraCarFarEnough(&c) == 0);
+    }
     return 0;
 }
 int re_selftest(void) {

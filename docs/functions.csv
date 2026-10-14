@@ -2413,7 +2413,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c483e,FUN_004c483e,ChangeCamera,debug_string,,,,118,named
 004c4ef9,FUN_004c4ef9,,,,,,809,todo
 004c5222,FUN_004c5222,,,,,,183,todo
-004c52d9,FUN_004c52d9,,,,,,142,todo
+004c52d9,FUN_004c52d9,SyncCameraFromList,manual,Director,,,142,ported
 004c5367,FUN_004c5367,,,,,,5,todo
 004c536c,FUN_004c536c,,,,,,301,todo
 004c5499,FUN_004c5499,,,,,,481,todo
@@ -2424,7 +2424,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c5e08,FUN_004c5e08,,,,,,353,todo
 004c5f69,FUN_004c5f69,,,,,,296,todo
 004c6091,FUN_004c6091,,,,,,33,todo
-004c60b2,FUN_004c60b2,,,,,,72,todo
+004c60b2,FUN_004c60b2,IsCameraCarFarEnough,manual,Director,,,72,ported
 004c60fa,FUN_004c60fa,SetCamera,manual,Director,,SetCamera,72,ported
 004c6142,FUN_004c6142,GetCamera,manual,Director,,,38,ported
 004c6168,FUN_004c6168,FindCameraById,manual,Director,,,74,ported

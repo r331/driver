@@ -8,7 +8,9 @@
 
 #define UNPORTED_LIST(V, R) \
     V(StoreCameraState,   0x004c5499, (void *cam), (cam))   /* камера <- текущее состояние игровой камеры */ \
-    V(RestoreCameraState, 0x004c536c, (void *cam), (cam))   /* текущее состояние игровой камеры <- cam */
+    V(RestoreCameraState, 0x004c536c, (void *cam), (cam))   /* текущее состояние игровой камеры <- cam */ \
+    R(void *, FindCameraRecordForFrame, 0x004c61b2, (int frame), (frame)) \
+    V(SetCameraPosition, 0x00523c99, (float x, float y, float z), (x, y, z))
 
 #ifdef RE_HOOK_BUILD
 #  define UNPORTED_V(name, addr, params, args) \

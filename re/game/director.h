@@ -63,3 +63,14 @@ void DropCameraBackup(void);
 void RestoreCameraBackup(void);
 WAYPOINT_REC *GetWaypointAfterFrame(int frame);   /* 004c375a */
 void ResetDirectorState(void);                    /* 004c8070 */
+
+typedef struct CAR_OBJ { uint8_t pad0[8]; uint32_t flags; uint8_t pad0c[4]; float dist; } CAR_OBJ; /* +8 флаги, +0x10 дальность */
+_Static_assert(sizeof(CAR_OBJ) == 0x14, "CAR_OBJ size");
+#ifdef RE_HOOK_BUILD
+#  define CarObjTable (*(CAR_OBJ*(*)[])(uintptr_t)0x00cfe7a0)   /* массив указателей CAR_OBJ* */
+#  define CarMinDist  (*(float*)(uintptr_t)0x00546200)
+#else
+extern CAR_OBJ *CarObjTable[]; extern float CarMinDist;
+#endif
+void SyncCameraFromList(void);
+int  IsCameraCarFarEnough(const DIRECTOR_CAMERA *cam);

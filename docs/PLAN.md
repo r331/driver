@@ -54,3 +54,4 @@
 ## v0.3 (2026-10-13): +12 функций Director.c (всего 17 ported); механизм unported.h + native stubs.c. Следующие кандидаты Director: 004c6740 (автокамера), 004c8070 (сброс режиссёра), 004c862f, 004c93b1; затем DirectorStorage.
 - v0.4: перенесено 5 функций DirectorStorage (всего 22); осталось 004c98de, 004c9a16 (assert)
 - v0.5: +7 функций (всего 29): DirectorStorage завершён (чтение блока, камеры V1/V2, LoadWaypoints). Дальше Director: 004c6740 (автокамера), 004c8070-соседи, 004c862f (thunk-адреса), 004c5499/004c536c (Store/RestoreCameraState), 004c93b1 (SaveDirector — осторожно, __thiscall?); затем MScript
+- v0.6: +SyncCameraFromList (004c52d9), IsCameraCarFarEnough (004c60b2); всего 31
