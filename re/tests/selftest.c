@@ -9,6 +9,7 @@
 #include "../game/uihandlers.h"
 #include "../game/ported4.h"
 #include "../game/ported5.h"
+#include "../game/ported6.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -246,8 +247,25 @@ static int test_p5(void) {
     SetIconIdx00412A0D(0); CHECK(WU0054CBB0 == 0x54cdf0);
     return 0;
 }
+static int test_p6(void) {
+    CHECK(AngleToDir00514103(0x100) == 4 && AngleToDir00514103(0x400) == 2 && AngleToDir00514103(0x800) == 8 && AngleToDir00514103(0xc00) == 1 && AngleToDir00514103(0xf00) == 4);
+    G6_00575F20 = 5; G6_00D11880 = 0; MenuToggle00408994();
+    CHECK(G6_00D11880 == 1 && G6_00575F20 == 0 && G00575EF8 == 4);
+    MenuToggle00408994(); CHECK(G6_00D11880 == 1 && G6_00575F20 == 1);
+    MenuToggle00408994(); CHECK(G6_00D11880 == 0 && G6_00575F20 == 0);
+    G6_00575F00 = 8; G6_00B91CF4 = 0; MenuBits0050F8F2(); CHECK(G6_00575F00 == 0x10);
+    MenuBits0050F8F2(); CHECK(G6_00575F00 == 8);
+    G6_00575F04 = 0x5622; MenuRate0050F930(); CHECK(G6_00575F04 == 0xac44);
+    G6_00B87E50 = 4; MenuSoundCh0050F971(); CHECK(G6_00B87E50 == 0);
+    D_01134528 = 0; D_01134ec0[0] = 7; CHECK(PoolAlloc004A2C12() == 7 && D_01134528 == 1 && D_01134554[42] == 1);
+    D_01134528 = 100; CHECK(PoolAlloc004A2C12() == -1);
+    { float a[5] = {1,2,3,0,4}, b[5] = {1,1,1,0,1}, r[5]; VecAdd4_0052715E(a, b, r); CHECK(r[0] == 2 && r[2] == 4 && r[4] == 5); VecSub4_005271A8(a, b, r); CHECK(r[1] == 1 && r[4] == 3); VecNeg4_00527123(a); CHECK(a[4] == -4 && a[0] == -1); }
+    { float m[9]; MatIdentity3_0052614F(m); CHECK(m[0] == 1 && m[4] == 1 && m[8] == 1 && m[1] == 0 && m[5] == 0); }
+    G6_00D117A4 = 5; G6_00D117A8 = 3; G6_0125F3F0 = 80; CursorWrap004D9478(); CHECK(G6_00D117A4 == 0 && G6_00D117A8 == 4);
+    return 0;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

@@ -104,6 +104,37 @@
     V(P4Call0041074D, 0x0041074d, (void), ()) \
     V(P4Call00411A9D, 0x00411a9d, (void), ()) \
     V(P4Call00415979, 0x00415979, (void), ()) \
+    V(G6Call004064B4, 0x004064b4, (int32_t a0, int32_t a1), (a0, a1)) \
+    V(G6Call004094E3, 0x004094e3, (void), ()) \
+    V(G6Call0050FAB0, 0x0050fab0, (void), ()) \
+    V(G6Call004D5FFC, 0x004d5ffc, (void), ()) \
+    V(G6Call004D5CE0, 0x004d5ce0, (void), ()) \
+    V(G6Call00524398, 0x00524398, (void), ()) \
+    V(G6Call00523628, 0x00523628, (void), ()) \
+    V(G6Call0041A16C, 0x0041a16c, (void), ()) \
+    V(G6Call004D4663, 0x004d4663, (void), ()) \
+    V(G6Call0040C5BE, 0x0040c5be, (int32_t a0), (a0)) \
+    V(G6Call0050E940, 0x0050e940, (int32_t a0), (a0)) \
+    V(G6Call00418119, 0x00418119, (int32_t a0), (a0)) \
+    V(G6Call00417CBB, 0x00417cbb, (void), ()) \
+    V(G6Call004A2B70, 0x004a2b70, (void), ()) \
+    V(G6Call0048BA20, 0x0048ba20, (void), ()) \
+    V(G6Call004BA457, 0x004ba457, (void), ()) \
+    V(G6Call004BA57A, 0x004ba57a, (void), ()) \
+    V(G6Call004BA64D, 0x004ba64d, (void), ()) \
+    V(G6Call004D614A, 0x004d614a, (int32_t a0, int32_t a1, int32_t a2, int32_t a3), (a0, a1, a2, a3)) \
+    V(G6Call00519D22, 0x00519d22, (int32_t a0), (a0)) \
+    V(G6Call00426580, 0x00426580, (int32_t a0), (a0)) \
+    V(G6Call00516EB4, 0x00516eb4, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
+    V(G6Call00500E1D, 0x00500e1d, (int32_t a0), (a0)) \
+    V(G6Call00491360, 0x00491360, (void), ()) \
+    V(G6Call004A05FA, 0x004a05fa, (void), ()) \
+    V(G6Call0048A239, 0x0048a239, (int32_t a0, int32_t a1), (a0, a1)) \
+    V(G6Call00489F50, 0x00489f50, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
+    V(G6Call00422AE7, 0x00422ae7, (void), ()) \
+    V(G6Call0041F57D, 0x0041f57d, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
+    R(int32_t, G6Call0041D63B, 0x0041d63b, (int32_t a0, int32_t a1, int32_t a2, int32_t a3), (a0, a1, a2, a3)) \
+    R(int32_t, G6Call00523CDA, 0x00523cda, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4), (a0, a1, a2, a3, a4)) \
     V(SetCameraPosition, 0x00523c99, (float x, float y, float z), (x, y, z))
 
 #ifdef RE_HOOK_BUILD
