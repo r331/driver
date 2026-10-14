@@ -6,6 +6,7 @@
 #include "../../game/menustate.h"
 #include "../../game/noop.h"
 #include "../../game/uihandlers.h"
+#include "../../game/uihandlers2.h"
 #include "../../game/menuselect.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
@@ -66,6 +67,54 @@ void re_install_all(void) {
     re_hook(0x0041e456, (void*)NoopFn0041e456, "NoopFn0041e456");
     re_hook(0x0041ed21, (void*)NoopFn0041ed21, "NoopFn0041ed21");
     re_hook(0x0041ed39, (void*)NoopFn0041ed39, "NoopFn0041ed39");
+    re_hook(0x00417b03, (void*)Ui00417B03, "Ui00417B03");
+    re_hook(0x004183e8, (void*)Ui004183E8, "Ui004183E8");
+    re_hook(0x00418886, (void*)Ui00418886, "Ui00418886");
+    re_hook(0x0041889c, (void*)Ui0041889C, "Ui0041889C");
+    re_hook(0x00419c2d, (void*)Ui00419C2D, "Ui00419C2D");
+    re_hook(0x00419c46, (void*)Ui00419C46, "Ui00419C46");
+    re_hook(0x00419c69, (void*)Ui00419C69, "Ui00419C69");
+    re_hook(0x00419c82, (void*)Ui00419C82, "Ui00419C82");
+    re_hook(0x00419d02, (void*)Ui00419D02, "Ui00419D02");
+    re_hook(0x00419d1b, (void*)Ui00419D1B, "Ui00419D1B");
+    re_hook(0x00419fbd, (void*)Ui00419FBD, "Ui00419FBD");
+    re_hook(0x00419fcc, (void*)Ui00419FCC, "Ui00419FCC");
+    re_hook(0x00419fd6, (void*)Ui00419FD6, "Ui00419FD6");
+    re_hook(0x00419fe2, (void*)Ui00419FE2, "Ui00419FE2");
+    re_hook(0x00419ff1, (void*)Ui00419FF1, "Ui00419FF1");
+    re_hook(0x00419ffb, (void*)Ui00419FFB, "Ui00419FFB");
+    re_hook(0x0041a007, (void*)Ui0041A007, "Ui0041A007");
+    re_hook(0x0041a016, (void*)Ui0041A016, "Ui0041A016");
+    re_hook(0x0041a020, (void*)Ui0041A020, "Ui0041A020");
+    re_hook(0x0041a02c, (void*)Ui0041A02C, "Ui0041A02C");
+    re_hook(0x0041a03b, (void*)Ui0041A03B, "Ui0041A03B");
+    re_hook(0x0041a045, (void*)Ui0041A045, "Ui0041A045");
+    re_hook(0x0041a192, (void*)Ui0041A192, "Ui0041A192");
+    re_hook(0x0041ae25, (void*)Ui0041AE25, "Ui0041AE25");
+    re_hook(0x0041d94a, (void*)Ui0041D94A, "Ui0041D94A");
+    re_hook(0x0041dec1, (void*)Ui0041DEC1, "Ui0041DEC1");
+    re_hook(0x0041ec79, (void*)Ui0041EC79, "Ui0041EC79");
+    re_hook(0x0041ed0e, (void*)Ui0041ED0E, "Ui0041ED0E");
+    re_hook(0x0041ed2d, (void*)Ui0041ED2D, "Ui0041ED2D");
+    re_hook(0x0041ed3e, (void*)Ui0041ED3E, "Ui0041ED3E");
+    re_hook(0x0041ed83, (void*)Ui0041ED83, "Ui0041ED83");
+    re_hook(0x0041ed8a, (void*)Ui0041ED8A, "Ui0041ED8A");
+    re_hook(0x0041ed91, (void*)Ui0041ED91, "Ui0041ED91");
+    re_hook(0x0041f47c, (void*)Ui0041F47C, "Ui0041F47C");
+    re_hook(0x0041f74a, (void*)Ui0041F74A, "Ui0041F74A");
+    re_hook(0x0041f7e7, (void*)Ui0041F7E7, "Ui0041F7E7");
+    re_hook(0x0041f7f7, (void*)Ui0041F7F7, "Ui0041F7F7");
+    re_hook(0x0041f800, (void*)Ui0041F800, "Ui0041F800");
+    re_hook(0x0041fa2d, (void*)Ui0041FA2D, "Ui0041FA2D");
+    re_hook(0x0041fa40, (void*)Ui0041FA40, "Ui0041FA40");
+    re_hook(0x0041fa6b, (void*)Ui0041FA6B, "Ui0041FA6B");
+    re_hook(0x0041fa74, (void*)Ui0041FA74, "Ui0041FA74");
+    re_hook(0x0041fa84, (void*)Ui0041FA84, "Ui0041FA84");
+    re_hook(0x0041fa99, (void*)Ui0041FA99, "Ui0041FA99");
+    re_hook(0x0041faa2, (void*)Ui0041FAA2, "Ui0041FAA2");
+    re_hook(0x0041faab, (void*)Ui0041FAAB, "Ui0041FAAB");
+    re_hook(0x004264a7, (void*)Ui004264A7, "Ui004264A7");
+    re_hook(0x004268e0, (void*)Ui004268E0, "Ui004268E0");
     re_hook(0x00408699, (void*)Ui00408699, "Ui00408699");
     re_hook(0x0040c867, (void*)Ui0040C867, "Ui0040C867");
     re_hook(0x0040c87a, (void*)Ui0040C87A, "Ui0040C87A");

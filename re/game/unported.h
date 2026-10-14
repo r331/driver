@@ -7,6 +7,22 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    V(UiCall0041A8AB, 0x0041a8ab, (void), ()) \
+    V(UiCall004EE065, 0x004ee065, (void), ()) \
+    V(UiCall004184F5, 0x004184f5, (void), ()) \
+    V(UiCall005170AB, 0x005170ab, (void), ()) \
+    V(UiCall00419DB3, 0x00419db3, (void), ()) \
+    V(UiCall0041A085, 0x0041a085, (void), ()) \
+    V(UiCall00417620, 0x00417620, (void), ()) \
+    V(UiCall00414C30, 0x00414c30, (void), ()) \
+    V(UiCall00407160, 0x00407160, (void), ()) \
+    V(UiCall00419AB0, 0x00419ab0, (void), ()) \
+    V(UiCall0041B059, 0x0041b059, (void), ()) \
+    V(UiCall0041AF29, 0x0041af29, (int32_t a0), (a0)) \
+    V(UiCall0041F2A0, 0x0041f2a0, (void), ()) \
+    V(UiCall00424647, 0x00424647, (void), ()) \
+    V(UiCall00528455, 0x00528455, (void), ()) \
+    V(UiCall004D8F30, 0x004d8f30, (int32_t a0), (a0)) \
     V(UiCall0040C455, 0x0040c455, (int32_t a0, int32_t a1), (a0, a1)) \
     V(UiCall00523E50, 0x00523e50, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(UiCall00412254, 0x00412254, (void), ()) \
