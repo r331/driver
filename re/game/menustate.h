@@ -101,3 +101,4 @@ int MenuRedraw4094CD(void); /* 004094cd */
 void MenuIncVar5759A4(void); /* 00409b75 */
 void MenuDecVar5759A4(void); /* 00409b9f */
 void MenuIncVarB87E4C(void); /* 00409c31 */
+void MenuDecVarB87E4C(void); /* 00409c5b */

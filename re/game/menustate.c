@@ -66,3 +66,4 @@ int MenuRedraw4094CD(void) { MenuVar575EF8 = 4; MenuRedraw(); return 0; }
 void MenuIncVar5759A4(void) { if (MenuVar5759A4 < 0x40) { MenuVar5759A4++; MenuVar575EF8 = 4; MenuRedraw(); } }
 void MenuDecVar5759A4(void) { if (0 < MenuVar5759A4) { MenuVar5759A4--; MenuVar575EF8 = 4; MenuRedraw(); } }
 void MenuIncVarB87E4C(void) { if (MenuVarB87E4C < 3) { MenuVarB87E4C++; MenuVar575EF8 = 4; MenuRedraw(); } }
+void MenuDecVarB87E4C(void) { if (0 < MenuVarB87E4C) { MenuVarB87E4C--; MenuVar575EF8 = 4; MenuRedraw(); } }

@@ -1231,7 +1231,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00409bc9,FUN_00409bc9,,,,,,52,todo
 00409bfd,FUN_00409bfd,,,,,,52,todo
 00409c31,FUN_00409c31,MenuIncVarB87E4C,manual,MenuState,,,42,ported
-00409c5b,FUN_00409c5b,,,,,,42,todo
+00409c5b,FUN_00409c5b,MenuDecVarB87E4C,manual,MenuState,,,42,ported
 00409c85,FUN_00409c85,,,,,,117,todo
 00409cfa,FUN_00409cfa,,,,,,108,todo
 00409d66,FUN_00409d66,,,,,,141,todo
