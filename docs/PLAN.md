@@ -61,3 +61,4 @@
 - v0.10: DumpWaypoints, DrawCornerIndicator (47 всего)
 - v0.11: DrawNode, DrawNodeMarker (всего 49)
 - v0.12: +ReadDirectorKeys, ClampCameraHeight (51 всего)
+- v0.13: +CameraDump (52 всего)

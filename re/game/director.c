@@ -1,4 +1,5 @@
 /* Director.c — восстановлено из Game.exe (PC, 1999-09-10). Переносимый код: без WinAPI. */
+#include <stdio.h>
 #include "director.h"
 #include "engine.h"
 #include "unported.h"
@@ -263,4 +264,18 @@ int CountNearbyCars(void) {
 void ClearDirectorTables(void) {
     ClearDirectorTable((DIR_NODE *)&DirTableA);
     ClearDirectorTable((DIR_NODE *)&DirTableB);
+}
+
+/* 004c567a — лог дампа камеры (cam: 0x8c байт как int32[0x23]) */
+void CameraDump(const int32_t *c) {
+    char buf[128];
+    DebugLog("CameraDump....");
+    snprintf(buf, sizeof buf, "Camera type is %d(%s)", c[0], GetCameraTypeName(c[0])); DebugLog(buf);
+    snprintf(buf, sizeof buf, "Camera position is x = %d, y = %d, z = %d", c[0x13], c[0x14], c[0x15]); DebugLog(buf);
+    snprintf(buf, sizeof buf, "Holding camera position is x = %d, y = %d, z = %d", c[0x17], c[0x18], c[0x19]); DebugLog(buf);
+    snprintf(buf, sizeof buf, "Camera angle is %d, %d, %d", (int)*(const int16_t *)(c + 0x1f),
+             (int)*((const int16_t *)(c + 0x1f) + 1), (int)*(const int16_t *)(c + 0x20)); DebugLog(buf);
+    snprintf(buf, sizeof buf, "Camera distance is %d", c[2]); DebugLog(buf);
+    snprintf(buf, sizeof buf, "Cameras maximum distance is %d", c[3]); DebugLog(buf);
+    DebugLog("End of Camera dump\n");
 }

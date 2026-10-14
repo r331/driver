@@ -2417,7 +2417,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c5367,FUN_004c5367,DirNopStub,manual,DirNodes.c,,,5,ported
 004c536c,FUN_004c536c,,,,,,301,todo
 004c5499,FUN_004c5499,,,,,,481,todo
-004c567a,FUN_004c567a,,,,,,317,todo
+004c567a,FUN_004c567a,CameraDump,manual,Director,,,317,ported
 004c57b7,FUN_004c57b7,GetCameraTypeName,manual,Director.c,,,43,ported
 004c582f,FUN_004c582f,CreateNewAutoCamera,debug_string,,,,658,named
 004c5d40,FUN_004c5d40,CountNearbyCars,manual,Director.c,,,200,ported

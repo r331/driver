@@ -87,3 +87,4 @@ const char *GetCameraTypeName(int type);          /* 004c57b7 */
 void SelectNewCamera(void);                       /* 004c5222 */
 int  CountNearbyCars(void);                       /* 004c5d40 */
 void ClearDirectorTables(void);                   /* 004c810f */
+void CameraDump(const int32_t *cam);              /* 004c567a */
