@@ -1,4 +1,5 @@
 /* Проверка перенесённых модулей в нативной сборке: ./driver --selftest */
+#include "../game/menuselect.h"
 #include "../game/director.h"
 #include "../game/directorstorage.h"
 #include "../game/dirnodes.h"
@@ -177,8 +178,19 @@ static int test_menu4(void) {
     MenuTable54B010[7] = 0xabcd; return MenuTableGet54B010(0x107) != 0xabcd;
 }
 
+static int test_menu5(void) {
+    MenuSelect00407334(1);
+    if (MenuB00549F8C != 3 || MenuB00549F9C != 3) return 1;
+    MenuSelect00407334(2);
+    if (MenuI0057B730 != 1 || MenuI0054A060 != 2) return 1;
+    MenuSelect004091A0(2);
+    if (MenuI0054A694 != -1 || MenuFlag5F7E4C != 1) return 1;
+    MenuLeave0040E8FF(0); MenuLeave0040E8FF(1);
+    return (MenuByte54ACD4 != 2 || MenuByte54ACE4 != 2);
+}
+
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

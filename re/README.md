@@ -33,7 +33,7 @@ Wine/CrossOver: `WINEDLLOVERRIDES="dinput=n,b" wine Game.exe`. Лог — re_dri
 - новая функция: game/<module>.c + строка в platform/win32/install.c + тест + статус ported в docs/functions.csv.
 
 ## Статус
-Перенесено 125 функций (из ~3275 без CRT), отслеживается в docs/functions.csv (status=ported).
+Перенесено 209 функций (из ~3275 без CRT), отслеживается в docs/functions.csv (status=ported).
 Director.c (17): FindCameraById, RenumberCameras, InsertCamera, DeleteCamera, AddDirectorCamera,
 SetCamera, GetCamera, FindCameraForFrame, FreeCameraList, FindNearestCamera, CameraFrameDistance,
 AddDefaultCamera, FreeDirectorBuffer, FreeDirectorData, BackupCameraState, DropCameraBackup, RestoreCameraBackup.
@@ -61,3 +61,4 @@ v0.5: +7 (29 всего): DirectorStorage.c — ReadDirectorData, ReadCameraChun
 - v-next (Noop): 5 пустых функций (0041b054,0041b3a6,0041e456,0041ed21,0041ed39); всего 116
 - v0.26 (MenuState): MenuSet54BE5CTo3, MenuSet54BE5CTo2, MenuSet54BE7CTo3, MenuSet54BE7CTo2; всего 120
 - v0.27 (MenuState): 4 сеттера 54ACD4/54ACF4/54AD14/54AD34 + MenuTableGet54B010; всего 125
+- v0.28 (MenuState/menuselect.c): 84 обработчика Select/Leave подсветки меню; всего 209
