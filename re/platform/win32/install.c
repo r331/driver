@@ -94,4 +94,8 @@ void re_install_all(void) {
     re_hook(0x00409b9f, (void*)MenuDecVar5759A4, "MenuDecVar5759A4");
     re_hook(0x00409c31, (void*)MenuIncVarB87E4C, "MenuIncVarB87E4C");
     re_hook(0x00409c5b, (void*)MenuDecVarB87E4C, "MenuDecVarB87E4C");
+    re_hook(0x0040a443, (void*)MenuSet54A844On, "MenuSet54A844On");
+    re_hook(0x0040a44f, (void*)MenuSet54A844Off, "MenuSet54A844Off");
+    re_hook(0x0040a495, (void*)MenuSet54A854On, "MenuSet54A854On");
+    re_hook(0x0040a4a1, (void*)MenuSet54A854Off, "MenuSet54A854Off");
 }

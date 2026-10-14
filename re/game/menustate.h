@@ -80,7 +80,10 @@ void MenuCopyPos(void); /* 0040831c */
 #define MenuVarB31F04 GAME_VAR(int32_t, MenuVarB31F04, 0x00b31f04)
 #define MenuVarB87E4C GAME_VAR(int32_t, MenuVarB87E4C, 0x00b87e4c)
 #define MenuVarD118C8 GAME_VAR(int32_t, MenuVarD118C8, 0x00d118c8)
+#define MenuVar54A844 GAME_VAR(int32_t, MenuVar54A844, 0x0054a844)
+#define MenuVar54A854 GAME_VAR(int32_t, MenuVar54A854, 0x0054a854)
 #ifndef RE_HOOK_BUILD
+extern int32_t MenuVar54A844, MenuVar54A854;
 extern int32_t MenuVar55384C, MenuVar553850, MenuVar55C974, MenuVar5759A4, MenuVar575EE8, MenuVar575EF8, MenuVar575F30, MenuVar575F3C, MenuVar575F44, MenuVarB201DC, MenuVarB31F04, MenuVarB87E4C, MenuVarD118C8;
 #endif
 int MenuToggle55384CRedraw(void); /* 00408a69 */
@@ -102,3 +105,7 @@ void MenuIncVar5759A4(void); /* 00409b75 */
 void MenuDecVar5759A4(void); /* 00409b9f */
 void MenuIncVarB87E4C(void); /* 00409c31 */
 void MenuDecVarB87E4C(void); /* 00409c5b */
+void MenuSet54A844On(void); /* 0040a443 */
+void MenuSet54A844Off(void); /* 0040a44f */
+void MenuSet54A854On(void); /* 0040a495 */
+void MenuSet54A854Off(void); /* 0040a4a1 */

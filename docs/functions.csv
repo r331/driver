@@ -1237,11 +1237,11 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00409d66,FUN_00409d66,,,,,,141,todo
 0040a3a0,FUN_0040a3a0,,,,,,124,todo
 0040a41c,FUN_0040a41c,,,,,,39,todo
-0040a443,FUN_0040a443,,,,,,12,todo
-0040a44f,FUN_0040a44f,,,,,,12,todo
+0040a443,FUN_0040a443,MenuSet54A844On,manual,MenuState,,,12,ported
+0040a44f,FUN_0040a44f,MenuSet54A844Off,manual,MenuState,,,12,ported
 0040a45b,FUN_0040a45b,,,,,,58,todo
-0040a495,FUN_0040a495,,,,,,12,todo
-0040a4a1,FUN_0040a4a1,,,,,,12,todo
+0040a495,FUN_0040a495,MenuSet54A854On,manual,MenuState,,,12,ported
+0040a4a1,FUN_0040a4a1,MenuSet54A854Off,manual,MenuState,,,12,ported
 0040a4ad,FUN_0040a4ad,,,,,,58,todo
 0040a540,FUN_0040a540,,,,,,134,todo
 0040a5c6,FUN_0040a5c6,,,,,,95,todo
