@@ -7,6 +7,7 @@
 #include "../../game/ported16.h"
 #include "../../game/ported17.h"
 #include "../../game/ported18.h"
+#include "../../game/ported19.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1102,4 +1103,13 @@ void re_install_all(void) {
     re_hook(0x00528e12, (void*)P17_ISqrt, "P17_ISqrt");
     re_hook(0x005104ed, (void*)P17_PushScreenState, "P17_PushScreenState");
     re_hook(0x0052840c, (void*)P18_ClearFlag, "P18_ClearFlag");
+    re_hook(0x004107b9, (void*)P19_KeysUnique12, "P19_KeysUnique12");
+    re_hook(0x00411b09, (void*)P19_KeysUnique14, "P19_KeysUnique14");
+    re_hook(0x004184f5, (void*)P19_FadeStep, "P19_FadeStep");
+    re_hook(0x0041c7da, (void*)P19_TakeToken, "P19_TakeToken");
+    re_hook(0x00416084, (void*)P19_Sel2, "P19_Sel2");
+    re_hook(0x004160e9, (void*)P19_Sel3, "P19_Sel3");
+    re_hook(0x0041614e, (void*)P19_Sel4, "P19_Sel4");
+    re_hook(0x005174c6, (void*)P19_ScaleX, "P19_ScaleX");
+    re_hook(0x00517512, (void*)P19_ScaleY, "P19_ScaleY");
 }

@@ -20,6 +20,7 @@
 #include "../game/ported16.h"
 #include "../game/ported17.h"
 #include "../game/ported18.h"
+#include "../game/ported19.h"
 #include "../game/ported13.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -388,9 +389,25 @@ static int test_ported17(void) {
   if (P17_PtrB != 7 || P17_ValB != 9 || P17_ValA != 2 || P17_Dst != 200 || P17_Const6 != 6) f++;
   return f;
 }
+static int test_ported19(void) {
+  int f = 0;
+  P19_Cur = 0; P19_Target = 1; P19_Step = 0.4f; P19_Active = 1;
+  P19_FadeStep(); P19_FadeStep(); P19_FadeStep();
+  if (P19_Cur != 1.0f || P19_Active != 0 || P19_OutC != 1.0f) f++;
+  { char s[16] = "  ab cd"; char o[16]; int e = P19_TakeToken(s, o); if (e || strcmp(o, "ab") || strcmp(s, "cd")) f++; }
+  { char s[8] = ""; char o[8]; if (!P19_TakeToken(s, o)) f++; }
+  P19_Level = 1; P19_Sel2(0); /* Level<2 → Fn00416040 (stub) */
+  P19_Level = 4; P19_Sel4(0); if (P19_Cond != 0x31 || P19_Wd != 0x147 || P19_F3 != 1) f++;
+  P19_ScrW = 640; P19_DivW = 640; P19_DivC = 2; P19_Scale = 1;
+  if (P19_ScaleX(1) != 1 * 1.0f - 320 + 320) f++;
+  for (int i = 0; i < 14; i++) P19_Keys2[i] = (uint8_t)i;
+  if (!P19_KeysUnique14()) f++;
+  P19_Keys2[13] = 0; if (P19_KeysUnique14()) f++;
+  return f;
+}
 static int test_ported18(void) { P18_Flag0057A0E6 = 5; P18_ClearFlag(); return P18_Flag0057A0E6 != 0; }
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

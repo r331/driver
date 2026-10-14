@@ -8,6 +8,7 @@
 
 #define UNPORTED_LIST(V, R) \
     R(uint32_t, N14_Rand, 0x0052e190, (void), ()) \
+    V(Fn00416040, 0x00416040, (int32_t a0), (a0)) \
     V(N14_Fn4CB4FF, 0x004cb4ff, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(N14_Fn4FBA23, 0x004fba23, (const uint8_t* a0), (a0)) \
     V(N14_Fn4D6C5A, 0x004d6c5a, (void), ()) \
