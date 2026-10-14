@@ -1080,8 +1080,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402ae5,thunk_FUN_004ad5d2,,,,,,5,todo
 00402aea,thunk_FUN_00407d97,,,,,,5,todo
 004045e0,FUN_004045e0,,,,,,167,todo
-00404687,FUN_00404687,,,,,,15,todo
-00404696,FUN_00404696,,,,,,50,todo
+00404687,FUN_00404687,MenuFlagSet,manual,MenuState,,,15,ported
+00404696,FUN_00404696,MenuFlagUpdate,manual,MenuState,,,50,ported
 004046c8,FUN_004046c8,,,,,,89,todo
 00404721,FUN_00404721,,,,,,61,todo
 0040475e,FUN_0040475e,,,,,,61,todo
@@ -1097,7 +1097,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00404f14,FUN_00404f14,,,,,,25,todo
 00404f2d,FUN_00404f2d,,,,,,25,todo
 00404f46,FUN_00404f46,,,,,,25,todo
-00404f5f,FUN_00404f5f,,,,,,17,todo
+00404f5f,FUN_00404f5f,MenuStateSetFour,manual,MenuState,,,17,ported
 00404f70,FUN_00404f70,,,,,,62,todo
 00404fae,FUN_00404fae,,,,,,80,todo
 00404ffe,FUN_00404ffe,,,,,,15,todo

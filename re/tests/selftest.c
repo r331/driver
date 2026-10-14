@@ -2,6 +2,7 @@
 #include "../game/director.h"
 #include "../game/directorstorage.h"
 #include "../game/dirnodes.h"
+#include "../game/menustate.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -137,8 +138,15 @@ static int test_nodes(void) {
     DumpWaypoints(); DirIndicatorOn = 1; DirIndicatorCnt = 0; DirectorUnk84 = 4; DrawCornerIndicator(); DirIndicatorOn = 0;
     return 0;
 }
+static int test_menu(void) {
+    MenuFlagSet(); if (MenuFlag5F7E4C != 1) return 1;
+    MenuFlagUpdate(1); if (MenuFlag5F7E4C != 1) return 1;
+    MenuFlagUpdate(2); if (MenuFlag5F7E4C != 0) return 1;
+    return MenuStateSetFour() != 0 || MenuState575EF0 != 4;
+}
+
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
