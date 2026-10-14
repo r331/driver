@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.16)
+project(re_driver C)
+set(CMAKE_C_STANDARD 11)
+file(GLOB GAME_SRC game/*.c)
+
+if(RE_HOOK_BUILD)
+  # Win32-DLL для оригинального Game.exe (i686). См. build.sh
+  add_library(DINPUT SHARED ${GAME_SRC} platform/win32/hook.c platform/win32/dinput_proxy.c platform/win32/install.c)
+  target_compile_definitions(DINPUT PRIVATE RE_HOOK_BUILD)
+  set_target_properties(DINPUT PROPERTIES PREFIX "")
+else()
+  # Нативная сборка: macOS (Apple Silicon), Linux, Windows x64
+  find_package(SDL2 REQUIRED)
+  add_executable(driver ${GAME_SRC} platform/native/main.c platform/native/engine_native.c platform/native/stubs.c tests/selftest.c)
+  target_link_libraries(driver PRIVATE SDL2::SDL2)
+  if(NOT MSVC)
+    target_compile_options(driver PRIVATE -Wall -Wextra -Wno-unused-parameter)
+  endif()
+  enable_testing()
+  add_test(NAME selftest COMMAND driver --selftest)
+endif()

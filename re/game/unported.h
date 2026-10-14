@@ -1,0 +1,22 @@
+/* Вызовы функций Game.exe, которые ещё не перенесены.
+   RE_HOOK_BUILD: вызов по адресу в оригинальном Game.exe (__cdecl).
+   Нативная сборка: заглушка из platform/native/stubs.c, пишет в лог «not ported: ИМЯ (адрес)».
+   Список — X-макросы: UNPORTED_V(имя, адрес, (параметры), (аргументы)) для void,
+                       UNPORTED_R(тип, имя, адрес, (параметры), (аргументы)) для остальных (заглушка возвращает 0). */
+#pragma once
+#include "gvar.h"
+
+#define UNPORTED_LIST(V, R) \
+    V(StoreCameraState,   0x004c5499, (void *cam), (cam))   /* камера <- текущее состояние игровой камеры */ \
+    V(RestoreCameraState, 0x004c536c, (void *cam), (cam))   /* текущее состояние игровой камеры <- cam */
+
+#ifdef RE_HOOK_BUILD
+#  define UNPORTED_V(name, addr, params, args) \
+     static void (__cdecl * const name) params __attribute__((unused)) = (void (__cdecl *) params)(uintptr_t)(addr);
+#  define UNPORTED_R(ret, name, addr, params, args) \
+     static ret (__cdecl * const name) params __attribute__((unused)) = (ret (__cdecl *) params)(uintptr_t)(addr);
+#else
+#  define UNPORTED_V(name, addr, params, args)      void name params;
+#  define UNPORTED_R(ret, name, addr, params, args) ret name params;
+#endif
+UNPORTED_LIST(UNPORTED_V, UNPORTED_R)

@@ -1,0 +1,2 @@
+/workspace/tools/ghidra_12.1.4_PUBLIC/support/analyzeHeadless /tmp/gproj Driver -process Game.exe -noanalysis -scriptPath /workspace/projects/ce1b1d6d-abf1-4bda-ab0c-56fb1670a4a3/scripts -postScript ExportAll.java /workspace/projects/ce1b1d6d-abf1-4bda-ab0c-56fb1670a4a3/out > /workspace/projects/ce1b1d6d-abf1-4bda-ab0c-56fb1670a4a3/out/ghidra_export.log 2>&1
+grep -E "functions=|ERROR" /workspace/projects/ce1b1d6d-abf1-4bda-ab0c-56fb1670a4a3/out/ghidra_export.log | head -5

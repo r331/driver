@@ -1,0 +1,12 @@
+# Файлы игры и артефакты анализа не коммитим
+input/
+out/
+ghidra_project/
+work/
+re/build/
+re/build-native/
+re/build-*/
+*.exe
+*.dll
+*.bin
+*.zip
