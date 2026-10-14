@@ -1,5 +1,6 @@
 /* Регистрация перенесённых функций для hook-сборки (Game.exe + DINPUT.dll) */
 #include "hook.h"
+#include "../../game/ported11.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
 #include "../../game/dirnodes.h"
@@ -961,4 +962,37 @@ void re_install_all(void) {
     re_hook(0x4d1135, (void*)ScriptReadU32_004D1135, "ScriptReadU32_004D1135");
     re_hook(0x4d12ca, (void*)ScriptReadPair_004D12CA, "ScriptReadPair_004D12CA");
     re_hook(0x4d133c, (void*)ScriptLoopStep_004D133C, "ScriptLoopStep_004D133C");
+    re_hook(0x00407d97, (void*)SndHelper_00407D97, "SndHelper_00407D97");
+    re_hook(0x00407d56, (void*)SndHelper_00407D56, "SndHelper_00407D56");
+    re_hook(0x0040aa82, (void*)CopySlots_0040AA82, "CopySlots_0040AA82");
+    re_hook(0x0041645b, (void*)MenuAction_0041645B, "MenuAction_0041645B");
+    re_hook(0x004164b2, (void*)MenuAction_004164B2, "MenuAction_004164B2");
+    re_hook(0x0048f34c, (void*)GetRect_0048F34C, "GetRect_0048F34C");
+    re_hook(0x004a9ddc, (void*)DrawFrame_004A9DDC, "DrawFrame_004A9DDC");
+    re_hook(0x004d02c6, (void*)ScriptReadShort3_004D02C6, "ScriptReadShort3_004D02C6");
+    re_hook(0x004d033f, (void*)ScriptReadVec3_004D033F, "ScriptReadVec3_004D033F");
+    re_hook(0x004d611b, (void*)TryStartTrack_004D611B, "TryStartTrack_004D611B");
+    re_hook(0x004f5d98, (void*)DrawBanner_004F5D98, "DrawBanner_004F5D98");
+    re_hook(0x004eb7cf, (void*)ReadBlocks_004EB7CF, "ReadBlocks_004EB7CF");
+    re_hook(0x004ec466, (void*)ReadTable_004EC466, "ReadTable_004EC466");
+    re_hook(0x004ec49a, (void*)ReadTable_004EC49A, "ReadTable_004EC49A");
+    re_hook(0x004ec522, (void*)ReadTable_004EC522, "ReadTable_004EC522");
+    re_hook(0x004ec556, (void*)ReadTable_004EC556, "ReadTable_004EC556");
+    re_hook(0x004f30e6, (void*)FreeBuffer_004F30E6, "FreeBuffer_004F30E6");
+    re_hook(0x004fe830, (void*)ResolveTable_004FE830, "ResolveTable_004FE830");
+    re_hook(0x005103c4, (void*)BackOrDirector_005103C4, "BackOrDirector_005103C4");
+    re_hook(0x005104b9, (void*)SwitchPanel_005104B9, "SwitchPanel_005104B9");
+    re_hook(0x0051066a, (void*)SwitchPanel_0051066A, "SwitchPanel_0051066A");
+    re_hook(0x0051069e, (void*)SwitchPanel_0051069E, "SwitchPanel_0051069E");
+    re_hook(0x00522306, (void*)ResetDirector_00522306, "ResetDirector_00522306");
+    re_hook(0x0052436a, (void*)InitChannels_0052436A, "InitChannels_0052436A");
+    re_hook(0x00525e50, (void*)LoadFsin_00525E50, "LoadFsin_00525E50");
+    re_hook(0x005263fe, (void*)InitXform_005263FE, "InitXform_005263FE");
+    re_hook(0x00526582, (void*)InitVec_00526582, "InitVec_00526582");
+    re_hook(0x004bf400, (void*)RoundSet_004BF400, "RoundSet_004BF400");
+    re_hook(0x0051010c, (void*)StepUp_0051010C, "StepUp_0051010C");
+    re_hook(0x00510145, (void*)StepDown_00510145, "StepDown_00510145");
+    re_hook(0x0051017e, (void*)StepUp_0051017E, "StepUp_0051017E");
+    re_hook(0x005101b7, (void*)StepDown_005101B7, "StepDown_005101B7");
+    re_hook(0x00425e9e, (void*)Zoom_00425E9E, "Zoom_00425E9E");
 }

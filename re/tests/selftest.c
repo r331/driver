@@ -13,6 +13,7 @@
 #include "../game/ported7.h"
 #include "../game/ported8.h"
 #include "../game/ported9.h"
+#include "../game/ported11.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -300,8 +301,21 @@ static int test_p9(void) {
     P9_00b31e20 = -20; P9_00b31dfc = 0; CHECK(IsButtonActive_004E3924(0x20) == 1 && IsButtonActive_004E3924(0x21) == 0);
     return 0;
 }
+static int test_p11(void) {
+    P11_01270c24 = 1.0f; P11_00546028 = 5.0f; P11_0054604c = 0.5f; P11_00575ef8 = 0;
+    StepUp_0051010C(); CHECK(P11_01270c24 == 1.5f && P11_00575ef8 == 4);
+    P11_01270c24 = 9.0f; P11_00575ef8 = 0; StepUp_0051010C(); CHECK(P11_01270c24 == 9.0f && P11_00575ef8 == 0);
+    P11_00ba52d0 = 0; RoundSet_004BF400(2.5f, 3.5f); CHECK(P11_00ba52d0 == 2);
+    { uint8_t buf[0x50] = {0}; uint8_t *sp = (uint8_t*)buf; (void)sp;
+      uint8_t sc[0x60] = {0}; uint8_t sdb[18] = {0,0, 1,0, 2,0, 3,0}; uint8_t *sd = sdb + 2;
+      uint8_t *oc = P10_ScriptCtx, *op = P10_ScriptPtr;
+      P10_ScriptCtx = sc; P10_ScriptPtr = sd - 2; ScriptReadShort3_004D02C6();
+      CHECK(sc[0x10] == 1 && sc[0x12] == 2 && sc[0x14] == 3 && P10_ScriptPtr == sd + 6);
+      P10_ScriptCtx = oc; P10_ScriptPtr = op; }
+    return 0;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

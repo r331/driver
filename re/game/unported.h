@@ -135,6 +135,27 @@
     V(G6Call0041F57D, 0x0041f57d, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     R(int32_t, G6Call0041D63B, 0x0041d63b, (int32_t a0, int32_t a1, int32_t a2, int32_t a3), (a0, a1, a2, a3)) \
     R(int32_t, G6Call00523CDA, 0x00523cda, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4), (a0, a1, a2, a3, a4)) \
+    V(Call004BF910, 0x004bf910, (uint32_t a0, uint32_t a1, uint32_t a2), (a0, a1, a2)) \
+    V(Call005291ED, 0x005291ed, (uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3), (a0, a1, a2, a3)) \
+    V(Call0052B650, 0x0052b650, (uint32_t a0, uint32_t a1, uint32_t a2), (a0, a1, a2)) \
+    V(Call004D9596, 0x004d9596, (uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3), (a0, a1, a2, a3)) \
+    V(Call004D94B7, 0x004d94b7, (uint32_t a0, uint32_t a1), (a0, a1)) \
+    R(int32_t, Call00524473, 0x00524473, (int32_t a0), (a0)) \
+    V(Call004A9F45, 0x004a9f45, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4), (a0, a1, a2, a3, a4)) \
+    R(uint32_t, Call0048F3B4, 0x0048f3b4, (int32_t a0, int32_t a1, int32_t a2, int32_t a3), (a0, a1, a2, a3)) \
+    R(uint32_t, Call004EC8A8, 0x004ec8a8, (uint32_t a0), (a0)) \
+    V(Call00510784, 0x00510784, (void), ()) \
+    V(Call0050FAB0, 0x0050fab0, (void), ()) \
+    V(Call004C64BD, 0x004c64bd, (void), ()) \
+    V(Call004C372A, 0x004c372a, (void), ()) \
+    V(Call0052434A, 0x0052434a, (int32_t a0), (a0)) \
+    V(Call004D303A, 0x004d303a, (uint32_t a0, uint32_t a1), (a0, a1)) \
+    V(Call005261AD, 0x005261ad, (uint32_t a0, uint32_t a1), (a0, a1)) \
+    V(Call00528461, 0x00528461, (uint32_t a0, uint32_t a1), (a0, a1)) \
+    V(Call00528982, 0x00528982, (uint32_t a0), (a0)) \
+    V(Call00425B12, 0x00425b12, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
+    V(Call004D8F30, 0x004d8f30, (uint32_t a0), (a0)) \
+    V(SetDirectorMode_004C875D, 0x004c875d, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(SetCameraPosition, 0x00523c99, (float x, float y, float z), (x, y, z))
 
 #ifdef RE_HOOK_BUILD

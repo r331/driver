@@ -12,7 +12,7 @@ else()
   # Нативная сборка: macOS (Apple Silicon), Linux, Windows x64
   find_package(SDL2 REQUIRED)
   add_executable(driver ${GAME_SRC} platform/native/main.c platform/native/engine_native.c platform/native/stubs.c tests/selftest.c)
-  target_link_libraries(driver PRIVATE SDL2::SDL2)
+  target_link_libraries(driver PRIVATE SDL2::SDL2 m)
   if(NOT MSVC)
     target_compile_options(driver PRIVATE -Wall -Wextra -Wno-unused-parameter)
   endif()
