@@ -11,6 +11,7 @@
 #include "../game/ported5.h"
 #include "../game/ported6.h"
 #include "../game/ported7.h"
+#include "../game/ported8.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -282,8 +283,18 @@ static int test_p7(void) {
     { int32_t o[3] = {0,0,0}; (void)o; }
     return 0;
 }
+static int test_p8(void) {
+    A_00D04B00[3] = 1; A_00D04B00[0x103] = 0; CHECK(IsFlagSetNotMasked_004E383A(3) == 1); A_00D04B00[0x103] = 1; CHECK(IsFlagSetNotMasked_004E383A(3) == 0);
+    { float a[9] = {1,2,3,4,5,6,7,8,9}, b[9] = {1,0,0,0,1,0,0,0,1}, o[9], t[9]; Mat3Mul_0052859A(a, b, o); Mat3MulT_005284AC(a, b, t); CHECK(o[0] == 1 && o[4] == 5 && t[1] == 2); }
+    P8_00b91c08 = 1; P8_00b91c0c = 2; P8_00b91c10 = 3; PushVec3_00523C99(7, 8, 9); CHECK(P8_00b91c14 == 1 && P8_00b91c1c == 3 && P8_00b91c08 == 7);
+    P8_00b5a764 = 0; SetMode1b_005106D2(); CHECK(P8_0054da10 == 1 && P8_005f7e54 == 1 && P8_00575550 == 2);
+    P8_005feee8 = 0; P8_005feeec = 0; RedMarkers_0041ADA1(); CHECK(P8_0054E834[0x10] == 0xff && P8_0054E834[0x20] == 0xff);
+    SetZoom_00421CAB(0); CHECK(P8_00a4217c == 0.0f);
+    { uint8_t blk[0x70] = {0}; float f = 5; int32_t v = 3; memcpy(blk + 4, &f, 4); memcpy(blk + 0x60, &v, 4); StepSpeedA_004B9E2B(blk); memcpy(&v, blk + 0x50, 4); CHECK(v == 3); }
+    return 0;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

@@ -18,6 +18,7 @@
 #include "../../game/ported5.h"
 #include "../../game/ported6.h"
 #include "../../game/ported7.h"
+#include "../../game/ported8.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
     re_hook(0x004c622c, (void*)RenumberCameras,   "RenumberCameras");
@@ -908,6 +909,22 @@ void re_install_all(void) {
     re_hook(0x0041d8e9, (void*)InitIdentityPalette_0041D8E9, "InitIdentityPalette_0041D8E9");
     re_hook(0x00421c1d, (void*)MaskShift_00421C1D, "MaskShift_00421C1D");
     re_hook(0x00426abc, (void*)AddEntry_00426ABC, "AddEntry_00426ABC");
+    re_hook(0x004e383a, (void*)IsFlagSetNotMasked_004E383A, "IsFlagSetNotMasked_004E383A");
+    re_hook(0x004b9e2b, (void*)StepSpeedA_004B9E2B, "StepSpeedA_004B9E2B");
+    re_hook(0x004b9e54, (void*)StepSpeedB_004B9E54, "StepSpeedB_004B9E54");
+    re_hook(0x004ab0df, (void*)InitSlotsTable_004AB0DF, "InitSlotsTable_004AB0DF");
+    re_hook(0x00523c99, (void*)PushVec3_00523C99, "PushVec3_00523C99");
+    re_hook(0x004d9539, (void*)SetDrawParams_004D9539, "SetDrawParams_004D9539");
+    re_hook(0x00510382, (void*)SetMode4_00510382, "SetMode4_00510382");
+    re_hook(0x00510448, (void*)SetMode1_00510448, "SetMode1_00510448");
+    re_hook(0x005106d2, (void*)SetMode1b_005106D2, "SetMode1b_005106D2");
+    re_hook(0x005284ac, (void*)Mat3MulT_005284AC, "Mat3MulT_005284AC");
+    re_hook(0x0052859a, (void*)Mat3Mul_0052859A, "Mat3Mul_0052859A");
+    re_hook(0x005279cb, (void*)RotVec_005279CB, "RotVec_005279CB");
+    re_hook(0x0041ada1, (void*)RedMarkers_0041ADA1, "RedMarkers_0041ADA1");
+    re_hook(0x004cb097, (void*)SetScaled_004CB097, "SetScaled_004CB097");
+    re_hook(0x00421cab, (void*)SetZoom_00421CAB, "SetZoom_00421CAB");
+    re_hook(0x004f89eb, (void*)NoopFn004F89EB, "NoopFn004F89EB");
     re_hook(0x0048a4e6, (void*)FindFreeEven_0048A4E6, "FindFreeEven_0048A4E6");
     re_hook(0x0048f2e7, (void*)CountByOwner_0048F2E7, "CountByOwner_0048F2E7");
     re_hook(0x004a2db5, (void*)FindSlot_004A2DB5, "FindSlot_004A2DB5");
