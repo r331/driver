@@ -56,8 +56,54 @@ static int test_storage(void) {
     LogWaypoint(7); CHECK(WaypointDirty == 1 && WaypointCount == 0);
     return 0;
 }
+static int test_read(void) {
+    DIRECTOR_CAMERA c; memset(&c, 0, sizeof c); c.unk18 = 0x800;
+    AddDirectorCamera(&c, 10); AddDirectorCamera(&c, 20); AddDirectorCamera(&c, 30);
+    DirectorLastFrame = 4321; DirectorBufferCount = 0;
+    FILE *f = tmpfile(); CHECK(f);
+    fputs("junk", f);                       /* блок начинается не с начала файла */
+    WriteDirectorData(f);
+    fputs("tail", f);
+    long end = ftell(f);
+    FreeDirectorData(); DirectorLastFrame = 0;
+    fseek(f, 4, SEEK_SET);
+    ReadDirectorData(f);
+    CHECK(ftell(f) == end - 4);             /* позиция за блоком */
+    CHECK(NumCameras == 3 && CameraList[1]->id == 20 && CameraList[2]->unk18 == 0x800 && DirectorLastFrame == 4321);
+    fclose(f); FreeCameraList();
+    /* камеры старого формата */
+    f = tmpfile(); CHECK(f);
+    int32_t n = 1; fwrite(&n, 4, 1, f);
+    int32_t old[15]; for (int i = 0; i < 15; i++) old[i] = 100 + i;
+    fwrite(old, 0x3c, 1, f); rewind(f);
+    ReadCameraChunkV1(f);
+    CHECK(NumCameras == 1 && CameraList[0]->unk00 == 100 && CameraList[0]->unk08 == 102 && CameraList[0]->unk0c == 103);
+    CHECK(CameraList[0]->unk10 == 104 && CameraList[0]->id == 105 && CameraList[0]->unk18 == 106);
+    int32_t *w = (int32_t*)CameraList[0];
+    CHECK(w[0x4c / 4] == 111 && w[0x5c / 4] == 111 && w[0x68 / 4] == 114 && w[0x54 / 4] == 113 && w[0x1c / 4] == 0);
+    fclose(f); FreeCameraList();
+    /* путевые точки: Scripts/Waypoint.tmp */
+    DirectorBufferCount = 0; WaypointCount = 0; WaypointDirty = 0;
+    CHECK(!LoadWaypoints());                /* файла нет */
+    f = fopen("Scripts\\Waypoint.tmp", "wb");
+    if (f) {
+        int32_t recs[9] = { 1500, 3000, 150, 1500, 4500, 300, 3000, 4500, 450 };
+        fwrite(recs, 4, 9, f); fclose(f);
+        CHECK(LoadWaypoints() == 1);
+        CHECK(DirectorBufferCount == 3 && NumCameras == 1);
+        CHECK(GetWaypointAfterFrame(0)->frame == 300 && GetWaypointAfterFrame(150)->frame == 450 && !GetWaypointAfterFrame(300));
+        CHECK(!fopen("Scripts\\Waypoint.tmp", "rb"));   /* временный файл удалён */
+        FreeDirectorData();
+    }
+    CHECK(!GetWaypointAfterFrame(0));
+    WaypointCount = 5; WaypointDirty = 1; GameMode = 0; CurCamera = (void*)1; DirectorUnk6C = 9;
+    ResetDirectorState();
+    CHECK(WaypointCount == 0 && WaypointDirty == 0 && CurCamera == NULL && DirectorCam.index == -1 && DirectorUnk6C == 0);
+    CHECK(DirectorUnk8C == 0xffff00 && DirectorUnk7C == 1 && DirectorUnk84 == 4 && DirectorUnk88 == 0x20);
+    return 0;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage();
+    int f = test_director() | test_director2() | test_storage() | test_read();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

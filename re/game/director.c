@@ -2,6 +2,8 @@
 #include "director.h"
 #include "engine.h"
 #include "unported.h"
+#include "crt.h"
+#include "directorstorage.h"
 #include <string.h>
 
 GAME_VAR_DEF(int32_t, NumCameras, 0x00d17b60)
@@ -13,6 +15,14 @@ GAME_VAR_DEF(DIRECTOR_CAMERA, DirectorCam, 0x00d17bc4)
 GAME_VAR_DEF(void*, DirectorBuffer, 0x00d17c5c)
 GAME_VAR_DEF(int32_t, DirectorBufferCount, 0x00d17b70)
 GAME_VAR_DEF(DIRECTOR_CAMERA, CamBackup, 0x00d17c64)
+
+GAME_VAR_DEF(int32_t, DirectorUnk64, 0x00d17b64)
+GAME_VAR_DEF(int32_t, DirectorUnk6C, 0x00d17b6c)
+GAME_VAR_DEF(int32_t, DirectorUnk7C, 0x00d17b7c)
+GAME_VAR_DEF(int32_t, DirectorUnk84, 0x00d17b84)
+GAME_VAR_DEF(int32_t, DirectorUnk88, 0x00d17b88)
+GAME_VAR_DEF(int32_t, DirectorUnk8C, 0x00d17b8c)
+GAME_VAR_DEF(int32_t, GameMode, 0x005f7e50)
 
 /* 004c6168 */
 DIRECTOR_CAMERA *FindCameraById(int id) {
@@ -157,5 +167,31 @@ void RestoreCameraBackup(void) {
     if (CamBackupValid != 0) {
         RestoreCameraState(&CamBackup);
         CamBackupValid = 0;
+    }
+}
+
+/* 004c375a — запись путевой точки, следующая за кадром (по одной на 150 кадров), либо NULL */
+WAYPOINT_REC *GetWaypointAfterFrame(int frame) {
+    if (!DirectorBuffer) return NULL;
+    int i = frame / 150 + 1;
+    if (i < DirectorBufferCount) return (WAYPOINT_REC *)DirectorBuffer + i;
+    return NULL;
+}
+/* 004c8070 — сброс состояния режиссёра (вызывает также удаление Waypoint.tmp и временного файла камер) */
+void ResetDirectorState(void) {
+    WaypointCount = 0;
+    WaypointDirty = 0;
+    DirectorUnk6C = 0;
+    DirectorUnk64 = 0;
+    memset(&DirectorCam, 0, sizeof DirectorCam);
+    DirectorCam.index = -1;
+    CurCamera = NULL;
+    DirectorUnk8C = 0xffff00;
+    DirectorUnk7C = 1;
+    DirectorUnk84 = 4;
+    DirectorUnk88 = 0x20;
+    if (GameMode != 4 && GameMode != 5) {
+        DeleteWaypointFile();
+        g_remove("REPLAYDATA\\USER\\$TEMP$.CAMS");
     }
 }

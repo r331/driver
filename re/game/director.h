@@ -15,6 +15,12 @@ typedef struct DIRECTOR_CAMERA {
 } DIRECTOR_CAMERA;      /* 0x8c байт, см. InsertCamera */
 _Static_assert(sizeof(DIRECTOR_CAMERA) == 0x8c, "DIRECTOR_CAMERA size");
 
+typedef struct WAYPOINT_REC {   /* запись Scripts\Waypoint.tmp и DirectorBuffer */
+    int32_t x, z;       /* координаты игрока, округлённые до 1500 */
+    int32_t frame;
+} WAYPOINT_REC;
+_Static_assert(sizeof(WAYPOINT_REC) == 12, "WAYPOINT_REC size");
+
 #define NumCameras  GAME_VAR(int32_t,           NumCameras, 0x00d17b60)
 #define CurCamera   GAME_VAR(DIRECTOR_CAMERA*,  CurCamera,  0x00d17c50)
 #define CameraList  GAME_VAR(DIRECTOR_CAMERA**, CameraList, 0x00d17c54)
@@ -24,7 +30,15 @@ _Static_assert(sizeof(DIRECTOR_CAMERA) == 0x8c, "DIRECTOR_CAMERA size");
 #define DirectorBuffer      GAME_VAR(void*,            DirectorBuffer,      0x00d17c5c)
 #define DirectorBufferCount GAME_VAR(int32_t,          DirectorBufferCount, 0x00d17b70)
 #define CamBackup           GAME_VAR(DIRECTOR_CAMERA,  CamBackup,           0x00d17c64) /* предположительно та же структура */
+#define DirectorUnk64   GAME_VAR(int32_t, DirectorUnk64, 0x00d17b64)
+#define DirectorUnk6C   GAME_VAR(int32_t, DirectorUnk6C, 0x00d17b6c)
+#define DirectorUnk7C   GAME_VAR(int32_t, DirectorUnk7C, 0x00d17b7c)
+#define DirectorUnk84   GAME_VAR(int32_t, DirectorUnk84, 0x00d17b84)
+#define DirectorUnk88   GAME_VAR(int32_t, DirectorUnk88, 0x00d17b88)
+#define DirectorUnk8C   GAME_VAR(int32_t, DirectorUnk8C, 0x00d17b8c)
+#define GameMode        GAME_VAR(int32_t, GameMode,      0x005f7e50)   /* 4 и 5 — режимы, где временные файлы режиссёра не трогаем */
 #ifndef RE_HOOK_BUILD
+extern int32_t DirectorUnk64, DirectorUnk6C, DirectorUnk7C, DirectorUnk84, DirectorUnk88, DirectorUnk8C, GameMode;
 extern int32_t NumCameras; extern DIRECTOR_CAMERA *CurCamera; extern DIRECTOR_CAMERA **CameraList;
 extern int32_t DirectorLastFrame, CamBackupValid, DirectorBufferCount;
 extern DIRECTOR_CAMERA DirectorCam, CamBackup; extern void *DirectorBuffer;
@@ -47,3 +61,5 @@ void FreeDirectorData(void);
 void BackupCameraState(void);
 void DropCameraBackup(void);
 void RestoreCameraBackup(void);
+WAYPOINT_REC *GetWaypointAfterFrame(int frame);   /* 004c375a */
+void ResetDirectorState(void);                    /* 004c8070 */

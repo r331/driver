@@ -19,3 +19,8 @@ void WriteWaypointChunk(void *file);       /* 004c96d6 */
 void WriteCameraChunk(void *file);         /* 004c97a2 */
 void WriteDirectorData(void *file);        /* 004c9621 */
 void LogWaypoint(int frame);               /* 004c9bf4 */
+void ReadDirectorData(void *file);         /* 004c93e6 */
+void ReadCameraChunkV2(void *file);        /* 004c98de — камеры текущего формата (0x8c байт) */
+void ReadCameraChunkV1(void *file);        /* 004c9a16 — камеры старого формата (0x3c байт) */
+int  LoadWaypoints(void);                  /* 004c9ca0 */
+void DeleteWaypointFile(void);             /* 004c9dcc */

@@ -25,4 +25,11 @@ void re_install_all(void) {
     re_hook(0x004c8e9e, (void*)BackupCameraState,   "BackupCameraState");
     re_hook(0x004c8ed2, (void*)DropCameraBackup,    "DropCameraBackup");
     re_hook(0x004c8eec, (void*)RestoreCameraBackup, "RestoreCameraBackup");
+    re_hook(0x004c93e6, (void*)ReadDirectorData,    "ReadDirectorData");
+    re_hook(0x004c98de, (void*)ReadCameraChunkV2,   "ReadCameraChunkV2");
+    re_hook(0x004c9a16, (void*)ReadCameraChunkV1,   "ReadCameraChunkV1");
+    re_hook(0x004c9ca0, (void*)LoadWaypoints,       "LoadWaypoints");
+    re_hook(0x004c9dcc, (void*)DeleteWaypointFile,  "DeleteWaypointFile");
+    re_hook(0x004c375a, (void*)GetWaypointAfterFrame, "GetWaypointAfterFrame");
+    re_hook(0x004c8070, (void*)ResetDirectorState,  "ResetDirectorState");
 }
