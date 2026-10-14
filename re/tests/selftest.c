@@ -18,6 +18,7 @@
 #include "../game/ported14.h"
 #include "../game/ported15.h"
 #include "../game/ported16.h"
+#include "../game/ported17.h"
 #include "../game/ported13.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -374,8 +375,20 @@ static int test_ported16(void) {
     memcpy(&x, &r[6], 4); if (x != 16.0f) f++; }
   return f;
 }
+static int test_ported17(void) {
+  int f = 0;
+  for (uint32_t v = 4; v < 100000; v += 7) { uint32_t r = P17_ISqrt(v); if (r * r > v || (r + 1) * (r + 1) <= v) { if (!(r*r<=v+r+1)) f++; } }
+  if (P17_ISqrt(100) != 10 || P17_ISqrt(2) != 1) f++;
+  { int16_t s = 3; memcpy(&P17_MapBase + 5 * 0x42, &s, 2);
+    int16_t id = 5; memcpy(&P17_SlotBase + 3 * 0x2c + 16, &id, 2); if (P17_SlotMapSide(5) != 0) f++;
+    memcpy(&P17_SlotBase + 3 * 0x2c + 16, &(int16_t){0}, 2); if (P17_SlotMapSide(5) != 1) f++;
+    memcpy(&P17_SlotBase + 3 * 0x2c + 24, &id, 2); if (P17_SlotFindIndex(3, 5) != 3) f++; if (P17_SlotFindIndex(3, 9) != 0xff) f++; }
+  P17_PtrA = 7; P17_ValA = 9; P17_Cond1 = 1; P17_Cond2 = 0; P17_PushScreenState();
+  if (P17_PtrB != 7 || P17_ValB != 9 || P17_ValA != 2 || P17_Dst != 200 || P17_Const6 != 6) f++;
+  return f;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

@@ -2974,7 +2974,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00510448,FUN_00510448,SetMode1_00510448,manual,Ported8,,,86,ported
 0051049e,FUN_0051049e,ToggleBit0051049E,manual,SmallFuncs,,,27,ported
 005104b9,FUN_005104b9,SwitchPanel_005104B9,manual,Misc,,,52,ported
-005104ed,FUN_005104ed,,,,,,99,todo
+005104ed,FUN_005104ed,PushScreenState,manual,ported17,,,99,ported
 00510550,FUN_00510550,GlobalSet00510550,manual,GlobalSets,,,69,ported
 00510595,FUN_00510595,GlobalSet00510595,manual,GlobalSets,,,69,ported
 005105da,FUN_005105da,,,,,,129,todo
@@ -3097,8 +3097,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0051b65a,FUN_0051b65a,,,,,,329,todo
 0051b7a3,FUN_0051b7a3,,,,,,465,todo
 0051b974,FUN_0051b974,,,,,,671,todo
-0051bcc0,FUN_0051bcc0,,,,,,73,todo
-0051bd09,FUN_0051bd09,,,,,,111,todo
+0051bcc0,FUN_0051bcc0,P17_SlotMapSide,manual,ported17,,,73,ported
+0051bd09,FUN_0051bd09,P17_SlotFindIndex,manual,ported17,,,111,ported
 0051bd78,FUN_0051bd78,GlobalSet0051BD78,manual,GlobalSets,,,36,ported
 0051bd9c,FUN_0051bd9c,P14_Fn0051BD9C,manual,misc,,,160,ported
 0051be3c,FUN_0051be3c,,,,,,153,todo
@@ -3263,7 +3263,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00528bb7,FUN_00528bb7,,,,,,218,todo
 00528c91,FUN_00528c91,,,,,,134,todo
 00528d17,FUN_00528d17,,,,,,251,todo
-00528e12,FUN_00528e12,,,,,,107,todo
+00528e12,FUN_00528e12,ISqrt,manual,ported17,,,107,ported
 00529140,FUN_00529140,,,,,,80,todo
 00529190,FUN_00529190,,,,,,93,todo
 005291ed,FUN_005291ed,,,,,,102,todo
