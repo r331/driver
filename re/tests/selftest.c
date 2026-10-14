@@ -1,6 +1,7 @@
 /* Проверка перенесённых модулей в нативной сборке: ./driver --selftest */
 #include "../game/director.h"
 #include "../game/directorstorage.h"
+#include "../game/dirnodes.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -115,8 +116,23 @@ static int test_read(void) {
     ObjPosTable[0x52] = 40000; CHECK(CountNearbyCars() == 0);          /* 40000^2 > 9e8 */
     return 0;
 }
+static int test_nodes(void) {
+    DIR_NODE n[3]; memset(n, 0, sizeof n);
+    n[0].id = 5; n[0].link1 = 7; n[0].gx = 1; n[0].gy = 2;
+    n[1].id = 7; n[1].link2 = 9;
+    n[2].id = 0xffff;
+    DirNodeTable = n;
+    CHECK(FindNodeById(7) == &n[1] && !FindNodeById(0) && !FindNodeById(8));
+    CHECK(FindNodeByLink(7) == &n[0] && FindNodeByLink(9) == &n[1] && !FindNodeByLink(3));
+    CHECK(FindNodeAtPixel(0x35 + 0x10, 2 * 0x35 + 0x3c) == 5 && FindNodeAtPixel(0x35 + 0x3d, 2 * 0x35 + 0x10) == 0);
+    CHECK(SetNodeEnabled(5, 0) == 1 && (n[0].flags & 4) && SetNodeEnabled(5, 1) == 0 && !(n[0].flags & 4));
+    WAYPOINT_REC w[2]; DirectorBuffer = w; DirectorBufferCount = 2;
+    CHECK(GetWaypointForFrame(2) == &w[0] && GetWaypointForFrame(152) == &w[1]);
+    CHECK(!GetWaypointForFrame(302) && !GetWaypointForFrame(3));
+    return 0;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

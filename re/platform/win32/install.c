@@ -2,6 +2,7 @@
 #include "hook.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
+#include "../../game/dirnodes.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
     re_hook(0x004c622c, (void*)RenumberCameras,   "RenumberCameras");
@@ -37,5 +38,11 @@ void re_install_all(void) {
     re_hook(0x004c5222, (void*)SelectNewCamera,     "SelectNewCamera");
     re_hook(0x004c5d40, (void*)CountNearbyCars,     "CountNearbyCars");
     re_hook(0x004c810f, (void*)ClearDirectorTables, "ClearDirectorTables");
+    re_hook(0x004c5367, (void*)DirNopStub, "DirNopStub");
+    re_hook(0x004c379d, (void*)GetWaypointForFrame, "GetWaypointForFrame");
+    re_hook(0x004c4151, (void*)FindNodeById, "FindNodeById");
+    re_hook(0x004c419e, (void*)FindNodeByLink, "FindNodeByLink");
+    re_hook(0x004c4226, (void*)FindNodeAtPixel, "FindNodeAtPixel");
+    re_hook(0x004c3f26, (void*)SetNodeEnabled, "SetNodeEnabled");
     re_hook(0x004c60b2, (void*)IsCameraCarFarEnough, "IsCameraCarFarEnough");
 }
