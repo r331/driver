@@ -9,6 +9,7 @@
 #include "../../game/ported18.h"
 #include "../../game/ported19.h"
 #include "../../game/ported20.h"
+#include "../../game/ported21.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1115,4 +1116,9 @@ void re_install_all(void) {
     re_hook(0x00517512, (void*)P19_ScaleY, "P19_ScaleY");
     re_hook(0x004ec837, (void*)P20_FindNameNoCase, "P20_FindNameNoCase");
     re_hook(0x004ec8a8, (void*)P20_FindNameValue, "P20_FindNameValue");
+    re_hook(0x004ecfbd, (void*)P21_GridCellSet, "P21_GridCellSet");
+    re_hook(0x005250cb, (void*)P21_AddMsf, "P21_AddMsf");
+    re_hook(0x004e43b7, (void*)P21_SetAxisByte, "P21_SetAxisByte");
+    re_hook(0x0049509a, (void*)P21_CountActiveEntries, "P21_CountActiveEntries");
+    re_hook(0x004a519a, (void*)P21_MatchPrefix, "P21_MatchPrefix");
 }

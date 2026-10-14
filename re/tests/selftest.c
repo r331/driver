@@ -23,6 +23,7 @@
 #include "../game/ported19.h"
 #include "../game/ported13.h"
 #include <stdlib.h>
+#include "../game/ported21.h"
 #include <stdio.h>
 #include <string.h>
 #define CHECK(c) do { if (!(c)) { printf("FAIL %s:%d %s\n", __FILE__, __LINE__, #c); return 1; } } while (0)
@@ -406,8 +407,27 @@ static int test_ported19(void) {
   return f;
 }
 static int test_ported18(void) { P18_Flag0057A0E6 = 5; P18_ClearFlag(); return P18_Flag0057A0E6 != 0; }
+static int test_p21(void) {
+  int f = 0;
+  if (P21_AddMsf(0x00000102u, 0x00000103u) != 0x00000205u) f++;
+  P21_AxisValue = -20; P21_SetAxisByte(0x20, 3); if (P21_AxisOut[3] != 0x80) f++;
+  P21_AxisValue = 0; P21_SetAxisByte(0x21, 4); if (P21_AxisOut[4] != 0) f++;
+  P21_AxisSrc[5] = 7; P21_SetAxisByte(5, 6); if (P21_AxisOut[6] != 7) f++;
+  if (P21_MatchPrefix((const uint8_t*)"abc1", (const uint8_t*)"abc") != 3) f++;
+  if (P21_MatchPrefix((const uint8_t*)"abcD", (const uint8_t*)"abc") != 0) f++;
+  if (P21_MatchPrefix((const uint8_t*)"abx", (const uint8_t*)"abc") != 0) f++;
+  P21_EntryCount = 2; memset(P21_Entries, 0, sizeof P21_Entries);
+  P21_Entries[1] = 1; int32_t o = 9; memcpy(P21_Entries + 0x28, &o, 4);
+  P21_Entries[0x54 + 0x13] = 8; memcpy(P21_Entries + 0x54 + 0x28, &o, 4);
+  if (P21_CountActiveEntries(9) != 2 || P21_CountActiveEntries(1) != 0) f++;
+  static uint8_t map[31 * 31]; P21_GridDiv = 10; P21_GridRadius = 15; P21_GridStride = 31;
+  map[(0 + 0xf) + (1 + 0xf) * 31] = 1;  /* dx=0 dy=1 */
+  if (!P21_GridCellSet(10 + 5, map, 5, 0)) f++;
+  if (P21_GridCellSet(10 + 5, map, 5, 1)) f++;
+  return f;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

@@ -2137,7 +2137,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00494701,FUN_00494701,,,,,,661,todo
 004949f0,FUN_004949f0,,,,,,972,todo
 00494e01,FUN_00494e01,,,,,,665,todo
-0049509a,FUN_0049509a,,,,,,145,todo
+0049509a,FUN_0049509a,P21_CountActiveEntries,manual,ported21,,,145,ported
 0049512b,FUN_0049512b,,,,,,243,todo
 0049521e,FUN_0049521e,,,,,,809,todo
 0049565b,FUN_0049565b,,,,,,555,todo
@@ -2222,7 +2222,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004a4f7d,FUN_004a4f7d,,,compiler,range,,170,todo
 004a50a2,FUN_004a50a2,SkipInteger,manual,compiler,range,,85,ported
 004a50f7,FUN_004a50f7,,,compiler,range,,163,todo
-004a519a,FUN_004a519a,,,compiler,range,,144,todo
+004a519a,FUN_004a519a,P21_MatchPrefix,manual,ported21,range,,144,ported
 004a522a,FUN_004a522a,,,compiler,range,,270,todo
 004a5338,FUN_004a5338,,,compiler,assert,,461,todo
 004a5505,FUN_004a5505,,,compiler,range,,166,todo
@@ -2675,7 +2675,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004e41d5,FUN_004e41d5,,,,,,198,todo
 004e429b,FUN_004e429b,,,,,,222,todo
 004e4379,FUN_004e4379,Get4Words004E4379,manual,ui/widgets,,,62,ported
-004e43b7,FUN_004e43b7,,,,,,169,todo
+004e43b7,FUN_004e43b7,P21_SetAxisByte,manual,ported21,,,169,ported
 004e49c0,FUN_004e49c0,,,,,,540,todo
 004e4bdc,FUN_004e4bdc,,,,,,345,todo
 004e4d35,FUN_004e4d35,,,,,,557,todo
@@ -2753,7 +2753,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004ece1a,FUN_004ece1a,FreeMapBufs004ECE1A,manual,map,range,,106,ported
 004ece84,FUN_004ece84,,,map,range,,100,todo
 004ecee8,FUN_004ecee8,,,map,range,,213,todo
-004ecfbd,FUN_004ecfbd,,,map,range,,152,todo
+004ecfbd,FUN_004ecfbd,P21_GridCellSet,manual,ported21,range,,152,ported
 004ed055,FUN_004ed055,,,map,range,,1372,todo
 004ed5b1,FUN_004ed5b1,AllocMapBuffer300000,manual,map,assert,,33,ported
 004ed5d2,FUN_004ed5d2,FreeMapBuffer300000,manual,map,range,,38,ported
@@ -3191,7 +3191,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00524e22,FUN_00524e22,,,,,,175,todo
 00524ed1,FUN_00524ed1,,,,,,198,todo
 00524f97,FUN_00524f97,GetCDTOC,debug_string,,,,308,named
-005250cb,FUN_005250cb,,,,,,184,todo
+005250cb,FUN_005250cb,P21_AddMsf,manual,ported21,,,184,ported
 00525900,FUN_00525900,,,,,,200,todo
 005259c8,FUN_005259c8,,,,,,751,todo
 00525cb7,FUN_00525cb7,P12_Fn00525CB7,manual,Misc12,,,133,ported
