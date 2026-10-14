@@ -48,3 +48,4 @@ v0.5: +7 (29 всего): DirectorStorage.c — ReadDirectorData, ReadCameraChun
 - v0.12 (DirNodes): ReadDirectorKeys, ClampCameraHeight; всего 51
 - v0.13 (Director): CameraDump; всего 52
 - v0.14 (MenuState): MenuFlagSet, MenuFlagUpdate, MenuStateSetFour; всего 55
+- v0.15 (MenuState): 7 MenuToggleOpt* + MenuReturnOne; всего 63

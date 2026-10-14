@@ -7,6 +7,7 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    V(MenuRefresh, 0x0040500d, (void), ()) \
     V(StoreCameraState,   0x004c5499, (void *cam), (cam))   /* камера <- текущее состояние игровой камеры */ \
     V(RestoreCameraState, 0x004c536c, (void *cam), (cam))   /* текущее состояние игровой камеры <- cam */ \
     R(void *, FindCameraRecordForFrame, 0x004c61b2, (int frame), (frame)) \

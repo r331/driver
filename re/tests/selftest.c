@@ -142,6 +142,8 @@ static int test_menu(void) {
     MenuFlagSet(); if (MenuFlag5F7E4C != 1) return 1;
     MenuFlagUpdate(1); if (MenuFlag5F7E4C != 1) return 1;
     MenuFlagUpdate(2); if (MenuFlag5F7E4C != 0) return 1;
+    MenuOptBDFA44 = 0; MenuToggleOptBDFA44(); if (MenuOptBDFA44 != 1) return 1;
+    MenuToggleOptBDFA44(); if (MenuOptBDFA44 != 0 || MenuReturnOne() != 1) return 1;
     return MenuStateSetFour() != 0 || MenuState575EF0 != 4;
 }
 

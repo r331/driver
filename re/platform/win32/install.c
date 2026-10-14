@@ -43,6 +43,14 @@ void re_install_all(void) {
     re_hook(0x004c5367, (void*)DirNopStub, "DirNopStub");
     re_hook(0x00404687, (void*)MenuFlagSet, "MenuFlagSet");
     re_hook(0x00404696, (void*)MenuFlagUpdate, "MenuFlagUpdate");
+    re_hook(0x00404eb0, (void*)MenuToggleOptBDFA44, "MenuToggleOptBDFA44");
+    re_hook(0x00404ec9, (void*)MenuToggleOptBDFA48, "MenuToggleOptBDFA48");
+    re_hook(0x00404ee2, (void*)MenuToggleOptBDFA4C, "MenuToggleOptBDFA4C");
+    re_hook(0x00404efb, (void*)MenuToggleOptBDFA50, "MenuToggleOptBDFA50");
+    re_hook(0x00404f14, (void*)MenuToggleOptBDFA54, "MenuToggleOptBDFA54");
+    re_hook(0x00404f2d, (void*)MenuToggleOptB87E9C, "MenuToggleOptB87E9C");
+    re_hook(0x00404f46, (void*)MenuToggleOptBDFA58, "MenuToggleOptBDFA58");
+    re_hook(0x00407c42, (void*)MenuReturnOne, "MenuReturnOne");
     re_hook(0x00404f5f, (void*)MenuStateSetFour, "MenuStateSetFour");
     re_hook(0x004c379d, (void*)GetWaypointForFrame, "GetWaypointForFrame");
     re_hook(0x004c4151, (void*)FindNodeById, "FindNodeById");
