@@ -1629,7 +1629,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00416540,FUN_00416540,,,,,,107,todo
 00416605,FUN_00416605,,,,,,399,todo
 00416794,FUN_00416794,,,,,,229,todo
-00416d17,FUN_00416d17,,,,,,86,todo
+00416d17,FUN_00416d17,SelectByDifficulty,manual,ported9,,,86,ported
 00416d6d,FUN_00416d6d,,,,,,505,todo
 004171f0,FUN_004171f0,,,,,,355,todo
 00417353,FUN_00417353,LoadArrowIcons00417353,manual,Menu,,,51,ported
@@ -2192,7 +2192,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004a1b2d,FUN_004a1b2d,,,,,,516,todo
 004a1d31,FUN_004a1d31,Get138Entry148,manual,UIMisc,,,27,ported
 004a1d4c,FUN_004a1d4c,,,,,,2177,todo
-004a2b70,FUN_004a2b70,,,,,,132,todo
+004a2b70,FUN_004a2b70,ResetSlots,manual,ported9,,,132,ported
 004a2bf4,FUN_004a2bf4,ResetEffectsState,manual,Menu,,,20,ported
 004a2c08,FUN_004a2c08,Call004A2C08,manual,UIMisc,,,10,ported
 004a2c12,FUN_004a2c12,PoolAlloc004A2C12,manual,Ported6,,,73,ported
@@ -2663,7 +2663,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004e38d9,FUN_004e38d9,IsKeyOnly004E38D9,manual,SmallFuncs,,,37,ported
 004e38fe,FUN_004e38fe,GlobalSet004E38FE,manual,GlobalSets,,,19,ported
 004e3911,FUN_004e3911,GlobalSet004E3911,manual,GlobalSets,,,19,ported
-004e3924,FUN_004e3924,,,,,,136,todo
+004e3924,FUN_004e3924,IsButtonActive,manual,ported9,,,136,ported
 004e39ac,FUN_004e39ac,,,,,,365,todo
 004e3b19,FUN_004e3b19,ReturnZero004E3B19,manual,SmallFuncs,,,7,ported
 004e3b20,FUN_004e3b20,SetB31E00,manual,UIMisc,,,28,ported

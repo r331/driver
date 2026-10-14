@@ -12,6 +12,7 @@
 #include "../game/ported6.h"
 #include "../game/ported7.h"
 #include "../game/ported8.h"
+#include "../game/ported9.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -293,8 +294,14 @@ static int test_p8(void) {
     { uint8_t blk[0x70] = {0}; float f = 5; int32_t v = 3; memcpy(blk + 4, &f, 4); memcpy(blk + 0x60, &v, 4); StepSpeedA_004B9E2B(blk); memcpy(&v, blk + 0x50, 4); CHECK(v == 3); }
     return 0;
 }
+static int test_p9(void) {
+    P9_005fe9f0 = 2; P9_00c55a50 = 77; SelectByDifficulty_00416D17(); CHECK(P9_0054e258 == 77);
+    ResetSlots_004A2B70(); { int32_t v; memcpy(&v, &A_01134540[24*5], 4); CHECK(v == 5 && D_01134ec0[99] == 99); }
+    P9_00b31e20 = -20; P9_00b31dfc = 0; CHECK(IsButtonActive_004E3924(0x20) == 1 && IsButtonActive_004E3924(0x21) == 0);
+    return 0;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
