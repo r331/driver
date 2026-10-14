@@ -53,6 +53,10 @@ void re_install_all(void) {
     re_hook(0x00404ffe, (void*)MenuCallAction40CD17, "MenuCallAction40CD17");
     re_hook(0x00407c42, (void*)MenuReturnOne, "MenuReturnOne");
     re_hook(0x00404f5f, (void*)MenuStateSetFour, "MenuStateSetFour");
+    re_hook(0x00408337, (void*)MenuFlag54A0BCSet, "MenuFlag54A0BCSet");
+    re_hook(0x00408343, (void*)MenuFlag54A0BCClear, "MenuFlag54A0BCClear");
+    re_hook(0x0040844c, (void*)MenuVar54A0CCClear, "MenuVar54A0CCClear");
+    re_hook(0x00408710, (void*)MenuCounter5D577CInc, "MenuCounter5D577CInc");
     re_hook(0x004c379d, (void*)GetWaypointForFrame, "GetWaypointForFrame");
     re_hook(0x004c4151, (void*)FindNodeById, "FindNodeById");
     re_hook(0x004c419e, (void*)FindNodeByLink, "FindNodeByLink");

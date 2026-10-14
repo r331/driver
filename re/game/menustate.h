@@ -46,3 +46,13 @@ extern int32_t MenuOptBDFA58;
 int MenuToggleOptBDFA58(void); /* 00404f46 */
 int MenuReturnOne(void); /* 00407c42 */
 int MenuCallAction40CD17(void); /* 00404ffe */
+#define MenuFlag54A0BC GAME_VAR(int32_t, MenuFlag54A0BC, 0x0054a0bc)
+#define MenuVar54A0CC  GAME_VAR(int32_t, MenuVar54A0CC,  0x0054a0cc)
+#define MenuCounter5D577C GAME_VAR(int32_t, MenuCounter5D577C, 0x005d577c)
+#ifndef RE_HOOK_BUILD
+extern int32_t MenuFlag54A0BC, MenuVar54A0CC, MenuCounter5D577C;
+#endif
+void MenuFlag54A0BCSet(void);   /* 00408337 */
+void MenuFlag54A0BCClear(void); /* 00408343 */
+void MenuVar54A0CCClear(void);  /* 0040844c */
+void MenuCounter5D577CInc(void);/* 00408710 */

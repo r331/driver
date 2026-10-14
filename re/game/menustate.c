@@ -21,3 +21,10 @@ GAME_VAR_DEF(int32_t, MenuOptBDFA58, 0x00bdfa58)
 int MenuToggleOptBDFA58(void) { MenuOptBDFA58 ^= 1; MenuRefresh(); return 0; }
 int MenuReturnOne(void) { return 1; }
 int MenuCallAction40CD17(void) { MenuAction40CD17(); return 1; }
+GAME_VAR_DEF(int32_t, MenuFlag54A0BC, 0x0054a0bc)
+GAME_VAR_DEF(int32_t, MenuVar54A0CC, 0x0054a0cc)
+GAME_VAR_DEF(int32_t, MenuCounter5D577C, 0x005d577c)
+void MenuFlag54A0BCSet(void) { MenuFlag54A0BC = 1; }
+void MenuFlag54A0BCClear(void) { MenuFlag54A0BC = 0; }
+void MenuVar54A0CCClear(void) { MenuVar54A0CC = 0; }
+void MenuCounter5D577CInc(void) { MenuCounter5D577C++; }
