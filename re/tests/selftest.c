@@ -413,6 +413,7 @@ static int test_p21(void) {
   P21_AxisValue = -20; P21_SetAxisByte(0x20, 3); if (P21_AxisOut[3] != 0x80) f++;
   P21_AxisValue = 0; P21_SetAxisByte(0x21, 4); if (P21_AxisOut[4] != 0) f++;
   P21_AxisSrc[5] = 7; P21_SetAxisByte(5, 6); if (P21_AxisOut[6] != 7) f++;
+  P21_NameTable[2] = "x"; if (P21_GetNameByIndex(2)[0] != 'x') f++; if (P21_GetNameByIndex(0x23)[0] != 'E') f++;
   if (P21_MatchPrefix((const uint8_t*)"abc1", (const uint8_t*)"abc") != 3) f++;
   if (P21_MatchPrefix((const uint8_t*)"abcD", (const uint8_t*)"abc") != 0) f++;
   if (P21_MatchPrefix((const uint8_t*)"abx", (const uint8_t*)"abc") != 0) f++;

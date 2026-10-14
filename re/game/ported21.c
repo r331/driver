@@ -58,3 +58,11 @@ uint32_t P21_MatchPrefix(const uint8_t* s, const uint8_t* prefix) {
     if (x != y) return 0;
   }
 }
+
+#ifndef RE_HOOK_BUILD
+const char* P21_NameTable[0x23];
+const char* P21_ErrorName = "Error";
+#endif
+const char* P21_GetNameByIndex(uint8_t idx) {
+  return idx < 0x23 ? P21_NameTable[idx] : P21_ErrorName;
+}

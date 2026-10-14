@@ -21,3 +21,11 @@ uint32_t P21_AddMsf(uint32_t a, uint32_t b);                                    
 void     P21_SetAxisByte(uint8_t kind, uint32_t slot);                             /* 004e43b7 */
 int32_t  P21_CountActiveEntries(int32_t owner);                                    /* 0049509a */
 uint32_t P21_MatchPrefix(const uint8_t* s, const uint8_t* prefix);                 /* 004a519a */
+#ifdef RE_HOOK_BUILD
+#define P21_NameTable ((const char**)0x0054b410)
+#define P21_ErrorName ((const char*)0x0054b6a4)
+#else
+extern const char* P21_NameTable[0x23];
+extern const char* P21_ErrorName;
+#endif
+const char* P21_GetNameByIndex(uint8_t idx); /* 0040f14a */

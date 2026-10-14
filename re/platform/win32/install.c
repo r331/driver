@@ -1121,4 +1121,5 @@ void re_install_all(void) {
     re_hook(0x004e43b7, (void*)P21_SetAxisByte, "P21_SetAxisByte");
     re_hook(0x0049509a, (void*)P21_CountActiveEntries, "P21_CountActiveEntries");
     re_hook(0x004a519a, (void*)P21_MatchPrefix, "P21_MatchPrefix");
+    re_hook(0x0040f14a, (void*)P21_GetNameByIndex, "P21_GetNameByIndex");
 }

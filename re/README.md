@@ -107,3 +107,4 @@ v0.51: +4 (ported17: SlotMapSide 0051bcc0, SlotFindIndex 0051bd09, ISqrt 00528e1
 - v0.52: +1 (ported18: P18_ClearFlag 0052840c), всего 1247 (остальные простые листовые — COM/WinAPI/указатели, не переносимы)
 - v0.54 (ported20): P20_FindNameNoCase, P20_FindNameValue; всего 1257 (остальные простые — WinAPI/ftol/указатели)
 - v0.55 (ported21): 5 функций (GridCellSet, AddMsf, SetAxisByte, CountActiveEntries, MatchPrefix); всего 1262 (остальные — WinAPI/указатели/float)
+- v0.56 (ported21): GetNameByIndex 0040f14a; всего 1263 (остальные простые — WinAPI/ftol/COM)

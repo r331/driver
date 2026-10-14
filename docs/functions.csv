@@ -1323,7 +1323,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040f09c,FUN_0040f09c,P12_Fn0040F09C,manual,Misc12,,,75,ported
 0040f0e7,FUN_0040f0e7,MenuTableGet54B010,manual,MenuState,,,20,ported
 0040f0fb,FUN_0040f0fb,P14_Fn0040F0FB,manual,misc,,,79,ported
-0040f14a,FUN_0040f14a,,,,,,41,todo
+0040f14a,FUN_0040f14a,GetNameByIndex,manual,Misc,,,41,ported
 0040f2d0,FUN_0040f2d0,,,,,,124,todo
 0040f34c,FUN_0040f34c,MenuSet54BE5CTo3,manual,MenuState,,,12,ported
 0040f358,FUN_0040f358,MenuSet54BE5CTo2,manual,MenuState,,,12,ported
