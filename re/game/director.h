@@ -37,7 +37,15 @@ _Static_assert(sizeof(WAYPOINT_REC) == 12, "WAYPOINT_REC size");
 #define DirectorUnk88   GAME_VAR(int32_t, DirectorUnk88, 0x00d17b88)
 #define DirectorUnk8C   GAME_VAR(int32_t, DirectorUnk8C, 0x00d17b8c)
 #define GameMode        GAME_VAR(int32_t, GameMode,      0x005f7e50)   /* 4 и 5 — режимы, где временные файлы режиссёра не трогаем */
+typedef uint8_t TRAFFIC_RECS_T[0x40 * 0x54];
+typedef int32_t OBJPOS_T[0x52 * 65];
+typedef uint8_t DIRTABLE_T[64];
+#define TrafficRecs GAME_VAR(TRAFFIC_RECS_T, TrafficRecs, 0x011443e0)
+#define ObjPosTable GAME_VAR(OBJPOS_T, ObjPosTable, 0x00d07888)
+#define DirTableA   GAME_VAR(DIRTABLE_T, DirTableA, 0x0055f088)
+#define DirTableB   GAME_VAR(DIRTABLE_T, DirTableB, 0x0055f030)
 #ifndef RE_HOOK_BUILD
+extern TRAFFIC_RECS_T TrafficRecs; extern OBJPOS_T ObjPosTable; extern DIRTABLE_T DirTableA, DirTableB;
 extern int32_t DirectorUnk64, DirectorUnk6C, DirectorUnk7C, DirectorUnk84, DirectorUnk88, DirectorUnk8C, GameMode;
 extern int32_t NumCameras; extern DIRECTOR_CAMERA *CurCamera; extern DIRECTOR_CAMERA **CameraList;
 extern int32_t DirectorLastFrame, CamBackupValid, DirectorBufferCount;
@@ -74,3 +82,8 @@ extern CAR_OBJ *CarObjTable[]; extern float CarMinDist;
 #endif
 void SyncCameraFromList(void);
 int  IsCameraCarFarEnough(const DIRECTOR_CAMERA *cam);
+
+const char *GetCameraTypeName(int type);          /* 004c57b7 */
+void SelectNewCamera(void);                       /* 004c5222 */
+int  CountNearbyCars(void);                       /* 004c5d40 */
+void ClearDirectorTables(void);                   /* 004c810f */

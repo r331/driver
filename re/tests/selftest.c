@@ -107,6 +107,12 @@ static int test_read(void) {
         car.flags = 0x400; CHECK(IsCameraCarFarEnough(&c) == 0);
         car.flags = 0; CarMinDist = 9.0f; CHECK(IsCameraCarFarEnough(&c) == 0);
     }
+    CHECK(!strcmp(GetCameraTypeName(0x11), "Watch car camera") && !strcmp(GetCameraTypeName(7), "WARNING! Unknown camera type."));
+    memset(TrafficRecs, 0, sizeof TrafficRecs); memset(ObjPosTable, 0, sizeof ObjPosTable);
+    CHECK(CountNearbyCars() == 0);
+    TrafficRecs[5] = 1; TrafficRecs[0xc] = 1; TrafficRecs[1] = 4;      /* машина 0 рядом (ObjPos[1] = 0,0) */
+    CHECK(CountNearbyCars() == 1);
+    ObjPosTable[0x52] = 40000; CHECK(CountNearbyCars() == 0);          /* 40000^2 > 9e8 */
     return 0;
 }
 int re_selftest(void) {

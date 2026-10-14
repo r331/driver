@@ -33,5 +33,9 @@ void re_install_all(void) {
     re_hook(0x004c375a, (void*)GetWaypointAfterFrame, "GetWaypointAfterFrame");
     re_hook(0x004c8070, (void*)ResetDirectorState,  "ResetDirectorState");
     re_hook(0x004c52d9, (void*)SyncCameraFromList,  "SyncCameraFromList");
+    re_hook(0x004c57b7, (void*)GetCameraTypeName,   "GetCameraTypeName");
+    re_hook(0x004c5222, (void*)SelectNewCamera,     "SelectNewCamera");
+    re_hook(0x004c5d40, (void*)CountNearbyCars,     "CountNearbyCars");
+    re_hook(0x004c810f, (void*)ClearDirectorTables, "ClearDirectorTables");
     re_hook(0x004c60b2, (void*)IsCameraCarFarEnough, "IsCameraCarFarEnough");
 }

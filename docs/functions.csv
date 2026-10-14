@@ -2412,15 +2412,15 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c459f,FUN_004c459f,AddCamera,debug_string,,,,118,named
 004c483e,FUN_004c483e,ChangeCamera,debug_string,,,,118,named
 004c4ef9,FUN_004c4ef9,,,,,,809,todo
-004c5222,FUN_004c5222,,,,,,183,todo
+004c5222,FUN_004c5222,SelectNewCamera,manual,Director.c,,,183,ported
 004c52d9,FUN_004c52d9,SyncCameraFromList,manual,Director,,,142,ported
 004c5367,FUN_004c5367,,,,,,5,todo
 004c536c,FUN_004c536c,,,,,,301,todo
 004c5499,FUN_004c5499,,,,,,481,todo
 004c567a,FUN_004c567a,,,,,,317,todo
-004c57b7,FUN_004c57b7,,,,,,43,todo
+004c57b7,FUN_004c57b7,GetCameraTypeName,manual,Director.c,,,43,ported
 004c582f,FUN_004c582f,CreateNewAutoCamera,debug_string,,,,658,named
-004c5d40,FUN_004c5d40,,,,,,200,todo
+004c5d40,FUN_004c5d40,CountNearbyCars,manual,Director.c,,,200,ported
 004c5e08,FUN_004c5e08,,,,,,353,todo
 004c5f69,FUN_004c5f69,,,,,,296,todo
 004c6091,FUN_004c6091,,,,,,33,todo
@@ -2440,7 +2440,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c68a7,FUN_004c68a7,,,,,,1053,todo
 004c6d62,FUN_004c6d62,,,,,,487,todo
 004c8070,FUN_004c8070,ResetDirectorState,manual,Director,,,159,ported
-004c810f,FUN_004c810f,,,,,,31,todo
+004c810f,FUN_004c810f,ClearDirectorTables,manual,Director.c,,,31,ported
 004c812e,FUN_004c812e,FreeDirectorData,manual,Director,,,15,ported
 004c813d,FUN_004c813d,HandleDirector,debug_string,,,,468,named
 004c862f,FUN_004c862f,,,,,,73,todo

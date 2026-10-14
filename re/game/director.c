@@ -218,3 +218,48 @@ int IsCameraCarFarEnough(const DIRECTOR_CAMERA *cam) {
     if (car->flags & 0x400) return 0;
     return CarMinDist <= car->dist ? 1 : 0;
 }
+
+GAME_VAR_DEF(TRAFFIC_RECS_T, TrafficRecs, 0x011443e0)
+GAME_VAR_DEF(OBJPOS_T, ObjPosTable, 0x00d07888)
+GAME_VAR_DEF(DIRTABLE_T, DirTableA, 0x0055f088)
+GAME_VAR_DEF(DIRTABLE_T, DirTableB, 0x0055f030)
+/* 004c57b7 — название типа камеры */
+const char *GetCameraTypeName(int type) {
+    switch (type) {
+    case 0:    return "Chase camera";
+    case 1:    return "Flying camera";
+    case 2:    return "In car camera";
+    case 0x10: return "Static camera";
+    case 0x11: return "Watch car camera";
+    default:   return "WARNING! Unknown camera type.";
+    }
+}
+/* 004c5222 — выбрать новую автокамеру и сделать её текущей */
+void SelectNewCamera(void) {
+    if (!FindAutoCamera((void **)&CurCamera)) return;
+    InitNewCamera(CurCamera);
+    int32_t *w = (int32_t *)CurCamera;
+    w[5] = DirectorUnk6C < 4 ? 2 : DirectorUnk6C;
+    DirectorUnk64 = w[1];
+    DirectorCam = *CurCamera;
+    SetCameraPosition((float)w[0x13], (float)w[0x14], (float)w[0x15]);
+}
+/* 004c5d40 — сколько из 64 машин (тип 4, активные) ближе 30000 по плоскости к игроку (квадрат < 900000000) */
+int CountNearbyCars(void) {
+    int n = 0;
+    for (int i = 0; i < 0x40; i++) {
+        const uint8_t *rec = TrafficRecs + i * 0x54;
+        if (rec[5] && rec[0xc] == 1 && rec[1] == 4) {
+            const int32_t *pl = ObjPosTable;
+            const int32_t *ot = pl + (i + 1) * 0x52;
+            int32_t dx = pl[0] - ot[0], dz = pl[2] - ot[2];
+            if (dx * dx + dz * dz < 900000000) n++;
+        }
+    }
+    return n;
+}
+/* 004c810f */
+void ClearDirectorTables(void) {
+    ClearDirectorTable(&DirTableA);
+    ClearDirectorTable(&DirTableB);
+}

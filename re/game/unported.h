@@ -10,6 +10,9 @@
     V(StoreCameraState,   0x004c5499, (void *cam), (cam))   /* камера <- текущее состояние игровой камеры */ \
     V(RestoreCameraState, 0x004c536c, (void *cam), (cam))   /* текущее состояние игровой камеры <- cam */ \
     R(void *, FindCameraRecordForFrame, 0x004c61b2, (int frame), (frame)) \
+    R(int, FindAutoCamera, 0x004c6740, (void **out), (out))   /* выбирает автокамеру в *out, 0 — не нашлось */ \
+    V(InitNewCamera, 0x004c32c1, (void *cam), (cam)) \
+    V(ClearDirectorTable, 0x004c36da, (void *tbl), (tbl)) \
     V(SetCameraPosition, 0x00523c99, (float x, float y, float z), (x, y, z))
 
 #ifdef RE_HOOK_BUILD
