@@ -2515,11 +2515,11 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d0f28,FUN_004d0f28,,,,,,342,todo
 004d107e,FUN_004d107e,,,,,,147,todo
 004d1111,FUN_004d1111,ScriptOpSkipClear004D1111,manual,SmallFuncs,,,36,ported
-004d1135,FUN_004d1135,,,,,,55,todo
+004d1135,FUN_004d1135,ScriptReadU32_004D1135,manual,Script,,,55,ported
 004d116c,FUN_004d116c,,,,,,175,todo
 004d121b,FUN_004d121b,,,,,,175,todo
-004d12ca,FUN_004d12ca,,,,,,114,todo
-004d133c,FUN_004d133c,,,,,,156,todo
+004d12ca,FUN_004d12ca,ScriptReadPair_004D12CA,manual,Script,,,114,ported
+004d133c,FUN_004d133c,ScriptLoopStep_004D133C,manual,Script,,,156,ported
 004d13d8,FUN_004d13d8,ScriptOpSetBit4_004D13D8,manual,SmallFuncs,,,42,ported
 004d1402,FUN_004d1402,ScriptOpClearBit2_004D1402,manual,SmallFuncs,,,42,ported
 004d142c,FUN_004d142c,,,,,,172,todo
@@ -2527,7 +2527,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d1529,FUN_004d1529,,,,,,65,todo
 004d156a,FUN_004d156a,,,,,,151,todo
 004d1601,FUN_004d1601,ScriptOpSkip4_004D1601,manual,SmallFuncs,,,52,ported
-004d1635,FUN_004d1635,,,,,,61,todo
+004d1635,FUN_004d1635,ScriptSkipBack_004D1635,manual,Script,,,61,ported
 004d1672,FUN_004d1672,,,,,,197,todo
 004d1737,FUN_004d1737,ScriptOpToggle10_004D1737,manual,SmallFuncs,,,46,ported
 004d1765,FUN_004d1765,,,,,,799,todo
@@ -2831,7 +2831,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004f87e0,FUN_004f87e0,,,MScript,range,,130,todo
 004f8862,FUN_004f8862,,,MScript,assert,,200,todo
 004f892a,FUN_004f892a,,,MScript,range,,141,todo
-004f89b7,FUN_004f89b7,,,MScript,range,,52,todo
+004f89b7,FUN_004f89b7,SetTableValue_004F89B7,manual,Script,range,,52,ported
 004f89eb,FUN_004f89eb,NoopFn004F89EB,manual,MScript,range,,66,ported
 004f8a2d,FUN_004f8a2d,,,MScript,assert,,159,todo
 004f8acc,FUN_004f8acc,MenuClick004F8ACC,manual,MScript,range,,62,ported

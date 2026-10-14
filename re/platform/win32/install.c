@@ -20,6 +20,7 @@
 #include "../../game/ported7.h"
 #include "../../game/ported8.h"
 #include "../../game/ported9.h"
+#include "../../game/ported10.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
     re_hook(0x004c622c, (void*)RenumberCameras,   "RenumberCameras");
@@ -955,4 +956,9 @@ void re_install_all(void) {
     re_hook(0x00416d17, (void*)SelectByDifficulty_00416D17, "SelectByDifficulty_00416D17");
     re_hook(0x004a2b70, (void*)ResetSlots_004A2B70, "ResetSlots_004A2B70");
     re_hook(0x004e3924, (void*)IsButtonActive_004E3924, "IsButtonActive_004E3924");
+    re_hook(0x4f89b7, (void*)SetTableValue_004F89B7, "SetTableValue_004F89B7");
+    re_hook(0x4d1635, (void*)ScriptSkipBack_004D1635, "ScriptSkipBack_004D1635");
+    re_hook(0x4d1135, (void*)ScriptReadU32_004D1135, "ScriptReadU32_004D1135");
+    re_hook(0x4d12ca, (void*)ScriptReadPair_004D12CA, "ScriptReadPair_004D12CA");
+    re_hook(0x4d133c, (void*)ScriptLoopStep_004D133C, "ScriptLoopStep_004D133C");
 }
