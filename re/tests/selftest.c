@@ -150,8 +150,17 @@ static int test_menu(void) {
     return MenuStateSetFour() != 0 || MenuState575EF0 != 4;
 }
 
+static int test_menu2(void) {
+    MenuVar55384C = 0; MenuVar575EF8 = 0;
+    MenuToggle55384CRedraw(); if (MenuVar55384C != 1 || MenuVar575EF8 != 4) return 1;
+    MenuToggle55384CRedraw(); if (MenuVar55384C != 0) return 1;
+    MenuVar5759A4 = 0x3f; MenuIncVar5759A4(); MenuIncVar5759A4(); if (MenuVar5759A4 != 0x40) return 1;
+    MenuVar5759A4 = 1; MenuDecVar5759A4(); MenuDecVar5759A4(); if (MenuVar5759A4 != 0) return 1;
+    MenuVarB87E4C = 2; MenuIncVarB87E4C(); MenuIncVarB87E4C(); if (MenuVarB87E4C != 3) return 1;
+    return 0;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

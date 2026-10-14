@@ -52,3 +52,4 @@ v0.5: +7 (29 всего): DirectorStorage.c — ReadDirectorData, ReadCameraChun
 - v0.16 (MenuState): MenuCallAction40CD17; всего 64
 - v0.17 (MenuState): 4 мелких функции; всего 68
 - v0.18 (MenuState): SumBytes, MenuCopyPos; всего 70
+- v0.19 (MenuState): 18 функций меню (10 переключателей, 5 перерисовок, Inc/Dec); всего 88

@@ -65,3 +65,39 @@ int32_t SumBytes(const uint8_t *data, int32_t count); /* 0040682d */
 extern int32_t MenuSrcC559A4, MenuSrcC559A8, MenuDst54A0C0, MenuDst54A0D0;
 #endif
 void MenuCopyPos(void); /* 0040831c */
+
+/* Меню 2: переключатели + перерисовка (00409622) */
+#define MenuVar55384C GAME_VAR(int32_t, MenuVar55384C, 0x0055384c)
+#define MenuVar553850 GAME_VAR(int32_t, MenuVar553850, 0x00553850)
+#define MenuVar55C974 GAME_VAR(int32_t, MenuVar55C974, 0x0055c974)
+#define MenuVar5759A4 GAME_VAR(int32_t, MenuVar5759A4, 0x005759a4)
+#define MenuVar575EE8 GAME_VAR(int32_t, MenuVar575EE8, 0x00575ee8)
+#define MenuVar575EF8 GAME_VAR(int32_t, MenuVar575EF8, 0x00575ef8)
+#define MenuVar575F30 GAME_VAR(int32_t, MenuVar575F30, 0x00575f30)
+#define MenuVar575F3C GAME_VAR(int32_t, MenuVar575F3C, 0x00575f3c)
+#define MenuVar575F44 GAME_VAR(int32_t, MenuVar575F44, 0x00575f44)
+#define MenuVarB201DC GAME_VAR(int32_t, MenuVarB201DC, 0x00b201dc)
+#define MenuVarB31F04 GAME_VAR(int32_t, MenuVarB31F04, 0x00b31f04)
+#define MenuVarB87E4C GAME_VAR(int32_t, MenuVarB87E4C, 0x00b87e4c)
+#define MenuVarD118C8 GAME_VAR(int32_t, MenuVarD118C8, 0x00d118c8)
+#ifndef RE_HOOK_BUILD
+extern int32_t MenuVar55384C, MenuVar553850, MenuVar55C974, MenuVar5759A4, MenuVar575EE8, MenuVar575EF8, MenuVar575F30, MenuVar575F3C, MenuVar575F44, MenuVarB201DC, MenuVarB31F04, MenuVarB87E4C, MenuVarD118C8;
+#endif
+int MenuToggle55384CRedraw(void); /* 00408a69 */
+int MenuToggle553850Redraw(void); /* 00408b03 */
+int MenuToggleB31F04Redraw(void); /* 00408b9d */
+int MenuToggle575F44Redraw(void); /* 00408d0c */
+int MenuToggle55C974Redraw(void); /* 00408da6 */
+int MenuToggle575F30Redraw(void); /* 00408e40 */
+int MenuToggleB201DCRedraw(void); /* 00408eda */
+int MenuToggle575EE8Redraw(void); /* 00408f74 */
+int MenuToggle575F3CRedraw(void); /* 0040900e */
+int MenuToggleD118C8Redraw(void); /* 004090a8 */
+int MenuRedraw409231(void); /* 00409231 */
+int MenuRedraw4092D8(void); /* 004092d8 */
+int MenuRedraw40937F(void); /* 0040937f */
+int MenuRedraw409426(void); /* 00409426 */
+int MenuRedraw4094CD(void); /* 004094cd */
+void MenuIncVar5759A4(void); /* 00409b75 */
+void MenuDecVar5759A4(void); /* 00409b9f */
+void MenuIncVarB87E4C(void); /* 00409c31 */

@@ -34,3 +34,35 @@ GAME_VAR_DEF(int32_t, MenuSrcC559A8, 0x00c559a8)
 GAME_VAR_DEF(int32_t, MenuDst54A0C0, 0x0054a0c0)
 GAME_VAR_DEF(int32_t, MenuDst54A0D0, 0x0054a0d0)
 void MenuCopyPos(void) { MenuDst54A0C0 = MenuSrcC559A4; MenuDst54A0D0 = MenuSrcC559A8; }
+
+GAME_VAR_DEF(int32_t, MenuVar55384C, 0x0055384c)
+GAME_VAR_DEF(int32_t, MenuVar553850, 0x00553850)
+GAME_VAR_DEF(int32_t, MenuVar55C974, 0x0055c974)
+GAME_VAR_DEF(int32_t, MenuVar5759A4, 0x005759a4)
+GAME_VAR_DEF(int32_t, MenuVar575EE8, 0x00575ee8)
+GAME_VAR_DEF(int32_t, MenuVar575EF8, 0x00575ef8)
+GAME_VAR_DEF(int32_t, MenuVar575F30, 0x00575f30)
+GAME_VAR_DEF(int32_t, MenuVar575F3C, 0x00575f3c)
+GAME_VAR_DEF(int32_t, MenuVar575F44, 0x00575f44)
+GAME_VAR_DEF(int32_t, MenuVarB201DC, 0x00b201dc)
+GAME_VAR_DEF(int32_t, MenuVarB31F04, 0x00b31f04)
+GAME_VAR_DEF(int32_t, MenuVarB87E4C, 0x00b87e4c)
+GAME_VAR_DEF(int32_t, MenuVarD118C8, 0x00d118c8)
+int MenuToggle55384CRedraw(void) { MenuVar55384C ^= 1; MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuToggle553850Redraw(void) { MenuVar553850 ^= 1; MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuToggleB31F04Redraw(void) { MenuVarB31F04 ^= 1; MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuToggle575F44Redraw(void) { MenuVar575F44 ^= 1; MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuToggle55C974Redraw(void) { MenuVar55C974 ^= 1; MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuToggle575F30Redraw(void) { MenuVar575F30 ^= 1; MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuToggleB201DCRedraw(void) { MenuVarB201DC ^= 1; MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuToggle575EE8Redraw(void) { MenuVar575EE8 ^= 1; MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuToggle575F3CRedraw(void) { MenuVar575F3C ^= 1; MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuToggleD118C8Redraw(void) { MenuVarD118C8 ^= 1; MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuRedraw409231(void) { MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuRedraw4092D8(void) { MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuRedraw40937F(void) { MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuRedraw409426(void) { MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+int MenuRedraw4094CD(void) { MenuVar575EF8 = 4; MenuRedraw(); return 0; }
+void MenuIncVar5759A4(void) { if (MenuVar5759A4 < 0x40) { MenuVar5759A4++; MenuVar575EF8 = 4; MenuRedraw(); } }
+void MenuDecVar5759A4(void) { if (0 < MenuVar5759A4) { MenuVar5759A4--; MenuVar575EF8 = 4; MenuRedraw(); } }
+void MenuIncVarB87E4C(void) { if (MenuVarB87E4C < 3) { MenuVarB87E4C++; MenuVar575EF8 = 4; MenuRedraw(); } }

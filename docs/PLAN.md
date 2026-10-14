@@ -62,3 +62,4 @@
 - v0.11: DrawNode, DrawNodeMarker (всего 49)
 - v0.12: +ReadDirectorKeys, ClampCameraHeight (51 всего)
 - v0.13: +CameraDump (52 всего)
+- v0.19: +18 MenuState (88 всего)

@@ -75,4 +75,22 @@ void re_install_all(void) {
     re_hook(0x004c4226, (void*)FindNodeAtPixel, "FindNodeAtPixel");
     re_hook(0x004c3f26, (void*)SetNodeEnabled, "SetNodeEnabled");
     re_hook(0x004c60b2, (void*)IsCameraCarFarEnough, "IsCameraCarFarEnough");
+    re_hook(0x00408a69, (void*)MenuToggle55384CRedraw, "MenuToggle55384CRedraw");
+    re_hook(0x00408b03, (void*)MenuToggle553850Redraw, "MenuToggle553850Redraw");
+    re_hook(0x00408b9d, (void*)MenuToggleB31F04Redraw, "MenuToggleB31F04Redraw");
+    re_hook(0x00408d0c, (void*)MenuToggle575F44Redraw, "MenuToggle575F44Redraw");
+    re_hook(0x00408da6, (void*)MenuToggle55C974Redraw, "MenuToggle55C974Redraw");
+    re_hook(0x00408e40, (void*)MenuToggle575F30Redraw, "MenuToggle575F30Redraw");
+    re_hook(0x00408eda, (void*)MenuToggleB201DCRedraw, "MenuToggleB201DCRedraw");
+    re_hook(0x00408f74, (void*)MenuToggle575EE8Redraw, "MenuToggle575EE8Redraw");
+    re_hook(0x0040900e, (void*)MenuToggle575F3CRedraw, "MenuToggle575F3CRedraw");
+    re_hook(0x004090a8, (void*)MenuToggleD118C8Redraw, "MenuToggleD118C8Redraw");
+    re_hook(0x00409231, (void*)MenuRedraw409231, "MenuRedraw409231");
+    re_hook(0x004092d8, (void*)MenuRedraw4092D8, "MenuRedraw4092D8");
+    re_hook(0x0040937f, (void*)MenuRedraw40937F, "MenuRedraw40937F");
+    re_hook(0x00409426, (void*)MenuRedraw409426, "MenuRedraw409426");
+    re_hook(0x004094cd, (void*)MenuRedraw4094CD, "MenuRedraw4094CD");
+    re_hook(0x00409b75, (void*)MenuIncVar5759A4, "MenuIncVar5759A4");
+    re_hook(0x00409b9f, (void*)MenuDecVar5759A4, "MenuDecVar5759A4");
+    re_hook(0x00409c31, (void*)MenuIncVarB87E4C, "MenuIncVarB87E4C");
 }
