@@ -2744,8 +2744,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004ec58a,FUN_004ec58a,,,map,assert,,546,todo
 004ec7ac,FUN_004ec7ac,,,map,assert,,72,todo
 004ec7f4,FUN_004ec7f4,,,map,assert,,67,todo
-004ec837,FUN_004ec837,,,map,range,,113,todo
-004ec8a8,FUN_004ec8a8,,,map,range,,118,todo
+004ec837,FUN_004ec837,P20_FindNameNoCase,manual,ported20,range,,113,ported
+004ec8a8,FUN_004ec8a8,P20_FindNameValue,manual,ported20,range,,118,ported
 004ec91e,FUN_004ec91e,,,map,range,,234,todo
 004eca08,FUN_004eca08,,,map,range,,214,todo
 004ecade,FUN_004ecade,,,map,range,,242,todo
