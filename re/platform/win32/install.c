@@ -2,6 +2,7 @@
 #include "hook.h"
 #include "../../game/ported11.h"
 #include "../../game/ported12.h"
+#include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
 #include "../../game/dirnodes.h"
@@ -1051,4 +1052,7 @@ void re_install_all(void) {
     re_hook(0x004f3e78, (void*)P12_Fn004F3E78, "P12_Fn004F3E78");
     re_hook(0x00504699, (void*)P12_Fn00504699, "P12_Fn00504699");
     re_hook(0x00525cb7, (void*)P12_Fn00525CB7, "P12_Fn00525CB7");
+    re_hook(0x004064b4, (void*)P13_Fn004064B4, "P13_Fn004064B4");
+    re_hook(0x00422ac0, (void*)P13_Fn00422AC0, "P13_Fn00422AC0");
+    re_hook(0x004f8735, (void*)P13_Fn004F8735, "P13_Fn004F8735");
 }

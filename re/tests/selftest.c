@@ -15,6 +15,7 @@
 #include "../game/ported9.h"
 #include "../game/ported11.h"
 #include "../game/ported12.h"
+#include "../game/ported13.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -324,8 +325,16 @@ static int test_p12(void) {
   if (g_00c7d800[1] != 3 + 2 * 0x37 || g_00c7d828 != 0x00c7d82c) return 3;
   return 0;
 }
+static int test_p13(void) {
+  char a[8] = {0}, b[8] = "abcdefg";
+  P13_Fn00422AC0(a, b, 7); if (strcmp(a, "abcdefg")) return 1;
+  P13_Fn004064B4(2, 0);
+  if (P13_00575f30 != 1 || P13_005759a4 != 0x20 || P13_00575ee4 != 0x30) return 2;
+  if (strcmp(P13_Fn004F8735(3), "Out of memory")) return 3;
+  return 0;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

@@ -1118,7 +1118,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00406369,FUN_00406369,,,frontend/config,assert,,208,todo
 00406439,FUN_00406439,,,,,,64,todo
 00406479,FUN_00406479,,,,,,59,todo
-004064b4,FUN_004064b4,,,,,,34,todo
+004064b4,FUN_004064b4,ApplyDetailLevel,manual,Config,,,34,ported
 0040682d,FUN_0040682d,SumBytes,manual,MenuState,,,72,ported
 00406875,FUN_00406875,,,,,,732,todo
 00406b51,FUN_00406b51,,,,,,55,todo
@@ -1919,7 +1919,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0042282f,FUN_0042282f,,,,,,188,todo
 004228eb,FUN_004228eb,,,,,,271,todo
 004229fa,FUN_004229fa,,,,,,198,todo
-00422ac0,FUN_00422ac0,,,,,,39,todo
+00422ac0,FUN_00422ac0,CopyDwords,manual,Util,,,39,ported
 00422ae7,FUN_00422ae7,,,,,,366,todo
 00422c55,FUN_00422c55,,,,,,287,todo
 00424530,FUN_00424530,,,,,,178,todo
@@ -2827,7 +2827,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004f68a1,FUN_004f68a1,,,MScript,range,,295,todo
 004f8485,FUN_004f8485,,,MScript,range,,446,todo
 004f8643,FUN_004f8643,,,MScript,assert,,242,todo
-004f8735,FUN_004f8735,,,MScript,range,,35,todo
+004f8735,FUN_004f8735,GetScriptErrorText,manual,Script,range,,35,ported
 004f87e0,FUN_004f87e0,,,MScript,range,,130,todo
 004f8862,FUN_004f8862,,,MScript,assert,,200,todo
 004f892a,FUN_004f892a,,,MScript,range,,141,todo
