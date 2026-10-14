@@ -94,6 +94,14 @@ void re_install_all(void) {
     re_hook(0x00409b9f, (void*)MenuDecVar5759A4, "MenuDecVar5759A4");
     re_hook(0x00409c31, (void*)MenuIncVarB87E4C, "MenuIncVarB87E4C");
     re_hook(0x00409c5b, (void*)MenuDecVarB87E4C, "MenuDecVarB87E4C");
+    re_hook(0x0040a625, (void*)MenuEnterMode2, "MenuEnterMode2");
+    re_hook(0x0040a63b, (void*)MenuLeaveMode2, "MenuLeaveMode2");
+    re_hook(0x0040a64d, (void*)MenuEnterMode1, "MenuEnterMode1");
+    re_hook(0x0040a663, (void*)MenuLeaveMode1, "MenuLeaveMode1");
+    re_hook(0x0040a675, (void*)MenuEnterMode5, "MenuEnterMode5");
+    re_hook(0x0040a68b, (void*)MenuLeaveMode5, "MenuLeaveMode5");
+    re_hook(0x0040a69d, (void*)MenuEnterMode3, "MenuEnterMode3");
+    re_hook(0x0040a6b3, (void*)MenuLeaveMode3, "MenuLeaveMode3");
     re_hook(0x0040a443, (void*)MenuSet54A844On, "MenuSet54A844On");
     re_hook(0x0040a44f, (void*)MenuSet54A844Off, "MenuSet54A844Off");
     re_hook(0x0040a495, (void*)MenuSet54A854On, "MenuSet54A854On");

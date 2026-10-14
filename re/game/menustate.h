@@ -109,3 +109,20 @@ void MenuSet54A844On(void); /* 0040a443 */
 void MenuSet54A844Off(void); /* 0040a44f */
 void MenuSet54A854On(void); /* 0040a495 */
 void MenuSet54A854Off(void); /* 0040a4a1 */
+#define MenuMode1271060 GAME_VAR(int32_t, MenuMode1271060, 0x01271060)
+#define MenuFlag54A90C GAME_VAR(uint8_t, MenuFlag54A90C, 0x0054a90c)
+#define MenuFlag54A91C GAME_VAR(uint8_t, MenuFlag54A91C, 0x0054a91c)
+#define MenuFlag54A8FC GAME_VAR(uint8_t, MenuFlag54A8FC, 0x0054a8fc)
+#define MenuFlag54A92C GAME_VAR(uint8_t, MenuFlag54A92C, 0x0054a92c)
+#ifndef RE_HOOK_BUILD
+extern int32_t MenuMode1271060;
+extern uint8_t MenuFlag54A90C, MenuFlag54A91C, MenuFlag54A8FC, MenuFlag54A92C;
+#endif
+void MenuEnterMode2(void); /* 0040a625 */
+void MenuLeaveMode2(int32_t v); /* 0040a63b */
+void MenuEnterMode1(void); /* 0040a64d */
+void MenuLeaveMode1(int32_t v); /* 0040a663 */
+void MenuEnterMode5(void); /* 0040a675 */
+void MenuLeaveMode5(int32_t v); /* 0040a68b */
+void MenuEnterMode3(void); /* 0040a69d */
+void MenuLeaveMode3(int32_t v); /* 0040a6b3 */

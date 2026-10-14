@@ -73,3 +73,16 @@ void MenuSet54A844On(void) { MenuVar54A844 = 1; }
 void MenuSet54A844Off(void) { MenuVar54A844 = 0; }
 void MenuSet54A854On(void) { MenuVar54A854 = 1; }
 void MenuSet54A854Off(void) { MenuVar54A854 = 0; }
+GAME_VAR_DEF(int32_t, MenuMode1271060, 0x01271060)
+GAME_VAR_DEF(uint8_t, MenuFlag54A90C, 0x0054a90c)
+GAME_VAR_DEF(uint8_t, MenuFlag54A91C, 0x0054a91c)
+GAME_VAR_DEF(uint8_t, MenuFlag54A8FC, 0x0054a8fc)
+GAME_VAR_DEF(uint8_t, MenuFlag54A92C, 0x0054a92c)
+void MenuEnterMode2(void) { MenuFlag54A90C = 1; MenuMode1271060 = 2; }
+void MenuLeaveMode2(int32_t v) { if (v == 0) MenuFlag54A90C = 0; }
+void MenuEnterMode1(void) { MenuFlag54A91C = 1; MenuMode1271060 = 1; }
+void MenuLeaveMode1(int32_t v) { if (v == 0) MenuFlag54A91C = 0; }
+void MenuEnterMode5(void) { MenuFlag54A8FC = 1; MenuMode1271060 = 5; }
+void MenuLeaveMode5(int32_t v) { if (v == 0) MenuFlag54A8FC = 0; }
+void MenuEnterMode3(void) { MenuFlag54A92C = 1; MenuMode1271060 = 3; }
+void MenuLeaveMode3(int32_t v) { if (v == 0) MenuFlag54A92C = 0; }
