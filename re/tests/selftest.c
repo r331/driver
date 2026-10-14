@@ -7,6 +7,7 @@
 #include "../game/dirnodes.h"
 #include "../game/menustate.h"
 #include "../game/uihandlers.h"
+#include "../game/ported4.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -219,8 +220,18 @@ static int test_ui(void) {
     CHECK(Ui004157A9() == 0);
     return 0;
 }
+static int test_p4(void) {
+    D_00d00230 = 0; AllocMapBuffer300000(); CHECK(D_00d00230 != 0); FreeMapBuffer300000(); CHECK(D_00d00230 == 0);
+    MenuSlotHandler004088AA(0); CHECK(D_0054a254 == 2 && D_0054a264 == 2);
+    MenuSlotHandlerReset004091F3(0); CHECK(D_0054a424 == 2 && D_005f7e4c == 0);
+    D_00b1c0d4 = 0; CallIf424A02(1, 2);
+    int16_t sh[3] = { -5, 7, 300 }; LoadShort3FromPtr(sh); CHECK(D_00b93e48 == -5 && D_00b93e50 == 300);
+    D_01134528 = 1; ReleaseSlot4A2C5B(3); CHECK(D_01134528 == 0 && D_01134ec0[0] == 3);
+    D_00c81494 = 0; TickTimer4F5D67(); CHECK(D_00c81494 == 0); D_00c81494 = 3; TickTimer4F5D67(); CHECK(D_00c81494 == 2);
+    return 0;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

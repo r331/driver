@@ -66,6 +66,20 @@
     V(Call0041AFCA, 0x0041afca, (void), ()) \
     V(Call0050F7B2, 0x0050f7b2, (void), ()) \
     V(Call0050FBF4, 0x0050fbf4, (void), ()) \
+    V(P4Call004A3354, 0x004a3354, (void), ()) \
+    V(P4Call0041A8CD, 0x0041a8cd, (void), ()) \
+    V(P4Call0051AA5B, 0x0051aa5b, (void), ()) \
+    V(P4Call004ECADE, 0x004ecade, (void), ()) \
+    V(P4Call004D2D85, 0x004d2d85, (int32_t a0), (a0)) \
+    V(P4Call0041D89C, 0x0041d89c, (int32_t a0, int32_t a1), (a0, a1)) \
+    V(P4Call004CA98D, 0x004ca98d, (int32_t a0, int32_t a1), (a0, a1)) \
+    V(P4Call00528293, 0x00528293, (int32_t a0), (a0)) \
+    V(P4Call004C032A, 0x004c032a, (int32_t a0), (a0)) \
+    V(P4Call004076E2, 0x004076e2, (void), ()) \
+    V(P4Call00409CFA, 0x00409cfa, (void), ()) \
+    V(P4Call0041074D, 0x0041074d, (void), ()) \
+    V(P4Call00411A9D, 0x00411a9d, (void), ()) \
+    V(P4Call00415979, 0x00415979, (void), ()) \
     V(SetCameraPosition, 0x00523c99, (float x, float y, float z), (x, y, z))
 
 #ifdef RE_HOOK_BUILD

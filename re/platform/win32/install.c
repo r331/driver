@@ -14,6 +14,7 @@
 #include "../../game/smallfuncs2.h"
 #include "../../game/menuselect.h"
 #include "../../game/widgets.h"
+#include "../../game/ported4.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
     re_hook(0x004c622c, (void*)RenumberCameras,   "RenumberCameras");
@@ -685,4 +686,80 @@ void re_install_all(void) {
     re_hook(0x0050ffc5, (void*)Toggle0050FFC5, "Toggle0050FFC5");
     re_hook(0x0050ffe6, (void*)Toggle0050FFE6, "Toggle0050FFE6");
     re_hook(0x00510007, (void*)Toggle00510007, "Toggle00510007");
+    re_hook(0x0040737a, (void*)MenuSlotHandler0040737A, "MenuSlotHandler0040737A");
+    re_hook(0x00407605, (void*)MenuSlotHandler00407605, "MenuSlotHandler00407605");
+    re_hook(0x004088aa, (void*)MenuSlotHandler004088AA, "MenuSlotHandler004088AA");
+    re_hook(0x00408963, (void*)MenuSlotHandler00408963, "MenuSlotHandler00408963");
+    re_hook(0x00408a38, (void*)MenuSlotHandler00408A38, "MenuSlotHandler00408A38");
+    re_hook(0x00408ad2, (void*)MenuSlotHandler00408AD2, "MenuSlotHandler00408AD2");
+    re_hook(0x00408b6c, (void*)MenuSlotHandler00408B6C, "MenuSlotHandler00408B6C");
+    re_hook(0x00408c06, (void*)MenuSlotHandler00408C06, "MenuSlotHandler00408C06");
+    re_hook(0x00408cdb, (void*)MenuSlotHandler00408CDB, "MenuSlotHandler00408CDB");
+    re_hook(0x00408d75, (void*)MenuSlotHandler00408D75, "MenuSlotHandler00408D75");
+    re_hook(0x00408e0f, (void*)MenuSlotHandler00408E0F, "MenuSlotHandler00408E0F");
+    re_hook(0x00408ea9, (void*)MenuSlotHandler00408EA9, "MenuSlotHandler00408EA9");
+    re_hook(0x00408f43, (void*)MenuSlotHandler00408F43, "MenuSlotHandler00408F43");
+    re_hook(0x00408fdd, (void*)MenuSlotHandler00408FDD, "MenuSlotHandler00408FDD");
+    re_hook(0x00409077, (void*)MenuSlotHandler00409077, "MenuSlotHandler00409077");
+    re_hook(0x00409111, (void*)MenuSlotHandler00409111, "MenuSlotHandler00409111");
+    re_hook(0x0040fe6f, (void*)MenuSlotHandler0040FE6F, "MenuSlotHandler0040FE6F");
+    re_hook(0x0040ff29, (void*)MenuSlotHandler0040FF29, "MenuSlotHandler0040FF29");
+    re_hook(0x0040ffe3, (void*)MenuSlotHandler0040FFE3, "MenuSlotHandler0040FFE3");
+    re_hook(0x0041009d, (void*)MenuSlotHandler0041009D, "MenuSlotHandler0041009D");
+    re_hook(0x00410157, (void*)MenuSlotHandler00410157, "MenuSlotHandler00410157");
+    re_hook(0x00410211, (void*)MenuSlotHandler00410211, "MenuSlotHandler00410211");
+    re_hook(0x004102cb, (void*)MenuSlotHandler004102CB, "MenuSlotHandler004102CB");
+    re_hook(0x00410385, (void*)MenuSlotHandler00410385, "MenuSlotHandler00410385");
+    re_hook(0x0041043f, (void*)MenuSlotHandler0041043F, "MenuSlotHandler0041043F");
+    re_hook(0x004104f9, (void*)MenuSlotHandler004104F9, "MenuSlotHandler004104F9");
+    re_hook(0x004105b3, (void*)MenuSlotHandler004105B3, "MenuSlotHandler004105B3");
+    re_hook(0x0041066d, (void*)MenuSlotHandler0041066D, "MenuSlotHandler0041066D");
+    re_hook(0x00411091, (void*)MenuSlotHandler00411091, "MenuSlotHandler00411091");
+    re_hook(0x00411146, (void*)MenuSlotHandler00411146, "MenuSlotHandler00411146");
+    re_hook(0x004111fb, (void*)MenuSlotHandler004111FB, "MenuSlotHandler004111FB");
+    re_hook(0x004112b0, (void*)MenuSlotHandler004112B0, "MenuSlotHandler004112B0");
+    re_hook(0x00411365, (void*)MenuSlotHandler00411365, "MenuSlotHandler00411365");
+    re_hook(0x0041141a, (void*)MenuSlotHandler0041141A, "MenuSlotHandler0041141A");
+    re_hook(0x004114cf, (void*)MenuSlotHandler004114CF, "MenuSlotHandler004114CF");
+    re_hook(0x00411584, (void*)MenuSlotHandler00411584, "MenuSlotHandler00411584");
+    re_hook(0x00411639, (void*)MenuSlotHandler00411639, "MenuSlotHandler00411639");
+    re_hook(0x004116ee, (void*)MenuSlotHandler004116EE, "MenuSlotHandler004116EE");
+    re_hook(0x004117a3, (void*)MenuSlotHandler004117A3, "MenuSlotHandler004117A3");
+    re_hook(0x00411858, (void*)MenuSlotHandler00411858, "MenuSlotHandler00411858");
+    re_hook(0x0041190d, (void*)MenuSlotHandler0041190D, "MenuSlotHandler0041190D");
+    re_hook(0x004119c2, (void*)MenuSlotHandler004119C2, "MenuSlotHandler004119C2");
+    re_hook(0x00414fe3, (void*)MenuSlotHandler00414FE3, "MenuSlotHandler00414FE3");
+    re_hook(0x00415157, (void*)MenuSlotHandler00415157, "MenuSlotHandler00415157");
+    re_hook(0x00415276, (void*)MenuSlotHandler00415276, "MenuSlotHandler00415276");
+    re_hook(0x00415369, (void*)MenuSlotHandler00415369, "MenuSlotHandler00415369");
+    re_hook(0x004153f9, (void*)MenuSlotHandler004153F9, "MenuSlotHandler004153F9");
+    re_hook(0x0041549c, (void*)MenuSlotHandler0041549C, "MenuSlotHandler0041549C");
+    re_hook(0x0041553b, (void*)MenuSlotHandler0041553B, "MenuSlotHandler0041553B");
+    re_hook(0x004155f2, (void*)MenuSlotHandler004155F2, "MenuSlotHandler004155F2");
+    re_hook(0x004156ac, (void*)MenuSlotHandler004156AC, "MenuSlotHandler004156AC");
+    re_hook(0x004091f3, (void*)MenuSlotHandlerReset004091F3, "MenuSlotHandlerReset004091F3");
+    re_hook(0x0040929a, (void*)MenuSlotHandlerReset0040929A, "MenuSlotHandlerReset0040929A");
+    re_hook(0x00409341, (void*)MenuSlotHandlerReset00409341, "MenuSlotHandlerReset00409341");
+    re_hook(0x004093e8, (void*)MenuSlotHandlerReset004093E8, "MenuSlotHandlerReset004093E8");
+    re_hook(0x0040948f, (void*)MenuSlotHandlerReset0040948F, "MenuSlotHandlerReset0040948F");
+    re_hook(0x0041576b, (void*)MenuSlotHandlerReset0041576B, "MenuSlotHandlerReset0041576B");
+    re_hook(0x00415803, (void*)MenuSlotHandlerReset00415803, "MenuSlotHandlerReset00415803");
+    re_hook(0x004a2bf4, (void*)ResetEffectsState, "ResetEffectsState");
+    re_hook(0x0041a8ab, (void*)StepIfActive0041A8AB, "StepIfActive0041A8AB");
+    re_hook(0x004ed5b1, (void*)AllocMapBuffer300000, "AllocMapBuffer300000");
+    re_hook(0x004ed5d2, (void*)FreeMapBuffer300000, "FreeMapBuffer300000");
+    re_hook(0x004eb449, (void*)AllocMapBuffer400000, "AllocMapBuffer400000");
+    re_hook(0x004eb46a, (void*)FreeMapBuffer400000, "FreeMapBuffer400000");
+    re_hook(0x004c1b46, (void*)FreeBufferD17EC8, "FreeBufferD17EC8");
+    re_hook(0x0041a16c, (void*)FreeBuffer5FED98, "FreeBuffer5FED98");
+    re_hook(0x004a7ee9, (void*)SetVarD1193C, "SetVarD1193C");
+    re_hook(0x00424a02, (void*)CallIf424A02, "CallIf424A02");
+    re_hook(0x004cad24, (void*)CallIfD14EE4, "CallIfD14EE4");
+    re_hook(0x005279a1, (void*)LoadShort3FromPtr, "LoadShort3FromPtr");
+    re_hook(0x004086ea, (void*)StopTimer4086EA, "StopTimer4086EA");
+    re_hook(0x004d3426, (void*)InitMapState4D3426, "InitMapState4D3426");
+    re_hook(0x004c200f, (void*)DrainStackC200F, "DrainStackC200F");
+    re_hook(0x004ef997, (void*)FillOnes4EF997, "FillOnes4EF997");
+    re_hook(0x004a2c5b, (void*)ReleaseSlot4A2C5B, "ReleaseSlot4A2C5B");
+    re_hook(0x004f5d67, (void*)TickTimer4F5D67, "TickTimer4F5D67");
 }
