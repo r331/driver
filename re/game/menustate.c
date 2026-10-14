@@ -28,3 +28,9 @@ void MenuFlag54A0BCSet(void) { MenuFlag54A0BC = 1; }
 void MenuFlag54A0BCClear(void) { MenuFlag54A0BC = 0; }
 void MenuVar54A0CCClear(void) { MenuVar54A0CC = 0; }
 void MenuCounter5D577CInc(void) { MenuCounter5D577C++; }
+int32_t SumBytes(const uint8_t *data, int32_t count) { int32_t s = 0; for (int32_t i = 0; i < count; i++) s += data[i]; return s; }
+GAME_VAR_DEF(int32_t, MenuSrcC559A4, 0x00c559a4)
+GAME_VAR_DEF(int32_t, MenuSrcC559A8, 0x00c559a8)
+GAME_VAR_DEF(int32_t, MenuDst54A0C0, 0x0054a0c0)
+GAME_VAR_DEF(int32_t, MenuDst54A0D0, 0x0054a0d0)
+void MenuCopyPos(void) { MenuDst54A0C0 = MenuSrcC559A4; MenuDst54A0D0 = MenuSrcC559A8; }

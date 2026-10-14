@@ -56,3 +56,12 @@ void MenuFlag54A0BCSet(void);   /* 00408337 */
 void MenuFlag54A0BCClear(void); /* 00408343 */
 void MenuVar54A0CCClear(void);  /* 0040844c */
 void MenuCounter5D577CInc(void);/* 00408710 */
+int32_t SumBytes(const uint8_t *data, int32_t count); /* 0040682d */
+#define MenuSrcC559A4 GAME_VAR(int32_t, MenuSrcC559A4, 0x00c559a4)
+#define MenuSrcC559A8 GAME_VAR(int32_t, MenuSrcC559A8, 0x00c559a8)
+#define MenuDst54A0C0 GAME_VAR(int32_t, MenuDst54A0C0, 0x0054a0c0)
+#define MenuDst54A0D0 GAME_VAR(int32_t, MenuDst54A0D0, 0x0054a0d0)
+#ifndef RE_HOOK_BUILD
+extern int32_t MenuSrcC559A4, MenuSrcC559A8, MenuDst54A0C0, MenuDst54A0D0;
+#endif
+void MenuCopyPos(void); /* 0040831c */

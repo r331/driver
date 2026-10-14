@@ -1119,7 +1119,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00406439,FUN_00406439,,,,,,64,todo
 00406479,FUN_00406479,,,,,,59,todo
 004064b4,FUN_004064b4,,,,,,34,todo
-0040682d,FUN_0040682d,,,,,,72,todo
+0040682d,FUN_0040682d,SumBytes,manual,MenuState,,,72,ported
 00406875,FUN_00406875,,,,,,732,todo
 00406b51,FUN_00406b51,,,,,,55,todo
 00407160,FUN_00407160,,,,,,236,todo
@@ -1151,7 +1151,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00407dba,FUN_00407dba,,,,,,117,todo
 00407e2f,FUN_00407e2f,,,,,,625,todo
 004082a0,FUN_004082a0,,,,,,124,todo
-0040831c,FUN_0040831c,,,,,,27,todo
+0040831c,FUN_0040831c,MenuCopyPos,manual,MenuState,,,27,ported
 00408337,FUN_00408337,MenuFlag54A0BCSet,manual,MenuState,,,12,ported
 00408343,FUN_00408343,MenuFlag54A0BCClear,manual,MenuState,,,12,ported
 0040834f,FUN_0040834f,,,,,,71,todo
