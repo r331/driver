@@ -2,6 +2,7 @@
 #include "hook.h"
 #include "../../game/ported11.h"
 #include "../../game/ported12.h"
+#include "../../game/ported14.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1055,4 +1056,21 @@ void re_install_all(void) {
     re_hook(0x004064b4, (void*)P13_Fn004064B4, "P13_Fn004064B4");
     re_hook(0x00422ac0, (void*)P13_Fn00422AC0, "P13_Fn00422AC0");
     re_hook(0x004f8735, (void*)P13_Fn004F8735, "P13_Fn004F8735");
+    re_hook(0x004cac86, (void*)P14_Fn004CAC86, "P14_Fn004CAC86");
+    re_hook(0x004e12e4, (void*)P14_Fn004E12E4, "P14_Fn004E12E4");
+    re_hook(0x0051bd9c, (void*)P14_Fn0051BD9C, "P14_Fn0051BD9C");
+    re_hook(0x0048db65, (void*)P14_Fn0048DB65, "P14_Fn0048DB65");
+    re_hook(0x00503ef4, (void*)P14_Fn00503EF4, "P14_Fn00503EF4");
+    re_hook(0x00504439, (void*)P14_Fn00504439, "P14_Fn00504439");
+    re_hook(0x00526a34, (void*)P14_Fn00526A34, "P14_Fn00526A34");
+    re_hook(0x0040f0fb, (void*)P14_Fn0040F0FB, "P14_Fn0040F0FB");
+    re_hook(0x004cad47, (void*)P14_Fn004CAD47, "P14_Fn004CAD47");
+    re_hook(0x004a3b80, (void*)P14_Fn004A3B80, "P14_Fn004A3B80");
+    re_hook(0x004a39f6, (void*)P14_Fn004A39F6, "P14_Fn004A39F6");
+    re_hook(0x0050d97a, (void*)P14_Fn0050D97A, "P14_Fn0050D97A");
+    re_hook(0x004a6749, (void*)P14_Fn004A6749, "P14_Fn004A6749");
+    re_hook(0x0051bed5, (void*)P14_Fn0051BED5, "P14_Fn0051BED5");
+    re_hook(0x004a7e6e, (void*)P14_Fn004A7E6E, "P14_Fn004A7E6E");
+    re_hook(0x004d623b, (void*)P14_Fn004D623B, "P14_Fn004D623B");
+    re_hook(0x00503e83, (void*)P14_Fn00503E83, "P14_Fn00503E83");
 }

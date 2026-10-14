@@ -7,6 +7,17 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    R(uint32_t, N14_Rand, 0x0052e190, (void), ()) \
+    V(N14_Fn4CB4FF, 0x004cb4ff, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
+    V(N14_Fn4FBA23, 0x004fba23, (const uint8_t* a0), (a0)) \
+    V(N14_Fn4D6C5A, 0x004d6c5a, (void), ()) \
+    V(N14_Fn4D6DAC, 0x004d6dac, (void), ()) \
+    V(N14_Fn4D6EF2, 0x004d6ef2, (void), ()) \
+    V(N14_Fn5259C8, 0x005259c8, (int32_t a0), (a0)) \
+    V(N14_Fn4D2ADE, 0x004d2ade, (int32_t a0), (a0)) \
+    V(N14_Fn4A7EE9, 0x004a7ee9, (int32_t a0), (a0)) \
+    V(N14_Fn48A627, 0x0048a627, (void), ()) \
+    R(uint32_t, N14_Fn503ECC, 0x00503ecc, (const uint8_t* a0), (a0)) \
     V(Call00405D60, 0x00405d60, (int32_t a0, uint32_t a1), (a0, a1)) \
     V(Call0049EC01, 0x0049ec01, (int32_t a0, uint32_t a1), (a0, a1)) \
     V(Call0040CCB4, 0x0040ccb4, (uint32_t a0, uint32_t a1), (a0, a1)) \

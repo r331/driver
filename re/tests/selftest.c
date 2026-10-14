@@ -15,6 +15,7 @@
 #include "../game/ported9.h"
 #include "../game/ported11.h"
 #include "../game/ported12.h"
+#include "../game/ported14.h"
 #include "../game/ported13.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -333,8 +334,28 @@ static int test_p13(void) {
   if (strcmp(P13_Fn004F8735(3), "Out of memory")) return 3;
   return 0;
 }
+static int test_p14(void) {
+  int f = 0;
+  int32_t tri[6] = {0, 0, 10, 0, 0, 10};
+  if (P14_Fn00526A34(1, 1, tri) != 1 && P14_Fn00526A34(20, 20, tri) != 0) f++; /* порядок обхода: знак */
+  uint8_t a[0x18] = {0}, b[0x18] = {0}, o[0x18] = {0};
+  int32_t v;
+  v = 5; memcpy(a + 0x14, &v, 4); v = 10; memcpy(a + 0x10, &v, 4); v = 3; memcpy(a + 0xc, &v, 4);
+  v = 2; memcpy(b + 0x14, &v, 4); v = 20; memcpy(b + 0x10, &v, 4); v = 7; memcpy(b + 0xc, &v, 4);
+  P14_Fn00503EF4(a, b, o);
+  int32_t r0, r1, r2; memcpy(&r0, o + 0x14, 4); memcpy(&r1, o + 0x10, 4); memcpy(&r2, o + 0xc, 4);
+  if (r0 != 2 || r1 != 49 || r2 != 96) f++;
+  uint32_t buf[4] = {1, 2, 3, 4};
+  P14_Fn0048DB65(buf, 16);
+  if (buf[0] | buf[3]) f++;
+  P14_00c4bdc4 = 1; P14_00c29d80 = 1; P14_00c29d81 = 4; P14_00bf1c20 = 0;
+  P14_Fn0051BD9C();
+  if (P14_00c29d80 != 2 || P14_00c29d81 != 1 || P14_00c4bdc4 != 100 || P14_00bf1c20 != 1) f++;
+  if (f) printf("test_p14 FAILED %d\n", f);
+  return f;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
