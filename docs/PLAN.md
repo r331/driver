@@ -59,3 +59,4 @@
 | v0.8 | DirNodes +6 |
 | v0.9 | DirNodes +4 (всего 45) |
 - v0.10: DumpWaypoints, DrawCornerIndicator (47 всего)
+- v0.11: DrawNode, DrawNodeMarker (всего 49)

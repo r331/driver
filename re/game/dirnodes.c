@@ -9,6 +9,10 @@ GAME_VAR_DEF(DIR_NODE*, DirNodeTable, 0x00d17c58)
 GAME_VAR_DEF(int32_t, DirIndicatorOn, 0x00d17bac)
 GAME_VAR_DEF(int32_t, DirIndicatorCnt, 0x00d17b80)
 GAME_VAR_DEF(uint32_t, IndicatorTex, 0x00c55c58)
+GAME_VAR_DEF(uint32_t, DirSelectedColor, 0x00d17b8c)
+#ifndef RE_HOOK_BUILD
+uint32_t NodeIconTexArr[64];
+#endif
 /* 004c5367 — пустая функция */
 void DirNopStub(void) {}
 /* 004c379d — запись буфера для кадра (frame-2 кратно 150) */
@@ -103,4 +107,22 @@ void DrawCornerIndicator(void) {
     case 3: DrawSprite(0x270, 0x1d0, IndicatorTex, 0, 0x22, 0xff, 0, 0); break;
     case 4: DrawSprite(0x140, 0xf0,  IndicatorTex, 0, 1,    0xff, 0, 0); break;
     }
+}
+/* 004c3d5c — рисует узел в сетке (шаг 53, смещение 16): цвет — выбранный / включён 0xff8b00 / выключен 0x804500 */
+void DrawNode(DIR_NODE *n) {
+    uint32_t col = (n->id == DirectorUnk7C) ? DirSelectedColor : ((n->flags & 4) ? 0x804500u : 0xff8b00u);
+    float x = 53.0f * (float)n->gx + 16.0f, y = 53.0f * (float)n->gy + 16.0f;
+    if (n->unk24 == 0) { DrawRect(x, y, 45.0f, 45.0f, col); return; }
+#ifdef RE_HOOK_BUILD
+    const uint8_t *icon = (const uint8_t *)(uintptr_t)(uint32_t)n->unk24;
+    DrawIcon(x, y, 45.0f / (float)icon[0xb], 45.0f / (float)icon[0xc], (uint32_t)n->unk24, col);
+#endif
+}
+/* 004c3e6a — маркер узла: иконка (по unk00) в углу клетки; серый (0x40) если узел выключен, бит 1 — нижний правый угол */
+void DrawNodeMarker(DIR_NODE *n) {
+    int x = n->gx * 0x35 + 0x10, y = n->gy * 0x35 + 0x10;
+    uint32_t c = (n->flags & 4) ? 0x40 : 0xff;
+    if (n->flags & 1) { x += 0x31; y += 0x2d - GetMarkerYAdjust(0); }
+    else y += 0x31;
+    if (n->unk00 != -1) DrawSprite(x, y, NodeIconTex[n->unk00], 0, 0, c, c, c);
 }

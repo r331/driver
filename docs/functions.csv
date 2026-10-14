@@ -2400,8 +2400,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c38e2,FUN_004c38e2,ReplayMenuHandler,debug_string,,,,195,named
 004c3c94,FUN_004c3c94,DrawNodeChain,manual,DirNodes.c,,,93,ported
 004c3cf1,FUN_004c3cf1,DrawNodeMarkersChain,manual,DirNodes.c,,,107,ported
-004c3d5c,FUN_004c3d5c,,,,,,270,todo
-004c3e6a,FUN_004c3e6a,,,,,,188,todo
+004c3d5c,FUN_004c3d5c,DrawNode,manual,DirNodes.c,,,270,ported
+004c3e6a,FUN_004c3e6a,DrawNodeMarker,manual,DirNodes.c,,,188,ported
 004c3f26,FUN_004c3f26,SetNodeEnabled,manual,DirNodes.c,,,105,ported
 004c3f8f,FUN_004c3f8f,,,,,,450,todo
 004c4151,FUN_004c4151,FindNodeById,manual,DirNodes.c,,,77,ported

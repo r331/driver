@@ -36,3 +36,14 @@ void DrawCornerIndicator(void);                  /* 004c42a9 */
 #ifndef RE_HOOK_BUILD
 extern int32_t DirIndicatorOn, DirIndicatorCnt; extern uint32_t IndicatorTex;
 #endif
+void DrawNode(DIR_NODE *node);                    /* 004c3d5c */
+void DrawNodeMarker(DIR_NODE *node);              /* 004c3e6a */
+#define DirSelectedColor GAME_VAR(uint32_t, DirSelectedColor, 0x00d17b8c)
+#ifdef RE_HOOK_BUILD
+#define NodeIconTex ((uint32_t*)(uintptr_t)0x00c55820)
+#else
+#define NodeIconTex NodeIconTexArr
+#endif
+#ifndef RE_HOOK_BUILD
+extern uint32_t DirSelectedColor; extern uint32_t NodeIconTexArr[];
+#endif
