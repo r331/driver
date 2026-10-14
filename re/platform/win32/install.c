@@ -122,6 +122,11 @@ void re_install_all(void) {
     re_hook(0x0040f358, (void*)MenuSet54BE5CTo2, "MenuSet54BE5CTo2");
     re_hook(0x0040f395, (void*)MenuSet54BE7CTo3, "MenuSet54BE7CTo3");
     re_hook(0x0040f3a1, (void*)MenuSet54BE7CTo2, "MenuSet54BE7CTo2");
+    re_hook(0x0040e8ec, (void*)MenuSet54ACD4To3, "MenuSet54ACD4To3");
+    re_hook(0x0040e944, (void*)MenuSet54ACF4To3, "MenuSet54ACF4To3");
+    re_hook(0x0040e989, (void*)MenuSet54AD14To3, "MenuSet54AD14To3");
+    re_hook(0x0040ea2b, (void*)MenuSet54AD34To3, "MenuSet54AD34To3");
+    re_hook(0x0040f0e7, (void*)MenuTableGet54B010, "MenuTableGet54B010");
     re_hook(0x0040a443, (void*)MenuSet54A844On, "MenuSet54A844On");
     re_hook(0x0040a44f, (void*)MenuSet54A844Off, "MenuSet54A844Off");
     re_hook(0x0040a495, (void*)MenuSet54A854On, "MenuSet54A854On");

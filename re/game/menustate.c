@@ -115,3 +115,17 @@ void MenuSet54BE5CTo3(void) { MenuByte54BE5C = 3; }
 void MenuSet54BE5CTo2(void) { MenuByte54BE5C = 2; }
 void MenuSet54BE7CTo3(void) { MenuByte54BE7C = 3; }
 void MenuSet54BE7CTo2(void) { MenuByte54BE7C = 2; }
+GAME_VAR_DEF(MenuTable256_t, MenuTable54B010, 0x0054b010)
+GAME_VAR_DEF(uint8_t, MenuByte54ACD4, 0x0054acd4)
+GAME_VAR_DEF(uint8_t, MenuByte54ACE4, 0x0054ace4)
+GAME_VAR_DEF(uint8_t, MenuByte54ACF4, 0x0054acf4)
+GAME_VAR_DEF(uint8_t, MenuByte54AD04, 0x0054ad04)
+GAME_VAR_DEF(uint8_t, MenuByte54AD14, 0x0054ad14)
+GAME_VAR_DEF(uint8_t, MenuByte54AD24, 0x0054ad24)
+GAME_VAR_DEF(uint8_t, MenuByte54AD34, 0x0054ad34)
+GAME_VAR_DEF(uint8_t, MenuByte54AD44, 0x0054ad44)
+void MenuSet54ACD4To3(void) { MenuByte54ACD4 = 3; MenuByte54ACE4 = 3; }
+void MenuSet54ACF4To3(void) { MenuByte54ACF4 = 3; MenuByte54AD04 = 3; }
+void MenuSet54AD14To3(void) { MenuByte54AD14 = 3; MenuByte54AD24 = 3; }
+void MenuSet54AD34To3(void) { MenuByte54AD34 = 3; MenuByte54AD44 = 3; }
+uint32_t MenuTableGet54B010(uint32_t i) { return MenuTable54B010[i & 0xff]; }

@@ -150,8 +150,20 @@ void MenuLeaveMode6(int32_t v); /* 0040a72b */
 #define MenuByte5D77C0 GAME_VAR(uint8_t, MenuByte5D77C0, 0x005d77c0)
 #define MenuByte54BE5C GAME_VAR(uint8_t, MenuByte54BE5C, 0x0054be5c)
 #define MenuByte54BE7C GAME_VAR(uint8_t, MenuByte54BE7C, 0x0054be7c)
+typedef uint32_t MenuTable256_t[256];
+#define MenuTable54B010 GAME_VAR(MenuTable256_t, MenuTable54B010, 0x0054b010)
+#define MenuByte54ACD4 GAME_VAR(uint8_t, MenuByte54ACD4, 0x0054acd4)
+#define MenuByte54ACE4 GAME_VAR(uint8_t, MenuByte54ACE4, 0x0054ace4)
+#define MenuByte54ACF4 GAME_VAR(uint8_t, MenuByte54ACF4, 0x0054acf4)
+#define MenuByte54AD04 GAME_VAR(uint8_t, MenuByte54AD04, 0x0054ad04)
+#define MenuByte54AD14 GAME_VAR(uint8_t, MenuByte54AD14, 0x0054ad14)
+#define MenuByte54AD24 GAME_VAR(uint8_t, MenuByte54AD24, 0x0054ad24)
+#define MenuByte54AD34 GAME_VAR(uint8_t, MenuByte54AD34, 0x0054ad34)
+#define MenuByte54AD44 GAME_VAR(uint8_t, MenuByte54AD44, 0x0054ad44)
 #ifndef RE_HOOK_BUILD
 extern uint8_t MenuByte54BE5C, MenuByte54BE7C;
+extern MenuTable256_t MenuTable54B010;
+extern uint8_t MenuByte54ACD4, MenuByte54ACE4, MenuByte54ACF4, MenuByte54AD04, MenuByte54AD14, MenuByte54AD24, MenuByte54AD34, MenuByte54AD44;
 extern uint8_t MenuColorR54AA2C, MenuColorG54AA2D, MenuColorB54AA2E, MenuByte5D77C1, MenuByte5D77C0;
 extern int32_t MenuPosX54AA24, MenuPosY54AA28, MenuVal5D77CC, MenuVal5D77C4, MenuVal5D77C8;
 #endif
@@ -163,3 +175,8 @@ void MenuSet54BE5CTo3(void); /* 0040f34c */
 void MenuSet54BE5CTo2(void); /* 0040f358 */
 void MenuSet54BE7CTo3(void); /* 0040f395 */
 void MenuSet54BE7CTo2(void); /* 0040f3a1 */
+void MenuSet54ACD4To3(void); /* 0040e8ec */
+void MenuSet54ACF4To3(void); /* 0040e944 */
+void MenuSet54AD14To3(void); /* 0040e989 */
+void MenuSet54AD34To3(void); /* 0040ea2b */
+uint32_t MenuTableGet54B010(uint32_t i); /* 0040f0e7 */
