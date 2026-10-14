@@ -7,6 +7,68 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    V(Call00405D60, 0x00405d60, (int32_t a0, uint32_t a1), (a0, a1)) \
+    V(Call0049EC01, 0x0049ec01, (int32_t a0, uint32_t a1), (a0, a1)) \
+    V(Call0040CCB4, 0x0040ccb4, (uint32_t a0, uint32_t a1), (a0, a1)) \
+    R(int32_t, R12_4082A0, 0x004082a0, (void), ()) \
+    R(int32_t, R12_413D70, 0x00413d70, (void), ()) \
+    R(int32_t, R12_413B00, 0x00413b00, (void), ()) \
+    R(int32_t, R12_4134A0, 0x004134a0, (void), ()) \
+    R(int32_t, R12_413890, 0x00413890, (void), ()) \
+    R(int32_t, R12_416390, 0x00416390, (void), ()) \
+    R(int32_t, R12_40A540, 0x0040a540, (void), ()) \
+    R(int32_t, R12_404850, 0x00404850, (void), ()) \
+    R(int32_t, R12_415EC0, 0x00415ec0, (void), ()) \
+    R(int32_t, R12_413610, 0x00413610, (void), ()) \
+    R(int32_t, R12_411FD0, 0x00411fd0, (void), ()) \
+    R(int32_t, R12_40E870, 0x0040e870, (void), ()) \
+    R(int32_t, R12_4123D0, 0x004123d0, (void), ()) \
+    R(int32_t, R12_40F2D0, 0x0040f2d0, (void), ()) \
+    R(int32_t, R12_410C30, 0x00410c30, (void), ()) \
+    R(int32_t, R12_40FA60, 0x0040fa60, (void), ()) \
+    R(int32_t, R12_408770, 0x00408770, (void), ()) \
+    R(int32_t, R12_414C30, 0x00414c30, (void), ()) \
+    R(int32_t, R12_407160, 0x00407160, (void), ()) \
+    V(Call00517D58, 0x00517d58, (uint32_t a0), (a0)) \
+    R(int32_t, R12_405CB4, 0x00405cb4, (int32_t a0), (a0)) \
+    R(int32_t, R12_405F2E, 0x00405f2e, (int32_t a0), (a0)) \
+    V(Call004122C4, 0x004122c4, (void), ()) \
+    V(Call004126DF, 0x004126df, (void), ()) \
+    V(Call00523595, 0x00523595, (void), ()) \
+    V(Call005233BE, 0x005233be, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
+    V(Call00524496, 0x00524496, (uint32_t a0, int32_t a1), (a0, a1)) \
+    V(Call0052360D, 0x0052360d, (int32_t a0), (a0)) \
+    V(Call004184DE, 0x004184de, (uint32_t a0), (a0)) \
+    V(Call00522323, 0x00522323, (void), ()) \
+    V(Call0041846C, 0x0041846c, (uint32_t a0, uint32_t a1), (a0, a1)) \
+    V(Call0040C610, 0x0040c610, (uint32_t a0, int32_t a1), (a0, a1)) \
+    V(Call004086B4, 0x004086b4, (void), ()) \
+    V(Call004086EA, 0x004086ea, (void), ()) \
+    V(Call004D78F3, 0x004d78f3, (int32_t a0), (a0)) \
+    R(int32_t, R12_4D97E9, 0x004d97e9, (void), ()) \
+    V(Call00489D20, 0x00489d20, (void), ()) \
+    R(uint32_t, R12_40DAE1, 0x0040dae1, (uint32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
+    V(Call00424921, 0x00424921, (int32_t a0, int32_t a1, uint32_t a2, int32_t a3), (a0, a1, a2, a3)) \
+    V(Call0048A525, 0x0048a525, (int32_t a0), (a0)) \
+    V(Call0048A68E, 0x0048a68e, (int32_t a0), (a0)) \
+    V(Call004248C6, 0x004248c6, (int32_t a0, int32_t a1, int32_t a2, uint32_t a3, int32_t a4), (a0, a1, a2, a3, a4)) \
+    V(Call004C0C6F, 0x004c0c6f, (int32_t a0), (a0)) \
+    V(Call004BA31B, 0x004ba31b, (void), ()) \
+    V(Call004B9AEC, 0x004b9aec, (void), ()) \
+    V(Call004B9D79, 0x004b9d79, (void), ()) \
+    V(Call004B998B, 0x004b998b, (uint32_t a0), (a0)) \
+    V(Call004911D9, 0x004911d9, (void), ()) \
+    V(Call0050F289, 0x0050f289, (void), ()) \
+    V(Call0050EE00, 0x0050ee00, (void), ()) \
+    R(int32_t, R12_40A8B0, 0x0040a8b0, (uint32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4), (a0, a1, a2, a3, a4)) \
+    V(Call004DAA36, 0x004daa36, (uint32_t a0, uint32_t a1), (a0, a1)) \
+    V(Call00527885, 0x00527885, (int32_t a0, int32_t a1, int32_t a2, uint32_t a3), (a0, a1, a2, a3)) \
+    V(Call004D6190, 0x004d6190, (int32_t a0), (a0)) \
+    V(Call0048DB65, 0x0048db65, (uint32_t a0, int32_t a1), (a0, a1)) \
+    V(Call0051551E, 0x0051551e, (int32_t a0), (a0)) \
+    V(Call00493ECE, 0x00493ece, (int32_t a0), (a0)) \
+    V(Call0051200F, 0x0051200f, (uint32_t a0), (a0)) \
+    V(Call005186CE, 0x005186ce, (void), ()) \
     V(Call004E3391, 0x004e3391, (void), ()) \
     V(Call0052A910, 0x0052a910, (uint32_t a0, uint32_t a1, int32_t a2), (a0, a1, a2)) \
     V(Call0041219E, 0x0041219e, (void), ()) \

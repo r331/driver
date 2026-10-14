@@ -1,6 +1,7 @@
 /* Регистрация перенесённых функций для hook-сборки (Game.exe + DINPUT.dll) */
 #include "hook.h"
 #include "../../game/ported11.h"
+#include "../../game/ported12.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
 #include "../../game/dirnodes.h"
@@ -995,4 +996,59 @@ void re_install_all(void) {
     re_hook(0x0051017e, (void*)StepUp_0051017E, "StepUp_0051017E");
     re_hook(0x005101b7, (void*)StepDown_005101B7, "StepDown_005101B7");
     re_hook(0x00425e9e, (void*)Zoom_00425E9E, "Zoom_00425E9E");
+    re_hook(0x00404f70, (void*)P12_Fn00404F70, "P12_Fn00404F70");
+    re_hook(0x00404fae, (void*)P12_Fn00404FAE, "P12_Fn00404FAE");
+    re_hook(0x004152a7, (void*)P12_Fn004152A7, "P12_Fn004152A7");
+    re_hook(0x00407563, (void*)P12_Fn00407563, "P12_Fn00407563");
+    re_hook(0x0040a45b, (void*)P12_Fn0040A45B, "P12_Fn0040A45B");
+    re_hook(0x0040a4ad, (void*)P12_Fn0040A4AD, "P12_Fn0040A4AD");
+    re_hook(0x004129df, (void*)P12_Fn004129DF, "P12_Fn004129DF");
+    re_hook(0x00412a4b, (void*)P12_Fn00412A4B, "P12_Fn00412A4B");
+    re_hook(0x00412ab9, (void*)P12_Fn00412AB9, "P12_Fn00412AB9");
+    re_hook(0x00412b27, (void*)P12_Fn00412B27, "P12_Fn00412B27");
+    re_hook(0x00412b95, (void*)P12_Fn00412B95, "P12_Fn00412B95");
+    re_hook(0x00412c03, (void*)P12_Fn00412C03, "P12_Fn00412C03");
+    re_hook(0x00412c71, (void*)P12_Fn00412C71, "P12_Fn00412C71");
+    re_hook(0x00412cdf, (void*)P12_Fn00412CDF, "P12_Fn00412CDF");
+    re_hook(0x00412d4d, (void*)P12_Fn00412D4D, "P12_Fn00412D4D");
+    re_hook(0x00413596, (void*)P12_Fn00413596, "P12_Fn00413596");
+    re_hook(0x004136ec, (void*)P12_Fn004136EC, "P12_Fn004136EC");
+    re_hook(0x0041373a, (void*)P12_Fn0041373A, "P12_Fn0041373A");
+    re_hook(0x00413788, (void*)P12_Fn00413788, "P12_Fn00413788");
+    re_hook(0x004137d6, (void*)P12_Fn004137D6, "P12_Fn004137D6");
+    re_hook(0x00413973, (void*)P12_Fn00413973, "P12_Fn00413973");
+    re_hook(0x00413cbf, (void*)P12_Fn00413CBF, "P12_Fn00413CBF");
+    re_hook(0x004183f7, (void*)P12_Fn004183F7, "P12_Fn004183F7");
+    re_hook(0x00418433, (void*)P12_Fn00418433, "P12_Fn00418433");
+    re_hook(0x0050229c, (void*)P12_Fn0050229C, "P12_Fn0050229C");
+    re_hook(0x00526427, (void*)P12_Fn00526427, "P12_Fn00526427");
+    re_hook(0x00496505, (void*)P12_Fn00496505, "P12_Fn00496505");
+    re_hook(0x00491360, (void*)P12_Fn00491360, "P12_Fn00491360");
+    re_hook(0x0048ebc8, (void*)P12_Fn0048EBC8, "P12_Fn0048EBC8");
+    re_hook(0x00511fb8, (void*)P12_Fn00511FB8, "P12_Fn00511FB8");
+    re_hook(0x005229f0, (void*)P12_Fn005229F0, "P12_Fn005229F0");
+    re_hook(0x005188ec, (void*)P12_Fn005188EC, "P12_Fn005188EC");
+    re_hook(0x0040f09c, (void*)P12_Fn0040F09C, "P12_Fn0040F09C");
+    re_hook(0x004120af, (void*)P12_Fn004120AF, "P12_Fn004120AF");
+    re_hook(0x004124af, (void*)P12_Fn004124AF, "P12_Fn004124AF");
+    re_hook(0x0040c813, (void*)P12_Fn0040C813, "P12_Fn0040C813");
+    re_hook(0x0040da56, (void*)P12_Fn0040DA56, "P12_Fn0040DA56");
+    re_hook(0x0041a8cd, (void*)P12_Fn0041A8CD, "P12_Fn0041A8CD");
+    re_hook(0x0041aecf, (void*)P12_Fn0041AECF, "P12_Fn0041AECF");
+    re_hook(0x0041af85, (void*)P12_Fn0041AF85, "P12_Fn0041AF85");
+    re_hook(0x00426580, (void*)P12_Fn00426580, "P12_Fn00426580");
+    re_hook(0x00425ee0, (void*)P12_Fn00425EE0, "P12_Fn00425EE0");
+    re_hook(0x00489ed6, (void*)P12_Fn00489ED6, "P12_Fn00489ED6");
+    re_hook(0x0048a627, (void*)P12_Fn0048A627, "P12_Fn0048A627");
+    re_hook(0x0048a46b, (void*)P12_Fn0048A46B, "P12_Fn0048A46B");
+    re_hook(0x004aae34, (void*)P12_Fn004AAE34, "P12_Fn004AAE34");
+    re_hook(0x004b9933, (void*)P12_Fn004B9933, "P12_Fn004B9933");
+    re_hook(0x0050e963, (void*)P12_Fn0050E963, "P12_Fn0050E963");
+    re_hook(0x0050c010, (void*)P12_Fn0050C010, "P12_Fn0050C010");
+    re_hook(0x00516e76, (void*)P12_Fn00516E76, "P12_Fn00516E76");
+    re_hook(0x004dc8ea, (void*)P12_Fn004DC8EA, "P12_Fn004DC8EA");
+    re_hook(0x004e5982, (void*)P12_Fn004E5982, "P12_Fn004E5982");
+    re_hook(0x004f3e78, (void*)P12_Fn004F3E78, "P12_Fn004F3E78");
+    re_hook(0x00504699, (void*)P12_Fn00504699, "P12_Fn00504699");
+    re_hook(0x00525cb7, (void*)P12_Fn00525CB7, "P12_Fn00525CB7");
 }
