@@ -11,6 +11,7 @@
 #include "../../game/uihandlers4.h"
 #include "../../game/globalsets.h"
 #include "../../game/smallfuncs.h"
+#include "../../game/smallfuncs2.h"
 #include "../../game/menuselect.h"
 #include "../../game/widgets.h"
 void re_install_all(void) {
@@ -604,6 +605,21 @@ void re_install_all(void) {
     re_hook(0x004d1737, (void*)ScriptOpToggle10_004D1737, "ScriptOpToggle10_004D1737");
     re_hook(0x004d1601, (void*)ScriptOpSkip4_004D1601, "ScriptOpSkip4_004D1601");
     re_hook(0x004d7b36, (void*)RingAdvance004D7B36, "RingAdvance004D7B36");
+    re_hook(0x00421c72, (void*)CountTrailingZeros00421C72, "CountTrailingZeros00421C72");
+    re_hook(0x0041d954, (void*)FillTable8_0041D954, "FillTable8_0041D954");
+    re_hook(0x004cb982, (void*)ScriptStackPop004CB982, "ScriptStackPop004CB982");
+    re_hook(0x004cb9ba, (void*)ScriptStackPop004CB9BA, "ScriptStackPop004CB9BA");
+    re_hook(0x004cb9f2, (void*)ScriptStackPush004CB9F2, "ScriptStackPush004CB9F2");
+    re_hook(0x004d14d8, (void*)ScriptSkip16_004D14D8, "ScriptSkip16_004D14D8");
+    re_hook(0x004d2ade, (void*)AddClamp4095_004D2ADE, "AddClamp4095_004D2ADE");
+    re_hook(0x004d2b16, (void*)FillRange004D2B16, "FillRange004D2B16");
+    re_hook(0x004d6d68, (void*)ClearPair004D6D68, "ClearPair004D6D68");
+    re_hook(0x004d8c23, (void*)ClearSlots004D8C23, "ClearSlots004D8C23");
+    re_hook(0x004e612a, (void*)SetMode2_004E612A, "SetMode2_004E612A");
+    re_hook(0x00493e9b, (void*)PopIndex00493E9B, "PopIndex00493E9B");
+    re_hook(0x004a59c6, (void*)SkipLine004A59C6, "SkipLine004A59C6");
+    re_hook(0x004eaf8d, (void*)NegateCamZ004EAF8D, "NegateCamZ004EAF8D");
+    re_hook(0x0042f7b8, (void*)AdvanceOpPtr0042F7B8, "AdvanceOpPtr0042F7B8");
     re_hook(0x00404e52, (void*)MenuRowsTo3_00404E52, "MenuRowsTo3_00404E52");
     re_hook(0x00404e7e, (void*)MenuRowsIf0To2_00404E7E, "MenuRowsIf0To2_00404E7E");
     re_hook(0x00417a55, (void*)SetColorRed00417A55, "SetColorRed00417A55");
