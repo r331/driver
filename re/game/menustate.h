@@ -126,3 +126,15 @@ void MenuEnterMode5(void); /* 0040a675 */
 void MenuLeaveMode5(int32_t v); /* 0040a68b */
 void MenuEnterMode3(void); /* 0040a69d */
 void MenuLeaveMode3(int32_t v); /* 0040a6b3 */
+#define MenuFlag54A8EC GAME_VAR(uint8_t, MenuFlag54A8EC, 0x0054a8ec)
+#define MenuFlag54A94C GAME_VAR(uint8_t, MenuFlag54A94C, 0x0054a94c)
+#define MenuFlag54A93C GAME_VAR(uint8_t, MenuFlag54A93C, 0x0054a93c)
+#ifndef RE_HOOK_BUILD
+extern uint8_t MenuFlag54A8EC, MenuFlag54A94C, MenuFlag54A93C;
+#endif
+void MenuEnterMode4(void); /* 0040a6c5 */
+void MenuLeaveMode4(int32_t v); /* 0040a6db */
+void MenuEnterMode7(void); /* 0040a6ed */
+void MenuLeaveMode7(int32_t v); /* 0040a703 */
+void MenuEnterMode6(void); /* 0040a715 */
+void MenuLeaveMode6(int32_t v); /* 0040a72b */
