@@ -1,5 +1,6 @@
 /* Проверка перенесённых модулей в нативной сборке: ./driver --selftest */
 #include "../game/uihandlers3.h"
+#include "../game/uihandlers4.h"
 #include "../game/menuselect.h"
 #include "../game/director.h"
 #include "../game/directorstorage.h"
@@ -203,6 +204,14 @@ static int test_ui3(void) {
     G0112B284 = 7; CHECK(IsVar112B284Lt8() == 1);
     return 0;
 }
+static int test_ui4(void) {
+    G005759A4 = 0x3f;
+    Inc5759A4Max40(); CHECK(G005759A4 == 0x40); Inc5759A4Max40(); CHECK(G005759A4 == 0x40);
+    G005759A4 = 1; Dec5759A4Min0(); Dec5759A4Min0(); CHECK(G005759A4 == 0);
+    G0054A90C = 5; Clear54A90C_IfZero(1); CHECK(G0054A90C == 5); Clear54A90C_IfZero(0); CHECK(G0054A90C == 0);
+    Select54A94C_Mode7(); CHECK(G0054A94C == 1 && G01271060 == 7);
+    return 0;
+}
 static int test_ui(void) {
     UiVar005FE84C = 0; UiVar005FE84C = 0;
     Ui00412F62(); CHECK(Ui00412F9C() == 1);
@@ -211,7 +220,7 @@ static int test_ui(void) {
     return 0;
 }
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

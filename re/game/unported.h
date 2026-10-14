@@ -48,6 +48,7 @@
     V(MenuAction40CD17, 0x0040cd17, (void), ()) \
     V(MenuRedraw, 0x00409622, (void), ()) \
     V(MenuRefresh, 0x0040500d, (void), ()) \
+    V(Call004076E2, 0x004076e2, (void), ()) \
     V(StoreCameraState,   0x004c5499, (void *cam), (cam))   /* камера <- текущее состояние игровой камеры */ \
     V(RestoreCameraState, 0x004c536c, (void *cam), (cam))   /* текущее состояние игровой камеры <- cam */ \
     R(void *, FindCameraRecordForFrame, 0x004c61b2, (int frame), (frame)) \

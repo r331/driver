@@ -8,6 +8,7 @@
 #include "../../game/uihandlers.h"
 #include "../../game/uihandlers2.h"
 #include "../../game/uihandlers3.h"
+#include "../../game/uihandlers4.h"
 #include "../../game/menuselect.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
@@ -125,6 +126,59 @@ void re_install_all(void) {
     re_hook(0x004d629e, (void*)Set560388, "Set560388");
     re_hook(0x004d9013, (void*)Round1024, "Round1024");
     re_hook(0x004d9587, (void*)Clear2C3B8, "Clear2C3B8");
+    re_hook(0x00404687, (void*)Set5F7E4C_1, "Set5F7E4C_1");
+    re_hook(0x0040844c, (void*)Set54A0CC_0, "Set54A0CC_0");
+    re_hook(0x00408337, (void*)Set54A0BC_1, "Set54A0BC_1");
+    re_hook(0x00408343, (void*)Set54A0BC_0, "Set54A0BC_0");
+    re_hook(0x00408710, (void*)Inc5D577C, "Inc5D577C");
+    re_hook(0x0040a443, (void*)Set54A844_1, "Set54A844_1");
+    re_hook(0x0040a44f, (void*)Set54A844_0, "Set54A844_0");
+    re_hook(0x0040a495, (void*)Set54A854_1, "Set54A854_1");
+    re_hook(0x0040a4a1, (void*)Set54A854_0, "Set54A854_0");
+    re_hook(0x00404f5f, (void*)Set575EF0_4Ret0, "Set575EF0_4Ret0");
+    re_hook(0x00404eb0, (void*)ToggleBDFA44_Call40500D, "ToggleBDFA44_Call40500D");
+    re_hook(0x00404ec9, (void*)ToggleBDFA48_Call40500D, "ToggleBDFA48_Call40500D");
+    re_hook(0x00404ee2, (void*)ToggleBDFA4C_Call40500D, "ToggleBDFA4C_Call40500D");
+    re_hook(0x00404efb, (void*)ToggleBDFA50_Call40500D, "ToggleBDFA50_Call40500D");
+    re_hook(0x00404f14, (void*)ToggleBDFA54_Call40500D, "ToggleBDFA54_Call40500D");
+    re_hook(0x00404f2d, (void*)ToggleB87E9C_Call40500D, "ToggleB87E9C_Call40500D");
+    re_hook(0x00404f46, (void*)ToggleBDFA58_Call40500D, "ToggleBDFA58_Call40500D");
+    re_hook(0x00408a69, (void*)ToggleEF8_55384C, "ToggleEF8_55384C");
+    re_hook(0x00408b03, (void*)ToggleEF8_553850, "ToggleEF8_553850");
+    re_hook(0x00408b9d, (void*)ToggleEF8_B31F04, "ToggleEF8_B31F04");
+    re_hook(0x00408d0c, (void*)ToggleEF8_575F44, "ToggleEF8_575F44");
+    re_hook(0x00408da6, (void*)ToggleEF8_55C974, "ToggleEF8_55C974");
+    re_hook(0x00408e40, (void*)ToggleEF8_575F30, "ToggleEF8_575F30");
+    re_hook(0x00408eda, (void*)ToggleEF8_B201DC, "ToggleEF8_B201DC");
+    re_hook(0x00408f74, (void*)ToggleEF8_575EE8, "ToggleEF8_575EE8");
+    re_hook(0x0040900e, (void*)ToggleEF8_575F3C, "ToggleEF8_575F3C");
+    re_hook(0x004090a8, (void*)ToggleEF8_D118C8, "ToggleEF8_D118C8");
+    re_hook(0x00409231, (void*)RefreshMenu00409231, "RefreshMenu00409231");
+    re_hook(0x004092d8, (void*)RefreshMenu004092D8, "RefreshMenu004092D8");
+    re_hook(0x0040937f, (void*)RefreshMenu0040937F, "RefreshMenu0040937F");
+    re_hook(0x00409426, (void*)RefreshMenu00409426, "RefreshMenu00409426");
+    re_hook(0x004094cd, (void*)RefreshMenu004094CD, "RefreshMenu004094CD");
+    re_hook(0x00409b75, (void*)Inc5759A4Max40, "Inc5759A4Max40");
+    re_hook(0x00409b9f, (void*)Dec5759A4Min0, "Dec5759A4Min0");
+    re_hook(0x00409c31, (void*)IncB87E4CMax3, "IncB87E4CMax3");
+    re_hook(0x00409c5b, (void*)DecB87E4CMin0, "DecB87E4CMin0");
+    re_hook(0x0040a625, (void*)Select54A90C_Mode2, "Select54A90C_Mode2");
+    re_hook(0x0040a64d, (void*)Select54A91C_Mode1, "Select54A91C_Mode1");
+    re_hook(0x0040a675, (void*)Select54A8FC_Mode5, "Select54A8FC_Mode5");
+    re_hook(0x0040a69d, (void*)Select54A92C_Mode3, "Select54A92C_Mode3");
+    re_hook(0x0040a6c5, (void*)Select54A8EC_Mode4, "Select54A8EC_Mode4");
+    re_hook(0x0040a6ed, (void*)Select54A94C_Mode7, "Select54A94C_Mode7");
+    re_hook(0x0040a715, (void*)Select54A93C_Mode6, "Select54A93C_Mode6");
+    re_hook(0x0040a63b, (void*)Clear54A90C_IfZero, "Clear54A90C_IfZero");
+    re_hook(0x0040a663, (void*)Clear54A91C_IfZero, "Clear54A91C_IfZero");
+    re_hook(0x0040a68b, (void*)Clear54A8FC_IfZero, "Clear54A8FC_IfZero");
+    re_hook(0x0040a6b3, (void*)Clear54A92C_IfZero, "Clear54A92C_IfZero");
+    re_hook(0x0040a6db, (void*)Clear54A8EC_IfZero, "Clear54A8EC_IfZero");
+    re_hook(0x0040a703, (void*)Clear54A94C_IfZero, "Clear54A94C_IfZero");
+    re_hook(0x00407460, (void*)Menu549FBC, "Menu549FBC");
+    re_hook(0x00407539, (void*)Menu549FCC, "Menu549FCC");
+    re_hook(0x0040831c, (void*)Copy54A0C0, "Copy54A0C0");
+    re_hook(0x0040a41c, (void*)Copy54A838, "Copy54A838");
     re_hook(0x004d97dc, (void*)SetD11804, "SetD11804");
     re_hook(0x004da75b, (void*)CopyBDF984, "CopyBDF984");
     re_hook(0x004e3830, (void*)GetB31E18, "GetB31E18");
