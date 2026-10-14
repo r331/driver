@@ -7,6 +7,7 @@
 #include "../../game/noop.h"
 #include "../../game/uihandlers.h"
 #include "../../game/uihandlers2.h"
+#include "../../game/uihandlers3.h"
 #include "../../game/menuselect.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
@@ -43,7 +44,6 @@ void re_install_all(void) {
     re_hook(0x004c567a, (void*)CameraDump, "CameraDump");
     re_hook(0x004c5222, (void*)SelectNewCamera,     "SelectNewCamera");
     re_hook(0x004c5d40, (void*)CountNearbyCars,     "CountNearbyCars");
-    re_hook(0x004c810f, (void*)ClearDirectorTables, "ClearDirectorTables");
     re_hook(0x004c5367, (void*)DirNopStub, "DirNopStub");
     re_hook(0x00404687, (void*)MenuFlagSet, "MenuFlagSet");
     re_hook(0x00404696, (void*)MenuFlagUpdate, "MenuFlagUpdate");
@@ -67,7 +67,73 @@ void re_install_all(void) {
     re_hook(0x0041e456, (void*)NoopFn0041e456, "NoopFn0041e456");
     re_hook(0x0041ed21, (void*)NoopFn0041ed21, "NoopFn0041ed21");
     re_hook(0x0041ed39, (void*)NoopFn0041ed39, "NoopFn0041ed39");
+    re_hook(0x00408d0c, (void*)MenuToggle575F44Redraw, "MenuToggle575F44Redraw");
+    re_hook(0x00408e40, (void*)MenuToggle575F30Redraw, "MenuToggle575F30Redraw");
+    re_hook(0x0040900e, (void*)MenuToggle575F3CRedraw, "MenuToggle575F3CRedraw");
+    re_hook(0x004c36da, (void*)ClearDirectorTable, "ClearDirectorTable");
+    re_hook(0x004c810f, (void*)ClearDirectorTables, "ClearDirectorTables");
     re_hook(0x00417b03, (void*)Ui00417B03, "Ui00417B03");
+    re_hook(0x0040e970, (void*)MenuToggle575F24Call40EA70, "MenuToggle575F24Call40EA70");
+    re_hook(0x0040ea57, (void*)MenuToggle575F48Call40EA70, "MenuToggle575F48Call40EA70");
+    re_hook(0x00419c50, (void*)MenuToggle575F24Call419B35, "MenuToggle575F24Call419B35");
+    re_hook(0x00419d25, (void*)MenuToggle575F48Call419B35, "MenuToggle575F48Call419B35");
+    re_hook(0x0041539a, (void*)MenuToggle575F40Call414D1F, "MenuToggle575F40Call414D1F");
+    re_hook(0x004142e8, (void*)UiSetSlot004142E8, "UiSetSlot004142E8");
+    re_hook(0x004143fa, (void*)UiSetSlot004143FA, "UiSetSlot004143FA");
+    re_hook(0x0041450c, (void*)UiSetSlot0041450C, "UiSetSlot0041450C");
+    re_hook(0x00414621, (void*)UiSetSlot00414621, "UiSetSlot00414621");
+    re_hook(0x00418119, (void*)Ui00418119, "Ui00418119");
+    re_hook(0x004184de, (void*)Ui004184DE, "Ui004184DE");
+    re_hook(0x004197f8, (void*)Ui004197F8, "Ui004197F8");
+    re_hook(0x0041a1ec, (void*)Ui0041A1EC, "Ui0041A1EC");
+    re_hook(0x0041ae2f, (void*)UiSetMode005FEEEC_0, "UiSetMode005FEEEC_0");
+    re_hook(0x0041ae43, (void*)UiSetMode005FEEEC_1, "UiSetMode005FEEEC_1");
+    re_hook(0x0041ae57, (void*)UiSetMode005FEEEC_2, "UiSetMode005FEEEC_2");
+    re_hook(0x0041ae6b, (void*)UiSetMode005FEEEC_3, "UiSetMode005FEEEC_3");
+    re_hook(0x0041ae7f, (void*)UiSetMode005FEEEC_4, "UiSetMode005FEEEC_4");
+    re_hook(0x0041ae93, (void*)UiSetMode005FEEEC_5, "UiSetMode005FEEEC_5");
+    re_hook(0x0041aea7, (void*)UiSetMode005FEEEC_6, "UiSetMode005FEEEC_6");
+    re_hook(0x0041aebb, (void*)UiSetMode005FEEEC_7, "UiSetMode005FEEEC_7");
+    re_hook(0x0041b059, (void*)Ui0041B059, "Ui0041B059");
+    re_hook(0x0041b790, (void*)FlagSet0127104C, "FlagSet0127104C");
+    re_hook(0x0041d8cd, (void*)SetScale54EF38, "SetScale54EF38");
+    re_hook(0x0041ed53, (void*)Ui0041ED53, "Ui0041ED53");
+    re_hook(0x0041ed68, (void*)GetVarA421A8, "GetVarA421A8");
+    re_hook(0x0041ed72, (void*)GetVarA421A4, "GetVarA421A4");
+    re_hook(0x0041f734, (void*)Ret1FFFF8IfZero, "Ret1FFFF8IfZero");
+    re_hook(0x0041fa36, (void*)RetZero0041FA36, "RetZero0041FA36");
+    re_hook(0x004245e2, (void*)GetVarB1C0D8, "GetVarB1C0D8");
+    re_hook(0x00424633, (void*)Dev00424633, "Dev00424633");
+    re_hook(0x00424647, (void*)Dev00424647, "Dev00424647");
+    re_hook(0x00424661, (void*)GameCall00424661, "GameCall00424661");
+    re_hook(0x004246bd, (void*)Dev004246BD, "Dev004246BD");
+    re_hook(0x0042480d, (void*)Dev0042480D, "Dev0042480D");
+    re_hook(0x00424858, (void*)Dev00424858, "Dev00424858");
+    re_hook(0x00426caf, (void*)Ui00426CAF, "Ui00426CAF");
+    re_hook(0x00426cc6, (void*)Ui00426CC6, "Ui00426CC6");
+    re_hook(0x0042d2b0, (void*)Reset0042D2B0, "Reset0042D2B0");
+    re_hook(0x0048b6a9, (void*)Set551134, "Set551134");
+    re_hook(0x0048ec34, (void*)Ret1, "Ret1");
+    re_hook(0x004964c7, (void*)Dec145934, "Dec145934");
+    re_hook(0x004a1d31, (void*)Get138Entry148, "Get138Entry148");
+    re_hook(0x004a66d8, (void*)IsVar112B284Lt8, "IsVar112B284Lt8");
+    re_hook(0x004a994a, (void*)Inc0B1FFBC, "Inc0B1FFBC");
+    re_hook(0x004ab7fa, (void*)Clear110E180, "Clear110E180");
+    re_hook(0x004bf485, (void*)Call004BF485, "Call004BF485");
+    re_hook(0x004c16c1, (void*)CopyWords8000, "CopyWords8000");
+    re_hook(0x004d2d85, (void*)Call004D2D85, "Call004D2D85");
+    re_hook(0x004d629e, (void*)Set560388, "Set560388");
+    re_hook(0x004d9013, (void*)Round1024, "Round1024");
+    re_hook(0x004d9587, (void*)Clear2C3B8, "Clear2C3B8");
+    re_hook(0x004d97dc, (void*)SetD11804, "SetD11804");
+    re_hook(0x004da75b, (void*)CopyBDF984, "CopyBDF984");
+    re_hook(0x004e3830, (void*)GetB31E18, "GetB31E18");
+    re_hook(0x004e3b20, (void*)SetB31E00, "SetB31E00");
+    re_hook(0x004e5f4d, (void*)Get138, "Get138");
+    re_hook(0x004e6166, (void*)Set0D044C8, "Set0D044C8");
+    re_hook(0x004a2c08, (void*)Call004A2C08, "Call004A2C08");
+    re_hook(0x004bf476, (void*)Call004BF476, "Call004BF476");
+    re_hook(0x004c020e, (void*)Call004C020E, "Call004C020E");
     re_hook(0x004183e8, (void*)Ui004183E8, "Ui004183E8");
     re_hook(0x00418886, (void*)Ui00418886, "Ui00418886");
     re_hook(0x0041889c, (void*)Ui0041889C, "Ui0041889C");
@@ -185,7 +251,6 @@ void re_install_all(void) {
     re_hook(0x004c42a9, (void*)DrawCornerIndicator, "DrawCornerIndicator");
     re_hook(0x004c3d5c, (void*)DrawNode, "DrawNode");
     re_hook(0x004c3e6a, (void*)DrawNodeMarker, "DrawNodeMarker");
-    re_hook(0x004c36da, (void*)ClearDirectorTable, "ClearDirectorTable");
     re_hook(0x004c3c94, (void*)DrawNodeChain, "DrawNodeChain");
     re_hook(0x004c3cf1, (void*)DrawNodeMarkersChain, "DrawNodeMarkersChain");
     re_hook(0x004c41ec, (void*)GetNodeParent, "GetNodeParent");
@@ -195,12 +260,9 @@ void re_install_all(void) {
     re_hook(0x00408a69, (void*)MenuToggle55384CRedraw, "MenuToggle55384CRedraw");
     re_hook(0x00408b03, (void*)MenuToggle553850Redraw, "MenuToggle553850Redraw");
     re_hook(0x00408b9d, (void*)MenuToggleB31F04Redraw, "MenuToggleB31F04Redraw");
-    re_hook(0x00408d0c, (void*)MenuToggle575F44Redraw, "MenuToggle575F44Redraw");
     re_hook(0x00408da6, (void*)MenuToggle55C974Redraw, "MenuToggle55C974Redraw");
-    re_hook(0x00408e40, (void*)MenuToggle575F30Redraw, "MenuToggle575F30Redraw");
     re_hook(0x00408eda, (void*)MenuToggleB201DCRedraw, "MenuToggleB201DCRedraw");
     re_hook(0x00408f74, (void*)MenuToggle575EE8Redraw, "MenuToggle575EE8Redraw");
-    re_hook(0x0040900e, (void*)MenuToggle575F3CRedraw, "MenuToggle575F3CRedraw");
     re_hook(0x004090a8, (void*)MenuToggleD118C8Redraw, "MenuToggleD118C8Redraw");
     re_hook(0x00409231, (void*)MenuRedraw409231, "MenuRedraw409231");
     re_hook(0x004092d8, (void*)MenuRedraw4092D8, "MenuRedraw4092D8");

@@ -1,4 +1,5 @@
 /* Проверка перенесённых модулей в нативной сборке: ./driver --selftest */
+#include "../game/uihandlers3.h"
 #include "../game/menuselect.h"
 #include "../game/director.h"
 #include "../game/directorstorage.h"
@@ -190,6 +191,18 @@ static int test_menu5(void) {
     return (MenuByte54ACD4 != 2 || MenuByte54ACE4 != 2);
 }
 
+static int test_ui3(void) {
+    CHECK(Round1024(0) == 0 && Round1024(0x200) == 1 && Round1024(0x5ff) == 1 && Round1024(0x600) == 2);
+    CHECK(Ret1FFFF8IfZero(0) == 0x1ffff8 && Ret1FFFF8IfZero(3) == 0);
+    G00B1FFBC = 4; Inc0B1FFBC(); CHECK(G00B1FFBC == 5);
+    G01145934 = 1; Dec145934(); Dec145934(); CHECK(G01145934 == 0);
+    FlagSet0127104C(3); CHECK(G0127104C == 8);
+    SetScale54EF38(2.0f); CHECK(G0054EF38 == 2.0f);
+    UiSetMode005FEEEC_5(); CHECK(G005FEEEC == 5);
+    G00B1C0D4 = 0; CHECK(GameCall00424661(7) == 0);
+    G0112B284 = 7; CHECK(IsVar112B284Lt8() == 1);
+    return 0;
+}
 static int test_ui(void) {
     UiVar005FE84C = 0; UiVar005FE84C = 0;
     Ui00412F62(); CHECK(Ui00412F9C() == 1);
@@ -198,7 +211,7 @@ static int test_ui(void) {
     return 0;
 }
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

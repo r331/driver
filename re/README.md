@@ -64,3 +64,4 @@ v0.5: +7 (29 всего): DirectorStorage.c — ReadDirectorData, ReadCameraChun
 - v0.28 (MenuState/menuselect.c): 84 обработчика Select/Leave подсветки меню; всего 209
 - v0.29 (MenuState/uihandlers.c): 60 простых сеттеров/переходов UI-меню (Ui<адрес>); всего 269
 - v0.30 (MenuUI/uihandlers2.c): 48 простых UI-обработчиков; всего 317
+- v0.31 (UIMisc/uihandlers3.c): 61 простая функция (сеттеры, переключатели, обёртки); всего 378

@@ -7,6 +7,17 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    V(Call0040EA70, 0x0040ea70, (void), ()) \
+    V(Call00419B35, 0x00419b35, (void), ()) \
+    V(Call00414D1F, 0x00414d1f, (void), ()) \
+    V(Call0041A1F9, 0x0041a1f9, (int32_t a0), (a0)) \
+    R(int32_t, Call0042655A, 0x0042655a, (int32_t a0), (a0)) \
+    V(Call0041D6AA, 0x0041d6aa, (void), ()) \
+    V(Call004D90F4, 0x004d90f4, (int32_t a0), (a0)) \
+    V(Call004D611B, 0x004d611b, (int32_t a0), (a0)) \
+    V(Call004A2C98, 0x004a2c98, (void), ()) \
+    V(Call004D9478, 0x004d9478, (void), ()) \
+    V(Call004C1B46, 0x004c1b46, (void), ()) \
     V(UiCall0041A8AB, 0x0041a8ab, (void), ()) \
     V(UiCall004EE065, 0x004ee065, (void), ()) \
     V(UiCall004184F5, 0x004184f5, (void), ()) \
