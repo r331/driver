@@ -3,6 +3,7 @@
 #include "../../game/ported11.h"
 #include "../../game/ported12.h"
 #include "../../game/ported14.h"
+#include "../../game/ported15.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1073,4 +1074,21 @@ void re_install_all(void) {
     re_hook(0x004a7e6e, (void*)P14_Fn004A7E6E, "P14_Fn004A7E6E");
     re_hook(0x004d623b, (void*)P14_Fn004D623B, "P14_Fn004D623B");
     re_hook(0x00503e83, (void*)P14_Fn00503E83, "P14_Fn00503E83");
+    re_hook(0x004142a4, (void*)P15_MenuMiami, "P15_MenuMiami");
+    re_hook(0x004142fc, (void*)P15_MenuItem2, "P15_MenuItem2");
+    re_hook(0x004143b6, (void*)P15_MenuItem3, "P15_MenuItem3");
+    re_hook(0x0041440e, (void*)P15_MenuItem4, "P15_MenuItem4");
+    re_hook(0x004144c8, (void*)P15_MenuItem5, "P15_MenuItem5");
+    re_hook(0x00414520, (void*)P15_MenuItem6, "P15_MenuItem6");
+    re_hook(0x004145da, (void*)P15_MenuItem7, "P15_MenuItem7");
+    re_hook(0x004148b9, (void*)P15_SetHighlightRange, "P15_SetHighlightRange");
+    re_hook(0x00427a08, (void*)P15_ScaleVertices, "P15_ScaleVertices");
+    re_hook(0x00427a71, (void*)P15_ScaleNormalW, "P15_ScaleNormalW");
+    re_hook(0x004a50a2, (void*)P15_SkipInteger, "P15_SkipInteger");
+    re_hook(0x004c16d9, (void*)P15_BlitRect16, "P15_BlitRect16");
+    re_hook(0x004c1749, (void*)P15_BlitRect8, "P15_BlitRect8");
+    re_hook(0x004cff20, (void*)P15_ListClearActiveByTag, "P15_ListClearActiveByTag");
+    re_hook(0x004d0021, (void*)P15_ListClearAllActive, "P15_ListClearAllActive");
+    re_hook(0x004e58ba, (void*)P15_GridCell, "P15_GridCell");
+    re_hook(0x004e5f5b, (void*)P15_RaiseLimits, "P15_RaiseLimits");
 }

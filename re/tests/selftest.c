@@ -16,6 +16,7 @@
 #include "../game/ported11.h"
 #include "../game/ported12.h"
 #include "../game/ported14.h"
+#include "../game/ported15.h"
 #include "../game/ported13.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -354,8 +355,17 @@ static int test_p14(void) {
   if (f) printf("test_p14 FAILED %d\n", f);
   return f;
 }
+static int test_ported15(void) {
+  int f = 0;
+  if (P15_GridCell(0, 0) != 0 || P15_GridCell(-0x2000, -0x3000) != 4) f++;
+  { uint8_t a[0x400 * 3], b[0x400 * 3]; for (int i = 0; i < (int)sizeof a; i++) { a[i] = (uint8_t)i; b[i] = 0; }
+    P15_BlitRect8(a, 2, 1, 4, 2, b, 1, 0);
+    if (b[1] != a[0x100 + 2] || b[4] != a[0x100 + 5] || b[5] != 0 || b[0x101] != a[0x200 + 2]) f++; }
+  { char buf[] = "-123ab"; char *p = buf; P15_SkipInteger(&p); if (*p != 'a') f++; }
+  return f;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
