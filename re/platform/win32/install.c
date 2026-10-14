@@ -12,6 +12,7 @@
 #include "../../game/globalsets.h"
 #include "../../game/smallfuncs.h"
 #include "../../game/menuselect.h"
+#include "../../game/widgets.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
     re_hook(0x004c622c, (void*)RenumberCameras,   "RenumberCameras");
@@ -609,4 +610,63 @@ void re_install_all(void) {
     re_hook(0x00417aa2, (void*)SetColorWhite00417AA2, "SetColorWhite00417AA2");
     re_hook(0x0041a051, (void*)SetColorRed0041A051, "SetColorRed0041A051");
     re_hook(0x0041a085, (void*)SetColorWhite0041A085, "SetColorWhite0041A085");
+    re_hook(0x004110c2, (void*)SelectRow004110C2, "SelectRow004110C2");
+    re_hook(0x00411177, (void*)SelectRow00411177, "SelectRow00411177");
+    re_hook(0x0041122c, (void*)SelectRow0041122C, "SelectRow0041122C");
+    re_hook(0x004112e1, (void*)SelectRow004112E1, "SelectRow004112E1");
+    re_hook(0x00411396, (void*)SelectRow00411396, "SelectRow00411396");
+    re_hook(0x0041144b, (void*)SelectRow0041144B, "SelectRow0041144B");
+    re_hook(0x00411500, (void*)SelectRow00411500, "SelectRow00411500");
+    re_hook(0x004115b5, (void*)SelectRow004115B5, "SelectRow004115B5");
+    re_hook(0x0041166a, (void*)SelectRow0041166A, "SelectRow0041166A");
+    re_hook(0x0041171f, (void*)SelectRow0041171F, "SelectRow0041171F");
+    re_hook(0x004117d4, (void*)SelectRow004117D4, "SelectRow004117D4");
+    re_hook(0x00411889, (void*)SelectRow00411889, "SelectRow00411889");
+    re_hook(0x0041193e, (void*)SelectRow0041193E, "SelectRow0041193E");
+    re_hook(0x004119f3, (void*)SelectRow004119F3, "SelectRow004119F3");
+    re_hook(0x00409bc9, (void*)VolumeUp00409BC9, "VolumeUp00409BC9");
+    re_hook(0x00409bfd, (void*)VolumeDown00409BFD, "VolumeDown00409BFD");
+    re_hook(0x0040e918, (void*)CycleInc0040E918, "CycleInc0040E918");
+    re_hook(0x0040f364, (void*)CycleDec0040F364, "CycleDec0040F364");
+    re_hook(0x0040f3ad, (void*)CycleInc0040F3AD, "CycleInc0040F3AD");
+    re_hook(0x00412254, (void*)MenuRowsTo2_00412254, "MenuRowsTo2_00412254");
+    re_hook(0x00412280, (void*)MenuAllRowsTo2_00412280, "MenuAllRowsTo2_00412280");
+    re_hook(0x00412643, (void*)MenuRowsTo3_00412643, "MenuRowsTo3_00412643");
+    re_hook(0x0041266f, (void*)MenuRowsTo2_0041266F, "MenuRowsTo2_0041266F");
+    re_hook(0x0041269b, (void*)MenuAllRowsTo2_0041269B, "MenuAllRowsTo2_0041269B");
+    re_hook(0x00412a36, (void*)SetIconName00412A36, "SetIconName00412A36");
+    re_hook(0x00412aa4, (void*)SetIconName00412AA4, "SetIconName00412AA4");
+    re_hook(0x00412b12, (void*)SetIconName00412B12, "SetIconName00412B12");
+    re_hook(0x00412b80, (void*)SetIconName00412B80, "SetIconName00412B80");
+    re_hook(0x00412bee, (void*)SetIconName00412BEE, "SetIconName00412BEE");
+    re_hook(0x00412c5c, (void*)SetIconName00412C5C, "SetIconName00412C5C");
+    re_hook(0x00412cca, (void*)SetIconName00412CCA, "SetIconName00412CCA");
+    re_hook(0x00412d38, (void*)SetIconName00412D38, "SetIconName00412D38");
+    re_hook(0x00415848, (void*)StepUp00415848, "StepUp00415848");
+    re_hook(0x00415877, (void*)StepDown00415877, "StepDown00415877");
+    re_hook(0x004158a6, (void*)StepUp004158A6, "StepUp004158A6");
+    re_hook(0x004158d5, (void*)StepDown004158D5, "StepDown004158D5");
+    re_hook(0x0050f9b4, (void*)StepUp0050F9B4, "StepUp0050F9B4");
+    re_hook(0x0050f9e3, (void*)StepDown0050F9E3, "StepDown0050F9E3");
+    re_hook(0x0050fa12, (void*)StepUp0050FA12, "StepUp0050FA12");
+    re_hook(0x0050fa41, (void*)StepDown0050FA41, "StepDown0050FA41");
+    re_hook(0x0041ad8d, (void*)CopyWord0041AD8D, "CopyWord0041AD8D");
+    re_hook(0x00514e6a, (void*)RangeCheck00514E6A, "RangeCheck00514E6A");
+    re_hook(0x00526029, (void*)Dot3_00526029, "Dot3_00526029");
+    re_hook(0x0041fa5e, (void*)GetConst0041FA5E, "GetConst0041FA5E");
+    re_hook(0x004d61cf, (void*)ClearSlots004D61CF, "ClearSlots004D61CF");
+    re_hook(0x004d6c20, (void*)ClearPairs004D6C20, "ClearPairs004D6C20");
+    re_hook(0x004d950f, (void*)Pack565_004D950F, "Pack565_004D950F");
+    re_hook(0x004e122c, (void*)AddVelocity004E122C, "AddVelocity004E122C");
+    re_hook(0x004e4379, (void*)Get4Words004E4379, "Get4Words004E4379");
+    re_hook(0x0050fe82, (void*)Toggle0050FE82, "Toggle0050FE82");
+    re_hook(0x0050fea3, (void*)Toggle0050FEA3, "Toggle0050FEA3");
+    re_hook(0x0050fec4, (void*)Toggle0050FEC4, "Toggle0050FEC4");
+    re_hook(0x0050ff41, (void*)Toggle0050FF41, "Toggle0050FF41");
+    re_hook(0x0050ff62, (void*)Toggle0050FF62, "Toggle0050FF62");
+    re_hook(0x0050ff83, (void*)Toggle0050FF83, "Toggle0050FF83");
+    re_hook(0x0050ffa4, (void*)Toggle0050FFA4, "Toggle0050FFA4");
+    re_hook(0x0050ffc5, (void*)Toggle0050FFC5, "Toggle0050FFC5");
+    re_hook(0x0050ffe6, (void*)Toggle0050FFE6, "Toggle0050FFE6");
+    re_hook(0x00510007, (void*)Toggle00510007, "Toggle00510007");
 }

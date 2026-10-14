@@ -61,6 +61,11 @@
     R(int, GetMarkerYAdjust, 0x004023c9, (int a), (a)) \
     R(int, IsKeyDown, 0x004e383a, (int sc), (sc)) \
     R(int, GetGroundHeight, 0x004dd039, (int *pos), (pos)) \
+    V(Call00411A9D, 0x00411a9d, (void), ()) \
+    V(Call0040F3DE, 0x0040f3de, (void), ()) \
+    V(Call0041AFCA, 0x0041afca, (void), ()) \
+    V(Call0050F7B2, 0x0050f7b2, (void), ()) \
+    V(Call0050FBF4, 0x0050fbf4, (void), ()) \
     V(SetCameraPosition, 0x00523c99, (float x, float y, float z), (x, y, z))
 
 #ifdef RE_HOOK_BUILD
