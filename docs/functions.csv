@@ -1325,11 +1325,11 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040f0fb,FUN_0040f0fb,,,,,,79,todo
 0040f14a,FUN_0040f14a,,,,,,41,todo
 0040f2d0,FUN_0040f2d0,,,,,,124,todo
-0040f34c,FUN_0040f34c,,,,,,12,todo
-0040f358,FUN_0040f358,,,,,,12,todo
+0040f34c,FUN_0040f34c,MenuSet54BE5CTo3,manual,MenuState,,,12,ported
+0040f358,FUN_0040f358,MenuSet54BE5CTo2,manual,MenuState,,,12,ported
 0040f364,FUN_0040f364,,,,,,49,todo
-0040f395,FUN_0040f395,,,,,,12,todo
-0040f3a1,FUN_0040f3a1,,,,,,12,todo
+0040f395,FUN_0040f395,MenuSet54BE7CTo3,manual,MenuState,,,12,ported
+0040f3a1,FUN_0040f3a1,MenuSet54BE7CTo2,manual,MenuState,,,12,ported
 0040f3ad,FUN_0040f3ad,,,,,,49,todo
 0040f3de,FUN_0040f3de,,,,,,595,todo
 0040fa60,FUN_0040fa60,,,,,,570,todo

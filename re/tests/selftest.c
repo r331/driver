@@ -164,8 +164,15 @@ static int test_menu2(void) {
     MenuSet54A854On(); if (MenuVar54A854 != 1) return 1; MenuSet54A854Off(); if (MenuVar54A854 != 0) return 1;
     return 0;
 }
+static int test_menu3(void) {
+    MenuSet54BE5CTo3(); MenuSet54BE7CTo2();
+    if (MenuByte54BE5C != 3 || MenuByte54BE7C != 2) return 1;
+    MenuSet54BE5CTo2(); MenuSet54BE7CTo3();
+    return (MenuByte54BE5C != 2 || MenuByte54BE7C != 3);
+}
+
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
