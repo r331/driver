@@ -17,6 +17,7 @@
 #include "../game/ported12.h"
 #include "../game/ported14.h"
 #include "../game/ported15.h"
+#include "../game/ported16.h"
 #include "../game/ported13.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -364,8 +365,17 @@ static int test_ported15(void) {
   { char buf[] = "-123ab"; char *p = buf; P15_SkipInteger(&p); if (*p != 'a') f++; }
   return f;
 }
+static int test_ported16(void) {
+  int f = 0;
+  P16_IdleMode = 0; P16_Level = 5; P16_IdleCounter = 9; P16_IdleTimer(); if (P16_IdleCounter != 0) f++;
+  P16_Level = 0; P16_FlagA = P16_FlagB = P16_FlagC = P16_FlagD = 0; P16_IdleCounter = 300; P16_IdleTimer();
+  if (P16_IdleMode != 0xff0 || P16_IdleArg2 != 0x5a) f++;
+  { uint32_t r[12]; float x; P16_FillHudRect(r, 7, 0x102030, 9, 1, 0); memcpy(&x, &r[0], 4); if (x != 624.0f || r[10] != 2 || r[11] != 1) f++;
+    memcpy(&x, &r[6], 4); if (x != 16.0f) f++; }
+  return f;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

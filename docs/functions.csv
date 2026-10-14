@@ -2342,7 +2342,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004b9933,FUN_004b9933,P12_Fn004B9933,manual,Misc12,,,88,ported
 004b998b,FUN_004b998b,,,,,,353,todo
 004b9aec,FUN_004b9aec,,,,,,653,todo
-004b9d79,FUN_004b9d79,,,,,,178,todo
+004b9d79,FUN_004b9d79,P16_StepParticles,manual,ported16,,,178,ported
 004b9e2b,FUN_004b9e2b,StepSpeedA_004B9E2B,manual,Ported8,,,41,ported
 004b9e54,FUN_004b9e54,StepSpeedB_004B9E54,manual,Ported8,,,75,ported
 004b9e9f,FUN_004b9e9f,,,,,,500,todo
@@ -2651,7 +2651,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004e0fd4,FUN_004e0fd4,,,,,,271,todo
 004e10e3,FUN_004e10e3,,,,,,329,todo
 004e122c,FUN_004e122c,AddVelocity004E122C,manual,ui/widgets,,,184,ported
-004e12e4,FUN_004e12e4,P14_Fn004E12E4,manual,misc,,,149,ported
+004e12e4,FUN_004e12e4,P16_IdleTimer,manual,ported16,,,149,ported
 004e2ee0,FUN_004e2ee0,,,,,,757,todo
 004e31d5,FUN_004e31d5,,,,,,444,todo
 004e3391,FUN_004e3391,,,,,,984,todo
@@ -2869,7 +2869,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0050230a,FUN_0050230a,,,,,,722,todo
 005025dc,FUN_005025dc,,,,,,164,todo
 00502680,FUN_00502680,ClearField2C_00502680,manual,SmallFuncs,,,15,ported
-0050268f,FUN_0050268f,,,,,,234,todo
+0050268f,FUN_0050268f,P16_FillHudRect,manual,ported16,,,234,ported
 00502779,FUN_00502779,SetField24_00502779,manual,SmallFuncs,,,14,ported
 00502787,FUN_00502787,,,,,,1383,todo
 00502cee,FUN_00502cee,,,,,,392,todo

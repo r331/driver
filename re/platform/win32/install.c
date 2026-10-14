@@ -4,6 +4,7 @@
 #include "../../game/ported12.h"
 #include "../../game/ported14.h"
 #include "../../game/ported15.h"
+#include "../../game/ported16.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1091,4 +1092,7 @@ void re_install_all(void) {
     re_hook(0x004d0021, (void*)P15_ListClearAllActive, "P15_ListClearAllActive");
     re_hook(0x004e58ba, (void*)P15_GridCell, "P15_GridCell");
     re_hook(0x004e5f5b, (void*)P15_RaiseLimits, "P15_RaiseLimits");
+    re_hook(0x004b9d79, (void*)P16_StepParticles, "P16_StepParticles");
+    re_hook(0x004e12e4, (void*)P16_IdleTimer, "P16_IdleTimer");
+    re_hook(0x0050268f, (void*)P16_FillHudRect, "P16_FillHudRect");
 }
