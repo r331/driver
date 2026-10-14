@@ -126,3 +126,60 @@ void DrawNodeMarker(DIR_NODE *n) {
     else y += 0x31;
     if (n->unk00 != -1) DrawSprite(x, y, NodeIconTex[n->unk00], 0, 0, c, c, c);
 }
+
+#ifndef RE_HOOK_BUILD
+uint8_t KeyState[0x200]; int32_t CamParamTblArr[0x52*4];
+#  define KS(a) KeyState[(a)-0x00d04b00]
+#  define CPT(i) CamParamTblArr[i]
+#else
+#  define KS(a) (*(uint8_t*)(uintptr_t)(a))
+#  define CPT(i) (((int32_t*)(uintptr_t)0x00d0788c)[i])
+#endif
+GAME_VAR_DEF(int32_t, DirUseDI, 0x00d17ba0)
+
+uint32_t ReadDirectorKeys(void) {
+    uint32_t m = 0;
+    if (!DirUseDI) {
+        if (KS(0xd04b2a) || KS(0xd04b36)) m = 0x80;
+        if (KS(0xd04b4a)) m |= 0x20;
+        if (KS(0xd04b4e)) m |= 0x40;
+        if (KS(0xd04bcb)) m |= 1;
+        if (KS(0xd04bcd)) m |= 2;
+        if (KS(0xd04bc8)) m |= 4;
+        if (KS(0xd04bd0)) m |= 8;
+        if (KS(0xd04b1c) || KS(0xd04b39)) m |= 0x10;
+        if (KS(0xd04bcf)) m |= 0x100;
+    } else {
+        if (IsKeyDown(0x2a) || IsKeyDown(0x36)) m = 0x80;
+        if (IsKeyDown(0x4a)) m = 0x20;
+        if (IsKeyDown(0x4e)) m = 0x40;
+        if (IsKeyDown(0xcb)) m = 1;
+        if (IsKeyDown(0xcd)) m = 2;
+        if (IsKeyDown(200)) m = 4;
+        if (IsKeyDown(0xd0)) m = 8;
+        if (IsKeyDown(0x1c) || IsKeyDown(0x39)) m = 0x10;
+    }
+    return m;
+}
+
+void ClampCameraHeight(int32_t *p) {
+    if (p[4] == -1) p[4] = 0;
+    int idx = p[4];
+    if (p[0] == 0) {
+        int old = p[0x14];
+        int g = -GetGroundHeight(p + 0x13);
+        if (g - 100 < p[0x14]) p[0x14] = g - 100;
+        if (p[0x14] < g - 0x640) p[0x14] = g - 0x640;
+        if (old != p[0x14]) {
+            p[0x17] = p[0x13]; p[0x18] = p[0x14]; p[0x19] = p[0x15]; p[0x1a] = p[0x16];
+            p[0x1c] = p[0x14] + CPT(idx * 0x52);
+        }
+    } else {
+        int g = -GetGroundHeight(p + 0x13);
+        int lim = g - 100;
+        if (lim < p[0x14]) { p[0x1c] = lim + CPT(idx * 0x52); p[0x14] = lim; p[0x18] = lim; }
+        if (p[0x14] - lim < -0x640) {
+            p[0x14] = g - 0x6a4; p[0x18] = g - 0x6a4; p[0x1c] = p[0x14] + CPT(idx * 0x52);
+        }
+    }
+}

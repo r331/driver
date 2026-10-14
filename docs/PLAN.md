@@ -60,3 +60,4 @@
 | v0.9 | DirNodes +4 (всего 45) |
 - v0.10: DumpWaypoints, DrawCornerIndicator (47 всего)
 - v0.11: DrawNode, DrawNodeMarker (всего 49)
+- v0.12: +ReadDirectorKeys, ClampCameraHeight (51 всего)

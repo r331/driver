@@ -17,6 +17,8 @@
     V(DrawRect, 0x004d7c46, (float x, float y, float w, float h, uint32_t color), (x, y, w, h, color)) \
     V(DrawIcon, 0x004e72f8, (float x, float y, float sx, float sy, uint32_t icon, uint32_t color), (x, y, sx, sy, icon, color)) \
     R(int, GetMarkerYAdjust, 0x004023c9, (int a), (a)) \
+    R(int, IsKeyDown, 0x004e383a, (int sc), (sc)) \
+    R(int, GetGroundHeight, 0x004dd039, (int *pos), (pos)) \
     V(SetCameraPosition, 0x00523c99, (float x, float y, float z), (x, y, z))
 
 #ifdef RE_HOOK_BUILD

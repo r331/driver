@@ -43,6 +43,8 @@ void re_install_all(void) {
     re_hook(0x004c4151, (void*)FindNodeById, "FindNodeById");
     re_hook(0x004c419e, (void*)FindNodeByLink, "FindNodeByLink");
     re_hook(0x004c37f6, (void*)DumpWaypoints, "DumpWaypoints");
+    re_hook(0x004c3f8f, (void*)ReadDirectorKeys, "ReadDirectorKeys");
+    re_hook(0x004c356d, (void*)ClampCameraHeight, "ClampCameraHeight");
     re_hook(0x004c42a9, (void*)DrawCornerIndicator, "DrawCornerIndicator");
     re_hook(0x004c3d5c, (void*)DrawNode, "DrawNode");
     re_hook(0x004c3e6a, (void*)DrawNodeMarker, "DrawNodeMarker");

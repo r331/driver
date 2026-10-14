@@ -45,3 +45,4 @@ v0.5: +7 (29 всего): DirectorStorage.c — ReadDirectorData, ReadCameraChun
 - v0.9 (DirNodes): ClearDirectorTable, DrawNodeChain, DrawNodeMarkersChain, GetNodeParent; всего 45
 - v0.10 (DirNodes): DumpWaypoints, DrawCornerIndicator; всего 47
 - v0.11 (DirNodes): DrawNode, DrawNodeMarker; всего 49
+- v0.12 (DirNodes): ReadDirectorKeys, ClampCameraHeight; всего 51

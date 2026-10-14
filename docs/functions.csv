@@ -2391,7 +2391,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c3048,FUN_004c3048,,,,,,633,todo
 004c32c1,FUN_004c32c1,,,,,,358,todo
 004c3427,FUN_004c3427,,,,,,326,todo
-004c356d,FUN_004c356d,,,,,,365,todo
+004c356d,FUN_004c356d,ClampCameraHeight,manual,DirNodes.c,,,365,ported
 004c36da,FUN_004c36da,ClearDirectorTable,manual,DirNodes.c,,,80,ported
 004c372a,FUN_004c372a,FreeDirectorBuffer,manual,Director,,,48,ported
 004c375a,FUN_004c375a,GetWaypointAfterFrame,manual,Director,,,67,ported
@@ -2403,7 +2403,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c3d5c,FUN_004c3d5c,DrawNode,manual,DirNodes.c,,,270,ported
 004c3e6a,FUN_004c3e6a,DrawNodeMarker,manual,DirNodes.c,,,188,ported
 004c3f26,FUN_004c3f26,SetNodeEnabled,manual,DirNodes.c,,,105,ported
-004c3f8f,FUN_004c3f8f,,,,,,450,todo
+004c3f8f,FUN_004c3f8f,ReadDirectorKeys,manual,DirNodes.c,,,450,ported
 004c4151,FUN_004c4151,FindNodeById,manual,DirNodes.c,,,77,ported
 004c419e,FUN_004c419e,FindNodeByLink,manual,DirNodes.c,,,78,ported
 004c41ec,FUN_004c41ec,GetNodeParent,manual,DirNodes.c,,,58,ported
