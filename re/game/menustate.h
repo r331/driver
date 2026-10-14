@@ -138,3 +138,21 @@ void MenuEnterMode7(void); /* 0040a6ed */
 void MenuLeaveMode7(int32_t v); /* 0040a703 */
 void MenuEnterMode6(void); /* 0040a715 */
 void MenuLeaveMode6(int32_t v); /* 0040a72b */
+#define MenuColorR54AA2C GAME_VAR(uint8_t, MenuColorR54AA2C, 0x0054aa2c)
+#define MenuColorG54AA2D GAME_VAR(uint8_t, MenuColorG54AA2D, 0x0054aa2d)
+#define MenuColorB54AA2E GAME_VAR(uint8_t, MenuColorB54AA2E, 0x0054aa2e)
+#define MenuPosX54AA24 GAME_VAR(int32_t, MenuPosX54AA24, 0x0054aa24)
+#define MenuPosY54AA28 GAME_VAR(int32_t, MenuPosY54AA28, 0x0054aa28)
+#define MenuVal5D77CC GAME_VAR(int32_t, MenuVal5D77CC, 0x005d77cc)
+#define MenuVal5D77C4 GAME_VAR(int32_t, MenuVal5D77C4, 0x005d77c4)
+#define MenuVal5D77C8 GAME_VAR(int32_t, MenuVal5D77C8, 0x005d77c8)
+#define MenuByte5D77C1 GAME_VAR(uint8_t, MenuByte5D77C1, 0x005d77c1)
+#define MenuByte5D77C0 GAME_VAR(uint8_t, MenuByte5D77C0, 0x005d77c0)
+#ifndef RE_HOOK_BUILD
+extern uint8_t MenuColorR54AA2C, MenuColorG54AA2D, MenuColorB54AA2E, MenuByte5D77C1, MenuByte5D77C0;
+extern int32_t MenuPosX54AA24, MenuPosY54AA28, MenuVal5D77CC, MenuVal5D77C4, MenuVal5D77C8;
+#endif
+void MenuSetColor(uint8_t r, uint8_t g, uint8_t b); /* 0040ab3a */
+void MenuSetPos(int32_t x, int32_t y); /* 0040ab59 */
+void MenuSetVals5D77C0(int32_t a, int32_t b, uint8_t c, uint8_t d); /* 0040ab6f */
+void MenuSetByte5D77C1(uint8_t v); /* 0040ab9f */

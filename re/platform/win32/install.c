@@ -108,6 +108,10 @@ void re_install_all(void) {
     re_hook(0x0040a703, (void*)MenuLeaveMode7, "MenuLeaveMode7");
     re_hook(0x0040a715, (void*)MenuEnterMode6, "MenuEnterMode6");
     re_hook(0x0040a72b, (void*)MenuLeaveMode6, "MenuLeaveMode6");
+    re_hook(0x0040ab3a, (void*)MenuSetColor, "MenuSetColor");
+    re_hook(0x0040ab59, (void*)MenuSetPos, "MenuSetPos");
+    re_hook(0x0040ab6f, (void*)MenuSetVals5D77C0, "MenuSetVals5D77C0");
+    re_hook(0x0040ab9f, (void*)MenuSetByte5D77C1, "MenuSetByte5D77C1");
     re_hook(0x0040a443, (void*)MenuSet54A844On, "MenuSet54A844On");
     re_hook(0x0040a44f, (void*)MenuSet54A844Off, "MenuSet54A844Off");
     re_hook(0x0040a495, (void*)MenuSet54A854On, "MenuSet54A854On");

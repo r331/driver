@@ -57,3 +57,4 @@ v0.5: +7 (29 всего): DirectorStorage.c — ReadDirectorData, ReadCameraChun
 - v0.21 (MenuState): 4 сеттера флагов 54A844/54A854; всего 93
 - v0.22 (MenuState): 8 функций Enter/LeaveMode 1,2,3,5; всего 101
 - v0.23 (MenuState): Enter/LeaveMode 4,7,6; всего 107
+- v0.24 (MenuState): MenuSetColor, MenuSetPos, MenuSetVals5D77C0, MenuSetByte5D77C1; всего 111

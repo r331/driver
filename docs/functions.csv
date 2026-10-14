@@ -1263,10 +1263,10 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040a8b0,FUN_0040a8b0,,,,,,466,todo
 0040aa82,FUN_0040aa82,,,,,,96,todo
 0040aae2,FUN_0040aae2,,,,,,88,todo
-0040ab3a,FUN_0040ab3a,,,,,,31,todo
-0040ab59,FUN_0040ab59,,,,,,22,todo
-0040ab6f,FUN_0040ab6f,,,,,,48,todo
-0040ab9f,FUN_0040ab9f,,,,,,13,todo
+0040ab3a,FUN_0040ab3a,MenuSetColor,manual,MenuState,,,31,ported
+0040ab59,FUN_0040ab59,MenuSetPos,manual,MenuState,,,22,ported
+0040ab6f,FUN_0040ab6f,MenuSetVals5D77C0,manual,MenuState,,,48,ported
+0040ab9f,FUN_0040ab9f,MenuSetByte5D77C1,manual,MenuState,,,13,ported
 0040abac,FUN_0040abac,,,,,,1272,todo
 0040b0a4,FUN_0040b0a4,,,,,,90,todo
 0040b0fe,FUN_0040b0fe,,,,,,206,todo

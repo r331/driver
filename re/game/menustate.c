@@ -95,3 +95,17 @@ void MenuEnterMode7(void) { MenuFlag54A94C = 1; MenuMode1271060 = 7; }
 void MenuLeaveMode7(int32_t v) { if (v == 0) MenuFlag54A94C = 0; }
 void MenuEnterMode6(void) { MenuFlag54A93C = 1; MenuMode1271060 = 6; }
 void MenuLeaveMode6(int32_t v) { if (v == 0) MenuFlag54A93C = 0; }
+GAME_VAR_DEF(uint8_t, MenuColorR54AA2C, 0x0054aa2c)
+GAME_VAR_DEF(uint8_t, MenuColorG54AA2D, 0x0054aa2d)
+GAME_VAR_DEF(uint8_t, MenuColorB54AA2E, 0x0054aa2e)
+GAME_VAR_DEF(int32_t, MenuPosX54AA24, 0x0054aa24)
+GAME_VAR_DEF(int32_t, MenuPosY54AA28, 0x0054aa28)
+GAME_VAR_DEF(int32_t, MenuVal5D77CC, 0x005d77cc)
+GAME_VAR_DEF(int32_t, MenuVal5D77C4, 0x005d77c4)
+GAME_VAR_DEF(int32_t, MenuVal5D77C8, 0x005d77c8)
+GAME_VAR_DEF(uint8_t, MenuByte5D77C1, 0x005d77c1)
+GAME_VAR_DEF(uint8_t, MenuByte5D77C0, 0x005d77c0)
+void MenuSetColor(uint8_t r, uint8_t g, uint8_t b) { MenuColorR54AA2C = r; MenuColorG54AA2D = g; MenuColorB54AA2E = b; }
+void MenuSetPos(int32_t x, int32_t y) { MenuPosX54AA24 = x; MenuPosY54AA28 = y; }
+void MenuSetVals5D77C0(int32_t a, int32_t b, uint8_t c, uint8_t d) { MenuVal5D77CC = a; MenuVal5D77C4 = a; MenuVal5D77C8 = b; MenuByte5D77C1 = c; MenuByte5D77C0 = d; }
+void MenuSetByte5D77C1(uint8_t v) { MenuByte5D77C1 = v; }
