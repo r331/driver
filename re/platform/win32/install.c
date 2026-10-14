@@ -4,6 +4,7 @@
 #include "../../game/directorstorage.h"
 #include "../../game/dirnodes.h"
 #include "../../game/menustate.h"
+#include "../../game/noop.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
     re_hook(0x004c622c, (void*)RenumberCameras,   "RenumberCameras");
@@ -58,6 +59,11 @@ void re_install_all(void) {
     re_hook(0x0040844c, (void*)MenuVar54A0CCClear, "MenuVar54A0CCClear");
     re_hook(0x00408710, (void*)MenuCounter5D577CInc, "MenuCounter5D577CInc");
     re_hook(0x0040682d, (void*)SumBytes, "SumBytes");
+    re_hook(0x0041b054, (void*)NoopFn0041b054, "NoopFn0041b054");
+    re_hook(0x0041b3a6, (void*)NoopFn0041b3a6, "NoopFn0041b3a6");
+    re_hook(0x0041e456, (void*)NoopFn0041e456, "NoopFn0041e456");
+    re_hook(0x0041ed21, (void*)NoopFn0041ed21, "NoopFn0041ed21");
+    re_hook(0x0041ed39, (void*)NoopFn0041ed39, "NoopFn0041ed39");
     re_hook(0x0040831c, (void*)MenuCopyPos, "MenuCopyPos");
     re_hook(0x004c379d, (void*)GetWaypointForFrame, "GetWaypointForFrame");
     re_hook(0x004c4151, (void*)FindNodeById, "FindNodeById");

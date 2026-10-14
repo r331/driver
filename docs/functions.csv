@@ -1726,10 +1726,10 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041af29,FUN_0041af29,,,,,,92,todo
 0041af85,FUN_0041af85,,,,,,69,todo
 0041afca,FUN_0041afca,,,,,,138,todo
-0041b054,FUN_0041b054,,,,,,5,todo
+0041b054,FUN_0041b054,NoopFn0041b054,manual,Noop,,,5,ported
 0041b059,FUN_0041b059,,,,,,23,todo
 0041b1c0,FUN_0041b1c0,,,,,,486,todo
-0041b3a6,FUN_0041b3a6,,,,,,5,todo
+0041b3a6,FUN_0041b3a6,NoopFn0041b3a6,manual,Noop,,,5,ported
 0041b3ab,FUN_0041b3ab,,,,,,69,todo
 0041b790,FUN_0041b790,,,,,,29,todo
 0041b7ad,FUN_0041b7ad,,,,,,36,todo
@@ -1777,7 +1777,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041e215,FUN_0041e215,,,,,,117,todo
 0041e28a,FUN_0041e28a,,,,,,66,todo
 0041e404,FUN_0041e404,,,,,,82,todo
-0041e456,FUN_0041e456,,,,,,5,todo
+0041e456,FUN_0041e456,NoopFn0041e456,manual,Noop,,,5,ported
 0041e45b,FUN_0041e45b,,,,,,7,todo
 0041e462,FUN_0041e462,,,,,,87,todo
 0041e4b9,FUN_0041e4b9,,,,,,87,todo
@@ -1807,10 +1807,10 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041ed07,FUN_0041ed07,,,,,,7,todo
 0041ed0e,FUN_0041ed0e,,,,,,12,todo
 0041ed1a,FUN_0041ed1a,,,,,,7,todo
-0041ed21,FUN_0041ed21,,,,,,5,todo
+0041ed21,FUN_0041ed21,NoopFn0041ed21,manual,Noop,,,5,ported
 0041ed26,FUN_0041ed26,,,,,,7,todo
 0041ed2d,FUN_0041ed2d,,,,,,12,todo
-0041ed39,FUN_0041ed39,,,,,,5,todo
+0041ed39,FUN_0041ed39,NoopFn0041ed39,manual,Noop,,,5,ported
 0041ed3e,FUN_0041ed3e,,,,,,7,todo
 0041ed45,FUN_0041ed45,,,,,,7,todo
 0041ed4c,FUN_0041ed4c,,,,,,7,todo
