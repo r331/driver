@@ -17,6 +17,7 @@
 #include "../../game/ported4.h"
 #include "../../game/ported5.h"
 #include "../../game/ported6.h"
+#include "../../game/ported7.h"
 void re_install_all(void) {
     re_hook(0x004c6168, (void*)FindCameraById,    "FindCameraById");
     re_hook(0x004c622c, (void*)RenumberCameras,   "RenumberCameras");
@@ -902,4 +903,35 @@ void re_install_all(void) {
     re_hook(0x00407c27, (void*)Copy400_00407C27, "Copy400_00407C27");
     re_hook(0x004fbe96, (void*)LoadTrail004FBE96, "LoadTrail004FBE96");
     re_hook(0x004fc0c7, (void*)Fwd004FC0C7, "Fwd004FC0C7");
+    re_hook(0x0040aae2, (void*)ScanSlot_0040AAE2, "ScanSlot_0040AAE2");
+    re_hook(0x0041621c, (void*)SetHiliteBits_0041621C, "SetHiliteBits_0041621C");
+    re_hook(0x0041d8e9, (void*)InitIdentityPalette_0041D8E9, "InitIdentityPalette_0041D8E9");
+    re_hook(0x00421c1d, (void*)MaskShift_00421C1D, "MaskShift_00421C1D");
+    re_hook(0x00426abc, (void*)AddEntry_00426ABC, "AddEntry_00426ABC");
+    re_hook(0x0048a4e6, (void*)FindFreeEven_0048A4E6, "FindFreeEven_0048A4E6");
+    re_hook(0x0048f2e7, (void*)CountByOwner_0048F2E7, "CountByOwner_0048F2E7");
+    re_hook(0x004a2db5, (void*)FindSlot_004A2DB5, "FindSlot_004A2DB5");
+    re_hook(0x004a596b, (void*)SkipToIdentStart_004A596B, "SkipToIdentStart_004A596B");
+    re_hook(0x004a6370, (void*)FillThresholds_004A6370, "FillThresholds_004A6370");
+    re_hook(0x004ab712, (void*)ResetSlots_004AB712, "ResetSlots_004AB712");
+    re_hook(0x004ab780, (void*)ClearTables_004AB780, "ClearTables_004AB780");
+    re_hook(0x004bb11f, (void*)FindOrAdd_004BB11F, "FindOrAdd_004BB11F");
+    re_hook(0x004bf8a1, (void*)ClearEntry_004BF8A1, "ClearEntry_004BF8A1");
+    re_hook(0x004c1f9b, (void*)AddUnique_004C1F9B, "AddUnique_004C1F9B");
+    re_hook(0x004cc784, (void*)PushEntry_004CC784, "PushEntry_004CC784");
+    re_hook(0x004d6190, (void*)SetFirstFree_004D6190, "SetFirstFree_004D6190");
+    re_hook(0x004d6e9f, (void*)CopyTable_004D6E9F, "CopyTable_004D6E9F");
+    re_hook(0x004d9078, (void*)Rand_004D9078, "Rand_004D9078");
+    re_hook(0x004e3871, (void*)AnyKeyHeld_004E3871, "AnyKeyHeld_004E3871");
+    re_hook(0x004e5938, (void*)PushHistory_004E5938, "PushHistory_004E5938");
+    re_hook(0x00514c72, (void*)SetObjState_00514C72, "SetObjState_00514C72");
+    re_hook(0x00514bc7, (void*)InitObjState_00514BC7, "InitObjState_00514BC7");
+    re_hook(0x00514e99, (void*)ResetObjState_00514E99, "ResetObjState_00514E99");
+    re_hook(0x00523c56, (void*)InitSoundVolumes_00523C56, "InitSoundVolumes_00523C56");
+    re_hook(0x0052422d, (void*)SoundLoop_0052422D, "SoundLoop_0052422D");
+    re_hook(0x00527885, (void*)Lerp4_00527885, "Lerp4_00527885");
+    re_hook(0x005278fb, (void*)CopyShort9_005278FB, "CopyShort9_005278FB");
+    re_hook(0x005270bd, (void*)Dot4_005270BD, "Dot4_005270BD");
+    re_hook(0x005120a7, (void*)CountActive_005120A7, "CountActive_005120A7");
+    re_hook(0x005283e2, (void*)InitFpuCw_005283E2, "InitFpuCw_005283E2");
 }

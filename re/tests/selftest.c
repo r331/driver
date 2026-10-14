@@ -10,6 +10,7 @@
 #include "../game/ported4.h"
 #include "../game/ported5.h"
 #include "../game/ported6.h"
+#include "../game/ported7.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -264,8 +265,25 @@ static int test_p6(void) {
     G6_00D117A4 = 5; G6_00D117A8 = 3; G6_0125F3F0 = 80; CursorWrap004D9478(); CHECK(G6_00D117A4 == 0 && G6_00D117A8 == 4);
     return 0;
 }
+static int test_p7(void) {
+    CHECK(MaskShift_00421C1D(0) == 8 && MaskShift_00421C1D(0xf800) == 3 && MaskShift_00421C1D(0x7e0) == 2);
+    InitIdentityPalette_0041D8E9(); CHECK(A_006017C0[5*4] == 5 && A_006017C0[5*4+3] == 2);
+    A_01146F20[0] = 1; A_01146F20[2*0x1c] = 0; CHECK(FindFreeEven_0048A4E6() == 2);
+    G8_0110B024 = 0; for (int i = 0; i < 0x1e; i++) memset(&A_01123302[i*0x28], 0, 4);
+    CHECK(FindOrAdd_004BB11F(77) == -1 && G8_0110B024 == 1);
+    G8_00DBB450 = 0; AddUnique_004C1F9B(5); AddUnique_004C1F9B(5); AddUnique_004C1F9B(6); CHECK(G8_00DBB450 == 2);
+    G8_0110E144 = 7; ResetSlots_004AB712(); CHECK(G8_0110E144 == 0);
+    { uint8_t blk[0x60] = {0}; FillThresholds_004A6370(blk); int32_t v; memcpy(&v, blk + 0x18 + 4, 4); CHECK(v == 0x2aa + 0x40); memcpy(&v, blk + 0x18 + 32, 4); CHECK(v == 0x7fffffff); }
+    { const uint8_t *s = (const uint8_t*)"  12ab"; CHECK(SkipToIdentStart_004A596B(s) == s + 4); }
+    { float a[5] = {0,0,0,0,0}, b[5] = {10,20,30,0,40}, o[5]; Lerp4_00527885(a, b, 0.5f, o); CHECK(o[0] == 5 && o[2] == 15 && o[4] == 20); }
+    { float a[5] = {1,2,3,0,4}, b[5] = {1,1,1,0,1}; CHECK(Dot4_005270BD(a, b) == 10); }
+    G8_00D17B0C = 99; { uint32_t p3[3] = {1,2,3}; PushEntry_004CC784(p3, 7, 8); } CHECK(G8_00D17B0C == 100 && A_00D132C0[99*0x48 + 0x10] == 7);
+    G8_00B20344 = 0; { int32_t m1 = -1; for (int i = 0; i < 4; i++) memcpy(&A_00B20330[i*4], &m1, 4); } SetFirstFree_004D6190(9); { int32_t v; memcpy(&v, &A_00B20330[0], 4); CHECK(v == 9); }
+    { int32_t o[3] = {0,0,0}; (void)o; }
+    return 0;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6();
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7();
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
