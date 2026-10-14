@@ -50,6 +50,7 @@ void re_install_all(void) {
     re_hook(0x00404f14, (void*)MenuToggleOptBDFA54, "MenuToggleOptBDFA54");
     re_hook(0x00404f2d, (void*)MenuToggleOptB87E9C, "MenuToggleOptB87E9C");
     re_hook(0x00404f46, (void*)MenuToggleOptBDFA58, "MenuToggleOptBDFA58");
+    re_hook(0x00404ffe, (void*)MenuCallAction40CD17, "MenuCallAction40CD17");
     re_hook(0x00407c42, (void*)MenuReturnOne, "MenuReturnOne");
     re_hook(0x00404f5f, (void*)MenuStateSetFour, "MenuStateSetFour");
     re_hook(0x004c379d, (void*)GetWaypointForFrame, "GetWaypointForFrame");

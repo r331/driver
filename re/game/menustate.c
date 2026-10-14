@@ -20,3 +20,4 @@ int MenuToggleOptB87E9C(void) { MenuOptB87E9C ^= 1; MenuRefresh(); return 0; }
 GAME_VAR_DEF(int32_t, MenuOptBDFA58, 0x00bdfa58)
 int MenuToggleOptBDFA58(void) { MenuOptBDFA58 ^= 1; MenuRefresh(); return 0; }
 int MenuReturnOne(void) { return 1; }
+int MenuCallAction40CD17(void) { MenuAction40CD17(); return 1; }

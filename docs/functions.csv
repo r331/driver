@@ -1100,7 +1100,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00404f5f,FUN_00404f5f,MenuStateSetFour,manual,MenuState,,,17,ported
 00404f70,FUN_00404f70,,,,,,62,todo
 00404fae,FUN_00404fae,,,,,,80,todo
-00404ffe,FUN_00404ffe,,,,,,15,todo
+00404ffe,FUN_00404ffe,MenuCallAction40CD17,manual,MenuState,,,15,ported
 0040500d,FUN_0040500d,,,,,,71,todo
 00405450,FUN_00405450,,,,,,408,todo
 004055e8,FUN_004055e8,,,,,,1238,todo

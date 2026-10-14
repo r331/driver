@@ -45,3 +45,4 @@ extern int32_t MenuOptBDFA58;
 #endif
 int MenuToggleOptBDFA58(void); /* 00404f46 */
 int MenuReturnOne(void); /* 00407c42 */
+int MenuCallAction40CD17(void); /* 00404ffe */
