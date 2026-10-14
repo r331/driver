@@ -69,3 +69,5 @@ v0.5: +7 (29 всего): DirectorStorage.c — ReadDirectorData, ReadCameraChun
 v0.32: +53 простые UI-функции (game/uihandlers4.c: сеттеры, переключатели, инкремент/декремент меню). Всего перенесено 381.
 
 v0.33: +50 пустых функций (game/noop.c, NoopFn<адрес>). Всего перенесено 431.
+
+v0.34: +24 пустых функций (push/pop ebp; ret) в noop.c. Всего перенесено 455.
