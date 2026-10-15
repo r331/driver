@@ -232,7 +232,8 @@
     V(Call004D9663, 0x004d9663, (void), ()) \
     V(Call004C1B6C, 0x004c1b6c, (int32_t a0), (a0)) \
     R(int32_t, Call004EC91E, 0x004ec91e, (const char* a0), (a0)) \
-    V(SetDirectorMode_004C875D, 0x004c875d, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
+    V(Call0052E180, 0x0052e180, (uint32_t a0), (a0)) \
+    V(Call005243EB, 0x005243eb, (void), ()) \
     V(Call004C2042, 0x004c2042, (void), ()) \
     V(Call004C0218, 0x004c0218, (int32_t a0), (a0)) \
     R(int32_t, Call00475A3D, 0x00475a3d, (void *src, void *dst), (src, dst)) \

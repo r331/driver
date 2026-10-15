@@ -1,4 +1,5 @@
 #include "ported11.h"
+#include "ported29.h"
 GAME_VAR_DEF(int32_t, P11_00b87e7c, 0x00b87e7c)
 GAME_VAR_DEF(int32_t, P11_005c6760, 0x005c6760)
 GAME_VAR_DEF(int32_t, P11_01271060, 0x01271060)
@@ -136,7 +137,7 @@ void ResolveTable_004FE830(void) {
 }
 
 void BackOrDirector_005103C4(void) {
-  if (P11_00d11934 == 0) G6Call0050E940(0); else SetDirectorMode_004C875D(0xf, 0, 0);
+  if (P11_00d11934 == 0) G6Call0050E940(0); else SetDirectorMode(0xf, 0, 0);
 }
 
 void SwitchPanel_005104B9(void) {
@@ -158,7 +159,7 @@ void SwitchPanel_0051069E(void) {
 }
 
 void ResetDirector_00522306(void) {
-  Call004C64BD(); Call004C372A(); SetDirectorMode_004C875D(0, 0, 0);
+  Call004C64BD(); Call004C372A(); SetDirectorMode(0, 0, 0);
 }
 
 void InitChannels_0052436A(void) {

@@ -17,6 +17,7 @@
 #include "../../game/ported26.h"
 #include "../../game/ported27.h"
 #include "../../game/ported28.h"
+#include "../../game/ported29.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1182,6 +1183,7 @@ void re_install_all(void) {
     re_hook(0x004d8c80, (void*)P27_MemLeakReport, "P27_MemLeakReport");
     re_hook(0x004c17ae, (void*)P27_LoadDentTextures, "P27_LoadDentTextures");
     re_hook(0x004ec58a, (void*)P28_LoadEventModels, "P28_LoadEventModels");
+    re_hook(0x004c875d, (void*)SetDirectorMode, "SetDirectorMode");
     re_hook(0x004bfc30, (void*)P28_LoadCarModels, "P28_LoadCarModels");
     re_hook(0x005281b0, (void*)P25_TimersInit, "P25_TimersInit");
     re_hook(0x005281e1, (void*)P25_TimersShutdown, "P25_TimersShutdown");

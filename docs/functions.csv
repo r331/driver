@@ -2444,7 +2444,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c812e,FUN_004c812e,FreeDirectorData,manual,Director,,,15,ported
 004c813d,FUN_004c813d,HandleDirector,debug_string,,,,468,named
 004c862f,FUN_004c862f,,,,,,73,todo
-004c875d,FUN_004c875d,SetDirectorMode,debug_string,,,,155,named
+004c875d,FUN_004c875d,SetDirectorMode,manual,Director,,,155,ported
 004c8e9e,FUN_004c8e9e,BackupCameraState,manual,Director,,,52,ported
 004c8ed2,FUN_004c8ed2,DropCameraBackup,manual,Director,,,26,ported
 004c8eec,FUN_004c8eec,RestoreCameraBackup,manual,Director,,,39,ported

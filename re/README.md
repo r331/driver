@@ -34,6 +34,7 @@ Wine/CrossOver: `WINEDLLOVERRIDES="dinput=n,b" wine Game.exe`. Лог — re_dri
 
 ## Статус
 Перенесено 1322 функции (из ~3275 без CRT), отслеживается в docs/functions.csv (status=ported).
+v0.76: +1 функция (game/ported29.c): SetDirectorMode (004c875d) — переключатель 16 режимов режиссёра повторов, вызывает ported11 вместо заглушки. Всего 1323.
 v0.75: +2 функции (game/ported28.c): LoadEventModels (004ec58a), LoadCarModels (004bfc30; MessageBox через plat_message_box). Всего 1322.
 v0.74: +4 функции (game/ported27.c): ReadChunked (004d9596), LoadPalettes (004ec154), MemLeakReport (004d8c80, MessageBox → plat_message_box), LoadDentTextures (004c17ae). Всего 1320.
 v0.73: +6 функций (game/ported26.c, шаг C платформенного слоя): WaveSetVolume (waveOutSetVolume), ErrorInLine/FindWheelModels (MessageBox), LogTime (GetSystemTime), RandomFx (timeGetTime), FindCdDrive (GetLogicalDriveStrings/GetDriveTypeA). Новое в plat.h: plat_message_box, plat_utc_hms, plat_wave_set_volume, plat_cd_roots. Всего 1316.

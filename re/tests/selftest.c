@@ -31,6 +31,7 @@
 #include "../game/ported26.h"
 #include "../game/ported27.h"
 #include "../game/ported28.h"
+#include "../game/ported29.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -608,6 +609,23 @@ static int test_p28(void) {
   if (P28_CarClean[0] != 0 || P28_CarLow[0] != P28_CarClean[0] || P28_CarOpsSize[3] != 0) f++;
   return f;
 }
+static int test_p29(void) {
+  int f = 0;
+  P29_Mode = 7; DirectorLastFrame = 10; DirectorUnk6C = 0; DirectorBuffer = NULL;
+  if (SetDirectorMode(1, 5, 9) != 7) f++;
+  if (P29_Mode != 1 || P29_Param != 9 || DirectorUnk7C != 5 || DirNodeTable != (DIR_NODE *)DirTableA || P29_FlagA8 != 1 || G6_00B87EFC != 1) f++;
+  SetDirectorMode(1, -1, 0); if (DirectorUnk7C != 1) f++;
+  if (SetDirectorMode(8, 0, 0) != 1 || P29_Flag9C != 1 || P29_Flag98 != 1 || DirUseDI != 0) f++;
+  SetDirectorMode(9, 0, 0); if (P29_Flag98 != 0 || P29_Mode != 9) f++;
+  SetDirectorMode(4, 0, 0); if (P29_Mode != 4 || DirNodeTable != (DIR_NODE *)DirTableB || DirectorUnk7C != 0x1b || DirUseDI != 1) f++;
+  SetDirectorMode(15, 0, 0); if (P29_Mode != 15 || DirIndicatorOn != 1 || DirectorUnk84 != 2 || DirNodeTable != NULL) f++;
+  DirectorLastFrame = 0;     /* кадров нет: режимы 3..5 переходят в 1 */
+  SetDirectorMode(3, 0, 0); if (P29_Mode != 1 || DirectorUnk7C != 2) f++;
+  SetDirectorMode(5, 0, 0); if (P29_Mode != 1 || DirectorUnk7C != 4) f++;
+  SetDirectorMode(0xb, 0, 0); if (P29_Mode != 0) f++;
+  P29_Mode = 3; SetDirectorMode(99, 0, 0); if (P29_Mode != 3) f++;
+  return f;
+}
 static int test_p26(void) {
   int f = 0;
   P26_WaveSetVolume(0x8000); if (plat_wave_volume() != 0x80008000u) f++;
@@ -629,7 +647,7 @@ static int test_p26(void) {
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
