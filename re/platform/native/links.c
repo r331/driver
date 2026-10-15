@@ -83,6 +83,7 @@
 #include "../../game/ported92.h"
 #include "../../game/ported93.h"
 #include "../../game/ported94.h"
+#include "../../game/ported95.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -150,6 +151,7 @@ void P55_Fn4264A7 (void) { Ui004264A7(); }
 void N54_Fn4913CC (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4) { P75_TrafficPos(a0, a1, a2, a3, a4); }
 int32_t P53_Fn40EFD5 (void) { return (int32_t)P74_KeyScan(); }
 int32_t P53_Fn4045E0 (void) { return (int32_t)P57_Menu4045E0(); }
+void P52_Fn4AB808 (void) { P95_PoolIconInit(); }
 void P52_Fn4AB95C (void) { P94_IconQuad(); }
 void P52_Fn5173D7 (float a0, float a1, int32_t a2, int32_t a3, int32_t a4) { P73_Text(a0, a1, a2, a3, a4); }
 int32_t P52_Fn405F6F (int32_t a0, void *a1) { return (int32_t)P64_ReplayStart(a0, a1); }
@@ -161,6 +163,7 @@ void P47_Fn405BFA (void) { P58_SaveConfig(); }
 int32_t P47_Fn406199 (int32_t a0) { return (int32_t)P70_LoadReplay(a0); }
 void N14_Fn4D6C5A (void) { P75_BgSound(); }
 void N14_Fn4D6DAC (void) { P75_CarSound(); }
+void N14_Fn4D6EF2 (void) { P95_AmbientTick(); }
 void N14_Fn4D2ADE (int32_t a0) { AddClamp4095_004D2ADE(a0); }
 void N14_Fn4A7EE9 (int32_t a0) { SetVarD1193C(a0); }
 void N14_Fn48A627 (void) { P12_Fn0048A627(); }
@@ -277,6 +280,9 @@ void G6Call0050E940 (int32_t a0) { SetLatchValue0050E940(a0); }
 void G6Call00418119 (int32_t a0) { Ui00418119(a0); }
 void G6Call00417CBB (void) { P45_PickColor(); }
 void G6Call004A2B70 (void) { ResetSlots_004A2B70(); }
+void G6Call004BA457 (void) { P95_SortObjA(); }
+void G6Call004BA57A (void) { P95_SortObjC(); }
+void G6Call004BA64D (void) { P95_SortObjB(); }
 void G6Call004D614A (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { P46_SetBounds(a0, a1, a2, a3); }
 void G6Call00426580 (int32_t a0) { P12_Fn00426580(a0); }
 void G6Call00516EB4 (int32_t a0, int32_t a1, int32_t a2) { SetRGB00516EB4(a0, a1, a2); }

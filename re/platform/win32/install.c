@@ -83,6 +83,7 @@
 #include "../../game/ported92.h"
 #include "../../game/ported93.h"
 #include "../../game/ported94.h"
+#include "../../game/ported95.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1781,4 +1782,24 @@ void re_install_all(void) {
     re_hook(0x004e5284, (void*)P94_FadeStep, "P94_FadeStep");
     re_hook(0x004ab95c, (void*)P94_IconQuad, "P94_IconQuad");
     re_hook(0x00507672, (void*)P94_MapToScreen, "P94_MapToScreen");
+    re_hook(0x004d2500, (void*)P95_SndInit, "P95_SndInit");
+    re_hook(0x004d29e1, (void*)P95_SndTrigger, "P95_SndTrigger");
+    re_hook(0x00405450, (void*)P95_ResetRace, "P95_ResetRace");
+    re_hook(0x004e5d64, (void*)P95_SeqMatch, "P95_SeqMatch");
+    re_hook(0x004ba57a, (void*)P95_SortObjC, "P95_SortObjC");
+    re_hook(0x004ba64d, (void*)P95_SortObjB, "P95_SortObjB");
+    re_hook(0x004ba457, (void*)P95_SortObjA, "P95_SortObjA");
+    re_hook(0x004c5f69, (void*)P95_SlotAt, "P95_SlotAt");
+    re_hook(0x004d6ef2, (void*)P95_AmbientTick, "P95_AmbientTick");
+    re_hook(0x004c08bb, (void*)P95_InitDebris, "P95_InitDebris");
+    re_hook(0x004ab808, (void*)P95_PoolIconInit, "P95_PoolIconInit");
+    re_hook(0x0040b0fe, (void*)P95_TextWidthCur, "P95_TextWidthCur");
+    re_hook(0x00507de2, (void*)P95_MapRotate, "P95_MapRotate");
+    re_hook(0x0049f418, (void*)P95_CamFromQuat, "P95_CamFromQuat");
+    re_hook(0x0048f6c1, (void*)P95_CountNear, "P95_CountNear");
+    re_hook(0x004d65fa, (void*)P95_NearestTwo, "P95_NearestTwo");
+    re_hook(0x00405abe, (void*)P95_DefaultOptions, "P95_DefaultOptions");
+    re_hook(0x00509d27, (void*)P95_DrawLineRGB, "P95_DrawLineRGB");
+    re_hook(0x004d0f28, (void*)P95_ScriptTurn, "P95_ScriptTurn");
+    re_hook(0x00507310, (void*)P95_DrawCross, "P95_DrawCross");
 }
