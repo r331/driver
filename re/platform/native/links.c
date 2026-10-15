@@ -86,6 +86,7 @@
 #include "../../game/ported95.h"
 #include "../../game/ported96.h"
 #include "../../game/ported97.h"
+#include "../../game/ported98.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -168,6 +169,7 @@ void P47_Fn4D90F4 (const char *a0) { P96_LogLine(a0); }
 int32_t P47_Fn40A3A0 (void) { return (int32_t)P57_Menu40A3A0(); }
 void P47_Fn405BFA (void) { P58_SaveConfig(); }
 int32_t P47_Fn406199 (int32_t a0) { return (int32_t)P70_LoadReplay(a0); }
+void N14_Fn4CB4FF (int32_t a0, int32_t a1, int32_t a2) { P98_LampColor(a0, a1, a2); }
 void N14_Fn4FBA23 (const uint8_t* a0) { P96_ClockText(a0); }
 void N14_Fn4D6C5A (void) { P75_BgSound(); }
 void N14_Fn4D6DAC (void) { P75_CarSound(); }
@@ -209,6 +211,7 @@ void Call00424921 (int32_t a0, int32_t a1, uint32_t a2, int32_t a3) { P47_TexTab
 void Call0048A525 (int32_t a0) { P76_MarkSlots(a0); }
 void Call0048A68E (int32_t a0) { Dispatch0048A68E(a0); }
 void Call004B9D79 (void) { P16_StepParticles(); }
+void Call004911D9 (void) { P98_TrafficSpin(); }
 void Call0050F289 (void) { P55_StopAudio(); }
 void Call004D6190 (int32_t a0) { SetFirstFree_004D6190(a0); }
 void Call00493ECE (int32_t a0) { P74_FreeTraffic(a0); }
@@ -264,6 +267,7 @@ void MenuAction40CD17 (void) { P57_MenuDone(); }
 void MenuRefresh (void) { P54_MenuTexSel(); }
 void Call004076E2 (void) { MenuWhite004076E2(); }
 void * FindCameraRecordForFrame (int frame) { return (void *)FindCameraForFrame(frame); }
+void InitNewCamera (void *cam) { P98_CamClamp(cam); }
 void DrawSprite (int x, int y, uint32_t tex, int a, int b, int c, int d, int e) { P70_ShadowText(x, y, tex, a, b, c, d, e); }
 int IsKeyDown (int sc) { return (int)IsFlagSetNotMasked_004E383A(sc); }
 void Call00411A9D (void) { MenuHiliteWhite00411A9D(); }
@@ -316,6 +320,7 @@ void Call00421A39 (void) { P57_ResetTexNodes(); }
 void Call0052434A (int32_t a0) { SlotSetOff0052434A(a0); }
 void Call004D9663 (void) { P96_LoadBar(); }
 void Call005243EB (void) { P48_FadeEnd(); }
+void Call004C2042 (void) { P98_ClearCarData(); }
 int32_t Call00475A3D (void *src, void *dst) { return (int32_t)P79_Convert(src, dst); }
 void Call00427757 (void *m) { P79_Relocate(m); }
 void Call0042793F (void *m, int32_t a1) { P79_Radius(m, a1); }
@@ -325,3 +330,4 @@ void SetCameraPosition (float x, float y, float z) { PushVec3_00523C99(x, y, z);
 void P46_Fn4D6354 (void) { P53_StepBounds(); }
 void P46_Fn51BE3C (void) { P58_BuildBlockIndex(); }
 void P58_Fn4185D2 (uint32_t tbl, int32_t a1, uint32_t tbl2) { P97_MenuCall2(tbl, a1, tbl2); }
+void P58_Fn51763A (const char *a0, int32_t a1) { P98_LoadLang(a0, a1); }

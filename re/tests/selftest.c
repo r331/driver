@@ -101,6 +101,7 @@
 #include "../game/ported95.h"
 #include "../game/ported96.h"
 #include "../game/ported97.h"
+#include "../game/ported98.h"
 #include "../game/reptr.h"
 #include <math.h>
 #include <stdio.h>
@@ -663,10 +664,10 @@ static int test_p28(void) {
   /* события: старые записи освобождаются, файл с нулевым числом моделей */
   FILE *tf = tmpfile(); if (!tf) return 1;
   int32_t zero = 0; fwrite(&zero, 4, 1, tf); rewind(tf);
-  P28_EventCount = 2; P28_EventModels[0] = DebugMalloc(16, "t", 1); P28_EventModels[1] = NULL;
+  P28_EventCount = 2; P28_EventModels[0] = re_addr(DebugMalloc(16, "t", 1)); P28_EventModels[1] = 0;
   P27_ReadBytes = 0; P27_ReadLimit = 0x7fffffff; P27_ProgressOn = 0;
   P28_LoadEventModels(tf);
-  if (P28_EventCount != 0 || P28_EventModels[0] != NULL) f++;
+  if (P28_EventCount != 0 || P28_EventModels[0] != 0) f++;
   fclose(tf);
   /* машины: имена не найдены -> сообщения «ERROR IN _LEVEL_ DATA», блоки таблиц копируются */
   const char *tx, *ti; int n0 = plat_message_box_last(&tx, &ti);
@@ -1444,7 +1445,7 @@ static int test_p45(void) {
   P45_Col0 = 11; P45_Col1 = 12; P45_Col2 = 13; P45_Col3 = 14; P45_Col4 = 15;
   P45_Pick = 3; P45_PickColor(); CK(P45_Color == 14);
   P45_Pick = 9; P45_Color = 99; P45_PickColor(); CK(P45_Color == 99);
-  P45_Wait(5, 6); CK(P45_PtrB == 5 && P45_PtrA == 6 && P45_Busy == 0 && P45_Step == 0);
+  { static int16_t its[10] = { 0, 0, 0, 0, 4 }; P45_Wait(re_addr(its), 6); CK(P58_ItemList == its && P45_PtrA == 6 && P45_Busy == 0 && P45_Step == 0); P58_ItemList = NULL; }
 #undef CK
   return f;
 }
@@ -2405,7 +2406,7 @@ static int test_p65(void) {
   strcpy(nm, "gamma"); CK(P65_FindByName(nm, &tab) == -1);
   CK(P65_FindByName(NULL, &tab) == -1);
   /* имя в меню */
-  P65_Str[0x40] = "NONE"; P65_Str[0xc] = "BG0"; P65_Str[0x41] = "PAD"; P65_Str[2] = "BG2"; P65_Str[1] = "BG1";
+  P97_StrAddr[0x40] = re_addr("NONE"); P97_StrAddr[0xc] = re_addr("BG0"); P97_StrAddr[0x41] = re_addr("PAD"); P97_StrAddr[2] = re_addr("BG2"); P97_StrAddr[1] = re_addr("BG1");
   Q0057B72C = 0; P65_SetNameFields();
   CK(P35_InputMode == 0 && strcmp(P65_NamePtr, "NONE") == 0 && strcmp(P65_NameBg, "BG0") == 0);
   Q0057B72C = 3; Q00B87EF0 = 1; P65_SetNameFields();
@@ -3880,6 +3881,75 @@ static void p95_line(const float *a, const float *b) { p95_lines++; p95_lx[0] = 
 static int p95_st, p95_bl;
 static void p95_state(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e) { (void)a; (void)b; (void)c; (void)d; (void)e; p95_st++; }
 static void p95_blend(int32_t a, int32_t b, int32_t c, int32_t d) { (void)a; (void)b; (void)c; (void)d; p95_bl++; }
+static uint16_t rd16t(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
+static void wr16t(void *p, uint16_t v) { memcpy(p, &v, 2); }
+static int32_t rd32t(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
+static void wr32t(void *p, int32_t v) { memcpy(p, &v, 4); }
+#undef CK
+#define CK(c) do { if (!(c)) { fprintf(stderr, "p98 fail line %d: %s\n", __LINE__, #c); f = 1; } } while (0)
+static int test_p98(void) {
+  int f = 0;
+  { int32_t a0 = P27_MemAllocated, f0 = P27_MemFreed;   /* 004d8db4 / 004d8f30 */
+    uint8_t *p = (uint8_t *)P98_DebugMalloc(10, "x.c", 7);
+    CK(p != NULL && p[0] == 0 && p[9] == 0 && memcmp(p + 10, "NAIF", 4) == 0 && P27_MemAllocated == a0 + 10);
+    int32_t slot = -1; for (int32_t i = 0; i < 0x1000; i++) if (P27_MemTab[i * 3] == re_addr(p)) { slot = i; break; }
+    CK(slot >= 0 && P27_MemTab[slot * 3 + 1] == 10 && strcmp((const char *)re_ptr(P27_MemTab[slot * 3 + 2]), "File: x.c (Line: 7)") == 0);
+    P98_DebugFree(p); CK(slot >= 0 && P27_MemTab[slot * 3] == 0 && P27_MemFreed == f0 + 10); }
+  { uint8_t *n = (uint8_t *)DebugMalloc(0x24, "t", 1), *o = (uint8_t *)DebugMalloc(0x60, "t", 2), *base = (uint8_t *)DebugMalloc(8, "t", 3);   /* 004d0102 */
+    memset(n, 0, 0x24); memset(o, 0, 0x60); re_wr_ptr(n + 0x1c, o); re_wr_ptr(o + 0x50, base);
+    P15_ListHead = n; P28_EventCount = 0; P98_ScriptFreeAll(); CK(P15_ListHead == NULL && P28_EventCount == 0); }
+  { P98_CreditsInit();   /* 004a9850 */
+    CK(P98_Credits[0].y == 0x1e0 && P98_Credits[1].y == 0x1e0 + 74 && P98_Credits[2].y == 0x1e0 + 74 + 54 && P98_Faces[2].id == 0xffff && P98_FaceCur == 0);
+    CK(strcmp((const char *)re_ptr(P98_FaceNames[0]), "MARTIN") == 0 && strcmp((const char *)re_ptr(P98_FaceNames[3]), "STEVEB") == 0);
+    uint8_t rec[4] = { 0, 0xff, 0, 0 }; P98_Faces[1].id = 0xff; CK(P98_CreditsFace(rec) == 1 && P98_FaceCur == 0); P98_Faces[1].id = 0xffff; }
+  { int32_t sv = P22_DevReady, tv = P22_TexVarA, cv; P22_DevReady = 1; P22_TexVarA = 32; cv = P33_Count[32];   /* 0041e52c */
+    static int32_t q[4 * 15]; memset(q, 0, sizeof q); P98_QuadA(0, (const uint8_t *)q); CK(P33_Count[32] == cv + 6);
+    P98_QuadB(0, (const uint8_t *)q); CK(P33_Count[32] == cv + 12);
+    P33_Count[32] = cv; P22_DevReady = sv; P22_TexVarA = tv; }
+  { P98_M4658 = 3; P94_FadeVal = 5; P15_Vals9[8] = 7; P98_M4648 = 9; P98_ResetMission();   /* 004e49c0 */
+    CK(P98_M4658 == 0 && P94_FadeVal == 0 && P15_Vals9[8] == 0 && P98_M4640 == 0); }
+  { uint8_t sv[0x54 * 2]; memcpy(sv, TrafficRecs, sizeof sv);   /* 004911d9 */
+    memset(TrafficRecs, 0, sizeof sv); TrafficRecs[1] = 9; wr16t(&TrafficRecs[0x16], 0xffe); TrafficRecs[0x54 + 1] = 4;
+    int32_t a = G6_00B87EAC, b = P58_SB87EB0; G6_00B87EAC = 0; P58_SB87EB0 = 0; P98_DD70 = 1; P98_DDE4 = 0xf00;
+    P98_TrafficSpin(); CK(rd16t(&TrafficRecs[0x16]) == ((0xffe + 512) & 0xfff) && rd16t(&TrafficRecs[0x54 + 0x16]) == 0 && P98_DDE4 == ((0xf00 + 0x200) & 0xfff));
+    memcpy(TrafficRecs, sv, sizeof sv); G6_00B87EAC = a; P58_SB87EB0 = b; P98_DD70 = 0; }
+  { static uint8_t tab[4 + 100 * 0x34 + 0x1c8]; P98_InitSplash(tab);   /* 004cb857 */
+    CK(rd32t(tab + 4 + 99 * 4) == 99 && rd16t(tab + 5 * 0x34 + 0x1c6) == 5 && rd32t(tab) == 0); }
+  { P98_CarOpsC[0x27b600 - 1] = 1; P28_CarClean[3] = 5; P95_Deb0 = 2; P98_ClearCarData();   /* 004c2042 */
+    CK(P98_CarOpsC[0x27b600 - 1] == 0 && P28_CarClean[3] == 0 && P95_Deb0 == 0); }
+  { FILE *fp = fopen("p98_lang.txt", "wb"); if (fp) { fputs("Hello\r\nWorld\n", fp); fclose(fp); }   /* 0051763a */
+    uint32_t s2 = P97_StrAddr[2];
+    P98_LoadLang("p98_lang.txt", 0);
+    CK(strcmp((const char *)re_ptr(P97_StrAddr[0]), "Hello") == 0 && strcmp((const char *)re_ptr(P97_StrAddr[1]), "World") == 0);
+    P98_LoadLang("p98_missing.txt", 1); CK(strcmp((const char *)re_ptr(P98_MisStr[5]), "Mission.? missing!") == 0);
+    remove("p98_lang.txt"); P97_StrAddr[2] = s2; }
+  { int32_t a = G6_00B5A8A0, b = P47_CamB; G6_00B5A8A0 = 0; P47_CamB = 0; P59_Mode1137324 = 2; P61_V10b = 77; P62_Frame = 123;   /* 00519a45 */
+    P98_CamRecAdd(0); CK(rd32t(P98_CamRecs) == 123 && P98_CamRecs[4] == 2 && rd32t(P98_CamRecs + 0x20) == 77 && P47_CamB == 1 && P52_ResetA == 1);
+    G6_00B5A8A0 = a; P47_CamB = b; P59_Mode1137324 = 0; }
+  { int32_t cam[0x20]; memset(cam, 0, sizeof cam); P59_PosX = 0; P59_PosZ = 0; cam[0x13] = 20000; cam[0] = 0;   /* 004c32c1 */
+    CK(P98_CamClamp(cam) == 1 && cam[2] == 15000 && cam[3] == 15000); }
+  { static int16_t pp[0x50]; memset(pp, 0, sizeof pp); float x = 50.0f, z = 0.0f; memcpy((uint8_t *)pp + 0x84, &x, 4); memcpy((uint8_t *)pp + 0x8c, &z, 4);   /* 00514a47 */
+    P59_PosX = 0; P59_PosZ = 0; P98_D078C8 = 1; P98_PartAim(pp); CK(rd32t((uint8_t *)pp + 0x4c) == 10); P98_D078C8 = 0; }
+  { int32_t pos[3] = { 10, 20, 30 }; int32_t a = G6_00B91CF4, b = G00575F40; G6_00B91CF4 = 1; G00575F40 = 1;   /* 005240d0 */
+    P48_Slot sv = P48_Snd[3]; P48_Snd[3].flags = 0x21; P48_Snd[3].defVol = -500; P48_VolTab[9500] = 1234;
+    P98_VoicePos(3, pos, 7, 0x7fff);
+    float fy; memcpy(&fy, P48_Snd[3].data + 4, 4);
+    CK(P48_Snd[3].flags == (0x01 | 0xe) && fy == -20.0f && P48_Snd[3].vol == -500 && P48_Snd[3].scaled == 1234 && rd32t(P48_Snd[3].data + 0x24) == 7);
+    P48_Snd[3] = sv; G6_00B91CF4 = a; G00575F40 = b; }
+  { static uint8_t wav[12 + 8 + 16 + 8 + 4]; memcpy(wav, "RIFF", 4); wr32t(wav + 4, sizeof wav - 8); memcpy(wav + 8, "WAVE", 4);   /* 0048c5b7 */
+    memcpy(wav + 12, "fmt ", 4); wr32t(wav + 16, 16); memcpy(wav + 36, "data", 4); wr32t(wav + 40, 4);
+    const void *fm, *da; uint32_t sz; CK(P98_RiffFind(wav, &fm, &da, &sz) == 1 && fm == wav + 20 && da == wav + 44 && sz == 4);
+    memcpy(wav, "RIFX", 4); CK(P98_RiffFind(wav, &fm, &da, &sz) == 0 && fm == NULL); }
+  { static uint8_t dev[0x548]; wr32t(dev + 0x538, 0xf800); wr32t(dev + 0x53c, 0x7e0); wr32t(dev + 0x540, 0x1f); wr32t(dev + 0x544, 0);   /* 00421a80 */
+    uint8_t *sd = P32_DevInfo; P32_DevInfo = dev; P98_PixTabInit(); P32_DevInfo = sd;
+    CK(P98_PixTab[0x7fff] == 0xffdf && P98_PixTab[0x8000] == 0xff && P98_PixTab[0x001f] == 0x001f && P98_PixTab[0x0400] == 0x0800); }
+  { uint8_t sv[0x8c]; memcpy(sv, &DirectorCam, 0x8c); uint8_t *c = (uint8_t *)&DirectorCam;   /* 004c2b9a */
+    wr32t(c + 0x7c, 0x00100500); P29_Flag94 = 0; P98_DirCamKeys(4); CK(rd16t(c + 0x7c) == 0x400 && rd32t(c + 0x18) == 0x10 && rd32t(c + 0x20) == 0x400);
+    memcpy(&DirectorCam, sv, 0x8c); }
+  { D_00b87e30 = 0; P98_DrawSix(); P94_IconRec = NULL; P98_IconN = 3; P98_IconFlush(); CK(P98_IconN == 0);   /* 004ba720 / 004b4095 */
+    int16_t *sl = P58_ItemList; static int16_t items[20] = { 1, 2, 0, 0, 8 }; items[14] = 4; P58_ItemList = items; P98_ItemsDraw(); P58_ItemList = sl; }
+  return f;
+}
 #undef CK
 #define CK(c) do { if (!(c)) { fprintf(stderr, "p97 fail line %d: %s\n", __LINE__, #c); f = 1; } } while (0)
 static int p97_menu_hits[3];
@@ -4698,7 +4768,7 @@ static int test_p86(void) {
 
 int re_selftest(void) {
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

@@ -86,6 +86,7 @@
 #include "../../game/ported95.h"
 #include "../../game/ported96.h"
 #include "../../game/ported97.h"
+#include "../../game/ported98.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1859,4 +1860,34 @@ void re_install_all(void) {
     re_hook(0x004afcf7, (void*)P97_SpawnSmoke, "P97_SpawnSmoke");
     re_hook(0x004ad128, (void*)P97_KickDebris, "P97_KickDebris");
     re_hook(0x004e5a1a, (void*)P97_FadeIconDraw, "P97_FadeIconDraw");
+    re_hook(0x004d8f30, (void*)P98_DebugFree, "P98_DebugFree");
+    re_hook(0x004d8db4, (void*)P98_DebugMalloc, "P98_DebugMalloc");
+    re_hook(0x004d0102, (void*)P98_ScriptFreeAll, "P98_ScriptFreeAll");
+    re_hook(0x004a9850, (void*)P98_CreditsInit, "P98_CreditsInit");
+    re_hook(0x004a9cd0, (void*)P98_CreditsFace, "P98_CreditsFace");
+    re_hook(0x004b4095, (void*)P98_IconFlush, "P98_IconFlush");
+    re_hook(0x004ba720, (void*)P98_DrawSix, "P98_DrawSix");
+    re_hook(0x0041e52c, (void*)P98_QuadA, "P98_QuadA");
+    re_hook(0x0041e729, (void*)P98_QuadB, "P98_QuadB");
+    re_hook(0x004e49c0, (void*)P98_ResetMission, "P98_ResetMission");
+    re_hook(0x004911d9, (void*)P98_TrafficSpin, "P98_TrafficSpin");
+    re_hook(0x004cb857, (void*)P98_InitSplash, "P98_InitSplash");
+    re_hook(0x004c2042, (void*)P98_ClearCarData, "P98_ClearCarData");
+    re_hook(0x0049ec01, (void*)P98_CamSpline, "P98_CamSpline");
+    re_hook(0x0051763a, (void*)P98_LoadLang, "P98_LoadLang");
+    re_hook(0x004cb4ff, (void*)P98_LampColor, "P98_LampColor");
+    re_hook(0x00519a45, (void*)P98_CamRecAdd, "P98_CamRecAdd");
+    re_hook(0x004ea346, (void*)P98_DrawMarker, "P98_DrawMarker");
+    re_hook(0x004c32c1, (void*)P98_CamClamp, "P98_CamClamp");
+    re_hook(0x004c6740, (void*)P98_DirCamNext, "P98_DirCamNext");
+    re_hook(0x00514a47, (void*)P98_PartAim, "P98_PartAim");
+    re_hook(0x004fc3f4, (void*)P98_DrawScriptModels, "P98_DrawScriptModels");
+    re_hook(0x004d7766, (void*)P98_FreeCamKeys, "P98_FreeCamKeys");
+    re_hook(0x005240d0, (void*)P98_VoicePos, "P98_VoicePos");
+    re_hook(0x0040cd6f, (void*)P98_ItemsDraw, "P98_ItemsDraw");
+    re_hook(0x0048c5b7, (void*)P98_RiffFind, "P98_RiffFind");
+    re_hook(0x00421a80, (void*)P98_PixTabInit, "P98_PixTabInit");
+    re_hook(0x004f5012, (void*)P98_ScriptRange, "P98_ScriptRange");
+    re_hook(0x0051564f, (void*)P98_PartCheck, "P98_PartCheck");
+    re_hook(0x004c2b9a, (void*)P98_DirCamKeys, "P98_DirCamKeys");
 }

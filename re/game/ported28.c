@@ -1,6 +1,7 @@
 /* Загрузка моделей событий и машин уровня — восстановлено из Game.exe. */
 #include "ported28.h"
 #include "ported79.h"
+#include "reptr.h"
 #include "ported6.h"
 #include "ported20.h"
 #include "ported27.h"
@@ -34,7 +35,7 @@ void P28_LoadEventModels(void *file) {
   void *tmp = DebugMalloc(0x80000, MAP_C, 0x3d4);
   void *buf = DebugMalloc(0x80000, MAP_C, 0x3d5);
   for (int i = 0; i < P28_EventCount; i++) {
-    if (P28_EventModels[i] != NULL) { P79_EventFree(P28_EventModels[i]); P28_EventModels[i] = NULL; }
+    if (P28_EventModels[i] != 0) { P79_EventFree(re_ptr(P28_EventModels[i])); P28_EventModels[i] = 0; }
   }
   P27_ReadChunked(&P28_EventCount, 4, 1, file);
   for (int i = 0; i < P28_EventCount; i++) {
@@ -43,7 +44,7 @@ void P28_LoadEventModels(void *file) {
     P27_ReadChunked(tmp, sz, 1, file);
     sz = Call00475A3D(tmp, buf);
     void *m = P79_EventAlloc(sz);
-    P28_EventModels[i] = m;
+    P28_EventModels[i] = re_addr(m);
     if (m == NULL) {
       P28_EventCount = 0;
       plat_message_box(MAIN_HWND, "Not enogh memory for event models!", "Memory Error!", 0x30);

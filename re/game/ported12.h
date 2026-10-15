@@ -328,12 +328,9 @@ extern int32_t P12_00c55034;
 #ifndef RE_HOOK_BUILD
 extern int32_t P12_00d044d0;
 #endif
-typedef uint32_t p12_00c55820_t[0x40];
+#include "strtab.h"
 #define g_00c55820 P12_00c55820
-#define P12_00c55820 GAME_VAR(p12_00c55820_t,P12_00c55820,0x00c55820)
-#ifndef RE_HOOK_BUILD
-extern p12_00c55820_t P12_00c55820;
-#endif
+#define P12_00c55820 P97_StrAddr   /* единая таблица строк 00c55820 */
 #define g_00c821a0 P12_00c821a0
 #define P12_00c821a0 GAME_VAR(int32_t,P12_00c821a0,0x00c821a0)
 #ifndef RE_HOOK_BUILD

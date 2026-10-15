@@ -10,7 +10,7 @@
 #include <stdint.h>
 /* Переключение вариантов меню, ожидание-прокрутка и цвет кнопки по уровню. */
 #define P45_Mode      GAME_VAR(int32_t, P45_Mode, 0x00b87e38)   /* код текущего пункта (0x2e..0x31 / 0x92..0x95) */
-#define P45_PtrB      GAME_VAR(uint32_t, P45_PtrB, 0x005f7e64)
+/* 005f7e64 — P58_ItemList (родной указатель; P45_Wait переводит адрес через re_ptr) */
 #define P45_PtrA      GAME_VAR(uint32_t, P45_PtrA, 0x005f7e40)
 #define P45_Busy      GAME_VAR(int32_t, P45_Busy, 0x005f7e44)
 #define P45_Step      GAME_VAR(int32_t, P45_Step, 0x005f7e48)
@@ -23,7 +23,7 @@
 #define P45_Col4      GAME_VAR(uint32_t, P45_Col4, 0x00c55a68)
 #ifndef RE_HOOK_BUILD
 extern int32_t P45_Mode, P45_Busy, P45_Step, P45_Pick;
-extern uint32_t P45_PtrB, P45_PtrA, P45_Color, P45_Col0, P45_Col1, P45_Col2, P45_Col3, P45_Col4;
+extern uint32_t P45_PtrA, P45_Color, P45_Col0, P45_Col1, P45_Col2, P45_Col3, P45_Col4;
 #endif
 int32_t P45_ModeA(void);                     /* 0040834f: код пункта -> вариант A (0x2e..0x31), перерисовка; 1 */
 int32_t P45_ModeB(void);                     /* 00408458: код пункта -> вариант B (0x92..0x95), перерисовка; 1 */

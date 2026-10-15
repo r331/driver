@@ -67,7 +67,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401177,thunk_FUN_004a2c08,Thunk_004A2C08,manual,Thunks,,,5,ported
 00401181,thunk_FUN_004ad128,,,,,,5,ported
 00401195,thunk_FUN_004bb060,,,,,,5,ported
-0040119f,thunk_FUN_004fc3f4,,,,,,5,todo
+0040119f,thunk_FUN_004fc3f4,,,,,,5,ported
 004011a4,thunk_FUN_004ac671,Thunk_004AC671,manual,Thunks,,,5,ported
 004011bd,thunk_FUN_004eca08,,,,,,5,ported
 004011c2,thunk_FUN_004b3fb1,,,,,,5,todo
@@ -90,7 +90,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401244,thunk_FUN_004ecee8,,,,,,5,ported
 00401249,thunk_FUN_004e3b3c,,,,,,5,ported
 0040124e,thunk_FUN_00524473,Thunk_00524473,manual,Thunks,,,5,ported
-00401253,thunk_FUN_00519a45,,,,,,5,todo
+00401253,thunk_FUN_00519a45,,,,,,5,ported
 00401258,thunk_FUN_00518d32,,,,,,5,todo
 00401262,thunk_FUN_0051718a,,,,,,5,ported
 00401267,thunk_FUN_004b33d8,,,,,,5,todo
@@ -168,8 +168,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040141f,thunk_FUN_004c375a,Thunk_004C375A,manual,Thunks,,,5,ported
 00401424,thunk_FUN_00426c06,,,,,,5,ported
 00401429,thunk_FUN_00411fd0,,,,,,5,ported
-0040142e,thunk_FUN_004c2042,,,,,,5,todo
-00401433,thunk_FUN_004d7766,,,,,,5,todo
+0040142e,thunk_FUN_004c2042,,,,,,5,ported
+00401433,thunk_FUN_004d7766,,,,,,5,ported
 0040143d,thunk_FUN_0049ed20,,,,,,5,ported
 00401442,thunk_FUN_004aad65,,,,,,5,ported
 00401447,thunk_FUN_0040c5be,,,,,,5,ported
@@ -206,7 +206,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401505,thunk_FUN_00502cee,,,,,,5,todo
 0040150a,thunk_FUN_0052436a,,,,,,5,ported
 00401514,thunk_FUN_0042da16,,,,,,5,todo
-0040151e,thunk_FUN_004a9850,,,,,,5,todo
+0040151e,thunk_FUN_004a9850,,,,,,5,ported
 00401523,thunk_FUN_004f57d7,,,,,,5,ported
 0040152d,thunk_FUN_004283d9,,,,,,5,ported
 00401537,thunk_FUN_0042486b,,,,,,5,ported
@@ -223,7 +223,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401578,thunk_FUN_004fe869,,,,,,5,todo
 0040157d,thunk_FUN_005012a3,Thunk_005012A3,manual,Thunks,,,5,ported
 00401582,thunk_FUN_004f2c9a,,,,,,5,todo
-00401587,thunk_FUN_0048c5b7,,,,,,5,todo
+00401587,thunk_FUN_0048c5b7,,,,,,5,ported
 0040158c,thunk_FUN_0048dddb,,,,,,5,todo
 00401591,thunk_FUN_005144d4,,,,,,5,ported
 00401596,thunk_FUN_00407cb8,,,,,,5,ported
@@ -242,7 +242,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004015d7,thunk_FUN_0041938a,,,,,,5,todo
 004015dc,thunk_FUN_004d8c80,,,,,,5,ported
 004015e1,thunk_FUN_004a58ad,,,,,,5,ported
-004015e6,thunk_FUN_004d8db4,,,,,,5,todo
+004015e6,thunk_FUN_004d8db4,,,,,,5,ported
 004015eb,thunk_FUN_004c96d6,Thunk_004C96D6,manual,Thunks,,,5,ported
 004015f0,thunk_FUN_004a2c12,Thunk_004A2C12,manual,Thunks,,,5,ported
 004015f5,thunk_FUN_0049f418,,,,,,5,ported
@@ -330,7 +330,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004017df,thunk_FUN_004e71dc,,,,,,5,ported
 004017e4,thunk_FUN_0048db8e,,,,,,5,ported
 004017e9,thunk_FUN_004e5011,,,,,,5,todo
-004017ee,thunk_FUN_004cb4ff,,,,,,5,todo
+004017ee,thunk_FUN_004cb4ff,,,,,,5,ported
 004017f8,thunk_FUN_0048f1c6,,,,,,5,ported
 00401802,thunk_FUN_00514e99,Thunk_00514E99,manual,Thunks,,,5,ported
 0040180c,thunk_FUN_0049cad4,,,,,,5,todo
@@ -338,7 +338,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401816,thunk_FUN_00424661,Thunk_00424661,manual,Thunks,,,5,ported
 0040181b,thunk_FUN_00428b69,,,,,,5,ported
 00401820,thunk_FUN_00407160,,,,,,5,ported
-00401825,thunk_FUN_004c6740,,,,,,5,todo
+00401825,thunk_FUN_004c6740,,,,,,5,ported
 0040182a,thunk_FUN_00527123,Thunk_00527123,manual,Thunks,,,5,ported
 0040182f,thunk_FUN_004a7e6e,,,,,,5,ported
 00401834,thunk_FUN_00426580,,,,,,5,ported
@@ -363,7 +363,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004018ac,thunk_FUN_0051bed5,,,,,,5,ported
 004018bb,thunk_FUN_004d9539,Thunk_004D9539,manual,Thunks,,,5,ported
 004018c0,thunk_FUN_0048edff,,,,,,5,todo
-004018d4,thunk_FUN_004ba720,,,,,,5,todo
+004018d4,thunk_FUN_004ba720,,,,,,5,ported
 004018d9,thunk_FUN_004a3a80,Thunk_004A3A80,manual,Thunks,,,5,ported
 004018de,thunk_FUN_004e3830,Thunk_004E3830,manual,Thunks,,,5,ported
 004018e3,thunk_FUN_004c3427,,,,,,5,todo
@@ -568,7 +568,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401e24,thunk_FUN_005139d7,,,,,,5,todo
 00401e29,thunk_FUN_004c0c6f,,,,,,5,todo
 00401e2e,thunk_FUN_00502779,Thunk_00502779,manual,Thunks,,,5,ported
-00401e38,thunk_FUN_004ea346,,,,,,5,todo
+00401e38,thunk_FUN_004ea346,,,,,,5,ported
 00401e42,thunk_FUN_004d1a89,Thunk_004D1A89,manual,Thunks,,,5,ported
 00401e47,thunk_FUN_00424921,,,,,,5,ported
 00401e4c,thunk_FUN_004282f8,,,,,,5,ported
@@ -579,7 +579,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401e79,thunk_FUN_00528e12,,,,,,5,ported
 00401e7e,thunk_FUN_00413d70,,,,,,5,ported
 00401e83,thunk_FUN_004d7f91,,,,,,5,todo
-00401e88,thunk_FUN_004f5012,,,,,,5,todo
+00401e88,thunk_FUN_004f5012,,,,,,5,ported
 00401e92,thunk_FUN_004b73f3,,,,,,5,todo
 00401e9c,thunk_FUN_00522369,,,,,,5,ported
 00401ea1,thunk_FUN_0040f0fb,,,,,,5,ported
@@ -649,7 +649,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040202c,thunk_FUN_0041a192,Thunk_0041A192,manual,Thunks,,,5,ported
 00402031,thunk_FUN_00413b00,,,,,,5,ported
 00402036,thunk_FUN_004e3769,,,,,,5,ported
-0040203b,thunk_FUN_004e49c0,,,,,,5,todo
+0040203b,thunk_FUN_004e49c0,,,,,,5,ported
 00402040,thunk_FUN_004ac726,Thunk_004AC726,manual,Thunks,,,5,ported
 00402045,thunk_FUN_004a1d31,Thunk_004A1D31,manual,Thunks,,,5,ported
 0040204a,thunk_FUN_004e625e,,,,,,5,ported
@@ -695,12 +695,12 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402158,thunk_FUN_0050e9ab,,,,,,5,ported
 0040215d,thunk_FUN_004c582f,,,,,,5,todo
 00402162,thunk_FUN_004bf452,Thunk_004BF452,manual,Thunks,,,5,ported
-0040216c,thunk_FUN_0049ec01,,,,,,5,todo
+0040216c,thunk_FUN_0049ec01,,,,,,5,ported
 00402176,thunk_FUN_004cb097,Thunk_004CB097,manual,Thunks,,,5,ported
 0040217b,thunk_FUN_004f388e,,,,,,5,todo
 00402180,thunk_FUN_004932d5,,,,,,5,todo
 00402185,thunk_FUN_004f4d3c,,,,,,5,todo
-0040218a,thunk_FUN_004c32c1,,,,,,5,todo
+0040218a,thunk_FUN_004c32c1,,,,,,5,ported
 00402194,thunk_FUN_004b0256,,,,,,5,todo
 00402199,thunk_FUN_00406199,,,,,,5,ported
 0040219e,thunk_FUN_004cff7e,,,,,,5,ported
@@ -712,7 +712,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004021c1,thunk_FUN_004c5499,,,,,,5,ported
 004021d0,thunk_FUN_004c3f8f,Thunk_004C3F8F,manual,Thunks,,,5,ported
 004021da,thunk_FUN_004b9e2b,Thunk_004B9E2B,manual,Thunks,,,5,ported
-004021df,thunk_FUN_004d0102,,,,,,5,todo
+004021df,thunk_FUN_004d0102,,,,,,5,ported
 004021e4,thunk_FUN_004268e0,Thunk_004268E0,manual,Thunks,,,5,ported
 004021e9,thunk_FUN_004ad3b5,,,,,,5,todo
 004021ee,thunk_FUN_004d30f8,,,,,,5,ported
@@ -764,7 +764,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040231f,thunk_FUN_004c9dcc,Thunk_004C9DCC,manual,Thunks,,,5,ported
 00402324,thunk_FUN_004ca802,,,,,,5,todo
 00402329,thunk_FUN_0040b286,,,,,,5,todo
-00402333,thunk_FUN_0051564f,,,,,,5,todo
+00402333,thunk_FUN_0051564f,,,,,,5,ported
 00402338,thunk_FUN_004d0071,,,,,,5,ported
 0040233d,thunk_FUN_004d303a,,,,,,5,ported
 0040234c,thunk_FUN_004b9835,,,,,,5,ported
@@ -837,7 +837,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004024d7,thunk_FUN_0050cfeb,,,,,,5,todo
 004024dc,thunk_FUN_0048ac0d,Thunk_0048AC0D,manual,Thunks,,,5,ported
 004024e1,thunk_FUN_0049565b,,,,,,5,todo
-004024eb,thunk_FUN_004cb857,,,,,,5,todo
+004024eb,thunk_FUN_004cb857,,,,,,5,ported
 004024f0,thunk_FUN_004b00ad,,,,,,5,todo
 004024f5,thunk_FUN_005181da,,,,,,5,todo
 004024fa,thunk_FUN_004b5049,,,,,,5,todo
@@ -932,10 +932,10 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040270c,thunk_FUN_004aba7c,,,,,,5,todo
 00402711,thunk_FUN_004f6333,,,,,,5,ported
 0040271b,thunk_FUN_005248cd,,,,,,5,ported
-00402720,thunk_FUN_004911d9,,,,,,5,todo
+00402720,thunk_FUN_004911d9,,,,,,5,ported
 00402725,thunk_FUN_0051e1b7,,,,,,5,todo
 00402734,thunk_FUN_004129df,,,,,,5,ported
-00402748,thunk_FUN_00514a47,,,,,,5,todo
+00402748,thunk_FUN_00514a47,,,,,,5,ported
 0040274d,thunk_FUN_0051dc18,,,,,,5,todo
 00402752,thunk_FUN_0050230a,,,,,,5,todo
 00402757,thunk_FUN_004e31d5,,,,,,5,ported
@@ -952,7 +952,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004027a2,thunk_FUN_004bfc30,,,,,,5,ported
 004027a7,thunk_FUN_0049d84a,,,,,,5,todo
 004027ac,thunk_FUN_00407d07,,,,,,5,ported
-004027b1,thunk_FUN_004d8f30,,,,,,5,todo
+004027b1,thunk_FUN_004d8f30,,,,,,5,ported
 004027b6,thunk_FUN_004f2360,,,,,,5,todo
 004027bb,thunk_FUN_0052422d,Thunk_0052422D,manual,Thunks,,,5,ported
 004027ca,thunk_FUN_004958b7,,,,,,5,todo
@@ -995,7 +995,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402900,thunk_FUN_0051378b,,,,,,5,ported
 00402905,thunk_FUN_004f8e0c,,,,,,5,todo
 0040290a,thunk_FUN_0051879f,,,,,,5,todo
-0040290f,thunk_FUN_004b4095,,,,,,5,todo
+0040290f,thunk_FUN_004b4095,,,,,,5,ported
 00402914,thunk_FUN_004af93c,,,,,,5,todo
 00402919,thunk_FUN_004f556c,,,,,,5,todo
 0040291e,thunk_FUN_00514103,Thunk_00514103,manual,Thunks,,,5,ported
@@ -1291,7 +1291,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040cb9f,FUN_0040cb9f,,,frontend/frontend,range,,277,todo
 0040ccb4,FUN_0040ccb4,WaitLoop,manual,Menu,range,,99,ported
 0040cd17,FUN_0040cd17,P57_MenuDone,manual,frontend/frontend,range,,88,ported
-0040cd6f,FUN_0040cd6f,,,frontend/frontend,range,,194,todo
+0040cd6f,FUN_0040cd6f,P98_ItemsDraw,manual,frontend/frontend,range,,194,ported
 0040ce31,FUN_0040ce31,,,frontend/frontend,range,,260,todo
 0040cf35,FUN_0040cf35,P58_Backgrounds,manual,frontend/frontend,range,,170,ported
 0040cfdf,FUN_0040cfdf,P67_DrawIcon,manual,frontend/frontend,range,,156,ported
@@ -1785,8 +1785,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041e517,FUN_0041e517,NoopFn0041e517,manual,Noop,,,7,ported
 0041e51e,FUN_0041e51e,NoopFn0041e51e,manual,Noop,,,7,ported
 0041e525,FUN_0041e525,NoopFn0041e525,manual,Noop,,,7,ported
-0041e52c,FUN_0041e52c,,,,,,509,todo
-0041e729,FUN_0041e729,,,,,,509,todo
+0041e52c,FUN_0041e52c,P98_QuadA,manual,,,,509,ported
+0041e729,FUN_0041e729,P98_QuadB,manual,,,,509,ported
 0041e926,FUN_0041e926,P76_TriA1,manual,ported76,,,260,ported
 0041ea2a,FUN_0041ea2a,P76_TriB1,manual,ported76,,,260,ported
 0041eb2e,FUN_0041eb2e,NoopFn0041eb2e,manual,Noop,,,7,ported
@@ -1900,7 +1900,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00421861,FUN_00421861,,,,,,391,todo
 004219e8,FUN_004219e8,,,,,,81,todo
 00421a39,FUN_00421a39,P57_ResetTexNodes,manual,,,,71,ported
-00421a80,FUN_00421a80,,,,,,413,todo
+00421a80,FUN_00421a80,P98_PixTabInit,manual,,,,413,ported
 00421c1d,FUN_00421c1d,MaskShift_00421C1D,manual,Misc,,,85,ported
 00421c72,FUN_00421c72,CountTrailingZeros00421C72,manual,SmallFuncs,,,57,ported
 00421cab,FUN_00421cab,SetZoom_00421CAB,manual,Ported8,,,83,ported
@@ -2064,7 +2064,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0048c43c,FUN_0048c43c,,,,,,66,todo
 0048c47e,FUN_0048c47e,,,,,,162,todo
 0048c520,FUN_0048c520,ReleaseVoice,manual,sound,,,151,ported
-0048c5b7,FUN_0048c5b7,,,,,,404,todo
+0048c5b7,FUN_0048c5b7,P98_RiffFind,manual,,,,404,ported
 0048c74b,FUN_0048c74b,DsListenerPos,manual,sound,,,51,ported
 0048c77e,FUN_0048c77e,DsListenerOrient,manual,sound,,,63,ported
 0048c7bd,FUN_0048c7bd,DsListenerVel,manual,sound,,,51,ported
@@ -2114,7 +2114,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004906f9,FUN_004906f9,,,,,,1234,todo
 00490bcb,FUN_00490bcb,,,,,,879,todo
 00490f3a,FUN_00490f3a,,,,,,671,todo
-004911d9,FUN_004911d9,,,,,,391,todo
+004911d9,FUN_004911d9,P98_TrafficSpin,manual,,,,391,ported
 00491360,FUN_00491360,P12_Fn00491360,manual,Misc12,,,108,ported
 004913cc,FUN_004913cc,TrafficPos,manual,,,,253,ported
 00491650,FUN_00491650,P59_CellLeft,manual,,,,144,ported
@@ -2182,7 +2182,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0049e7a8,FUN_0049e7a8,,,,,,361,todo
 0049e911,FUN_0049e911,,,,,,294,todo
 0049ea37,FUN_0049ea37,,,,,,458,todo
-0049ec01,FUN_0049ec01,,,,,,287,todo
+0049ec01,FUN_0049ec01,P98_CamSpline,manual,,,,287,ported
 0049ed20,FUN_0049ed20,Hermite,manual,camera,,,317,ported
 0049ee5d,FUN_0049ee5d,Spline,manual,math,,,181,ported
 0049ef12,FUN_0049ef12,CatmullRom,manual,camera,,,287,ported
@@ -2264,12 +2264,12 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004a7ee9,FUN_004a7ee9,SetVarD1193C,manual,Menu,,,37,ported
 004a7f0e,FUN_004a7f0e,P74_Dist,manual,Misc74,,,222,ported
 004a7fec,FUN_004a7fec,,,,,,3134,todo
-004a9850,FUN_004a9850,,,,,,250,todo
+004a9850,FUN_004a9850,P98_CreditsInit,manual,,,,250,ported
 004a994a,FUN_004a994a,Inc0B1FFBC,manual,UIMisc,,,18,ported
 004a995c,FUN_004a995c,,,,,,287,todo
 004a9b1a,FUN_004a9b1a,P58_DrawLogo,manual,,,,150,ported
 004a9bb0,FUN_004a9bb0,,,,,,288,todo
-004a9cd0,FUN_004a9cd0,,,,,,268,todo
+004a9cd0,FUN_004a9cd0,P98_CreditsFace,manual,,,,268,ported
 004a9ddc,FUN_004a9ddc,DrawFrame_004A9DDC,manual,Misc,,,46,ported
 004a9e0a,FUN_004a9e0a,P52_DrawLabel,manual,,,,126,ported
 004a9e88,FUN_004a9e88,P67_Logo,manual,game,,,189,ported
@@ -2332,7 +2332,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004b3ddb,FUN_004b3ddb,ReleaseOverlays,manual,render,,,122,ported
 004b3e55,FUN_004b3e55,,,,,,348,todo
 004b3fb1,FUN_004b3fb1,,,,,,228,todo
-004b4095,FUN_004b4095,,,,,,248,todo
+004b4095,FUN_004b4095,P98_IconFlush,manual,,,,248,ported
 004b418d,FUN_004b418d,,,,,,2458,todo
 004b4b27,FUN_004b4b27,,,,,,1314,todo
 004b5049,FUN_004b5049,,,,,,917,todo
@@ -2361,7 +2361,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004ba457,FUN_004ba457,P95_SortObjA,manual,,,,291,ported
 004ba57a,FUN_004ba57a,P95_SortObjC,manual,,,,211,ported
 004ba64d,FUN_004ba64d,P95_SortObjB,manual,,,,211,ported
-004ba720,FUN_004ba720,,,,,,255,todo
+004ba720,FUN_004ba720,P98_DrawSix,manual,,,,255,ported
 004ba81f,FUN_004ba81f,,,,,,2113,todo
 004bb060,FUN_004bb060,P67_CompactPool,manual,game,,,191,ported
 004bb11f,FUN_004bb11f,FindOrAdd_004BB11F,manual,Misc,,,112,ported
@@ -2393,12 +2393,12 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c1c23,FUN_004c1c23,,,,,,888,todo
 004c1f9b,FUN_004c1f9b,AddUnique_004C1F9B,manual,Misc,,,116,ported
 004c200f,FUN_004c200f,DrainStackC200F,manual,Menu,,,51,ported
-004c2042,FUN_004c2042,,,,,,287,todo
+004c2042,FUN_004c2042,P98_ClearCarData,manual,,,,287,ported
 004c2ab0,FUN_004c2ab0,P97_DirKeys,manual,,,,234,ported
-004c2b9a,FUN_004c2b9a,,,,,,473,todo
+004c2b9a,FUN_004c2b9a,P98_DirCamKeys,manual,,,,473,ported
 004c2d73,FUN_004c2d73,,,,,,725,todo
 004c3048,FUN_004c3048,,,,,,633,todo
-004c32c1,FUN_004c32c1,,,,,,358,todo
+004c32c1,FUN_004c32c1,P98_CamClamp,manual,,,,358,ported
 004c3427,FUN_004c3427,,,,,,326,todo
 004c356d,FUN_004c356d,ClampCameraHeight,manual,DirNodes.c,,,365,ported
 004c36da,FUN_004c36da,ClearDirectorTable,manual,DirNodes.c,,,80,ported
@@ -2448,7 +2448,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c6524,FUN_004c6524,DeleteCamera,manual,Director,assert,deleteCamera,365,ported
 004c6691,FUN_004c6691,FindNearestCamera,manual,Director,,,132,ported
 004c6715,FUN_004c6715,CameraFrameDistance,manual,Director,,,43,ported
-004c6740,FUN_004c6740,,,,,,359,todo
+004c6740,FUN_004c6740,P98_DirCamNext,manual,,,,359,ported
 004c68a7,FUN_004c68a7,,,,,,1053,todo
 004c6d62,FUN_004c6d62,P61_CamPrepare,manual,director,manual,,487,ported
 004c8070,FUN_004c8070,ResetDirectorState,manual,Director,,,159,ported
@@ -2485,9 +2485,9 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004cb097,FUN_004cb097,SetScaled_004CB097,manual,Ported8,,,107,ported
 004cb102,FUN_004cb102,,,,,,499,todo
 004cb2f5,FUN_004cb2f5,,,,,,522,todo
-004cb4ff,FUN_004cb4ff,,,,,,282,todo
+004cb4ff,FUN_004cb4ff,P98_LampColor,manual,,,,282,ported
 004cb619,FUN_004cb619,P81_Light,manual,render,,,574,ported
-004cb857,FUN_004cb857,,,,,,299,todo
+004cb857,FUN_004cb857,P98_InitSplash,manual,,,,299,ported
 004cb982,FUN_004cb982,ScriptStackPop004CB982,manual,SmallFuncs,,,56,ported
 004cb9ba,FUN_004cb9ba,ScriptStackPop004CB9BA,manual,SmallFuncs,,,56,ported
 004cb9f2,FUN_004cb9f2,ScriptStackPush004CB9F2,manual,SmallFuncs,,,43,ported
@@ -2513,7 +2513,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004cff7e,FUN_004cff7e,P97_ScriptResetCur,manual,,,,163,ported
 004d0021,FUN_004d0021,ListClearAllActive,manual,ui,,,80,ported
 004d0071,FUN_004d0071,P51_SteerHeading,manual,Ported51,,,145,ported
-004d0102,FUN_004d0102,,,,,,265,todo
+004d0102,FUN_004d0102,P98_ScriptFreeAll,manual,,,,265,ported
 004d020b,FUN_004d020b,P48_OpSet3,manual,MScript,manual,,187,ported
 004d02c6,FUN_004d02c6,ScriptReadShort3_004D02C6,manual,Misc,,,121,ported
 004d033f,FUN_004d033f,ScriptReadVec3_004D033F,manual,Misc,,,145,ported
@@ -2601,7 +2601,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d6e9f,FUN_004d6e9f,CopyTable_004D6E9F,manual,Misc,,,83,ported
 004d6ef2,FUN_004d6ef2,P95_AmbientTick,manual,,,,282,ported
 004d74e0,FUN_004d74e0,,,,,,646,todo
-004d7766,FUN_004d7766,,,,,,397,todo
+004d7766,FUN_004d7766,P98_FreeCamKeys,manual,,,,397,ported
 004d78f3,FUN_004d78f3,P21_FrameTicks,manual,,,,302,ported
 004d7a21,FUN_004d7a21,P96_FpsText,manual,Ported96,,,277,ported
 004d7b36,FUN_004d7b36,RingAdvance004D7B36,manual,SmallFuncs,,,42,ported
@@ -2615,8 +2615,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d8511,FUN_004d8511,,,,,,1077,todo
 004d8c23,FUN_004d8c23,ClearSlots004D8C23,manual,SmallFuncs,,,93,ported
 004d8c80,FUN_004d8c80,P27_MemLeakReport,manual,,,,308,ported
-004d8db4,FUN_004d8db4,DebugMalloc,manual,,,,380,todo
-004d8f30,FUN_004d8f30,DebugFree,manual,,,,227,todo
+004d8db4,FUN_004d8db4,P98_DebugMalloc,manual,,,,380,ported
+004d8f30,FUN_004d8f30,P98_DebugFree,manual,,,,227,ported
 004d9013,FUN_004d9013,Round1024,manual,UIMisc,,,21,ported
 004d9028,FUN_004d9028,Mask004D9028,manual,Ported6,,,80,ported
 004d9078,FUN_004d9078,Rand_004D9078,manual,Misc,,,124,ported
@@ -2688,7 +2688,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004e429b,FUN_004e429b,P35_CreateEffectB,manual,Input,,,222,ported
 004e4379,FUN_004e4379,Get4Words004E4379,manual,ui/widgets,,,62,ported
 004e43b7,FUN_004e43b7,P21_SetAxisByte,manual,ported21,,,169,ported
-004e49c0,FUN_004e49c0,,,,,,540,todo
+004e49c0,FUN_004e49c0,P98_ResetMission,manual,,,,540,ported
 004e4bdc,FUN_004e4bdc,,,,,,345,todo
 004e4d35,FUN_004e4d35,,,,,,557,todo
 004e4f62,FUN_004e4f62,HudTick,manual,hud,,,175,ported
@@ -2730,7 +2730,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004e964a,FUN_004e964a,SetViewAngles,manual,camera,,,85,ported
 004e969f,FUN_004e969f,,,,,,1312,todo
 004e9bbf,FUN_004e9bbf,,,,,,1927,todo
-004ea346,FUN_004ea346,,,,,,283,todo
+004ea346,FUN_004ea346,P98_DrawMarker,manual,,,,283,ported
 004eac70,FUN_004eac70,,,,,,797,todo
 004eaf8d,FUN_004eaf8d,NegateCamZ004EAF8D,manual,SmallFuncs,,,66,ported
 004eafcf,FUN_004eafcf,P78_LoadLampsBlock,manual,Menu,,,17,ported
@@ -2811,7 +2811,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004f4c3d,FUN_004f4c3d,P94_NearestObjDist,manual,MScript,range,,255,ported
 004f4d3c,FUN_004f4d3c,,,MScript,range,,468,todo
 004f4f10,FUN_004f4f10,P97_ObjsFromScript,manual,MScript,range,,258,ported
-004f5012,FUN_004f5012,,,MScript,range,,418,todo
+004f5012,FUN_004f5012,P98_ScriptRange,manual,MScript,range,,418,ported
 004f51b4,FUN_004f51b4,,,MScript,range,,180,todo
 004f556c,FUN_004f556c,,,MScript,range,,286,todo
 004f568a,FUN_004f568a,,,MScript,range,,333,todo
@@ -2859,7 +2859,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004fbfad,FUN_004fbfad,,,,,,282,todo
 004fc0c7,FUN_004fc0c7,Fwd004FC0C7,manual,Menu,,,18,ported
 004fc0d9,FUN_004fc0d9,,,,,,795,todo
-004fc3f4,FUN_004fc3f4,,,,,,391,todo
+004fc3f4,FUN_004fc3f4,P98_DrawScriptModels,manual,,,,391,ported
 004fc57b,FUN_004fc57b,FreeBuf004FC57B,manual,Ported6,,,48,ported
 004fc5ab,FUN_004fc5ab,FindScriptCommandById,manual,mscript,,,54,ported
 004fc5e1,FUN_004fc5e1,P26_RandomFx,manual,ported26,,,239,ported
@@ -3032,7 +3032,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00514403,FUN_00514403,P70_SpawnPart2,manual,particles,,,209,ported
 005144d4,FUN_005144d4,P71_EdgeA,manual,misc,,,265,ported
 00514779,FUN_00514779,P71_EdgeB,manual,misc,,,265,ported
-00514a47,FUN_00514a47,,,,,,384,todo
+00514a47,FUN_00514a47,P98_PartAim,manual,,,,384,ported
 00514bc7,FUN_00514bc7,InitObjState_00514BC7,manual,Misc,,,124,ported
 00514c43,FUN_00514c43,ObjInit00514C43,manual,Ported6,,,47,ported
 00514c72,FUN_00514c72,SetObjState_00514C72,manual,Misc,,,45,ported
@@ -3044,7 +3044,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00514f47,FUN_00514f47,P68_AimSetup,manual,misc,,,197,ported
 0051500c,FUN_0051500c,,,,,,510,todo
 0051551e,FUN_0051551e,P71_InitNear,manual,misc,,,305,ported
-0051564f,FUN_0051564f,,,,,,452,todo
+0051564f,FUN_0051564f,P98_PartCheck,manual,,,,452,ported
 00515813,FUN_00515813,ParticleInit,manual,,,,188,ported
 005158cf,FUN_005158cf,,,,,,802,todo
 00515bf1,FUN_00515bf1,P71_InPlanes,manual,misc,,,217,ported
@@ -3063,7 +3063,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 005174c6,FUN_005174c6,ScaleScreenX,manual,,,,76,ported
 00517512,FUN_00517512,ScaleScreenY,manual,,,,76,ported
 0051755e,FUN_0051755e,P70_ShadowText,manual,misc,,,220,ported
-0051763a,FUN_0051763a,,,,,,290,todo
+0051763a,FUN_0051763a,P98_LoadLang,manual,,,,290,ported
 005179d0,FUN_005179d0,,,,,,904,todo
 00517d58,FUN_00517d58,,,,,,991,todo
 00518137,FUN_00518137,ReplayPaths,manual,replays,,,163,ported
@@ -3083,7 +3083,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00519873,FUN_00519873,P55_SaveRec,manual,,,,151,ported
 0051990a,FUN_0051990a,ReplayRead,manual,replays,,,178,ported
 005199bc,FUN_005199bc,P96_ReplayTag,manual,Ported96,,,137,ported
-00519a45,FUN_00519a45,,,,,,269,todo
+00519a45,FUN_00519a45,P98_CamRecAdd,manual,,,,269,ported
 00519d09,FUN_00519d09,AddToCounter00519D09,manual,SmallFuncs,,,20,ported
 00519d1d,FUN_00519d1d,NoopFn00519d1d,manual,Noop,,,5,ported
 00519d22,FUN_00519d22,ReturnOne00519D22,manual,SmallFuncs,,,10,ported
@@ -3178,7 +3178,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00523ec6,FUN_00523ec6,SetVoicePos,manual,sound,,,196,ported
 00523f8a,FUN_00523f8a,SoundSetPos00523F8A,manual,Ported6,,,115,ported
 00523ffd,FUN_00523ffd,P48_SetVoiceVolume,manual,sound,manual,,211,ported
-005240d0,FUN_005240d0,,,,,,349,todo
+005240d0,FUN_005240d0,P98_VoicePos,manual,,,,349,ported
 0052422d,FUN_0052422d,SoundLoop_0052422D,manual,Misc,,,122,ported
 005242a7,FUN_005242a7,SoundGetPos005242A7,manual,Ported6,,,64,ported
 005242e7,FUN_005242e7,P48_GetVoiceVolume,manual,sound,manual,,67,ported

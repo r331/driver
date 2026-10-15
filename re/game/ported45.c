@@ -1,7 +1,8 @@
 /* Меню и ожидание — восстановлено из Game.exe (cdecl). */
 #include "ported45.h"
+#include "ported58.h"
+#include "reptr.h"
 GAME_VAR_DEF(int32_t, P45_Mode, 0x00b87e38)
-GAME_VAR_DEF(uint32_t, P45_PtrB, 0x005f7e64)
 GAME_VAR_DEF(uint32_t, P45_PtrA, 0x005f7e40)
 GAME_VAR_DEF(int32_t, P45_Busy, 0x005f7e44)
 GAME_VAR_DEF(int32_t, P45_Step, 0x005f7e48)
@@ -38,7 +39,7 @@ int32_t P45_ModeB(void) {
   return 1;
 }
 void P45_Wait(uint32_t a, uint32_t b) {
-  P45_PtrB = a;
+  P58_ItemList = (int16_t *)re_ptr(a);   /* бывший P45_PtrB: тот же 005f7e64 */
   P45_PtrA = b;
   P45_Busy = 1;
   for (int32_t i = 5; i > -1; i--) {

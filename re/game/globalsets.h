@@ -443,10 +443,8 @@ extern uint8_t G00C29D81;
 #ifndef RE_HOOK_BUILD
 extern int32_t G00C4BDC4;
 #endif
-#define G00C55820 GAME_VAR(int32_t, G00C55820, 0x00c55820)
-#ifndef RE_HOOK_BUILD
-extern int32_t G00C55820;
-#endif
+#include "strtab.h"
+#define G00C55820 ((int32_t)P97_StrAddr[0])   /* единая таблица строк 00c55820 */
 #define G00C5582C GAME_VAR(int32_t, G00C5582C, 0x00c5582c)
 #ifndef RE_HOOK_BUILD
 extern int32_t G00C5582C;
@@ -587,17 +585,17 @@ extern int32_t G00D1241C;
 #ifndef RE_HOOK_BUILD
 extern int32_t G00D14EEC;
 #endif
-#define G00D14EF0 GAME_VAR(int32_t, G00D14EF0, 0x00d14ef0)
+#define G00D14EF0 GAME_VAR(uint8_t *, G00D14EF0, 0x00d14ef0)   /* значок RFLECT (004cb857) */
 #ifndef RE_HOOK_BUILD
-extern int32_t G00D14EF0;
+extern uint8_t *G00D14EF0;
 #endif
 #define G00D14EF4 GAME_VAR(int32_t, G00D14EF4, 0x00d14ef4)
 #ifndef RE_HOOK_BUILD
 extern int32_t G00D14EF4;
 #endif
-#define G00D164EC GAME_VAR(int32_t, G00D164EC, 0x00d164ec)
+#define G00D164EC GAME_VAR(uint8_t *, G00D164EC, 0x00d164ec)   /* значок SPLASH (004cb857) */
 #ifndef RE_HOOK_BUILD
-extern int32_t G00D164EC;
+extern uint8_t *G00D164EC;
 #endif
 #define G00D164F0 GAME_VAR(uint8_t, G00D164F0, 0x00d164f0)
 #ifndef RE_HOOK_BUILD

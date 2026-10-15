@@ -18,6 +18,7 @@ void     re_fn_register(uint32_t addr, re_fn_t fn) { (void)addr; (void)fn; }
 #include "ported95.h"
 #include "ported96.h"
 #include "ported97.h"
+#include "ported98.h"
 #include "noop.h"
 #include <string.h>
 
@@ -43,6 +44,7 @@ static const re_region_t k_regions[] = {
   { 0x005755f4u, (uint8_t *)P97_Str16bit, sizeof P97_Str16bit },
   { 0x005755fcu, (uint8_t *)P97_Str22k, sizeof P97_Str22k },
   { 0x00575608u, (uint8_t *)P97_Str44k, sizeof P97_Str44k },
+  { 0x005532ccu, P98_FaceBlk, sizeof P98_FaceBlk },              /* имена лиц титров (00552e1c → сюда) */
 };
 /* таблица функций: адрес Game.exe → перенесённая native-функция */
 static const re_fnent_t k_fns[] = {

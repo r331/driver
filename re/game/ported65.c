@@ -6,7 +6,6 @@
 char *P65_Line = NULL;
 p65_tok_t P65_Tok;
 p65_ints_t P65_Ints;
-p65_strtab_t P65_Str;
 p65_name_t P65_Name;
 const char *P65_NamePtr = NULL;
 const char *P65_NameBg = NULL;
@@ -73,17 +72,17 @@ static int32_t SelIdx(int32_t i) {
 void P65_SetNameFields(void) {
   if (P65_NameVal == 0) {
     P35_InputMode = 0;
-    P65_NamePtr = P65_Str[0x40];
-    P65_NameBg = P65_Str[0xc];
+    P65_NamePtr = P65_STR(0x40);
+    P65_NameBg = P65_STR(0xc);
   } else {
     P35_InputMode = 2;
-    snprintf(P65_Name, sizeof P65_Name, "%s %d", P65_Str[0x41], P65_NameVal);   /* в оригинале sprintf без границ в 20 байт */
+    snprintf(P65_Name, sizeof P65_Name, "%s %d", P65_STR(0x41), P65_NameVal);   /* в оригинале sprintf без границ в 20 байт */
     P65_NamePtr = P65_Name;
     int32_t k = SelIdx(Q00B87EF0);
 #ifdef RE_HOOK_BUILD
-    P65_NameBg = ((const char **)P65_Str)[k];
+    P65_NameBg = P65_STR(k);
 #else
-    P65_NameBg = (k >= 0 && k < 128) ? P65_Str[k] : NULL;
+    P65_NameBg = (k >= 0 && k < 0x15e) ? P65_STR(k) : NULL;
 #endif
   }
 }

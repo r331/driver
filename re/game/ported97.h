@@ -11,7 +11,7 @@
    (004f58c6, 004f57d7, 004f5c89), обзор копа 004d2c95, клавиши режиссёра 004c2ab0, мигание значков меню 00417479/00417fff,
    дым 004afcf7, подброс обломков 004ad128, затемнение со значком 004e5a1a. Все cdecl. */
 
-typedef uint32_t p97_strtab_t[0x140];       /* 00c55820: адреса строк языка (то же место, что P65_Str/P12_00c55820) */
+#include "strtab.h"                         /* p97_strtab_t, P97_StrAddr (00c55820) */
 typedef uint32_t p97_u4_t[4];
 typedef uint32_t p97_u2_t[2];
 typedef int32_t  p97_i2_t[2];
@@ -33,7 +33,6 @@ typedef int32_t (*p97_lfblock_fn)(int32_t buffer, int32_t type, int32_t mode, in
 typedef void (*p97_gr5_fn)(int32_t, int32_t, int32_t, int32_t, int32_t);
 typedef void (*p97_gr1_fn)(int32_t);
 
-#define P97_StrAddr   GAME_VAR(p97_strtab_t, P97_StrAddr, 0x00c55820)
 #define P97_DrvA      GAME_VAR(re_fn_t, P97_DrvA, 0x00bdcb10)        /* звуковой драйвер: слоты без прежних имён */
 #define P97_DrvB      GAME_VAR(re_fn_t, P97_DrvB, 0x00bdcb1c)
 #define P97_DrvC      GAME_VAR(re_fn_t, P97_DrvC, 0x00bdcb28)
@@ -100,7 +99,7 @@ typedef void (*p97_gr1_fn)(int32_t);
 #define P97_D11A44    GAME_VAR(uint16_t, P97_D11A44, 0x00d11a44)
 
 #ifndef RE_HOOK_BUILD
-extern p97_strtab_t P97_StrAddr;
+
 extern re_fn_t P97_DrvA, P97_DrvB, P97_DrvC, P97_DrvD, P97_DrvE, P97_DrvF, P97_DrvG, P97_DrvH, P97_DrvI, P97_DrvJ, P97_DrvK, P97_DrvL;
 extern p97_lfblock_fn P97_LfbLock; extern p97_gr5_fn P97_GrAlpha; extern p97_gr1_fn P97_GrDepth;
 extern p97_pat_t P97_CellPat; extern int32_t P97_ScrObjOn;

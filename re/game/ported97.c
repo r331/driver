@@ -358,7 +358,7 @@ void P97_ScriptEach(int32_t a, int32_t b, int32_t c) {
       wr32(tmp + 4, m);
       memcpy(tmp + 8, o, 16);
       wr32(tmp + 0x18, (int16_t)rd16(o + 0x12));
-      P53_Fn500937(tmp, a, b, c, (int32_t)re_addr(P28_EventModels[m]), 0);
+      P53_Fn500937(tmp, a, b, c, (int32_t)P28_EventModels[m], 0);
     }
   }
 }

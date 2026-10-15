@@ -4,7 +4,7 @@
 #include <stdint.h>
 /* Загрузка моделей: события (map.c) и машины уровня. Все __cdecl. Значения-«указатели» на модели
    хранятся 32-битными (как в Game.exe); разыменовываются только в hook-сборке. */
-typedef void *p28_evtab_t[0x270];
+typedef uint32_t p28_evtab_t[0x270];   /* адреса моделей событий (стандарт v1.42: re_ptr/re_addr) */
 #define P28_EventModels GAME_VAR(p28_evtab_t, P28_EventModels, 0x00d11a60)
 #define P28_EventCount  GAME_VAR(int32_t, P28_EventCount, 0x00d12418)
 typedef int32_t p28_models_t[12];

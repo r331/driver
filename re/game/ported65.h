@@ -21,7 +21,9 @@ typedef char p65_name_t[20];
 #define P65_Line   GAME_VAR(char *, P65_Line, 0x00c81684)
 #define P65_Tok    GAME_VAR(p65_tok_t, P65_Tok, 0x00c81580)
 #define P65_Ints   GAME_VAR(p65_ints_t, P65_Ints, 0x00c80c00)
-#define P65_Str    GAME_VAR(p65_strtab_t, P65_Str, 0x00c55820)
+#include "strtab.h"
+#include "reptr.h"
+#define P65_STR(i) ((const char *)re_ptr(P97_StrAddr[(i)]))   /* бывший P65_Str[i]: единая таблица адресов 00c55820 */
 #define P65_Name   GAME_VAR(p65_name_t, P65_Name, 0x0057b718)
 #define P65_NamePtr GAME_VAR(const char *, P65_NamePtr, 0x00549fa0)
 #define P65_NameBg  GAME_VAR(const char *, P65_NameBg, 0x00549ff0)
@@ -34,7 +36,7 @@ typedef char p65_name_t[20];
 extern char *P65_Line;
 extern p65_tok_t P65_Tok;
 extern p65_ints_t P65_Ints;
-extern p65_strtab_t P65_Str;
+
 extern p65_name_t P65_Name;
 extern const char *P65_NamePtr;
 extern const char *P65_NameBg;

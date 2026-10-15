@@ -12,6 +12,8 @@
 #  define g_fgets  ((char* (__cdecl*)(char*, int, void*))0x0052c000)
 #  define g_fgetc  ((int  (__cdecl*)(void*))0x0052baf0)
 #  define g_sscanf ((int  (__cdecl*)(const char*, const char*, ...))0x0052e250)
+#  define g_malloc ((void* (__cdecl*)(size_t))0x0052c130)
+#  define g_free   ((void  (__cdecl*)(void*))0x0052cb70)
 #else
 #  include <stdio.h>
 #  define g_fread(p, s, n, f)  fread((p), (s), (n), (FILE*)(f))
@@ -24,4 +26,7 @@
 #  define g_fgets(b, n, f)     fgets((b), (n), (FILE*)(f))
 #  define g_fgetc(f)           fgetc((FILE*)(f))
 #  define g_sscanf             sscanf
+#  include <stdlib.h>
+#  define g_malloc(n)          malloc((n))
+#  define g_free(p)            free((p))
 #endif
