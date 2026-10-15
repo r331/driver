@@ -2247,7 +2247,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004a63c6,FUN_004a63c6,P51_DirFromHeading,manual,Ported51,,,61,ported
 004a6403,FUN_004a6403,,,,,,725,todo
 004a66d8,FUN_004a66d8,IsVar112B284Lt8,manual,UIMisc,,,23,ported
-004a66ef,FUN_004a66ef,,,,,,90,todo
+004a66ef,FUN_004a66ef,P91_ReleaseTraffic,manual,,,,90,ported
 004a6749,FUN_004a6749,P14_Fn004A6749,manual,misc,,,103,ported
 004a67b0,FUN_004a67b0,P68_SpawnCar,manual,misc,,,106,ported
 004a681a,FUN_004a681a,,,,,,573,todo
