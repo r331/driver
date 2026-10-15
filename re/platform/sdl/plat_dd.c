@@ -99,3 +99,20 @@ int32_t plat_ds3d_set_mode(void *b, uint32_t m) { return ds3_rec(b, 9, 0, 0, 0, 
 int32_t plat_ds3d_set_position(void *b, float x, float y, float z) { return ds3_rec(b, 10, x, y, z, 0); }
 int32_t plat_ds3d_set_velocity(void *b, float x, float y, float z) { return ds3_rec(b, 11, x, y, z, 0); }
 int plat_ds3d_stub_last(int *op, float *v6, uint32_t *u) { *op = g_ds3_op; memcpy(v6, g_ds3_v, sizeof g_ds3_v); *u = g_ds3_u; return 1; }
+static uint32_t g_dsx_fail, g_dsx_support = 3, g_dsx_pid, g_dsx_plen, g_dsx_pd0; static uint8_t g_dsx_pg[16]; static int g_dsx_pn;
+int32_t plat_ds_buf_stop(void *b) { return ds3_rec(b, 12, 0, 0, 0, 0); }
+int32_t plat_ds_buf_set_position(void *b, uint32_t pos) { return ds3_rec(b, 13, 0, 0, 0, pos); }
+int32_t plat_ds3d_set_velocity_ex(void *b, float x, float y, float z, uint32_t ap) { return ds3_rec(b, 14, x, y, z, ap); }
+int32_t plat_ds_create_buffer(void *ds, uint32_t fl, uint32_t bytes, const void *wfx, void **out) {
+    (void)wfx; if (!ds || (g_dsx_fail & 1)) { *out = NULL; return -1; }
+    *out = plat_dd_create(NULL); g_ds3_op = 15; g_ds3_u = fl; g_ds3_v[0] = (float)bytes; return 0; }
+int32_t plat_com_query_interface(void *obj, const void *iid, void **out) {
+    (void)iid; if (!obj || (g_dsx_fail & 2)) { *out = NULL; return -1; }
+    *out = plat_dd_create(NULL); return 0; }
+int32_t plat_ds_prop_set(void *ps, const void *g, uint32_t id, const void *d, uint32_t len) {
+    if (!ps) return -1; memcpy(g_dsx_pg, g, 16); g_dsx_pid = id; g_dsx_plen = len; g_dsx_pd0 = 0; memcpy(&g_dsx_pd0, d, len < 4 ? len : 4); g_dsx_pn++; return 0; }
+int32_t plat_ds_prop_support(void *ps, const void *g, uint32_t id, uint32_t *sup) {
+    (void)g; (void)id; if (!ps || (g_dsx_fail & 4)) return -1; *sup = g_dsx_support; return 0; }
+void plat_ds_stub_ctl(uint32_t fm, uint32_t sup) { g_dsx_fail = fm; g_dsx_support = sup; }
+int plat_ds_stub_prop(uint8_t *g, uint32_t *id, uint32_t *len, uint32_t *d0, int *n) {
+    memcpy(g, g_dsx_pg, 16); *id = g_dsx_pid; *len = g_dsx_plen; *d0 = g_dsx_pd0; *n = g_dsx_pn; return 1; }

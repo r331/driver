@@ -194,6 +194,15 @@ int32_t plat_ds3d_set_mode(void *b3d, uint32_t mode);                           
 int32_t plat_ds3d_set_position(void *b3d, float x, float y, float z);            /* SetPosition(x,y,z,1) */
 int32_t plat_ds3d_set_velocity(void *b3d, float x, float y, float z);            /* SetVelocity(x,y,z,1) */
 int     plat_ds3d_stub_last(int *op, float *v6, uint32_t *u);                    /* тесты (SDL): последний вызов (op 1..11), числа, целое */
+int32_t plat_ds_buf_stop(void *b);                                               /* IDirectSoundBuffer::Stop */
+int32_t plat_ds_buf_set_position(void *b, uint32_t pos);                         /* SetCurrentPosition */
+int32_t plat_ds3d_set_velocity_ex(void *b3d, float x, float y, float z, uint32_t apply);   /* SetVelocity с явным режимом применения */
+int32_t plat_ds_create_buffer(void *ds, uint32_t flags, uint32_t bytes, const void *wfx18, void **out);   /* CreateSoundBuffer(DSBUFFERDESC 20 байт); 0 — успех */
+int32_t plat_com_query_interface(void *obj, const void *iid16, void **out);      /* IUnknown::QueryInterface; 0 — успех */
+int32_t plat_ds_prop_set(void *ps, const void *guid16, uint32_t id, const void *data, uint32_t len);   /* IKsPropertySet::Set */
+int32_t plat_ds_prop_support(void *ps, const void *guid16, uint32_t id, uint32_t *support);            /* IKsPropertySet::QuerySupport */
+void    plat_ds_stub_ctl(uint32_t fail_mask, uint32_t support);                  /* тесты (SDL): bit0 — CreateBuffer падает, bit1 — QI падает, bit2 — QuerySupport падает */
+int     plat_ds_stub_prop(uint8_t *guid16, uint32_t *id, uint32_t *len, uint32_t *data0, int *count);   /* тесты (SDL): последний Set */
 void    plat_fmv_stub_fail(uint32_t mask);                                /* тесты (SDL): бит 0 SetState, 1 Update, 2 Blt — отказ */
 int     plat_fmv_stub_stats(int *state, int *updates, int32_t *rect4, int *blts, uint32_t *fill_px, int *fills, uint8_t *fmt18, uint32_t *spk); /* тесты (SDL) */
 /* Поверхности: блокировка, формат пикселей, показ кадра (0041eb8c, 0041ec82, 0041d3ed, 0041dec8, 00420c5a, 00420cac, 00421149) */

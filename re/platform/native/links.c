@@ -38,6 +38,7 @@
 #include "../../game/ported47.h"
 #include "../../game/ported48.h"
 #include "../../game/ported49.h"
+#include "../../game/ported50.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -83,6 +84,7 @@ void Call0052369B (int32_t a0) { P48_SndPause(a0); }
 void Call00524873 (void) { P25_CDStop(); }
 void Call00524763 (void) { P25_CDClose(); }
 void Call0048B65D (void) { P38_FmvStop(); }
+void Call0048B568 (void) { P50_FmvReleaseObjs(); }
 void Call005237B1 (void) { P48_StopAll(); }
 void Call0052436A (void) { InitChannels_0052436A(); }
 void Call0052479E (int32_t a0) { P25_PlayCDTrack(a0); }

@@ -52,6 +52,7 @@
 #include "../game/ported45.h"
 #include "../game/ported48.h"
 #include "../game/ported49.h"
+#include "../game/ported50.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -1430,8 +1431,73 @@ static int test_p49(void) {
   P49_Listener = NULL; plat_dd_release(o); plat_dd_release(b); plat_dd_release(b3);
   return f;
 }
+#undef CK
+static int test_p50(void) {
+  int f = 0, op; float v[6]; uint32_t u;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p50 fail line %d\n",__LINE__); } } while (0)
+  int base = plat_dd_stub_count();
+  /* FMV */
+  P50_FmvA = plat_dd_create(NULL); P50_FmvFlag = P50_FmvA; P50_FmvB = plat_dd_create(NULL); P50_FmvC = plat_dd_create(NULL);
+  P50_FmvReleaseObjs();
+  CK(P50_FmvA == NULL && P50_FmvFlag == NULL && P50_FmvB == NULL && P50_FmvC == NULL && plat_dd_stub_count() == base);
+  P50_FmvReleaseObjs(); CK(plat_dd_stub_count() == base);
+  P50_Fmv834 = plat_dd_create(NULL); P50_Fmv830 = plat_dd_create(NULL); P50_Fmv82C = plat_dd_create(NULL); P38_Sample = plat_dd_create(NULL);
+  P38_Mms = NULL; P50_FmvReleaseAll();
+  CK(P38_Sample == NULL && P50_Fmv834 == NULL && P50_Fmv830 == NULL && P50_Fmv82C == NULL && plat_dd_stub_count() == base);
+  P50_Fmv82C = plat_dd_create(NULL); P38_Mms = plat_dd_create(NULL); P50_FmvReleaseAll();
+  CK(P38_Mms == NULL && P50_Fmv82C == NULL && plat_dd_stub_count() == base + 1);   /* освобождён только Mms, 82C обнулён без Release */
+  /* голосовые ячейки */
+  memset(P50_Voices, 0, sizeof(P50_VoiceTab));
+  P50_Voices[3].a = plat_dd_create(NULL); P50_Voices[3].b = plat_dd_create(NULL);
+  int c0 = plat_dd_stub_count(); P50_ReleaseVoice(3);
+  CK(P50_Voices[3].a == NULL && P50_Voices[3].b == NULL && plat_dd_stub_count() == c0 - 2);
+  P50_ReleaseVoice(3); CK(plat_dd_stub_count() == c0 - 2);
+  /* буферы: сброс и освобождение */
+  memset(P49_Bufs, 0, sizeof(P49_PairTab));
+  P50_ResetBuf(1);
+  P49_Bufs[1].buf = plat_dd_create(NULL); P49_Bufs[1].buf3d = plat_dd_create(NULL);
+  P50_ResetBuf(1); plat_ds3d_stub_last(&op, v, &u); CK(op == 14 && u == 0);
+  P49_Bufs[1].buf3d = NULL; P50_ResetBuf(1); plat_ds3d_stub_last(&op, v, &u); CK(op == 6);       /* без 3D — последним уходит громкость */
+  P49_Bufs[1].buf3d = plat_dd_create(NULL);
+  c0 = plat_dd_stub_count(); P50_ReleaseBuf(1);
+  CK(P49_Bufs[1].buf == NULL && P49_Bufs[1].buf3d == NULL && plat_dd_stub_count() == c0 - 2);
+  plat_ds3d_stub_last(&op, v, &u); CK(op == 12);
+  P50_ReleaseBuf(1); CK(plat_dd_stub_count() == c0 - 2);
+  /* EAX */
+  uint8_t g[16]; uint32_t id, len, d0; int n;
+  void *ps = plat_dd_create(NULL);
+  plat_ds_stub_ctl(0, 3); plat_ds_stub_prop(g, &id, &len, &d0, &n); int n0 = n;
+  P50_EaxSetDefault(NULL); plat_ds_stub_prop(g, &id, &len, &d0, &n); CK(n == n0);
+  P50_EaxSetDefault(ps); plat_ds_stub_prop(g, &id, &len, &d0, &n);
+  CK(n == n0 + 1 && g[0] == 0xc0 && g[1] == 0x6f && id == 1 && len == 4 && d0 == 0xbf800000u);
+  P49_Prop30 = NULL; CK(P50_EaxEnable() == 0);
+  P49_Prop30 = ps; CK(P50_EaxEnable() == 1); plat_ds_stub_prop(g, &id, &len, &d0, &n);
+  CK(n == n0 + 2 && g[0] == 0xae && id == 0 && d0 == 2);
+  plat_ds_stub_ctl(0, 1); CK(P50_EaxEnable() == 0);
+  plat_ds_stub_ctl(4, 3); CK(P50_EaxEnable() == 0);
+  plat_ds_stub_ctl(0, 3);
+  P49_Prop30 = NULL; plat_dd_release(ps);
+  /* создание свойств */
+  P38_Ds = plat_dd_create(NULL); int c1 = plat_dd_stub_count();
+  P49_Prop2C = NULL; P49_Prop30 = NULL;
+  CK(P50_CreateKsProps() == 1 && P49_Prop2C != NULL && P49_Prop30 != NULL && plat_dd_stub_count() == c1 + 2);
+  plat_ds3d_stub_last(&op, v, &u); CK(op == 15 && u == 0x12 && v[0] == 32.0f);
+  P49_ReleaseProps(); CK(plat_dd_stub_count() == c1);
+  plat_ds_stub_ctl(1, 3); CK(P50_CreateKsProps() == 0 && P49_Prop2C == NULL && plat_dd_stub_count() == c1);
+  plat_ds_stub_ctl(2, 3); CK(P50_CreateKsProps() == 0 && P49_Prop2C == NULL && P49_Prop30 == NULL && plat_dd_stub_count() == c1);
+  plat_ds_stub_ctl(0, 3);
+  /* полное завершение звука */
+  P49_Listener = plat_dd_create(NULL); P38_DsPrimary = plat_dd_create(NULL);
+  P49_Prop2C = plat_dd_create(NULL); P49_Prop30 = plat_dd_create(NULL);
+  P50_SoundShutdown();
+  CK(P49_Listener == NULL && P38_DsPrimary == NULL && P38_Ds == NULL && P49_Prop2C == NULL && P49_Prop30 == NULL && plat_dd_stub_count() == c1 - 1);
+  P50_SoundShutdown(); CK(plat_dd_stub_count() == c1 - 1);
+  P50_Nop();
+#undef CK
+  return f;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

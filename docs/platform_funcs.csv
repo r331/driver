@@ -82,9 +82,9 @@ address,name,layer,imports,callers,status
 0048c77e,FUN_0048c77e,render,COM_vtable,,ported
 0048c7bd,FUN_0048c7bd,render,COM_vtable,,ported
 0048cad6,FUN_0048cad6,render,COM_vtable,,todo
-0048cba4,FUN_0048cba4,render,COM_vtable,,todo
-0048cbd3,FUN_0048cbd3,render,COM_vtable,,todo
-0048ccdd,FUN_0048ccdd,render,COM_vtable,,todo
+0048cba4,FUN_0048cba4,render,COM_vtable,,ported
+0048cbd3,FUN_0048cbd3,render,COM_vtable,,ported
+0048ccdd,FUN_0048ccdd,render,COM_vtable,,ported
 0048cdab,FUN_0048cdab,render,COM_vtable,,todo
 004e3391,FUN_004e3391,render,COM_vtable,,ported
 004e3b3c,FUN_004e3b3c,render,COM_vtable,,ported

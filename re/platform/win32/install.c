@@ -38,6 +38,7 @@
 #include "../../game/ported47.h"
 #include "../../game/ported48.h"
 #include "../../game/ported49.h"
+#include "../../game/ported50.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1359,4 +1360,16 @@ void re_install_all(void) {
     re_hook(0x0048c7f0, (void*)P49_Play, "P49_Play");
     re_hook(0x0048cd82, (void*)P49_ReleaseProp2C, "P49_ReleaseProp2C");
     re_hook(0x0048ccaf, (void*)P49_ReleaseProps, "P49_ReleaseProps");
+    re_hook(0x0048b568, (void*)P50_FmvReleaseObjs, "P50_FmvReleaseObjs");
+    re_hook(0x0048ac0d, (void*)P50_FmvStopRelease, "P50_FmvStopRelease");
+    re_hook(0x0048b242, (void*)P50_FmvReleaseAll, "P50_FmvReleaseAll");
+    re_hook(0x0048bcc0, (void*)P50_SoundShutdown, "P50_SoundShutdown");
+    re_hook(0x0048cc5f, (void*)P50_Nop, "P50_Nop");
+    re_hook(0x0048c520, (void*)P50_ReleaseVoice, "P50_ReleaseVoice");
+    re_hook(0x0048c83d, (void*)P50_ReleaseBuf, "P50_ReleaseBuf");
+    re_hook(0x0048c8d6, (void*)P50_ResetBuf, "P50_ResetBuf");
+    re_hook(0x0048cba4, (void*)P50_EaxSetDefault, "P50_EaxSetDefault");
+    re_hook(0x0048cbd3, (void*)P50_EaxEnable, "P50_EaxEnable");
+    re_hook(0x0048ccdd, (void*)P50_CreateDummyBuf, "P50_CreateDummyBuf");
+    re_hook(0x0048cc64, (void*)P50_CreateKsProps, "P50_CreateKsProps");
 }
