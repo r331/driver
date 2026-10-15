@@ -184,3 +184,29 @@ int32_t plat_dd_get_display_flags(void *dd, uint32_t *f) {   /* DDSURFACEDESC (0
     uint32_t d[27]; for (int i = 0; i < 27; i++) d[i] = 0; d[0] = 0x6c; d[1] = 0x1000;
     long hr = ((dd_f1)VT(dd, 0x30))(dd, d); *f = d[19]; return hr; }
 void plat_dd_stub_display(uint32_t f, int a, int b) { (void)f; (void)a; (void)b; }
+
+/* --- DirectInput: создание и настройка (IDirectInput: CreateDevice 0xc, EnumDevices 0x10; IDirectInputDevice: QI 0, GetCapabilities 0xc, SetProperty 0x18, SetEventNotification 0x30, SetCooperativeLevel 0x34) --- */
+extern long __attribute__((stdcall)) DirectInputCreateA(void *hinst, unsigned long ver, void **out, void *outer);   /* экспорт этого же DINPUT.dll */
+void *plat_di_create(void *hinst, uint32_t version) { void *o = 0; return DirectInputCreateA(hinst, version, &o, 0) == 0 ? o : (void *)0; }
+void *plat_di_create_sys_device(void *di, int kind) {   /* GUID_SysKeyboard 005464f0, GUID_SysMouse 005464e0 */
+    void *out = 0; long hr = ((dd_f3)VT(di, 0xc))(di, (void *)(kind == 0 ? 0x005464f0u : 0x005464e0u), &out, 0); return wrap_out(hr, out); }
+void *plat_di_create_device(void *di, const void *guid) { void *out = 0; long hr = ((dd_f3)VT(di, 0xc))(di, (void *)guid, &out, 0); return wrap_out(hr, out); }
+void *plat_di_query_device2(void *dev) { void *out = 0; long hr = ((dd_f2)VT(dev, 0))(dev, (void *)0x00546400, &out); return wrap_out(hr, out); }   /* IID_IDirectInputDevice2A */
+int32_t plat_di_set_coop(void *dev, void *hwnd, uint32_t flags) { return ((dd_f2)VT(dev, 0x34))(dev, hwnd, (void *)(uintptr_t)flags); }
+int32_t plat_di_set_event(void *dev, void *ev) { return ((dd_f1)VT(dev, 0x30))(dev, ev); }
+int32_t plat_di_set_prop(void *dev, int prop, uint32_t obj, uint32_t how, int32_t a, int32_t b) {
+    uint32_t p[6];
+    p[1] = 0x10; p[2] = obj; p[3] = how; p[4] = (uint32_t)a;
+    if (prop == 4) { p[0] = 0x18; p[5] = (uint32_t)b; } else p[0] = 0x14;
+    if (prop == 1) { p[2] = 0; p[3] = 0; }
+    return ((dd_f2)VT(dev, 0x18))(dev, (void *)(uintptr_t)prop, p);
+}
+int32_t plat_di_get_caps_flags(void *dev, uint32_t *flags) {
+    uint32_t c[11]; for (int i = 0; i < 11; i++) c[i] = 0; c[0] = 0x2c;
+    long hr = ((dd_f1)VT(dev, 0xc))(dev, c); *flags = c[1]; return hr; }
+static plat_di_joy_cb g_joy_cb;
+static int __attribute__((stdcall)) joy_thunk(const void *inst, void *di) { return g_joy_cb ? g_joy_cb(inst, di) : 0; }
+int32_t plat_di_enum_joysticks(void *di, plat_di_joy_cb cb) { g_joy_cb = cb; return ((dd_f4)VT(di, 0x10))(di, (void *)4, (void *)joy_thunk, di, (void *)1); }
+void *plat_event_create(void) { extern void *__attribute__((stdcall)) CreateEventA(void *, int, int, const char *); return CreateEventA(0, 0, 0, 0); }
+void plat_di_stub_setup(int j, uint32_t c, uint32_t m) { (void)j; (void)c; (void)m; }
+int plat_di_stub_init_stats(int *a, int *b, int *c, int *d) { *a = *b = *c = *d = 0; return 0; }

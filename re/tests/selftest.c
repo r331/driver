@@ -39,6 +39,7 @@
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
+#include "../game/ported37.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -834,6 +835,34 @@ static int test_p36(void) {
 #undef CK
   return f;
 }
+static int test_p37(void) {
+  int f = 0, dv, co, pr, qy;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p37 fail line %d\n",__LINE__); } } while (0)
+  P34_Di = NULL; P36_JoyPresent = 0; P37_MouseShared = 0; memset(P34_EffC, 0, sizeof P34_EffC);
+  memset(P36_KeyCfg, 0, 0x50);
+  plat_di_stub_setup(0, 0, 0);
+  CK(P37_InitInput() == 1 && P34_Di && P34_Kbd && P34_Mouse && P34_Event && P35_InputMode == 0 && P34_Reg24 == 0 && P36_JoyCount == 0);
+  CK(P36_KeyCfg[0] == 0x3b && P36_KeyCfg[4] == 0x2c && P36_KeyCfg[17] == 3 && P36_KeyCfg[20] == 0);
+  CK(P19_Keys1[0] == 0x20 && P19_Keys1[3] == 2 && P19_Keys1[11] == 9);
+  plat_di_stub_init_stats(&dv, &co, &pr, &qy); CK(dv == 2 && co == 2 && pr == 1 && qy == 0);
+  /* два джойстика + Force Feedback: оба заняты, выбран первый */
+  P36_JoyPresent = 1; plat_di_stub_setup(2, 0x100, 0);
+  CK(P37_InitInput() == 1 && P36_JoyCount == 2 && P34_EffC[0] && P34_EffC[1] && P36_JoyAux[0] == 1 && P36_JoyAxisCap[0] == 1 && P36_JoyAxisCap[1] == 0 && P34_Joy == P34_EffC[0] && P34_EffA[0] && P34_EffB[1]);
+  plat_di_stub_init_stats(&dv, &co, &pr, &qy); CK(dv == 4 && qy == 2 && pr == 1 + 8);
+  /* без FF */
+  plat_di_stub_setup(1, 0, 0); CK(P37_InitInput() == 1 && P36_JoyCount == 1 && P36_JoyAux[0] == 0);
+  /* ошибки: каждая ступень освобождает всё */
+  { static const uint32_t fm[] = { 1u << 0, 1u << 1, 1u << 4, 1u << 8, 1u << 9, 1u << 5, 1u << 6 };
+    for (unsigned i = 0; i < sizeof fm / sizeof fm[0]; i++) {
+      plat_di_stub_setup(0, 0, fm[i]);
+      CK(P37_InitInput() == 0 && P34_Kbd == NULL && P34_Mouse == NULL && P34_Event == NULL && (i == 0 || P34_Di == NULL));
+    } }
+  /* отказ на одном джойстике — продолжаем перечисление */
+  P36_JoyPresent = 1; plat_di_stub_setup(2, 0, 1u << 3); CK(P37_InitInput() == 1 && P36_JoyCount == 0 && P34_Joy == NULL);
+  P36_JoyPresent = 0; P34_ReleaseInput();
+#undef CK
+  return f;
+}
 static int test_p35(void) {
   int f = 0, c, ck, s, sk; int32_t dx, dy, mag;
   static int dev;
@@ -874,7 +903,7 @@ static int test_p35(void) {
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

@@ -66,3 +66,5 @@
 - v0.73: +6 функций (ported26: системные обёртки над plat_message_box/utc/wave/cd_roots), всего 1316
 
 - v0.83: +4 функции (ported36: DirectInput джойстик/геймпад над plat_di_poll), всего 1349
+
+- v0.84: +2 функции (ported37: InitInput и колбэк джойстиков), всего 1351

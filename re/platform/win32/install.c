@@ -25,6 +25,7 @@
 #include "../../game/ported34.h"
 #include "../../game/ported35.h"
 #include "../../game/ported36.h"
+#include "../../game/ported37.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1223,4 +1224,6 @@ void re_install_all(void) {
     re_hook(0x004e3769, (void*)P36_SelectJoystick, "P36_SelectJoystick");
     re_hook(0x004e39ac, (void*)P36_GetPadButtons, "P36_GetPadButtons");
     re_hook(0x004e3391, (void*)P36_PollInput, "P36_PollInput");
+    /* 004e3cdf (P37_JoyEnumCb) не хукается: stdcall-колбэк, его вызывает только P37_InitInput через plat_di_enum_joysticks */
+    re_hook(0x004e2ee0, (void*)P37_InitInput, "P37_InitInput");
 }

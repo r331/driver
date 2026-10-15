@@ -151,6 +151,21 @@ int32_t plat_di_create_effect(void *dev, int kind, const uint8_t *guid, void **o
 int32_t plat_di_set_effect(void *eff, int kind, int32_t dx, int32_t dy, int32_t magnitude); /* SetParameters(START|...): kind 0 — направление (dx,dy)+сила, kind 1 — только сила */
 int     plat_di_stub_effects(int *created, int *created_kind, int *sets, int *set_kind, int32_t *dx, int32_t *dy, int32_t *mag); /* тесты (SDL) */
 void    plat_di_stub_fail_enum(int on);                /* тест: EnumEffects ошибка */
+/* DirectInput: создание и настройка (InitInput 004e2ee0, колбэк джойстиков 004e3cdf) */
+typedef int32_t (*plat_di_joy_cb)(const void *inst, void *di);   /* inst: DIDEVICEINSTANCE (guidInstance +4, dwDevType +0x24); 1 — продолжить, 0 — стоп */
+void   *plat_di_create(void *hinst, uint32_t version);           /* DirectInputCreateA(hinst, version); NULL — ошибка */
+void   *plat_di_create_sys_device(void *di, int kind);           /* CreateDevice(GUID_SysKeyboard (0) / GUID_SysMouse (1)); NULL — ошибка */
+void   *plat_di_create_device(void *di, const void *guid);       /* CreateDevice(guid); NULL — ошибка */
+void   *plat_di_query_device2(void *dev);                        /* QueryInterface(IDirectInputDevice2A), исходный объект остаётся у вызывающего; NULL — ошибка */
+int32_t plat_di_set_coop(void *dev, void *hwnd, uint32_t flags); /* SetCooperativeLevel; 0 — успех */
+int32_t plat_di_set_event(void *dev, void *ev);                  /* SetEventNotification; 0 — успех */
+int32_t plat_di_set_prop(void *dev, int prop, uint32_t obj, uint32_t how, int32_t a, int32_t b); /* SetProperty: prop 1 буфер (a — размер), 4 диапазон (a..b), 5 мёртвая зона (a); 0 — успех */
+int32_t plat_di_get_caps_flags(void *dev, uint32_t *flags);      /* GetCapabilities → DIDEVCAPS.dwFlags (0x100 — Force Feedback); 0 — успех */
+int32_t plat_di_enum_joysticks(void *di, plat_di_joy_cb cb);     /* EnumDevices(DIDEVTYPE_JOYSTICK, ATTACHEDONLY); колбэк получает di; 0 — успех */
+void   *plat_event_create(void);                                 /* CreateEvent (авто-сброс); NULL — ошибка */
+/* тесты (SDL): сколько джойстиков «подключено», флаги устройства, маска отказов (бит: 0 create, 1 sys_device, 2 device, 3 query, 4 coop, 5 event, 6 prop, 7 caps, 8 acquire, 9 event_create) */
+void    plat_di_stub_setup(int joysticks, uint32_t caps_flags, uint32_t fail_mask);
+int     plat_di_stub_init_stats(int *devices, int *coops, int *props, int *queries); /* SDL: счётчики вызовов */
 /* DirectDraw: создание объекта и режим экрана */
 void   *plat_dd_create(const void *guid);              /* DirectDrawCreate(guid, &dd, NULL); NULL — ошибка */
 int32_t plat_dd_get_display_flags(void *dd, uint32_t *pixfmt_flags); /* GetDisplayMode → ddpfPixelFormat.dwFlags; HRESULT */
