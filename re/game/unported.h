@@ -27,6 +27,8 @@
     V(P66_Fn4EE8F4, 0x004ee8f4, (int32_t a), (a)) \
     V(P66_Fn4169AF, 0x004169af, (void), ()) \
     V(P66_Fn4C3BC7, 0x004c3bc7, (void), ()) \
+    V(P70_Fn5063A4, 0x005063a4, (int32_t i), (i)) \
+    V(P70_Fn507925, 0x00507925, (int32_t i), (i)) \
     V(P66_Fn4C68A7, 0x004c68a7, (int32_t a), (a)) \
     V(P65_Fn4CFE69, 0x004cfe69, (uint32_t a0), (a0)) \
     R(int32_t, P63_Fn49521E, 0x0049521e, (void *r, int32_t a, int32_t b), (r, a, b)) \

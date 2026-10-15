@@ -58,6 +58,7 @@
 #include "../../game/ported67.h"
 #include "../../game/ported68.h"
 #include "../../game/ported69.h"
+#include "../../game/ported70.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1626,4 +1627,14 @@ void re_install_all(void) {
     re_hook(0x004b3ddb, (void*)P69_ReleaseOverlays, "P69_ReleaseOverlays");
     re_hook(0x004aaea6, (void*)P69_SceneFrame, "P69_SceneFrame");
     re_hook(0x004246f0, (void*)P69_FreeDevices, "P69_FreeDevices");
+    re_hook(0x00514332, (void*)P70_SpawnPart4, "P70_SpawnPart4");
+    re_hook(0x00514403, (void*)P70_SpawnPart2, "P70_SpawnPart2");
+    re_hook(0x00513905, (void*)P70_FindParticle, "P70_FindParticle");
+    re_hook(0x0051ab31, (void*)P70_RowDecode, "P70_RowDecode");
+    re_hook(0x00406369, (void*)P70_ReadChunk, "P70_ReadChunk");
+    re_hook(0x00406199, (void*)P70_LoadReplay, "P70_LoadReplay");
+    re_hook(0x005170ab, (void*)P70_FadeColor, "P70_FadeColor");
+    re_hook(0x0051755e, (void*)P70_ShadowText, "P70_ShadowText");
+    re_hook(0x005062cc, (void*)P70_RadarNearest, "P70_RadarNearest");
+    re_hook(0x0050784d, (void*)P70_RadarNearestB, "P70_RadarNearestB");
 }
