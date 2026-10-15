@@ -39,6 +39,7 @@
 #include "../../game/ported48.h"
 #include "../../game/ported49.h"
 #include "../../game/ported50.h"
+#include "../../game/ported51.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1372,4 +1373,15 @@ void re_install_all(void) {
     re_hook(0x0048cbd3, (void*)P50_EaxEnable, "P50_EaxEnable");
     re_hook(0x0048ccdd, (void*)P50_CreateDummyBuf, "P50_CreateDummyBuf");
     re_hook(0x0048cc64, (void*)P50_CreateKsProps, "P50_CreateKsProps");
+    re_hook(0x004d69ed, (void*)P51_PitchJitterSfx, "P51_PitchJitterSfx");
+    re_hook(0x004d8487, (void*)P51_ScalePair, "P51_ScalePair");
+    re_hook(0x004a59f2, (void*)P51_PrefixMatch, "P51_PrefixMatch");
+    re_hook(0x004a5a83, (void*)P51_SkipToLine, "P51_SkipToLine");
+    re_hook(0x004d3000, (void*)P51_FileSize, "P51_FileSize");
+    re_hook(0x004a63c6, (void*)P51_DirFromHeading, "P51_DirFromHeading");
+    re_hook(0x00491928, (void*)P51_InitCarSlot, "P51_InitCarSlot");
+    re_hook(0x0048eb25, (void*)P51_TrafficConflict, "P51_TrafficConflict");
+    re_hook(0x0048f7fe, (void*)P51_NodeKind, "P51_NodeKind");
+    re_hook(0x004d0071, (void*)P51_SteerHeading, "P51_SteerHeading");
+    re_hook(0x004a50f7, (void*)P51_SkipNumber, "P51_SkipNumber");
 }
