@@ -5,6 +5,7 @@
 /* --- system --- */
 uint32_t plat_time_ms(void);
 void plat_sleep_ms(uint32_t ms);
+void plat_local_hms(int *h, int *m, int *s); /* GetLocalTime */
 void plat_log(const char *fmt, ...);
 void *plat_file_open(const char *path, const char *mode); /* case-insensitive lookup */
 /* --- window & input --- */

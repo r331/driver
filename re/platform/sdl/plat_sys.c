@@ -29,3 +29,5 @@ int plat_window_open(const char *t,int w,int h,int fs){
 int plat_poll_events(void){ SDL_Event e; while (SDL_PollEvent(&e)) if (e.type==SDL_QUIT) return 0; return 1; }
 int plat_key_down(int sc){ const Uint8 *k = SDL_GetKeyboardState(NULL); return k ? k[sc] : 0; }
 void plat_window_close(void){ if (g_win) SDL_DestroyWindow(g_win); g_win=0; SDL_Quit(); }
+#include <time.h>
+void plat_local_hms(int *h,int *m,int *s){ time_t t=time(0); struct tm *l=localtime(&t); *h=l->tm_hour; *m=l->tm_min; *s=l->tm_sec; }

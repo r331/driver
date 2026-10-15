@@ -30,3 +30,4 @@
 - 2026-10-14 18:20: шаг B (часть): win32/plat_rs.c — render/звук заглушки для hook; native+hook собраны. Следующий: GL-бэкенд, SDL_audio микшер, перенос обёрток (C).
 - 2026-10-14 18:40: шаг B (часть): SDL-звук — таблица буферов (create/destroy/play/stop/set/pos3d); native+hook собраны. Следующий: GL-бэкенд, SDL_audio микшер, перенос обёрток (C).
 - 2026-10-14 18:55: шаг B (часть): CD-аудио — состояние трека (plat_cd_play/stop/current) в sdl; native+hook собраны. Следующий: GL-бэкенд, SDL_audio микшер, перенос обёрток (C).
+- 2026-10-14 19:15: шаг B (часть): plat_local_hms (GetLocalTime) в sdl и win32; native+hook собраны, ctest ок. Следующий: перенос обёртки 004d986e (часы) и timeGetTime-тонков, GL-бэкенд, SDL_audio.
