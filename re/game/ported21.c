@@ -124,3 +124,33 @@ uint32_t P21_FrameTicks(void) {
   P21_FrameTotal += (int32_t)r;
   return r;
 }
+
+#ifndef RE_HOOK_BUILD
+uint32_t P21_Fps2Last, P21_Fps2Val; int32_t P21_Fps2Cnt;
+uint8_t P21_Font8[256 * 8];
+#endif
+void P21_FpsToBuf(uint8_t* dst, uint8_t fg, uint8_t bg) {
+  char txt[32];
+  P21_Fps2Cnt++;
+  uint32_t t = plat_time_ms();
+  if (t - P21_Fps2Last > 1000) {
+    P21_Fps2Val = (uint32_t)(P21_Fps2Cnt * 1000) / (t - P21_Fps2Last);
+    P21_Fps2Last = plat_time_ms();
+    P21_Fps2Cnt = 0;
+  }
+  snprintf(txt, sizeof txt, "%dfps", (int)P21_Fps2Val);
+  for (const uint8_t* p = (const uint8_t*)txt; *p; p++) {
+    uint8_t c = *p;
+    if (c > 0x60 && c < 0x7b) c = (uint8_t)(c + 0xa0);
+    uint8_t* q = dst;
+    for (int row = 0; row < 8; row++) {
+      uint8_t bits = P21_Font8[c * 8 + row];
+      for (int col = 0; col < 8; col++) {
+        *q++ = (bits & 0x80) ? fg : bg;
+        bits = (uint8_t)(bits << 1);
+      }
+      q += 0x278;
+    }
+    dst += 8;
+  }
+}

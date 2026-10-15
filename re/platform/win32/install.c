@@ -1125,4 +1125,5 @@ void re_install_all(void) {
     re_hook(0x004d986e, (void*)P21_DrawClock, "P21_DrawClock");
     re_hook(0x004d53e8, (void*)P21_DrawFps, "P21_DrawFps");
     re_hook(0x004d78f3, (void*)P21_FrameTicks, "P21_FrameTicks");
+    re_hook(0x004bf910, (void*)P21_FpsToBuf, "P21_FpsToBuf");
 }

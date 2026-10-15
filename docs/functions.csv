@@ -2366,7 +2366,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004bf485,FUN_004bf485,Call004BF485,manual,UIMisc,,,28,ported
 004bf4a1,FUN_004bf4a1,,,,,,150,todo
 004bf8a1,FUN_004bf8a1,ClearEntry_004BF8A1,manual,Misc,,,111,ported
-004bf910,FUN_004bf910,,,,,,369,todo
+004bf910,P21_FpsToBuf,manual,,,,,369,ported
 004bfc30,FUN_004bfc30,,,,,,1502,todo
 004c020e,FUN_004c020e,Call004C020E,manual,UIMisc,,,10,ported
 004c0218,FUN_004c0218,,,,,,274,todo

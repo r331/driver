@@ -53,3 +53,13 @@ extern int32_t P21_FrameFlagA, P21_FrameFlagB, P21_FrameMin, P21_FrameTotal;
 extern uint32_t P21_FrameBase;
 #endif
 uint32_t P21_FrameTicks(void); /* 004d78f3: 20ms frame ticks, capped at 10 */
+#ifdef RE_HOOK_BUILD
+#define P21_Fps2Last (*(uint32_t*)0x00b20260)
+#define P21_Fps2Val  (*(uint32_t*)0x00b20264)
+#define P21_Fps2Cnt  (*(int32_t*)0x00b20268)
+#define P21_Font8    ((const uint8_t*)0x00554414)
+#else
+extern uint32_t P21_Fps2Last, P21_Fps2Val; extern int32_t P21_Fps2Cnt;
+extern uint8_t P21_Font8[256 * 8];
+#endif
+void P21_FpsToBuf(uint8_t* dst, uint8_t fg, uint8_t bg); /* 004bf910: FPS text into 8bpp buffer, 640 stride */
