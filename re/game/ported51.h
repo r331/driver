@@ -1,5 +1,6 @@
 #pragma once
 #include "gvar.h"
+#include "nodetab.h"
 #include "unported.h"
 #include "ported19.h"
 #include "ported44.h"
@@ -11,11 +12,10 @@
 #define P51_Half       GAME_VAR(float, P51_Half, 0x00546068)          /* 0.5 */
 #define P51_TrafficN   GAME_VAR(int32_t, P51_TrafficN, 0x00575ee4)
 typedef uint8_t p51_tab_1ed80_t[0x2c * 64];
-#define P51_Tab1ED80   GAME_VAR(p51_tab_1ed80_t, P51_Tab1ED80, 0x00c1ed80) /* записи по 0x2c байт; байт +3 — флаг блокировки */
+#define P51_Tab1ED80   SLOTTAB_VAR(p51_tab_1ed80_t, P51_Tab1ED80, 0x00c1ed80) /* записи по 0x2c байт; байт +3 — флаг блокировки */
 #ifndef RE_HOOK_BUILD
 extern int32_t P51_PitchCount, P51_TrafficN;
 extern float P51_Half;
-extern p51_tab_1ed80_t P51_Tab1ED80;
 #endif
 void    P51_PitchJitterSfx(void);                        /* 004d69ed: звук 0x16 с разбросом высоты ±0x1000 по таймеру */
 void    P51_ScalePair(float *x, float *y);               /* 004d8487: (v/640|480 − 0.5)·масштаб + 0.5, умножить на размер экрана */

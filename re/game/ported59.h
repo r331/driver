@@ -1,5 +1,6 @@
 #pragma once
 #include "gvar.h"
+#include "nodetab.h"
 #include "unported.h"
 #include "engine.h"
 #include "crt.h"
@@ -39,7 +40,7 @@ typedef int16_t p59_sin_t[4096];
 #define P59_Mode1137324 GAME_VAR(uint8_t, P59_Mode1137324, 0x01137324)
 #define P59_CarsTab     GAME_VAR(uint8_t *, P59_CarsTab, 0x0113a6c4)  /* таблица машин, запись 0x148 */
 #define P59_C39DC0      GAME_VAR(p59_tab_c39dc0_t, P59_C39DC0, 0x00c39dc0) /* запись 0x24: байты +0..3 — длины, int +4/+0x10/+0x14/+0x20 — границы */
-#define P59_BF1C48      GAME_VAR(p59_tab_bf1c48_t, P59_BF1C48, 0x00bf1c48) /* запись 0x42: int16 в начале */
+#define P59_BF1C48      NODETAB_VAR(p59_tab_bf1c48_t, P59_BF1C48, 0x00bf1c48) /* запись 0x42: int16 в начале */
 #define P59_ModelCount  GAME_VAR(int32_t, P59_ModelCount, 0x01134120)
 #define P59_Flags9      GAME_VAR(p59_u8x9_t, P59_Flags9, 0x00d04a50)
 #define P59_Picked      GAME_VAR(int8_t, P59_Picked, 0x00d04650)
@@ -62,7 +63,7 @@ typedef uint32_t p59_hdr_t[2];
 #ifndef RE_HOOK_BUILD
 extern float P59_CamF1, P59_CamLim, P59_VX, P59_VY, P59_VZ;
 extern uint16_t P59_AngA, P59_AngB, P59_AngC; extern uint8_t P59_Mode1137324, *P59_CarsTab;
-extern p59_tab_c39dc0_t P59_C39DC0; extern p59_tab_bf1c48_t P59_BF1C48; extern int32_t P59_ModelCount;
+extern p59_tab_c39dc0_t P59_C39DC0; extern int32_t P59_ModelCount;
 extern p59_u8x9_t P59_Flags9; extern int8_t P59_Picked; extern int32_t P59_S4654, P59_S44CC, P59_S4790, P59_S3904;
 extern p59_i32x18_t P59_PickTab; extern int32_t P59_NearN; extern p59_u8x64_t P59_NearList;
 extern p59_sin_t P59_Sin; extern p59_hdr_t P59_Hdr; extern p59_rep_t P59_Rep57B6B8; extern float P59_One;

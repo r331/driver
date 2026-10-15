@@ -771,11 +771,7 @@ void P100_MarkerSpawn(int32_t k) {
   P44_XformT(v);
   v[0] += (float)c->pos[0]; v[1] -= (float)c->pos[1]; v[2] += (float)c->pos[2];
   wrf(b + 0xd0, v[0]); wrf(b + 0xd4, v[1]); wrf(b + 0xd8, v[2]);
-#ifdef RE_HOOK_BUILD
-  memcpy(b + 0x50, P98_MrkMat, 0x40);
-#else
-  memcpy(b + 0x50, P98_MrkMat, sizeof P98_MrkMat);   /* в native матрица маркера — 9 float */
-#endif
+  memcpy(b + 0x50, P98_CarMat[0], 0x40);   /* v1.46: в native тоже вся матрица 0x40 (P98_CarMat) */
   int16_t ang[3] = { 0, 0, 10 };
   P43_EulerMatrix((float *)(b + 0x90), ang);
   if (k == 3 || k == 2) {

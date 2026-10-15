@@ -8,9 +8,6 @@
 GAME_VAR_DEF(int32_t, P51_PitchCount, 0x00560388)
 GAME_VAR_DEF(float, P51_Half, 0x00546068)
 GAME_VAR_DEF(int32_t, P51_TrafficN, 0x00575ee4)
-#ifndef RE_HOOK_BUILD
-p51_tab_1ed80_t P51_Tab1ED80;
-#endif
 #include "ported12.h"
 
 static inline uint32_t rd32(const uint8_t *p, int o) { uint32_t v; memcpy(&v, p + o, 4); return v; }

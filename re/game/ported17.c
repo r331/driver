@@ -1,7 +1,5 @@
 #include "ported17.h"
 #include <string.h>
-GAME_VAR_DEF(p17_slots_t, P17_SlotBase, 0x00c1ed8a)
-GAME_VAR_DEF(p17_map_t, P17_MapBase, 0x00bf1c42)
 GAME_VAR_DEF(uint32_t, P17_SqrtArg, 0x0057a136)
 GAME_VAR_DEF(uint32_t, P17_PtrA, 0x00b5a730)
 GAME_VAR_DEF(uint32_t, P17_PtrB, 0x00b5a734)

@@ -104,6 +104,8 @@
 #include "../game/ported98.h"
 #include "../game/ported99.h"
 #include "../game/ported100.h"
+#include "../game/ported101.h"
+#include "../game/nodetab.h"
 #include "../game/reptr.h"
 #include <math.h>
 #include <stdio.h>
@@ -4346,6 +4348,88 @@ static int test_p95(void) {
 
 static void st_depth_mask(int32_t w) { plat_set_zbuffer(1, w != 0); }   /* _grDepthMask@4 для 0042655a в native */
 int png_write_rgba(const char *path, const uint32_t *px, int w, int h);
+static int test_p101(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p101 fail line %d\n",__LINE__); } } while (0)
+  /* единые таблицы дороги / матриц (v1.46) */
+  CK((uint8_t *)P17_MapBase == P11_00bf1c40 + 2 && (uint8_t *)P59_BF1C48 == P11_00bf1c40 + 8);
+  CK((uint8_t *)P17_SlotBase == P11_00c1ed80 + 0xa && (uint8_t *)P11_00c1ed8a == P11_00c1ed80 + 0xa && (uint8_t *)P51_Tab1ED80 == P11_00c1ed80);
+  CK((float *)P98_MrkMat == P98_CarMat[0] && sizeof P98_MrkMat == 36);
+  { /* 0051b974 */
+    static uint8_t sn[0x42 * 4], ss[0x2c * 3], sr[0x14 * 4];
+    memcpy(sn, P11_00bf1c40, sizeof sn); memcpy(ss, P11_00c1ed80, sizeof ss); memcpy(sr, P11_00c12c60, sizeof sr);
+    int32_t c64 = P62_MapC64, c40 = P62_Map2C40, b1 = P54_MapB1, b2 = P54_MapB2, mn = P62_MapN, rows = P72_Rows;
+    void *ra = P54_RoadA[0], *rb = P54_RoadB[0];
+    uint16_t ta[16] = { 3 }; uint32_t tb[16] = { 0x00050007u };
+    P62_MapC64 = 0; P62_Map2C40 = 0; P54_MapB1 = P54_MapB2 = 4; P62_MapN = 4; P72_Rows = 1; P54_RoadA[0] = ta; P54_RoadB[0] = tb;
+    int16_t v; memset(P11_00bf1c40 + 3 * 0x42, 0, 0x42);
+    v = 2; memcpy(P17_MapBase + 3 * 0x42, &v, 2);                    /* +2 — через псевдоним P17_MapBase */
+    v = 9; memcpy(P11_00bf1c40 + 3 * 0x42 + 4, &v, 2);
+    v = 2; memcpy(P59_BF1C48 + 3 * 0x42, &v, 2);                     /* +8 — через псевдоним P59_BF1C48 */
+    memset(P11_00c1ed80 + 2 * 0x2c, 0, 0x2c);
+    P11_00c1ed8a[2 * 0x16 + 2 * 4] = 3; P11_00c1ed8a[2 * 0x16 + 2 * 4 + 1] = 7;
+    int32_t one = 1; memcpy(P11_00c12c60 + 3 * 0x14 + 4, &one, 4);
+    CK(P101_RoadNode(0, 0, 0) == 0 && P101_RdNode == 2 && P101_RdCell == 3 && P101_RdLane == 7 && P72_Id == 5 && P72_Low == 7);
+    CK(P101_RdDist == -0x2ee && P101_RdLeft == 2 * 0x5dc + 0x2ee);
+    ta[0] = 0x4005; CK(P101_RoadNode(0, 0, 0) == 1 && P101_RdNode == 5);
+    ta[0] = 0xffff; CK(P101_RoadNode(0, 0, 0) == -1 && P101_RdDist == 0x7fffffff);
+    CK(P101_RoadNode(-100000, 0, 0) == -1);
+    p101_nbr_t nb; memcpy(nb, P101_Nbr, sizeof nb); memset(P101_Nbr, 0, sizeof nb); P101_Nbr[3] = -0x8000;   /* 005139d7 */
+    float o[3] = { 0, 0, 0 };
+    CK(P101_PickCell(0, 0, 0, o) == 1 && o[0] == -1500.0f && o[2] == 0.0f);
+    P101_Nbr[3] = 0; CK(P101_PickCell(0, 0, 0, o) == 0);
+    memcpy(P101_Nbr, nb, sizeof nb);
+    P62_MapC64 = c64; P62_Map2C40 = c40; P54_MapB1 = b1; P54_MapB2 = b2; P62_MapN = mn; P72_Rows = rows; P54_RoadA[0] = ra; P54_RoadB[0] = rb;
+    memcpy(P11_00bf1c40, sn, sizeof sn); memcpy(P11_00c1ed80, ss, sizeof ss); memcpy(P11_00c12c60, sr, sizeof sr); }
+  { int32_t a[0x20], b[0x20], best = 0;   /* 004997a0 */
+    memset(a, 0, sizeof a); memset(b, 0, sizeof b);
+    a[0] = 4096; a[5] = 4096; a[10] = 4096; a[0x10] = 100; a[0x11] = 200; a[0x12] = 300; memcpy(b, a, sizeof a);
+    int32_t r = P101_BoxHit(a, b, &best);
+    CK((r == 0 || r == 1) && a[0x13] == 100 && a[0x18] == 200 && a[0x1d] == 300 && b[0x13] == 100); }
+  { int32_t p[16]; memset(p, 0, sizeof p);   /* 004b998b */
+    int16_t c = 5; memcpy((uint8_t *)p + 0x20, &c, 2); c = 0x80; memcpy((uint8_t *)p + 0x26, &c, 2); c = 0x90; memcpy((uint8_t *)p + 0x28, &c, 2);
+    p[0] = 10; p[4] = 5; p[2] = 1; p[6] = 2;
+    P101_DebrisBounce(p);
+    uint16_t a26; memcpy(&a26, (uint8_t *)p + 0x26, 2); memcpy(&c, (uint8_t *)p + 0x20, 2);
+    CK(p[0] == 15 && p[2] == 3 && a26 == 0x10 && c == 4); }
+  { uint8_t pt[0xa0]; memset(pt, 0, sizeof pt);   /* 00513d0a */
+    uint32_t fl = 0x13; memcpy(pt + 0x10, &fl, 4); P101_PartFall(pt); memcpy(&fl, pt + 0x10, 4); CK(fl == 0x20);
+    fl = 0x11; memcpy(pt + 0x10, &fl, 4); P101_PartFall(pt); memcpy(&fl, pt + 0x10, 4); CK(fl == 0x12);
+    float vy = 60.0f; fl = 0x10; memcpy(pt + 0x10, &fl, 4); memcpy(pt + 0x78, &vy, 4); P101_PartFall(pt); memcpy(&vy, pt + 0x78, 4); CK(vy == 55.0f); }
+  { float buf[48], *so = P100_ClipOut; int32_t sn = P100_ClipN; float sf = P95_Near;   /* 0042da16 */
+    float va[6] = { 0, 0, 0, 0, 0, 0 }, vb[6] = { 0, 0, 0, 4, 8, 100 };
+    P95_Near = 50.0f; P100_ClipOut = buf; P100_ClipN = 0;
+    P101_ClipNearUV((const uint8_t *)va, (const uint8_t *)vb, 0.0f, 0.0f, 1.0f, 2.0f);
+    CK(P100_ClipN == 2 && P100_ClipOut == buf + 24 && buf[0] == 2.0f && buf[1] == 4.0f && buf[2] == 50.0f && buf[4] == 0.5f && buf[5] == 1.0f);
+    CK(buf[12] == 4.0f && buf[14] == 100.0f && buf[16] == 1.0f && buf[17] == 2.0f);
+    P100_ClipOut = buf; P100_ClipN = 0;
+    P101_ClipNearRGB((const uint8_t *)vb, (const uint8_t *)va, 1.0f, 2.0f, 3.0f, 0.0f, 0.0f, 0.0f);
+    CK(P100_ClipN == 1 && buf[7] == 0.5f && buf[8] == 1.0f && buf[9] == 1.5f && buf[2] == 50.0f);
+    P100_ClipOut = so; P100_ClipN = sn; P95_Near = sf; }
+  { static uint8_t px[0x280 * 2]; memset(px, 0, sizeof px);   /* 005291ed */
+    P101_FillRows(px, 0x40, 2, 0xab); CK(px[0] == 0xab && px[0x3f] == 0xab && px[0x40] == 0 && px[0x280 + 0x3f] == 0xab); }
+  { static uint8_t src[640], dst[0x500]; memset(src, 0, sizeof src);   /* 00529253 */
+    uint32_t p1 = P101_PalLfb[1], p2 = P101_PalLfb[2]; int32_t pitch = P100_LfbPitch;
+    P101_PalLfb[1] = 0x1234; P101_PalLfb[2] = 0x5678; P100_LfbPitch = 0x500; src[0] = 1; src[1] = 2;
+    P101_Pal16(src, dst, 0, 1); uint32_t w; memcpy(&w, dst, 4); CK(w == 0x56781234u);
+    P101_PalLfb[1] = p1; P101_PalLfb[2] = p2; P100_LfbPitch = pitch; }
+  { float m[9] = { 1, 0, 0, 0, 1, 0, 0, 0, 1 }, v[6] = { 0, 0, 0, 4, 5, 6 };   /* 00528c91 */
+    float *sm = P44_MatPtr, bx = P44_BiasX, by = P44_BiasY, bz = P44_BiasZ;
+    P44_MatPtr = m; P44_BiasX = 1; P44_BiasY = 2; P44_BiasZ = 3;
+    P101_XformBias2(v); uint32_t tg; memcpy(&tg, &v[0], 4);
+    CK(v[3] == 5.0f && v[4] == 7.0f && v[5] == 9.0f && tg == P44_XformTag);
+    P44_MatPtr = sm; P44_BiasX = bx; P44_BiasY = by; P44_BiasZ = bz; }
+  { p99_car_t sv = P99_Cars[6]; uint8_t out[0x20] = { 0 };   /* 004dea35 */
+    int16_t cl = 10, sc; memcpy(&sc, S_00D0CC60 + 0xe2, 2); memcpy(S_00D0CC60 + 0xe2, &cl, 2);
+    memset(&P99_Cars[6], 0, sizeof P99_Cars[6]);
+    int32_t h = P100_RoadHeight((const int32_t *)((uint8_t *)&P99_Cars[6] + 0xc8));
+    P101_CarGround(&P99_Cars[6], out);
+    CK(out[0x14] == 1 && P99_Cars[6].pos[1] == h - 10 && P99_Cars[6].f78[0][0] == 0x10 && P99_Cars[6].f78[3][0] == 0x10);
+    memcpy(S_00D0CC60 + 0xe2, &sc, 2); P99_Cars[6] = sv; }
+  return f;
+}
+
 static int test_real_level(void) {
   const char *nm = getenv("RE_REAL_LEVEL");
   if (!nm) return 0;
@@ -4936,7 +5020,7 @@ static int test_p86(void) {
 
 int re_selftest(void) {
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

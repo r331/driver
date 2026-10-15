@@ -89,6 +89,7 @@
 #include "../../game/ported98.h"
 #include "../../game/ported99.h"
 #include "../../game/ported100.h"
+#include "../../game/ported101.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1953,4 +1954,35 @@ void re_install_all(void) {
     re_hook(0x004f2c9a, (void*)P100_MirrorMask, "P100_MirrorMask");
     re_hook(0x00494701, (void*)P100_TrafficSlot, "P100_TrafficSlot");
     re_hook(0x00407e2f, (void*)P100_IconLfb2x, "P100_IconLfb2x");
+    re_hook(0x004f51b4, (void*)P101_GoalTick, "P101_GoalTick");
+    re_hook(0x004b998b, (void*)P101_DebrisBounce, "P101_DebrisBounce");
+    re_hook(0x00518953, (void*)P101_ReplayBegin, "P101_ReplayBegin");
+    re_hook(0x00522d02, (void*)P101_Drips, "P101_Drips");
+    re_hook(0x004dea35, (void*)P101_CarGround, "P101_CarGround");
+    re_hook(0x005139d7, (void*)P101_PickCell, "P101_PickCell");
+    re_hook(0x004997a0, (void*)P101_BoxHit, "P101_BoxHit");
+    re_hook(0x0051c07a, (void*)P101_RoadBounds, "P101_RoadBounds");
+    re_hook(0x00513d0a, (void*)P101_PartFall, "P101_PartFall");
+    re_hook(0x0051500c, (void*)P101_PartTurn, "P101_PartTurn");
+    re_hook(0x004d63bc, (void*)P101_TrafficSounds, "P101_TrafficSounds");
+    re_hook(0x004b0256, (void*)P101_AddObjB, "P101_AddObjB");
+    re_hook(0x004af076, (void*)P101_CarLight, "P101_CarLight");
+    re_hook(0x004b9aec, (void*)P101_DebrisFly, "P101_DebrisFly");
+    re_hook(0x0051d97e, (void*)P101_WheelsGround, "P101_WheelsGround");
+    re_hook(0x004ef3cd, (void*)P101_SkyInit, "P101_SkyInit");
+    re_hook(0x0051b974, (void*)P101_RoadNode, "P101_RoadNode");
+    re_hook(0x004f29f7, (void*)P101_MirrorMaskR, "P101_MirrorMaskR");
+    re_hook(0x004aecb1, (void*)P101_CarSkids, "P101_CarSkids");
+    re_hook(0x00528bb7, (void*)P101_ProjT, "P101_ProjT");
+    re_hook(0x00528c91, (void*)P101_XformBias2, "P101_XformBias2");
+    re_hook(0x00528d17, (void*)P101_Proj, "P101_Proj");
+    re_hook(0x005291ed, (void*)P101_FillRows, "P101_FillRows");
+    re_hook(0x00529253, (void*)P101_Pal16, "P101_Pal16");
+    re_hook(0x005292d1, (void*)P101_Pal32, "P101_Pal32");
+    re_hook(0x0042da16, (void*)P101_ClipNearUV, "P101_ClipNearUV");
+    re_hook(0x0042f124, (void*)P101_ClipFarUV, "P101_ClipFarUV");
+    re_hook(0x0042dce8, (void*)P101_ClipNearUVW, "P101_ClipNearUVW");
+    re_hook(0x0042e3c7, (void*)P101_ClipNearRGB, "P101_ClipNearRGB");
+    re_hook(0x0042e007, (void*)P101_ClipNear5A, "P101_ClipNear5A");
+    re_hook(0x0042e6e6, (void*)P101_ClipNear5B, "P101_ClipNear5B");
 }

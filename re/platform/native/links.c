@@ -89,6 +89,7 @@
 #include "../../game/ported98.h"
 #include "../../game/ported99.h"
 #include "../../game/ported100.h"
+#include "../../game/ported101.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -213,6 +214,7 @@ int32_t R12_4D97E9 (void) { return (int32_t)P48_AnyKey(); }
 void Call00424921 (int32_t a0, int32_t a1, uint32_t a2, int32_t a3) { P47_TexTable(a0, a1, a2, a3); }
 void Call0048A525 (int32_t a0) { P76_MarkSlots(a0); }
 void Call0048A68E (int32_t a0) { Dispatch0048A68E(a0); }
+void Call004B9AEC (void) { P101_DebrisFly(); }
 void Call004B9D79 (void) { P16_StepParticles(); }
 void Call004911D9 (void) { P98_TrafficSpin(); }
 void Call0050F289 (void) { P55_StopAudio(); }

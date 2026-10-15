@@ -34,6 +34,7 @@ typedef uint8_t  p98_six_t[6 * 0x30];
 typedef float    p98_f3_t[3];
 typedef float    p98_f5_t[5];
 typedef float    p98_f9_t[9];
+typedef float    p98_carmat_t[65][16];   /* v1.46: матрицы машин 01135060 (шаг 0x40, до 011360a0) */
 typedef float    p98_f16_t[16];
 typedef int32_t  p98_i10_t[10];
 typedef uint8_t  p98_b148_t[0x148];
@@ -81,7 +82,8 @@ typedef uint16_t p98_pix_t[0x10000];
 #define P98_MrkPos    GAME_VAR(p98_f3_t, P98_MrkPos, 0x00d02670)
 #define P98_MrkW      GAME_VAR(uint32_t, P98_MrkW, 0x00d0267c)
 #define P98_MrkSrc    GAME_VAR(p98_f3_t, P98_MrkSrc, 0x00d02720)
-#define P98_MrkMat    GAME_VAR(p98_f9_t, P98_MrkMat, 0x01135060)
+#define P98_CarMat    GAME_VAR(p98_carmat_t, P98_CarMat, 0x01135060)
+#define P98_MrkMat    (*(p98_f9_t *)P98_CarMat[0])   /* v1.46: матрица 0 таблицы P98_CarMat (прежде отдельные 9 float) */
 #define P98_C824A0    GAME_VAR(int32_t, P98_C824A0, 0x00c824a0)
 #define P98_D078C8    CARTAB_VAR(int32_t, P98_D078C8, 0x00d078c8)            /* поле +0x108 записи игрока (как P97_D078CC) */
 #define P98_ScrFirst  GAME_VAR(int32_t, P98_ScrFirst, 0x00c80cc0)
@@ -139,7 +141,7 @@ extern p98_gr1_fn P98_GrD40; extern int32_t P98_IconN; extern p98_iconidx_t P98_
 extern uint8_t *P98_SixRec; extern p98_six_t P98_Six; extern uint8_t P98_DD70; extern int16_t P98_DDE4; extern p98_b54_t P98_TrafX;
 extern uint32_t P98_CamW; extern float P98_ScaleB; extern p98_f5_t P98_CamQuat; extern p98_camrecs_t P98_CamRecs; extern uint32_t P98_TgtW;
 extern int32_t P98_FreeTurn; extern uint8_t P98_KeyL, P98_KeyR, P98_KeyB, P98_KeyMode, P98_KeyTgt;
-extern int32_t P98_MrkOff, P98_MrkModel; extern p98_f3_t P98_MrkPos, P98_MrkSrc; extern uint32_t P98_MrkW; extern p98_f9_t P98_MrkMat;
+extern int32_t P98_MrkOff, P98_MrkModel; extern p98_f3_t P98_MrkPos, P98_MrkSrc; extern uint32_t P98_MrkW; extern p98_carmat_t P98_CarMat;
 extern int32_t P98_C824A0, P98_ScrFirst, P98_ScrModel; extern p98_i10_t P98_Range; extern int32_t P98_PartDist;
 extern p98_f16_t P98_PartPl; extern p98_pix_t P98_PixTab;
 extern p98_b410_t P98_CarBufA; extern p98_b110_t P98_CarTimer; extern p98_b45100_t P98_CarOpsA; extern p98_b61c00_t P98_CarOpsB;

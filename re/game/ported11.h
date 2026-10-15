@@ -1,5 +1,6 @@
 #pragma once
 #include "gvar.h"
+#include "nodetab.h"
 #include "unported.h"
 #include "menustate.h"
 #include "ported10.h"
@@ -138,9 +139,8 @@ extern float P11_00546054;
 #ifndef RE_HOOK_BUILD
 extern float P11_00546080;
 #endif
-#define P11_00c1ed8a GAME_VAR(p11_s16arr, P11_00c1ed8a, 0x00c1ed8a)
+#define P11_00c1ed8a SLOTTAB_VAR(p11_s16arr, P11_00c1ed8a, 0x00c1ed8a)   /* v1.46: над P11_00c1ed80 */
 #ifndef RE_HOOK_BUILD
-extern p11_s16arr P11_00c1ed8a;
 #endif
 #define P11_00572b40 GAME_VAR(p11_u32arr, P11_00572b40, 0x00572b40)
 #ifndef RE_HOOK_BUILD
