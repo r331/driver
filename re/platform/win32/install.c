@@ -56,6 +56,7 @@
 #include "../../game/ported65.h"
 #include "../../game/ported66.h"
 #include "../../game/ported67.h"
+#include "../../game/ported68.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1609,4 +1610,13 @@ void re_install_all(void) {
     re_hook(0x00415ec0, (void*)P67_Menu415EC0, "P67_Menu415EC0");
     re_hook(0x00417970, (void*)P67_Menu417970, "P67_Menu417970");
     re_hook(0x00415188, (void*)P67_Menu415188, "P67_Menu415188");
+    re_hook(0x00522e64, (void*)P68_RepeatCheck, "P68_RepeatCheck");
+    re_hook(0x00524ed1, (void*)P68_ReadWords, "P68_ReadWords");
+    re_hook(0x00514f47, (void*)P68_AimSetup, "P68_AimSetup");
+    re_hook(0x00513efd, (void*)P68_ObjStepB, "P68_ObjStepB");
+    re_hook(0x004a5505, (void*)P68_ReadCamArgs, "P68_ReadCamArgs");
+    re_hook(0x0052455f, (void*)P68_ChangeSample, "P68_ChangeSample");
+    re_hook(0x0042476c, (void*)P68_LfbLock, "P68_LfbLock");
+    re_hook(0x0040c480, (void*)P68_ScreenReset, "P68_ScreenReset");
+    re_hook(0x004a67b0, (void*)P68_SpawnCar, "P68_SpawnCar");
 }

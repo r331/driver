@@ -53,6 +53,7 @@
 #include "../game/ported65.h"
 #include "../game/ported66.h"
 #include "../game/ported67.h"
+#include "../game/ported68.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -2599,8 +2600,96 @@ static int test_p67(void) {
   return f;
 }
 
+/* ported68 */
+static int t68_cmds[8], t68_ret41b1c0, t68_loadN; static int32_t t68_freed;
+void P68_Fn514A47(void *p) { (void)p; t68_cmds[0]++; }
+int32_t P68_Fn41B1C0(void) { return t68_ret41b1c0; }
+void P68_Fn41B3AB(void) { t68_cmds[1]++; }
+static int32_t t68_load(int32_t n, int32_t a) { t68_loadN++; return a == 99 ? -1 : n * 100 + a; }
+static void t68_free(int32_t id) { t68_freed = id; }
+static float rd_f32(const uint8_t *p, uint32_t o) { float v; memcpy(&v, p + o, 4); return v; }
+static void wr_f32(uint8_t *p, uint32_t o, float v) { memcpy(p + o, &v, 4); }
+static int test_p68(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p68 fail line %d\n",__LINE__); } } while (0)
+  /* 00522e64: третий повтор из последних четырёх ключей */
+  memset(P68_Rep_, 0, sizeof(P68_RepArr)); P12_00bde728 = 0;
+  CK(P68_RepeatCheck(7) == 0 && P12_00bde728 == 1);
+  CK(P68_RepeatCheck(7) == 0 && P68_Rep_[0].cnt == 1);
+  CK(P68_RepeatCheck(7) == 0 && P68_Rep_[0].cnt == 2 && P68_RepeatCheck(7) == 1 && P68_RepeatCheck(7) == 0);
+  for (int i = 0; i < 5; i++) P68_RepeatCheck(100 + i);
+  CK(P12_00bde728 == 6 % 5 || P12_00bde728 < 5);
+  /* 00524ed1 */
+  { FILE *fp = fopen("p68.txt", "wb"); fputs("\n\n  ab \t cd\t\r\nxyz\n", fp); fclose(fp);
+    fp = fopen("p68.txt", "rb"); uint8_t b[32]; memset(b, 0x55, sizeof b);
+    CK(P68_ReadWords(fp, b) == 6 && strcmp((char *)b, "ab cd ") == 0);   /* пробел перед концом строки остаётся, как в оригинале */
+    CK(P68_ReadWords(fp, b) == 3 && strcmp((char *)b, "xyz") == 0);
+    CK(P68_ReadWords(fp, b) == -1); fclose(fp);
+    fp = fopen("p68.txt", "wb"); fputs("q w", fp); fclose(fp); fp = fopen("p68.txt", "rb");
+    memset(b, 0x55, sizeof b); CK(P68_ReadWords(fp, b) == 3 && b[0] == 'q' && b[1] == ' ' && b[2] == 'w' && b[3] == 0x55);
+    fclose(fp); remove("p68.txt"); }
+  /* 00514f47 */
+  { uint8_t o[0xb0]; memset(o, 0, sizeof o);
+    wr_f32(o, 0x84, 10.0f); wr_f32(o, 0x88, 1.0f); wr_f32(o, 0x8c, 20.0f);
+    wr_f32(o, 0x94, 10.0f); wr_f32(o, 0x98, 1.0f); wr_f32(o, 0x9c, 120.0f);
+    P68_AimSetup(o);
+    uint16_t a, b; memcpy(&a, o + 0x5c, 2); memcpy(&b, o + 0x5e, 2);
+    CK(a == 0x800 && rd_f32(o, 0x6c) == 100.0f && rd_f32(o, 0x64) == 0.0f && P11_00ba52d0 == 100);
+    CK(b == ((-P44_Atan2(100, 0) - 0x400) & 0xfff)); }
+  /* 00513efd */
+  { uint8_t o[0x80]; memset(o, 0, sizeof o); uint32_t fl = 0x10, c = 0xabcd1234u; memcpy(o + 0xc, &fl, 4); memcpy(o + 0x5c, &c, 4);
+    t68_cmds[0] = 0; t67_ret = 1; t67_calls = 0; P68_ObjStepB(o);
+    uint16_t hi; memcpy(&hi, o + 0x5e, 2);
+    CK(t68_cmds[0] == 1 && hi == 0xabcd && t67_calls == 1);
+    t67_ret = 0; t67_calls = 0; fl = 0; memcpy(o + 0xc, &fl, 4); P68_ObjStepB(o); CK(t67_calls == 1);
+    fl = 8; memcpy(o + 0xc, &fl, 4); P68_ObjStepB(o); CK(t67_calls == 1); }
+  /* 004a5505 */
+  { P68_CamF[3] = 0x11; P68_CamF[2] = 0x22; P68_CamF[1] = 0x33; P68_CamF[0] = 0x44; P68_CamI0 = 5; P68_CamI1 = 6; P68_CamI2 = 7; P68_CamI3 = 8;
+    uint8_t o[32]; memset(o, 0, sizeof o);
+    uint8_t *e = P68_ReadCamArgs(o, "fifi");
+    uint32_t w0, w1; uint16_t s0, s1; memcpy(&w0, o, 4); memcpy(&s0, o + 4, 2); memcpy(&w1, o + 6, 4); memcpy(&s1, o + 10, 2);
+    CK(e == o + 12 && w0 == 0x11 && s0 == 5 && w1 == 0x22 && s1 == 6);
+    memset(o, 0, sizeof o); e = P68_ReadCamArgs(o, "ffffxf"); CK(e == o + 16);
+    uint32_t w3; memcpy(&w3, o + 12, 4); CK(w3 == 0x44);
+    memset(o, 0, sizeof o); e = P68_ReadCamArgs(o, "iiiii"); CK(e == o + 10);
+    uint16_t s4; memcpy(&s4, o + 8, 2); CK(s4 == 0 && P68_ReadCamArgs(o, "") == o); }
+  /* 0052455f */
+  { for (int i = 0; i < 0x14; i++) P48_Snd[i].id = 0xffff;
+    P48_Drv2C = t68_free; P68_DrvLoad = t68_load; G6_00B91D34 = 10;
+    G6_00B91CF4 = 0; CK(P68_ChangeSample(1, 3) == 1 && t68_loadN == 0);
+    G6_00B91CF4 = 1;
+    CK(P68_ChangeSample(1, -1) == 0 && P68_ChangeSample(1, 10) == 0 && t68_loadN == 0);
+    CK(P68_ChangeSample(5, 3) == 1 && t68_freed == 3 && P68_Samps[3].handle == 305 && P48_Samples[24] == 2 && P48_Samples[25] == 8 && P68_Samps[3].extra == 0);
+    CK(P68_ChangeSample(99, 4) == 0 && P68_Samps[4].handle == -1 && P48_Samples[32] == 4); }
+  /* 0042476c: Glide не загружен, поэтому вызов не выполняется, но байты формата пишутся */
+  { uint8_t info[0x40]; memset(info, 0, sizeof info);
+    D_00b1c0d4 = 0; CK(P68_LfbLock(0, info) == 0 && info[0x14] == 0);
+    D_00b1c0d4 = 1; D_00b1c0d8 = 0; CK(P68_LfbLock(0, info) == 0 && info[0x14] == 0x10 && info[0x15] == 3 && info[0x16] == 2 && info[0x17] == 3 && info[0x18] == 0xb && info[0x19] == 5 && info[0x1a] == 0);
+    D_00b1c0d8 = 5; CK(P68_LfbLock(0, info) == 0); }
+  /* 0040c480 */
+  { P56_AA30 = 0; t68_ret41b1c0 = 0; t68_cmds[1] = 0;
+    P68_ScreenReset(1); CK(t68_cmds[1] == 0);
+    t68_ret41b1c0 = 1; P68_ModeW = P19_ScrW; P68_ModeH = P19_ScrH;
+    P19_Level = 3; P68_Saved[0] = 7; P68_Saved[1] = 4; P68_Saved[2] = 11; P68_Saved[3] = 12; P68_Saved[4] = 13; P68_IntroBase = 0x1000;
+    P58_CfgOn = 0;
+    P68_ScreenReset(1);
+    CK(P19_Level == 7 && P68_IntroCur == 0x1040 && P68_IntroA == 11 && S_0127104C == 12 && P68_B87E54 == 13 && t68_cmds[1] == 1);
+    P19_Level = 9; P68_ScreenReset(0); CK(P19_Level == 9 && t68_cmds[1] == 2); }
+  /* 004a67b0 */
+  { memset(P12_0112da00, 0, sizeof(p12_0112da00_t)); G0112B284 = 3; P68_D11A48 = 5;
+    uint8_t rec[16] = { 0 };
+    uint8_t *s = P68_SpawnCar(rec, 0x1234);
+    CK(s == (uint8_t *)P12_0112da00 + 0xcd8 && rec[5] == 2 && G0112B284 == 4 && P68_D11A48 == 0);
+    uint32_t id, owner; memcpy(&id, s, 4); memcpy(&owner, s + 0xcd0, 4); CK(id == 1 && owner == 0x1234);
+    for (int i = 0; i < 8; i++) { uint32_t one = 1; memcpy((uint8_t *)P12_0112da00 + i * 0xcd8 + 0xcb4, &one, 4); }
+    G0112B284 = 3; CK(P68_SpawnCar(rec, 1) == NULL && G0112B284 == 3); }
+#undef CK
+  return f;
+}
+
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_p62() | test_p63() | test_p64() | test_p65() | test_p66() | test_p67() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_p62() | test_p63() | test_p64() | test_p65() | test_p66() | test_p67() | test_p68() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

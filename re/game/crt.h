@@ -10,6 +10,7 @@
 #  define g_fopen  ((void* (__cdecl*)(const char*, const char*))0x0052adb0)
 #  define g_fclose ((int   (__cdecl*)(void*))0x0052aa10)
 #  define g_fgets  ((char* (__cdecl*)(char*, int, void*))0x0052c000)
+#  define g_fgetc  ((int  (__cdecl*)(void*))0x0052baf0)
 #  define g_sscanf ((int  (__cdecl*)(const char*, const char*, ...))0x0052e250)
 #else
 #  include <stdio.h>
@@ -21,5 +22,6 @@
 #  define g_fopen(n, m)        ((void*)fopen((n), (m)))
 #  define g_fclose(f)          fclose((FILE*)(f))
 #  define g_fgets(b, n, f)     fgets((b), (n), (FILE*)(f))
+#  define g_fgetc(f)           fgetc((FILE*)(f))
 #  define g_sscanf             sscanf
 #endif

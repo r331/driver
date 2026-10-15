@@ -56,6 +56,7 @@
 #include "../../game/ported65.h"
 #include "../../game/ported66.h"
 #include "../../game/ported67.h"
+#include "../../game/ported68.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -79,6 +80,7 @@
 #include "../../game/ported9.h"
 #include "../../game/ported10.h"
 int32_t P62_Fn51CC55 (void *a, int32_t t, int32_t i) { return (int32_t)P64_RankPlace(a, t, i); }
+void P61_Fn514F47 (void *p) { P68_AimSetup(p); }
 void P61_Fn514BC7 (void *p, int32_t a, int32_t b) { InitObjState_00514BC7(p, a, b); }
 void P60_SetupCamN (int32_t n) { P61_SetupCamN(n); }
 void P60_CamPrepare (void *cam) { P61_CamPrepare(cam); }
@@ -183,6 +185,7 @@ void UiCall00412087 (void) { SetupMenuTable00412087(); }
 void UiCall0041266F (void) { MenuRowsTo2_0041266F(); }
 void UiCall00412643 (void) { MenuRowsTo3_00412643(); }
 void UiCall00412487 (void) { SetupMenuTable00412487(); }
+void UiCall0040C480 (int32_t a0) { P68_ScreenReset(a0); }
 void UiCall00408600 (int32_t a0) { P58_PlayDemo(a0); }
 void UiCall00417AA2 (void) { SetColorWhite00417AA2(); }
 void MenuAction40CD17 (void) { P57_MenuDone(); }
