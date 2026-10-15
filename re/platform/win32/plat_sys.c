@@ -34,3 +34,29 @@ void plat_screensaver_set(int on){ SystemParametersInfoA(SPI_SETSCREENSAVEACTIVE
 static LONG WINAPI crash_filter(EXCEPTION_POINTERS *ep){ (void)ep; if(g_crash) g_crash(); return EXCEPTION_EXECUTE_HANDLER; }
 void plat_set_crash_handler(void (*fn)(void)){ g_crash=fn; SetUnhandledExceptionFilter(fn?crash_filter:NULL); }
 void (*plat_crash_handler(void))(void){ return g_crash; }
+
+/* --- окно игры, цикл сообщений --- */
+static plat_wndproc g_wp;
+static LRESULT CALLBACK wnd_tramp(HWND h, UINT m, WPARAM w, LPARAM l){
+    if(m==WM_CREATE) l=(LPARAM)((CREATESTRUCTA*)l)->hInstance;   /* игра берёт hInstance из lparam */
+    return (LRESULT)g_wp((void*)h,m,(uint32_t)w,(int32_t)l);
+}
+void *plat_game_window_create(void *hinst,int32_t show,const char *title,int w,int h,plat_wndproc proc){
+    WNDCLASSA wc; g_wp=proc;
+    wc.style=3; wc.lpfnWndProc=wnd_tramp; wc.cbClsExtra=0; wc.cbWndExtra=0; wc.hInstance=(HINSTANCE)hinst;
+    wc.hIcon=LoadIconA((HINSTANCE)hinst,(LPCSTR)0x7f00); wc.hCursor=LoadCursorA(NULL,(LPCSTR)0x7f00);
+    wc.hbrBackground=CreateSolidBrush(0); wc.lpszMenuName=NULL; wc.lpszClassName="Driver";
+    RegisterClassA(&wc);
+    HWND hw=CreateWindowExA(0,"Driver",title,0x80000000,0,0,w,h,NULL,NULL,(HINSTANCE)hinst,NULL);
+    if(hw) ShowWindow(hw,show);
+    return (void*)hw;
+}
+void plat_pump_messages(void){ MSG m; while(PeekMessageA(&m,NULL,0,0,0)){ GetMessageA(&m,NULL,0,0); TranslateMessage(&m); DispatchMessageA(&m); } }
+void plat_set_priority(int level){ SetPriorityClass(GetCurrentProcess(), level==0?0x20:(level==1?0x80:0x100)); }
+void plat_post_quit(int code){ PostQuitMessage(code); }
+void plat_post_close(void *hwnd){ PostMessageA((HWND)hwnd,WM_CLOSE,0,0); }
+void plat_set_cursor(int visible){ SetCursor(visible?LoadCursorA(NULL,(LPCSTR)0x7f00):NULL); }
+int32_t plat_def_window_proc(void *hwnd,uint32_t msg,uint32_t wp,int32_t lp){ return (int32_t)DefWindowProcA((HWND)hwnd,msg,wp,(LPARAM)lp); }
+void *plat_dll_load(const char *name){ return (void*)LoadLibraryA(name); }
+void plat_win_trap(int on){ (void)on; }
+int plat_win_state(int *a,int *b,int *c,int *d,int *e,int *f,const char **g,plat_wndproc *h){ (void)a;(void)b;(void)c;(void)d;(void)e;(void)f;(void)g;(void)h; return 0; }

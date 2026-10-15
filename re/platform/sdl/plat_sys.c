@@ -87,3 +87,36 @@ void plat_set_crash_handler(void (*fn)(void)){
 #endif
 }
 void (*plat_crash_handler(void))(void){ return g_crash; }
+
+/* --- окно игры, цикл сообщений --- */
+static int g_wtrap, g_wcur=1, g_wprio, g_wquit, g_wclose, g_ww, g_wh; static char g_wtitle[64]; static plat_wndproc g_wproc;
+void plat_win_trap(int on){ g_wtrap=on; }
+void *plat_game_window_create(void *hinst,int32_t show,const char *title,int w,int h,plat_wndproc proc){
+    (void)hinst; (void)show; g_ww=w; g_wh=h; g_wproc=proc; snprintf(g_wtitle,sizeof g_wtitle,"%s",title?title:"");
+    if(g_wtrap) return (void *)(intptr_t)1;
+    return plat_window_open(title,w,h,0)==0 ? (void *)(intptr_t)1 : NULL;
+}
+void plat_pump_messages(void){
+    if(!SDL_WasInit(SDL_INIT_VIDEO)) return;
+    SDL_Event e; while(SDL_PollEvent(&e)) if(e.type==SDL_QUIT) g_wquit=1;
+}
+void plat_set_priority(int level){
+    g_wprio=level;
+    SDL_SetThreadPriority(level>0?SDL_THREAD_PRIORITY_HIGH:SDL_THREAD_PRIORITY_NORMAL);
+}
+void plat_post_quit(int code){ (void)code; g_wquit=1; }
+void plat_post_close(void *hwnd){ (void)hwnd; g_wclose++; }
+void plat_set_cursor(int visible){ g_wcur=visible?1:0; if(SDL_WasInit(SDL_INIT_VIDEO)) SDL_ShowCursor(g_wcur); }
+int32_t plat_def_window_proc(void *hwnd,uint32_t msg,uint32_t wp,int32_t lp){ (void)hwnd;(void)msg;(void)wp;(void)lp; return 0; }
+void *plat_dll_load(const char *name){ (void)name; return NULL; }
+int plat_win_state(int *cur,int *prio,int *quit,int *closes,int *w,int *h,const char **title,plat_wndproc *proc){
+    if(cur){ *cur=g_wcur; }
+    if(prio){ *prio=g_wprio; }
+    if(quit){ *quit=g_wquit; }
+    if(closes){ *closes=g_wclose; }
+    if(w){ *w=g_ww; }
+    if(h){ *h=g_wh; }
+    if(title){ *title=g_wtitle; }
+    if(proc){ *proc=g_wproc; }
+    return 1;
+}

@@ -51,7 +51,6 @@
     V(Call00524496, 0x00524496, (uint32_t a0, int32_t a1), (a0, a1)) \
     V(Call0052360D, 0x0052360d, (int32_t a0), (a0)) \
     V(Call004184DE, 0x004184de, (uint32_t a0), (a0)) \
-    V(Call00522323, 0x00522323, (void), ()) \
     V(Call0041846C, 0x0041846c, (uint32_t a0, uint32_t a1), (a0, a1)) \
     V(Call0040C610, 0x0040c610, (uint32_t a0, int32_t a1), (a0, a1)) \
     V(Call004086B4, 0x004086b4, (void), ()) \
@@ -223,6 +222,7 @@
     V(Call004D3402, 0x004d3402, (void), ()) \
     V(Call004246F0, 0x004246f0, (void), ()) \
     V(Call004C372A, 0x004c372a, (void), ()) \
+    V(Call00421A39, 0x00421a39, (void), ()) \
     V(Call0052434A, 0x0052434a, (int32_t a0), (a0)) \
     V(Call004D303A, 0x004d303a, (uint32_t a0, uint32_t a1), (a0, a1)) \
     V(Call005261AD, 0x005261ad, (uint32_t a0, uint32_t a1), (a0, a1)) \
@@ -262,3 +262,5 @@ static void (__stdcall * const G6Call0041F57D)(int32_t, int32_t, int32_t) __attr
 #else
 void G6Call0041F57D(int32_t a0, int32_t a1, int32_t a2);
 #endif
+
+#include "ported31.h"

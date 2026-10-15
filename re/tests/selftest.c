@@ -33,6 +33,7 @@
 #include "../game/ported28.h"
 #include "../game/ported29.h"
 #include "../game/ported30.h"
+#include "../game/ported31.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -646,6 +647,46 @@ static int test_p30(void) {
   plat_exit_trap(0);
   return f;
 }
+static int test_p31(void) {
+  int f = 0, cur, prio, quit, cl, w, h; const char *ti; plat_wndproc pr;
+  plat_win_trap(1);
+  G6_01270C28 = 640; G6_0125F3F0 = 480; G6_00BDF9C0 = 0;
+  if (P31_InitWindow((void *)(intptr_t)7, 5) != 1 || G6_00BDF9C0 == 0) f++;
+  plat_win_state(&cur, &prio, &quit, &cl, &w, &h, &ti, &pr);
+  if (w != 640 || h != 480 || strcmp(ti, "Driver V6.3w") || pr != P31_WndProc) f++;
+  P31_PriorityHigh = 0; P31_WndProc(0, 0x1c, 0, 0); plat_win_state(0, &prio, 0, 0, 0, 0, 0, 0);
+  if (P31_Active != 0 || prio != 0) f++;
+  P31_WndProc(0, 0x1c, 1, 0); plat_win_state(0, &prio, 0, 0, 0, 0, 0, 0);
+  if (P31_Active != 1 || prio != 1) f++;
+  P31_PriorityHigh = 1; P31_WndProc(0, 0x1c, 1, 0); plat_win_state(0, &prio, 0, 0, 0, 0, 0, 0);
+  if (prio != 2) f++;
+  P31_WndProc(0, 6, 0, 0); if (P31_Active != 0) f++;
+  P31_WndProc(0, 6, 1, 0); if (P31_Active != 1) f++;
+  P31_WndProc(0, 6, 0x10001, 0); if (P31_Active != 0) f++;
+  P31_WndProc(0, 1, 0, 0x1234); if (G6_00BDF9C4 != 0x1234) f++;
+  P31_WndProc(0, 2, 0, 0); plat_win_state(0, 0, &quit, 0, 0, 0, 0, 0); if (!quit) f++;
+  P31_WindowMode = 1; if (P31_WndProc(0, 0x20, 0, 0) != 1) f++;
+  plat_win_state(&cur, 0, 0, 0, 0, 0, 0, 0); if (cur != 0) f++;
+  P31_WindowMode = 0; if (P31_WndProc(0, 0x20, 0, 0) != 1) f++;
+  plat_win_state(&cur, 0, 0, 0, 0, 0, 0, 0); if (cur != 1) f++;
+  if (P31_WndProc(0, 0x100, 0, 0) != 0 || P31_WndProc(0, 0x104, 0, 0) != 0 || P31_WndProc(0, 0x10, 0, 0) != 0) f++;
+  P25_CdPlaying = 1; P31_WndProc(0, 0x3b9, 2, 0); if (P25_CdPlaying != 1) f++;
+  P31_WndProc(0, 0x3b9, 8, 0); if (P25_CdPlaying != 0) f++;
+  P31_GlideModule = 5; if (P31_LoadGlide() != 0 || P31_GlideModule != 0) f++;
+  Call00522323();
+  { int base = plat_dd_stub_count(), dummy;
+    P31_DDObj0 = plat_dd_create_clipper(&dummy); P31_DDObj1 = plat_dd_create_clipper(&dummy);
+    P24_Primary = plat_dd_create_clipper(&dummy); P24_Back = plat_dd_create_clipper(&dummy);
+    P24_DD = plat_dd_create_clipper(&dummy);
+    P24_RestoreMode = 1; P24_Hwnd = &dummy; P24_ModeW = 640; P31_DDVal3 = 9;
+    if (plat_dd_stub_count() != base + 5) f++;
+    P31_ReleaseDirectDraw();
+    if (plat_dd_stub_count() != base || P24_DD || P24_Primary || P24_Back || P31_DDObj0 || P31_DDObj1) f++;
+    if (plat_dd_last_coop() != 8 || P24_RestoreMode != 0 || P24_ModeW != 0 || P31_DDVal3 != 0 || P24_Hwnd) f++;
+  }
+  plat_win_trap(0);
+  return f;
+}
 static int test_p26(void) {
   int f = 0;
   P26_WaveSetVolume(0x8000); if (plat_wave_volume() != 0x80008000u) f++;
@@ -667,7 +708,7 @@ static int test_p26(void) {
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

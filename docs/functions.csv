@@ -1823,7 +1823,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041ed8a,FUN_0041ed8a,Ui0041ED8A,manual,MenuUI,,,7,ported
 0041ed91,FUN_0041ed91,Ui0041ED91,manual,MenuUI,,,7,ported
 0041ed98,FUN_0041ed98,,,,,,1057,todo
-0041f2a0,FUN_0041f2a0,,,,,,476,todo
+0041f2a0,FUN_0041f2a0,ReleaseDirectDraw,manual,render,,,476,ported
 0041f47c,FUN_0041f47c,Ui0041F47C,manual,MenuUI,,,9,ported
 0041f485,FUN_0041f485,NoopFn0041f485,manual,Noop,,,7,ported
 0041f48c,FUN_0041f48c,NoopFn0041f48c,manual,Noop,,,7,ported
@@ -1944,7 +1944,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00424b70,FUN_00424b70,,,,,,208,todo
 00424c40,FUN_00424c40,,,,,,2764,todo
 0042570c,FUN_0042570c,,,,,,36,todo
-00425730,FUN_00425730,,,,,,39,todo
+00425730,FUN_00425730,LoadGlide,manual,WinMain,,,39,ported
 00425a50,FUN_00425a50,,,,,,194,todo
 00425b12,FUN_00425b12,,,,,,908,todo
 00425e9e,FUN_00425e9e,Zoom_00425E9E,manual,Misc,,,66,ported
@@ -3132,10 +3132,10 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00521f10,FUN_00521f10,,,,,,959,todo
 005222cf,FUN_005222cf,,,,,,55,todo
 00522306,FUN_00522306,ResetDirector_00522306,manual,Misc,,,29,ported
-00522323,FUN_00522323,,,,,,70,todo
+00522323,FUN_00522323,PumpMessages,manual,WinMain,,,70,ported
 00522369,FUN_00522369,FatalError,manual,WinMain,,,85,ported
 005223be,FUN_005223be,InitWindowGlobals,manual,WinMain,,,30,ported
-005223dc,FUN_005223dc,,,,,,204,todo
+005223dc,FUN_005223dc,InitWindow,manual,WinMain,,,204,ported
 005224a8,FUN_005224a8,,,,,,351,todo
 005226b5,FUN_005226b5,,,,,,135,todo
 0052273c,FUN_0052273c,CrashHandlerInstall,manual,WinMain,,,16,ported

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 typedef struct { uint32_t tag; int32_t lost; int32_t attached; int32_t clipper; } dd_obj;
-static int g_live;
+static int g_live; static uint32_t g_coop_flags;
 static int32_t g_fill[4]; static uint32_t g_fill_px; static int g_fill_n;
 static void *mk(uint32_t tag) { dd_obj *o = (dd_obj *)calloc(1, sizeof *o); if (o) { o->tag = tag; g_live++; } return o; }
 void *plat_dd_create_surface(void *dd, const void *desc) { if (!dd || !desc) return NULL; return mk(1); }
@@ -26,3 +26,5 @@ int32_t plat_d3d_set_viewport_rect(void *vp, int w, int h) { return (vp && w > 0
 void plat_window_maximize(void *wnd) { (void)wnd; }
 int plat_dd_stub_count(void) { return g_live; }
 int plat_dd_stub_last_fill(int32_t *r, uint32_t *px) { if (!g_fill_n) return 0; memcpy(r, g_fill, sizeof g_fill); *px = g_fill_px; return g_fill_n; }
+int32_t plat_dd_set_cooperative(void *dd, void *hwnd, uint32_t flags) { (void)hwnd; g_coop_flags = flags; return dd ? 0 : -1; }
+int plat_dd_last_coop(void) { return (int)g_coop_flags; }

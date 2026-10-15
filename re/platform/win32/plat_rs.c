@@ -101,3 +101,6 @@ int32_t plat_d3d_set_viewport_rect(void *vp, int w, int h) {   /* IDirect3DViewp
     return ((dd_f1)VT(vp, 0x44))(vp, &v); }
 int plat_dd_stub_count(void) { return 0; }
 int plat_dd_stub_last_fill(int32_t *r, uint32_t *px) { (void)r; (void)px; return 0; }
+
+int32_t plat_dd_set_cooperative(void *dd, void *hwnd, uint32_t flags) { return (int32_t)((int32_t (__stdcall *)(void *, void *, uint32_t))VT(dd, 0x50))(dd, hwnd, flags); }
+int plat_dd_last_coop(void) { return 0; }

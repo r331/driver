@@ -96,6 +96,7 @@ int32_t plat_dd_set_clipper(void *surf, void *clipper);
 int32_t plat_dd_attach_surface(void *surf, void *attached);
 void   *plat_dd_get_attached(void *surf, uint32_t caps);         /* backbuffer: caps = 4 */
 void    plat_dd_release(void *obj);
+int32_t plat_dd_set_cooperative(void *dd, void *hwnd, uint32_t flags); /* IDirectDraw::SetCooperativeLevel */
 int32_t plat_dd_is_lost(void *surf);                             /* != 0 — поверхность потеряна */
 int32_t plat_dd_restore(void *surf);
 int32_t plat_dd_fill_rect(void *surf, int x0, int y0, int x1, int y1, uint32_t pixel); /* цветовая заливка (Blt COLORFILL) */
@@ -104,6 +105,19 @@ void   *plat_d3d_create_viewport(void *d3d);
 int32_t plat_d3d_add_viewport(void *dev, void *vp);
 int32_t plat_d3d_set_viewport_rect(void *vp, int w, int h);
 void    plat_window_maximize(void *wnd);                         /* ShowWindow(SW_MAXIMIZE) */
+int     plat_dd_last_coop(void);                                 /* SDL: флаги последнего SetCooperativeLevel (тесты); hook: 0 */
 int     plat_dd_stub_count(void);                                /* SDL: число живых заглушек (тесты); hook: 0 */
 int     plat_dd_stub_last_fill(int32_t *rect4, uint32_t *pixel); /* SDL: последняя заливка (тесты); hook: 0 */
+/* --- окно игры, цикл сообщений (WinMain.c) --- */
+typedef int32_t (*plat_wndproc)(void *hwnd, uint32_t msg, uint32_t wparam, int32_t lparam);
+void   *plat_game_window_create(void *hinst, int32_t show, const char *title, int w, int h, plat_wndproc proc); /* RegisterClass+CreateWindowEx+ShowWindow; NULL — не удалось */
+void    plat_pump_messages(void);                                /* PeekMessage/GetMessage/Dispatch до опустошения очереди */
+void    plat_set_priority(int level);                            /* 0 — обычный, 1 — высокий (0x80), 2 — реального времени (0x100) */
+void    plat_post_quit(int code);                                /* PostQuitMessage */
+void    plat_post_close(void *hwnd);                             /* PostMessage(WM_CLOSE) */
+void    plat_set_cursor(int visible);                            /* SetCursor(стрелка / NULL) */
+int32_t plat_def_window_proc(void *hwnd, uint32_t msg, uint32_t wparam, int32_t lparam); /* DefWindowProc */
+void   *plat_dll_load(const char *name);                         /* LoadLibrary; SDL: NULL (Glide на macOS нет) */
+void    plat_win_trap(int on);                                   /* тесты (SDL): окно не создаётся, вызовы только запоминаются */
+int     plat_win_state(int *cursor, int *prio, int *quit, int *closes, int *w, int *h, const char **title, plat_wndproc *proc); /* тесты: SDL — состояние; hook — 0 */
 #endif

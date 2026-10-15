@@ -19,6 +19,7 @@
 #include "../../game/ported28.h"
 #include "../../game/ported29.h"
 #include "../../game/ported30.h"
+#include "../../game/ported31.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1196,4 +1197,8 @@ void re_install_all(void) {
     re_hook(0x0052274c, (void*)P30_CrashRemove, "P30_CrashRemove");
     re_hook(0x005223be, (void*)P30_InitWindowGlobals, "P30_InitWindowGlobals");
     re_hook(0x0052e400, (void*)P30_Exit, "P30_Exit");
+    re_hook(0x00522323, (void*)Call00522323, "P31_PumpMessages");
+    re_hook(0x005223dc, (void*)P31_InitWindow, "P31_InitWindow");
+    re_hook(0x00425730, (void*)P31_LoadGlide, "P31_LoadGlide");
+    re_hook(0x0041f2a0, (void*)P31_ReleaseDirectDraw, "P31_ReleaseDirectDraw");
 }
