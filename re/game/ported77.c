@@ -54,14 +54,13 @@ int32_t P77_LoadLevel(void) {
   if (f == NULL) return 0;
   P27_ReadChunked(&count, 4, 1, f);
   for (int32_t i = 0; i < count; i++) {
-    int32_t pos = (int32_t)g_ftell(f);
     P27_ReadChunked(&kind, 4, 1, f);
     P27_ReadChunked(&size, 4, 1, f);
     switch (kind) {
     case 0:    P41_LoadTexPages(f); break;
     case 1:    P77_Fn4EB490(f); break;
     case 2:    P77_Fn4ED055(f); break;
-    case 4:    P77_Fn4EB811(f, size); break;
+    case 4:    P78_LoadVerts(f, size); break;
     case 5:    P54_ReadMapA(f, size); break;
     case 6:    P57_SkipBlock(f, size); break;
     case 7:    P62_LoadMapHeader(f, size); break;
@@ -76,8 +75,8 @@ int32_t P77_LoadLevel(void) {
     case 0x10: ReadTable_004EC522(f); break;
     case 0x11: ReadTable_004EC556(f); break;
     case 0x12: g_fseek(f, size, 1); break;
-    case 0x13: P77_Fn4EAFCF(f); break;
-    case 0x14: P77_Fn4A2F77(f, size, kind, pos); break;
+    case 0x13: P78_LoadLampsBlock(f); break;
+    case 0x14: P78_LoadChairs(f, size); break;
     default: break;
     }
   }

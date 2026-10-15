@@ -9,9 +9,6 @@
 #define UNPORTED_LIST(V, R) \
     V(P77_Fn4EB490, 0x004eb490, (void *f), (f)) \
     V(P77_Fn4ED055, 0x004ed055, (void *f), (f)) \
-    V(P77_Fn4EB811, 0x004eb811, (void *f, int32_t size), (f, size)) \
-    V(P77_Fn4EAFCF, 0x004eafcf, (void *f), (f)) \
-    V(P77_Fn4A2F77, 0x004a2f77, (void *f, int32_t size, int32_t kind, int32_t pos), (f, size, kind, pos)) \
     V(P77_Fn501C63, 0x00501c63, (void), ()) \
     V(P77_Fn501770, 0x00501770, (void), ()) \
     V(P77_Fn524BD8, 0x00524bd8, (void *p), (p)) \

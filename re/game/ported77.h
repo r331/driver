@@ -22,6 +22,7 @@
 #include "ported58.h"
 #include "ported59.h"
 #include "ported62.h"
+#include "ported78.h"
 #include <stdint.h>
 /* Шаг D, ported77 (все cdecl):
    - 004eca08 — открыть файл уровня (Levels\\iview.lev / train.lev / flat.lev / Miami_01.lev / Levels\\<имя>), в native '\\' → '/';

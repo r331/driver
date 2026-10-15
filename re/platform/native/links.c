@@ -66,6 +66,7 @@
 #include "../../game/ported75.h"
 #include "../../game/ported76.h"
 #include "../../game/ported77.h"
+#include "../../game/ported78.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"

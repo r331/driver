@@ -66,6 +66,7 @@
 #include "../../game/ported75.h"
 #include "../../game/ported76.h"
 #include "../../game/ported77.h"
+#include "../../game/ported78.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1698,4 +1699,9 @@ void re_install_all(void) {
     re_hook(0x0051bf82, (void*)P73_RoadSides, "P73_RoadSides");
     re_hook(0x00511e60, (void*)P73_ParticlesReset, "P73_ParticlesReset");
     re_hook(0x0049f031, (void*)P73_CatmullRom, "P73_CatmullRom");
+    re_hook(0x004eb811, (void*)P78_LoadVerts, "P78_LoadVerts");
+    re_hook(0x004eafe0, (void*)P78_LoadLamps, "P78_LoadLamps");
+    re_hook(0x004eafcf, (void*)P78_LoadLampsBlock, "P78_LoadLampsBlock");
+    re_hook(0x004a31fc, (void*)P78_ChairAdd, "P78_ChairAdd");
+    re_hook(0x004a2f77, (void*)P78_LoadChairs, "P78_LoadChairs");
 }

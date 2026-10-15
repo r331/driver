@@ -8,6 +8,7 @@
 #include "../game/menustate.h"
 #include "../game/uihandlers.h"
 #include "../game/ported4.h"
+#include "../game/ported78.h"
 #include "../game/ported5.h"
 #include "../game/ported6.h"
 #include "../game/ported7.h"
@@ -3229,12 +3230,9 @@ static int test_p76(void) {
 
 
 /* ported77: подмена неперенесённых вызовов */
-static int t77_calls[8]; static int32_t t77_kind[4], t77_size[4], t77_pos[4];
+static int t77_calls[8];
 void P77_Fn4EB490(void *f) { (void)f; t77_calls[0]++; }
 void P77_Fn4ED055(void *f) { (void)f; t77_calls[1]++; }
-void P77_Fn4EB811(void *f, int32_t size) { (void)f; (void)size; t77_calls[2]++; }
-void P77_Fn4EAFCF(void *f) { (void)f; t77_calls[3]++; }
-void P77_Fn4A2F77(void *f, int32_t size, int32_t kind, int32_t pos) { g_fseek(f, size, 1); int n = t77_calls[4]++; if (n < 4) { t77_kind[n] = kind; t77_size[n] = size; t77_pos[n] = pos; } }
 void P77_Fn501C63(void) { t77_calls[5]++; }
 void P77_Fn501770(void) { t77_calls[6]++; }
 void P77_Fn524BD8(void *p) { (void)p; t77_calls[7]++; G6_00B91D34 = G6_00B91D34 + 1; }
@@ -3259,7 +3257,7 @@ static int test_p77(void) {
     P77_LevelName = "none.lev"; CK(P77_OpenLevel() == NULL); CK(P77_LoadLevel() == 0);
     P77_LevelName = "t77.lev";
     CK(P77_LoadLevel() == 1);
-    CK(t77_calls[4] == 2 && t77_kind[0] == 0x14 && t77_size[0] == 4 && t77_pos[0] == 4 && t77_pos[1] > t77_pos[0] && t77_calls[5] == 1 && t77_calls[6] == 1 && t77_calls[0] == 0);
+    CK(t77_calls[5] == 1 && t77_calls[6] == 1 && t77_calls[0] == 0);
     remove("Levels/t77.lev"); }
   /* 00524496 */
   { FILE *fp = fopen("t77.bank", "w"); fputs("; comment\nSND1 LOOP\nSND2 VOL=5\n", fp); fclose(fp);
@@ -3299,11 +3297,79 @@ static int test_p77(void) {
   return f;
 }
 
+static int test_p78(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p78 fail line %d\n",__LINE__); } } while (0)
+  /* 004eb811: 2 вершины по 0x2c байта */
+  { uint8_t in[0x58]; for (int i = 0; i < 0x58; i++) in[i] = (uint8_t)i;
+    FILE *fp = fopen("t78.bin", "wb"); fwrite(in, 1, 0x58, fp); fclose(fp);
+    fp = fopen("t78.bin", "rb");
+    P78_LoadVerts(fp, 0x58 + 5);
+    CK(P78_VertCount == 2 && P78_VertsA != NULL && P78_VertsB != NULL && S_00D0DDE0 == 1);
+    const uint8_t *o = (const uint8_t *)P78_VertsB; float one; uint16_t s; uint32_t w;
+    CK(memcmp(o, in, 12) == 0);
+    memcpy(&one, o + 12, 4); CK(one == 1.0f);
+    CK(memcmp(o + 0x10, in + 0x0c, 6) == 0 && memcmp(o + 0x18, in + 0x14, 12) == 0);
+    memcpy(&one, o + 0x24, 4); CK(one == 1.0f);
+    CK(memcmp(o + 0x28, in + 0x20, 6) == 0);
+    memcpy(&w, o + 0x30, 4); memcpy(&s, in + 0x28, 2); CK(w == s);
+    memcpy(&w, o + 0x34, 4); memcpy(&s, in + 0x2a, 2); CK(w == s);
+    o += 0x40; CK(memcmp(o, in + 0x2c, 12) == 0);
+    memcpy(&w, o + 0x34, 4); memcpy(&s, in + 0x2c + 0x2a, 2); CK(w == s);
+    DebugFree(P78_VertsA); DebugFree(P78_VertsB); fclose(fp); remove("t78.bin"); }
+  /* 004eafe0: сетка 2x2, 2 записи (ячейка 1: 2 фонаря, ячейка 3: 0) */
+  { uint8_t buf[512]; size_t n = 0; int32_t w;
+#define W32(v) do { w = (v); memcpy(buf + n, &w, 4); n += 4; } while (0)
+    memcpy(buf, "GLMP", 4); n = 4; W32(1); W32(2); W32(2); W32(2);
+    W32(1); W32(2); for (int i = 0; i < 0x50; i++) buf[n++] = (uint8_t)(i + 1);
+    W32(3); W32(0);
+    FILE *fp = fopen("t78.lmp", "wb"); fwrite(buf, 1, n, fp); fclose(fp);
+    fp = fopen("t78.lmp", "rb");
+    P58_ListB31EC4 = NULL; P58_CntB31EBC = 0;
+    CK(P78_LoadLamps(fp) == 1 && P58_CntB31EBC == 4 && P58_ListB31EC4 != NULL);
+    CK(P58_ListB31EC4[1].a == 2 && P58_ListB31EC4[1].p != NULL && ((uint8_t *)P58_ListB31EC4[1].p)[0x4f] == 0x50);
+    CK(P58_ListB31EC4[3].a == 0 && P58_ListB31EC4[3].p == NULL && P58_ListB31EC4[0].p == NULL);
+    P58_FreeList(); CK(P58_ListB31EC4 == NULL && P58_CntB31EBC == 0);
+    fclose(fp);
+    /* не «GLMP» — позиция возвращается */
+    fp = fopen("t78.lmp", "wb"); fwrite("XXXXXXXXXXXXXXXXXXXXXXXX", 1, 24, fp); fclose(fp);
+    fp = fopen("t78.lmp", "rb"); fseek(fp, 2, SEEK_SET);
+    CK(P78_LoadLamps(fp) == 0 && ftell(fp) == 2); fclose(fp); remove("t78.lmp");
+#undef W32
+  }
+  /* 004a31fc / 004a2f77: кресла, сетка 2x2: ячейка 2 — 2 кресла, ячейка 0 — 1 кресло */
+  { uint8_t buf[512]; size_t n = 0; int32_t w;
+#define W32(v) do { w = (v); memcpy(buf + n, &w, 4); n += 4; } while (0)
+    W32(0); W32(2); W32(2); W32(2); W32(2);
+    W32(2); W32(2); W32(0); for (int i = 0; i < 0x28; i++) buf[n++] = (uint8_t)(i + 1);
+    W32(0); W32(1); W32(0); for (int i = 0; i < 0x14; i++) buf[n++] = (uint8_t)(i + 0x41);
+#undef W32
+    FILE *fp = fopen("t78.chr", "wb"); fwrite(buf, 1, n, fp); fclose(fp);
+    fp = fopen("t78.chr", "rb"); P58_Grid = NULL; D_01134ea0 = 0;
+    P78_LoadChairs(fp, (int32_t)n);
+    CK(P58_Grid != NULL && P58_GridH == 2 && P58_GridW == 2 && D_01134ea0 == 3);
+    p58_cell_t *c2 = (p58_cell_t *)P58_Grid[2], *c0 = (p58_cell_t *)P58_Grid[0];
+    CK(c2 != NULL && c2->a == 2 && c2->b == 2 && ((uint8_t *)c2->items)[0x27] == 0x28);
+    CK(c0 != NULL && c0->b == 1 && ((uint8_t *)c0->items)[0x13] == 0x54 && P58_Grid[1] == NULL && P58_Grid[3] == NULL);
+    p58_cell_t add = {0, 5, DebugMalloc(8, "t", 1)};                /* замена: прежний буфер освобождается */
+    CK(P78_ChairAdd(&add) == 1 && c0->b == 5 && c0->items == add.items);
+    add.a = 9; CK(P78_ChairAdd(&add) == 0);                         /* вне сетки */
+    P58_FreeGrid(); CK(P58_Grid == NULL && P78_ChairAdd(&add) == 0);
+    /* версия не 2 — пропуск блока */
+    fclose(fp); fp = fopen("t78.chr", "wb"); { int32_t v[8] = {0, 7, 0, 0, 0, 1, 2, 3}; fwrite(v, 4, 8, fp); } fclose(fp);
+    fp = fopen("t78.chr", "rb"); fseek(fp, 4, SEEK_SET);
+    P78_LoadChairs(fp, 8); CK(ftell(fp) == 12 && P58_Grid == NULL);
+    fclose(fp); remove("t78.chr"); }
+#undef CK
+  return f;
+}
+
 /* RE_TRACE=1 печатает имя каждого теста перед запуском (поиск падения) */
 static int run_t_(const char *n, int r) { if (r) fprintf(stderr, "[test] %s returned %d\n", n, r); return r; }
 #define RUN_T(t) (getenv("RE_TRACE") ? (fprintf(stderr, "[test] %s\n", #t), run_t_(#t, t())) : t())
 int re_selftest(void) {
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
