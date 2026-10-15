@@ -81,6 +81,7 @@
 #include "../../game/ported90.h"
 #include "../../game/ported91.h"
 #include "../../game/ported92.h"
+#include "../../game/ported93.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"

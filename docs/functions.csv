@@ -790,7 +790,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004023c9,thunk_FUN_0040aae2,Thunk_0040AAE2,manual,Thunks,,,5,ported
 004023ce,thunk_FUN_00427757,,,,,,5,ported
 004023d3,thunk_FUN_004e8bd0,,,,,,5,todo
-004023d8,thunk_FUN_004ec91e,,,,,,5,todo
+004023d8,thunk_FUN_004ec91e,,,,,,5,ported
 004023dd,thunk_FUN_005237b1,,,,,,5,ported
 004023ec,thunk_FUN_004ef66a,,,,,,5,todo
 004023f1,thunk_FUN_004f87e0,,,,,,5,ported
@@ -2758,7 +2758,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004ec7f4,FUN_004ec7f4,LoadMapA,manual,Ported46,assert,,67,ported
 004ec837,FUN_004ec837,P20_FindNameNoCase,manual,ported20,range,,113,ported
 004ec8a8,FUN_004ec8a8,P20_FindNameValue,manual,ported20,range,,118,ported
-004ec91e,FUN_004ec91e,,,map,range,,234,todo
+004ec91e,FUN_004ec91e,P93_FindIcon,manual,map,range,,234,ported
 004eca08,FUN_004eca08,P77_OpenLevel,manual,map,range,,214,ported
 004ecade,FUN_004ecade,P77_LoadLevel,manual,map,range,,242,ported
 004ecda8,FUN_004ecda8,AllocMapBufs,manual,map,assert,,114,ported

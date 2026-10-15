@@ -1,4 +1,8 @@
 #include "uihandlers3.h"
+#ifndef RE_HOOK_BUILD
+#include "ported92.h"
+#include "ported93.h"
+#endif
 GAME_VAR_DEF(int32_t, G00575F24, 0x00575f24)
 GAME_VAR_DEF(int32_t, G00575F48, 0x00575f48)
 GAME_VAR_DEF(int32_t, G00575F40, 0x00575f40)
@@ -154,7 +158,14 @@ void Dev00424858(void) {
     if (GetVarB1C0D8() == 1) Call0041D6AA();
 }
 void Ui00426CAF(void) {
+#ifdef RE_HOOK_BUILD
     G012085F4 = LoadIconByName((const char *)&G00550808);
+#else
+    /* native: строки 00550808 ("SEA") в .data нет, а 32-битный G012085F4 родной указатель не вмещает —
+       прямоугольник текстуры кладётся в P92_SpinTex (его читает P92_DrawSpin 0042a5de). */
+    P92_SpinTex = P93_FindIcon("SEA");
+    G012085F4 = 0;
+#endif
 }
 void Ui00426CC6(void) {
     UiCall004D8F30(UiVar00B1C280); UiVar00B1C280 = 0;
