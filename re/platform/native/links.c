@@ -53,6 +53,7 @@
 #include "../../game/ported62.h"
 #include "../../game/ported63.h"
 #include "../../game/ported64.h"
+#include "../../game/ported65.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -147,6 +148,7 @@ void Call004125B9 (void) { P55_NamesB(); }
 void Call0052369B (int32_t a0) { P48_SndPause(a0); }
 void Call00524873 (void) { P25_CDStop(); }
 void Call00524763 (void) { P25_CDClose(); }
+void Call004072BE (void) { P65_SetNameFields(); }
 void Call0040C165 (void) { P56_ResetFrontend(); }
 void Call0048B65D (void) { P38_FmvStop(); }
 void Call0048B568 (void) { P50_FmvReleaseObjs(); }

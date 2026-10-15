@@ -50,6 +50,7 @@
 #include "../game/ported62.h"
 #include "../game/ported63.h"
 #include "../game/ported64.h"
+#include "../game/ported65.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -2331,6 +2332,76 @@ static int test_p62(void) {
   return f;
 }
 
+/* ported65 */
+static int test_p65(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p65 fail line %d\n",__LINE__); } } while (0)
+  /* токены */
+  char line[64] = "  foo, 12;bar\n";
+  char tok[32];
+  CK(P65_NextToken(line, tok) == 0 && strcmp(tok, "foo") == 0 && strcmp(line, " 12;bar\n") == 0);
+  CK(P65_NextToken(line, tok) == 0 && strcmp(tok, "12") == 0 && strcmp(line, "bar\n") == 0);
+  CK(P65_NextToken(line, tok) == 0 && strcmp(tok, "bar") == 0 && line[0] == 0);
+  CK(P65_NextToken(line, tok) == 10 && tok[0] == 0);
+  /* числа */
+  uint8_t cmd[0x110]; memset(cmd, 0, sizeof cmd);
+  int32_t cnt = 3; memcpy(cmd + 0x100, &cnt, 4);
+  static char src[64]; strcpy(src, "10 -5,7 x");
+  P65_Line = src;
+  CK(P65_ReadInts(cmd) == 0 && P65_Ints[0] == 10 && P65_Ints[1] == -5 && P65_Ints[2] == 7);
+  strcpy(src, "1 abc 3");
+  CK(P65_ReadInts(cmd) == 0xc);
+  strcpy(src, "1");
+  CK(P65_ReadInts(cmd) == 10);
+  /* поиск по имени */
+  p65_ent_t e0 = { "ALPHA", 11 }, e1 = { "BETA", 22 };
+  p65_ent_t *ents[2] = { &e0, &e1 };
+  p65_tab_t tab = { 2, ents };
+  char nm[16] = "beta";
+  CK(P65_FindByName(nm, &tab) == 22 && strcmp(nm, "BETA") == 0);
+  strcpy(nm, "Alpha"); CK(P65_FindByName(nm, &tab) == 11);
+  strcpy(nm, "gamma"); CK(P65_FindByName(nm, &tab) == -1);
+  CK(P65_FindByName(NULL, &tab) == -1);
+  /* имя в меню */
+  P65_Str[0x40] = "NONE"; P65_Str[0xc] = "BG0"; P65_Str[0x41] = "PAD"; P65_Str[2] = "BG2"; P65_Str[1] = "BG1";
+  Q0057B72C = 0; P65_SetNameFields();
+  CK(P35_InputMode == 0 && strcmp(P65_NamePtr, "NONE") == 0 && strcmp(P65_NameBg, "BG0") == 0);
+  Q0057B72C = 3; Q00B87EF0 = 1; P65_SetNameFields();
+  CK(P35_InputMode == 2 && strcmp(P65_NamePtr, "PAD 3") == 0 && strcmp(P65_NameBg, "BG1") == 0);
+  Q00B87EF0 = 0; P65_SetNameFields(); CK(strcmp(P65_NameBg, "BG2") == 0);
+  /* блиттеры */
+  uint8_t *page = (uint8_t *)aligned_alloc(0x10000, 0x10000);
+  for (int i = 0; i < 0x10000; i++) page[i] = (uint8_t)(i * 7 + 3);
+  P65_ColorKey = page[(5 << 8) | 0xfe];       /* строка v=5, u=0xfe → прозрачный цвет */
+  memset(P65_Screen, 0xEE, sizeof(p65_screen_t));
+  P65_BlitKeyed(page + 0x1234, (uint8_t *)P65_Screen + 640 + 10, 4, 2, 0xfe, 5);
+  uint8_t *d = (uint8_t *)P65_Screen + 640 + 10;
+  CK(d[0] == 0xEE);                                           /* ключевой цвет не пишется */
+  CK(d[1] == page[(5 << 8) | 0xff] && d[2] == page[(5 << 8) | 0x00] && d[3] == page[(5 << 8) | 0x01]);   /* u замыкается в 8 бит */
+  CK(d[640] == page[(6 << 8) | 0xfe] || page[(6 << 8) | 0xfe] == P65_ColorKey);
+  CK(d[4] == 0xEE);
+  for (int i = 0; i < 0x10000; i++) P65_Blend[i] = (uint8_t)((i >> 8) + (i & 0xff));
+  memset(P65_Screen, 0x10, sizeof(p65_screen_t));
+  P65_BlitBlend(page, (uint8_t *)P65_Screen, 3, 1, 4, 9);
+  CK(((uint8_t *)P65_Screen)[0] == (uint8_t)(0x10 + page[(9 << 8) | 4]) && ((uint8_t *)P65_Screen)[2] == (uint8_t)(0x10 + page[(9 << 8) | 6]));
+  /* обёртки со спрайтами */
+  P65_Texs[2].p = page;
+  memset(P65_Screen, 0, sizeof(p65_screen_t));
+  P65_ColorKey = 0;
+  P65_SpriteKeyed(7, 3, 2, 1, 1, 2, 1);
+  CK(((uint8_t *)P65_Screen)[3 * 640 + 7] == page[(1 << 8) | 1] || page[(1 << 8) | 1] == 0);
+  memset(P65_Screen, 4, sizeof(p65_screen_t));
+  P65_SpriteBlend(0, 0, 2, 0, 0, 1, 1);
+  CK(((uint8_t *)P65_Screen)[0] == (uint8_t)(4 + page[0]));
+  free(page);
+  /* вызов скрипта */
+  static uint8_t strm[8] = { 0, 0, 0x34, 0x12, 0, 0, 0, 0 };
+  P10_ScriptPtr = strm;
+  CK(P65_ScriptCall() == 1 && P10_ScriptPtr == strm + 4);
+#undef CK
+  return f;
+}
+
 /* ported64 */
 static void t64_put(const char *n, const char *d, size_t l) { FILE *f = fopen(n, "wb"); if (f) { fwrite(d, 1, l, f); fclose(f); } }
 static int test_p64(void) {
@@ -2388,7 +2459,7 @@ static int test_p64(void) {
 }
 
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_p62() | test_p63() | test_p64() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_p62() | test_p63() | test_p64() | test_p65() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

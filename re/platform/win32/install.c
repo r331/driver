@@ -53,6 +53,7 @@
 #include "../../game/ported62.h"
 #include "../../game/ported63.h"
 #include "../../game/ported64.h"
+#include "../../game/ported65.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1585,4 +1586,13 @@ void re_install_all(void) {
     re_hook(0x0051d0e0, (void*)P64_RankScoreB, "P64_RankScoreB");
     re_hook(0x0051d1a3, (void*)P64_RankTop, "P64_RankTop");
     re_hook(0x0051cc55, (void*)P64_RankPlace, "P64_RankPlace");
+    re_hook(0x004f6774, (void*)P65_NextToken, "P65_NextToken");
+    re_hook(0x004f87e0, (void*)P65_ReadInts, "P65_ReadInts");
+    re_hook(0x004f8cfd, (void*)P65_FindByName, "P65_FindByName");
+    re_hook(0x004072be, (void*)P65_SetNameFields, "P65_SetNameFields");
+    re_hook(0x00529140, (void*)P65_BlitKeyed, "P65_BlitKeyed");
+    re_hook(0x00529190, (void*)P65_BlitBlend, "P65_BlitBlend");
+    re_hook(0x00407cb8, (void*)P65_SpriteKeyed, "P65_SpriteKeyed");
+    re_hook(0x00407d07, (void*)P65_SpriteBlend, "P65_SpriteBlend");
+    re_hook(0x004d1529, (void*)P65_ScriptCall, "P65_ScriptCall");
 }

@@ -7,6 +7,7 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    V(P65_Fn4CFE69, 0x004cfe69, (uint32_t a0), (a0)) \
     R(int32_t, P63_Fn49521E, 0x0049521e, (void *r, int32_t a, int32_t b), (r, a, b)) \
     V(P62_Fn424A02, 0x00424a02, (uint32_t a, void *b), (a, b)) \
     R(int32_t, P62_Fn51CC55, 0x0051cc55, (void *a, int32_t t, int32_t i), (a, t, i)) \
