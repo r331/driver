@@ -1,4 +1,5 @@
 #include "ported80.h"
+#include "ported81.h"
 #include <math.h>
 #include <string.h>
 
@@ -160,7 +161,7 @@ void P80_LoadHeader(void *f) {
       P19_OutA *= P80_C045; P19_OutB *= P80_C045; P19_OutC *= P80_C045;
     }
   }
-  Call004CB619();
+  P81_Light();
   P27_ReadChunked(&P54_Cnt1E0, 4, 1, f);
   P54_AllocMapBufs();
   uint8_t *ent = (uint8_t *)G6_00D00208;

@@ -297,7 +297,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401726,thunk_FUN_0040ab9f,Thunk_0040AB9F,manual,Thunks,,,5,ported
 0040172b,thunk_FUN_004f8d6d,,,,,,5,ported
 00401730,thunk_FUN_004accf0,,,,,,5,todo
-0040173a,thunk_FUN_004e959a,,,,,,5,todo
+0040173a,thunk_FUN_004e959a,,,,,,5,ported
 0040173f,thunk_FUN_004ba443,Thunk_004BA443,manual,Thunks,,,5,ported
 00401744,thunk_FUN_0049f031,,,,,,5,ported
 00401749,thunk_FUN_004aef57,,,,,,5,todo
@@ -586,7 +586,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401ea6,thunk_FUN_00489ed6,,,,,,5,ported
 00401eab,thunk_FUN_004127f0,,,,,,5,todo
 00401eba,thunk_FUN_00524917,,,,,,5,ported
-00401ebf,thunk_FUN_004cb619,,,,,,5,todo
+00401ebf,thunk_FUN_004cb619,,,,,,5,ported
 00401ec4,thunk_FUN_00494701,,,,,,5,todo
 00401ec9,thunk_FUN_0048ed6f,,,,,,5,ported
 00401ece,thunk_FUN_004b955c,,,,,,5,todo
@@ -2474,7 +2474,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004cb102,FUN_004cb102,,,,,,499,todo
 004cb2f5,FUN_004cb2f5,,,,,,522,todo
 004cb4ff,FUN_004cb4ff,,,,,,282,todo
-004cb619,FUN_004cb619,,,,,,574,todo
+004cb619,FUN_004cb619,P81_Light,manual,render,,,574,ported
 004cb857,FUN_004cb857,,,,,,299,todo
 004cb982,FUN_004cb982,ScriptStackPop004CB982,manual,SmallFuncs,,,56,ported
 004cb9ba,FUN_004cb9ba,ScriptStackPop004CB9BA,manual,SmallFuncs,,,56,ported
@@ -2714,7 +2714,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004e9006,FUN_004e9006,,,,,,407,todo
 004e919d,FUN_004e919d,,,,,,650,todo
 004e9427,FUN_004e9427,,,,,,371,todo
-004e959a,FUN_004e959a,,,,,,176,todo
+004e959a,FUN_004e959a,P81_Limit,manual,render,,,176,ported
 004e964a,FUN_004e964a,SetViewAngles,manual,camera,,,85,ported
 004e969f,FUN_004e969f,,,,,,1312,todo
 004e9bbf,FUN_004e9bbf,,,,,,1927,todo
