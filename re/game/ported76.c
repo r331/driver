@@ -1,4 +1,5 @@
 #include "ported76.h"
+#include "ported89.h"
 #include <string.h>
 #ifdef RE_HOOK_BUILD
 #  define P76_STD __attribute__((stdcall))
@@ -138,7 +139,7 @@ int32_t P76_InBox(const float *pos, const uint8_t *grid, int32_t cx, int32_t cy)
 }
 
 /* 004ee813: клетка (ox, oy) в сетке размером N=P54_GridN; 004ef793(номер блока, номер внутри блока, arg) */
-void P76_CellFromPos(const float *pos, int32_t arg, int32_t *ox, int32_t *oy) {
+void P76_CellFromPos(const float *pos, uint8_t *arg, int32_t *ox, int32_t *oy) {
   float fx = cell_coord(P42_CellX, pos[0]);
   float fy = cell_coord(P42_CellY, pos[2]);
   int32_t x = (int32_t)fx, y = (int32_t)fy;
@@ -148,7 +149,7 @@ void P76_CellFromPos(const float *pos, int32_t arg, int32_t *ox, int32_t *oy) {
   int32_t qx = x / n, qy = y / n;
   int32_t blk = qx + qy * (P21_GridDiv / n);
   int32_t sub = (y - qy * n) * n + (x - qx * n);
-  P76_Fn4EF793(blk, sub, arg);
+  P89_VisMask(blk, sub, arg);
 }
 
 /* 004e8f1e: Angle (0..191) → три байта цвета; ≥192 — ничего */

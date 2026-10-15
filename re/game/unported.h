@@ -11,7 +11,6 @@
     V(P77_Fn501770, 0x00501770, (void), ()) \
     V(P77_Fn524BD8, 0x00524bd8, (void *p), (p)) \
     V(P76_Fn40DCE0, 0x0040dce0, (int32_t x, int32_t y, int32_t w, int32_t h, int32_t idx, void *color), (x, y, w, h, idx, color)) \
-    V(P76_Fn4EF793, 0x004ef793, (int32_t a, int32_t b, int32_t c), (a, b, c)) \
     V(P76_Fn4268EF, 0x004268ef, (void *p, int32_t a, int32_t b, int32_t c, int32_t d), (p, a, b, c, d)) \
     V(P75_Fn4958B7, 0x004958b7, (void), ()) \
     R(int32_t, P75_Fn491A56, 0x00491a56, (int32_t car, int32_t node, int32_t a, int32_t b, int32_t c), (car, node, a, b, c)) \
@@ -33,7 +32,6 @@
     V(P66_Draw5173D7, 0x005173d7, (float x, float y, uint32_t txt, int32_t a, int32_t flags), (x, y, txt, a, flags)) \
     V(P66_Fn523829, 0x00523829, (void), ()) \
     V(P66_Fn427EEA, 0x00427eea, (void), ()) \
-    V(P66_Fn4EE8F4, 0x004ee8f4, (int32_t a), (a)) \
     V(P66_Fn4169AF, 0x004169af, (void), ()) \
     V(P66_Fn4C3BC7, 0x004c3bc7, (void), ()) \
     V(P70_Fn5063A4, 0x005063a4, (int32_t i), (i)) \
@@ -93,7 +91,6 @@
     V(P87_Fn42A423, 0x0042a423, (uint32_t m, int32_t idx, float *pos, int32_t mode), (m, idx, pos, mode)) \
     V(P87_Fn42A5DE, 0x0042a5de, (uint32_t m, int32_t idx, float *pos, int32_t mode), (m, idx, pos, mode)) \
     V(P87_Fn4FEF26, 0x004fef26, (uint32_t m, const void *obj, int32_t r), (m, obj, r)) \
-    V(P55_Fn4EE18B, 0x004ee18b, (uint32_t a0), (a0)) \
     V(P55_Fn4ED5F8, 0x004ed5f8, (int32_t a0, int32_t a1), (a0, a1)) \
     V(P55_Fn4EDAA2, 0x004edaa2, (void), ()) \
     R(int32_t, P55_Fn405E79, 0x00405e79, (int32_t a0, void *a1), (a0, a1)) \

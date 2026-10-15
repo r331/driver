@@ -46,6 +46,6 @@ int32_t P76_GlideRegister(void);                                        /* 00424
 void P76_TileFill(float v);                                             /* 0040dbee */
 void P76_FlashStep(int32_t *o);                                         /* 004a3aa7 */
 int32_t P76_InBox(const float *pos, const uint8_t *grid, int32_t cx, int32_t cy);   /* 004ecee8 */
-void P76_CellFromPos(const float *pos, int32_t arg, int32_t *ox, int32_t *oy);      /* 004ee813 */
+void P76_CellFromPos(const float *pos, uint8_t *arg, int32_t *ox, int32_t *oy);      /* 004ee813 */
 void P76_AngleColor(void);                                              /* 004e8f1e */
 int32_t P76_LoadHsTables(void *f);                                      /* 0051caa7 */

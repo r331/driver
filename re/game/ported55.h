@@ -27,8 +27,8 @@
 typedef struct { uint32_t id; uint16_t w; uint16_t pad; uint32_t x, y; } P55_Pop;
 _Static_assert(sizeof(P55_Pop) == 0x10, "P55_Pop");
 typedef P55_Pop p55_pop_t[146];
-typedef uint32_t p55_tabA_t[1106];
-typedef uint32_t p55_tabB_t[2081];
+typedef void *p55_tabA_t[1106];
+typedef void *p55_tabB_t[2081];
 typedef uint8_t  p55_frustum_t[0x8000];
 typedef int32_t  p55_flags8_t[8];
 typedef uint32_t p55_glide_t[16];

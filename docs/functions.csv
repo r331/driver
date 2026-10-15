@@ -263,7 +263,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040164a,thunk_FUN_004c3e6a,Thunk_004C3E6A,manual,Thunks,,,5,ported
 0040164f,thunk_FUN_004e964a,,,,,,5,ported
 00401654,thunk_FUN_00427a71,,,,,,5,ported
-00401659,thunk_FUN_004ef793,,,,,,5,todo
+00401659,thunk_FUN_004ef793,,,,,,5,ported
 0040165e,thunk_FUN_004d7b73,,,,,,5,ported
 00401663,thunk_FUN_004cc784,Thunk_004CC784,manual,Thunks,,,5,ported
 00401668,thunk_FUN_0049e911,,,,,,5,todo
@@ -899,7 +899,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402653,thunk_FUN_0048ba31,,,,,,5,todo
 00402662,thunk_FUN_004d2500,,,,,,5,todo
 00402667,thunk_FUN_0049509a,,,,,,5,ported
-0040266c,thunk_FUN_004ee8f4,,,,,,5,todo
+0040266c,thunk_FUN_004ee8f4,,,,,,5,ported
 00402671,thunk_FUN_004f568a,,,,,,5,todo
 0040267b,thunk_FUN_004a1037,,,,,,5,todo
 00402680,thunk_FUN_0048f899,,,,,,5,todo
@@ -2777,13 +2777,13 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004ee18b,FUN_004ee18b,P87_DrawObjA,manual,Ported87,range,,812,ported
 004ee4b7,FUN_004ee4b7,P87_DrawObjB,manual,Ported87,range,,860,ported
 004ee813,FUN_004ee813,P76_CellFromPos,manual,ported76,range,,225,ported
-004ee8f4,FUN_004ee8f4,,,map,range,,2058,todo
+004ee8f4,FUN_004ee8f4,P89_DrawMap,manual,map,range,,2058,ported
 004ef309,FUN_004ef309,P55_RunTableA,manual,map,range,,91,ported
 004ef364,FUN_004ef364,P55_RunTableB,manual,map,range,,105,ported
 004ef3cd,FUN_004ef3cd,,,map,range,,669,todo
 004ef66a,FUN_004ef66a,,,map,range,,297,todo
-004ef793,FUN_004ef793,,,map,range,,516,todo
-004ef997,FUN_004ef997,FillOnes4EF997,manual,map,range,,54,ported
+004ef793,FUN_004ef793,P89_VisMask,manual,map,range,,516,ported
+004ef997,FUN_004ef997,P89_Fill1,manual,map,range,,54,ported
 004ef9cd,FUN_004ef9cd,,,map,range,,304,todo
 004efafd,FUN_004efafd,,,map,assert,,262,todo
 004efc03,FUN_004efc03,P58_FreeRecs,manual,,,,121,ported

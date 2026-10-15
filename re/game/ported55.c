@@ -1,4 +1,5 @@
 #include "ported55.h"
+#include "ported87.h"
 #include "ported27.h"
 #include "ported30.h"
 #include "ported48.h"
@@ -53,7 +54,7 @@ void P55_RunTableA(void) {
   /* Ограничение размером таблицы — защита от мусорного счётчика (в оригинале его нет). */
   int32_t n = P55_CntA;
   if (n < 0 || n > 1106) n = 1106;
-  for (int32_t i = 0; i < n; i++) P55_Fn4EE18B(P55_TabA[i]);
+  for (int32_t i = 0; i < n; i++) if (P55_TabA[i]) P87_DrawObjA((const uint8_t *)P55_TabA[i]);   /* пустой элемент — охранная проверка */
 }
 
 void P55_RunTableB(void) {
@@ -62,7 +63,7 @@ void P55_RunTableB(void) {
   int32_t n = P55_CntB;
   P55_Flag38C = 2;
   if (n < 0 || n > 2081) n = 2081;
-  for (int32_t i = 0; i < n; i++) P55_Fn4EE18B(P55_TabB[i]);
+  for (int32_t i = 0; i < n; i++) if (P55_TabB[i]) P87_DrawObjA((const uint8_t *)P55_TabB[i]);
   P55_Flag38C = 0;
 }
 

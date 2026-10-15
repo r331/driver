@@ -92,6 +92,7 @@
 #include "../game/ported86.h"
 #include "../game/ported87.h"
 #include "../game/ported88.h"
+#include "../game/ported89.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -1920,6 +1921,9 @@ int32_t P58_Fn418675(uint32_t tbl, int32_t cur) { (void)tbl; (void)cur; return -
 int32_t P58_Fn416794(void) { return 7; }
 static int test_p58(void) {
   int f = 0;
+  if (!P56_EulerTab) P56_AllocEulerTab(1);   /* кадр меню рисует мир: P83_LightMatrices читает таблицу поворотов */
+  g_00b1c3f0 = g_00cff9ac;   /* без смены блока 00489ed6 ничего не делает */
+  P54_GridN = 0;   /* кадры меню зовут P89_DrawMap — без сетки он сразу выходит (данные уровня в тесте не загружены) */
 #undef CK
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p58 fail line %d\n",__LINE__); } } while (0)
   /* 00524e22 */
@@ -2434,7 +2438,6 @@ void P66_Draw5173D7(float x, float y, uint32_t txt, int32_t a, int32_t flags) {
   if (t66_nshadow < 16) { t66_fx[t66_nshadow][0] = x; t66_fx[t66_nshadow][1] = y; t66_args[t66_nshadow][2] = (int32_t)txt; t66_args[t66_nshadow][4] = flags; } t66_nshadow++; (void)a; }
 void P66_Fn523829(void) { t66_fn++; }
 void P66_Fn427EEA(void) { t66_fn++; }
-void P66_Fn4EE8F4(int32_t a) { t66_fn += 10 * (a + 1); }
 void P66_Fn4169AF(void) { t66_cb++; }
 static int t66_a, t66_b;
 void P66_Fn4C3BC7(void) { t66_a++; }
@@ -2467,8 +2470,9 @@ static int test_p66(void) {
   P59_MenuLock = 0;
   /* начало кадра: сцена, режим 00426580 */
   t66_fn = 0; G6_00D0DDC0 = 5; Q00B87E90 = 0; P66_LoadFlag = 1; P66_Scene = 0;
-  P66_FrameBegin();
-  CK(P66_Scene == 0x00cb8f20u && G6_00D0DDC0 == 0 && t66_fn == 2 + 10 + 20);
+  { int32_t sgn = P54_GridN; P54_GridN = 0;   /* P89_DrawMap выходит сразу после обновления клетки */
+    P66_FrameBegin(); P54_GridN = sgn; }
+  CK(P66_Scene == 0x00cb8f20u && G6_00D0DDC0 == 0 && t66_fn == 2);
   /* кадр экрана: окно неактивно — ничего; вложенность */
   P31_Active = 0; P66_Nest = 0; t66_cb = 0; t66_n = 0;
   P66_ScreenFrame(0, 0x004169afu);
@@ -3165,7 +3169,6 @@ static int test_p75(void) {
 /* ported76: подмена неперенесённых вызовов */
 static int t76_calls[4]; static int32_t t76_arg[8]; static uint8_t t76_col;
 void P76_Fn40DCE0(int32_t x, int32_t y, int32_t w, int32_t h, int32_t idx, void *color) { t76_calls[0]++; t76_arg[0] = x; t76_arg[1] = y; t76_arg[2] = w; t76_arg[3] = h; t76_arg[4] = idx; t76_col = ((uint8_t *)color)[2]; }
-void P76_Fn4EF793(int32_t a, int32_t b, int32_t c) { t76_calls[1]++; t76_arg[5] = a; t76_arg[6] = b; t76_arg[7] = c; }
 void P76_Fn4268EF(void *p, int32_t a, int32_t b, int32_t c, int32_t d) { (void)p; t76_calls[2]++; t76_arg[0] = a; t76_arg[1] = b; t76_arg[2] = c; t76_arg[3] = d; }
 static int test_p76(void) {
   int f = 0;
@@ -3213,8 +3216,11 @@ static int test_p76(void) {
     CK(P76_InBox(pos, grid, 5, 11) == 0);          /* dx=dy=0 → ячейка 15+15*40 пуста */
     CK(P76_InBox(pos, grid, 100, 10) == 0);
     int32_t ox = 0, oy = 0; P54_GridN = 4; P21_GridDiv = 64; memset(t76_calls, 0, sizeof t76_calls);
-    P76_CellFromPos(pos, 77, &ox, &oy);
-    CK(ox == 5 && oy == 11 && t76_calls[1] == 1 && t76_arg[5] == 33 && t76_arg[6] == 13 && t76_arg[7] == 77); }
+    { uint8_t vis[8]; int32_t sd0 = D_00d00204; void *sb = P46_MapBufA; memset(vis, 0xaa, sizeof vis);
+      D_00d00204 = 3; P46_MapBufA = NULL;
+      P76_CellFromPos(pos, vis, &ox, &oy);
+      CK(ox == 5 && oy == 11 && vis[0] == 1 && vis[2] == 1 && vis[3] == 0xaa);   /* нет данных видимости — все единицы */
+      D_00d00204 = sd0; P46_MapBufA = sb; } }
   /* 004e8f1e */
   { memset(t76_calls, 0, sizeof t76_calls);
     P76_Angle = 10; P76_AngleColor();
@@ -3595,6 +3601,64 @@ static int test_p83(void) {
 
 
 /* ported87: загрузка плитки карты в слот и рисование объектов (004ed5f8, 004ee18b, 004ee4b7) */
+static int test_p89(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { fprintf(stderr, "p89 fail line %d: %s\n", __LINE__, #c); f = 1; } } while (0)
+  int32_t sd = D_00d00204; void *sb = P46_MapBufA;
+  uint8_t *seul = P56_EulerTab; uint8_t *eul = P56_AllocEulerTab(1); P56_EulerTab = eul;   /* свои таблицы поворотов: прежний указатель — на стек другого теста */
+  /* маска видимости: поток {1 полный байт, 1 байт с битами 0x05}, {0, 1 байт 0xff}; 20 клеток -> 21 записанная */
+  { static uint8_t buf[0x100]; uint8_t out[64]; memset(buf, 0, sizeof buf); memset(out, 0xaa, sizeof out);
+    uint32_t v;
+    v = 0x40; memcpy(buf + 0x10 + 2 * 4, &v, 4);                 /* блок 2 -> таблица +0x40 */
+    v = 0x20; memcpy(buf + 0x40 + 5 * 4, &v, 4);                 /* клетка 5 -> поток +0x40+0x20 */
+    { uint8_t st[] = { 1, 1, 0x05, 0, 1, 0xff }; memcpy(buf + 0x60, st, sizeof st); }
+    P46_MapBufA = buf; D_00d00204 = 20;
+    P89_VisMask(2, 5, out);
+    CK(memcmp(out, "\1\1\1\1\1\1\1\1", 8) == 0);
+    CK(out[8] == 1 && out[9] == 0 && out[10] == 1 && out[11] == 0 && out[15] == 0);
+    CK(out[16] == 1 && out[20] == 1 && out[21] == 0xaa);
+    /* пустой поток (смещение 0) — все единицы */
+    v = 0; memcpy(buf + 0x40 + 6 * 4, &v, 4); memset(out, 0xaa, sizeof out);
+    P89_VisMask(2, 6, out);
+    CK(out[0] == 1 && out[19] == 1 && out[20] == 0xaa);
+    P89_Fill1(out + 24); CK(out[24] == 1 && out[43] == 1 && out[44] == 0xaa); }
+  /* обход клеток: одна клетка с объектом класса 2 попадает в таблицу P55_TabA */
+  { static uint8_t nodes[16], objs[0x40]; static int32_t heads[4 * 60 * 60]; static uint8_t frus[0x80];
+    int32_t sn = P54_GridN, sdv = P21_GridDiv, sh = P80_GridH, sst = P21_GridStride, sx = P42_CellX, sy = P42_CellY, se = G6_00B87EEC;
+    void *s1 = G6_00CE0F20, *s2 = G6_00D01268, *s3 = G6_00D00208; float scx = P44_CamX, scz = P44_CamZ, ssc = P42_CellScale;
+    uint16_t sang = P59_AngB; uint8_t smd = P59_Mode1137324; int32_t sgs = P47_SwapCnt, ssh = G6_00D11880;
+    uint8_t sp80 = P80_Class[5]; int32_t sbd = S_00BDCD00[5]; uint8_t sfr[0x80]; memcpy(sfr, P55_Frustum, 0x80);
+    P54_GridN = 60; P21_GridDiv = 480; P80_GridH = 480; P21_GridStride = 40; P42_CellX = 0; P42_CellY = 0; P42_CellScale = 1.0f;
+    P44_CamX = 300.0f; P44_CamZ = 200.0f; G6_00B87EEC = 1; P59_AngB = 0; P59_Mode1137324 = 0; P47_SwapCnt = 7; G6_00D11880 = 0;
+    P46_MapBufA = NULL; D_00d00204 = 0;
+    memset(frus, 0, sizeof frus);
+    { int16_t r[32]; memset(r, 0, sizeof r); r[0] = 14; r[1] = 1; r[2 * 14 + 2] = 14; r[2 * 14 + 3] = 1; memcpy(P55_Frustum, r, sizeof r); }  /* первая строка 14, одна строка; для строки 14 пара {сдвиг 14, длина 1} */
+    memset((uint8_t *)P82_LightGrid, 0, 40 * 16); ((uint8_t *)P82_LightGrid)[14 * 40 + 14] = 1;
+    for (int i = 0; i < 4 * 60 * 60; i++) heads[i] = -1;
+    /* камера (300, 200): блок (5, 3); клетка обхода (299, 199) -> блок (4, 3), внутри (59, 19), слот (0 + 1*2) = 2 */
+    heads[2 * 3600 + 59 + 19 * 60] = 0;
+    { int32_t nd[2] = { 0, -1 }; memcpy(nodes, nd, 8); }
+    memset(objs, 0, sizeof objs); { int32_t m = 5; memcpy(objs + 4, &m, 4); }
+    G6_00CE0F20 = nodes; G6_00D01268 = heads; G6_00D00208 = objs; P54_Cnt1E0 = 0;
+    P80_Class[5] = 2; S_00BDCD00[5] = 1; P55_CntA = 0;
+    P89_DrawMap(0);                                                 /* считает клетку камеры (и маску: данных нет, D=0) */
+    CK(P88_CellA.x == 300 && P88_CellA.y == 200);
+    g_00b1c3f0 = g_00cff9ac;                                        /* 00489ed6 при mode=1 не трогает блоки */
+    P89_DrawMap(1);
+    CK(P55_CntA == 1 && P55_TabA[0] == objs);
+    { int32_t tag; memcpy(&tag, objs, 4); CK(tag == 7); }
+    P55_CntA = 0; P89_DrawMap(1);                                   /* метка кадра совпала -> второй раз не добавляется */
+    CK(P55_CntA == 0);
+    P89_DrawMap(0); CK(P55_CntA == 0);
+    G6_00CE0F20 = s1; G6_00D01268 = s2; G6_00D00208 = s3;
+    P54_GridN = sn; P21_GridDiv = sdv; P80_GridH = sh; P21_GridStride = sst; P42_CellX = sx; P42_CellY = sy; G6_00B87EEC = se;
+    P44_CamX = scx; P44_CamZ = scz; P42_CellScale = ssc; P59_AngB = sang; P59_Mode1137324 = smd; P47_SwapCnt = sgs; G6_00D11880 = ssh;
+    P80_Class[5] = sp80; S_00BDCD00[5] = sbd; memcpy(P55_Frustum, sfr, 0x80); P55_CntA = 0; }
+  P46_MapBufA = sb; D_00d00204 = sd; P56_EulerTab = seul; if (eul) DebugFree(eul);
+  return f;
+}
+
 static int test_p88(void) {
   int f = 0;
 #undef CK
@@ -4097,7 +4161,7 @@ static int test_p86(void) {
 
 int re_selftest(void) {
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

@@ -1,4 +1,5 @@
 #include "ported66.h"
+#include "ported89.h"
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
@@ -31,8 +32,8 @@ void P66_FrameBegin(void) {
   } else {
     P12_Fn00426580(1);
   }
-  P66_Fn4EE8F4(0);
-  P66_Fn4EE8F4(1);
+  P89_DrawMap(0);
+  P89_DrawMap(1);
   P12_Fn00426580(0x18);
 }
 

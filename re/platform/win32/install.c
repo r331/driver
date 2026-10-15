@@ -77,6 +77,7 @@
 #include "../../game/ported86.h"
 #include "../../game/ported87.h"
 #include "../../game/ported88.h"
+#include "../../game/ported89.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1752,4 +1753,7 @@ void re_install_all(void) {
     re_hook(0x004ee4b7, (void*)P87_DrawObjB, "P87_DrawObjB");
     re_hook(0x004edd08, (void*)P88_CellUpdate, "P88_CellUpdate");
     re_hook(0x004edaa2, (void*)P88_StreamTiles, "P88_StreamTiles");
+    re_hook(0x004ef997, (void*)P89_Fill1, "P89_Fill1");
+    re_hook(0x004ef793, (void*)P89_VisMask, "P89_VisMask");
+    re_hook(0x004ee8f4, (void*)P89_DrawMap, "P89_DrawMap");
 }
