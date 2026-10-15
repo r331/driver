@@ -143,8 +143,8 @@ address,name,layer,imports,callers,status
 004ec58a,FUN_004ec58a,system,MessageBoxA,,todo
 004fc5e1,FUN_004fc5e1,system,timeGetTime,,ported
 00521f10,FUN_00521f10,system,MessageBoxA;SetCursor,,todo
-00522369,FUN_00522369,system,MessageBoxA,,todo
-00522759,FUN_00522759,system,MessageBoxA,,todo
+00522369,FUN_00522369,system,MessageBoxA,,ported
+00522759,FUN_00522759,system,MessageBoxA,,ported
 005281b0,FUN_005281b0,system,timeBeginPeriod,,ported
 005281e1,FUN_005281e1,system,timeEndPeriod,,ported
 00528221,FUN_00528221,system,timeSetEvent,,ported

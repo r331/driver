@@ -32,6 +32,7 @@
 #include "../game/ported27.h"
 #include "../game/ported28.h"
 #include "../game/ported29.h"
+#include "../game/ported30.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -626,6 +627,25 @@ static int test_p29(void) {
   P29_Mode = 3; SetDirectorMode(99, 0, 0); if (P29_Mode != 3) f++;
   return f;
 }
+static int test_p30(void) {
+  int f = 0;
+  G6_00BDF9C0 = 5; G6_00BDF9C4 = 6;
+  P30_InitWindowGlobals(); if (G6_00BDF9C0 != 0 || G6_00BDF9C4 != 0) f++;
+  P30_CrashInstall(); if (plat_crash_handler() != P30_CrashHandler) f++;
+  P30_CrashRemove(); if (plat_crash_handler() != NULL) f++;
+  plat_exit_trap(1);
+  P30_Exit(3); if (plat_exit_last() != 3) f++;
+  const char *tx, *ti; int n0 = plat_message_box_last(&tx, &ti);
+  P30_CrashInstall(); P30_ScreensaverSaved = 0; plat_screensaver_set(1);
+  P30_FatalError("kaput");
+  int n1 = plat_message_box_last(&tx, &ti);
+  if (n1 != n0 + 1 || strcmp(tx, "kaput") || strcmp(ti, "ERROR")) f++;
+  if (plat_exit_last() != 0 || plat_screensaver_get() != 0 || plat_crash_handler() != NULL) f++;
+  P30_CrashInstall(); P30_CrashHandler();
+  if (strncmp(tx, "Application Error", 17) || strcmp(ti, "Driver Exception Handler") || plat_crash_handler() != NULL) f++;
+  plat_exit_trap(0);
+  return f;
+}
 static int test_p26(void) {
   int f = 0;
   P26_WaveSetVolume(0x8000); if (plat_wave_volume() != 0x80008000u) f++;
@@ -647,7 +667,7 @@ static int test_p26(void) {
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

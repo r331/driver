@@ -18,6 +18,7 @@
 #include "../../game/ported27.h"
 #include "../../game/ported28.h"
 #include "../../game/ported29.h"
+#include "../../game/ported30.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1190,4 +1191,9 @@ void re_install_all(void) {
     re_hook(0x00528221, (void*)P25_TimerStart, "P25_TimerStart");
     re_hook(0x00528293, (void*)P25_TimerStop, "P25_TimerStop");
     re_hook(0x005282e1, (void*)P25_TimerCb, "P25_TimerCb");
+    re_hook(0x00522369, (void*)P30_FatalError, "P30_FatalError");
+    re_hook(0x0052273c, (void*)P30_CrashInstall, "P30_CrashInstall");
+    re_hook(0x0052274c, (void*)P30_CrashRemove, "P30_CrashRemove");
+    re_hook(0x005223be, (void*)P30_InitWindowGlobals, "P30_InitWindowGlobals");
+    re_hook(0x0052e400, (void*)P30_Exit, "P30_Exit");
 }

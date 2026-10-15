@@ -63,3 +63,27 @@ int plat_cd_roots(char *buf,int size){   /* macOS: тома в /Volumes; Linux: 
         n+=l+1; }
     closedir(d); buf[n]=0; return n;
 }
+
+/* --- выход, хранитель экрана, обработчик аварий --- */
+#include <stdlib.h>
+#include <signal.h>
+static int g_exit_trap, g_exit_last, g_saver = 1;
+static void (*g_crash)(void);
+void plat_exit_trap(int on){ g_exit_trap=on; }
+int plat_exit_last(void){ return g_exit_last; }
+void plat_exit(int code){ g_exit_last=code; if(g_exit_trap) return; exit(code); }
+int plat_screensaver_get(void){ return g_saver; }
+void plat_screensaver_set(int on){
+    g_saver = on?1:0;
+    if(SDL_WasInit(SDL_INIT_VIDEO)){ if(g_saver) SDL_EnableScreenSaver(); else SDL_DisableScreenSaver(); }
+}
+static void crash_sig(int sig){ signal(sig,SIG_DFL); if(g_crash) g_crash(); _Exit(1); }
+void plat_set_crash_handler(void (*fn)(void)){
+    g_crash=fn;
+    void (*h)(int)= fn?crash_sig:SIG_DFL;
+    signal(SIGSEGV,h); signal(SIGFPE,h); signal(SIGILL,h);
+#ifdef SIGBUS
+    signal(SIGBUS,h);
+#endif
+}
+void (*plat_crash_handler(void))(void){ return g_crash; }

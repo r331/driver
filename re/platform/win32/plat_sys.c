@@ -22,3 +22,15 @@ int plat_cd_roots(char *buf,int size){
         int l=(int)strlen(p); if(n+l+2>=size) break; memcpy(buf+n,p,(size_t)l+1); n+=l+1; }
     buf[n]=0; return n;
 }
+
+/* --- выход, хранитель экрана, обработчик аварий --- */
+static int g_exit_trap, g_exit_last;
+static void (*g_crash)(void);
+void plat_exit_trap(int on){ g_exit_trap=on; }
+int plat_exit_last(void){ return g_exit_last; }
+void plat_exit(int code){ g_exit_last=code; if(g_exit_trap) return; ((void(__cdecl*)(int,int,int))0x0052e480)(code,0,0); }
+int plat_screensaver_get(void){ BOOL b=0; SystemParametersInfoA(SPI_GETSCREENSAVEACTIVE,0,&b,0); return (int)b; }
+void plat_screensaver_set(int on){ SystemParametersInfoA(SPI_SETSCREENSAVEACTIVE,(UINT)on,NULL,0); }
+static LONG WINAPI crash_filter(EXCEPTION_POINTERS *ep){ (void)ep; if(g_crash) g_crash(); return EXCEPTION_EXECUTE_HANDLER; }
+void plat_set_crash_handler(void (*fn)(void)){ g_crash=fn; SetUnhandledExceptionFilter(fn?crash_filter:NULL); }
+void (*plat_crash_handler(void))(void){ return g_crash; }

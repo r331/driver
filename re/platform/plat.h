@@ -12,6 +12,13 @@ int  plat_cd_roots(char *buf, int size);      /* корни CD/DVD-привод�
 void plat_wave_set_volume(uint32_t lr);      /* waveOutSetVolume(0, lr): (R<<16)|L; SDL: запоминает для микшера */
 uint32_t plat_wave_volume(void);             /* последнее значение (тесты) */
 int  plat_message_box_last(const char **text, const char **title); /* число вызовов и последний текст (тесты; hook: 0) */
+void plat_exit(int code);                     /* выход из процесса (hook: CRT-выход Game.exe 0052e480; SDL: exit) */
+void plat_exit_trap(int on);                  /* тесты: plat_exit только запоминает код и возвращается */
+int  plat_exit_last(void);                    /* последний код plat_exit (тесты) */
+int  plat_screensaver_get(void);              /* SystemParametersInfo(SPI_GETSCREENSAVEACTIVE) */
+void plat_screensaver_set(int on);            /* SPI_SETSCREENSAVEACTIVE */
+void plat_set_crash_handler(void (*fn)(void)); /* SetUnhandledExceptionFilter: fn вызывается при аварии, потом процесс завершается; NULL — снять */
+void (*plat_crash_handler(void))(void);       /* текущий обработчик (тесты) */
 void plat_log(const char *fmt, ...);
 void *plat_file_open(const char *path, const char *mode); /* case-insensitive lookup */
 /* --- window & input --- */

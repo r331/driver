@@ -220,6 +220,8 @@
     V(Call00510784, 0x00510784, (void), ()) \
     V(Call0050FAB0, 0x0050fab0, (void), ()) \
     V(Call004C64BD, 0x004c64bd, (void), ()) \
+    V(Call004D3402, 0x004d3402, (void), ()) \
+    V(Call004246F0, 0x004246f0, (void), ()) \
     V(Call004C372A, 0x004c372a, (void), ()) \
     V(Call0052434A, 0x0052434a, (int32_t a0), (a0)) \
     V(Call004D303A, 0x004d303a, (uint32_t a0, uint32_t a1), (a0, a1)) \
