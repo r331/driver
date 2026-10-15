@@ -10,6 +10,7 @@
 #include "../../game/ported19.h"
 #include "../../game/ported20.h"
 #include "../../game/ported21.h"
+#include "../../game/ported22.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1122,4 +1123,18 @@ void re_install_all(void) {
     re_hook(0x0049509a, (void*)P21_CountActiveEntries, "P21_CountActiveEntries");
     re_hook(0x004a519a, (void*)P21_MatchPrefix, "P21_MatchPrefix");
     re_hook(0x0040f14a, (void*)P21_GetNameByIndex, "P21_GetNameByIndex");
+    re_hook(0x00404eb0, (void*)P22_ToggleBDFA44, "P22_ToggleBDFA44");
+    re_hook(0x00404ec9, (void*)P22_ToggleBDFA48, "P22_ToggleBDFA48");
+    re_hook(0x00404ee2, (void*)P22_ToggleBDFA4C, "P22_ToggleBDFA4C");
+    re_hook(0x00404efb, (void*)P22_ToggleBDFA50, "P22_ToggleBDFA50");
+    re_hook(0x00404f14, (void*)P22_ToggleBDFA54, "P22_ToggleBDFA54");
+    re_hook(0x00404f2d, (void*)P22_ToggleB87E9C, "P22_ToggleB87E9C");
+    re_hook(0x00404f46, (void*)P22_ToggleBDFA58, "P22_ToggleBDFA58");
+    re_hook(0x00404f5f, (void*)P22_SetMode4, "P22_SetMode4");
+    re_hook(0x00404ffe, (void*)P22_RunMenuAction40CD17, "P22_RunMenuAction40CD17");
+    re_hook(0x00404687, (void*)P22_SetFlag5F7E4C, "P22_SetFlag5F7E4C");
+    re_hook(0x00408337, (void*)P22_SetFlag54A0BC, "P22_SetFlag54A0BC");
+    re_hook(0x00408343, (void*)P22_ClearFlag54A0BC, "P22_ClearFlag54A0BC");
+    re_hook(0x0040844c, (void*)P22_ClearFlag54A0CC, "P22_ClearFlag54A0CC");
+    re_hook(0x00408710, (void*)P22_Inc5D577C, "P22_Inc5D577C");
 }
