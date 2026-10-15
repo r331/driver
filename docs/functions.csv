@@ -2622,7 +2622,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d97dc,FUN_004d97dc,SetD11804,manual,UIMisc,,,13,ported
 004d97e9,FUN_004d97e9,,,,,,62,todo
 004d9827,FUN_004d9827,,,,,,71,todo
-004d986e,FUN_004d986e,,,,,,154,todo
+004d986e,FUN_004d986e,P21_DrawClock,manual,,,,154,ported
 004d9908,FUN_004d9908,CameraMode,debug_string,,,,73,named
 004d9951,FUN_004d9951,,,general,assert,,387,todo
 004d9ad4,FUN_004d9ad4,,,,,,308,todo

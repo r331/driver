@@ -29,3 +29,9 @@ extern const char* P21_NameTable[0x23];
 extern const char* P21_ErrorName;
 #endif
 const char* P21_GetNameByIndex(uint8_t idx); /* 0040f14a */
+#ifdef RE_HOOK_BUILD
+#define P21_ClockBuf ((char*)0x00b20384)
+#else
+extern char P21_ClockBuf[32];
+#endif
+void P21_DrawClock(void); /* 004d986e: HH:MM:SS clock, uses plat_local_hms */

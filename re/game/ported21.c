@@ -1,5 +1,10 @@
 #include "ported21.h"
 #include <string.h>
+#include <stdio.h>
+#include "../platform/plat.h"
+#include "unported.h"
+#include "ported19.h"
+#include "uihandlers3.h"
 GAME_VAR_DEF(int32_t, P21_GridDiv, 0x00562d38)
 GAME_VAR_DEF(int32_t, P21_GridRadius, 0x00cf56b8)
 GAME_VAR_DEF(int32_t, P21_GridStride, 0x00d00258)
@@ -65,4 +70,18 @@ const char* P21_ErrorName = "Error";
 #endif
 const char* P21_GetNameByIndex(uint8_t idx) {
   return idx < 0x23 ? P21_NameTable[idx] : P21_ErrorName;
+}
+
+#ifndef RE_HOOK_BUILD
+char P21_ClockBuf[32];
+#endif
+void P21_DrawClock(void) {
+  int h, m, s;
+  if (G00B87E7C != 0) return;
+  plat_local_hms(&h, &m, &s);
+  snprintf(P21_ClockBuf, 32, "%02d:%02d:%02d", h, m, s);
+  int32_t y = (P19_ScrH + ((P19_ScrH >> 31) & 7)) / 8 - 1;
+  int32_t x = (P19_ScrW + ((P19_ScrW >> 31) & 7)) / 8 - (int32_t)strlen(P21_ClockBuf);
+  Call004D94B7((uint32_t)x, (uint32_t)y);
+  Call004D90F4((int32_t)(intptr_t)P21_ClockBuf);
 }
