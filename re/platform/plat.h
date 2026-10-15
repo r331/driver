@@ -23,4 +23,13 @@ void plat_draw_tris(const plat_vertex *v, int count);
 void plat_clear(uint32_t color, int clear_z);
 void plat_flip(void);
 void plat_blit2d(int tex, int sx, int sy, int sw, int sh, int dx, int dy);
+/* Звук и CD-аудио */
+int  plat_snd_create(const void *pcm, int bytes, int rate, int channels, int bits);
+void plat_snd_destroy(int h);
+void plat_snd_play(int h, int loop);
+void plat_snd_stop(int h);
+void plat_snd_set(int h, int volume, int pitch_hz, int pan);
+void plat_snd_pos3d(int h, float x, float y, float z);
+int  plat_cd_play(int track);
+void plat_cd_stop(void);
 #endif

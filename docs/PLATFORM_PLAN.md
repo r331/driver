@@ -25,3 +25,4 @@
 - 2026-10-14 17:30: шаг A выполнен: scripts/platform_funcs.py → docs/platform_funcs.csv (189 функций: system 84, render 81, cdaudio 16, window_input 8; слой sound пуст — DirectSound идёт через COM-vtable, эвристику уточнить; колонка callers пуста). Следующий шаг: B — re/platform/plat.h (система + окно/ввод), затем уточнить sound/callers.
 - 2026-10-14 17:40: шаг B (часть): re/platform/plat.h (система + окно/ввод), platform/sdl/plat_sys.c, native собран, ctest ок, hook ок. Следующий: hook-вариант plat в win32/, затем рендер/звук, потом перенос обёрток (шаг C).
 - 2026-10-14 17:50: шаг B (часть): в plat.h объявлен слой рендера (текстуры, blend/z, draw_tris, clear/flip, blit2d), заглушки platform/sdl/plat_render.c; native+hook собраны. Следующий: GL 3.3 бэкенд, win32-вариант plat, звук.
+- 2026-10-14 18:00: шаг B (часть): в plat.h объявлен слой звука/CD, заглушки platform/sdl/plat_snd.c; native+hook собраны. Следующий: GL-бэкенд, win32-вариант plat, SDL_audio микшер.
