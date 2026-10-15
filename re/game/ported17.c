@@ -1,7 +1,7 @@
 #include "ported17.h"
 #include <string.h>
-GAME_VAR_DEF(uint8_t, P17_SlotBase, 0x00c1ed8a)
-GAME_VAR_DEF(uint8_t, P17_MapBase, 0x00bf1c42)
+GAME_VAR_DEF(p17_slots_t, P17_SlotBase, 0x00c1ed8a)
+GAME_VAR_DEF(p17_map_t, P17_MapBase, 0x00bf1c42)
 GAME_VAR_DEF(uint32_t, P17_SqrtArg, 0x0057a136)
 GAME_VAR_DEF(uint32_t, P17_PtrA, 0x00b5a730)
 GAME_VAR_DEF(uint32_t, P17_PtrB, 0x00b5a734)
@@ -15,11 +15,11 @@ GAME_VAR_DEF(int32_t, P17_Dst, 0x0054aa44)
 
 /* Слот: 0x2c байта, четыре int16-ячейки со смещением 0, 8, 0x10, 0x18 от 0xc1ed8a (шаг 8 байт). */
 static int16_t slot_cell(int slot, int cell) {
-  int16_t v; memcpy(&v, &P17_SlotBase + slot * 0x2c + cell * 8, 2); return v;
+  int16_t v; memcpy(&v, P17_SlotBase + slot * 0x2c + cell * 8, 2); return v;
 }
 
 uint8_t P17_SlotMapSide(int32_t id) {
-  int16_t slot; memcpy(&slot, &P17_MapBase + id * 0x42, 2);
+  int16_t slot; memcpy(&slot, P17_MapBase + id * 0x42, 2);
   if (slot_cell(slot, 0) == id) return 0;
   if (slot_cell(slot, 2) == id) return 0;
   return 1;

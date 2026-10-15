@@ -2,8 +2,10 @@
 #include "gvar.h"
 #include <stdint.h>
 /* Мелкие функции: слот-таблица 0x2c байта, целочисленный корень, переключение экрана. */
-#define P17_SlotBase    GAME_VAR(uint8_t, P17_SlotBase, 0x00c1ed8a)
-#define P17_MapBase     GAME_VAR(uint8_t, P17_MapBase, 0x00bf1c42)
+typedef uint8_t p17_slots_t[0x2c * 128];
+typedef uint8_t p17_map_t[0x42 * 64 + 8];
+#define P17_SlotBase    GAME_VAR(p17_slots_t, P17_SlotBase, 0x00c1ed8a)
+#define P17_MapBase     GAME_VAR(p17_map_t, P17_MapBase, 0x00bf1c42)
 #define P17_SqrtArg     GAME_VAR(uint32_t, P17_SqrtArg, 0x0057a136)
 #define P17_PtrA        GAME_VAR(uint32_t, P17_PtrA, 0x00b5a730)
 #define P17_PtrB        GAME_VAR(uint32_t, P17_PtrB, 0x00b5a734)
@@ -15,7 +17,7 @@
 #define P17_Src         GAME_VAR(int32_t, P17_Src, 0x00c80ee8)
 #define P17_Dst         GAME_VAR(int32_t, P17_Dst, 0x0054aa44)
 #ifndef RE_HOOK_BUILD
-extern uint8_t P17_SlotBase, P17_MapBase;
+extern p17_slots_t P17_SlotBase; extern p17_map_t P17_MapBase;
 extern uint32_t P17_SqrtArg, P17_PtrA, P17_PtrB;
 extern int32_t P17_ValA, P17_ValB, P17_Const6, P17_Cond1, P17_Cond2, P17_Src, P17_Dst;
 #endif

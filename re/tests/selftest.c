@@ -58,6 +58,7 @@
 #include "../game/ported70.h"
 #include "../game/ported71.h"
 #include "../game/ported72.h"
+#include "../game/ported73.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -435,10 +436,10 @@ static int test_ported17(void) {
   int f = 0;
   for (uint32_t v = 4; v < 100000; v += 7) { uint32_t r = P17_ISqrt(v); if (r * r > v || (r + 1) * (r + 1) <= v) { if (!(r*r<=v+r+1)) f++; } }
   if (P17_ISqrt(100) != 10 || P17_ISqrt(2) != 1) f++;
-  { int16_t s = 3; memcpy(&P17_MapBase + 5 * 0x42, &s, 2);
-    int16_t id = 5; memcpy(&P17_SlotBase + 3 * 0x2c + 16, &id, 2); if (P17_SlotMapSide(5) != 0) f++;
-    memcpy(&P17_SlotBase + 3 * 0x2c + 16, &(int16_t){0}, 2); if (P17_SlotMapSide(5) != 1) f++;
-    memcpy(&P17_SlotBase + 3 * 0x2c + 24, &id, 2); if (P17_SlotFindIndex(3, 5) != 3) f++; if (P17_SlotFindIndex(3, 9) != 0xff) f++; }
+  { int16_t s = 3; memcpy(P17_MapBase + 5 * 0x42, &s, 2);
+    int16_t id = 5; memcpy(P17_SlotBase + 3 * 0x2c + 16, &id, 2); if (P17_SlotMapSide(5) != 0) f++;
+    memcpy(P17_SlotBase + 3 * 0x2c + 16, &(int16_t){0}, 2); if (P17_SlotMapSide(5) != 1) f++;
+    memcpy(P17_SlotBase + 3 * 0x2c + 24, &id, 2); if (P17_SlotFindIndex(3, 5) != 3) f++; if (P17_SlotFindIndex(3, 9) != 0xff) f++; }
   P17_PtrA = 7; P17_ValA = 9; P17_Cond1 = 1; P17_Cond2 = 0; P17_PushScreenState();
   if (P17_PtrB != 7 || P17_ValB != 9 || P17_ValA != 2 || P17_Dst != 200 || P17_Const6 != 6) f++;
   return f;
@@ -2896,10 +2897,63 @@ static int test_p71(void) {
   return f;
 }
 
+/* ported73 */
+static int test_p73(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p73 fail line %d\n",__LINE__); } } while (0)
+  /* 005173d7: окно 1280x960, масштаб 1.0: (x*2 - 640)*1 + 640 = 2x */
+  P73_InitConsts();
+  P19_ScrW = 1280; P19_ScrH = 960; P19_Scale = 1.0f; S_00B5A834 = 9; S_00B5A835 = 8; S_00B5A836 = 7;
+  P73_Text(100.0f, 50.0f, 0x77, 3, 0x14);
+  CK(t67_f((int32_t)MenuPosX54AA24) == 2.0f && t67_f((int32_t)MenuPosY54AA28) == 2.0f);
+  CK(t67_f(MenuVal5D77CC) == 200.0f && t67_f(MenuVal5D77C8) == 100.0f && MenuByte5D77C1 == 3 && MenuByte5D77C0 == 0x14 && t67_p4 == 0x77);
+  CK(MenuColorR54AA2C == 9 && MenuColorG54AA2D == 8 && MenuColorB54AA2E == 7);
+  P19_Scale = 0.5f; P73_Text(640.0f, 480.0f, 1, 0, 0);
+  CK(t67_f(MenuVal5D77CC) == 960.0f && t67_f(MenuVal5D77C8) == 720.0f);
+  CK(t67_f((int32_t)MenuPosX54AA24) == 1.0f);
+  /* 0051bf82: тип 3 (маска 7); записи 0..3 */
+  memset(P17_MapBase, 0, sizeof P17_MapBase); memset(P17_SlotBase, 0, sizeof P17_SlotBase);
+  P11_00b5a8e8 = 4;
+  for (int i = 0; i < 4; i++) P17_MapBase[i * 0x42 + 4] = 3;
+  P17_MapBase[0 * 0x42 + 5] = 0;     /* нет битов */
+  P17_MapBase[1 * 0x42 + 5] = 7;     /* все биты */
+  P17_MapBase[2 * 0x42 + 5] = 2;     /* часть */
+  P17_MapBase[3 * 0x42 + 5] = 7;
+  { int16_t s3 = 1; memcpy(P17_MapBase + 3 * 0x42, &s3, 2); }      /* запись 3 -> слот 1 */
+  { int16_t id = 3; memcpy(P17_SlotBase + 1 * 0x2c + 8, &id, 2); } /* ячейка 1 слота 1 = 3 -> сторона 1 */
+  P73_RoadSides();
+  CK(P17_MapBase[0x3b] == 0x82);              /* слот 0, ячейка 0 = 0 = номер записи -> сторона 0 */
+  CK(P17_MapBase[2 * 0x42 + 0x3b] == 0);
+  CK(P17_MapBase[3 * 0x42 + 0x3b] == 0x81);
+  /* 00511e60 */
+  P60_PartLimit = 40; memset(A_00C56780, 0xcc, 0x2d00); P73_D00214 = 11; P73_CF56BC = 22;
+  P43_FreeCnt = 5; G8_00C56710 = 6; P71_NearAdd = 1500;
+  P73_ParticlesReset();
+  { int32_t v; int16_t id; memcpy(&v, &A_00C56780[0x44], 4); CK(v == 11); memcpy(&v, &A_00C56780[0xb4 + 0x44], 4); CK(v == 22);
+    memcpy(&id, &A_00C56780[63 * 0xb4 + 2], 2); CK(id == 63); CK(A_00C56780[5] == 0 && A_00C56780[0x10] == 0); }
+  CK(P43_FreeList[63] == 63 && P43_FreeList[7] == 7 && P43_FreeCnt == 0 && G8_00C56710 == 0 && P71_NearAdd == 0);
+  CK(P71_Near == (int32_t)(288000000 / 40) && P73_C56760 == 11);
+  P60_PartLimit = 0; P73_ParticlesReset(); CK(P71_Near == 0x44aa20 && P73_C56760 == 0);
+  /* 0049f031: на концах отрезка сплайн даёт p1 (t=0) и p2 (t=1); t=0.5 — (-p0 + 9 p1 + 9 p2 - p3)/16 */
+  {
+    float p0[5] = { 0, 1, 2, 0, 3 }, p1[5] = { 4, 5, 6, 0, 7 }, p2[5] = { 8, 9, 10, 0, 11 }, p3[5] = { 12, 13, 14, 0, 15 }, o[5] = { 0, 0, 0, 99, 0 }, t = 0.0f;
+    P73_InitConsts();
+    P51_Half = 0.5f; P56_C546120 = 1.5f; P56_C54611C = 2.5f; P59_One = 1.0f; P66_C2 = 2.0f;
+    P73_CatmullRom(&t, o, p0, p1, p2, p3);
+    CK(o[0] == 4 && o[1] == 5 && o[2] == 6 && o[4] == 7 && o[3] == 99);
+    t = 1.0f; P73_CatmullRom(&t, o, p0, p1, p2, p3);
+    CK(o[0] == 8 && o[1] == 9 && o[2] == 10 && o[4] == 11);
+    t = 0.5f; P73_CatmullRom(&t, o, p0, p1, p2, p3);
+    CK(o[0] == (-0.0f + 9 * 4 + 9 * 8 - 12) / 16.0f && o[4] == (-3.0f + 63 + 99 - 15) / 16.0f);
+  }
+  return f;
+}
+
 /* RE_TRACE=1 печатает имя каждого теста перед запуском (поиск падения) */
 #define RUN_T(t) (getenv("RE_TRACE") ? (fprintf(stderr, "[test] %s\n", #t), t()) : t())
 int re_selftest(void) {
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

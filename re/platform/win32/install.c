@@ -61,6 +61,7 @@
 #include "../../game/ported70.h"
 #include "../../game/ported71.h"
 #include "../../game/ported72.h"
+#include "../../game/ported73.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1650,4 +1651,8 @@ void re_install_all(void) {
     re_hook(0x0051b111, (void*)P72_RoadWord, "P72_RoadWord");
     re_hook(0x0051b566, (void*)P72_RoadDword, "P72_RoadDword");
     re_hook(0x0051b65a, (void*)P72_RoadLookup, "P72_RoadLookup");
+    re_hook(0x005173d7, (void*)P73_Text, "P73_Text");
+    re_hook(0x0051bf82, (void*)P73_RoadSides, "P73_RoadSides");
+    re_hook(0x00511e60, (void*)P73_ParticlesReset, "P73_ParticlesReset");
+    re_hook(0x0049f031, (void*)P73_CatmullRom, "P73_CatmullRom");
 }
