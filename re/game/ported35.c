@@ -1,0 +1,67 @@
+/* Force Feedback и создание DirectDraw — восстановлено из Game.exe (Input.c, Render.c). */
+#include "ported35.h"
+#include "noop.h"
+#include <math.h>
+GAME_VAR_DEF(int32_t, P35_PadX, 0x00d07790)
+GAME_VAR_DEF(int32_t, P35_FfX, 0x00b31e04)
+GAME_VAR_DEF(int32_t, P35_FfY, 0x00b31e08)
+GAME_VAR_DEF(int32_t, P35_FfPending, 0x00b31e10)
+GAME_VAR_DEF(int32_t, P35_ReqBpp, 0x00549ccc)
+GAME_VAR_DEF(uint8_t, P35_InputMode, 0x00562a44)
+
+/* GUID_ConstantForce {13541C20-8E33-11D0-9AD0-00A0C9A06E35} — данные игры по 00546510 */
+static const uint8_t k_constant_force[16] = { 0x20,0x1c,0x54,0x13,0x33,0x8e,0xd0,0x11,0x9a,0xd0,0x00,0xa0,0xc9,0xa0,0x6e,0x35 };
+
+int32_t P35_CreateEffectA(void *dev, int32_t slot) {
+  if (P34_FfA == NULL) {
+    if (plat_di_create_effect(dev, 0, k_constant_force, &P34_EffA[slot]) != 0) return 0;
+  }
+  return 1;
+}
+
+int32_t P35_CreateEffectB(void *dev, int32_t slot) {
+  if (P34_FfB == NULL) {
+    uint8_t guid[16];
+    if (plat_di_enum_effect(dev, guid) != 0) return 0;
+    if (plat_di_create_effect(dev, 1, guid, &P34_EffB[slot]) != 0) return 0;
+  }
+  return 1;
+}
+
+void P35_UpdateForce(void) {
+  if (P35_PadX != 0 && P16_FlagA == 0) {
+    P35_FfX = P35_PadX;
+    P35_FfPending = 1;
+  }
+  if (Q00B87EF0 != 0 && P35_InputMode == 2) {
+    if (P34_FfA != NULL && P35_FfPending != 0) {
+      uint32_t sq = (uint32_t)P35_FfX * (uint32_t)P35_FfX + (uint32_t)P35_FfY * (uint32_t)P35_FfY;
+      int32_t mag = (int32_t)sqrt((double)(int32_t)sq);   /* __ftol: усечение */
+      plat_di_set_effect(P34_FfA, 0, P35_FfX, P35_FfY, mag);
+      P35_FfPending = 0; P35_FfX = 0; P35_FfY = 0;
+    }
+    if (P34_FfB != NULL && G00B31E0C != 0) {
+      plat_di_set_effect(P34_FfB, 1, 0, 0, G00B31E00);
+      G00B31E0C = 0;
+    }
+  }
+}
+
+void *P35_GetDirectDrawInterface(const void *guid) {
+  NoopFn0042243f();   /* лог «GetDirectDrawInterface()» (в релизе — пусто) */
+  void *dd = plat_dd_create(guid);
+  if (dd != NULL) P31_DDObj0 = dd;
+  if (dd == NULL) { NoopFn0042243f(); return NULL; }
+  uint32_t pf = 0;
+  if (plat_dd_get_display_flags(dd, &pf) != 0) { NoopFn0042243f(); return NULL; }
+  if ((pf & 0x40) == 0) {   /* DDPF_RGB */
+    plat_message_box(P24_Hwnd, "To run, please switch to a\n16/32bit display mode.", "Sorry!", 0x10);
+    return NULL;
+  }
+  P24_Bpp = P35_ReqBpp;
+  if (P35_ReqBpp != 0x10 && P35_ReqBpp != 0x20) {
+    plat_message_box(P24_Hwnd, "To run, please switch to a\n16/32bit display mode.", "Sorry!", 0x10);
+    return NULL;
+  }
+  return dd;
+}

@@ -1877,7 +1877,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00420038,FUN_00420038,,,,,,2076,todo
 00420854,FUN_00420854,,,,,,461,todo
 00420a21,FUN_00420a21,,,,,,248,todo
-00420b19,FUN_00420b19,,,,,,247,todo
+00420b19,FUN_00420b19,P35_GetDirectDrawInterface,manual,Render,,,247,ported
 00420c10,FUN_00420c10,P24_CreateSurface,manual,render,,,74,ported
 00420c5a,FUN_00420c5a,,,,,,82,todo
 00420cac,FUN_00420cac,,,,,,82,todo
@@ -2667,13 +2667,13 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004e39ac,FUN_004e39ac,,,,,,365,todo
 004e3b19,FUN_004e3b19,ReturnZero004E3B19,manual,SmallFuncs,,,7,ported
 004e3b20,FUN_004e3b20,SetB31E00,manual,UIMisc,,,28,ported
-004e3b3c,FUN_004e3b3c,,,,,,419,todo
+004e3b3c,FUN_004e3b3c,P35_UpdateForce,manual,Input,,,419,ported
 004e3cdf,FUN_004e3cdf,,,,,,799,todo
 004e3ffe,FUN_004e3ffe,,,,,,120,todo
 004e4076,FUN_004e4076,DIReAcquire,manual,Input,manual,,265,ported
 004e417f,FUN_004e417f,ReadKeyboard,manual,Input,manual,,86,ported
-004e41d5,FUN_004e41d5,,,,,,198,todo
-004e429b,FUN_004e429b,,,,,,222,todo
+004e41d5,FUN_004e41d5,P35_CreateEffectA,manual,Input,,,198,ported
+004e429b,FUN_004e429b,P35_CreateEffectB,manual,Input,,,222,ported
 004e4379,FUN_004e4379,Get4Words004E4379,manual,ui/widgets,,,62,ported
 004e43b7,FUN_004e43b7,P21_SetAxisByte,manual,ported21,,,169,ported
 004e49c0,FUN_004e49c0,,,,,,540,todo

@@ -44,3 +44,8 @@ void plat_set_texture(int stage, void *tex) { g_tex_stage = stage; g_tex = tex; 
 void *plat_stub_last_texture(int *stage) { if (stage) *stage = g_tex_stage; return g_tex; }
 int plat_stub_pal_stats(int *a, int *b) { *a = g_pal_entries; *b = g_pal_changed; return 1; }
 int plat_dd_stub_last_desc(uint32_t *d) { if (!g_desc_n) return 0; memcpy(d, g_desc, sizeof g_desc); return g_desc_n; }
+/* --- создание DirectDraw и режим экрана --- */
+static uint32_t g_disp_flags = 0x40; static int g_disp_fail_create, g_disp_fail_mode;
+void *plat_dd_create(const void *guid) { (void)guid; return g_disp_fail_create ? NULL : mk(0); }
+int32_t plat_dd_get_display_flags(void *dd, uint32_t *f) { if (!dd || g_disp_fail_mode) return -1; *f = g_disp_flags; return 0; }
+void plat_dd_stub_display(uint32_t f, int fc, int fm) { g_disp_flags = f; g_disp_fail_create = fc; g_disp_fail_mode = fm; }

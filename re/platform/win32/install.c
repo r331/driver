@@ -23,6 +23,7 @@
 #include "../../game/ported33.h"
 #include "../../game/ported32.h"
 #include "../../game/ported34.h"
+#include "../../game/ported35.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1213,4 +1214,8 @@ void re_install_all(void) {
     re_hook(0x004e31d5, (void*)P34_ReleaseInput, "P34_ReleaseInput");
     re_hook(0x004e4076, (void*)P34_ReAcquire, "P34_ReAcquire");
     re_hook(0x004e417f, (void*)P34_ReadKeyboard, "P34_ReadKeyboard");
+    re_hook(0x004e41d5, (void*)P35_CreateEffectA, "P35_CreateEffectA");
+    re_hook(0x004e429b, (void*)P35_CreateEffectB, "P35_CreateEffectB");
+    re_hook(0x004e3b3c, (void*)P35_UpdateForce, "P35_UpdateForce");
+    re_hook(0x00420b19, (void*)P35_GetDirectDrawInterface, "P35_GetDirectDrawInterface");
 }

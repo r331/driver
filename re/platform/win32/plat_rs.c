@@ -144,3 +144,41 @@ int32_t plat_di_acquire(void *d) { return ((dd_f0)VT(d, 0x1c))(d); }
 int32_t plat_di_get_state(void *d, uint32_t size, void *buf) { return ((dd_f2)VT(d, 0x24))(d, (void *)(uintptr_t)size, buf); }
 int plat_di_stub_counts(int *r, int *u, int *e, int *k) { *r = *u = *e = *k = 0; return 0; }
 void plat_di_stub_fail_state(int on) { (void)on; }
+
+/* --- DirectInput Force Feedback (IDirectInputDevice2: EnumEffects 0x4c, CreateEffect 0x48; IDirectInputEffect: SetParameters 0x18) --- */
+static int __attribute__((stdcall)) di_enum_cb(const uint32_t *info, uint32_t *out) {   /* 004e4379: GUID из DIEFFECTINFO (+4) */
+    if (out) { out[0] = info[1]; out[1] = info[2]; out[2] = info[3]; out[3] = info[4]; }
+    return 0;
+}
+int32_t plat_di_enum_effect(void *d, uint8_t guid[16]) { return ((dd_f3)VT(d, 0x4c))(d, (void *)di_enum_cb, guid, (void *)1); }
+int32_t plat_di_create_effect(void *d, int kind, const uint8_t *guid, void **out) {
+    uint32_t m = 0, dir[2] = { 0, 0 }, ax[2] = { 0, 4 }, eff[13];
+    if (kind == 0) {
+        eff[0] = 0x34; eff[1] = 0x12; eff[2] = 250000; eff[3] = 0; eff[4] = 10000; eff[5] = 0xffffffff; eff[6] = 0; eff[7] = 2;
+        eff[8] = (uint32_t)(uintptr_t)ax; eff[9] = (uint32_t)(uintptr_t)dir; eff[10] = 0; eff[11] = 4; eff[12] = (uint32_t)(uintptr_t)&m;
+    } else {
+        uint32_t ax1 = 4, dir1 = 1; m = 5000;
+        eff[0] = 0x34; eff[1] = 0x12; eff[2] = 15000; eff[3] = 0; eff[4] = 0x1d4c; eff[5] = 0xffffffff; eff[6] = 0; eff[7] = 1;
+        eff[8] = (uint32_t)(uintptr_t)&ax1; eff[9] = (uint32_t)(uintptr_t)&dir1; eff[10] = 0; eff[11] = 4; eff[12] = (uint32_t)(uintptr_t)&m;
+        return ((dd_f4)VT(d, 0x48))(d, (void *)guid, eff, out, 0);
+    }
+    return ((dd_f4)VT(d, 0x48))(d, (void *)guid, eff, out, 0);
+}
+int32_t plat_di_set_effect(void *e, int kind, int32_t dx, int32_t dy, int32_t mag) {
+    uint32_t eff[13]; int32_t dir[2] = { dx, dy }; uint32_t ax = 4; int32_t m = mag;
+    for (int i = 0; i < 13; i++) eff[i] = 0;
+    eff[0] = 0x34; eff[1] = 0x12; eff[11] = 4; eff[12] = (uint32_t)(uintptr_t)&m;
+    if (kind == 0) { eff[7] = 2; eff[9] = (uint32_t)(uintptr_t)dir; return ((dd_f2)VT(e, 0x18))(e, eff, (void *)0x20000140); }
+    eff[8] = (uint32_t)(uintptr_t)&ax;   /* cAxes остаётся 0, как в оригинале */
+    return ((dd_f2)VT(e, 0x18))(e, eff, (void *)0x20000100);
+}
+int plat_di_stub_effects(int *c, int *ck, int *s, int *sk, int32_t *dx, int32_t *dy, int32_t *m) { *c = *ck = *s = *sk = 0; *dx = *dy = *m = 0; return 0; }
+void plat_di_stub_fail_enum(int on) { (void)on; }
+
+/* --- DirectDrawCreate / GetDisplayMode --- */
+extern long __attribute__((stdcall)) DirectDrawCreate(void *guid, void **out, void *outer);
+void *plat_dd_create(const void *guid) { void *o = 0; return DirectDrawCreate((void *)guid, &o, 0) == 0 ? o : (void *)0; }
+int32_t plat_dd_get_display_flags(void *dd, uint32_t *f) {   /* DDSURFACEDESC (0x6c): flags +4, ddpfPixelFormat.dwFlags +0x4c */
+    uint32_t d[27]; for (int i = 0; i < 27; i++) d[i] = 0; d[0] = 0x6c; d[1] = 0x1000;
+    long hr = ((dd_f1)VT(dd, 0x30))(dd, d); *f = d[19]; return hr; }
+void plat_dd_stub_display(uint32_t f, int a, int b) { (void)f; (void)a; (void)b; }

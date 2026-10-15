@@ -37,6 +37,7 @@
 #include "../game/ported33.h"
 #include "../game/ported32.h"
 #include "../game/ported34.h"
+#include "../game/ported35.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -793,10 +794,47 @@ static int test_p34(void) {
   plat_di_stub_fail_state(0); P34_Kbd = NULL;
   return f;
 }
+static int test_p35(void) {
+  int f = 0, c, ck, s, sk; int32_t dx, dy, mag;
+  static int dev;
+  memset(P34_EffA, 0, sizeof P34_EffA); memset(P34_EffB, 0, sizeof P34_EffB); P34_FfA = P34_FfB = NULL;
+  if (P35_CreateEffectA(&dev, 2) != 1 || P34_EffA[2] == NULL) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }
+  plat_di_stub_effects(&c, &ck, &s, &sk, &dx, &dy, &mag); if (c != 1 || ck != 0) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }
+  P34_FfA = &dev; if (P35_CreateEffectA(&dev, 3) != 1 || P34_EffA[3] != NULL) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }   /* уже есть — не создаётся */
+  P34_FfA = NULL;
+  if (P35_CreateEffectA(NULL, 1) != 0) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }
+  if (P35_CreateEffectB(&dev, 4) != 1 || P34_EffB[4] == NULL) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }
+  plat_di_stub_effects(&c, &ck, &s, &sk, &dx, &dy, &mag); if (c != 2 || ck != 1) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }
+  plat_di_stub_fail_enum(1); if (P35_CreateEffectB(&dev, 5) != 0 || P34_EffB[5] != NULL) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); } plat_di_stub_fail_enum(0);
+  /* обновление силы: джойстик (режим 2), FF включён */
+  P34_FfA = &dev; P34_FfB = &dev + 0; Q00B87EF0 = 1; P35_InputMode = 2; P16_FlagA = 0;
+  P35_PadX = 3; P35_FfY = 4; P35_FfPending = 0; G00B31E00 = 777; G00B31E0C = 1;
+  P35_UpdateForce();
+  plat_di_stub_effects(&c, &ck, &s, &sk, &dx, &dy, &mag);
+  if (s != 2 || dx != 0 || dy != 0 || mag != 777 || sk != 1) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }   /* сначала удар (3,4)->5, потом двигатель */
+  if (P35_FfPending != 0 || P35_FfX != 0 || P35_FfY != 0 || G00B31E0C != 0) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }
+  P35_PadX = 0;
+  P16_FlagA = 1; P35_PadX = 9; P35_UpdateForce(); if (P35_FfPending != 0 || P35_FfX != 0) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }   /* удар запрещён — не копится */
+  P35_InputMode = 0; P16_FlagA = 0; P35_PadX = 0; P35_FfPending = 1; P35_UpdateForce(); if (P35_FfPending != 1) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }
+  P34_FfA = P34_FfB = NULL; Q00B87EF0 = 0; P35_PadX = 0; P35_FfPending = 0;
+  /* DirectDraw */
+  plat_dd_stub_display(0x40, 0, 0); P35_ReqBpp = 0x10; P24_Bpp = 0; P31_DDObj0 = NULL;
+  void *dd = P35_GetDirectDrawInterface(NULL);
+  if (dd == NULL || P31_DDObj0 != dd || P24_Bpp != 0x10) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }
+  plat_dd_release(dd);
+  P35_ReqBpp = 8; P24_Bpp = 0; dd = P35_GetDirectDrawInterface(NULL); if (dd != NULL || P24_Bpp != 8) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }
+  const char *tx, *tt; int mb0 = plat_message_box_last(&tx, &tt);
+  plat_dd_stub_display(0x20, 0, 0); P35_ReqBpp = 0x20; if (P35_GetDirectDrawInterface(NULL) != NULL) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }   /* нет DDPF_RGB */
+  if (plat_message_box_last(&tx, &tt) != mb0 + 1 || strcmp(tt, "Sorry!") != 0) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }
+  plat_dd_stub_display(0x40, 0, 1); if (P35_GetDirectDrawInterface(NULL) != NULL) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }
+  plat_dd_stub_display(0x40, 1, 0); if (P35_GetDirectDrawInterface(NULL) != NULL) { f++; fprintf(stderr,"p35 fail line %d\n",__LINE__); }
+  plat_dd_stub_display(0x40, 0, 0);
+  return f;
+}
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

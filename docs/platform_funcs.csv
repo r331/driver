@@ -87,13 +87,13 @@ address,name,layer,imports,callers,status
 0048ccdd,FUN_0048ccdd,render,COM_vtable,,todo
 0048cdab,FUN_0048cdab,render,COM_vtable,,todo
 004e3391,FUN_004e3391,render,COM_vtable,,todo
-004e3b3c,FUN_004e3b3c,render,COM_vtable,,todo
+004e3b3c,FUN_004e3b3c,render,COM_vtable,,ported
 004e3cdf,FUN_004e3cdf,render,COM_vtable,,todo
 004e3ffe,FUN_004e3ffe,render,COM_vtable,,todo
 004e4076,DIReAcquire,render,COM_vtable,,ported
 004e417f,FUN_004e417f,render,COM_vtable,,ported
-004e41d5,FUN_004e41d5,render,COM_vtable,,todo
-004e429b,FUN_004e429b,render,COM_vtable,,todo
+004e41d5,FUN_004e41d5,render,COM_vtable,,ported
+004e429b,FUN_004e429b,render,COM_vtable,,ported
 0052955c,DirectDrawEnumerateA,render,DirectDrawEnumerateA,,named
 00529562,DirectDrawCreate,render,DirectDrawCreate,,named
 004010a0,thunk_FUN_004d53e8,system,timeGetTime,,ported
@@ -120,7 +120,7 @@ address,name,layer,imports,callers,status
 00402757,thunk_FUN_004e31d5,system,CloseHandle,,todo
 004027a2,thunk_FUN_004bfc30,system,MessageBoxA,,ported
 00402851,thunk_FUN_005281b0,system,timeBeginPeriod,,ported
-00420b19,FUN_00420b19,system,MessageBoxA;DirectDrawCreate,,todo
+00420b19,FUN_00420b19,system,MessageBoxA;DirectDrawCreate,,ported
 00424c40,FUN_00424c40,system,GetProcAddress,,ported
 00425730,FUN_00425730,system,LoadLibraryA,,ported
 0048a940,FUN_0048a940,system,Sleep;SetForegroundWindow;ShowWindow;UpdateWindow,,todo

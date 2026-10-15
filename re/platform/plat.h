@@ -143,4 +143,14 @@ int32_t plat_di_get_state(void *dev, uint32_t size, void *buf); /* GetDeviceStat
 void    plat_event_close(void *h);                     /* CloseHandle события */
 int     plat_di_stub_counts(int *releases, int *unacquires, int *events_closed, int *last_kind); /* для тестов (SDL: счётчики, hook: нули) */
 void    plat_di_stub_fail_state(int on);               /* тест: GetDeviceState возвращает ошибку */
+/* DirectInput Force Feedback: эффект постоянной силы. kind 0 — «удар» (250000 мкс, gain 10000, 2 оси), kind 1 — «двигатель» (15000 мкс, gain 7500, 1 ось) */
+int32_t plat_di_enum_effect(void *dev, uint8_t guid[16]);                     /* EnumEffects(DIEFT_CONSTANTFORCE): GUID первого эффекта; 0 — успех */
+int32_t plat_di_create_effect(void *dev, int kind, const uint8_t *guid, void **out); /* CreateEffect; 0 — успех */
+int32_t plat_di_set_effect(void *eff, int kind, int32_t dx, int32_t dy, int32_t magnitude); /* SetParameters(START|...): kind 0 — направление (dx,dy)+сила, kind 1 — только сила */
+int     plat_di_stub_effects(int *created, int *created_kind, int *sets, int *set_kind, int32_t *dx, int32_t *dy, int32_t *mag); /* тесты (SDL) */
+void    plat_di_stub_fail_enum(int on);                /* тест: EnumEffects ошибка */
+/* DirectDraw: создание объекта и режим экрана */
+void   *plat_dd_create(const void *guid);              /* DirectDrawCreate(guid, &dd, NULL); NULL — ошибка */
+int32_t plat_dd_get_display_flags(void *dd, uint32_t *pixfmt_flags); /* GetDisplayMode → ddpfPixelFormat.dwFlags; HRESULT */
+void    plat_dd_stub_display(uint32_t pixfmt_flags, int fail_create, int fail_mode);  /* тесты (SDL) */
 #endif
