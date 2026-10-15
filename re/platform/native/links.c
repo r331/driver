@@ -47,6 +47,7 @@
 #include "../../game/ported56.h"
 #include "../../game/ported57.h"
 #include "../../game/ported58.h"
+#include "../../game/ported59.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -87,6 +88,7 @@ void P57_Setup412702 (void) { Ui00412702(); }
 void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
 int32_t P55_Fn405E79 (int32_t a0, void *a1) { return (int32_t)P58_SaveSlot(a0, a1); }
+int32_t P55_Fn405FDB (int32_t a0, void *a1) { return (int32_t)P59_ReplayCheck(a0, a1); }
 void P55_Fn5248CD (void) { P25_CDResume(); }
 int32_t P55_Fn4245E2 (void) { return (int32_t)GetVarB1C0D8(); }
 void P55_Fn4264A7 (void) { Ui004264A7(); }

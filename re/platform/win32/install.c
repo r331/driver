@@ -47,6 +47,7 @@
 #include "../../game/ported56.h"
 #include "../../game/ported57.h"
 #include "../../game/ported58.h"
+#include "../../game/ported59.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1517,4 +1518,17 @@ void re_install_all(void) {
     re_hook(0x00405e79, (void*)P58_SaveSlot, "P58_SaveSlot");
     re_hook(0x00405bfa, (void*)P58_SaveConfig, "P58_SaveConfig");
     re_hook(0x0040b1cc, (void*)P58_TextWidth, "P58_TextWidth");
+    re_hook(0x0049c910, (void*)P59_SetupCamera, "P59_SetupCamera");
+    re_hook(0x004f8a2d, (void*)P59_VarSetString, "P59_VarSetString");
+    re_hook(0x004f892a, (void*)P59_VarsInit, "P59_VarsInit");
+    re_hook(0x0048ed6f, (void*)P59_TrafficCheck, "P59_TrafficCheck");
+    re_hook(0x0048eca3, (void*)P59_TrafficFind, "P59_TrafficFind");
+    re_hook(0x00491650, (void*)P59_CellLeft, "P59_CellLeft");
+    re_hook(0x004a3f06, (void*)P59_ModelNames, "P59_ModelNames");
+    re_hook(0x004a6dcd, (void*)P59_NearCars, "P59_NearCars");
+    re_hook(0x004e5ea2, (void*)P59_PickUp, "P59_PickUp");
+    re_hook(0x004daac7, (void*)P59_ObjDir, "P59_ObjDir");
+    re_hook(0x00405fdb, (void*)P59_ReplayCheck, "P59_ReplayCheck");
+    re_hook(0x00417d56, (void*)P59_MenuKeys, "P59_MenuKeys");
+    re_hook(0x0040d4b3, (void*)P59_ReadBlock, "P59_ReadBlock");
 }

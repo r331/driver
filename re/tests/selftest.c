@@ -44,6 +44,7 @@
 #include "../game/ported56.h"
 #include "../game/ported57.h"
 #include "../game/ported58.h"
+#include "../game/ported59.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -1966,8 +1967,89 @@ static int test_p58(void) {
   return f;
 }
 
+/* ported59 */
+static int test_p59(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p59 fail line %d\n",__LINE__); } } while (0)
+  P59_InitConsts();
+  /* таблица синусов: углы 0, 90, 180, 270 градусов */
+  CK(P59_Sin[0] == 0 && P59_Sin[1] == 6 && P59_Sin[1024] == 4096 && P59_Sin[2048] == 0 && P59_Sin[3072] == -4096);
+  /* 0049c910 */
+  P59_CamF1 = 5000.0f; P59_PosX = 10; P59_PosY = 20; P59_PosZ = 30;
+  P59_SetupCamera(); CK(P59_VX == 10.0f && P59_VY == -20.0f - 3000.0f && P59_VZ == 30.0f && P59_AngA == 0x400 && P59_Mode1137324 == 6);
+  P59_CamF1 = 40000.0f; P59_SetupCamera(); CK(P59_VY == -20.0f - 28672.0f);
+  /* 004f8a2d / 004f892a */
+  memset(P42_Vars, 0, sizeof P42_Vars);
+  P42_Vars[0].type = 1; P42_Vars[1].type = 3; P42_Vars[1].hi = 5; P42_Vars[2].type = 4; P42_Vars[3].type = 0x7f;
+  P59_VarSetString(0, "abc"); CK(P59_VarStr[0] != NULL && strcmp(P59_VarStr[0], "abc") == 0);
+  P59_VarSetString(0, "de"); CK(strcmp(P59_VarStr[0], "de") == 0);
+  P59_VarSetString(1, "zz"); CK(P59_VarStr[1] == NULL);                    /* тип не 1 — ничего */
+  P59_VarsInit();
+  DebugFree(P59_VarStr[0]); P59_VarStr[0] = NULL; memset(P42_Vars, 0, sizeof P42_Vars);
+  /* 0048eca3 / 0048ed6f */
+  { memset(P12_011443e0, 0, sizeof P12_011443e0); P51_TrafficN = 2;
+    uint8_t *e = P12_011443e0 + 0x54; e[0] = 1; e[1] = 2; e[8] = 0; uint32_t v;
+    v = 7; memcpy(e + 0x28, &v, 4); v = 3; memcpy(e + 0x24, &v, 4); v = 100; memcpy(e + 0x1c, &v, 4); v = 5; memcpy(e + 0x38, &v, 4);
+    CK(P59_TrafficFind(0, 7, 3) == 1); CK(P59_TrafficFind(0, 8, 3) == 0); CK(P59_TrafficFind(1, 7, 3) == 0);
+    v = 3000; memcpy(e + 0x1c, &v, 4); CK(P59_TrafficFind(0, 7, 3) == 0);                  /* порог 3000 */
+    uint32_t big = 1; memcpy(P12_011443e0 + 0x34, &big, 4); CK(P59_TrafficFind(0, 7, 3) == 1);  /* у машины 0 порог 6000 */
+    uint8_t r[0x34]; memset(r, 0, sizeof r); v = 7; memcpy(r + 0x2c, &v, 4); r[0x30] = 3;
+    CK(P59_TrafficCheck(r, 0) == 1); CK(P59_TrafficCheck(r, 1) == 1);
+    memset(P12_011443e0, 0, sizeof P12_011443e0); P51_TrafficN = 0; CK(P59_TrafficCheck(r, 0) == 0); }
+  /* 00491650 */
+  { static uint8_t cars[0x148 * 2]; uint32_t v; memset(cars, 0, sizeof cars); P59_CarsTab = cars;
+    v = 1000; memcpy(cars + 0x148 + 200, &v, 4); v = 2000; memcpy(cars + 0x148 + 0xd0, &v, 4);
+    memset(P59_C39DC0, 0, sizeof P59_C39DC0); uint8_t *rec = P59_C39DC0 + 2 * 0x24; rec[0] = 10; rec[1] = 1; rec[2] = 10;
+    uint8_t r[0x2c]; memset(r, 0, sizeof r); r[0] = 1; v = 2; memcpy(r + 0x28, &v, 4); v = 0; memcpy(r + 0x24, &v, 4);
+    CK(P59_CellLeft(r) == 8u);                                 /* ((1000+0x2ee)-0)/0x5dc = 1 -> 10-1-1 */
+    v = 1; memcpy(r + 0x24, &v, 4); CK(P59_CellLeft(r) == 0u); /* rec[1]==1 */
+    v = 2; memcpy(r + 0x24, &v, 4); memcpy(rec + 0x14, &(uint32_t){5000}, 4); CK(P59_CellLeft(r) == (uint32_t)(10 - (5000 - (1000 - 0x2ee)) / 0x5dc - 1));
+    P59_CarsTab = NULL; }
+  /* 004a3f06 / 004a6dcd */
+  { char txt[] = "junk\nMODEL_NAMES\nfoo\nbar\nCHUNK_END\nrest\n"; const char *e = P59_ModelNames(txt);
+    CK(e != NULL && strncmp(e, "CHUNK_END", 9) == 0 && P59_ModelCount == 0);
+    int32_t me = 0; CK(P59_NearCars(&me) == 0 && P59_NearN == 0); }
+  /* 004e5ea2 */
+  memset(P59_Flags9, 0, sizeof P59_Flags9); P59_Picked = 0; P59_S4654 = 0; P59_S44CC = 5;
+  for (int i = 0; i < 18; i++) P59_PickTab[i] = -1;
+  CK(P59_PickUp(3) == 1 && P59_Flags9[3] == 1 && P59_Picked == 1 && P59_S44CC == 0); CK(P59_PickUp(3) == 0 && P59_Picked == 1);
+  for (int i = 0; i < 9; i++) P59_PickUp(i);
+  CK(P59_Picked == 9 && P59_S4654 == 2);
+  /* 004daac7 */
+  { uint8_t o[0x110]; memset(o, 0, sizeof o); uint32_t v = 100; memcpy(o + 200, &v, 4); v = 7; memcpy(o + 0xcc, &v, 4); v = -3; memcpy(o + 0xd0, &v, 4);
+    v = 0; memcpy(o + 0x100, &v, 4);
+    P59_ObjDir(o, 1); int32_t x, y, vs, vc; memcpy(&x, o + 0x24, 4); memcpy(&y, o + 0x28, 4); memcpy(&vs, o + 0x34, 4); memcpy(&vc, o + 0x3c, 4);
+    CK(x == 1600 && y == 112 && vs == 0 && vc == 4096);
+    v = 2048; memcpy(o + 0x100, &v, 4); P59_ObjDir(o, 0); memcpy(&vs, o + 0x34, 4); memcpy(&vc, o + 0x3c, 4); memcpy(&x, o + 0x24, 4);
+    CK(vs == 4096 && vc == 0 && x == 1600); }
+  /* 00405fdb */
+  { uint8_t rb[0x38]; memset(rb, 0, sizeof rb); memcpy(rb, "rep", 3);
+    uint32_t hdr[2] = { 0x38910457u, (uint32_t)SumBytes(rb, 0x38) };
+    FILE *fp = fopen("SAVES\\REPLAY2.BIN", "wb"); CK(fp != NULL);
+    if (fp) { fwrite(hdr, 1, 8, fp); fwrite(rb, 1, 0x38, fp); fclose(fp);
+      uint8_t out[0x38]; memset(out, 0xaa, sizeof out);
+      CK(P59_ReplayCheck(1, out) == 1 && memcmp(out, rb, 0x38) == 0); CK(P59_ReplayCheck(1, NULL) == 1); CK(P59_ReplayCheck(5, out) == 0);
+      hdr[1] ^= 1; fp = fopen("SAVES\\REPLAY2.BIN", "wb"); fwrite(hdr, 1, 8, fp); fwrite(rb, 1, 0x38, fp); fclose(fp);
+      CK(P59_ReplayCheck(1, out) == 0); remove("SAVES\\REPLAY2.BIN"); } }
+  /* 0040d4b3 */
+  { uint8_t file[2 + 0x14 + 8]; memset(file, 0, sizeof file); int32_t h[5] = { 0x14 + 8, 0x14 + 3, 0x14, 0, 0 };
+    memcpy(file + 2, h, sizeof h); memcpy(file + 2 + 0x14, "ABCDEFG", 8);
+    FILE *fp = fopen("blk.tmp", "wb"); if (fp) { fwrite(file, 1, sizeof file, fp); fclose(fp); }
+    int32_t hh[5]; memset(hh, 0, sizeof hh); fp = fopen("blk.tmp", "rb"); CK(fp != NULL);
+    if (fp) { char *b = (char *)P59_ReadBlock(fp, 2.0f, hh); CK(b != NULL && hh[0] == 8 && hh[1] == 3 && hh[2] == 0 && memcmp(b, "ABCDEFG", 8) == 0);
+      DebugFree(b); fclose(fp); }
+    memcpy(file, h, sizeof h); memcpy(file + 0x14, "ABCDEFG", 8);                 /* scale 1.0: без пропуска */
+    fp = fopen("blk.tmp", "wb"); if (fp) { fwrite(file, 1, sizeof file - 2, fp); fclose(fp); }
+    fp = fopen("blk.tmp", "rb"); if (fp) { char *b = (char *)P59_ReadBlock(fp, 1.0f, hh); CK(b != NULL && hh[0] == 8 && memcmp(b, "ABCDEFG", 8) == 0); DebugFree(b); fclose(fp); }
+    remove("blk.tmp"); }
+  /* 00417d56: без нажатых клавиш (IsKeyDown вернёт 0) -> ветка Enter не выполняется -> 0 */
+  CK(P59_MenuKeys() == 0);
+  return f;
+}
+
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
