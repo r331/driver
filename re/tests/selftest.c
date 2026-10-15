@@ -40,6 +40,7 @@
 #include "../game/ported32.h"
 #include "../game/ported53.h"
 #include "../game/ported54.h"
+#include "../game/ported55.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -1689,8 +1690,63 @@ static int test_p52(void) {
 #undef CK
   return f;
 }
+static int test_p55(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p55 fail line %d\n",__LINE__); } } while (0)
+  /* таблицы объектов */
+  P44_MatPtr = NULL; P55_CntA = 0; P55_RunTableA(); CK(P44_MatPtr == NULL);
+  P55_CntA = 3; P55_RunTableA(); CK(P44_MatPtr == (float *)P44_ViewMatT);
+  P44_MatPtr = NULL; P55_CntB = 2; P55_Flag38C = 7; P55_RunTableB(); CK(P44_MatPtr != NULL && P55_Flag38C == 0);
+  /* сброс индексов */
+  P55_ResetSel(); CK(P55_VarC0 == -1 && P55_Var20 == -1 && P55_VarD2C == -1 && P55_VarD20 == -1);
+  /* списки имён: без реального 00405e79 используется имя по умолчанию */
+  P55_DefName = "A-very-long-default-name-that-overflows";
+  P55_NamesA(); CK(strcmp((char *)P12_005fe7a8 + 0x20 + 16, "A-very-long-def") == 0 && P12_005fe7a8[3] == 0);
+  P55_NamesC(); CK(strncmp((char *)P12_005fee60 + 0x11 * 2, "A-very-long-defa", 16) == 0 && P12_005fee60[0x11 * 2 + 16] == 0);
+  P55_NamesD(); CK(P52_NameTab[0x11 * 7 + 16] == 0 && P55_FlagsC[7] == 0);
+  /* очередь отложенных вызовов */
+  P55_PopTab[0].w = 11; P55_PopTab[0].x = 5; P55_PopTab[0].y = 6; P55_PopTab[1].w = 22;
+  P55_PopCnt = 2; P55_PopSkip = 1; P55_PopB2AC = 9; P55_PopDeferred();
+  CK(P55_PopCnt == 0 && WH00B2C3A8 == 11 && G6_00D117A4 == 0 && G6_00D117A8 == 0 && P55_PopB2AC == 0);
+  /* FRUSTRUM.DAT */
+  { FILE *fp = fopen("FRUSTRUM.DAT", "wb"); static uint8_t z[4 + 0x8000]; memset(z, 0, sizeof z);
+    for (int i = 0; i < 0x8000; i++) z[4 + i] = (uint8_t)(i * 7);
+    fwrite(z, 1, sizeof z, fp); fclose(fp);
+    memset(P55_Frustum, 0, sizeof(p55_frustum_t));
+    CK(P55_LoadFrustum() == 0 && P55_Frustum[1] == 7 && P55_Frustum[0x8000 - 1] == (uint8_t)(0x7fff * 7));
+    remove("FRUSTRUM.DAT"); CK(P55_LoadFrustum() == -1); }
+  /* описание устройства */
+  { uint32_t o[11]; memset(o, 0xAA, sizeof o);
+    P24_RShiftR = 1; P24_BShiftL = 6; P55_A4219C = 7; G6_00A421F0 = 8; P23_DevCaps = 9;
+    P55_FillDevInfo(o); CK(o[0] == 1 && o[5] == 6 && o[6] == 7 && o[8] == 8 && o[9] == 9 && o[10] == 0x00601bc0u);
+    D_00b1c0d4 = 1; D_00b1c0d8 = 0; P55_GlideDevInfo(o); CK(o[0] == 3 && o[1] == 10 && o[9] == 0xffffffffu && o[10] == 0);
+    D_00b1c0d8 = 1; P55_GlideDevInfo(o); CK(o[9] == 9);
+    D_00b1c0d4 = 0; o[0] = 55; P55_GlideDevInfo(o); CK(o[0] == 55); }
+  /* загрузка файлов */
+  { FILE *fp = fopen("p55_test.bin", "wb"); fwrite("0123456789", 1, 10, fp); fclose(fp);
+    int32_t sz = -1; uint8_t *b = P55_LoadFile("p55_test.bin"); CK(b != NULL && memcmp(b, "0123456789", 10) == 0); DebugFree(b);
+    b = P55_LoadFileSize("p55_test.bin", &sz); CK(b != NULL && sz == 10 && b[9] == '9'); DebugFree(b);
+    remove("p55_test.bin"); CK(P55_LoadFile("p55_test.bin") == NULL && P55_LoadFileSize("p55_test.bin", &sz) == NULL); }
+  /* запись состояния */
+  { uint8_t *rec = calloc(0x1a4 * 2, 1), *src = calloc(0x148 * 4, 1);
+    P55_RecBase = rec; G0113A6C4 = src; P55_RecCnt = 1; G8_00D118C0 = 1234; TrafficRecs[2 * 0x54 + 1] = 0x42; src[2 * 0x148] = 0x99;
+    P55_SaveRec(2);
+    CK(P55_RecCnt == 2 && *(uint32_t *)(rec + 0x1a4) == 1234 && *(uint32_t *)(rec + 0x1a4 + 4) == 2 &&
+       rec[0x1a4 + 8 + 1] == 0x42 && rec[0x1a4 + 0x5c] == 0x99);
+    P55_RecCnt = 0x800; P55_SaveRec(2); CK(P55_RecCnt == 0x800);
+    P55_RecBase = NULL; P55_RecCnt = 0; P55_SaveRec(2); CK(P55_RecCnt == 0);
+    free(rec); free(src); }
+  /* раскладка */
+  for (int i = 0; i < 15; i++) P54_KeySrc[i] = 0x300 + i;
+  Q0057B72C = 4; Q00B87EF0 = 0; CK(P55_NextPad() == 0);
+  { uint32_t v; memcpy(&v, &P36_KeyCfg[0], 4); CK(Q0057B72C == 0 && v == 0x306); }
+  /* бумага и остановка звука */
+  memset(G6_00D04A50, 1, 40); P55_Lang = 0; P55_LoadPaper(); CK(G6_00D04A50[0] == 0 && G6_00D04A50[35] == 0 && G6_00D04A50[36] == 1);
+  P55_StopAudio(); CK(G6_00B5A778 == 0 && G6_00B87EFC == 0);
+  return f;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

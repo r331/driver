@@ -43,6 +43,7 @@
 #include "../../game/ported52.h"
 #include "../../game/ported53.h"
 #include "../../game/ported54.h"
+#include "../../game/ported55.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -65,6 +66,9 @@
 #include "../../game/ported8.h"
 #include "../../game/ported9.h"
 #include "../../game/ported10.h"
+void P55_Fn5248CD (void) { P25_CDResume(); }
+int32_t P55_Fn4245E2 (void) { return (int32_t)GetVarB1C0D8(); }
+void P55_Fn4264A7 (void) { Ui004264A7(); }
 void N14_Fn4D2ADE (int32_t a0) { AddClamp4095_004D2ADE(a0); }
 void N14_Fn4A7EE9 (int32_t a0) { SetVarD1193C(a0); }
 void N14_Fn48A627 (void) { P12_Fn0048A627(); }
@@ -82,8 +86,11 @@ int32_t R12_4D97E9 (void) { return (int32_t)P48_AnyKey(); }
 void Call00424921 (int32_t a0, int32_t a1, uint32_t a2, int32_t a3) { P47_TexTable(a0, a1, a2, a3); }
 void Call0048A68E (int32_t a0) { Dispatch0048A68E(a0); }
 void Call004B9D79 (void) { P16_StepParticles(); }
+void Call0050F289 (void) { P55_StopAudio(); }
 void Call004D6190 (int32_t a0) { SetFirstFree_004D6190(a0); }
 void Call004E3391 (void) { P36_PollInput(); }
+void Call0041219E (void) { P55_NamesA(); }
+void Call004125B9 (void) { P55_NamesB(); }
 void Call0052369B (int32_t a0) { P48_SndPause(a0); }
 void Call00524873 (void) { P25_CDStop(); }
 void Call00524763 (void) { P25_CDClose(); }
@@ -120,6 +127,7 @@ void Call004076E2 (void) { MenuWhite004076E2(); }
 void * FindCameraRecordForFrame (int frame) { return (void *)FindCameraForFrame(frame); }
 int IsKeyDown (int sc) { return (int)IsFlagSetNotMasked_004E383A(sc); }
 void Call00411A9D (void) { MenuHiliteWhite00411A9D(); }
+void Call0041AFCA (void) { P55_NamesC(); }
 void P4Call0041A8CD (void) { P12_Fn0041A8CD(); }
 void P4Call0051AA5B (void) { P54_AllocRoadbits(); }
 void P4Call004D2D85 (int32_t a0) { Call004D2D85(a0); }
@@ -148,6 +156,7 @@ void Call0042486B (int32_t a0, uint32_t a1, int32_t a2, uint32_t a3, int32_t a4)
 int32_t G6Call0041D63B (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { return (int32_t)P53_TexLookup(a0, a1, a2, a3); }
 void Call004D94B7 (uint32_t a0, uint32_t a1) { CursorSet004D94B7(a0, a1); }
 int32_t Call00524473 (int32_t a0) { return (int32_t)IsSlotActive00524473(a0); }
+void Call00510784 (void) { P55_NamesD(); }
 void Call004C64BD (void) { FreeCameraList(); }
 void Call004D3402 (void) { P48_ShutdownSystems(); }
 void Call004C372A (void) { FreeDirectorBuffer(); }

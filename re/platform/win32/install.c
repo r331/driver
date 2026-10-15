@@ -43,6 +43,7 @@
 #include "../../game/ported52.h"
 #include "../../game/ported53.h"
 #include "../../game/ported54.h"
+#include "../../game/ported55.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1421,4 +1422,24 @@ void re_install_all(void) {
     re_hook(0x004ec7ac, (void*)P54_ReadNames, "P54_ReadNames");
     re_hook(0x004ec280, (void*)P54_ReadMapA, "P54_ReadMapA");
     re_hook(0x004ec3fd, (void*)P54_ReadMapB, "P54_ReadMapB");
+    re_hook(0x004ef309, (void*)P55_RunTableA, "P55_RunTableA");
+    re_hook(0x004ef364, (void*)P55_RunTableB, "P55_RunTableB");
+    re_hook(0x004ee129, (void*)P55_ResetSel, "P55_ResetSel");
+    re_hook(0x0041219e, (void*)P55_NamesA, "P55_NamesA");
+    re_hook(0x004125b9, (void*)P55_NamesB, "P55_NamesB");
+    re_hook(0x0041afca, (void*)P55_NamesC, "P55_NamesC");
+    re_hook(0x00510784, (void*)P55_NamesD, "P55_NamesD");
+    re_hook(0x004d9237, (void*)P55_PopDeferred, "P55_PopDeferred");
+    re_hook(0x004eb3c0, (void*)P55_LoadFrustum, "P55_LoadFrustum");
+    re_hook(0x0041d819, (void*)P55_FillDevInfo, "P55_FillDevInfo");
+    re_hook(0x00424974, (void*)P55_GlideDevInfo, "P55_GlideDevInfo");
+    re_hook(0x004d30f8, (void*)P55_LoadFile, "P55_LoadFile");
+    re_hook(0x004d318e, (void*)P55_LoadFileSize, "P55_LoadFileSize");
+    re_hook(0x00519873, (void*)P55_SaveRec, "P55_SaveRec");
+    re_hook(0x004073ab, (void*)P55_NextPad, "P55_NextPad");
+    re_hook(0x0050f289, (void*)P55_StopAudio, "P55_StopAudio");
+    re_hook(0x005226b5, (void*)P55_GlideInit, "P55_GlideInit");
+    re_hook(0x0040c533, (void*)P55_SetScreen, "P55_SetScreen");
+    re_hook(0x00409d66, (void*)P55_MenuLangCall, "P55_MenuLangCall");
+    re_hook(0x004e6175, (void*)P55_LoadPaper, "P55_LoadPaper");
 }
