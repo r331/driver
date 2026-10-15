@@ -2006,6 +2006,12 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00431016,FUN_00431016,,,,,,1493,todo
 00432186,,P85_LitTri,manual,render,,,1147,ported
 00432601,,P85_LitQuad,manual,render,,,1396,ported
+00432b77,,P86_GouraudTri,manual,render,,,1184,ported
+00433017,,P86_GouraudQuad,manual,render,,,1471,ported
+004335e6,,P86_TexTri,manual,render,,,2406,ported
+00433f4c,,P86_TexQuad,manual,render,,,3308,ported
+00434c58,,P86_TexTriD,manual,render,,,3302,ported
+0043593e,,P86_TexQuadD,manual,render,,,4450,ported
 0043a5be,FUN_0043a5be,,,,,,3955,todo
 00447753,FUN_00447753,,,,,,3265,todo
 00452327,FUN_00452327,,,,,,1079,todo

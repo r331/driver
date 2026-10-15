@@ -75,3 +75,9 @@ void P85_FlatTri(uint32_t arg);        /* 0042f7d9 */
 void P85_FlatQuad(uint32_t arg);       /* 0042fc29 */
 void P85_LitTri(uint32_t arg);         /* 00432186: типы 16/48 — как P85_FlatTri, но цвет × освещённость плоскости P84_LightIn[запись+4] */
 void P85_LitQuad(uint32_t arg);        /* 00432601: типы 17/49 */
+p85_vtx *P85_Prep(int32_t idx);                 /* спроецировать вершину модели в кэш (если ещё не в этом кадре) */
+void P85_CallState(void);                      /* общее состояние растеризатора «без текстуры» */
+void P85_SetBlend(uint8_t m);                  /* смена режима смешивания (с учётом принудительного 00b1c38c) */
+void P85_CallRaster(void);                     /* три вершины P85_RV → растеризатор (с отсечением при P82_Edge) */
+int  P85_EdgeReject(const p85_vtx *const *vs, int n); /* 1 — все вершины за краем экрана */
+void P85_PutVtx(p85_rv *r, const p85_vtx *v);  /* x, y, oow вершины → вершина растеризатора */

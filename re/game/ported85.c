@@ -1,4 +1,5 @@
 #include "ported85.h"
+#include "ported86.h"
 #include "../platform/plat.h"
 #include <string.h>
 
@@ -54,7 +55,7 @@ void P85_Project(p85_vtx *v) {
 }
 
 /* общие части обработчиков */
-static p85_vtx *prep(int32_t idx) {
+p85_vtx *P85_Prep(int32_t idx) {
   p85_vtx *c = &P85_VCache[idx];
   if (c->stamp != P44_XformTag) {
     const float *src = (const float *)((const uint8_t *)P79_PTR(P84_VertRef) + (size_t)idx * 16);
@@ -63,10 +64,10 @@ static p85_vtx *prep(int32_t idx) {
   }
   return c;
 }
-static void call_state(void) {
+void P85_CallState(void) {
   if (P85_StateDirty != 0) { P85_StateFn(1, 0, 0, 2, 0); P85_StateDirty = 0; }
 }
-static void set_blend(uint8_t m) {
+void P85_SetBlend(uint8_t m) {
   if (m != 0 && (uint8_t)P85_BlendForce != 0) m = (uint8_t)P85_BlendForce;
   if (P85_BlendCur != m) {
     switch (m) {
@@ -79,12 +80,12 @@ static void set_blend(uint8_t m) {
   }
   P85_BlendCur = m;
 }
-static void call_raster(void) {
+void P85_CallRaster(void) {
   if ((uint8_t)P82_Edge == 0) P85_RasterA(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
   else P85_RasterB(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
 }
 /* отсечение при P82_Edge≠0: 1 — треугольник/четырёхугольник пропускается */
-static int edge_reject(const p85_vtx *const *vs, int n) {
+int P85_EdgeReject(const p85_vtx *const *vs, int n) {
   uint32_t a = 0x80000000u;
   for (int i = 0; i < n; i++) a &= bits(vs[i]->x);
   P85_Clip = a; if (a) return 1;
@@ -101,7 +102,7 @@ static int edge_reject(const p85_vtx *const *vs, int n) {
   }
   return 0;
 }
-static void put_vtx(p85_rv *r, const p85_vtx *v) { r->x = v->x; r->y = v->y; r->oow = v->oow; }
+void P85_PutVtx(p85_rv *r, const p85_vtx *v) { r->x = v->x; r->y = v->y; r->oow = v->oow; }
 /* цвет записи → r,g,b трёх вершин; lit: умножается на освещённость плоскости (P84_LightIn[номер], как fmul → fstp во float) */
 static void put_color(const uint8_t *rec, int off, int lit) {
   float k = lit ? P84_LightIn[*(const int32_t *)(rec + 4)] : 1.0f;
@@ -116,27 +117,27 @@ static void do_tri(uint32_t arg, int lit) {
   const uint8_t *rec = G2_011F4064;
   int32_t i0 = *(const int32_t *)(rec + 8), i1 = *(const int32_t *)(rec + 0xc), i2 = *(const int32_t *)(rec + 0x10);
   G2_011F4064 = (uint8_t *)rec + 0x20;
-  p85_vtx *v0 = prep(i0), *v1 = prep(i1), *v2 = prep(i2);
-  if ((uint8_t)P82_Edge) { const p85_vtx *vs[3] = { v0, v1, v2 }; if (edge_reject(vs, 3)) return; }
+  p85_vtx *v0 = P85_Prep(i0), *v1 = P85_Prep(i1), *v2 = P85_Prep(i2);
+  if ((uint8_t)P82_Edge) { const p85_vtx *vs[3] = { v0, v1, v2 }; if (P85_EdgeReject(vs, 3)) return; }
   put_color(rec, 0x14, lit);
-  call_state();
-  set_blend((uint8_t)arg);
-  put_vtx(&P85_RV[0], v0); put_vtx(&P85_RV[1], v1); put_vtx(&P85_RV[2], v2);
-  call_raster();
+  P85_CallState();
+  P85_SetBlend((uint8_t)arg);
+  P85_PutVtx(&P85_RV[0], v0); P85_PutVtx(&P85_RV[1], v1); P85_PutVtx(&P85_RV[2], v2);
+  P85_CallRaster();
 }
 static void do_quad(uint32_t arg, int lit) {
   const uint8_t *rec = G2_011F4064;
   int32_t i0 = *(const int32_t *)(rec + 8), i1 = *(const int32_t *)(rec + 0xc), i2 = *(const int32_t *)(rec + 0x10), i3 = *(const int32_t *)(rec + 0x14);
   G2_011F4064 = (uint8_t *)rec + 0x24;
-  p85_vtx *v0 = prep(i0), *v1 = prep(i1), *v2 = prep(i2), *v3 = prep(i3);
-  if ((uint8_t)P82_Edge) { const p85_vtx *vs[4] = { v0, v1, v2, v3 }; if (edge_reject(vs, 4)) return; }
+  p85_vtx *v0 = P85_Prep(i0), *v1 = P85_Prep(i1), *v2 = P85_Prep(i2), *v3 = P85_Prep(i3);
+  if ((uint8_t)P82_Edge) { const p85_vtx *vs[4] = { v0, v1, v2, v3 }; if (P85_EdgeReject(vs, 4)) return; }
   put_color(rec, 0x18, lit);
-  call_state();
-  set_blend((uint8_t)arg);
-  put_vtx(&P85_RV[0], v0); put_vtx(&P85_RV[1], v2); put_vtx(&P85_RV[2], v1);
-  call_raster();
-  put_vtx(&P85_RV[2], v3);
-  call_raster();
+  P85_CallState();
+  P85_SetBlend((uint8_t)arg);
+  P85_PutVtx(&P85_RV[0], v0); P85_PutVtx(&P85_RV[1], v2); P85_PutVtx(&P85_RV[2], v1);
+  P85_CallRaster();
+  P85_PutVtx(&P85_RV[2], v3);
+  P85_CallRaster();
 }
 /* 0042f7d9 */
 void P85_FlatTri(uint32_t arg) { do_tri(arg, 0); }
@@ -151,6 +152,7 @@ void P85_LitQuad(uint32_t arg) { do_quad(arg, 1); }
 int32_t P85_Tris;
 uint8_t P85_LastBlend;
 static int g_blend_mode;
+static int g_textured;
 static void P85_STD native_blend(int32_t a, int32_t b, int32_t c, int32_t d) {
   (void)c; (void)d;
   if (a == 4 && b == 0) { g_blend_mode = 0; plat_set_blend(0, 0, 0); }
@@ -158,7 +160,11 @@ static void P85_STD native_blend(int32_t a, int32_t b, int32_t c, int32_t d) {
   else g_blend_mode = a == 0 && b == 5 ? 1 : 2;                                /* режимы 1/2 пока рисуются как непрозрачные */
   P85_LastBlend = (uint8_t)g_blend_mode;
 }
-static void P85_STD native_state(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e) { (void)a; (void)b; (void)c; (void)d; (void)e; }
+static void P85_STD native_state(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e) {
+  (void)b; (void)c; (void)d; (void)e;
+  g_textured = a == 3;                                  /* 3 — текстура + цвет, 1 — только цвет */
+  plat_tex_bind(g_textured ? P86_NativeHandle(P86_CurTex) : 0);
+}
 static uint32_t col8(float f) { int i = (int)lrintf(f); return (uint32_t)(i < 0 ? 0 : i > 255 ? 255 : i); }
 /* Glide GrVertex → plat_vertex; цвета 0..255, глубина из oow (больше oow — ближе) */
 static void P85_STD native_raster(const p85_rv *a, const p85_rv *b, const p85_rv *c) {
@@ -167,9 +173,10 @@ static void P85_STD native_raster(const p85_rv *a, const p85_rv *b, const p85_rv
   for (int i = 0; i < 3; i++) {
     const p85_rv *r = vs[i];
     float oow = r->oow < 0 ? 0 : r->oow;
-    pv[i].x = r->x; pv[i].y = r->y; pv[i].z = 1.0f / (1.0f + oow); pv[i].rhw = 1.0f;
+    pv[i].x = r->x; pv[i].y = r->y; pv[i].z = 1.0f / (1.0f + oow); pv[i].rhw = oow > 1e-7f ? oow : 1e-7f;
     pv[i].color = 0xFF000000u | col8(r->r) << 16 | col8(r->g) << 8 | col8(r->b);
     pv[i].specular = 0; pv[i].u = 0; pv[i].v = 0;
+    if (g_textured && oow > 1e-7f) { pv[i].u = r->tmu[0] / oow / 256.0f; pv[i].v = r->tmu[1] / oow / 256.0f; }
   }
   P85_Tris++;
   plat_draw_tris(pv, 3);
@@ -193,6 +200,7 @@ void P85_RegisterNative(void) {
   P85_RasterA = P85_RasterB = native_raster;
   P85_BlendFn = native_blend;
   P85_StateFn = native_state;
+  P86_NativeInit();
 }
 void P85_InitConsts(void) {
   P85_MaxX = 639.0f; P85_MaxY = 479.0f;

@@ -54,7 +54,7 @@ static const char *VS =
 static const char *FS =
  "#version 330 core\n"
  "in vec4 vCol; in vec3 vSpec; in vec2 vUV; uniform sampler2D uTex; out vec4 oCol;\n"
- "void main(){ vec4 c = vCol * texture(uTex, vUV); oCol = vec4(c.rgb + vSpec, c.a); }\n";
+ "void main(){ vec4 c = vCol * texture(uTex, vUV); if (c.a < 0.5) discard; oCol = vec4(c.rgb + vSpec, c.a); }\n";
 
 typedef struct { int w, h; unsigned id; } tex_t;
 #define MAX_TEX 4096

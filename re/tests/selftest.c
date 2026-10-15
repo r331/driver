@@ -89,6 +89,7 @@
 #include "../game/ported83.h"
 #include "../game/ported84.h"
 #include "../game/ported85.h"
+#include "../game/ported86.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -3591,9 +3592,11 @@ static int test_p83(void) {
 }
 
 /* Необязательная проверка на настоящем файле уровня: RE_REAL_LEVEL=имя (файл в Levels/ рядом с рабочим каталогом) */
+int png_write_rgba(const char *path, const uint32_t *px, int w, int h);
 static int test_real_level(void) {
   const char *nm = getenv("RE_REAL_LEVEL");
   if (!nm) return 0;
+  int gl_ok = getenv("RE_REAL_PNG") && plat_render_offscreen(640, 480) == 0;   /* GL до загрузки: страницы текстур сразу становятся plat_tex */
   D_00d00230 = calloc(1, 0x1000000);
   P77_LevelName = nm;
   int32_t r = P77_LoadLevel();
@@ -3614,6 +3617,40 @@ static int test_real_level(void) {
     fprintf(stderr, "record types (total %ld):", total);
     for (int t = 0; t < 64; t++) if (hist[t]) fprintf(stderr, " %d:%ld", t, hist[t]);
     fprintf(stderr, "\n");
+  }
+  if (getenv("RE_REAL_PNG") && P20_Count > 0) {   /* самая «плотная» модель уровня → P84_DrawModel → текстуры страниц LEV → PNG */
+    int best = -1, bn = 0;
+    for (int i = 0; i < P20_Count && i < 1126; i++) {
+      uint32_t ref = P79_ModelTab[i]; if (!ref) continue;
+      uint8_t *mdl = (uint8_t *)P79_PTR(ref); int n = *(uint16_t *)(mdl + 0x16);
+      float *bb = P80_Boxes[i]; if (getenv("RE_REAL_LIST") && n >= 40) fprintf(stderr, "m%d n=%d ext %g %g %g\n", i, n, bb[3] - bb[0], bb[4] - bb[1], bb[5] - bb[2]);
+      int sc = n >= 30 && n < 4000 && bb[3] - bb[0] < 2500 && bb[5] - bb[2] < 2500 ? (int)((bb[3] - bb[0]) * (bb[5] - bb[2]) * (bb[4] - bb[1] > 0 ? 1 : 1) / 100) : 0;
+      if (sc > bn) { bn = sc; best = i; }
+    }
+    if (getenv("RE_REAL_MODEL")) { best = atoi(getenv("RE_REAL_MODEL")); bn = *(uint16_t *)((uint8_t *)P79_PTR(P79_ModelTab[best]) + 0x16); }
+    fprintf(stderr, "render model %d (%d records), textures captured: %d\n", best, bn, (int)P86_TexCount);
+    if (best >= 0 && gl_ok) {
+      static uint32_t px[640 * 480];
+      float ident[16 * 8]; float b[6]; float pos[3];
+      memcpy(b, P80_Boxes[best], sizeof b);
+      float cx = (b[0] + b[3]) / 2, cy = (b[1] + b[4]) / 2, cz = (b[2] + b[5]) / 2;
+      float rad = fmaxf(fmaxf(b[3] - b[0], b[4] - b[1]), b[5] - b[2]);
+      memset(ident, 0, sizeof ident);
+      for (int k = 0; k < 8; k++) ident[k * 16] = ident[k * 16 + 4] = ident[k * 16 + 8] = 1.0f;
+      memset(P44_ViewMat, 0, sizeof(p44_m9_t)); P44_ViewMat[0] = P44_ViewMat[4] = P44_ViewMat[8] = 1.0f;
+      P84_InitConsts(); P85_InitConsts(); P19_Scale = 1.0f;
+      P85_RegisterNative(); P84_SelectTables(0);
+      P43_ScaleA = 500.0f; P43_OffX = 320.0f + 1048576.0f; P43_OffY = 240.0f + 1048576.0f; P43_Half = 1048576.0f;
+      for (int i = 1; i < 0x2000; i++) P12_00ba53a0[i] = 1.0f / (float)i;
+      G2_011F43B0 = 0; P84_Mirror = 0; P82_Edge = 0; P63_SphN = 0;
+      for (int i = 0; i < 4096; i++) { P84_LightIn[i] = 1.0f; }
+      for (int i = 0; i < 8192; i++) { P84_NormLight[i] = 1.0f; }
+      { float sy = getenv("RE_REAL_SY") ? (float)atof(getenv("RE_REAL_SY")) : 1.0f; pos[0] = -cx; pos[1] = sy * cy; pos[2] = -cz + 2.2f * rad; fprintf(stderr, "box %g %g %g .. %g %g %g\n", b[0], b[1], b[2], b[3], b[4], b[5]); }
+      plat_set_zbuffer(1, 1); plat_clear(0xFF304050u, 1); P85_Tris = 0; P86_CurTex = -1; P85_StateDirty = 0;
+      P44_XformTag = 100; P84_DrawModel(P79_ModelTab[best], ident, pos, 5);
+      fprintf(stderr, "model triangles: %d\n", (int)P85_Tris);
+      if (plat_render_readback(px) == 0) png_write_rgba(getenv("RE_REAL_PNG"), px, 640, 480);
+    }
   }
   if (P20_Count > 0) { float *b = P80_Boxes[0]; fprintf(stderr, "model0 box: %g %g %g .. %g %g %g\n", b[0], b[1], b[2], b[3], b[4], b[5]); }
   return r == 1 && bad == 0 && P20_Count > 0 ? 0 : 1;
@@ -3788,9 +3825,126 @@ static int test_p85(void) {
   return f;
 }
 
+
+static int p86_texsrc_calls; static int32_t p86_last_tex = -2;
+static void p86_texsrc_cap(int32_t tmu, uint32_t addr, int32_t mask, uint32_t info) { (void)tmu; (void)addr; (void)mask; (void)info; p86_texsrc_calls++; p86_last_tex = P86_CurTex; }
+static int test_p86(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { fprintf(stderr, "p86 fail line %d: %s\n", __LINE__, #c); f = 1; } } while (0)
+  re_init_consts();
+  { void *saved = D_00c98ed0; uint8_t *arena = (uint8_t *)calloc(1, 0x4000);
+    uint8_t *m = arena + 0x100; float *pl = (float *)(arena + 0x200); uint8_t *rec = arena + 0x300; float *vert = (float *)(arena + 0x800);
+    uint16_t u16; uint32_t u32; int32_t i32;
+    float ident[16 * 8]; float pos[3] = { 0, 0, 0 };
+    D_00c98ed0 = arena;
+    memset(ident, 0, sizeof ident);
+    for (int k = 0; k < 8; k++) ident[k * 16] = ident[k * 16 + 4] = ident[k * 16 + 8] = 1.0f;
+    memset(P44_ViewMat, 0, sizeof(p44_m9_t)); P44_ViewMat[0] = P44_ViewMat[4] = P44_ViewMat[8] = 1.0f;
+    P43_ScaleA = 100.0f; P43_OffX = 320.0f + 1048576.0f; P43_OffY = 240.0f + 1048576.0f; P43_Half = 1048576.0f;
+    P19_Scale = 1.0f;
+    for (int i = 1; i < 0x400; i++) P12_00ba53a0[i] = 1.0f / (float)i;
+    u16 = 0; memcpy(m + 2, &u16, 2); u16 = 3; memcpy(m + 0x16, &u16, 2); u16 = 0; memcpy(m + 0x18, &u16, 2);
+    P84_InitConsts(); P85_InitConsts();
+    u32 = P79_OFF(vert); memcpy(m + 0x20, &u32, 4); u32 = P79_OFF(pl); memcpy(m + 0x24, &u32, 4); u32 = P79_OFF(rec); memcpy(m + 0x2c, &u32, 4);
+    pl[0] = 0; pl[1] = 0; pl[2] = 1; pl[3] = 5;
+    { float vv[4][4] = { { 0, 0, 10, 0 }, { 10, 0, 10, 0 }, { 0, 10, 10, 0 }, { 10, 10, 10, 0 } }; memcpy(vert, vv, sizeof vv); }
+    memset(rec, 0, 256);
+    /* тип 20 (текстурный треугольник, текстура 3) в 0, тип 21 (четырёхугольник, текстура 3) в 0x38, тип 51 (гуро) в 0x7c */
+    rec[0] = 20; rec[1] = 8; rec[2] = 3; i32 = 0; memcpy(rec + 4, &i32, 4);
+    i32 = 0; memcpy(rec + 8, &i32, 4); i32 = 1; memcpy(rec + 12, &i32, 4); i32 = 2; memcpy(rec + 16, &i32, 4);
+    { float uv[6] = { 0, 0, 255, 0, 0, 255 }; memcpy(rec + 0x14, uv, 24); }
+    { float c[3] = { 200.0f, 100.0f, 50.0f }; memcpy(rec + 0x2c, c, 12); }
+    rec[0x38] = 21; rec[0x39] = 8; rec[0x3a] = 3; i32 = 0; memcpy(rec + 0x3c, &i32, 4);
+    i32 = 0; memcpy(rec + 0x40, &i32, 4); i32 = 1; memcpy(rec + 0x44, &i32, 4); i32 = 3; memcpy(rec + 0x48, &i32, 4); i32 = 2; memcpy(rec + 0x4c, &i32, 4);
+    { float uv[8] = { 0, 0, 255, 0, 255, 255, 0, 255 }; memcpy(rec + 0x38 + 0x18, uv, 32); }
+    { float c[3] = { 10.0f, 20.0f, 30.0f }; memcpy(rec + 0x38 + 0x38, c, 12); }
+    rec[0x7c] = 51; rec[0x7d] = 8; i32 = 0; memcpy(rec + 0x80, &i32, 4);
+    i32 = 0; memcpy(rec + 0x84, &i32, 4); i32 = 1; memcpy(rec + 0x88, &i32, 4); i32 = 3; memcpy(rec + 0x8c, &i32, 4); i32 = 2; memcpy(rec + 0x90, &i32, 4);
+    i32 = 5; memcpy(rec + 0x7c + 0x18, &i32, 4); i32 = 6; memcpy(rec + 0x7c + 0x1c, &i32, 4); i32 = 7; memcpy(rec + 0x7c + 0x20, &i32, 4); i32 = 8; memcpy(rec + 0x7c + 0x24, &i32, 4);
+    { float c[3] = { 100.0f, 100.0f, 100.0f }; memcpy(rec + 0x7c + 0x28, c, 12); }
+    P85_RegisterNative();
+    CK(P84_Handlers[2][20] == (uintptr_t)P86_TexTri && P84_Handlers[3][21] == (uintptr_t)P86_TexQuad && P84_Handlers[0][51] == (uintptr_t)P86_GouraudQuad && P84_Handlers[1][50] == (uintptr_t)P86_GouraudTri);
+    P85_RasterA = P85_RasterB = p85_capture; P85_BlendFn = p85_blend_cap; P85_StateFn = p85_state_cap; P86_TexSrc = p86_texsrc_cap;
+    P84_SelectTables(0); G2_011F43B0 = 0; P84_Mirror = 0; P82_Edge = 0; P63_SphN = 0;
+    P84_LightIn[0] = 0.5f; P84_NormLight[5] = 1.0f; P84_NormLight[6] = 0.5f; P84_NormLight[7] = 0.25f; P84_NormLight[8] = 0.0f;
+    P85_StateDirty = 0; P85_BlendCur = 0; P85_BlendForce = 0; P86_CurTex = -1; P86_Detail = 1;
+    P44_XformTag = 30; p85_calls = 0; p85_blend_calls = 0; p86_texsrc_calls = 0;
+    P84_DrawModel(P79_OFF(m), ident, pos, 5);
+    CK(p85_calls == 5);                                        /* треугольник + 2 + 2 */
+    CK(P85_StateDirty == 0 && G2_011F4064 == rec + 0x7c + 0x34);
+    CK(p86_texsrc_calls == 1 && p86_last_tex == 3);            /* тип 21 с той же текстурой её не ставит повторно (и 51 не трогает) */
+    /* тип 20: цвет = плоскость 0.5 × цвет, u·oow (oow = 1/10) */
+    CK(p85_cap[0][0].r == 100.0f && p85_cap[0][0].g == 50.0f && p85_cap[0][2].b == 25.0f);
+    CK(fabsf(p85_cap[0][1].tmu[0] - 25.5f) < 1e-3f && p85_cap[0][1].tmu[1] == 0.0f && fabsf(p85_cap[0][2].tmu[1] - 25.5f) < 1e-3f);
+    /* тип 21: вершины (0,2,1) и (0,2,3), u,v: v0=(0,0), v2=(255,255)?? — по индексам записи: i0=0,i1=1,i2=3,i3=2 */
+    CK(p85_cap[1][0].r == 5.0f && p85_cap[1][1].g == 10.0f);
+    CK(fabsf(p85_cap[1][1].tmu[0] - 25.5f) < 1e-3f && fabsf(p85_cap[1][1].tmu[1] - 25.5f) < 1e-3f);   /* RV1 — вершина записи №2 */
+    CK(fabsf(p85_cap[1][2].tmu[0] - 25.5f) < 1e-3f && p85_cap[1][2].tmu[1] == 0.0f);                   /* RV2 — вершина записи №1 */
+    CK(fabsf(p85_cap[2][2].tmu[0] - 0.0f) < 1e-3f && fabsf(p85_cap[2][2].tmu[1] - 25.5f) < 1e-3f);    /* вторая половина: вершина №3 */
+    /* тип 51: цвет × нормаль вершины: RV0 — нормаль 5 (1.0), RV1 — нормаль 7 (0.25), RV2 — нормаль 6 (0.5), второй треугольник — нормаль 8 (0) */
+    CK(p85_cap[3][0].r == 100.0f && p85_cap[3][1].r == 25.0f && p85_cap[3][2].r == 50.0f && p85_cap[4][2].r == 0.0f);
+    /* динамический свет: источник в точке вершины 0 (камерное пространство: x=0,y=0,z=10), радиус² 100, цвет (0,0,200) */
+    { float *L = (float *)&G2_011F40E0[0]; memset(L, 0, 0x24); L[0] = 0; L[1] = 0; L[2] = 10; L[4] = 0; L[5] = 0; L[6] = 200; L[7] = 100; L[8] = 0.01f; }
+    { int32_t rr = 100; memcpy(&((float *)&G2_011F40E0[0])[3], &rr, 4); } G2_011F43B0 = 1;   /* P84_DrawModel сам находит источники в радиусе модели */
+    P44_XformTag = 31; p85_calls = 0; P86_CurTex = -1; P85_StateDirty = 0;
+    P84_DrawModel(P79_OFF(m), ident, pos, 5);
+    /* вершина 0: d²=0 → вклад 100·0.01·200 = 200 в синий: 12.5.. нет, у типа 20 синий был 25·0.5=25 → 225; остальные вершины дальше на 10: d²=100 не < 100 */
+    CK(p85_cap[0][0].b == 225.0f && p85_cap[0][1].b == 25.0f && p85_cap[0][0].r == 100.0f);
+    G2_011F43B0 = 0; P63_SphN = 0;
+    /* 3) картинка: текстурированная плитка с перспективой и гуро-треугольник → PNG */
+    if (plat_render_offscreen(640, 480) == 0) {
+      static uint32_t px[640 * 480];
+      static uint16_t page[256 * 256];
+      for (int y = 0; y < 256; y++) for (int x = 0; x < 256; x++) {
+        int chk = ((x >> 5) + (y >> 5)) & 1;
+        page[y * 256 + x] = (uint16_t)(0x8000 | (chk ? (31 << 10 | 20 << 5 | 4) : (4 << 10 | 24 << 5 | 31)));   /* оранжевая / синяя клетка */
+      }
+      P86_NativeCapture(7, 0, page, NULL);
+      CK(P86_NativeHandle(7) > 0);
+      P85_RegisterNative();                                   /* растеризатор → plat_draw_tris, текстуры → GL */
+      P43_ScaleA = 400.0f; P43_OffX = 320.0f + 1048576.0f; P43_OffY = 240.0f + 1048576.0f;
+      for (int i = 1; i < 0x2000; i++) P12_00ba53a0[i] = 1.0f / (float)i;
+      /* пол в перспективе: ближний край z=30 шире, дальний z=90 */
+      { float vv[8][4] = { { -40, 20, 30, 0 }, { 40, 20, 30, 0 }, { 120, 20, 100, 0 }, { -120, 20, 100, 0 }, { 60, -40, 60, 0 }, { 110, -40, 60, 0 }, { 110, 0, 60, 0 }, { 60, 0, 60, 0 } };
+        memcpy(vert, vv, sizeof vv); }
+      u16 = 2; memcpy(m + 0x16, &u16, 2);
+      memset(rec, 0, 256);
+      rec[0] = 21; rec[1] = 8; rec[2] = 7;
+      i32 = 0; memcpy(rec + 8, &i32, 4); i32 = 1; memcpy(rec + 12, &i32, 4); i32 = 2; memcpy(rec + 16, &i32, 4); i32 = 3; memcpy(rec + 20, &i32, 4);
+      { float uv[8] = { 0, 0, 255, 0, 255, 255, 0, 255 }; memcpy(rec + 0x18, uv, 32); }
+      { float c[3] = { 255.0f, 255.0f, 255.0f }; memcpy(rec + 0x38, c, 12); }
+      rec[0x44] = 51; rec[0x45] = 8;
+      i32 = 4; memcpy(rec + 0x44 + 8, &i32, 4); i32 = 5; memcpy(rec + 0x44 + 12, &i32, 4); i32 = 6; memcpy(rec + 0x44 + 16, &i32, 4); i32 = 7; memcpy(rec + 0x44 + 20, &i32, 4);
+      i32 = 5; memcpy(rec + 0x44 + 0x18, &i32, 4); i32 = 6; memcpy(rec + 0x44 + 0x1c, &i32, 4); i32 = 7; memcpy(rec + 0x44 + 0x20, &i32, 4); i32 = 8; memcpy(rec + 0x44 + 0x24, &i32, 4);
+      { float c[3] = { 255.0f, 255.0f, 255.0f }; memcpy(rec + 0x44 + 0x28, c, 12); }
+      P84_LightIn[0] = 1.0f; P84_NormLight[5] = 1.0f; P84_NormLight[6] = 0.6f; P84_NormLight[7] = 0.2f; P84_NormLight[8] = 0.9f;
+      plat_set_zbuffer(1, 1); plat_clear(0xFF101820u, 1); P85_Tris = 0;
+      P86_CurTex = -1; P85_StateDirty = 0;
+      P44_XformTag = 40; P84_DrawModel(P79_OFF(m), ident, pos, 5);
+      CK(P85_Tris == 4);
+      if (plat_render_readback(px) == 0) {
+        uint32_t cA = px[(480 - 1 - 150) * 640 + 320 - 1], bg = px[5 * 640 + 5];
+        (void)cA;
+        CK((bg & 255) < 40 && ((bg >> 16) & 255) > 20);
+        int orange = 0, blue = 0;                              /* в плитке должны встретиться обе клетки шахматной текстуры */
+        for (int i = 0; i < 640 * 480; i++) {
+          uint32_t c = px[i], r = c & 255, b = (c >> 16) & 255;
+          if (r > 200 && b < 60) orange++;
+          if (b > 200 && r < 60) blue++;
+        }
+        CK(orange > 2000 && blue > 2000);
+        png_write_rgba(getenv("RE_TEX_PNG") ? getenv("RE_TEX_PNG") : "render_tex.png", px, 640, 480);
+      }
+    }
+    D_00c98ed0 = saved; free(arena);
+  }
+  return f;
+}
+
 int re_selftest(void) {
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

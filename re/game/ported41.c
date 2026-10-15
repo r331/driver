@@ -8,6 +8,9 @@
 #include "engine.h"
 #include "crt.h"
 #include <string.h>
+#ifndef RE_HOOK_BUILD
+#include "ported86.h"
+#endif
 GAME_VAR_DEF(p41_texsel_t, P41_TexSel, 0x00562d80)
 GAME_VAR_DEF(int32_t, P41_Offset, 0x00b31ee0)
 GAME_VAR_DEF(uint32_t, P41_Arena, 0x00d01260)
@@ -32,6 +35,9 @@ void P41_LoadTexPages(void *file) {
   int16_t tmp16;
   int32_t count = 0;
   P27_LoadPalettes(file);
+#ifndef RE_HOOK_BUILD
+  P86_NativeReset();
+#endif
   P27_ReadChunked(&count, 4, 1, file);
   P40_ResetTexMem();
   P41_Offset = 0;
@@ -81,6 +87,9 @@ void P41_LoadTexPages(void *file) {
       P27_ReadChunked(&tmp16, 2, 1, file);
       P27_ReadChunked(P41_Buf1, 0x10000, 1, file);
     }
+#ifndef RE_HOOK_BUILD
+    P86_NativeCapture(idx, pair, P41_Buf0, P41_Buf1);   /* native: страница → текстура GL */
+#endif
     int32_t b0 = (int32_t)(uintptr_t)P41_Buf0, b1 = (int32_t)(uintptr_t)P41_Buf1;
     if ((flags & 1) == 0) {
       if ((flags & 4) == 0) {
