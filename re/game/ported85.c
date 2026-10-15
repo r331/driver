@@ -1,0 +1,202 @@
+#include "ported85.h"
+#include "../platform/plat.h"
+#include <string.h>
+
+GAME_VAR_DEF(p85_vcache_t, P85_VCache, 0x011cffa0)
+GAME_VAR_DEF(p85_rv3_t, P85_RV, 0x00b1c290)
+GAME_VAR_DEF(p85_raster_fn, P85_RasterA, 0x01270e08)
+GAME_VAR_DEF(p85_raster_fn, P85_RasterB, 0x01270dfc)
+GAME_VAR_DEF(p85_blend_fn, P85_BlendFn, 0x01270dd0)
+GAME_VAR_DEF(p85_state_fn, P85_StateFn, 0x01270ea0)
+GAME_VAR_DEF(int32_t, P85_StateDirty, 0x01270c34)
+GAME_VAR_DEF(int32_t, P85_BlendForce, 0x00b1c38c)
+GAME_VAR_DEF(uint8_t, P85_BlendCur, 0x0125f3e4)
+GAME_VAR_DEF(uint32_t, P85_Clip, 0x01147620)
+GAME_VAR_DEF(p85_d_t, P85_D, 0x01159d5c)
+GAME_VAR_DEF(uint32_t, P85_D3, 0x01159d6c)
+GAME_VAR_DEF(float, P85_MaxX, 0x00550820)
+GAME_VAR_DEF(float, P85_MaxY, 0x00550824)
+GAME_VAR_DEF(float, P85_Tmp, 0x0057a10e)
+GAME_VAR_DEF(int32_t, P85_ZI, 0x0057a132)
+
+typedef long double ld;
+static uint32_t bits(float f) { uint32_t u; memcpy(&u, &f, 4); return u; }
+
+/* 00528ac8 */
+void P85_Project(p85_vtx *v) {
+  const float *m = P44_MatPtr;
+  ld x = v->x, y = v->y, z = v->z;
+  ld a = x * m[2] + P44_BiasZ;                     /* x·M2 + смещение Z */
+  ld c = x * m[1] + P44_BiasY;                     /* x·M1 + смещение Y */
+  ld sx = x * m[0] + (y * m[3] + (z * m[6] + P44_BiasX));
+  ld sy = c + (y * m[4] + z * m[7]);
+  ld sz = (a + y * m[5]) + z * m[8];
+  float fx = (float)sx, fy = (float)sy, fz = (float)sz;
+  P85_ZI = (int32_t)lrintl(sz);                    /* fist: округление к ближайшему чётному */
+  v->vx = fx; v->vy = fy; v->z = fz;
+  v->stamp = P44_XformTag;
+  {
+    int32_t zi = P85_ZI;
+    v->oow = ((const float *)&P12_00ba53a0[0])[zi];
+  }
+  {
+    ld kk = (ld)v->oow * (ld)P43_ScaleA;           /* держится на стеке x87 (расширенная точность) */
+    P85_Tmp = (float)(kk * (ld)fx);
+    /* дальше x87 работает в 24-битном режиме (после инициализации Glide/D3D): каждая операция округляется до float */
+    {
+      float px = (float)((ld)P85_Tmp + (ld)P43_OffX);
+      float py = (float)((ld)(float)(kk * (ld)fy) + (ld)P43_OffY);
+      px = (float)((ld)px - (ld)P43_Half);
+      py = (float)((ld)py - (ld)P43_Half);
+      v->x = px; v->y = py;
+    }
+  }
+}
+
+/* общие части обработчиков */
+static p85_vtx *prep(int32_t idx) {
+  p85_vtx *c = &P85_VCache[idx];
+  if (c->stamp != P44_XformTag) {
+    const float *src = (const float *)((const uint8_t *)P79_PTR(P84_VertRef) + (size_t)idx * 16);
+    c->x = src[0]; c->y = src[1]; c->z = src[2];
+    P85_Project(c);
+  }
+  return c;
+}
+static void call_state(void) {
+  if (P85_StateDirty != 0) { P85_StateFn(1, 0, 0, 2, 0); P85_StateDirty = 0; }
+}
+static void set_blend(uint8_t m) {
+  if (m != 0 && (uint8_t)P85_BlendForce != 0) m = (uint8_t)P85_BlendForce;
+  if (P85_BlendCur != m) {
+    switch (m) {
+    case 0: P85_BlendFn(4, 0, 4, 0); break;
+    case 1: P85_BlendFn(0, 5, 4, 0); break;
+    case 2: P85_BlendFn(0, 6, 4, 0); break;
+    case 3: P85_BlendFn(4, 4, 4, 0); break;
+    default: break;
+    }
+  }
+  P85_BlendCur = m;
+}
+static void call_raster(void) {
+  if ((uint8_t)P82_Edge == 0) P85_RasterA(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
+  else P85_RasterB(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
+}
+/* отсечение при P82_Edge≠0: 1 — треугольник/четырёхугольник пропускается */
+static int edge_reject(const p85_vtx *const *vs, int n) {
+  uint32_t a = 0x80000000u;
+  for (int i = 0; i < n; i++) a &= bits(vs[i]->x);
+  P85_Clip = a; if (a) return 1;
+  a = 0x80000000u;
+  for (int i = 0; i < n; i++) a &= bits(vs[i]->y);
+  P85_Clip = a; if (a) return 1;
+  {
+    uint32_t o = 0;
+    for (int i = 0; i < n; i++) { float d = (float)((ld)vs[i]->x - (ld)P85_MaxX); uint32_t u = bits(d); if (i < 3) P85_D[i] = u; else P85_D3 = u; o |= u; }
+    P85_Clip = o; if (o == 0) return 1;
+    o = 0;
+    for (int i = 0; i < n; i++) { float d = (float)((ld)vs[i]->y - (ld)P85_MaxY); uint32_t u = bits(d); if (i < 3) P85_D[i] = u; else P85_D3 = u; o |= u; }
+    P85_Clip = o; if (o == 0) return 1;
+  }
+  return 0;
+}
+static void put_vtx(p85_rv *r, const p85_vtx *v) { r->x = v->x; r->y = v->y; r->oow = v->oow; }
+/* цвет записи → r,g,b трёх вершин; lit: умножается на освещённость плоскости (P84_LightIn[номер], как fmul → fstp во float) */
+static void put_color(const uint8_t *rec, int off, int lit) {
+  float k = lit ? P84_LightIn[*(const int32_t *)(rec + 4)] : 1.0f;
+  for (int i = 0; i < 3; i++) {
+    float c; memcpy(&c, rec + off + 4 * i, 4);
+    if (lit) c = (float)((ld)k * (ld)c);
+    (&P85_RV[0].r)[i] = c; (&P85_RV[1].r)[i] = c; (&P85_RV[2].r)[i] = c;
+  }
+}
+
+static void do_tri(uint32_t arg, int lit) {
+  const uint8_t *rec = G2_011F4064;
+  int32_t i0 = *(const int32_t *)(rec + 8), i1 = *(const int32_t *)(rec + 0xc), i2 = *(const int32_t *)(rec + 0x10);
+  G2_011F4064 = (uint8_t *)rec + 0x20;
+  p85_vtx *v0 = prep(i0), *v1 = prep(i1), *v2 = prep(i2);
+  if ((uint8_t)P82_Edge) { const p85_vtx *vs[3] = { v0, v1, v2 }; if (edge_reject(vs, 3)) return; }
+  put_color(rec, 0x14, lit);
+  call_state();
+  set_blend((uint8_t)arg);
+  put_vtx(&P85_RV[0], v0); put_vtx(&P85_RV[1], v1); put_vtx(&P85_RV[2], v2);
+  call_raster();
+}
+static void do_quad(uint32_t arg, int lit) {
+  const uint8_t *rec = G2_011F4064;
+  int32_t i0 = *(const int32_t *)(rec + 8), i1 = *(const int32_t *)(rec + 0xc), i2 = *(const int32_t *)(rec + 0x10), i3 = *(const int32_t *)(rec + 0x14);
+  G2_011F4064 = (uint8_t *)rec + 0x24;
+  p85_vtx *v0 = prep(i0), *v1 = prep(i1), *v2 = prep(i2), *v3 = prep(i3);
+  if ((uint8_t)P82_Edge) { const p85_vtx *vs[4] = { v0, v1, v2, v3 }; if (edge_reject(vs, 4)) return; }
+  put_color(rec, 0x18, lit);
+  call_state();
+  set_blend((uint8_t)arg);
+  put_vtx(&P85_RV[0], v0); put_vtx(&P85_RV[1], v2); put_vtx(&P85_RV[2], v1);
+  call_raster();
+  put_vtx(&P85_RV[2], v3);
+  call_raster();
+}
+/* 0042f7d9 */
+void P85_FlatTri(uint32_t arg) { do_tri(arg, 0); }
+/* 0042fc29 */
+void P85_FlatQuad(uint32_t arg) { do_quad(arg, 0); }
+/* 00432186 */
+void P85_LitTri(uint32_t arg) { do_tri(arg, 1); }
+/* 00432601 */
+void P85_LitQuad(uint32_t arg) { do_quad(arg, 1); }
+
+#ifndef RE_HOOK_BUILD
+int32_t P85_Tris;
+uint8_t P85_LastBlend;
+static int g_blend_mode;
+static void P85_STD native_blend(int32_t a, int32_t b, int32_t c, int32_t d) {
+  (void)c; (void)d;
+  if (a == 4 && b == 0) { g_blend_mode = 0; plat_set_blend(0, 0, 0); }
+  else if (a == 4 && b == 4) { g_blend_mode = 3; plat_set_blend(1, 2, 2); }   /* ONE, ONE: сложение */
+  else g_blend_mode = a == 0 && b == 5 ? 1 : 2;                                /* режимы 1/2 пока рисуются как непрозрачные */
+  P85_LastBlend = (uint8_t)g_blend_mode;
+}
+static void P85_STD native_state(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e) { (void)a; (void)b; (void)c; (void)d; (void)e; }
+static uint32_t col8(float f) { int i = (int)lrintf(f); return (uint32_t)(i < 0 ? 0 : i > 255 ? 255 : i); }
+/* Glide GrVertex → plat_vertex; цвета 0..255, глубина из oow (больше oow — ближе) */
+static void P85_STD native_raster(const p85_rv *a, const p85_rv *b, const p85_rv *c) {
+  const p85_rv *vs[3] = { a, b, c };
+  plat_vertex pv[3];
+  for (int i = 0; i < 3; i++) {
+    const p85_rv *r = vs[i];
+    float oow = r->oow < 0 ? 0 : r->oow;
+    pv[i].x = r->x; pv[i].y = r->y; pv[i].z = 1.0f / (1.0f + oow); pv[i].rhw = 1.0f;
+    pv[i].color = 0xFF000000u | col8(r->r) << 16 | col8(r->g) << 8 | col8(r->b);
+    pv[i].specular = 0; pv[i].u = 0; pv[i].v = 0;
+  }
+  P85_Tris++;
+  plat_draw_tris(pv, 3);
+}
+void P85_SkipRecord(uint32_t arg) {
+  (void)arg;
+  G2_011F4064 += G2_TABLE_00550ACC[G2_011F4064[0]];
+}
+void P85_RegisterNative(void) {
+  for (int t = 0; t < 6; t++) {
+    for (int k = 0; k < 56; k++) {
+      uintptr_t f = (uintptr_t)P85_SkipRecord;
+      if (k == 0 || k == 32) f = (uintptr_t)P85_FlatTri;
+      else if (k == 1 || k == 33) f = (uintptr_t)P85_FlatQuad;
+      else if (k == 16 || k == 48) f = (uintptr_t)P85_LitTri;
+      else if (k == 17 || k == 49) f = (uintptr_t)P85_LitQuad;
+      else if (!G2_TABLE_00550ACC[k]) continue;
+      P84_Handlers[t][k] = f;
+    }
+  }
+  P85_RasterA = P85_RasterB = native_raster;
+  P85_BlendFn = native_blend;
+  P85_StateFn = native_state;
+}
+void P85_InitConsts(void) {
+  P85_MaxX = 639.0f; P85_MaxY = 479.0f;
+}
+#else
+void P85_InitConsts(void) {}
+#endif

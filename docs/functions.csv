@@ -306,7 +306,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401758,thunk_FUN_004b418d,,,,,,5,todo
 0040175d,thunk_FUN_004a59f2,,,,,,5,ported
 00401762,thunk_FUN_0048f3b4,,,,,,5,ported
-00401767,thunk_FUN_00528ac8,,,,,,5,todo
+00401767,thunk_FUN_00528ac8,,,,,,5,ported
 0040176c,thunk_FUN_004d4fc5,,,,,,5,todo
 00401771,thunk_FUN_004cad24,Thunk_004CAD24,manual,Thunks,,,5,ported
 00401776,thunk_FUN_00524398,,,,,,5,ported
@@ -2001,8 +2001,11 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0042f124,FUN_0042f124,,,,,,723,todo
 0042f3f7,FUN_0042f3f7,,,,,,961,todo
 0042f7b8,FUN_0042f7b8,AdvanceOpPtr0042F7B8,manual,SmallFuncs,,,33,ported
-0042f7d9,FUN_0042f7d9,,,,,,1026,todo
+0042f7d9,FUN_0042f7d9,P85_FlatTri,manual,render,,,1026,ported
+0042fc29,,P85_FlatQuad,manual,render,,,1360,ported
 00431016,FUN_00431016,,,,,,1493,todo
+00432186,,P85_LitTri,manual,render,,,1147,ported
+00432601,,P85_LitQuad,manual,render,,,1396,ported
 0043a5be,FUN_0043a5be,,,,,,3955,todo
 00447753,FUN_00447753,,,,,,3265,todo
 00452327,FUN_00452327,,,,,,1079,todo
@@ -2411,6 +2414,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c42a9,FUN_004c42a9,DrawCornerIndicator,manual,DirNodes,,,62,ported
 004c459f,FUN_004c459f,AddCamera,manual,Director,,,118,ported
 004c483e,FUN_004c483e,ChangeCamera,manual,Director,,,118,ported
+004c4b3a,,AddTripodCamera,manual,Director,,,,ported
+004c4cee,,ChangeTripodCamera,manual,Director,,,,ported
 004c4ef9,FUN_004c4ef9,,,,,,809,todo
 004c5222,FUN_004c5222,SelectNewCamera,manual,Director.c,,,183,ported
 004c52d9,FUN_004c52d9,SyncCameraFromList,manual,Director,,,142,ported
@@ -2420,6 +2425,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c567a,FUN_004c567a,CameraDump,manual,Director,,,317,ported
 004c57b7,FUN_004c57b7,GetCameraTypeName,manual,Director.c,,,43,ported
 004c582f,FUN_004c582f,CreateNewAutoCamera,debug_string,,,,658,named
+004c5c5d,,NextTrafficCar,manual,Director,,,,ported
 004c5d40,FUN_004c5d40,CountNearbyCars,manual,Director.c,,,200,ported
 004c5e08,FUN_004c5e08,,,,,,353,todo
 004c5f69,FUN_004c5f69,,,,,,296,todo
@@ -3259,7 +3265,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00528982,FUN_00528982,Xform,manual,Math,,,96,ported
 005289e2,FUN_005289e2,XformT,manual,Math,,,96,ported
 00528a42,FUN_00528a42,XformBias,manual,Math,,,134,ported
-00528ac8,FUN_00528ac8,,,,,,239,todo
+00528ac8,FUN_00528ac8,P85_Project,manual,render,,,239,ported
 00528bb7,FUN_00528bb7,,,,,,218,todo
 00528c91,FUN_00528c91,,,,,,134,todo
 00528d17,FUN_00528d17,,,,,,251,todo
@@ -3615,6 +3621,3 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0053fa70,FUN_0053fa70,,,CRT,range,,67,todo
 0053fac0,__strcmpi,__strcmpi,ghidra,CRT,range,,140,named
 0053fb50,FUN_0053fb50,,,CRT,crt,,250,todo
-004c5c5d,,NextTrafficCar,manual,Director,,,,ported
-004c4b3a,,AddTripodCamera,manual,Director,,,,ported
-004c4cee,,ChangeTripodCamera,manual,Director,,,,ported

@@ -88,6 +88,7 @@
 #include "../game/ported82.h"
 #include "../game/ported83.h"
 #include "../game/ported84.h"
+#include "../game/ported85.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -3603,6 +3604,17 @@ static int test_real_level(void) {
     if (!(b[3] >= b[0] && b[4] >= b[1] && b[5] >= b[2]) || P80_Class[i] > 7) bad++;
   }
   fprintf(stderr, "real level: models with bad box/class: %d\n", bad);
+  { /* гистограмма типов записей моделей (для выбора следующих обработчиков рендера) */
+    long hist[64] = { 0 }; long total = 0;
+    for (int i = 0; i < P20_Count && i < 1126; i++) {
+      uint32_t ref = P79_ModelTab[i]; if (!ref) continue;
+      uint8_t *mdl = (uint8_t *)P79_PTR(ref); uint16_t n = *(uint16_t *)(mdl + 0x16); uint8_t *rec = (uint8_t *)P79_PTR(*(uint32_t *)(mdl + 0x2c));
+      for (int k = 0; k < n; k++) { uint8_t t = rec[0]; if (t >= 56 || !G2_TABLE_00550ACC[t]) { hist[63]++; break; } hist[t]++; total++; rec += G2_TABLE_00550ACC[t]; }
+    }
+    fprintf(stderr, "record types (total %ld):", total);
+    for (int t = 0; t < 64; t++) if (hist[t]) fprintf(stderr, " %d:%ld", t, hist[t]);
+    fprintf(stderr, "\n");
+  }
   if (P20_Count > 0) { float *b = P80_Boxes[0]; fprintf(stderr, "model0 box: %g %g %g .. %g %g %g\n", b[0], b[1], b[2], b[3], b[4], b[5]); }
   return r == 1 && bad == 0 && P20_Count > 0 ? 0 : 1;
 }
@@ -3667,9 +3679,118 @@ static int test_p84(void) {
   return f;
 }
 
+int png_write_rgba(const char *path, const uint32_t *px, int w, int h);
+static int p85_calls; static p85_rv p85_cap[8][3];
+static void p85_capture(const p85_rv *a, const p85_rv *b, const p85_rv *c) { if (p85_calls < 8) { p85_cap[p85_calls][0] = *a; p85_cap[p85_calls][1] = *b; p85_cap[p85_calls][2] = *c; } p85_calls++; }
+static int p85_blend_calls, p85_blend_a;
+static void p85_blend_cap(int32_t a, int32_t b, int32_t c, int32_t d) { (void)b; (void)c; (void)d; p85_blend_calls++; p85_blend_a = a; }
+static void p85_state_cap(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e) { (void)a; (void)b; (void)c; (void)d; (void)e; }
+static int test_p85(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { fprintf(stderr, "p85 fail line %d: %s\n", __LINE__, #c); f = 1; } } while (0)
+  re_init_consts();
+  { void *saved = D_00c98ed0; uint8_t *arena = (uint8_t *)calloc(1, 0x4000);
+    uint8_t *m = arena + 0x100; float *pl = (float *)(arena + 0x200); uint8_t *rec = arena + 0x300; float *vert = (float *)(arena + 0x800);
+    uint16_t u16; uint32_t u32; int32_t i32;
+    float ident[16 * 8]; float pos[3] = { 0, 0, 0 };
+    D_00c98ed0 = arena;
+    memset(ident, 0, sizeof ident);
+    for (int k = 0; k < 8; k++) ident[k * 16] = ident[k * 16 + 4] = ident[k * 16 + 8] = 1.0f;
+    memset(P44_ViewMat, 0, sizeof(p44_m9_t)); P44_ViewMat[0] = P44_ViewMat[4] = P44_ViewMat[8] = 1.0f;
+    /* константы проекции: смещение экрана (320,240) + 2^20 — как в игре */
+    P43_ScaleA = 100.0f; P43_OffX = 320.0f + 1048576.0f; P43_OffY = 240.0f + 1048576.0f; P43_Half = 1048576.0f;
+    P19_Scale = 1.0f;
+    for (int i = 1; i < 0x400; i++) P12_00ba53a0[i] = 1.0f / (float)i;
+    /* 1) проекция одной вершины: (2, 4, 10) при единичной матрице → oow = 1/10, x = 320 + 100·2/10 = 340, y = 240 + 40 = 280 */
+    { p85_vtx v; memset(&v, 0, sizeof v); v.x = 2; v.y = 4; v.z = 10;
+      P44_MatPtr = P44_ViewMat; P44_BiasX = P44_BiasY = P44_BiasZ = 0; P44_XformTag = 5;
+      P85_Project(&v);
+      CK(v.stamp == 5 && v.z == 10.0f && v.vx == 2.0f && v.vy == 4.0f && P85_ZI == 10);
+      CK(v.oow == 1.0f / 10.0f && fabsf(v.x - 340.0f) <= 0.125f && fabsf(v.y - 280.0f) <= 0.125f);
+      /* смещения камеры прибавляются ДО округления z */
+      P44_BiasZ = 0.4f; v.x = 0; v.y = 0; v.z = 3.2f; P85_Project(&v); CK(P85_ZI == 4 && v.z > 3.59f && v.z < 3.61f);
+      P44_BiasZ = 0;
+    }
+    /* 2) модель: плоский треугольник (тип 0) и плоский четырёхугольник (тип 33, режим смешивания 1) */
+    u16 = 0; memcpy(m + 2, &u16, 2); u16 = 2; memcpy(m + 0x16, &u16, 2); u16 = 0; memcpy(m + 0x18, &u16, 2);
+    P84_InitConsts(); P85_InitConsts();
+    u32 = P79_OFF(vert); memcpy(m + 0x20, &u32, 4); u32 = P79_OFF(pl); memcpy(m + 0x24, &u32, 4); u32 = P79_OFF(rec); memcpy(m + 0x2c, &u32, 4);
+    pl[0] = 0; pl[1] = 0; pl[2] = 1; pl[3] = 5;
+    { float vv[4][4] = { { 0, 0, 10, 0 }, { 10, 0, 10, 0 }, { 0, 10, 10, 0 }, { 10, 10, 10, 0 } }; memcpy(vert, vv, sizeof vv); }
+    memset(rec, 0, 128);
+    rec[0] = 0; rec[1] = 8; i32 = 0; memcpy(rec + 4, &i32, 4);
+    i32 = 0; memcpy(rec + 8, &i32, 4); i32 = 1; memcpy(rec + 12, &i32, 4); i32 = 2; memcpy(rec + 16, &i32, 4);
+    { float c[3] = { 255.0f, 128.0f, 0.0f }; memcpy(rec + 0x14, c, 12); }
+    rec[0x20] = 33; rec[0x21] = 8; i32 = 0; memcpy(rec + 0x24, &i32, 4);
+    i32 = 0; memcpy(rec + 0x28, &i32, 4); i32 = 1; memcpy(rec + 0x2c, &i32, 4); i32 = 3; memcpy(rec + 0x30, &i32, 4); i32 = 2; memcpy(rec + 0x34, &i32, 4);
+    { float c[3] = { 1.0f, 2.0f, 3.0f }; memcpy(rec + 0x38, c, 12); }
+    P85_RegisterNative();
+    P85_RasterA = P85_RasterB = p85_capture; P85_BlendFn = p85_blend_cap; P85_StateFn = p85_state_cap;
+    CK(P84_Handlers[2][0] == (uintptr_t)P85_FlatTri && P84_Handlers[2][33] == (uintptr_t)P85_FlatQuad && P84_Handlers[0][2] == (uintptr_t)P85_SkipRecord);
+    P84_SelectTables(0); G2_011F43B0 = 0; P84_Mirror = 0; P82_Edge = 0;
+    P85_StateDirty = 1; P85_BlendCur = 0; P85_BlendForce = 0;
+    P44_XformTag = 20; p85_calls = 0; p85_blend_calls = 0;
+    P84_DrawModel(P79_OFF(m), ident, pos, 5);
+    CK(p85_calls == 3 && P85_StateDirty == 0 && p85_blend_calls == 1 && p85_blend_a == 0 && P85_BlendCur == 1);
+    CK(G2_011F4064 == rec + 0x20 + 0x24);                     /* курсор записей ушёл за обе записи */
+    /* треугольник: вершины (0,0,10),(10,0,10),(0,10,10) → (320,240),(420,240),(320,340) */
+    CK(fabsf(p85_cap[0][0].x - 320) <= 0.2f && fabsf(p85_cap[0][1].x - 420) <= 0.2f && fabsf(p85_cap[0][2].y - 340) <= 0.2f);
+    CK(p85_cap[0][0].r == 255.0f && p85_cap[0][1].g == 128.0f && p85_cap[0][2].b == 0.0f && p85_cap[0][1].oow == 0.1f);
+    /* четырёхугольник: (v0,v2,v1) и (v0,v2,v3): v2 = индекс 3 из записи → (420,340) */
+    CK(fabsf(p85_cap[1][1].x - 420) <= 0.2f && fabsf(p85_cap[1][1].y - 340) <= 0.2f && fabsf(p85_cap[1][2].x - 420) <= 0.2f && fabsf(p85_cap[1][2].y - 240) <= 0.2f);
+    CK(fabsf(p85_cap[2][1].x - 420) <= 0.2f && fabsf(p85_cap[2][2].x - 320) <= 0.2f && fabsf(p85_cap[2][2].y - 340) <= 0.2f);
+    CK(p85_cap[1][0].r == 1.0f && p85_cap[2][2].g == 2.0f);
+    /* отсечение по краям: всё левее экрана (знаковый бит) — пропуск */
+    P82_Edge = 1; P44_XformTag = 21; p85_calls = 0;
+    P85_VCache[0].x = P85_VCache[1].x = P85_VCache[2].x = P85_VCache[3].x = -5.0f;
+    { for (int i = 0; i < 4; i++) { vert[i * 4] = -100.0f; vert[i * 4 + 2] = 10.0f; } }
+    P84_DrawModel(P79_OFF(m), ident, pos, 5);
+    CK(p85_calls == 0 && (P85_Clip & 0x80000000u));
+    /* на экране: треугольник идёт, пока x−639 не равно +0.0 у всех вершин */
+    { float vv[4][4] = { { 0, 0, 10, 0 }, { 10, 0, 10, 0 }, { 0, 10, 10, 0 }, { 10, 10, 10, 0 } }; memcpy(vert, vv, sizeof vv); }
+    P44_XformTag = 22; p85_calls = 0; P84_DrawModel(P79_OFF(m), ident, pos, 5); CK(p85_calls == 3);
+    P82_Edge = 0;
+    /* 2б) освещённые типы 16 (треугольник) и 17 (четырёхугольник): цвет × P84_LightIn[плоскость] */
+    { float c[3] = { 200.0f, 100.0f, 50.0f }; rec[0] = 16; memcpy(rec + 0x14, c, 12); rec[0x20] = 17; memcpy(rec + 0x38, c, 12); }
+    P84_LightIn[0] = 0.5f; P84_SelectTables(0);
+    P44_XformTag = 23; p85_calls = 0;
+    P84_DrawModel(P79_OFF(m), ident, pos, 5);
+    CK(p85_calls == 3 && p85_cap[0][0].r == 100.0f && p85_cap[0][2].g == 50.0f && p85_cap[0][1].b == 25.0f && p85_cap[2][2].r == 100.0f);
+    /* 3) картинка: домик из плоских многоугольников через P84_DrawModel → plat_draw_tris → PNG (OSMesa, если есть) */
+    if (plat_render_offscreen(640, 480) == 0) {
+      static uint32_t px[640 * 480];
+      P85_RegisterNative();                                   /* растеризатор → plat_draw_tris */
+      P43_ScaleA = 400.0f; P43_OffX = 320.0f + 1048576.0f; P43_OffY = 240.0f + 1048576.0f;
+      for (int i = 1; i < 0x2000; i++) P12_00ba53a0[i] = 1.0f / (float)i;
+      { float vv[8][4] = { { -10, 10, 40, 0 }, { 10, 10, 40, 0 }, { 10, -10, 40, 0 }, { -10, -10, 40, 0 }, { -30, -20, 80, 0 }, { 30, -20, 80, 0 }, { 30, 20, 80, 0 }, { -30, 20, 80, 0 } };
+        memcpy(vert, vv, sizeof vv); }
+      memset(rec, 0, 256);
+      rec[0] = 1; rec[1] = 8; i32 = 0; memcpy(rec + 8, &i32, 4); i32 = 1; memcpy(rec + 12, &i32, 4); i32 = 2; memcpy(rec + 16, &i32, 4); i32 = 3; memcpy(rec + 20, &i32, 4);
+      { float c[3] = { 255.0f, 80.0f, 40.0f }; memcpy(rec + 0x18, c, 12); }
+      rec[36] = 1; rec[37] = 8; i32 = 4; memcpy(rec + 36 + 8, &i32, 4); i32 = 5; memcpy(rec + 36 + 12, &i32, 4); i32 = 6; memcpy(rec + 36 + 16, &i32, 4); i32 = 7; memcpy(rec + 36 + 20, &i32, 4);
+      { float c[3] = { 40.0f, 120.0f, 255.0f }; memcpy(rec + 36 + 0x18, c, 12); }
+      u16 = 2; memcpy(m + 0x16, &u16, 2);
+      plat_set_zbuffer(1, 1); plat_clear(0xFF101820u, 1); P85_Tris = 0;
+      P44_XformTag = 40; P84_DrawModel(P79_OFF(m), ident, pos, 5);
+      CK(P85_Tris == 4 && (uint8_t)P85_BlendCur == 0);
+      if (plat_render_readback(px) == 0) {
+        /* ближний красный квадрат перекрывает дальний синий; центр красный, левый край синий, угол — фон */
+        uint32_t c0 = px[240 * 640 + 320], c1 = px[(240) * 640 + 320 - 130], c2 = px[5 * 640 + 5];
+        CK((c0 & 255) > 200 && ((c0 >> 8) & 255) < 120 && ((c0 >> 16) & 255) < 80);
+        CK((c1 & 255) < 80 && ((c1 >> 16) & 255) > 200);
+        CK((c2 & 255) < 40 && ((c2 >> 16) & 255) > 20);
+        png_write_rgba(getenv("RE_WORLD_PNG") ? getenv("RE_WORLD_PNG") : "render_world.png", px, 640, 480);
+      }
+    }
+    D_00c98ed0 = saved; free(arena);
+  }
+  return f;
+}
+
 int re_selftest(void) {
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
