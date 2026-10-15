@@ -38,6 +38,10 @@ void plat_snd_play(int h, int loop);
 void plat_snd_stop(int h);
 void plat_snd_set(int h, int volume, int pitch_hz, int pan);
 void plat_snd_pos3d(int h, float x, float y, float z);
+/* volume/pan как в DirectSound (сотые дБ). Микшер: 44100 Гц, стерео S16; plat_snd_mix пригоден для тестов без устройства. */
+void plat_snd_mix(int16_t *out_stereo, int frames);
+int  plat_snd_open(void);                                /* SDL_audio, 1 = ок */
+void plat_snd_close(void);
 int  plat_cd_play(int track);
 void plat_cd_stop(void);
 int  plat_cd_current(void);

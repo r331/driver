@@ -111,3 +111,4 @@ v0.51: +4 (ported17: SlotMapSide 0051bcc0, SlotFindIndex 0051bd09, ISqrt 00528e1
 - v0.62: plat_local_hms (системный слой), 0 функций перенесено
 - v0.66: 004bf910 P21_FpsToBuf (FPS в буфер)
 - v0.67: OpenGL 3.3 бэкенд рендера (platform/sdl/plat_render.c) + offscreen-тест через OSMesa (tests/render_test.c, PNG); функций перенесено 0, всего 1267 из 3275
+- v0.68: SDL_audio микшер (platform/sdl/plat_snd.c: 44100 Гц стерео S16, 8/16 бит, моно/стерео, pitch, громкость/pan в сотых дБ как DirectSound, loop; plat_snd_open/close/mix) + tests/snd_test.c; функций перенесено 0, всего 1267 из 3275
