@@ -223,3 +223,15 @@ int32_t plat_ds_set_format(void *p, const void *w) { return ((dd_f1)VT(p, 0x38))
 int32_t plat_ds_set_speaker_config(void *ds, uint32_t cfg) { return ((dd_f1)VT(ds, 0x24))(ds, (void *)(uintptr_t)cfg); }
 void plat_fmv_stub_fail(uint32_t m) { (void)m; }
 int plat_fmv_stub_stats(int *a, int *b, int32_t *c, int *d, uint32_t *e, int *f, uint8_t *g, uint32_t *h) { (void)a;(void)b;(void)c;(void)d;(void)e;(void)f;(void)g;(void)h; return 0; }
+
+/* --- блокировка, формат пикселей, показ кадра (IDirectDrawSurface4 / IDirectDraw4 Game.exe) --- */
+int32_t plat_dd_lock(void *s, void *d) { return ((dd_f4)VT(s, 0x64))(s, 0, d, (void *)1, 0); }
+int32_t plat_dd_unlock(void *s) { return ((dd_f1)VT(s, 0x80))(s, 0); }
+int32_t plat_dd_get_pixel_format(void *s, uint32_t *pf) { return ((dd_f1)VT(s, 0x54))(s, pf); }
+void *plat_dd_query_dd4(void *dd) { void *out = 0; long hr = ((dd_f2)VT(dd, 0x0))(dd, (void *)0x00546250, &out); return wrap_out(hr, out); }
+void *plat_dd_query_d3d(void *dd) { void *out = 0; long hr = ((dd_f2)VT(dd, 0x0))(dd, (void *)0x005465f0, &out); return wrap_out(hr, out); }
+int32_t plat_dd_clipper_set_hwnd(void *c, void *h) { return ((dd_f2)VT(c, 0x20))(c, 0, h); }
+int32_t plat_dd_blt_rect(void *d, const int32_t *dr, void *s, const int32_t *sr) { return ((dd_f6)VT(d, 0x14))(d, (void *)dr, s, (void *)sr, 0, 0); }
+int32_t plat_dd_flip(void *s, uint32_t fl) { return ((dd_f2)VT(s, 0x2c))(s, 0, (void *)(uintptr_t)fl); }
+void plat_dd_stub_surface(int a, int b, uint32_t c, uint32_t d, uint32_t e, uint32_t f, int32_t g) { (void)a; (void)b; (void)c; (void)d; (void)e; (void)f; (void)g; }
+int plat_dd_stub_surface_stats(int *a, int *b, int *c, uint32_t *d, int *e, int32_t *f, int32_t *g, int *h) { (void)a; (void)b; (void)c; (void)d; (void)e; (void)f; (void)g; (void)h; return 0; }

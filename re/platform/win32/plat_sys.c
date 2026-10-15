@@ -10,6 +10,8 @@ void plat_log(const char *f, ...){ char b[512]; va_list a; va_start(a,f); vsnpri
 void *plat_file_open(const char *p, const char *m){ return fopen(p,m); }
 void plat_local_hms(int *h,int *m,int *s){ SYSTEMTIME st; GetLocalTime(&st); *h=st.wHour; *m=st.wMinute; *s=st.wSecond; }
 void plat_window_maximize(void *wnd){ ShowWindow((HWND)wnd, SW_MAXIMIZE); }
+void plat_window_client_rect(void *h, int32_t *rc){ RECT r; GetClientRect((HWND)h, &r); rc[0] = r.left; rc[1] = r.top; rc[2] = r.right; rc[3] = r.bottom; }
+void plat_client_to_screen(void *h, int32_t *pt){ POINT p; p.x = pt[0]; p.y = pt[1]; ClientToScreen((HWND)h, &p); pt[0] = p.x; pt[1] = p.y; }
 void plat_utc_hms(int *h,int *m,int *s){ SYSTEMTIME st; GetSystemTime(&st); *h=st.wHour; *m=st.wMinute; *s=st.wSecond; }
 int plat_message_box(void *hwnd,const char *text,const char *title,unsigned flags){ return MessageBoxA((HWND)hwnd,text,title,flags); }
 int plat_message_box_last(const char **text,const char **title){ if(text)*text=""; if(title)*title=""; return 0; }

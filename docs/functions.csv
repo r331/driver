@@ -1739,7 +1739,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041c7da,FUN_0041c7da,TakeToken,manual,,,,237,ported
 0041ce90,FUN_0041ce90,,,,,,78,todo
 0041cede,FUN_0041cede,,,,,,1295,todo
-0041d3ed,FUN_0041d3ed,,,,,,289,todo
+0041d3ed,FUN_0041d3ed,P39_GetSurfaceFormat,manual,render,,,289,ported
 0041d50e,FUN_0041d50e,Dispatch0041D50E,manual,Ported6,,,46,ported
 0041d53c,FUN_0041d53c,,,,,,171,todo
 0041d5e7,FUN_0041d5e7,,,,,,84,todo
@@ -1763,7 +1763,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041de1d,FUN_0041de1d,P22_SetAlphaRef,manual,render,,,41,ported
 0041de46,FUN_0041de46,,,,,,123,todo
 0041dec1,FUN_0041dec1,Ui0041DEC1,manual,MenuUI,,,7,ported
-0041dec8,FUN_0041dec8,,,,,,367,todo
+0041dec8,FUN_0041dec8,P39_Present,manual,render,,,367,ported
 0041e037,FUN_0041e037,P22_BeginScene,manual,render,,,31,ported
 0041e056,FUN_0041e056,P22_EndScene,manual,render,,,31,ported
 0041e075,FUN_0041e075,NoopFn0041e075,manual,Noop,,,7,ported
@@ -1800,9 +1800,9 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041eb77,FUN_0041eb77,NoopFn0041eb77,manual,Noop,,,7,ported
 0041eb7e,FUN_0041eb7e,NoopFn0041eb7e,manual,Noop,,,7,ported
 0041eb85,FUN_0041eb85,NoopFn0041eb85,manual,Noop,,,7,ported
-0041eb8c,FUN_0041eb8c,,,,,,237,todo
+0041eb8c,FUN_0041eb8c,P39_LockSurface,manual,render,,,237,ported
 0041ec79,FUN_0041ec79,Ui0041EC79,manual,MenuUI,,,9,ported
-0041ec82,FUN_0041ec82,,,,,,126,todo
+0041ec82,FUN_0041ec82,P39_UnlockSurface,manual,render,,,126,ported
 0041ed00,FUN_0041ed00,NoopFn0041ed00,manual,Noop,,,7,ported
 0041ed07,FUN_0041ed07,NoopFn0041ed07,manual,Noop,,,7,ported
 0041ed0e,FUN_0041ed0e,Ui0041ED0E,manual,MenuUI,,,12,ported
@@ -1879,8 +1879,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00420a21,FUN_00420a21,,,,,,248,todo
 00420b19,FUN_00420b19,P35_GetDirectDrawInterface,manual,Render,,,247,ported
 00420c10,FUN_00420c10,P24_CreateSurface,manual,render,,,74,ported
-00420c5a,FUN_00420c5a,,,,,,82,todo
-00420cac,FUN_00420cac,,,,,,82,todo
+00420c5a,FUN_00420c5a,P39_QueryDD4,manual,render,,,82,ported
+00420cac,FUN_00420cac,P39_QueryD3D,manual,render,,,82,ported
 00420cfe,FUN_00420cfe,P24_CreateDevice,manual,render,,,95,ported
 00420d5d,FUN_00420d5d,P24_CreateViewport,manual,render,,,80,ported
 00420dad,FUN_00420dad,P24_AddViewport,manual,render,,,230,ported
@@ -1888,7 +1888,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00420ef6,FUN_00420ef6,P24_FillBackbuffer,manual,render,,,293,ported
 0042101b,FUN_0042101b,P24_SetDisplayMode,manual,render,,,82,ported
 0042106d,FUN_0042106d,P24_CreatePrimarySurface,manual,render,,,220,ported
-00421149,FUN_00421149,,,,,,263,todo
+00421149,FUN_00421149,P39_CreateFrontBack,manual,render,,,263,ported
 00421250,FUN_00421250,P24_CreateClipper,manual,render,,,72,ported
 00421298,FUN_00421298,P24_SetClipper,manual,render,,,68,ported
 004212dc,FUN_004212dc,P24_RestoreSurfaces,manual,render,,,200,ported

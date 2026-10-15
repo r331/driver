@@ -60,3 +60,25 @@ int32_t plat_ds_set_speaker_config(void *ds, uint32_t cfg) { if (!ds) return -1;
 void plat_fmv_stub_fail(uint32_t m) { g_fmv_fail = m; }
 int plat_fmv_stub_stats(int *st, int *u, int32_t *r, int *b, uint32_t *fp, int *f, uint8_t *fmt, uint32_t *spk) {
     *st = g_ms_state; *u = g_upd; memcpy(r, g_blt_rc, sizeof g_blt_rc); *b = g_blts; *fp = g_fill_all_px; *f = g_fills; memcpy(fmt, g_fmt, 18); *spk = g_spk; return 1; }
+/* --- блокировка, формат пикселей, показ кадра --- */
+static int g_lk_fail, g_pf_fail, g_locks, g_unlocks, g_flips, g_blts_rc, g_clip_sets, g_rects_n; static uint32_t g_pf_bits, g_pf_m[3], g_flip_flags; static int32_t g_flip_hr, g_drc[4], g_src_rc[4];
+static uint8_t g_lock_mem[64];
+int32_t plat_dd_lock(void *s, void *d) {
+    if (!s || !d || g_lk_fail) return -1;
+    uint32_t *u = (uint32_t *)d; u[4] = 640; u[9] = (uint32_t)(uintptr_t)g_lock_mem; g_locks++; return 0; }
+int32_t plat_dd_unlock(void *s) { if (!s) return -1; g_unlocks++; return 0; }
+int32_t plat_dd_get_pixel_format(void *s, uint32_t *pf) {
+    if (!s || g_pf_fail) return -1;
+    memset(pf, 0, 32); pf[0] = 0x20; pf[3] = g_pf_bits; pf[4] = g_pf_m[0]; pf[5] = g_pf_m[1]; pf[6] = g_pf_m[2]; return 0; }
+void *plat_dd_query_dd4(void *dd) { return dd ? mk(0) : NULL; }
+void *plat_dd_query_d3d(void *dd) { return dd ? mk(0) : NULL; }
+void plat_window_client_rect(void *h, int32_t *rc) { (void)h; rc[0] = 0; rc[1] = 0; rc[2] = 800; rc[3] = 600; }
+void plat_client_to_screen(void *h, int32_t *pt) { (void)h; pt[0] += 100; pt[1] += 50; }
+int32_t plat_dd_clipper_set_hwnd(void *c, void *h) { (void)h; if (!c) return -1; g_clip_sets++; return 0; }
+int32_t plat_dd_blt_rect(void *d, const int32_t *dr, void *s, const int32_t *sr) {
+    if (!d || !s) return -1; memcpy(g_drc, dr, sizeof g_drc); memcpy(g_src_rc, sr, sizeof g_src_rc); g_blts_rc++; return 0; }
+int32_t plat_dd_flip(void *s, uint32_t fl) { if (!s) return -1; g_flips++; g_flip_flags = fl; return g_flip_hr; }
+void plat_dd_stub_surface(int lf, int pff, uint32_t bits, uint32_t r, uint32_t g, uint32_t b, int32_t fhr) {
+    g_lk_fail = lf; g_pf_fail = pff; g_pf_bits = bits; g_pf_m[0] = r; g_pf_m[1] = g; g_pf_m[2] = b; g_flip_hr = fhr; (void)g_rects_n; }
+int plat_dd_stub_surface_stats(int *lk, int *ul, int *fl, uint32_t *ff, int *bl, int32_t *dr, int32_t *sr, int *cs) {
+    *lk = g_locks; *ul = g_unlocks; *fl = g_flips; *ff = g_flip_flags; *bl = g_blts_rc; memcpy(dr, g_drc, sizeof g_drc); memcpy(sr, g_src_rc, sizeof g_src_rc); *cs = g_clip_sets; return 1; }

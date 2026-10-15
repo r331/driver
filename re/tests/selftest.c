@@ -41,6 +41,7 @@
 #include "../game/ported36.h"
 #include "../game/ported37.h"
 #include "../game/ported38.h"
+#include "../game/ported39.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -941,8 +942,67 @@ static int test_p38(void) {
 #undef CK
   return f;
 }
+static int test_p39(void) {
+  int f = 0, lk, ul, fl, bl, cs; uint32_t ff; int32_t dr[4], sr[4];
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p39 fail line %d\n",__LINE__); } } while (0)
+  void *dd = plat_dd_create(NULL); uint32_t desc[31] = {0}; desc[0] = 0x7c; desc[1] = 7;
+  P24_DD = dd; P24_Primary = plat_dd_create_surface(dd, desc); P24_Back = plat_dd_create_surface(dd, desc);
+  P22_DevReady = 0; P39_SurfInfo si; memset(&si, 0xAA, sizeof si);
+  CK(P39_LockSurface(0, 0, 0, 0, 0, &si) == 0 && si.ptr == 0xAAAAAAAAu);
+  CK(P39_UnlockSurface(0, 0) == 0);
+  P22_DevReady = 1; P39_Locked = 0;
+  plat_dd_stub_surface(0, 0, 16, 0xf800, 0x07e0, 0x001f, 0);
+  CK(P39_LockSurface(0, 1, 0, 0, 0, &si) == 1 && P39_Locked == 1 && si.pitch == 640 && si.one == 1 && si.zero == 0 && si.ptr != 0);
+  CK(P39_LockSurface(0, 2, 0, 0, 0, &si) == 0);
+  CK(P39_UnlockSurface(0, 1) == 1 && P39_Locked == 0);
+  plat_dd_stub_surface_stats(&lk, &ul, &fl, &ff, &bl, dr, sr, &cs); CK(lk == 1 && ul == 1);
+  CK(P39_UnlockSurface(0, 7) == 1);          /* не заблокирована — просто BeginScene */
+  /* сбой Lock → буфер-пустышка, pitch 0 */
+  plat_dd_stub_surface(1, 0, 16, 0xf800, 0x07e0, 0x001f, 0);
+  CK(P39_LockSurface(0, 0, 0, 0, 0, &si) == 1 && si.pitch == 0 && si.ptr == (uint32_t)(uintptr_t)&P39_Dummy);
+  P39_Locked = 0;
+  /* формат пикселей RGB565: потери 3/2/3, сдвиги 11/5/0 */
+  plat_dd_stub_surface(0, 0, 16, 0xf800, 0x07e0, 0x001f, 0);
+  memset(&si, 0, sizeof si);
+  CK(P39_GetSurfaceFormat(0, &si) == 1 && si.bpp == 16 && si.r_loss == 3 && si.g_loss == 2 && si.b_loss == 3 && si.r_shift == 11 && si.g_shift == 5 && si.b_shift == 0);
+  P39_Locked = 0;
+  plat_dd_stub_surface(0, 1, 16, 0, 0, 0, 0);   /* GetPixelFormat отказал → Unlock */
+  plat_dd_stub_surface_stats(&lk, &ul, &fl, &ff, &bl, dr, sr, &cs); int ul0 = ul;
+  CK(P39_GetSurfaceFormat(1, &si) == 0);
+  plat_dd_stub_surface_stats(&lk, &ul, &fl, &ff, &bl, dr, sr, &cs); CK(ul == ul0 + 1 && P39_Locked == 0);
+  CK(P39_GetSurfaceFormat(5, &si) == 0);
+  /* Present: окно 800×600, режим 640×480 → по центру, (800−640)/2 = 80 */
+  plat_dd_stub_surface(0, 0, 32, 0xff0000, 0xff00, 0xff, 0);
+  P24_Hwnd = (void *)1; P31_DDObj4 = plat_dd_create_clipper(dd); P24_RestoreMode = 0; P24_ModeW = 640; P24_ModeH = 480;
+  P39_Present(0);
+  plat_dd_stub_surface_stats(&lk, &ul, &fl, &ff, &bl, dr, sr, &cs);
+  CK(bl == 1 && cs == 1 && dr[0] == 80 + 100 && dr[1] == 60 + 50 && dr[2] == 720 + 100 && dr[3] == 540 + 50 && sr[0] == 0 && sr[1] == 0 && sr[2] == 640 && sr[3] == 480);
+  P24_ModeW = 1000; P24_ModeH = 1000;   /* режим больше окна — без обрезки */
+  P39_Present(0); plat_dd_stub_surface_stats(&lk, &ul, &fl, &ff, &bl, dr, sr, &cs);
+  CK(dr[0] == 100 && dr[1] == 50 && dr[2] == 900 && dr[3] == 650 && sr[2] == 800 && sr[3] == 600);
+  /* полный экран: Flip 9 / 1, потеря поверхности */
+  P24_RestoreMode = 1; P39_Present(0); plat_dd_stub_surface_stats(&lk, &ul, &fl, &ff, &bl, dr, sr, &cs); CK(fl == 1 && ff == 9);
+  P39_Present(1); plat_dd_stub_surface_stats(&lk, &ul, &fl, &ff, &bl, dr, sr, &cs); CK(fl == 2 && ff == 1);
+  P22_DevReady = 0; P39_Present(0); plat_dd_stub_surface_stats(&lk, &ul, &fl, &ff, &bl, dr, sr, &cs); CK(fl == 2);
+  P22_DevReady = 1;
+  /* QueryInterface */
+  int base = plat_dd_stub_count();
+  void *q = P39_QueryDD4(dd); CK(q != NULL && plat_dd_stub_count() == base + 1); plat_dd_release(q);
+  q = P39_QueryD3D(dd); CK(q != NULL); plat_dd_release(q);
+  CK(P39_QueryDD4(NULL) == NULL && P39_QueryD3D(NULL) == NULL);
+  /* основная и задний буфер */
+  P32_DevInfo = (uint8_t *)calloc(1, 0x600); P24_Primary = P24_Back = NULL; P31_DDObj4 = NULL;
+  CK(P39_CreateFrontBack(640, 480) == 1 && P24_Primary != NULL && P24_Back != NULL && P31_DDObj4 != NULL);
+  uint32_t ld[31]; CK(plat_dd_stub_last_desc(ld) > 0 && ld[0] == 0x7c && ld[1] == 7 && ld[2] == 480 && ld[3] == 640 && ld[26] == 0x2840);
+  *(int32_t *)(P32_DevInfo + 0x518) = 1; CK(P39_CreateFrontBack(320, 240) == 1);
+  CK(plat_dd_stub_last_desc(ld) > 0 && ld[2] == 240 && ld[3] == 320 && ld[26] == 0x6040);
+  free(P32_DevInfo); P32_DevInfo = NULL;
+  plat_dd_release(dd);
+#undef CK
+  return f;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

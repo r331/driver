@@ -179,4 +179,18 @@ int32_t plat_ds_set_format(void *primary, const void *wfx18);             /* IDi
 int32_t plat_ds_set_speaker_config(void *ds, uint32_t cfg);               /* IDirectSound::SetSpeakerConfig */
 void    plat_fmv_stub_fail(uint32_t mask);                                /* тесты (SDL): бит 0 SetState, 1 Update, 2 Blt — отказ */
 int     plat_fmv_stub_stats(int *state, int *updates, int32_t *rect4, int *blts, uint32_t *fill_px, int *fills, uint8_t *fmt18, uint32_t *spk); /* тесты (SDL) */
+/* Поверхности: блокировка, формат пикселей, показ кадра (0041eb8c, 0041ec82, 0041d3ed, 0041dec8, 00420c5a, 00420cac, 00421149) */
+int32_t plat_dd_lock(void *surf, void *desc124);                          /* Lock(NULL, desc, DDLOCK_WAIT, NULL); desc[0]=0x7c; lpSurface — desc[9], pitch — desc[4]; HRESULT */
+int32_t plat_dd_unlock(void *surf);                                       /* Unlock(NULL) */
+int32_t plat_dd_get_pixel_format(void *surf, uint32_t *pf8);              /* GetPixelFormat: DDPIXELFORMAT 32 байта (pf8[0]=0x20 на входе); HRESULT */
+void   *plat_dd_query_dd4(void *dd);                                      /* QueryInterface(IID_IDirectDraw4); NULL — ошибка */
+void   *plat_dd_query_d3d(void *dd);                                      /* QueryInterface(IID_IDirect3D3); NULL — ошибка */
+void    plat_window_client_rect(void *hwnd, int32_t *rc4);                /* GetClientRect: left, top, right, bottom */
+void    plat_client_to_screen(void *hwnd, int32_t *pt2);                  /* ClientToScreen: x, y */
+int32_t plat_dd_clipper_set_hwnd(void *clipper, void *hwnd);              /* IDirectDrawClipper::SetHWnd(0, hwnd) */
+int32_t plat_dd_blt_rect(void *dst, const int32_t *drc4, void *src, const int32_t *src_rc4); /* dst->Blt(drc, src, src_rc, 0, NULL); 0 — успех */
+int32_t plat_dd_flip(void *surf, uint32_t flags);                         /* Flip(NULL, flags); HRESULT */
+/* тесты (SDL): lock_fail — отказ Lock; pf: bitcount, маски R,G,B для GetPixelFormat (pf_fail — отказ) */
+void    plat_dd_stub_surface(int lock_fail, int pf_fail, uint32_t bits, uint32_t rmask, uint32_t gmask, uint32_t bmask, int32_t flip_hr);
+int     plat_dd_stub_surface_stats(int *locks, int *unlocks, int *flips, uint32_t *flip_flags, int *blts, int32_t *drc4, int32_t *src_rc4, int *clip_sets);
 #endif

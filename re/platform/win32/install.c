@@ -27,6 +27,7 @@
 #include "../../game/ported36.h"
 #include "../../game/ported37.h"
 #include "../../game/ported38.h"
+#include "../../game/ported39.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1234,4 +1235,11 @@ void re_install_all(void) {
     re_hook(0x0048b65d, (void*)P38_FmvStop, "P38_FmvStop");
     re_hook(0x0048bdcc, (void*)P38_SetPrimaryFormat, "P38_SetPrimaryFormat");
     re_hook(0x0048be68, (void*)P38_SetSpeakerConfig, "P38_SetSpeakerConfig");
+    re_hook(0x0041eb8c, (void*)P39_LockSurface, "P39_LockSurface");
+    re_hook(0x0041ec82, (void*)P39_UnlockSurface, "P39_UnlockSurface");
+    re_hook(0x0041d3ed, (void*)P39_GetSurfaceFormat, "P39_GetSurfaceFormat");
+    re_hook(0x0041dec8, (void*)P39_Present, "P39_Present");
+    re_hook(0x00420c5a, (void*)P39_QueryDD4, "P39_QueryDD4");
+    re_hook(0x00420cac, (void*)P39_QueryD3D, "P39_QueryD3D");
+    re_hook(0x00421149, (void*)P39_CreateFrontBack, "P39_CreateFrontBack");
 }
