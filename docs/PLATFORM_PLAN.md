@@ -27,3 +27,4 @@
 - 2026-10-14 17:50: шаг B (часть): в plat.h объявлен слой рендера (текстуры, blend/z, draw_tris, clear/flip, blit2d), заглушки platform/sdl/plat_render.c; native+hook собраны. Следующий: GL 3.3 бэкенд, win32-вариант plat, звук.
 - 2026-10-14 18:00: шаг B (часть): в plat.h объявлен слой звука/CD, заглушки platform/sdl/plat_snd.c; native+hook собраны. Следующий: GL-бэкенд, win32-вариант plat, SDL_audio микшер.
 - 2026-10-14 18:10: шаг B (часть): win32-вариант plat (platform/win32/plat_sys.c: время, sleep, лог, файлы); hook+native собраны. Следующий: GL-бэкенд, win32 render/snd, перенос обёрток (C).
+- 2026-10-14 18:20: шаг B (часть): win32/plat_rs.c — render/звук заглушки для hook; native+hook собраны. Следующий: GL-бэкенд, SDL_audio микшер, перенос обёрток (C).
