@@ -34,6 +34,7 @@
 #include "../game/ported29.h"
 #include "../game/ported30.h"
 #include "../game/ported31.h"
+#include "../game/ported32.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -687,6 +688,49 @@ static int test_p31(void) {
   plat_win_trap(0);
   return f;
 }
+static int test_p32(void) {
+  int f = 0, dummy;
+  P24_DD = plat_dd_create_clipper(&dummy);
+  void *back = P24_CreateSurface(P24_DD, (uint32_t[31]){ 0x7c, 6, 480, 640 });
+  P24_Back = back;
+  uint8_t dev[0x600]; memset(dev, 0, sizeof dev);
+  for (int i = 0; i < 32; i++) dev[0x568 + i] = (uint8_t)(i + 1);
+  P32_DevInfo = dev;
+  if (P32_CreateZSurface(back) != 1 || P24_ZSurf == NULL) f++;
+  uint32_t d[31];
+  if (!plat_dd_stub_last_desc(d) || d[0] != 0x7c || d[1] != 0x1007 || d[2] != 480 || d[3] != 640 || d[26] != 0x20800) f++;
+  if (((uint8_t *)&d[18])[0] != 1 || ((uint8_t *)&d[18])[31] != 32) f++;
+  dev[0x518] = 1; P32_CreateZSurface(back);
+  plat_dd_stub_last_desc(d); if (d[26] != 0x24000) f++;
+  /* палитры */
+  memset(P32_Slots, 0, sizeof P32_Slots);
+  G6_00A421F0 = 0;
+  P32_Slots[3].bpp = 8; P32_Slots[3].surf = back; P32_Slots[3].tex = back;
+  if (P32_CreateSlotPalette(3) != 1 || P32_Slots[3].pal == NULL) f++;
+  P32_Slots[4].bpp = 16; if (P32_CreateSlotPalette(4) != 1 || P32_Slots[4].pal != NULL) f++;
+  G6_00A421F0 = 1; P32_Slots[5].bpp = 8; if (P32_CreateSlotPalette(5) != 1 || P32_Slots[5].pal) f++;
+  G6_00A421F0 = 0;
+  uint8_t rgba[1024]; for (int i = 0; i < 1024; i++) rgba[i] = (uint8_t)i;
+  int e0, c0, e1, c1; plat_stub_pal_stats(&e0, &c0);
+  P32_SetPalette(0, 1, rgba);   /* режим != 2 — таблица не меняется */
+  if (P32_PalTable[0] == 2) f++;
+  P32_SetPalette(0, 2, rgba);
+  plat_stub_pal_stats(&e1, &c1);
+  if (P32_PalTable[0] != rgba[2] || P32_PalTable[1] != rgba[1] || P32_PalTable[2] != rgba[0] || P32_PalTable[3] != 2) f++;
+  if (P32_PalTable[1023] != 2 || P32_PalTable[1020] != rgba[1022]) f++;
+  if (e1 != e0 + 1 || c1 != c0 + 1) f++;   /* палитра только у слота 3 */
+  /* выбор палитры: узлы списка */
+  int32_t id1 = 7, id2 = 9;
+  P32_Node n2 = { 0, 9, {0}, &id2, NULL }, n1 = { 7, 7, {0}, &id1, &n2 };
+  void *h1 = &id1, *h2 = &id2;
+  P32_Slots[6].list = &n1;
+  G6_0054EF2C = 9; P32_SelectSlotPalette(6);
+  int st; void *tx = plat_stub_last_texture(&st);
+  if (tx != h2 || st != 0 || P32_CurSlot != 6 || P32_CurHandle != h2 || P32_Slots[6].cur_id != 9) f++;
+  G6_0054EF2C = 5; P32_SelectSlotPalette(6);   /* не найдена — берётся первый узел, сообщение */
+  if (plat_stub_last_texture(&st) != h1 || strcmp(P32_Msg, "Palette 5 not found (7)") != 0 || P32_Slots[6].cur_id != 5) f++;
+  return f;
+}
 static int test_p26(void) {
   int f = 0;
   P26_WaveSetVolume(0x8000); if (plat_wave_volume() != 0x80008000u) f++;
@@ -708,7 +752,7 @@ static int test_p26(void) {
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

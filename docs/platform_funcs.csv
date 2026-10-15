@@ -39,7 +39,7 @@ address,name,layer,imports,callers,status
 0041e4b9,FUN_0041e4b9,render,COM_vtable,,ported
 0041ec82,FUN_0041ec82,render,COM_vtable,,todo
 0041f2a0,FUN_0041f2a0,render,COM_vtable,,ported
-0041f57d,FUN_0041f57d,render,COM_vtable,,todo
+0041f57d,FUN_0041f57d,render,COM_vtable,,ported
 0041f6a9,FUN_0041f6a9,render,COM_vtable,,ported
 0041fac0,FUN_0041fac0,render,DirectDrawCreate,,todo
 00420038,FUN_00420038,render,DirectDrawCreate,,todo
@@ -54,12 +54,12 @@ address,name,layer,imports,callers,status
 00421250,FUN_00421250,render,COM_vtable,,ported
 00421298,FUN_00421298,render,COM_vtable,,ported
 004212dc,FUN_004212dc,render,COM_vtable,,ported
-004213dc,FUN_004213dc,render,COM_vtable,,todo
+004213dc,FUN_004213dc,render,COM_vtable,,ported
 004214dd,FUN_004214dd,render,COM_vtable,,ported
 00421521,FUN_00421521,render,COM_vtable,,ported
-00422309,FUN_00422309,render,COM_vtable,,todo
+00422309,FUN_00422309,render,COM_vtable,,ported
 00422ae7,FUN_00422ae7,render,COM_vtable,,todo
-00422c55,FUN_00422c55,render,COM_vtable,,todo
+00422c55,FUN_00422c55,render,COM_vtable,,ported
 0048ac1c,FUN_0048ac1c,render,DirectDrawCreate,,todo
 0048ae12,FUN_0048ae12,render,COM_vtable,,todo
 0048af23,OpenVideo,render,CoCreateInstance,,named

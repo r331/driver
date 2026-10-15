@@ -104,3 +104,18 @@ int plat_dd_stub_last_fill(int32_t *r, uint32_t *px) { (void)r; (void)px; return
 
 int32_t plat_dd_set_cooperative(void *dd, void *hwnd, uint32_t flags) { return (int32_t)((int32_t (__stdcall *)(void *, void *, uint32_t))VT(dd, 0x50))(dd, hwnd, flags); }
 int plat_dd_last_coop(void) { return 0; }
+
+/* --- палитры, размер поверхности, SetTexture --- */
+int32_t plat_dd_get_surface_size(void *s, int32_t *w, int32_t *h) {   /* GetSurfaceDesc (vtable 0x58): высота +8, ширина +0xc */
+    uint32_t d[31]; for (int i = 0; i < 31; i++) d[i] = 0; d[0] = 0x7c;
+    long hr = ((dd_f1)VT(s, 0x58))(s, d); *h = (int32_t)d[2]; *w = (int32_t)d[3]; return hr; }
+void *plat_dd_create_palette(void *dd, uint32_t flags, const void *e) {   /* IDirectDraw::CreatePalette(flags, entries, &out, NULL) */
+    void *out = 0; long hr = ((dd_f4)VT(dd, 0x14))(dd, (void *)(uintptr_t)flags, (void *)e, &out, 0); return wrap_out(hr, out); }
+int32_t plat_dd_surface_set_palette(void *s, void *p) { return ((dd_f1)VT(s, 0x7c))(s, p); }
+int32_t plat_dd_palette_set_entries(void *p, uint32_t f, uint32_t first, uint32_t n, const void *e) {
+    return ((dd_f4)VT(p, 0x18))(p, (void *)(uintptr_t)f, (void *)(uintptr_t)first, (void *)(uintptr_t)n, (void *)e); }
+void plat_tex_palette_changed(void *t, uint32_t first, uint32_t n) { ((dd_f2)VT(t, 0x10))(t, (void *)(uintptr_t)first, (void *)(uintptr_t)n); }
+void plat_set_texture(int stage, void *tex) { void *d = D3D_DEV; ((dd_f2)VT(d, 0x98))(d, (void *)(intptr_t)stage, tex); }
+void *plat_stub_last_texture(int *stage) { if (stage) *stage = 0; return 0; }
+int plat_stub_pal_stats(int *a, int *b) { *a = 0; *b = 0; return 0; }
+int plat_dd_stub_last_desc(uint32_t *d) { (void)d; return 0; }

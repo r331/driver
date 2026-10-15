@@ -1832,7 +1832,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041f4a1,FUN_0041f4a1,,,,,,206,todo
 0041f56f,FUN_0041f56f,NoopFn0041f56f,manual,Noop,,,7,ported
 0041f576,FUN_0041f576,NoopFn0041f576,manual,Noop,,,7,ported
-0041f57d,FUN_0041f57d,,,,,,293,todo
+0041f57d,FUN_0041f57d,SetPalette,manual,Render,,,293,ported
 0041f6a2,FUN_0041f6a2,NoopFn0041f6a2,manual,Noop,,,7,ported
 0041f6a9,FUN_0041f6a9,P22_SetTexFilter,manual,render,,,132,ported
 0041f72d,FUN_0041f72d,NoopFn0041f72d,manual,Noop,,,7,ported
@@ -1893,7 +1893,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00421298,FUN_00421298,P24_SetClipper,manual,render,,,68,ported
 004212dc,FUN_004212dc,P24_RestoreSurfaces,manual,render,,,200,ported
 004213a4,FUN_004213a4,P24_RestoreDisplay,manual,render,,,56,ported
-004213dc,FUN_004213dc,,,,,,257,todo
+004213dc,FUN_004213dc,CreateZSurface,manual,Render,,,257,ported
 004214dd,FUN_004214dd,P24_AttachSurface,manual,render,,,68,ported
 00421521,FUN_00421521,P23_InitRenderStates,manual,render,,,504,ported
 00421719,FUN_00421719,,,,,,328,todo
@@ -1910,7 +1910,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0042200c,FUN_0042200c,,,,,,82,todo
 0042205e,FUN_0042205e,,,,,,353,todo
 004221bf,FUN_004221bf,,,,,,330,todo
-00422309,FUN_00422309,,,,,,310,todo
+00422309,FUN_00422309,CreateSlotPalette,manual,Render,,,310,ported
 0042243f,FUN_0042243f,NoopFn0042243f,manual,Noop,,,5,ported
 00422444,FUN_00422444,,,,,,71,todo
 0042248b,FUN_0042248b,,,,,,352,todo
@@ -1921,7 +1921,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004229fa,FUN_004229fa,,,,,,198,todo
 00422ac0,FUN_00422ac0,CopyDwords,manual,Util,,,39,ported
 00422ae7,FUN_00422ae7,,,,,,366,todo
-00422c55,FUN_00422c55,,,,,,287,todo
+00422c55,FUN_00422c55,SelectSlotPalette,manual,Render,,,287,ported
 00424530,FUN_00424530,,,,,,178,todo
 004245e2,FUN_004245e2,GetVarB1C0D8,manual,UIMisc,,,10,ported
 004245ec,FUN_004245ec,,,,,,71,todo

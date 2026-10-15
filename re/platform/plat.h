@@ -108,6 +108,16 @@ void    plat_window_maximize(void *wnd);                         /* ShowWindow(S
 int     plat_dd_last_coop(void);                                 /* SDL: флаги последнего SetCooperativeLevel (тесты); hook: 0 */
 int     plat_dd_stub_count(void);                                /* SDL: число живых заглушек (тесты); hook: 0 */
 int     plat_dd_stub_last_fill(int32_t *rect4, uint32_t *pixel); /* SDL: последняя заливка (тесты); hook: 0 */
+/* --- палитры и размер поверхности, текстура устройства (Render.c) --- */
+int32_t plat_dd_get_surface_size(void *surf, int32_t *w, int32_t *h);  /* GetSurfaceDesc: ширина/высота; HRESULT */
+void   *plat_dd_create_palette(void *dd, uint32_t flags, const void *entries256); /* CreatePalette; NULL — ошибка */
+int32_t plat_dd_surface_set_palette(void *surf, void *pal);             /* IDirectDrawSurface::SetPalette */
+int32_t plat_dd_palette_set_entries(void *pal, uint32_t flags, uint32_t first, uint32_t count, const void *entries); /* SetEntries */
+void    plat_tex_palette_changed(void *tex, uint32_t first, uint32_t count); /* IDirect3DTexture2::PaletteChanged */
+void    plat_set_texture(int stage, void *tex);                         /* IDirect3DDevice3::SetTexture (SDL: запоминает) */
+void   *plat_stub_last_texture(int *stage);                             /* SDL (тесты): последний plat_set_texture; hook: NULL */
+int     plat_stub_pal_stats(int *entries_calls, int *changed_calls);    /* SDL (тесты): счётчики; hook: 0 */
+int     plat_dd_stub_last_desc(uint32_t *desc31);                       /* SDL (тесты): последний CreateSurface; hook: 0 */
 /* --- окно игры, цикл сообщений (WinMain.c) --- */
 typedef int32_t (*plat_wndproc)(void *hwnd, uint32_t msg, uint32_t wparam, int32_t lparam);
 void   *plat_game_window_create(void *hinst, int32_t show, const char *title, int w, int h, plat_wndproc proc); /* RegisterClass+CreateWindowEx+ShowWindow; NULL — не удалось */

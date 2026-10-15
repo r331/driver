@@ -3,11 +3,18 @@
 #include "../plat.h"
 #include <stdlib.h>
 #include <string.h>
-typedef struct { uint32_t tag; int32_t lost; int32_t attached; int32_t clipper; } dd_obj;
+typedef struct { uint32_t tag; int32_t lost; int32_t attached; int32_t clipper; int32_t w, h; } dd_obj;
+static uint32_t g_desc[31]; static int g_desc_n; static void *g_tex; static int g_tex_stage, g_pal_entries, g_pal_changed;
 static int g_live; static uint32_t g_coop_flags;
 static int32_t g_fill[4]; static uint32_t g_fill_px; static int g_fill_n;
 static void *mk(uint32_t tag) { dd_obj *o = (dd_obj *)calloc(1, sizeof *o); if (o) { o->tag = tag; g_live++; } return o; }
-void *plat_dd_create_surface(void *dd, const void *desc) { if (!dd || !desc) return NULL; return mk(1); }
+void *plat_dd_create_surface(void *dd, const void *desc) {
+    if (!dd || !desc) return NULL;
+    dd_obj *o = (dd_obj *)mk(1); if (!o) return NULL;
+    memcpy(g_desc, desc, sizeof g_desc); g_desc_n++;
+    if (g_desc[1] & 6) { o->h = (int32_t)g_desc[2]; o->w = (int32_t)g_desc[3]; }
+    return o;
+}
 int32_t plat_dd_set_display_mode(void *dd, int w, int h, int bpp) { (void)w; (void)h; (void)bpp; return dd ? 0 : -1; }
 void *plat_dd_create_clipper(void *dd) { return dd ? mk(2) : NULL; }
 int32_t plat_dd_set_clipper(void *s, void *c) { if (!s || !c) return -1; ((dd_obj *)s)->clipper = 1; return 0; }
@@ -28,3 +35,12 @@ int plat_dd_stub_count(void) { return g_live; }
 int plat_dd_stub_last_fill(int32_t *r, uint32_t *px) { if (!g_fill_n) return 0; memcpy(r, g_fill, sizeof g_fill); *px = g_fill_px; return g_fill_n; }
 int32_t plat_dd_set_cooperative(void *dd, void *hwnd, uint32_t flags) { (void)hwnd; g_coop_flags = flags; return dd ? 0 : -1; }
 int plat_dd_last_coop(void) { return (int)g_coop_flags; }
+int32_t plat_dd_get_surface_size(void *s, int32_t *w, int32_t *h) { if (!s) return -1; *w = ((dd_obj *)s)->w; *h = ((dd_obj *)s)->h; return 0; }
+void *plat_dd_create_palette(void *dd, uint32_t flags, const void *e) { (void)flags; return (dd && e) ? mk(5) : NULL; }
+int32_t plat_dd_surface_set_palette(void *s, void *p) { return (s && p) ? 0 : -1; }
+int32_t plat_dd_palette_set_entries(void *p, uint32_t f, uint32_t first, uint32_t n, const void *e) { (void)f; (void)first; (void)n; (void)e; if (!p) return -1; g_pal_entries++; return 0; }
+void plat_tex_palette_changed(void *t, uint32_t first, uint32_t n) { (void)t; (void)first; (void)n; g_pal_changed++; }
+void plat_set_texture(int stage, void *tex) { g_tex_stage = stage; g_tex = tex; }
+void *plat_stub_last_texture(int *stage) { if (stage) *stage = g_tex_stage; return g_tex; }
+int plat_stub_pal_stats(int *a, int *b) { *a = g_pal_entries; *b = g_pal_changed; return 1; }
+int plat_dd_stub_last_desc(uint32_t *d) { if (!g_desc_n) return 0; memcpy(d, g_desc, sizeof g_desc); return g_desc_n; }
