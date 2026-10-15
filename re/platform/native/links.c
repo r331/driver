@@ -55,6 +55,7 @@
 #include "../../game/ported64.h"
 #include "../../game/ported65.h"
 #include "../../game/ported66.h"
+#include "../../game/ported67.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -82,6 +83,7 @@ void P61_Fn514BC7 (void *p, int32_t a, int32_t b) { InitObjState_00514BC7(p, a, 
 void P60_SetupCamN (int32_t n) { P61_SetupCamN(n); }
 void P60_CamPrepare (void *cam) { P61_CamPrepare(cam); }
 void P60_Fn514261 (void *p) { P61_SpawnPart(p); }
+int32_t P59_Fn417970 (void) { return (int32_t)P67_Menu417970(); }
 void P57_Setup40A41C (void) { Copy54A838(); }
 void P57_Setup40831C (void) { MenuCopyPos(); }
 void P57_Setup41351C (void) { GlobalSet0041351C(); }
@@ -123,6 +125,7 @@ int32_t R12_413890 (void) { return (int32_t)P57_Menu413890(); }
 int32_t R12_416390 (void) { return (int32_t)P57_Menu416390(); }
 int32_t R12_40A540 (void) { return (int32_t)P57_Menu40A540(); }
 int32_t R12_404850 (void) { return (int32_t)P57_Menu404850(); }
+int32_t R12_415EC0 (void) { return (int32_t)P67_Menu415EC0(); }
 int32_t R12_413610 (void) { return (int32_t)P57_Menu413610(); }
 int32_t R12_411FD0 (void) { return (int32_t)P57_Menu411FD0(); }
 int32_t R12_40E870 (void) { return (int32_t)P57_Menu40E870(); }

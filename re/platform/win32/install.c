@@ -55,6 +55,7 @@
 #include "../../game/ported64.h"
 #include "../../game/ported65.h"
 #include "../../game/ported66.h"
+#include "../../game/ported67.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1600,4 +1601,12 @@ void re_install_all(void) {
     re_hook(0x0041897c, (void*)P66_DrawTable, "P66_DrawTable");
     re_hook(0x0041846c, (void*)P66_ScreenFrame, "P66_ScreenFrame");
     re_hook(0x004c862f, (void*)P66_DirSwitch, "P66_DirSwitch");
+    re_hook(0x004bb060, (void*)P67_CompactPool, "P67_CompactPool");
+    re_hook(0x00516fbe, (void*)P67_CenterDraw, "P67_CenterDraw");
+    re_hook(0x00513fbc, (void*)P67_ObjStep, "P67_ObjStep");
+    re_hook(0x004a9e88, (void*)P67_Logo, "P67_Logo");
+    re_hook(0x0040cfdf, (void*)P67_DrawIcon, "P67_DrawIcon");
+    re_hook(0x00415ec0, (void*)P67_Menu415EC0, "P67_Menu415EC0");
+    re_hook(0x00417970, (void*)P67_Menu417970, "P67_Menu417970");
+    re_hook(0x00415188, (void*)P67_Menu415188, "P67_Menu415188");
 }

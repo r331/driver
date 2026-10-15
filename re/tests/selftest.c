@@ -52,6 +52,7 @@
 #include "../game/ported64.h"
 #include "../game/ported65.h"
 #include "../game/ported66.h"
+#include "../game/ported67.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -2533,8 +2534,73 @@ static int test_p64(void) {
   return f;
 }
 
+/* ported67 */
+static uint32_t t67_p4; static int t67_calls, t67_stream; static int32_t t67_ret; static char t67_name[16];
+static uint8_t *t67_icon; static int32_t t67_logo[6]; static int t67_logoN; static const char *t67_findname;
+void P67_Fn40ABAC(uint32_t a) { t67_p4 = a; }
+int32_t P67_Fn514C9F(void *p, int32_t a, int32_t b) { (void)p; (void)a; (void)b; return t67_ret; }
+void P67_Fn51500C(void *p) { int32_t v = 0x777; memcpy((uint8_t *)p + 0x38, &v, 4); }
+void P67_Fn514165(void *p) { (void)p; t67_calls++; }
+void P67_Stream(const char *name, int32_t a) { (void)a; strncpy(t67_name, name, 15); t67_stream++; }
+uint8_t *P56_FindIcon(const char *n) { t67_findname = n; return t67_icon; }
+void P58_Fn4AA4EA(int32_t a0, int32_t a1, int32_t a2, int32_t a3, void *a4, int32_t a5) {
+  t67_logo[0] = a0; t67_logo[1] = a1; t67_logo[2] = a2; t67_logo[3] = a3; t67_logo[4] = a4 == (void *)t67_icon; t67_logo[5] = a5; t67_logoN++; }
+void Call005233BE(int32_t a0, int32_t a1, int32_t a2) { (void)a0; (void)a1; (void)a2; }
+void Call00414D1F(void) { t67_calls += 100; }
+static float t67_f(int32_t v) { float f; memcpy(&f, &v, 4); return f; }
+static int test_p67(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p67 fail line %d\n",__LINE__); } } while (0)
+  /* 004bb060 */
+  memset(P67_Ents, 0, sizeof(P67_EntArr)); memset(P67_Items, 0, sizeof(P67_ItemArr));
+  P67_Ents[0].used = 1; P67_Ents[0].item = 99; P67_Items[0] = 7; P67_Items[1] = 8; P67_ItemCnt = 2; P67_Cur = 5;
+  P67_CompactPool();
+  CK(P67_Ents[1].item == 8 && P67_Ents[1].a == 4 && P67_Ents[2].item == 7 && P67_Ents[0].item == 99);
+  CK(P67_ItemCnt == 0 && P67_Items[0] == 0 && P67_Ents[0].used == 0);
+  /* 00516fbe */
+  P19_ScrH = 480; P19_ScrW = 640; P19_Scale = 2.0f; S_00B5A834 = 1; S_00B5A835 = 2; S_00B5A836 = 3;
+  P67_CenterDraw(300.0f, 10.0f, 20.0f, 0x55);
+  CK(t67_f((int32_t)MenuPosX54AA24) == 20.0f && t67_f((int32_t)MenuPosY54AA28) == 40.0f);
+  CK(t67_f(MenuVal5D77CC) == 320.0f && t67_f(MenuVal5D77C8) == 360.0f && MenuByte5D77C0 == 5 && MenuByte5D77C1 == 0 && t67_p4 == 0x55);
+  CK(MenuColorR54AA2C == 1 && MenuColorG54AA2D == 2 && MenuColorB54AA2E == 3);
+  /* 00513fbc */
+  uint8_t obj[0x80]; memset(obj, 0, sizeof obj);
+  uint32_t fl = 0x10, c = 0xabcd1234u; memcpy(obj + 0xc, &fl, 4); memcpy(obj + 0x5c, &c, 4);
+  t67_ret = 1; t67_calls = 0; P67_ObjStep(obj);
+  { uint16_t hi; int32_t v; memcpy(&hi, obj + 0x5e, 2); memcpy(&v, obj + 0x38, 4); CK(hi == 0xabcd && v == 0x777 && t67_calls == 1); }
+  t67_ret = 0; t67_calls = 0; fl = 0; memcpy(obj + 0xc, &fl, 4); P67_ObjStep(obj); CK(t67_calls == 1);
+  fl = 0x80; memcpy(obj + 0xc, &fl, 4); P67_ObjStep(obj); CK(t67_calls == 1);
+  /* 004a9e88 / 0040cfdf */
+  uint8_t ic[16] = { 0 }; ic[8] = 3; ic[9] = 4; ic[10] = 5; ic[0xb] = 0; ic[0xc] = 32; t67_icon = ic;
+  t67_logoN = 0; P67_Logo(1, 0x30);
+  CK(t67_logoN == 1 && strcmp(t67_findname, "GT") == 0 && t67_logo[0] == 0x160 && t67_logo[1] == 0x30 && t67_logo[2] == 0x100 && t67_logo[3] == 32 && t67_logo[4] == 1 && t67_logo[5] == -1);
+  P67_Logo(2, 0); CK(t67_logoN == 1);
+  P67_Logo(2, 0x30); CK(t67_logoN == 2 && strcmp(t67_findname, "REFLEC") == 0);
+  uint8_t *page = (uint8_t *)aligned_alloc(0x10000, 0x10000);
+  for (int i = 0; i < 0x10000; i++) page[i] = (uint8_t)(i * 5 + 1);
+  P65_Texs[3].p = page; ic[0xb] = 2; ic[0xc] = 1; P65_ColorKey = 0; memset(P65_Screen, 0, sizeof(p65_screen_t));
+  P67_DrawIcon(9, 2, 0, "X");
+  CK(((uint8_t *)P65_Screen)[2 * 640 + 9] == page[(5 << 8) | 4] || page[(5 << 8) | 4] == 0);
+  CK(strcmp(t67_findname, "X") == 0);
+  t67_icon = NULL; P67_DrawIcon(9, 2, 0, "Y"); free(page);
+  /* меню: шаг меню в тесте всегда -1, т.е. выход сразу */
+  P19_Sel = 5; MenuMode1271060 = 3; P12_00bdfa40 = 4;
+  CK(P67_Menu415EC0() == 0 && P19_Sel == 0);
+  CK(MenuMode1271060 == 0 && P12_00bdfa40 == 0);
+  UiVar0054E4B0 = 5; P67_Res51C = 0;
+  CK(P67_Menu417970() == 0);
+  /* 00415188: 0→1→2→0 */
+  P12_00b87e5c = 0; G6_00B87EEC = 0; t67_stream = 0; t67_calls = 0;
+  CK(P67_Menu415188() == 0 && P12_00b87e5c == 1 && strcmp(t67_name, "TITLE.DSS") == 0 && t67_calls == 100);
+  G6_00B87EEC = 1; P67_Menu415188(); CK(P12_00b87e5c == 2 && strcmp(t67_name, "MOTEL.DSS") == 0);
+  P67_Menu415188(); CK(P12_00b87e5c == 0 && t67_stream == 3);
+#undef CK
+  return f;
+}
+
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_p62() | test_p63() | test_p64() | test_p65() | test_p66() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_p62() | test_p63() | test_p64() | test_p65() | test_p66() | test_p67() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
