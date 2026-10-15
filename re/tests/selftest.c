@@ -29,6 +29,7 @@
 #include "../game/ported24.h"
 #include "../game/ported25.h"
 #include "../game/ported26.h"
+#include "../game/ported27.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -555,6 +556,35 @@ static int test_p25(void) {
   if (P25_TimerCnt != 0) f++;
   return f;
 }
+static int test_p27(void) {
+  int f = 0;
+  /* ReadChunked: 200000 байт кусками по 0xffff, счётчик */
+  FILE *tf = tmpfile();
+  if (!tf) return 1;
+  enum { N = 200000 };
+  uint8_t *src = malloc(N), *dst = calloc(1, N);
+  for (int i = 0; i < N; i++) src[i] = (uint8_t)(i * 7);
+  fwrite(src, 1, N, tf); rewind(tf);
+  P27_ReadBytes = 0; P27_ReadLimit = 0x7fffffff; P27_ProgressOn = 0;
+  if (P27_ReadChunked(dst, N, 1, tf) != 1 || memcmp(src, dst, N) || P27_ReadBytes != N) f++;
+  /* палитры: 3 записи, одна с недопустимым слотом (пропускается) */
+  rewind(tf);
+  { int16_t n = 3; fwrite(&n, 2, 1, tf);
+    for (int k = 0; k < 3; k++) { int16_t sl = k == 1 ? 77 : (int16_t)(k ? 5 : 2); uint8_t pal[0x400]; memset(pal, 0x10 + k, sizeof pal);
+      fwrite(&sl, 2, 1, tf); fwrite(pal, 1, 0x400, tf); } }
+  rewind(tf);
+  P12_01252aa0[9] = 1;
+  P27_LoadPalettes(tf);
+  if (P12_01252aa0[2] != 1 || P12_01252aa0[5] != 1 || P12_01252aa0[9] != 0 || P12_01252aa0[3] != 0) f++;
+  if (P14_01252be0[2 * 0x400] != 0x10 || P14_01252be0[5 * 0x400 + 0x3ff] != 0x12) f++;
+  fclose(tf); free(src); free(dst);
+  /* утечки: счётчики равны — ничего не делает */
+  P27_MemAllocated = P27_MemFreed = 5; P27_MemLeakReport();
+  /* вмятины: имена текстур запрашиваются 66 раз, буфер 0x20000 выделяется */
+  S_00D1192C = 3; P27_LoadDentTextures();
+  if (D_00d17ec8 == NULL) f++;
+  return f;
+}
 static int test_p26(void) {
   int f = 0;
   P26_WaveSetVolume(0x8000); if (plat_wave_volume() != 0x80008000u) f++;
@@ -576,7 +606,7 @@ static int test_p26(void) {
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

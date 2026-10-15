@@ -2378,7 +2378,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c16c1,FUN_004c16c1,CopyWords8000,manual,UIMisc,,,24,ported
 004c16d9,FUN_004c16d9,BlitRect16,manual,ui,,,112,ported
 004c1749,FUN_004c1749,BlitRect8,manual,ui,,,101,ported
-004c17ae,FUN_004c17ae,,,denting,assert,,266,todo
+004c17ae,FUN_004c17ae,P27_LoadDentTextures,manual,denting,assert,,266,ported
 004c1b46,FUN_004c1b46,FreeBufferD17EC8,manual,Menu,,,38,ported
 004c1b6c,FUN_004c1b6c,,,,,,183,todo
 004c1c23,FUN_004c1c23,,,,,,888,todo
@@ -2602,7 +2602,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d8487,FUN_004d8487,,,,,,138,todo
 004d8511,FUN_004d8511,,,,,,1077,todo
 004d8c23,FUN_004d8c23,ClearSlots004D8C23,manual,SmallFuncs,,,93,ported
-004d8c80,FUN_004d8c80,,,,,,308,todo
+004d8c80,FUN_004d8c80,P27_MemLeakReport,manual,,,,308,ported
 004d8db4,FUN_004d8db4,DebugMalloc,manual,,,,380,todo
 004d8f30,FUN_004d8f30,DebugFree,manual,,,,227,todo
 004d9013,FUN_004d9013,Round1024,manual,UIMisc,,,21,ported
@@ -2616,7 +2616,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d950f,FUN_004d950f,Pack565_004D950F,manual,ui/widgets,,,42,ported
 004d9539,FUN_004d9539,SetDrawParams_004D9539,manual,Ported8,,,78,ported
 004d9587,FUN_004d9587,Clear2C3B8,manual,UIMisc,,,15,ported
-004d9596,FUN_004d9596,,,,,,205,todo
+004d9596,FUN_004d9596,P27_ReadChunked,manual,,,,205,ported
 004d9663,FUN_004d9663,,,,,,341,todo
 004d97b8,FUN_004d97b8,CounterDecrement004D97B8,manual,SmallFuncs,,,36,ported
 004d97dc,FUN_004d97dc,SetD11804,manual,UIMisc,,,13,ported
@@ -2731,7 +2731,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004eb7cf,FUN_004eb7cf,ReadBlocks_004EB7CF,manual,map,range,,66,ported
 004eb811,FUN_004eb811,,,map,assert,,356,todo
 004eb975,FUN_004eb975,,,map,assert,,2015,todo
-004ec154,FUN_004ec154,,,map,range,,300,todo
+004ec154,FUN_004ec154,P27_LoadPalettes,manual,map,range,,300,ported
 004ec280,FUN_004ec280,,,map,assert,,108,todo
 004ec2ec,FUN_004ec2ec,,,map,assert,,74,todo
 004ec336,FUN_004ec336,,,map,assert,,199,todo

@@ -228,6 +228,10 @@
     V(Call00528982, 0x00528982, (uint32_t a0), (a0)) \
     V(Call00425B12, 0x00425b12, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(Call004D8F30, 0x004d8f30, (uint32_t a0), (a0)) \
+    V(CrtFree_0052CB70, 0x0052cb70, (uint32_t a0), (a0)) \
+    V(Call004D9663, 0x004d9663, (void), ()) \
+    V(Call004C1B6C, 0x004c1b6c, (int32_t a0), (a0)) \
+    R(int32_t, Call004EC91E, 0x004ec91e, (const char* a0), (a0)) \
     V(SetDirectorMode_004C875D, 0x004c875d, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(SetCameraPosition, 0x00523c99, (float x, float y, float z), (x, y, z))
 

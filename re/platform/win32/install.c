@@ -15,6 +15,7 @@
 #include "../../game/ported24.h"
 #include "../../game/ported25.h"
 #include "../../game/ported26.h"
+#include "../../game/ported27.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1175,6 +1176,10 @@ void re_install_all(void) {
     re_hook(0x004d7b73, (void*)P26_FindWheelModels, "P26_FindWheelModels");
     re_hook(0x004d322c, (void*)P26_FindCdDrive, "P26_FindCdDrive");
     re_hook(0x004fc5e1, (void*)P26_RandomFx, "P26_RandomFx");
+    re_hook(0x004d9596, (void*)P27_ReadChunked, "P27_ReadChunked");
+    re_hook(0x004ec154, (void*)P27_LoadPalettes, "P27_LoadPalettes");
+    re_hook(0x004d8c80, (void*)P27_MemLeakReport, "P27_MemLeakReport");
+    re_hook(0x004c17ae, (void*)P27_LoadDentTextures, "P27_LoadDentTextures");
     re_hook(0x005281b0, (void*)P25_TimersInit, "P25_TimersInit");
     re_hook(0x005281e1, (void*)P25_TimersShutdown, "P25_TimersShutdown");
     re_hook(0x00528221, (void*)P25_TimerStart, "P25_TimerStart");
