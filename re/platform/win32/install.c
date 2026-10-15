@@ -76,6 +76,7 @@
 #include "../../game/ported85.h"
 #include "../../game/ported86.h"
 #include "../../game/ported87.h"
+#include "../../game/ported88.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1749,4 +1750,6 @@ void re_install_all(void) {
     re_hook(0x004ed5f8, (void*)P87_LoadTile, "P87_LoadTile");
     re_hook(0x004ee18b, (void*)P87_DrawObjA, "P87_DrawObjA");
     re_hook(0x004ee4b7, (void*)P87_DrawObjB, "P87_DrawObjB");
+    re_hook(0x004edd08, (void*)P88_CellUpdate, "P88_CellUpdate");
+    re_hook(0x004edaa2, (void*)P88_StreamTiles, "P88_StreamTiles");
 }

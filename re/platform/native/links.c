@@ -76,6 +76,7 @@
 #include "../../game/ported85.h"
 #include "../../game/ported86.h"
 #include "../../game/ported87.h"
+#include "../../game/ported88.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -129,6 +130,7 @@ void P57_Fn51CB98 (void *f) { P62_SaveScores(f); }
 void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
 void P55_Fn4ED5F8 (int32_t a0, int32_t a1) { P87_LoadTile(a0, a1); }
+void P55_Fn4EDAA2 (void) { P88_StreamTiles(); }
 int32_t P55_Fn405E79 (int32_t a0, void *a1) { return (int32_t)P58_SaveSlot(a0, a1); }
 int32_t P55_Fn405FDB (int32_t a0, void *a1) { return (int32_t)P59_ReplayCheck(a0, a1); }
 void P55_Fn5248CD (void) { P25_CDResume(); }

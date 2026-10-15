@@ -91,6 +91,7 @@
 #include "../game/ported85.h"
 #include "../game/ported86.h"
 #include "../game/ported87.h"
+#include "../game/ported88.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -3594,6 +3595,58 @@ static int test_p83(void) {
 
 
 /* ported87: загрузка плитки карты в слот и рисование объектов (004ed5f8, 004ee18b, 004ee4b7) */
+static int test_p88(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { fprintf(stderr, "p88 fail line %d: %s\n", __LINE__, #c); f = 1; } } while (0)
+  int32_t sn = P54_GridN, sd = P21_GridDiv, sx = P42_CellX, sy = P42_CellY, se = G6_00B87EEC, s4 = P14_00b87ee4, sa = G6_00B87EAC, sb = G6_00B87EB0, sc = G6_00B87EA0;
+  float scx = P44_CamX, scz = P44_CamZ, ssc = P42_CellScale; int32_t spx = P59_PosX, spz = P59_PosZ;
+  p88_cell_t sA = P88_CellA, sB = P88_CellB;
+  int32_t lump[3], slot[3];
+  P54_GridN = 60; P21_GridDiv = 480; P42_CellX = 1000; P42_CellY = 2000; P42_CellScale = 0.5f; P44_CamX = 200.5f; P44_CamZ = 100.25f;
+  G6_00B87EEC = 1; P14_00b87ee4 = 0; G6_00B87EAC = 0; G6_00B87EB0 = 0; G6_00B87EA0 = 0; P59_PosX = 40; P59_PosZ = 80;
+  P88_CellA.cell = 7;
+  P88_CellUpdate(0);       /* x = (int)((200.5+1000)*0.5) = 600, y = (int)((100.25+2000)*0.5) = 1050 */
+  CK(P88_CellA.x == 600 && P88_CellA.y == 1050);
+  CK(P88_CellA.idx == 600 + 1050 * 480);
+  CK(P88_CellA.cx == 10 && P88_CellA.cy == 17 && P88_CellA.cell == 10 + 17 * 8);
+  CK(P88_CellA.prev == 7 && P88_CellA.rx == 0 && P88_CellA.ry == 30);
+  CK(P88_CellA.px == 0 && P88_CellA.py == 1 && P88_CellA.pc == 2);
+  CK(memcmp(&P88_CellA, &P88_CellB, sizeof P88_CellA) == 0);   /* 00b87eec ≠ 0 — копия */
+  G6_00B87EEC = 0;         /* игрок: (40+1000)*0.5 = 520, (80+2000)*0.5 = 1040 */
+  P88_CellUpdate(0);
+  CK(P88_CellB.x == 520 && P88_CellB.y == 1040 && P88_CellB.cx == 8 && P88_CellB.cy == 17 && P88_CellB.rx == 40 && P88_CellB.ry == 20);
+  CK(P12_00cff9ac == P88_CellB.cell);
+  P88_ObjX = 20; P88_ObjZ = 40; G6_00B87EAC = 1;   /* объект: (20+1000)*0.5 = 510, (40+2000)*0.5 = 1020 */
+  P88_CellUpdate(0);
+  CK(P88_CellB.x == 510 && P88_CellB.y == 1020);
+  G6_00B87EA0 = 1; P88_Mode575 = 2;                /* режим 2 → снова игрок */
+  P88_CellUpdate(0);
+  CK(P88_CellB.x == 520);
+  P14_00b87ee4 = 1;                                /* камера */
+  P88_CellUpdate(0);
+  CK(P88_CellB.x == 600 && P88_CellB.y == 1050);
+  /* выбор соседних блоков */
+  { p88_cell_t b; memset(&b, 0, sizeof b); b.cx = 3; b.cy = 2; b.cell = 3 + 2 * 8; b.rx = 5; b.ry = 30;
+    CK(P88_PickTiles(&b, lump, slot) == 1 && lump[0] == b.cell - 1 && slot[0] == ((3 - 1) & 1) + (2 & 1) * 2);
+    b.ry = 10;
+    CK(P88_PickTiles(&b, lump, slot) == 3);           /* слева, сверху и угловой */
+    CK(lump[0] == b.cell - 1 && lump[1] == b.cell - 8 && lump[2] == b.cell - 1 - 8);
+    b.rx = 55;
+    CK(P88_PickTiles(&b, lump, slot) == 3 && lump[0] == b.cell + 1 && lump[1] == b.cell - 8 && lump[2] == b.cell + 1 - 8);
+    b.ry = 55;
+    CK(P88_PickTiles(&b, lump, slot) == 3 && lump[1] == b.cell + 8 && lump[2] == b.cell + 1 + 8);
+    b.rx = 30; b.ry = 30;
+    CK(P88_PickTiles(&b, lump, slot) == 0);
+    b.cx = 0; b.rx = 5;                               /* у левой границы карты ничего не грузим */
+    CK(P88_PickTiles(&b, lump, slot) == 0);
+  }
+  P88_CellUpdate(1);                                   /* только отметка занятых клеток */
+  P54_GridN = sn; P21_GridDiv = sd; P42_CellX = sx; P42_CellY = sy; G6_00B87EEC = se; P14_00b87ee4 = s4; G6_00B87EAC = sa; G6_00B87EB0 = sb; G6_00B87EA0 = sc;
+  P44_CamX = scx; P44_CamZ = scz; P42_CellScale = ssc; P59_PosX = spx; P59_PosZ = spz; P88_CellA = sA; P88_CellB = sB;
+  return f;
+}
+
 static int test_p87(void) {
   int f = 0;
 #undef CK
@@ -4044,7 +4097,7 @@ static int test_p86(void) {
 
 int re_selftest(void) {
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

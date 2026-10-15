@@ -496,7 +496,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401c49,thunk_FUN_004e6166,Thunk_004E6166,manual,Thunks,,,5,ported
 00401c4e,thunk_FUN_004bf471,Thunk_004BF471,manual,Thunks,,,5,ported
 00401c58,thunk_FUN_0048db65,,,,,,5,ported
-00401c67,thunk_FUN_004edaa2,,,,,,5,todo
+00401c67,thunk_FUN_004edaa2,,,,,,5,ported
 00401c71,thunk_FUN_004ef3cd,,,,,,5,todo
 00401c76,thunk_FUN_004f621d,,,,,,5,todo
 00401c7b,thunk_FUN_004c60b2,Thunk_004C60B2,manual,Thunks,,,5,ported
@@ -1043,7 +1043,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402a1d,thunk_FUN_0042570c,,,,,,5,ported
 00402a22,thunk_FUN_004c1f9b,Thunk_004C1F9B,manual,Thunks,,,5,ported
 00402a27,thunk_FUN_005248a0,,,,,,5,ported
-00402a2c,thunk_FUN_004edd08,,,,,,5,todo
+00402a2c,thunk_FUN_004edd08,,,,,,5,ported
 00402a31,thunk_FUN_00519873,,,,,,5,ported
 00402a36,thunk_FUN_004a32e9,,,,,,5,todo
 00402a3b,thunk_FUN_004d950f,Thunk_004D950F,manual,Thunks,,,5,ported
@@ -2770,8 +2770,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004ed5b1,FUN_004ed5b1,AllocMapBuffer300000,manual,map,assert,,33,ported
 004ed5d2,FUN_004ed5d2,FreeMapBuffer300000,manual,map,range,,38,ported
 004ed5f8,FUN_004ed5f8,P87_LoadTile,manual,Ported87,range,,1194,ported
-004edaa2,FUN_004edaa2,,,map,range,,614,todo
-004edd08,FUN_004edd08,,,map,range,,861,todo
+004edaa2,FUN_004edaa2,P88_StreamTiles,manual,Ported88,range,,614,ported
+004edd08,FUN_004edd08,P88_CellUpdate,manual,Ported88,range,,861,ported
 004ee065,FUN_004ee065,ResetObjs,manual,map,range,,196,ported
 004ee129,FUN_004ee129,P55_ResetSel,manual,map,range,,98,ported
 004ee18b,FUN_004ee18b,P87_DrawObjA,manual,Ported87,range,,812,ported
