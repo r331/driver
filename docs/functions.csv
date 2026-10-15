@@ -196,7 +196,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004014bf,thunk_FUN_00526940,,,,,,5,ported
 004014c9,thunk_FUN_0041a8ab,Thunk_0041A8AB,manual,Thunks,,,5,ported
 004014d3,thunk_FUN_004ae6fb,,,,,,5,todo
-004014dd,thunk_FUN_00428928,,,,,,5,todo
+004014dd,thunk_FUN_00428928,,,,,,5,ported
 004014e7,thunk_FUN_0051bd78,Thunk_0051BD78,manual,Thunks,,,5,ported
 004014ec,thunk_FUN_004a7aa7,,,,,,5,todo
 004014f1,thunk_FUN_00509d27,,,,,,5,todo
@@ -418,7 +418,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401a3c,thunk_FUN_004134a0,,,,,,5,ported
 00401a41,thunk_FUN_004055e8,,,,,,5,todo
 00401a4b,thunk_FUN_004e6310,,,,,,5,todo
-00401a50,thunk_FUN_00428672,,,,,,5,todo
+00401a50,thunk_FUN_00428672,,,,,,5,ported
 00401a55,thunk_FUN_004cf2cf,,,,,,5,todo
 00401a5a,thunk_FUN_00425a50,,,,,,5,ported
 00401a5f,thunk_FUN_004b04c0,,,,,,5,todo
@@ -1977,8 +1977,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00427eea,FUN_00427eea,FrustumSetup3D,manual,Render,,,1038,ported
 004282f8,FUN_004282f8,P77_CameraPlane,manual,render,,,225,ported
 004283d9,FUN_004283d9,SphereVis3D,manual,Render,,,665,ported
-00428672,FUN_00428672,,,,,,694,todo
-00428928,FUN_00428928,,,,,,577,todo
+00428672,FUN_00428672,BoxVis,manual,Ported83,,,694,ported
+00428928,FUN_00428928,LightMatrices,manual,Ported83,,,577,ported
 00428b69,FUN_00428b69,,,,,,1498,todo
 00429143,FUN_00429143,,,,,,1771,todo
 0042982e,FUN_0042982e,,,,,,1442,todo
