@@ -82,3 +82,20 @@ void plat_dd_stub_surface(int lf, int pff, uint32_t bits, uint32_t r, uint32_t g
     g_lk_fail = lf; g_pf_fail = pff; g_pf_bits = bits; g_pf_m[0] = r; g_pf_m[1] = g; g_pf_m[2] = b; g_flip_hr = fhr; (void)g_rects_n; }
 int plat_dd_stub_surface_stats(int *lk, int *ul, int *fl, uint32_t *ff, int *bl, int32_t *dr, int32_t *sr, int *cs) {
     *lk = g_locks; *ul = g_unlocks; *fl = g_flips; *ff = g_flip_flags; *bl = g_blts_rc; memcpy(dr, g_drc, sizeof g_drc); memcpy(sr, g_src_rc, sizeof g_src_rc); *cs = g_clip_sets; return 1; }
+/* --- DirectSound 3D: учётные записи (последний вызов) --- */
+static int g_ds3_op; static float g_ds3_v[6]; static uint32_t g_ds3_u;
+static int32_t ds3_rec(void *o, int op, float a, float b, float c, uint32_t u) {
+    if (!o) return -1; g_ds3_op = op; g_ds3_v[0] = a; g_ds3_v[1] = b; g_ds3_v[2] = c; g_ds3_u = u; return 0; }
+int32_t plat_ds_listener_set_position(void *l, float x, float y, float z) { return ds3_rec(l, 1, x, y, z, 0); }
+int32_t plat_ds_listener_set_orientation(void *l, const float *s) {
+    int32_t r = ds3_rec(l, 2, 0, 0, 0, 0); if (r == 0) memcpy(g_ds3_v, s, sizeof g_ds3_v); return r; }
+int32_t plat_ds_listener_set_velocity(void *l, float x, float y, float z) { return ds3_rec(l, 3, x, y, z, 0); }
+int32_t plat_ds_listener_commit(void *l) { return ds3_rec(l, 4, 0, 0, 0, 0); }
+int32_t plat_ds_buf_play(void *b, uint32_t fl) { return ds3_rec(b, 5, 0, 0, 0, fl); }
+int32_t plat_ds_buf_set_volume(void *b, int32_t v) { return ds3_rec(b, 6, 0, 0, 0, (uint32_t)v); }
+int32_t plat_ds_buf_set_frequency(void *b, uint32_t hz) { return ds3_rec(b, 7, 0, 0, 0, hz); }
+int32_t plat_ds_buf_get_status(void *b, uint32_t *st) { int32_t r = ds3_rec(b, 8, 0, 0, 0, 0); if (r == 0 && st) *st = 0x1; return r; }
+int32_t plat_ds3d_set_mode(void *b, uint32_t m) { return ds3_rec(b, 9, 0, 0, 0, m); }
+int32_t plat_ds3d_set_position(void *b, float x, float y, float z) { return ds3_rec(b, 10, x, y, z, 0); }
+int32_t plat_ds3d_set_velocity(void *b, float x, float y, float z) { return ds3_rec(b, 11, x, y, z, 0); }
+int plat_ds3d_stub_last(int *op, float *v6, uint32_t *u) { *op = g_ds3_op; memcpy(v6, g_ds3_v, sizeof g_ds3_v); *u = g_ds3_u; return 1; }

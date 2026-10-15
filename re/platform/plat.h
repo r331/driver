@@ -181,6 +181,19 @@ int32_t plat_dd_blt_from(void *dst, const int32_t *rect4, void *src);     /* dst
 int32_t plat_dd_fill_all(void *surf, uint32_t pixel);                     /* Blt на всю поверхность: DDBLT_COLORFILL */
 int32_t plat_ds_set_format(void *primary, const void *wfx18);             /* IDirectSoundBuffer::SetFormat(WAVEFORMATEX, 18 байт) */
 int32_t plat_ds_set_speaker_config(void *ds, uint32_t cfg);               /* IDirectSound::SetSpeakerConfig */
+/* DirectSound 3D (0048bd40, 0048c74b…0048cba4): слушатель IDirectSound3DListener, буфер IDirectSoundBuffer, 3D-буфер IDirectSound3DBuffer; 0 — успех */
+int32_t plat_ds_listener_set_position(void *l, float x, float y, float z);       /* SetPosition(x,y,z,DS3D_IMMEDIATE=1) */
+int32_t plat_ds_listener_set_orientation(void *l, const float *six);             /* SetOrientation(front xyz, top xyz, 1) */
+int32_t plat_ds_listener_set_velocity(void *l, float x, float y, float z);       /* SetVelocity(x,y,z,1) */
+int32_t plat_ds_listener_commit(void *l);                                        /* CommitDeferredSettings */
+int32_t plat_ds_buf_play(void *b, uint32_t flags);                               /* Play(0,0,flags) */
+int32_t plat_ds_buf_set_volume(void *b, int32_t vol);                            /* SetVolume (сотые дБ) */
+int32_t plat_ds_buf_set_frequency(void *b, uint32_t hz);                         /* SetFrequency */
+int32_t plat_ds_buf_get_status(void *b, uint32_t *status);                       /* GetStatus */
+int32_t plat_ds3d_set_mode(void *b3d, uint32_t mode);                            /* SetMode(mode, DS3D_IMMEDIATE=0) */
+int32_t plat_ds3d_set_position(void *b3d, float x, float y, float z);            /* SetPosition(x,y,z,1) */
+int32_t plat_ds3d_set_velocity(void *b3d, float x, float y, float z);            /* SetVelocity(x,y,z,1) */
+int     plat_ds3d_stub_last(int *op, float *v6, uint32_t *u);                    /* тесты (SDL): последний вызов (op 1..11), числа, целое */
 void    plat_fmv_stub_fail(uint32_t mask);                                /* тесты (SDL): бит 0 SetState, 1 Update, 2 Blt — отказ */
 int     plat_fmv_stub_stats(int *state, int *updates, int32_t *rect4, int *blts, uint32_t *fill_px, int *fills, uint8_t *fmt18, uint32_t *spk); /* тесты (SDL) */
 /* Поверхности: блокировка, формат пикселей, показ кадра (0041eb8c, 0041ec82, 0041d3ed, 0041dec8, 00420c5a, 00420cac, 00421149) */

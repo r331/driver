@@ -37,6 +37,7 @@
 #include "../../game/ported46.h"
 #include "../../game/ported47.h"
 #include "../../game/ported48.h"
+#include "../../game/ported49.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1345,4 +1346,17 @@ void re_install_all(void) {
     re_hook(0x004d142c, (void*)P48_OpFlags, "P48_OpFlags");
     re_hook(0x004d1672, (void*)P48_OpRepeat, "P48_OpRepeat");
     re_hook(0x004d0d7c, (void*)P48_OpTurn, "P48_OpTurn");
+    re_hook(0x0048bd40, (void*)P49_Commit, "P49_Commit");
+    re_hook(0x0048c74b, (void*)P49_ListenerPos, "P49_ListenerPos");
+    re_hook(0x0048c77e, (void*)P49_ListenerOrient, "P49_ListenerOrient");
+    re_hook(0x0048c7bd, (void*)P49_ListenerVel, "P49_ListenerVel");
+    re_hook(0x0048c97c, (void*)P49_SetVolume, "P49_SetVolume");
+    re_hook(0x0048c9b2, (void*)P49_SetFreq, "P49_SetFreq");
+    re_hook(0x0048caa0, (void*)P49_GetStatus, "P49_GetStatus");
+    re_hook(0x0048ca68, (void*)P49_SetMode3D, "P49_SetMode3D");
+    re_hook(0x0048c9e8, (void*)P49_SetPos3D, "P49_SetPos3D");
+    re_hook(0x0048ca28, (void*)P49_SetVel3D, "P49_SetVel3D");
+    re_hook(0x0048c7f0, (void*)P49_Play, "P49_Play");
+    re_hook(0x0048cd82, (void*)P49_ReleaseProp2C, "P49_ReleaseProp2C");
+    re_hook(0x0048ccaf, (void*)P49_ReleaseProps, "P49_ReleaseProps");
 }

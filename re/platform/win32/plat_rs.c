@@ -235,3 +235,21 @@ int32_t plat_dd_blt_rect(void *d, const int32_t *dr, void *s, const int32_t *sr)
 int32_t plat_dd_flip(void *s, uint32_t fl) { return ((dd_f2)VT(s, 0x2c))(s, 0, (void *)(uintptr_t)fl); }
 void plat_dd_stub_surface(int a, int b, uint32_t c, uint32_t d, uint32_t e, uint32_t f, int32_t g) { (void)a; (void)b; (void)c; (void)d; (void)e; (void)f; (void)g; }
 int plat_dd_stub_surface_stats(int *a, int *b, int *c, uint32_t *d, int *e, int32_t *f, int32_t *g, int *h) { (void)a; (void)b; (void)c; (void)d; (void)e; (void)f; (void)g; (void)h; return 0; }
+
+/* --- DirectSound 3D: прямые вызовы vtable (IDirectSound3DListener: Position 0x38, Orientation 0x34, Velocity 0x40, Commit 0x44;
+   IDirectSoundBuffer: Play 0x30, GetStatus 0x24, SetVolume 0x3c, SetFrequency 0x44; IDirectSound3DBuffer: SetMode 0x48, Position 0x4c, Velocity 0x50) --- */
+typedef long (__attribute__((stdcall)) *dd_f8)(void *, void *, void *, void *, void *, void *, void *, void *);
+static void *fbits(float f) { union { float f; uint32_t u; } c; c.f = f; return (void *)(uintptr_t)c.u; }
+int32_t plat_ds_listener_set_position(void *l, float x, float y, float z) { return ((dd_f4)VT(l, 0x38))(l, fbits(x), fbits(y), fbits(z), (void *)1); }
+int32_t plat_ds_listener_set_orientation(void *l, const float *s) {
+    return ((dd_f8)VT(l, 0x34))(l, fbits(s[0]), fbits(s[1]), fbits(s[2]), fbits(s[3]), fbits(s[4]), fbits(s[5]), (void *)1); }
+int32_t plat_ds_listener_set_velocity(void *l, float x, float y, float z) { return ((dd_f4)VT(l, 0x40))(l, fbits(x), fbits(y), fbits(z), (void *)1); }
+int32_t plat_ds_listener_commit(void *l) { return ((dd_f0)VT(l, 0x44))(l); }
+int32_t plat_ds_buf_play(void *b, uint32_t fl) { return ((dd_f3)VT(b, 0x30))(b, 0, 0, (void *)(uintptr_t)fl); }
+int32_t plat_ds_buf_set_volume(void *b, int32_t v) { return ((dd_f1)VT(b, 0x3c))(b, (void *)(uintptr_t)v); }
+int32_t plat_ds_buf_set_frequency(void *b, uint32_t hz) { return ((dd_f1)VT(b, 0x44))(b, (void *)(uintptr_t)hz); }
+int32_t plat_ds_buf_get_status(void *b, uint32_t *st) { return ((dd_f1)VT(b, 0x24))(b, st); }
+int32_t plat_ds3d_set_mode(void *b, uint32_t m) { return ((dd_f2)VT(b, 0x48))(b, (void *)(uintptr_t)m, 0); }
+int32_t plat_ds3d_set_position(void *b, float x, float y, float z) { return ((dd_f4)VT(b, 0x4c))(b, fbits(x), fbits(y), fbits(z), (void *)1); }
+int32_t plat_ds3d_set_velocity(void *b, float x, float y, float z) { return ((dd_f4)VT(b, 0x50))(b, fbits(x), fbits(y), fbits(z), (void *)1); }
+int plat_ds3d_stub_last(int *op, float *v6, uint32_t *u) { (void)op; (void)v6; (void)u; return 0; }

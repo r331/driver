@@ -37,6 +37,7 @@
 #include "../../game/ported46.h"
 #include "../../game/ported47.h"
 #include "../../game/ported48.h"
+#include "../../game/ported49.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
