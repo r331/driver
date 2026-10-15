@@ -110,3 +110,4 @@ v0.51: +4 (ported17: SlotMapSide 0051bcc0, SlotFindIndex 0051bd09, ISqrt 00528e1
 - v0.56 (ported21): GetNameByIndex 0040f14a; всего 1263 (остальные простые — WinAPI/ftol/COM)
 - v0.62: plat_local_hms (системный слой), 0 функций перенесено
 - v0.66: 004bf910 P21_FpsToBuf (FPS в буфер)
+- v0.67: OpenGL 3.3 бэкенд рендера (platform/sdl/plat_render.c) + offscreen-тест через OSMesa (tests/render_test.c, PNG); функций перенесено 0, всего 1267 из 3275

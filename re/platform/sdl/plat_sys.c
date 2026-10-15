@@ -6,7 +6,8 @@
 #include <strings.h>
 #include <dirent.h>
 #include <limits.h>
-static SDL_Window *g_win;
+static SDL_Window *g_win; static SDL_GLContext g_gl;
+static void swap_win(void){ SDL_GL_SwapWindow(g_win); }
 uint32_t plat_time_ms(void){ return SDL_GetTicks(); }
 void plat_sleep_ms(uint32_t ms){ SDL_Delay(ms); }
 void plat_log(const char *f, ...){ va_list a; va_start(a,f); vfprintf(stderr,f,a); va_end(a); }
@@ -23,11 +24,18 @@ void *plat_file_open(const char *path, const char *mode){
 }
 int plat_window_open(const char *t,int w,int h,int fs){
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER)) return -1;
-    g_win = SDL_CreateWindow(t, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, fs?SDL_WINDOW_FULLSCREEN_DESKTOP:0);
-    return g_win ? 0 : -1;
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG); /* macOS требует */
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    g_win = SDL_CreateWindow(t, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_OPENGL|(fs?SDL_WINDOW_FULLSCREEN_DESKTOP:0));
+    if (!g_win) return -1;
+    g_gl = SDL_GL_CreateContext(g_win); if (!g_gl) return -2;
+    SDL_GL_SetSwapInterval(1);
+    return plat_render_attach((void *(*)(const char *))SDL_GL_GetProcAddress, swap_win, w, h);
 }
 int plat_poll_events(void){ SDL_Event e; while (SDL_PollEvent(&e)) if (e.type==SDL_QUIT) return 0; return 1; }
 int plat_key_down(int sc){ const Uint8 *k = SDL_GetKeyboardState(NULL); return k ? k[sc] : 0; }
-void plat_window_close(void){ if (g_win) SDL_DestroyWindow(g_win); g_win=0; SDL_Quit(); }
+void plat_window_close(void){ plat_render_shutdown(); if (g_gl) SDL_GL_DeleteContext(g_gl); g_gl=0; if (g_win) SDL_DestroyWindow(g_win); g_win=0; SDL_Quit(); }
 #include <time.h>
 void plat_local_hms(int *h,int *m,int *s){ time_t t=time(0); struct tm *l=localtime(&t); *h=l->tm_hour; *m=l->tm_min; *s=l->tm_sec; }

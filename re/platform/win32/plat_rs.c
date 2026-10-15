@@ -22,3 +22,7 @@ void plat_snd_pos3d(int h,float x,float y,float z){(void)h;(void)x;(void)y;(void
 int plat_cd_play(int t){(void)t;return 0;}
 void plat_cd_stop(void){}
 int plat_cd_current(void){return 0;}
+int plat_render_attach(void *(*g)(const char *), void (*s)(void), int w, int h){(void)g;(void)s;(void)w;(void)h;return -1;}
+int plat_render_offscreen(int w, int h){(void)w;(void)h;return -1;}
+int plat_render_readback(uint32_t *o){(void)o;return -1;}
+void plat_render_shutdown(void){}

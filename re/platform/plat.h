@@ -24,6 +24,13 @@ void plat_draw_tris(const plat_vertex *v, int count);
 void plat_clear(uint32_t color, int clear_z);
 void plat_flip(void);
 void plat_blit2d(int tex, int sx, int sy, int sw, int sh, int dx, int dy);
+/* Константы смешивания = значения D3DBLEND (1 ZERO, 2 ONE, 3 SRCCOLOR, 4 INVSRCCOLOR, 5 SRCALPHA, 6 INVSRCALPHA, 7 DESTALPHA, 8 INVDESTALPHA, 9 DESTCOLOR, 10 INVDESTCOLOR).
+   color/specular вершины = 0xAARRGGBB; x,y в пикселях окна, z 0..1, rhw = 1/w (0 → 1). */
+/* Подключение GL-контекста (SDL-окно или OSMesa); swap может быть NULL (offscreen). */
+int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int w, int h);
+int plat_render_offscreen(int w, int h);                 /* OSMesa; <0 если нет в сборке */
+int plat_render_readback(uint32_t *rgba_topdown);        /* w*h пикселей 0xAABBGGRR (байты R,G,B,A) */
+void plat_render_shutdown(void);
 /* Звук и CD-аудио */
 int  plat_snd_create(const void *pcm, int bytes, int rate, int channels, int bits);
 void plat_snd_destroy(int h);
