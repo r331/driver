@@ -29,6 +29,7 @@
 #include "../../game/ported38.h"
 #include "../../game/ported39.h"
 #include "../../game/ported40.h"
+#include "../../game/ported41.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1247,4 +1248,5 @@ void re_install_all(void) {
     re_hook(0x0048a239, (void*)P40_UploadSlot, "P40_UploadSlot");
     re_hook(0x00489f50, (void*)P40_UploadSlotPair, "P40_UploadSlotPair");
     re_hook(0x004efc7c, (void*)P40_DownloadPalette, "P40_DownloadPalette");
+    re_hook(0x004eb975, (void*)P41_LoadTexPages, "P41_LoadTexPages");
 }

@@ -43,6 +43,7 @@
 #include "../game/ported38.h"
 #include "../game/ported39.h"
 #include "../game/ported40.h"
+#include "../game/ported41.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -943,6 +944,29 @@ static int test_p38(void) {
 #undef CK
   return f;
 }
+static int test_p41(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p41 fail line %d\n",__LINE__); } } while (0)
+  FILE *fp = tmpfile();
+  uint16_t z = 0; int32_t cnt = 4;
+  fwrite(&z, 2, 1, fp); fwrite(&cnt, 4, 1, fp);          /* 0 палитр, 4 страницы */
+  static uint8_t page[0x20000];
+  const uint16_t fl[4] = {1, 1, 2, 4}; const int16_t tx[4] = {0, 0, 0, 7};
+  for (int i = 0; i < 4; i++) {
+    memset(page, 0x10 + i, sizeof page);
+    fwrite(&fl[i], 2, 1, fp); fwrite(&tx[i], 2, 1, fp); fwrite(page, sizeof page, 1, fp);
+  }
+  rewind(fp);
+  D_00b87e30 = 0; P41_TexSel[0] = 1; S_00D1192C = 7;
+  P41_LoadTexPages(fp);
+  CK(P41_Offset == 0x60000);                              /* слоты 1, 2, 3 по 0x20000 */
+  CK(P40_Slots[0].flags == 2 && P40_Slots[1].flags == 2 && P40_Slots[2].flags == 0 && P40_Slots[3].flags == 2);
+  CK(P40_Slots[1].data == P41_Arena && P40_Slots[2].data == P41_Arena + 0x20000 && P40_Slots[3].data == P41_Arena + 0x40000);
+  CK(P40_Slots[0].data == 0 && P41_Flag == 1);
+  fclose(fp);
+#undef CK
+  return f;
+}
 static int test_p40(void) {
   int f = 0;
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p40 fail line %d\n",__LINE__); } } while (0)
@@ -1039,7 +1063,7 @@ static int test_p39(void) {
   return f;
 }
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
