@@ -26,6 +26,7 @@
 #include "../game/ported21.h"
 #include "../game/ported22.h"
 #include "../game/ported23.h"
+#include "../game/ported24.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -485,10 +486,43 @@ static int test_p23(void) {
   P22_SetZFunc(3); P22_SetZWrite(1); plat_set_render_state(7, 1);  /* вернуть состояние для render_test */
   return f;
 }
+static int test_p24(void) {
+  int f = 0;
+  int base = plat_dd_stub_count();
+  uint32_t desc[31]; memset(desc, 0, sizeof desc);
+  int dummy_dd, dummy_d3d;
+  P24_DD = &dummy_dd; P24_Fullscreen = 0; P24_Bpp = 16;
+  if (P24_CreateSurface(NULL, desc) != NULL) f++;
+  if (P24_CreatePrimarySurface() != 1 || P24_Primary == NULL || P24_Back == NULL) f++;
+  if (plat_dd_stub_count() != base + 2) f++;
+  void *z = P24_CreateSurface(&dummy_dd, desc);
+  if (!z || !P24_AttachSurface(P24_Back, z)) f++;
+  void *c = P24_CreateClipper(&dummy_dd);
+  if (!c || !P24_SetClipper(P24_Primary, c) || P24_SetClipper(NULL, c)) f++;
+  void *dev = P24_CreateDevice(&dummy_d3d, NULL, P24_Back);
+  void *vp = P24_CreateViewport(&dummy_d3d);
+  if (!dev || !vp || P24_CreateDevice(NULL, NULL, NULL) || P24_CreateViewport(NULL)) f++;
+  if (!P24_AddViewport(dev, vp, 640, 480) || P24_AddViewport(NULL, vp, 640, 480) || P24_AddViewport(dev, vp, 0, 480)) f++;
+  /* заливка: RGB 565 (R 16 бит -> сдвиг 3 вправо, позиция 11; G сдвиг 2, позиция 5; B сдвиг 3, позиция 0) */
+  P24_RShiftR = 3; P24_RShiftL = 11; P24_GShiftR = 2; P24_GShiftL = 5; P24_BShiftR = 3; P24_BShiftL = 0;
+  P22_VpX = 10; P22_VpY = 20; P22_VpW = 100; P22_VpH = 50;
+  int32_t r[4]; uint32_t px;
+  if (P24_FillBackbuffer(P24_Back, 0xff8040) != 1 || !plat_dd_stub_last_fill(r, &px)) f++;
+  if (r[0] != 10 || r[1] != 20 || r[2] != 110 || r[3] != 70) f++;
+  if (px != ((0xffu >> 3) << 11 | (0x80u >> 2) << 5 | (0x40u >> 3))) f++;
+  P24_RestoreMode = 0; P24_RestoreDisplay();
+  P24_RestoreMode = 1; P24_ModeW = 640; P24_ModeH = 480; P24_RestoreDisplay();
+  P24_RestoreSurfaces();
+  if (!P24_SetDisplayMode(&dummy_dd, 640, 480) || P24_SetDisplayMode(NULL, 640, 480)) f++;
+  plat_dd_release(z); plat_dd_release(c); plat_dd_release(dev); plat_dd_release(vp); plat_dd_release(P24_Back); plat_dd_release(P24_Primary);
+  P24_Primary = NULL; P24_Back = NULL; P24_DD = NULL;
+  if (plat_dd_stub_count() != base) f++;
+  return f;
+}
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

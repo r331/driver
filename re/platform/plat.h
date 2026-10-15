@@ -57,4 +57,23 @@ void plat_snd_close(void);
 int  plat_cd_play(int track);
 void plat_cd_stop(void);
 int  plat_cd_current(void);
+/* --- DirectDraw/Direct3D-объекты (непрозрачные дескрипторы; NULL = ошибка). Возврат int32 — HRESULT (0 = успех).
+   SDL: объекты-заглушки без устройства (поверхности существуют только как учётные записи); hook: вызовы vtable объектов Game.exe. --- */
+void   *plat_dd_create_surface(void *dd, const void *desc124);   /* DDSURFACEDESC 124 байта */
+int32_t plat_dd_set_display_mode(void *dd, int w, int h, int bpp);
+void   *plat_dd_create_clipper(void *dd);
+int32_t plat_dd_set_clipper(void *surf, void *clipper);
+int32_t plat_dd_attach_surface(void *surf, void *attached);
+void   *plat_dd_get_attached(void *surf, uint32_t caps);         /* backbuffer: caps = 4 */
+void    plat_dd_release(void *obj);
+int32_t plat_dd_is_lost(void *surf);                             /* != 0 — поверхность потеряна */
+int32_t plat_dd_restore(void *surf);
+int32_t plat_dd_fill_rect(void *surf, int x0, int y0, int x1, int y1, uint32_t pixel); /* цветовая заливка (Blt COLORFILL) */
+void   *plat_d3d_create_device(void *d3d, const void *iid, void *surf);
+void   *plat_d3d_create_viewport(void *d3d);
+int32_t plat_d3d_add_viewport(void *dev, void *vp);
+int32_t plat_d3d_set_viewport_rect(void *vp, int w, int h);
+void    plat_window_maximize(void *wnd);                         /* ShowWindow(SW_MAXIMIZE) */
+int     plat_dd_stub_count(void);                                /* SDL: число живых заглушек (тесты); hook: 0 */
+int     plat_dd_stub_last_fill(int32_t *rect4, uint32_t *pixel); /* SDL: последняя заливка (тесты); hook: 0 */
 #endif

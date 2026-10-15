@@ -12,6 +12,7 @@
 #include "../../game/ported21.h"
 #include "../../game/ported22.h"
 #include "../../game/ported23.h"
+#include "../../game/ported24.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1146,4 +1147,16 @@ void re_install_all(void) {
     re_hook(0x0041d9d2, (void*)P23_SetBlendMode, "P23_SetBlendMode");
     re_hook(0x00421521, (void*)P23_InitRenderStates, "P23_InitRenderStates");
     re_hook(0x00420e93, (void*)P23_ClearZ, "P23_ClearZ");
+    re_hook(0x00420c10, (void*)P24_CreateSurface, "P24_CreateSurface");
+    re_hook(0x00420cfe, (void*)P24_CreateDevice, "P24_CreateDevice");
+    re_hook(0x00420d5d, (void*)P24_CreateViewport, "P24_CreateViewport");
+    re_hook(0x00420dad, (void*)P24_AddViewport, "P24_AddViewport");
+    re_hook(0x00420ef6, (void*)P24_FillBackbuffer, "P24_FillBackbuffer");
+    re_hook(0x0042101b, (void*)P24_SetDisplayMode, "P24_SetDisplayMode");
+    re_hook(0x0042106d, (void*)P24_CreatePrimarySurface, "P24_CreatePrimarySurface");
+    re_hook(0x00421250, (void*)P24_CreateClipper, "P24_CreateClipper");
+    re_hook(0x00421298, (void*)P24_SetClipper, "P24_SetClipper");
+    re_hook(0x004214dd, (void*)P24_AttachSurface, "P24_AttachSurface");
+    re_hook(0x004213a4, (void*)P24_RestoreDisplay, "P24_RestoreDisplay");
+    re_hook(0x004212dc, (void*)P24_RestoreSurfaces, "P24_RestoreSurfaces");
 }
