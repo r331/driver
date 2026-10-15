@@ -142,6 +142,7 @@
     V(UiCall00408600, 0x00408600, (int32_t a0), (a0)) \
     V(UiCall00417AA2, 0x00417aa2, (void), ()) \
     V(MenuAction40CD17, 0x0040cd17, (void), ()) \
+    V(Call0040CB9F, 0x0040cb9f, (void), ()) \
     V(MenuRedraw, 0x00409622, (void), ()) \
     V(MenuRefresh, 0x0040500d, (void), ()) \
     V(Call004076E2, 0x004076e2, (void), ()) \

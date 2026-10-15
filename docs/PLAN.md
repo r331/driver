@@ -71,3 +71,4 @@
 - v0.85: +7 функций (ported38: FMV-проигрыватель и DirectSound-обёртки), всего 1358
 - v0.86: +7 функций (ported39: Lock/Unlock/GetSurfaceFormat/Present/QueryDD4/QueryD3D/CreateFrontBack), всего 1365
 - v0.87: +4 функции (ported40: память текстур Glide — ResetTexMem/UploadTexSlot/UploadTexSlotPair/DownloadSlotPalette), всего 1369
+| v0.91 | математика ч.2 (ported44) + меню (ported45), native-линковка перенесённых функций; всего 1571 |

@@ -32,6 +32,8 @@
 #include "../../game/ported41.h"
 #include "../../game/ported42.h"
 #include "../../game/ported43.h"
+#include "../../game/ported44.h"
+#include "../../game/ported45.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1277,4 +1279,26 @@ void re_install_all(void) {
     re_hook(0x0052647d, (void*)P43_ProjectGrid, "P43_ProjectGrid");
     re_hook(0x0051200f, (void*)P43_FreeSlot, "P43_FreeSlot");
     re_hook(0x00514073, (void*)P43_AnimNext, "P43_AnimNext");
+    re_hook(0x00525900, (void*)P44_ResetState, "P44_ResetState");
+    re_hook(0x00525e7e, (void*)P44_Atan2, "P44_Atan2");
+    re_hook(0x005262cc, (void*)P44_EulerMatXYZ, "P44_EulerMatXYZ");
+    re_hook(0x00526365, (void*)P44_EulerMatYXZ, "P44_EulerMatYXZ");
+    re_hook(0x00526940, (void*)P44_PointInQuad, "P44_PointInQuad");
+    re_hook(0x005272f2, (void*)P44_QuatNormalize, "P44_QuatNormalize");
+    re_hook(0x00527544, (void*)P44_QuatMul, "P44_QuatMul");
+    re_hook(0x0052763b, (void*)P44_EulerToQuat, "P44_EulerToQuat");
+    re_hook(0x00527746, (void*)P44_AxisAngleMat, "P44_AxisAngleMat");
+    re_hook(0x005283b5, (void*)P44_Copy4, "P44_Copy4");
+    re_hook(0x00528461, (void*)P44_Transpose, "P44_Transpose");
+    re_hook(0x00528688, (void*)P44_RotX, "P44_RotX");
+    re_hook(0x00528788, (void*)P44_RotY, "P44_RotY");
+    re_hook(0x00528885, (void*)P44_RotZ, "P44_RotZ");
+    re_hook(0x00528982, (void*)P44_Xform, "P44_Xform");
+    re_hook(0x005289e2, (void*)P44_XformT, "P44_XformT");
+    re_hook(0x00528a42, (void*)P44_XformBias, "P44_XformBias");
+    re_hook(0x0040834f, (void*)P45_ModeA, "P45_ModeA");
+    re_hook(0x00408458, (void*)P45_ModeB, "P45_ModeB");
+    re_hook(0x0040ccb4, (void*)P45_Wait, "P45_Wait");
+    re_hook(0x00417cbb, (void*)P45_PickColor, "P45_PickColor");
+    re_hook(0x005266ed, (void*)P44_LookAt, "P44_LookAt");
 }

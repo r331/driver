@@ -33,7 +33,7 @@ Wine/CrossOver: `WINEDLLOVERRIDES="dinput=n,b" wine Game.exe`. Лог — re_dri
 - новая функция: game/<module>.c + строка в platform/win32/install.c + тест + статус ported в docs/functions.csv.
 
 ## Статус
-Перенесено 1369 функций (из ~3275 без CRT), отслеживается в docs/functions.csv (status=ported).
+Перенесено 1571 функция (из ~3275 без CRT), отслеживается в docs/functions.csv (status=ported).
 v0.77: +6 функций (game/ported30.c, WinMain.c): FatalError (00522369), CrashHandler (00522759, тело), CrashHandlerInstall/Remove (0052273c/0052274c), InitWindowGlobals (005223be), Exit (0052e400). Новое в plat.h: plat_exit, plat_screensaver_get/set, plat_set_crash_handler (SDL: signal; hook: SetUnhandledExceptionFilter / CRT-выход 0052e480). Всего 1328 (по docs/functions.csv).
 v0.76: +1 функция (game/ported29.c): SetDirectorMode (004c875d) — переключатель 16 режимов режиссёра повторов, вызывает ported11 вместо заглушки. Всего 1323.
 v0.75: +2 функции (game/ported28.c): LoadEventModels (004ec58a), LoadCarModels (004bfc30; MessageBox через plat_message_box). Всего 1322.
@@ -134,3 +134,4 @@ v0.51: +4 (ported17: SlotMapSide 0051bcc0, SlotFindIndex 0051bd09, ISqrt 00528e1
 - v0.88: LoadTexPages 004eb975 (game/ported41.c, страницы текстур карты из файла уровня) + 123 thunk-а jmp на перенесённые функции (tools/mark_thunks.py); всего 1493
 - v0.89: 10 функций (game/ported42.c): таблицы MScript FindScriptCommand 004f6333/FindScriptCommandById 004fc5ab/FindScriptVar 004f64dd, GetHighScoreTable 0051cd43, FreeGlide 0042570c (plat_dll_unload), GetVersionString 0041eb51, ActionBound 004d6209, GetGlideDeviceName 004245ec, SetViewAngles 004e964a, CellIndex 004ece84; +6 thunk-ов; всего 1509
 - v0.90: 16 функций (game/ported43.c): векторы/матрицы/кватернионы (Normalize 005260d7, Cross 0052605d, Len3/Len4, Orthonormalize 005265e3, EulerMatrix 005261ad, MatToQuat/QuatToMat, PointInPoly, ClipT, ProjectGrid), CdFadeInit 00524398, FreeSlot 0051200f, AnimNext 00514073 + 9 thunk-ов; re_init_consts() задаёт float-константы .data в native; всего 1534
+- v0.91: 22 функции + 15 thunk-ов: математика ч.2 (game/ported44.c: Atan2 по таблице 00525e7e, матрицы поворота RotX/RotY/RotZ 00528688/788/885, EulerMat 005262cc/00526365, кватернионы 005272f2/00527544/0052763b, ось-угол 00527746, Xform 00528982/005289e2/00528a42, LookAt 005266ed, PointInQuad, Copy4, Transpose, ResetState) и меню (game/ported45.c: 0040834f, 00408458, 0040ccb4, 00417cbb). Новое: tools/gen_native_links.py → platform/native/links.c — в native перенесённые функции теперь вызываются из «неперенесённых» вызовов (раньше уходили в заглушки; заглушки стали слабыми). Всего 1571

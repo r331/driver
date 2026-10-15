@@ -1,5 +1,6 @@
 /* Векторная математика, CD-фейд, слоты — восстановлено из Game.exe (cdecl). */
 #include "ported43.h"
+#include "ported44.h"
 #include <math.h>
 #include <string.h>
 GAME_VAR_DEF(p43_sintab_t, P43_Sin, 0x00b94280)
@@ -178,5 +179,6 @@ void re_init_consts(void) {
 #ifndef RE_HOOK_BUILD
   P8_00546020 = 1.0f; P8_00546024 = 0.0f;
   P43_Eps = 9.999999747378752e-05f; P43_Four = 4.0f; P43_FadeLen = 1.0f; P43_FadeDiv = 10.0f; P43_Half = 1048576.0f;
+  P44_InitTables();
 #endif
 }

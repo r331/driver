@@ -46,6 +46,8 @@
 #include "../game/ported41.h"
 #include "../game/ported42.h"
 #include "../game/ported43.h"
+#include "../game/ported44.h"
+#include "../game/ported45.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -1161,8 +1163,80 @@ static int test_p43(void) {
 #undef CK
   return f;
 }
+static int test_p44(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p44 fail line %d\n",__LINE__); } } while (0)
+  P8_00546020 = 1.0f; P8_00546024 = 0.0f;
+  for (int i = 0; i < 4096; i++) P43_Sin[i] = sinf((float)i * 6.28318530718f / 4096.0f);
+  for (int i = 4096; i < 5120; i++) P43_Sin[i] = P43_Sin[i - 4096];
+  P44_InitTables();
+  CK(P44_AtanTab[0] == 0 && P44_AtanTab[512] == 302 && P44_AtanTab[1024] == 512);
+  /* арктангенс: 4096 = оборот, 0 = +x? проверяем по четвертям */
+  CK(P44_Atan2(0, 0) == 0);
+  CK(P44_Atan2(0, 10) == 0 && P44_Atan2(10, 0) == 0x400 && P44_Atan2(0, -10) == 0x800 && P44_Atan2(-10, 0) == 0xc00);
+  CK(P44_Atan2(10, 10) == 0x200 && P44_Atan2(10, -10) == 0x600 && P44_Atan2(-10, -10) == 0xa00 && P44_Atan2(-10, 10) == 0xe00);
+  /* сброс состояния */
+  P44_Rst_B93CEC = 5; P44_Rst_B93CE0 = 7; P44_Rst_Tab[3] = 9; P44_Rst_Tab[4] = 9;
+  P44_ResetState(); CK(P44_Rst_B93CEC == 0 && P44_Rst_B93CE0 == -1 && P44_Rst_Tab[3] == 0 && P44_Rst_Tab[4] == 9);
+  /* точка в четырёхугольнике (обход: проверка знаков как в оригинале) */
+  int32_t quad[8] = {0,0, 0,10, 10,10, 10,0};
+  CK(P44_PointInQuad(5, 5, quad) == 1);
+  CK(P44_PointInQuad(15, 5, quad) == 0 && P44_PointInQuad(5, -3, quad) == 0);
+  /* повороты: RotX на 90° переводит столбцы 1,2 */
+  float m[9]; int16_t ang[3] = {0, 0, 0};
+  P44_EulerMatXYZ(m, ang); CK(fa(m[0],1) && fa(m[4],1) && fa(m[8],1) && fa(m[1],0));
+  ang[0] = 1024; P44_EulerMatXYZ(m, ang);
+  CK(fa(m[0],1) && fa(m[4],0) && fa(m[5],-1) && fa(m[7],1) && fa(m[8],0));
+  float m2[9]; ang[0] = 1024; ang[1] = 512; ang[2] = 256;
+  P44_EulerMatXYZ(m, ang); P44_EulerMatYXZ(m2, ang);
+  float dot = 0; for (int i = 0; i < 3; i++) dot += m[i] * m[i]; CK(fa(dot, 1));   /* ортонормальная строка */
+  P44_RotY(m, 0); P44_RotZ(m, 0); P44_RotX(m, 0); (void)m2;
+  /* транспонирование */
+  float t[9] = {1,2,3,4,5,6,7,8,9}, u[9]; P44_Transpose(t, u);
+  CK(u[1] == 4 && u[3] == 2 && u[8] == 9 && u[2] == 7);
+  /* кватернион: единичный, умножение на единичный, нормализация */
+  float qi[5] = {0,0,0,0,1}, qa[5] = {0.5f,0,0,0,0.5f}, qo[5];
+  P44_QuatMul(qa, qi, qo); CK(fa(qo[0],0.5f) && fa(qo[4],0.5f) && qo[3] == 0);
+  P44_QuatNormalize(qa); CK(fa(qa[0], 0.70710678f) && fa(qa[4], 0.70710678f));
+  float qz[5] = {0,0,0,0,0}; P44_QuatNormalize(qz); CK(qz[4] == 1.0f && qz[0] == 0);
+  int16_t ea[3] = {0, 0, 0}; float eq[5]; P44_EulerToQuat(ea, eq); CK(fa(eq[4], 1) && fa(eq[0], 0));
+  ea[0] = 1024; P44_EulerToQuat(ea, eq); CK(fa(eq[0], 0.70710678f) && fa(eq[4], 0.70710678f));
+  /* ось-угол: поворот на 90° (ang=1024) вокруг z */
+  float ax[3] = {0, 0, 1}, am[9]; P44_AxisAngleMat(1024, ax, am);
+  CK(fa(am[0], 0) && fa(am[1], 1) && fa(am[3], -1) && fa(am[8], 1) && fa(am[4], 0));
+  /* копирование и преобразование вектора */
+  uint8_t src[7] = {1,2,3,4,5,6,7}, dst[7] = {0}; P44_Copy4(dst, src, 7); CK(memcmp(src, dst, 7) == 0);
+  float M[9] = {2,0,0, 0,3,0, 0,0,4}, v[6] = {1,1,1,0,0,0}; P44_MatPtr = M;
+  P44_Xform(v); CK(fa(v[0],2) && fa(v[1],3) && fa(v[2],4));
+  float M2[9] = {0,1,0, 0,0,1, 1,0,0}, w[3] = {1,2,3}; P44_MatPtr = M2; P44_XformT(w);
+  CK(fa(w[0], 2) && fa(w[1], 3) && fa(w[2], 1));
+  float x[6] = {0,0,0,1,1,1}; P44_MatPtr = M; P44_BiasX = 10; P44_BiasY = 20; P44_BiasZ = 30; P44_XformTag = 0x3f800000u;
+  P44_XformBias(x); CK(fa(x[3],12) && fa(x[4],23) && fa(x[5],34) && fa(x[0],1.0f));
+  /* камера: смотрим по +x, up = +z */
+  P44_CamX = 0; P44_CamY = 0; P44_CamZ = 0;
+  float eye[3] = {2, 0, 0}, up[3] = {0, 0, 1}; P44_LookAt(eye, up);
+  CK(fa(P44_ViewMat[6], 1) && fa(P44_ViewMat[7], 0) && fa(P44_ViewMat[8], 0));
+  CK(fa(P44_ViewMat[0], 0) && fa(P44_ViewMat[1], -1));      /* right = f x up */
+  CK(fa(P44_ViewMatT[2], 1) && fa(P44_ViewMatT[3], P44_ViewMat[1]));
+#undef CK
+  return f;
+}
+static int test_p45(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p45 fail line %d\n",__LINE__); } } while (0)
+  P45_Mode = 0x93; CK(P45_ModeA() == 1 && P45_Mode == 0x2f);
+  P45_Mode = 0x2e; CK(P45_ModeB() == 1 && P45_Mode == 0x92);
+  P45_Mode = 0x31; P45_ModeB(); CK(P45_Mode == 0x95);
+  P45_Mode = 7; P45_ModeA(); CK(P45_Mode == 7);                /* вне таблицы — без изменений */
+  P45_Col0 = 11; P45_Col1 = 12; P45_Col2 = 13; P45_Col3 = 14; P45_Col4 = 15;
+  P45_Pick = 3; P45_PickColor(); CK(P45_Color == 14);
+  P45_Pick = 9; P45_Color = 99; P45_PickColor(); CK(P45_Color == 99);
+  P45_Wait(5, 6); CK(P45_PtrB == 5 && P45_PtrA == 6 && P45_Busy == 0 && P45_Step == 0);
+#undef CK
+  return f;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
