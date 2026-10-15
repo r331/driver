@@ -88,6 +88,7 @@
 #include "../../game/ported97.h"
 #include "../../game/ported98.h"
 #include "../../game/ported99.h"
+#include "../../game/ported100.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1922,4 +1923,34 @@ void re_install_all(void) {
     re_hook(0x00526aeb, (void*)P99_SegCross, "P99_SegCross");
     re_hook(0x00526cd5, (void*)P99_SegClip, "P99_SegClip");
     re_hook(0x0050f569, (void*)P99_MenuItems, "P99_MenuItems");
+    re_hook(0x00416605, (void*)P100_ReplayMenuInit, "P100_ReplayMenuInit");
+    re_hook(0x00413e37, (void*)P100_PadMenuInit, "P100_PadMenuInit");
+    re_hook(0x004f3c74, (void*)P100_DrawParts, "P100_DrawParts");
+    re_hook(0x004f1325, (void*)P100_DrawPartsB, "P100_DrawPartsB");
+    re_hook(0x004ab500, (void*)P100_DebrisInit, "P100_DebrisInit");
+    re_hook(0x004f556c, (void*)P100_GoalsCheck, "P100_GoalsCheck");
+    re_hook(0x004d28a3, (void*)P100_CarSounds, "P100_CarSounds");
+    re_hook(0x004d6740, (void*)P100_CarRevs, "P100_CarRevs");
+    re_hook(0x00518d32, (void*)P100_RecInput, "P100_RecInput");
+    re_hook(0x00518f44, (void*)P100_RecRead, "P100_RecRead");
+    re_hook(0x00504479, (void*)P100_RadarMap, "P100_RadarMap");
+    re_hook(0x0051acc5, (void*)P100_RoadRect, "P100_RoadRect");
+    re_hook(0x0051aee6, (void*)P100_RoadRectAbs, "P100_RoadRectAbs");
+    re_hook(0x004dd039, (void*)P100_RoadHeight, "P100_RoadHeight");
+    re_hook(0x004dc91b, (void*)P100_RoadHeightF, "P100_RoadHeightF");
+    re_hook(0x0049ae98, (void*)P100_CarHit, "P100_CarHit");
+    re_hook(0x004078d0, (void*)P100_LfbFormat, "P100_LfbFormat");
+    re_hook(0x0048c43c, (void*)P100_RiffFromRes, "P100_RiffFromRes");
+    re_hook(0x0042eee6, (void*)P100_ClipFar, "P100_ClipFar");
+    re_hook(0x0042d797, (void*)P100_ClipNear, "P100_ClipNear");
+    re_hook(0x004e6f90, (void*)P100_GhostNear, "P100_GhostNear");
+    re_hook(0x00499951, (void*)P100_BoxFace, "P100_BoxFace");
+    re_hook(0x00499fb0, (void*)P100_BoxOverlap, "P100_BoxOverlap");
+    re_hook(0x004c3048, (void*)P100_FreeCamKeys, "P100_FreeCamKeys");
+    re_hook(0x004ba093, (void*)P100_PartStep, "P100_PartStep");
+    re_hook(0x004c09e6, (void*)P100_MarkerSpawn, "P100_MarkerSpawn");
+    re_hook(0x004feb59, (void*)P100_Billboards, "P100_Billboards");
+    re_hook(0x004f2c9a, (void*)P100_MirrorMask, "P100_MirrorMask");
+    re_hook(0x00494701, (void*)P100_TrafficSlot, "P100_TrafficSlot");
+    re_hook(0x00407e2f, (void*)P100_IconLfb2x, "P100_IconLfb2x");
 }

@@ -37,12 +37,13 @@ typedef uint8_t p99_vis_t[0x2000];
 #define P99_Mrk2764   GAME_VAR(int32_t, P99_Mrk2764, 0x00d02764)
 #define P99_Mrk2768   GAME_VAR(int32_t, P99_Mrk2768, 0x00d02768)
 #define P99_Vis       GAME_VAR(p99_vis_t, P99_Vis, 0x01136500)        /* маска видимости клеток (P76_CellFromPos/P76_InBox) */
-#define P99_RoadPick  GAME_VAR(int32_t, P99_RoadPick, 0x011443c4)    /* выбранный узел дороги (-1 — нет) */
+#define P99_RoadPick  GAME_VAR(int16_t, P99_RoadPick, 0x011443c4)    /* выбранный узел дороги (-1 — нет); в игре — слово (movsx) */
 #ifndef RE_HOOK_BUILD
 extern const p99_gear_t P99_GearTab;
 extern p99_b8_t P99_D17ECC; extern p99_vis_t P99_Vis;
 extern int32_t P99_MrkA, P99_MrkB, P99_Mrk2660, P99_Mrk2664, P99_Mrk26B0, P99_Mrk26B8, P99_Mrk270C,
-  P99_Mrk2710, P99_Mrk2730, P99_Mrk2734, P99_Mrk2738, P99_Mrk2750, P99_Mrk2760, P99_Mrk2764, P99_Mrk2768, P99_RoadPick;
+  P99_Mrk2710, P99_Mrk2730, P99_Mrk2734, P99_Mrk2738, P99_Mrk2750, P99_Mrk2760, P99_Mrk2764, P99_Mrk2768;
+extern int16_t P99_RoadPick;
 #endif
 
 void    P99_RadarXform(const int32_t *src, int32_t *dst, int32_t n);   /* 00506a07: точки мира → радар (шаг 4 int) */

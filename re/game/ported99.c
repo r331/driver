@@ -83,7 +83,7 @@ GAME_VAR_DEF(int32_t, P99_Mrk2760, 0x00d02760)
 GAME_VAR_DEF(int32_t, P99_Mrk2764, 0x00d02764)
 GAME_VAR_DEF(int32_t, P99_Mrk2768, 0x00d02768)
 GAME_VAR_DEF(p99_vis_t, P99_Vis, 0x01136500)
-GAME_VAR_DEF(int32_t, P99_RoadPick, 0x011443c4)
+GAME_VAR_DEF(int16_t, P99_RoadPick, 0x011443c4)
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }

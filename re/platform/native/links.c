@@ -88,6 +88,7 @@
 #include "../../game/ported97.h"
 #include "../../game/ported98.h"
 #include "../../game/ported99.h"
+#include "../../game/ported100.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -159,6 +160,7 @@ void N54_Fn4913CC (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4) 
 int32_t P53_Fn40EFD5 (void) { return (int32_t)P74_KeyScan(); }
 int32_t P53_Fn4045E0 (void) { return (int32_t)P57_Menu4045E0(); }
 void P52_Fn4E5A1A (void) { P97_FadeIconDraw(); }
+void P52_Fn4AB500 (void) { P100_DebrisInit(); }
 void P52_Fn4AB808 (void) { P95_PoolIconInit(); }
 void P52_Fn4AB95C (void) { P94_IconQuad(); }
 void P52_Fn5173D7 (float a0, float a1, int32_t a2, int32_t a3, int32_t a4) { P73_Text(a0, a1, a2, a3, a4); }
@@ -271,6 +273,7 @@ void * FindCameraRecordForFrame (int frame) { return (void *)FindCameraForFrame(
 void InitNewCamera (void *cam) { P98_CamClamp(cam); }
 void DrawSprite (int x, int y, uint32_t tex, int a, int b, int c, int d, int e) { P70_ShadowText(x, y, tex, a, b, c, d, e); }
 int IsKeyDown (int sc) { return (int)IsFlagSetNotMasked_004E383A(sc); }
+int GetGroundHeight (int *pos) { return (int)P100_RoadHeight(pos); }
 void Call00411A9D (void) { MenuHiliteWhite00411A9D(); }
 void Call0041AFCA (void) { P55_NamesC(); }
 void Call0050F7B2 (void) { P97_SndMenuInit(); }
@@ -333,4 +336,6 @@ void SetCameraPosition (float x, float y, float z) { PushVec3_00523C99(x, y, z);
 void P46_Fn4D6354 (void) { P53_StepBounds(); }
 void P46_Fn51BE3C (void) { P58_BuildBlockIndex(); }
 void P58_Fn4185D2 (uint32_t tbl, int32_t a1, uint32_t tbl2) { P97_MenuCall2(tbl, a1, tbl2); }
+void P58_Fn416605 (void) { P100_ReplayMenuInit(); }
 void P58_Fn51763A (const char *a0, int32_t a1) { P98_LoadLang(a0, a1); }
+void P58_Fn413E37 (void) { P100_PadMenuInit(); }

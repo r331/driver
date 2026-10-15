@@ -19,6 +19,8 @@ void     re_fn_register(uint32_t addr, re_fn_t fn) { (void)addr; (void)fn; }
 #include "ported96.h"
 #include "ported97.h"
 #include "ported98.h"
+#include "ported100.h"
+#include "p100_data.h"
 #include "noop.h"
 #include <string.h>
 
@@ -46,6 +48,10 @@ static const re_region_t k_regions[] = {
   { 0x00575608u, (uint8_t *)P97_Str44k, sizeof P97_Str44k },
   { 0x005532ccu, P98_FaceBlk, sizeof P98_FaceBlk },              /* имена лиц титров (00552e1c → сюда) */
   { P99_CARS_ADDR, (uint8_t *)P99_Cars, sizeof P99_Cars },       /* v1.44: таблица игроков/машин 00d077c0 (0x148 × 66) */
+  { P100_C810_ADDR, P100_MenuC810, sizeof P100_MenuC810 },     /* v1.45: .data меню (game/p100_data.h) */
+  { P100_D4A8_ADDR, P100_MenuD4A8, sizeof P100_MenuD4A8 },
+  { P100_E0B0_ADDR, P100_MenuE0B0, sizeof P100_MenuE0B0 },
+  { P100_E33C_ADDR, (uint8_t *)P100_SpeedTab, sizeof P100_SpeedTab },
 };
 /* таблица функций: адрес Game.exe → перенесённая native-функция */
 static const re_fnent_t k_fns[] = {

@@ -111,6 +111,7 @@ int32_t plat_def_window_proc(void *hwnd,uint32_t msg,uint32_t wp,int32_t lp){ (v
 void plat_dll_unload(void *mod){ (void)mod; }
 void *plat_dll_load(const char *name){ (void)name; return NULL; }
 void *plat_dll_proc(void *mod, const char *name){ (void)mod; (void)name; return NULL; }
+void *plat_lock_resource(void *res){ return res; }
 int plat_win_state(int *cur,int *prio,int *quit,int *closes,int *w,int *h,const char **title,plat_wndproc *proc){
     if(cur){ *cur=g_wcur; }
     if(prio){ *prio=g_wprio; }

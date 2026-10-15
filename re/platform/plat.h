@@ -134,6 +134,7 @@ void    plat_post_close(void *hwnd);                             /* PostMessage(
 void    plat_set_cursor(int visible);                            /* SetCursor(стрелка / NULL) */
 int32_t plat_def_window_proc(void *hwnd, uint32_t msg, uint32_t wparam, int32_t lparam); /* DefWindowProc */
 void   *plat_dll_proc(void *mod, const char *name);              /* GetProcAddress; SDL: NULL */
+void   *plat_lock_resource(void *res);                           /* LockResource (v1.45, 0048c43c); SDL: res — уже указатель на данные */
 void    plat_dll_unload(void *mod);                              /* FreeLibrary; SDL: ничего */
 void   *plat_dll_load(const char *name);                         /* LoadLibrary; SDL: NULL (Glide на macOS нет) */
 void    plat_win_trap(int on);                                   /* тесты (SDL): окно не создаётся, вызовы только запоминаются */
