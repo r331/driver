@@ -85,3 +85,22 @@ void P21_DrawClock(void) {
   Call004D94B7((uint32_t)x, (uint32_t)y);
   Call004D90F4((int32_t)(intptr_t)P21_ClockBuf);
 }
+
+#ifndef RE_HOOK_BUILD
+uint32_t P21_FpsLast, P21_FpsVal; int32_t P21_FpsCnt;
+#endif
+void P21_DrawFps(void) {
+  char buf[32];
+  if (G00B87E7C != 0) return;
+  P21_FpsCnt++;
+  uint32_t t = plat_time_ms();
+  if (t - P21_FpsLast > 1000) {
+    P21_FpsVal = (uint32_t)(P21_FpsCnt * 1000) / (t - P21_FpsLast);
+    P21_FpsLast = plat_time_ms();
+    P21_FpsCnt = 0;
+  }
+  int32_t y = (P19_ScrH + ((P19_ScrH >> 31) & 7)) / 8 - 1;
+  snprintf(buf, sizeof buf, "%dfps", (int)P21_FpsVal);
+  Call004D94B7(0, (uint32_t)y);
+  Call004D90F4((int32_t)(intptr_t)buf);
+}

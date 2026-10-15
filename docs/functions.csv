@@ -2561,7 +2561,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d4a63,FUN_004d4a63,,,,,,408,todo
 004d4bfb,FUN_004d4bfb,,,,,,970,todo
 004d4fc5,FUN_004d4fc5,,,,,,1059,todo
-004d53e8,FUN_004d53e8,,,,,,182,todo
+004d53e8,FUN_004d53e8,P21_DrawFps,manual,,,,182,ported
 004d5ce0,FUN_004d5ce0,,,,,,796,todo
 004d5ffc,FUN_004d5ffc,Chain004D5FFC,manual,Menu,,,15,ported
 004d600b,FUN_004d600b,Reset004D600B,manual,Ported6,,,35,ported

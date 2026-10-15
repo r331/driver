@@ -1123,4 +1123,5 @@ void re_install_all(void) {
     re_hook(0x004a519a, (void*)P21_MatchPrefix, "P21_MatchPrefix");
     re_hook(0x0040f14a, (void*)P21_GetNameByIndex, "P21_GetNameByIndex");
     re_hook(0x004d986e, (void*)P21_DrawClock, "P21_DrawClock");
+    re_hook(0x004d53e8, (void*)P21_DrawFps, "P21_DrawFps");
 }

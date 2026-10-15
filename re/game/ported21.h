@@ -35,3 +35,11 @@ const char* P21_GetNameByIndex(uint8_t idx); /* 0040f14a */
 extern char P21_ClockBuf[32];
 #endif
 void P21_DrawClock(void); /* 004d986e: HH:MM:SS clock, uses plat_local_hms */
+#ifdef RE_HOOK_BUILD
+#define P21_FpsLast  (*(uint32_t*)0x00b202f8)
+#define P21_FpsVal   (*(uint32_t*)0x00b202f4)
+#define P21_FpsCnt   (*(int32_t*)0x00b202fc)
+#else
+extern uint32_t P21_FpsLast, P21_FpsVal; extern int32_t P21_FpsCnt;
+#endif
+void P21_DrawFps(void); /* 004d53e8: FPS counter text (plat_time_ms) */
