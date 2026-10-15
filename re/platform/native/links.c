@@ -84,6 +84,7 @@
 #include "../../game/ported93.h"
 #include "../../game/ported94.h"
 #include "../../game/ported95.h"
+#include "../../game/ported96.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -158,9 +159,11 @@ int32_t P52_Fn405F6F (int32_t a0, void *a1) { return (int32_t)P64_ReplayStart(a0
 void P48_Fn516DA0 (void) { P58_LangStrings(); }
 int32_t P47_Fn51B111 (int32_t a0, int32_t a1) { return (int32_t)P72_RoadWord(a0, a1); }
 uint32_t P47_Fn51B566 (int32_t a0, int32_t a1) { return (uint32_t)P72_RoadDword(a0, a1); }
+void P47_Fn4D90F4 (const char *a0) { P96_LogLine(a0); }
 int32_t P47_Fn40A3A0 (void) { return (int32_t)P57_Menu40A3A0(); }
 void P47_Fn405BFA (void) { P58_SaveConfig(); }
 int32_t P47_Fn406199 (int32_t a0) { return (int32_t)P70_LoadReplay(a0); }
+void N14_Fn4FBA23 (const uint8_t* a0) { P96_ClockText(a0); }
 void N14_Fn4D6C5A (void) { P75_BgSound(); }
 void N14_Fn4D6DAC (void) { P75_CarSound(); }
 void N14_Fn4D6EF2 (void) { P95_AmbientTick(); }
@@ -221,6 +224,7 @@ void Call0052436A (void) { InitChannels_0052436A(); }
 void Call0052479E (int32_t a0) { P25_PlayCDTrack(a0); }
 int32_t Call0042655A (int32_t a0) { return (int32_t)DrvSetMode0042655A(a0); }
 void Call004D611B (int32_t a0) { TryStartTrack_004D611B(a0); }
+void Call004A2C98 (void) { P96_DropFarChairs(); }
 void Call004D9478 (void) { CursorWrap004D9478(); }
 void Call004C1B46 (void) { FreeBufferD17EC8(); }
 void UiCall0041A8AB (void) { StepIfActive0041A8AB(); }
@@ -271,6 +275,7 @@ void P4Call00411A9D (void) { MenuHiliteWhite00411A9D(); }
 void P4Call00415979 (void) { MenuWhite00415979(); }
 void G6Call004064B4 (int32_t a0, int32_t a1) { P13_Fn004064B4(a0, a1); }
 void G6Call004094E3 (void) { P94_ClampView(); }
+void G6Call0050FAB0 (void) { P96_ClampOptions(); }
 void G6Call004D5FFC (void) { Chain004D5FFC(); }
 void G6Call00524398 (void) { P43_CdFadeInit(); }
 void G6Call00523628 (void) { P48_ResetAll(); }
@@ -293,12 +298,14 @@ void Call004D94B7 (uint32_t a0, uint32_t a1) { CursorSet004D94B7(a0, a1); }
 int32_t Call00524473 (int32_t a0) { return (int32_t)IsSlotActive00524473(a0); }
 uint32_t Call0048F3B4 (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { return (uint32_t)P63_CountByNode(a0, a1, a2, a3); }
 void Call00510784 (void) { P55_NamesD(); }
+void Call0050FAB0 (void) { P96_ClampOptions(); }
 void Call004C64BD (void) { FreeCameraList(); }
 void Call004D3402 (void) { P48_ShutdownSystems(); }
 void Call004246F0 (void) { P69_FreeDevices(); }
 void Call004C372A (void) { FreeDirectorBuffer(); }
 void Call00421A39 (void) { P57_ResetTexNodes(); }
 void Call0052434A (int32_t a0) { SlotSetOff0052434A(a0); }
+void Call004D9663 (void) { P96_LoadBar(); }
 void Call005243EB (void) { P48_FadeEnd(); }
 int32_t Call00475A3D (void *src, void *dst) { return (int32_t)P79_Convert(src, dst); }
 void Call00427757 (void *m) { P79_Relocate(m); }

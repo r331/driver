@@ -150,6 +150,7 @@ void P85_LitQuad(uint32_t arg) { do_quad(arg, 1); }
 
 #ifndef RE_HOOK_BUILD
 int32_t P85_Tris;
+int32_t P85_TrisBy[4];
 uint8_t P85_LastBlend;
 static int g_blend_mode;
 static int g_textured;
@@ -157,7 +158,9 @@ static void P85_STD native_blend(int32_t a, int32_t b, int32_t c, int32_t d) {
   (void)c; (void)d;
   if (a == 4 && b == 0) { g_blend_mode = 0; plat_set_blend(0, 0, 0); }
   else if (a == 4 && b == 4) { g_blend_mode = 3; plat_set_blend(1, 2, 2); }   /* ONE, ONE: сложение */
-  else g_blend_mode = a == 0 && b == 5 ? 1 : 2;                                /* режимы 1/2 пока рисуются как непрозрачные */
+  else if (a == 0 && b == 5) { g_blend_mode = 1; plat_set_blend(1, 1, 6); }   /* ZERO, ONE_MINUS_SRC_ALPHA: затемнение по альфе (v1.41) */
+  else if (a == 0 && b == 6) { g_blend_mode = 2; plat_set_blend(1, 1, 4); }   /* ZERO, ONE_MINUS_SRC_COLOR: затемнение по цвету (v1.41) */
+  else { g_blend_mode = 2; plat_set_blend(0, 0, 0); }                          /* прочие сочетания — непрозрачно */
   P85_LastBlend = (uint8_t)g_blend_mode;
 }
 static void P85_STD native_state(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e) {
@@ -178,7 +181,7 @@ static void P85_STD native_raster(const p85_rv *a, const p85_rv *b, const p85_rv
     pv[i].specular = 0; pv[i].u = 0; pv[i].v = 0;
     if (g_textured && oow > 1e-7f) { pv[i].u = r->tmu[0] / oow / 256.0f; pv[i].v = r->tmu[1] / oow / 256.0f; }
   }
-  P85_Tris++;
+  P85_Tris++; P85_TrisBy[g_blend_mode & 3]++;
   plat_draw_tris(pv, 3);
 }
 void P85_SkipRecord(uint32_t arg) {

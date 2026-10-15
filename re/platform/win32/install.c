@@ -84,6 +84,7 @@
 #include "../../game/ported93.h"
 #include "../../game/ported94.h"
 #include "../../game/ported95.h"
+#include "../../game/ported96.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1802,4 +1803,29 @@ void re_install_all(void) {
     re_hook(0x00509d27, (void*)P95_DrawLineRGB, "P95_DrawLineRGB");
     re_hook(0x004d0f28, (void*)P95_ScriptTurn, "P95_ScriptTurn");
     re_hook(0x00507310, (void*)P95_DrawCross, "P95_DrawCross");
+    re_hook(0x004d90f4, (void*)P96_LogLine, "P96_LogLine");
+    re_hook(0x004a2c98, (void*)P96_DropFarChairs, "P96_DropFarChairs");
+    re_hook(0x004a32e9, (void*)P96_PickChair, "P96_PickChair");
+    re_hook(0x004f652e, (void*)P96_ParseWord, "P96_ParseWord");
+    re_hook(0x004f6612, (void*)P96_ParseQuoted, "P96_ParseQuoted");
+    re_hook(0x004e8440, (void*)P96_InitSphere, "P96_InitSphere");
+    re_hook(0x0048db8e, (void*)P96_InitRotTab, "P96_InitRotTab");
+    re_hook(0x004d7a21, (void*)P96_FpsText, "P96_FpsText");
+    re_hook(0x004d9663, (void*)P96_LoadBar, "P96_LoadBar");
+    re_hook(0x004e71dc, (void*)P96_IconAt, "P96_IconAt");
+    re_hook(0x004e72f8, (void*)P96_IconRect, "P96_IconRect");
+    re_hook(0x004b9464, (void*)P96_SpawnSpark, "P96_SpawnSpark");
+    re_hook(0x004b04c0, (void*)P96_SpawnDust, "P96_SpawnDust");
+    re_hook(0x004ad5d2, (void*)P96_AddObjB, "P96_AddObjB");
+    re_hook(0x004fba23, (void*)P96_ClockText, "P96_ClockText");
+    re_hook(0x005199bc, (void*)P96_ReplayTag, "P96_ReplayTag");
+    re_hook(0x00516ed3, (void*)P96_TextCenter, "P96_TextCenter");
+    re_hook(0x0051718a, (void*)P96_TextAt, "P96_TextAt");
+    re_hook(0x005172bb, (void*)P96_TextMid, "P96_TextMid");
+    re_hook(0x005222cf, (void*)P96_ResetDirector, "P96_ResetDirector");
+    re_hook(0x0050fab0, (void*)P96_ClampOptions, "P96_ClampOptions");
+    re_hook(0x0050e9ab, (void*)P96_ReplayScript, "P96_ReplayScript");
+    re_hook(0x00513cc7, (void*)P96_PartRunA, "P96_PartRunA");
+    re_hook(0x00513ce0, (void*)P96_PartRunB, "P96_PartRunB");
+    re_hook(0x0052008e, (void*)P96_ShadowInit, "P96_ShadowInit");
 }

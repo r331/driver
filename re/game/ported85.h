@@ -67,6 +67,7 @@ extern int32_t P85_ZI;
 void P85_RegisterNative(void);
 void P85_SkipRecord(uint32_t arg);
 extern int32_t P85_Tris;      /* число переданных растеризатору треугольников */
+extern int32_t P85_TrisBy[4]; /* то же по режимам смешивания 0..3 (native) */
 extern uint8_t P85_LastBlend; /* последний режим смешивания, переданный P85_BlendFn (native) */
 #endif
 void P85_InitConsts(void);
