@@ -42,6 +42,7 @@
 #include "../game/ported37.h"
 #include "../game/ported38.h"
 #include "../game/ported39.h"
+#include "../game/ported40.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -942,6 +943,42 @@ static int test_p38(void) {
 #undef CK
   return f;
 }
+static int test_p40(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p40 fail line %d\n",__LINE__); } } while (0)
+  P40_ResetTexMem();
+  CK(P12_00b1c3f0 == -1 && P12_00b1c3dc == 0);
+  for (int i = 0; i < 0x100; i++) CK(P40_Slots[i].flags == 0 && P40_Slots[i].block == 0xff);
+  for (int i = 0; i < 0x40; i++) CK(P40_Blocks[i].slot == 0xff && P40_Blocks[i].info[2] == 3 && P40_Blocks[i].info[3] == 5);
+  for (int i = 0; i < 4; i++) CK(P40_00b1c3e0[i] == -1);
+  CK(P40_Blocks[0].flags == 1);                         /* без Glide границы памяти 0..0 → блоки вне памяти */
+  for (int i = 0; i < 0x40; i++) P40_Blocks[i].flags = 0;
+  /* одиночная загрузка: пара блоков 0/1 */
+  P40_Slots[5].data = 0x1234;
+  P40_UploadSlot(5, 0);
+  CK(P40_Slots[5].block == 0 && P40_Blocks[0].slot == 5 && P40_Blocks[1].slot == 5);
+  CK(P40_Blocks[0].info[4] == 0x1234 && P40_Blocks[0].info[3] == 0xb && (P40_Blocks[0].flags & 2) && (P40_Blocks[1].flags & 2));
+  CK(P40_Blocks[1].info[4] == 0x1234 && P40_Blocks[1].info[3] == 0xb);
+  P40_UploadSlot(5, 0);                                  /* уже загружена — без изменений */
+  CK(P40_Slots[5].block == 0);
+  P40_Slots[6].flags = 2; P40_UploadSlot(6, 0x77);       /* следующая пара 2/3, флаг 4 */
+  CK(P40_Slots[6].block == 2 && P40_Blocks[2].info[4] == 0x77 && (P40_Blocks[2].flags & 4) && P40_Blocks[3].info[4] == 0);
+  /* двойная загрузка: слот 8 (вторая часть, флаг 8) → начинает со слота 7 */
+  P40_Slots[7].data = 0xa; P40_Slots[8].data = 0xb; P40_Slots[8].flags = 8;
+  P40_UploadSlotPair(8, 0, 0);
+  CK(P40_Slots[7].block == 4 && P40_Slots[8].block == 5 && P40_Blocks[4].slot == 7 && P40_Blocks[5].slot == 8);
+  CK(P40_Blocks[4].info[4] == 0xa && P40_Blocks[5].info[4] == 0xb && P40_Blocks[4].info[3] == 5);
+  /* занятый блок отдаёт слот: заполняем всю таблицу и вытесняем */
+  for (int i = 0; i < 0x40; i++) { P40_Blocks[i].flags = 1; }
+  P40_UploadSlot(9, 1);
+  CK(P40_Slots[9].block == 0xff);                        /* свободных блоков нет */
+  /* палитры: без списка — одна запись в 0x1252fe0 (счёт вызовов Fwd через G00B1C0D8 != 1 не считается) */
+  P40_ListCount = 0;
+  P40_DownloadPalette(3, 1);
+#undef CK
+  return f;
+}
+
 static int test_p39(void) {
   int f = 0, lk, ul, fl, bl, cs; uint32_t ff; int32_t dr[4], sr[4];
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p39 fail line %d\n",__LINE__); } } while (0)
@@ -1002,7 +1039,7 @@ static int test_p39(void) {
   return f;
 }
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

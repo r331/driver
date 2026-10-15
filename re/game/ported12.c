@@ -1,4 +1,5 @@
 #include "ported12.h"
+#include "ported40.h"
 GAME_VAR_DEF(int32_t,P12_00bdfa40,0x00bdfa40)
 GAME_VAR_DEF(int32_t,P12_00b87ef8,0x00b87ef8)
 GAME_VAR_DEF(int32_t,P12_005f7e5c,0x005f7e5c)
@@ -203,11 +204,11 @@ void P12_Fn0040C813(uint32_t a, int32_t b) {
 }
 void P12_Fn0040DA56(uint32_t a) {
   int32_t n = 0;
-  Call00489D20();
+  P40_ResetTexMem();
   for (int32_t y = 0; y < 0x1e0; y += 0x100)
     for (int32_t x = 0; x < 0x280; x += 0x100) {
       uint32_t v = R12_40DAE1(a, x, y);
-      G6Call0048A239(n, (int32_t)v); n++;
+      P40_UploadSlot(n, (int32_t)v); n++;
     }
 }
 void P12_Fn0041A8CD(void) {

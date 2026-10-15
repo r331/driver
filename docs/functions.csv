@@ -2013,10 +2013,10 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004757d2,FUN_004757d2,,,,,,308,todo
 00475906,FUN_00475906,,,,,,311,todo
 00475a3d,FUN_00475a3d,,,,,,897,todo
-00489d20,FUN_00489d20,,,,,,438,todo
+00489d20,FUN_00489d20,ResetTexMem,manual,GlideTexMem,manual,,438,ported
 00489ed6,FUN_00489ed6,P12_Fn00489ED6,manual,Misc12,,,122,ported
-00489f50,FUN_00489f50,,,,,,745,todo
-0048a239,FUN_0048a239,,,,,,562,todo
+00489f50,FUN_00489f50,UploadTexSlotPair,manual,GlideTexMem,manual,,745,ported
+0048a239,FUN_0048a239,UploadTexSlot,manual,GlideTexMem,manual,,562,ported
 0048a46b,FUN_0048a46b,P12_Fn0048A46B,manual,Misc12,,,118,ported
 0048a4e1,FUN_0048a4e1,NoopFn0048a4e1,manual,Noop,,,5,ported
 0048a4e6,FUN_0048a4e6,FindFreeEven_0048A4E6,manual,Misc,,,63,ported
@@ -2775,7 +2775,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004ef9cd,FUN_004ef9cd,,,map,range,,304,todo
 004efafd,FUN_004efafd,,,map,assert,,262,todo
 004efc03,FUN_004efc03,,,,,,121,todo
-004efc7c,FUN_004efc7c,,,,,,182,todo
+004efc7c,FUN_004efc7c,DownloadSlotPalette,manual,GlideTexMem,manual,,182,ported
 004f0f90,FUN_004f0f90,,,,,,917,todo
 004f1325,FUN_004f1325,,,,,,553,todo
 004f154e,FUN_004f154e,,,,,,503,todo

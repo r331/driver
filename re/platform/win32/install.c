@@ -28,6 +28,7 @@
 #include "../../game/ported37.h"
 #include "../../game/ported38.h"
 #include "../../game/ported39.h"
+#include "../../game/ported40.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1242,4 +1243,8 @@ void re_install_all(void) {
     re_hook(0x00420c5a, (void*)P39_QueryDD4, "P39_QueryDD4");
     re_hook(0x00420cac, (void*)P39_QueryD3D, "P39_QueryD3D");
     re_hook(0x00421149, (void*)P39_CreateFrontBack, "P39_CreateFrontBack");
+    re_hook(0x00489d20, (void*)P40_ResetTexMem, "P40_ResetTexMem");
+    re_hook(0x0048a239, (void*)P40_UploadSlot, "P40_UploadSlot");
+    re_hook(0x00489f50, (void*)P40_UploadSlotPair, "P40_UploadSlotPair");
+    re_hook(0x004efc7c, (void*)P40_DownloadPalette, "P40_DownloadPalette");
 }

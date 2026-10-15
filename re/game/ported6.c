@@ -1,4 +1,5 @@
 #include "ported6.h"
+#include "ported40.h"
 #include "engine.h"
 #include "flush.h"
 GAME_VAR_DEF(int32_t, G6_011368C4, 0x011368c4)
@@ -325,7 +326,7 @@ int32_t StartFlyby004A05C0(void) {
     return -1;
 }
 void Dispatch0048A68E(int32_t i) {
-    if ((G6_01145A60[i * 0x10] & 4) == 0) G6Call0048A239(i, 0); else G6Call00489F50(i, 0, 0);
+    if ((P12_01145a60[i * 0x10] & 4) == 0) P40_UploadSlot(i, 0); else P40_UploadSlotPair(i, 0, 0);
 }
 void Dispatch0041D50E(int32_t a, int32_t b, int32_t c, int32_t d) {
     G6Call00422AE7(); G6_0054EF2C = d; if (G6_00A421F0 == 0) G6Call0041F57D(a, b, c);
