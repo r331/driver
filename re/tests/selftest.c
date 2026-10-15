@@ -27,6 +27,7 @@
 #include "../game/ported22.h"
 #include "../game/ported23.h"
 #include "../game/ported24.h"
+#include "../game/ported25.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -519,10 +520,44 @@ static int test_p24(void) {
   if (plat_dd_stub_count() != base) f++;
   return f;
 }
+static int p25_hits;
+static void p25_cb(void) { p25_hits++; }
+static int test_p25(void) {
+  int f = 0;
+  uint32_t from, to, vol;
+  plat_cd_stub_set(0, -1); P25_CdOpen = 0;
+  if (P25_InitCDAudio() != 0 || P25_CdOpen != 0) f++;
+  plat_cd_stub_set(5, 2);
+  if (P25_InitCDAudio() != 1 || P25_CdOpen != 1 || P25_CdTracks != 5 || P25_AuxDev != 2) f++;
+  Q00B87E90 = 1; P25_PlayCDTrack(1); if (Q00B87E90 != 0 || P25_CdPlaying != 0) f++;
+  Q00B87E90 = 1; P25_PlayCDTrack(6); if (Q00B87E90 != 0) f++;
+  P25_PlayCDTrack(3);
+  if (P25_CdPlaying != 1 || P25_CdTrack != 3 || !plat_cd_stub_state(&from, &to, &vol) || from != (3u | 6u << 8) || to != (6u | 36u << 8)) f++;
+  P25_CDStop(); if (P25_CdPlaying != 0 || plat_cd_stub_state(&from, &to, &vol)) f++;
+  P25_CDResume(); if (P25_CdPlaying != 1 || !plat_cd_stub_state(&from, &to, &vol) || to != (6u | 36u << 8)) f++;
+  P25_CDSetVolume(0x8000); plat_cd_stub_state(&from, &to, &vol); if (vol != 0x80008000u) f++;
+  P25_CDSetVolume(0x20000); plat_cd_stub_state(&from, &to, &vol); if (vol != 0xffffffffu) f++;
+  P25_CDSetVolume((uint32_t)-5); plat_cd_stub_state(&from, &to, &vol); if (vol != 0) f++;
+  if (P21_AddMsf(0x0a0500, 0x0b0100) != (0u | 6u << 8 | 0x15u << 16)) f++;   /* без переносов: 5+1 мин, 10+11 сек */
+  if (P21_AddMsf(0x400000 | 0x0100, 0x400000 | 0x0100) != (0x35u << 16 | 3u << 8)) f++; /* сек 0x40+0x40=0x80 -> >0x4a: -0x4b, минуты+1 */
+  P25_CDClose(); if (P25_CdOpen != 0 || P25_CdPlaying != 0) f++;
+  /* таймеры */
+  if (P25_TimersInit() != 1) f++;
+  p25_hits = 0;
+  int s = P25_TimerStart(30, 0, p25_cb);
+  if (s != 0) f++;
+  plat_sleep_ms(150);
+  if (p25_hits != 1) f++;
+  P25_TimerStop(s);
+  if (P25_TimerStart(1000, 0, p25_cb) != 0) f++;   /* слот 0 освободился */
+  P25_TimersShutdown();
+  if (P25_TimerCnt != 0) f++;
+  return f;
+}
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

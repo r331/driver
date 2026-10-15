@@ -58,3 +58,41 @@ static int g_cd_track=0;
 int plat_cd_play(int t){ if(t<1||t>99) return 0; g_cd_track=t; return 1;}
 void plat_cd_stop(void){ g_cd_track=0; }
 int plat_cd_current(void){ return g_cd_track; }
+
+/* --- CD-аудио/таймеры (SDL): привода нет — учётная заглушка для тестов; таймеры на SDL_AddTimer --- */
+#include <stdlib.h>
+static int g_cdn, g_cdaux = -1, g_cdopen, g_cdplay;
+static uint32_t g_cdfrom, g_cdto, g_cdvol;
+void plat_cd_stub_set(int n, int aux) { g_cdn = n; g_cdaux = aux; }
+int plat_cd_stub_state(uint32_t *f, uint32_t *t, uint32_t *v) { *f = g_cdfrom; *t = g_cdto; *v = g_cdvol; return g_cdplay; }
+int plat_cd_open(void *hwnd) { (void)hwnd; if (g_cdn <= 0) return 0; g_cdopen = 1; return 1; }
+void plat_cd_close(void) { g_cdopen = 0; g_cdplay = 0; }
+int plat_cd_track_count(void) { return g_cdopen ? g_cdn : -1; }
+int plat_cd_track_info(int t, uint32_t *pos, uint32_t *len) {
+  if (!g_cdopen || t < 1 || t > g_cdn) return 1;
+  *pos = (uint32_t)t | (uint32_t)(t * 2) << 8;     /* T, M */
+  *len = 3u | 30u << 8;                            /* M=3, S=30 */
+  return 0;
+}
+int plat_cd_play_range(void *hwnd, uint32_t from, uint32_t to) { (void)hwnd; if (!g_cdopen) return 0; g_cdfrom = from; g_cdto = to; g_cdplay = 1; return 1; }
+int plat_cd_play_to(uint32_t to) { if (!g_cdopen) return 0; g_cdto = to; g_cdplay = 1; return 1; }
+void plat_cd_pause(void) { g_cdplay = 0; }
+int plat_aux_find_cd(void) { return g_cdaux; }
+void plat_aux_set_volume(int dev, uint32_t lr) { if (dev == g_cdaux) g_cdvol = lr; }
+int plat_timer_period_begin(unsigned ms) { (void)ms; return 0; }
+void plat_timer_period_end(unsigned ms) { (void)ms; }
+typedef struct { void (*cb)(unsigned); unsigned flags; unsigned id; } TmrCtx;
+static Uint32 tmr_cb(Uint32 interval, void *p) {
+  TmrCtx *c = (TmrCtx *)p;
+  c->cb((unsigned)c->id);
+  return c->flags & 1 ? interval : 0;
+}
+static TmrCtx g_tc[64]; static int g_tcn;
+unsigned plat_timer_start(unsigned delay, unsigned flags, void (*cb)(unsigned)) {
+  TmrCtx *c = &g_tc[g_tcn++ & 63];
+  c->cb = cb; c->flags = flags; c->id = 0;
+  SDL_TimerID id = SDL_AddTimer(delay, tmr_cb, c);
+  c->id = (unsigned)id;
+  return (unsigned)id;
+}
+void plat_timer_kill(unsigned id) { SDL_RemoveTimer((SDL_TimerID)id); }

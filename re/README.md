@@ -33,7 +33,7 @@ Wine/CrossOver: `WINEDLLOVERRIDES="dinput=n,b" wine Game.exe`. Лог — re_dri
 - новая функция: game/<module>.c + строка в platform/win32/install.c + тест + статус ported в docs/functions.csv.
 
 ## Статус
-Перенесено 1285 функций (из ~3275 без CRT), отслеживается в docs/functions.csv (status=ported).
+Перенесено 1310 функций (из ~3275 без CRT), отслеживается в docs/functions.csv (status=ported).
 Director.c (17): FindCameraById, RenumberCameras, InsertCamera, DeleteCamera, AddDirectorCamera,
 SetCamera, GetCamera, FindCameraForFrame, FreeCameraList, FindNearestCamera, CameraFrameDistance,
 AddDefaultCamera, FreeDirectorBuffer, FreeDirectorData, BackupCameraState, DropCameraBackup, RestoreCameraBackup.
@@ -115,3 +115,4 @@ v0.51: +4 (ported17: SlotMapSide 0051bcc0, SlotFindIndex 0051bd09, ISqrt 00528e1
 - v0.69: 11 render-функций состояния устройства (game/ported22.c: Begin/EndScene, ZFunc, ZWrite, AlphaRef/Func/Test, Cull, Viewport, фильтры, TexOp) над новыми plat_scene_*/plat_set_render_state/plat_set_tex_stage/plat_set_viewport (GL-вариант + COM-вариант в hook). ИСПРАВЛЕНИЕ hook: 81 хукнутая функция Game.exe заканчивается `ret N` (stdcall) — re_hook теперь ставит переходник (platform/win32/hook.c, таблица stdcall_tbl.h из tools/gen_stdcall.py), иначе стек терялся. Всего перенесено 1278 из 3275
 - v0.70: 7 render-функций (game/ported23.c): конвертеры вершин игры → plat_vertex (00421cfe/00421db8), линии (0041e462/0041e4b9), режимы смешивания 0041d9d2, начальные render-state 00421521, очистка Z 00420e93; новые plat_draw_lines, plat_set_current_viewport, plat_clear_depth, plat_get_render_state. Всего перенесено 1285 из 3275
 - v0.71: 12 DirectDraw/Direct3D-обёрток инициализации (game/ported24.c): CreateSurface/CreateDevice/CreateViewport/AddViewport/CreateClipper/SetClipper/AttachSurface (00420c10, 00420cfe, 00420d5d, 00420dad, 00421250, 00421298, 004214dd), SetDisplayMode 0042101b, CreatePrimarySurface 0042106d, FillBackbuffer 00420ef6, RestoreSurfaces 004212dc, RestoreDisplay 004213a4; новый слой plat_dd_*/plat_d3d_* (SDL: заглушки platform/sdl/plat_dd.c, hook: vtable Game.exe). Всего перенесено 1297 из 3275
+- v0.72: 13 функций CD-аудио и таймеров (game/ported25.c): InitCDAudio 00524611, CDClose 00524763, PlayCDTrack 0052479e, CDStop 00524873/005248a0, CDResume 005248cd, CDSetVolume 00524917, GetCDTOC 00524f97, TimersInit/Shutdown/Start/Stop 005281b0/005281e1/00528221/00528293, колбэк таймера 005282e1 (stdcall); новый слой plat_cd_*/plat_aux_*/plat_timer_* (hook: winmm, SDL: учётная заглушка + SDL_AddTimer); hook-сборка линкуется с -lwinmm. Всего перенесено 1310 из 3275

@@ -13,6 +13,7 @@
 #include "../../game/ported22.h"
 #include "../../game/ported23.h"
 #include "../../game/ported24.h"
+#include "../../game/ported25.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1159,4 +1160,17 @@ void re_install_all(void) {
     re_hook(0x004214dd, (void*)P24_AttachSurface, "P24_AttachSurface");
     re_hook(0x004213a4, (void*)P24_RestoreDisplay, "P24_RestoreDisplay");
     re_hook(0x004212dc, (void*)P24_RestoreSurfaces, "P24_RestoreSurfaces");
+    re_hook(0x00524f97, (void*)P25_GetCDTOC, "P25_GetCDTOC");
+    re_hook(0x00524611, (void*)P25_InitCDAudio, "P25_InitCDAudio");
+    re_hook(0x00524763, (void*)P25_CDClose, "P25_CDClose");
+    re_hook(0x0052479e, (void*)P25_PlayCDTrack, "P25_PlayCDTrack");
+    re_hook(0x00524873, (void*)P25_CDStop, "P25_CDStop");
+    re_hook(0x005248a0, (void*)P25_CDStop, "P25_CDStop2");
+    re_hook(0x005248cd, (void*)P25_CDResume, "P25_CDResume");
+    re_hook(0x00524917, (void*)P25_CDSetVolume, "P25_CDSetVolume");
+    re_hook(0x005281b0, (void*)P25_TimersInit, "P25_TimersInit");
+    re_hook(0x005281e1, (void*)P25_TimersShutdown, "P25_TimersShutdown");
+    re_hook(0x00528221, (void*)P25_TimerStart, "P25_TimerStart");
+    re_hook(0x00528293, (void*)P25_TimerStop, "P25_TimerStop");
+    re_hook(0x005282e1, (void*)P25_TimerCb, "P25_TimerCb");
 }

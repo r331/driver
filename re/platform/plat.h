@@ -57,6 +57,23 @@ void plat_snd_close(void);
 int  plat_cd_play(int track);
 void plat_cd_stop(void);
 int  plat_cd_current(void);
+/* --- CD-аудио (MCI cdaudio, формат времени TMSF) и aux-громкость; таймеры (timeSetEvent). Время/позиции — упакованные TMSF как у MCI.
+   SDL: учётная заглушка (plat_cd_stub_*), hook: winmm. --- */
+int      plat_cd_open(void *hwnd);                    /* 1 = ок, 0 = не открылся, -1 = формат времени не принят (устройство закрыто) */
+void     plat_cd_close(void);
+int      plat_cd_track_count(void);                   /* <0 — ошибка запроса */
+int      plat_cd_track_info(int track, uint32_t *pos, uint32_t *len); /* 0 ок, 1 — позиция не получена, 2 — длина не получена */
+int      plat_cd_play_range(void *hwnd, uint32_t from, uint32_t to);  /* 1 = ок */
+int      plat_cd_play_to(uint32_t to);                /* продолжить с текущей позиции до to; 1 = ок */
+void     plat_cd_pause(void);                         /* MCI_STOP */
+int      plat_aux_find_cd(void);                      /* индекс aux-устройства CD или -1 */
+void     plat_aux_set_volume(int dev, uint32_t lr);   /* (R<<16)|L, 0..0xffff */
+int      plat_timer_period_begin(unsigned ms);        /* 0 = ок */
+void     plat_timer_period_end(unsigned ms);
+unsigned plat_timer_start(unsigned delay_ms, unsigned flags, void (*cb)(unsigned id)); /* flags: 0 разово, 1 периодически; 0 = ошибка */
+void     plat_timer_kill(unsigned id);
+void     plat_cd_stub_set(int ntracks, int aux_dev);  /* только SDL (тесты): сколько дорожек «в приводе» */
+int      plat_cd_stub_state(uint32_t *from, uint32_t *to, uint32_t *vol); /* только SDL: 1 — играет */
 /* --- DirectDraw/Direct3D-объекты (непрозрачные дескрипторы; NULL = ошибка). Возврат int32 — HRESULT (0 = успех).
    SDL: объекты-заглушки без устройства (поверхности существуют только как учётные записи); hook: вызовы vtable объектов Game.exe. --- */
 void   *plat_dd_create_surface(void *dd, const void *desc124);   /* DDSURFACEDESC 124 байта */
