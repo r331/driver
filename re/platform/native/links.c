@@ -50,6 +50,7 @@
 #include "../../game/ported59.h"
 #include "../../game/ported60.h"
 #include "../../game/ported61.h"
+#include "../../game/ported62.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -91,6 +92,7 @@ void P57_Setup4122E7 (void) { Ui004122E7(); }
 void P57_Setup412487 (void) { SetupMenuTable00412487(); }
 void P57_Setup41269B (void) { MenuAllRowsTo2_0041269B(); }
 void P57_Setup412702 (void) { Ui00412702(); }
+void P57_Fn51CB98 (void *f) { P62_SaveScores(f); }
 void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
 int32_t P55_Fn405E79 (int32_t a0, void *a1) { return (int32_t)P58_SaveSlot(a0, a1); }

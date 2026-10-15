@@ -47,6 +47,7 @@
 #include "../game/ported59.h"
 #include "../game/ported60.h"
 #include "../game/ported61.h"
+#include "../game/ported62.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -2157,8 +2158,100 @@ static int test_p61(void) {
   return f;
 }
 
+/* ported62 */
+static int test_p62(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p62 fail line %d\n",__LINE__); } } while (0)
+  P59_InitConsts(); P61_InitConsts();
+  /* 0049c850 */
+  P60_Var1373C0 = 0x01020304; P62_InitCamDefaults();
+  CK(P61_V1C == 0x800 && P62_C82434 == -0x400 && P62_C82500 == 0x338 && P61_OffX == -45.0f && P61_OffY == -256.0f && P61_OffZ == -160.0f);
+  CK(P61_Dist8 == 1280.0f && P62_F136C54 == 10.0f && P62_I13738C == 42000 && P60_Var1373C0 == 0x01020300);
+  /* 00425a50 */
+  P19_ScrW = 640; P19_ScrH = 480; P19_DivC = 640.0f; P58_CfgOn = 0;
+  P62_InitRenderConsts();
+  CK(P43_ScaleA == 1152.0f && P62_F252A94 == 1.0f && P62_F25F3F4 == 0.75f && P62_I270C44 == 0xdbba && P11_01270c24 == 42000.0f);
+  P11_01270c24 = 1.0f; P58_CfgOn = 1; P62_InitRenderConsts(); CK(P11_01270c24 == 1.0f);
+  /* 0049431d / 00492398 / 004a6749 / 0049199a */
+  static uint8_t cars[0x148 * 8]; memset(cars, 0, sizeof cars); P59_CarsTab = cars;
+  { int32_t h = 0x100; memcpy(cars + 0x148 + 0x100, &h, 4); }
+  uint8_t id = 1;
+  CK(P62_HeadingDelta(&id, 0x120) == 0x20 && rd_i32(cars, 0x148 + 0xfc) == 0x10);
+  CK(P62_HeadingDelta(&id, 0x300) == 0x200 && rd_i32(cars, 0x148 + 0xfc) == 0x200);
+  CK(P62_HeadingDelta(&id, 0x000) == 0x100 && rd_i32(cars, 0x148 + 0xfc) == -0x200);
+  CK(P62_HeadingDelta(&id, 0x100) == 0 && rd_i32(cars, 0x148 + 0xfc) == 0);
+  memset((uint8_t *)TrafficRecs, 0, sizeof(TRAFFIC_RECS_T));
+  ((uint8_t *)TrafficRecs)[2 * 0x54 + 6] = 5;                   /* запись 2 — машина с id 4 */
+  P59_PosX = 0; P59_PosZ = 0;
+  { int32_t x = 300, z = 400; memcpy(cars + 2 * 0x148 + 200, &x, 4); memcpy(cars + 2 * 0x148 + 0xd0, &z, 4); }
+  CK(P62_FarFromPlayer(4, 400) == 1 && P62_FarFromPlayer(4, 600) == 0 && P62_FarFromPlayer(4, 500) == 0);
+  CK(P62_FarFromPlayer(9, 100) == 0 && P62_FarFromPlayer(4, 0) == 0);
+  memset(P12_0112da00, 0, sizeof(p12_0112da00_t));
+  CK(P62_FindFreeTrafficSlot() == 1);
+  { uint8_t *s = (uint8_t *)P12_0112da00; int32_t one = 1; memcpy(s + 0xcb4, &one, 4); memcpy(s + 0xcd8 + 0xcb4, &one, 4);
+    CK(P62_FindFreeTrafficSlot() == 3 && rd_i32(s + 2 * 0xcd8, 0) == 2);
+    for (int i = 2; i < 8; i++) memcpy(s + i * 0xcd8 + 0xcb4, &one, 4);
+    CK(P62_FindFreeTrafficSlot() == -1);
+    for (int i = 0; i < 8; i++) memset(s + i * 0xcd8 + 0xcb4, 0, 4); }
+  G0112B284 = 0; P62_Max = 4; P62_I14428C = 7;
+  P62_SpawnTrafficCar(3);
+  { uint8_t *rec = (uint8_t *)TrafficRecs + 3 * 0x54; uint8_t *s = (uint8_t *)P12_0112da00;
+    CK(rec[5] == 1 && rec[0xd] == 0x19 && G0112B284 == 1 && P62_I14428C == 0 && rd_i32(s, 0xcbc) == 0 && rd_i32(s, 0x5c) == 1 && rd_i32(s, 0xcb4) == 1); }
+  G0112B284 = 4; P62_I14428C = 7; P62_SpawnTrafficCar(3); CK(P62_I14428C == 7);
+  /* 0042d2c9 */
+  { static uint8_t q[0xb8 * 2]; uint32_t a[15], b[15], c[15]; for (int i = 0; i < 15; i++) { a[i] = 100 + i; b[i] = 200 + i; c[i] = 300 + i; }
+    G0115A13C = q; G01159D74 = 0; P62_QueueTri(a, b, c, 0xabcd);
+    uint32_t *w = (uint32_t *)q;
+    CK(w[0] == 0xabcd && w[1] == 100 && w[15] == 114 && w[0x10] == 200 && w[0x1e] == 214 && w[0x1f] == 300 && w[0x2d] == 314 && G01159D74 == 1 && G0115A13C == q + 0xb8); }
+  /* 0051ac05 */
+  { static uint8_t m[256]; memset(m, 0, sizeof m); int32_t off0 = -1, off1 = 40; memcpy(m + 8, &off0, 4); memcpy(m + 12, &off1, 4);
+    int32_t r1[2] = { 3, 7 }, r2[2] = { 1, 9 }; memcpy(m + 40, r1, 8); memcpy(m + 48, r2, 8);
+    P54_MapBPtr = m; P62_MapN = 2; int32_t out[4];
+    CK(P62_MapRow(0, out) == 0 && out[0] == -1 && out[3] == -1);
+    CK(P62_MapRow(1, out) == 1 && out[0] == 7 && out[2] == 7 && out[3] == 9); }
+  /* 004a58ad */
+  { static const char names[] = "ford\0\x11\x01" "fiat\0\x22\x02" "mini\0\x33\x03"; uint16_t o = 0;
+    P62_ModelNames = names; P62_ModelCount = 3; P62_NoErr = 1;
+    CK(P62_ModelLookup("fiat", &o) == 1 && o == 0x0222);
+    CK(P62_ModelLookup("mini", &o) == 1 && o == 0x0333);
+    CK(P62_ModelLookup("opel", &o) == 0); }
+  /* 005047ab */
+  { static uint16_t bmp[64 * 64]; for (int i = 0; i < 64 * 64; i++) bmp[i] = (uint16_t)i;
+    memset(P62_Page, 0, sizeof(p62_page_t)); P62_DownloadPage(5, bmp, 2, 3, 4, 2, 64);
+    CK(P62_Page[0] == 3 * 64 + 2 && P62_Page[3] == 3 * 64 + 5 && P62_Page[4] == 0 && P62_Page[0x100] == 4 * 64 + 2 && P62_Page[0x100 + 3] == 4 * 64 + 5);
+    P62_DownloadPage(5, NULL, 0, 0, 1, 1, 1); }
+  /* 0051cb98 */
+  { FILE *fp = tmpfile(); memset(P62_Hs1, 7, 4);
+    CK(P62_SaveScores(fp) == 1 && ftell(fp) == 16 + 0x2c * (0x28 * 2 + 0x14 * 3 + 4));
+    rewind(fp); uint32_t h[4]; CK(fread(h, 16, 1, fp) == 1 && h[0] == 0x53435245 && h[3] == 3); fclose(fp); }
+  /* 00413df3 / 0051cdec */
+  P62_BusyA = P62_BusyB = P62_BusyC = P62_BusyD = P62_BusyE = 0; CK(P62_MenuBusy() == 0);
+  P62_BusyD = 1; P62_Menu1271060 = 3; CK(P62_MenuBusy() == 1); P62_Menu1271060 = 7; CK(P62_MenuBusy() == 0);
+  P62_BusyC = 1; CK(P62_MenuBusy() == 1);
+  { int32_t idx = 5; P62_Menu1271060 = 3; CK(P62_ScoreTable(&idx, 0) == 0 && idx == 5);   /* занято */
+    P62_BusyC = 0; P62_BusyD = 0; P62_Menu1271060 = 5; P62_ScoreTable(&idx, 1); CK(idx == 5); }
+  /* 005025dc */
+  P62_HudOff1 = 0; P62_HudOff2 = 0; P62_Spd = 100; P62_Unit = "mph"; P62_Blink = 0; P62_SpeedText();
+  /* 004ec336 */
+  { FILE *fp = tmpfile(); int32_t wh[2] = { 6, 4 }; uint8_t pay[16]; for (int i = 0; i < 16; i++) pay[i] = (uint8_t)(i + 1);
+    fwrite(wh, 8, 1, fp); fwrite(pay, 16, 1, fp); rewind(fp);
+    P62_LoadMapHeader(fp, 8 + 16);
+    CK(P62_MapW == 6 && P62_MapH == 4 && P62_Map1C10 == 6 * 0x5dc && P62_Map1C24 == 4 * 0x5dc && P62_MapC64 == 3 * 0x5dc && P62_Map2C40 == 2 * 0x5dc);
+    CK(P62_Map1C0C == 3 && P62_MapCC90 == 2 && P62_MapBuf != NULL && P62_MapBuf[0] == 1 && P62_MapBuf[15] == 16); fclose(fp); }
+  /* 00514c72 / 00515813 */
+  { uint8_t p[0x100]; memset(p, 0, sizeof p); P62_ParticleSet(p, 3, 9, 0x400, 1);
+    CK(rd_i32(p, 0x24) == 9 && rd_i32(p, 0x40) == 1 && rd_i32(p, 0xc) == 0x480 && p[4] == 3);
+    memset(p, 0, sizeof p); P62_Alt = 0; int32_t fl = 0xfffff7ff; memcpy(p + 0xc, &fl, 4); P62_ParticleInit(p, NULL);
+    CK(p[0] == 1 && rd_i32(p, 0xc) == (int32_t)(0xfffff7ffu & 0xfffffbffu | 0x80) && p[4] == 3 && rd_i32(p, 0x40) == 1);
+    memset(p, 0, sizeof p); P62_Alt = 1; P62_ParticleInit(p, NULL);
+    float fa, fb; memcpy(&fa, p + 0x74, 4); memcpy(&fb, p + 0x7c, 4);
+    CK((rd_i32(p, 0xc) & 0x800) && fa == (float)(P59_Sin[0] >> 7) && fb == (float)(P59_Sin[0x400] >> 7) && rd_i32(p, 0x78) == (int32_t)0xc25c0000); }
+  return f;
+}
+
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_p62() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

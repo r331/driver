@@ -50,6 +50,7 @@
 #include "../../game/ported59.h"
 #include "../../game/ported60.h"
 #include "../../game/ported61.h"
+#include "../../game/ported62.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1545,4 +1546,21 @@ void re_install_all(void) {
     re_hook(0x004c536c, (void*)P61_RestoreCamState, "P61_RestoreCamState");
     re_hook(0x004c6d62, (void*)P61_CamPrepare,      "P61_CamPrepare");
     re_hook(0x00514261, (void*)P61_SpawnPart,       "P61_SpawnPart");
+    re_hook(0x0049c850, (void*)P62_InitCamDefaults, "P62_InitCamDefaults");
+    re_hook(0x00425a50, (void*)P62_InitRenderConsts, "P62_InitRenderConsts");
+    re_hook(0x0049431d, (void*)P62_HeadingDelta, "P62_HeadingDelta");
+    re_hook(0x00492398, (void*)P62_FarFromPlayer, "P62_FarFromPlayer");
+    re_hook(0x0042d2c9, (void*)P62_QueueTri, "P62_QueueTri");
+    re_hook(0x0051ac05, (void*)P62_MapRow, "P62_MapRow");
+    re_hook(0x004a58ad, (void*)P62_ModelLookup, "P62_ModelLookup");
+    re_hook(0x004a6749, (void*)P62_FindFreeTrafficSlot, "P62_FindFreeTrafficSlot");
+    re_hook(0x0049199a, (void*)P62_SpawnTrafficCar, "P62_SpawnTrafficCar");
+    re_hook(0x005047ab, (void*)P62_DownloadPage, "P62_DownloadPage");
+    re_hook(0x0051cb98, (void*)P62_SaveScores, "P62_SaveScores");
+    re_hook(0x0051cdec, (void*)P62_ScoreTable, "P62_ScoreTable");
+    re_hook(0x00413df3, (void*)P62_MenuBusy, "P62_MenuBusy");
+    re_hook(0x005025dc, (void*)P62_SpeedText, "P62_SpeedText");
+    re_hook(0x004ec336, (void*)P62_LoadMapHeader, "P62_LoadMapHeader");
+    re_hook(0x00514c72, (void*)P62_ParticleSet, "P62_ParticleSet");
+    re_hook(0x00515813, (void*)P62_ParticleInit, "P62_ParticleInit");
 }
