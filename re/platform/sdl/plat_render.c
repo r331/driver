@@ -18,7 +18,7 @@ enum {
     GL_COLOR_BUFFER_BIT = 0x4000, GL_DEPTH_BUFFER_BIT = 0x0100, GL_RGBA = 0x1908, GL_UNSIGNED_BYTE = 0x1401, GL_FLOAT = 0x1406,
     GL_TEXTURE_MIN_FILTER = 0x2801, GL_TEXTURE_MAG_FILTER = 0x2800, GL_TEXTURE_WRAP_S = 0x2802, GL_TEXTURE_WRAP_T = 0x2803,
     GL_NEAREST = 0x2600, GL_LINEAR = 0x2601, GL_REPEAT = 0x2901, GL_CLAMP_TO_EDGE = 0x812F, GL_TEXTURE0 = 0x84C0,
-    GL_ARRAY_BUFFER = 0x8892, GL_STREAM_DRAW = 0x88E0, GL_TRIANGLES = 0x0004, GL_VERTEX_SHADER = 0x8B31, GL_FRAGMENT_SHADER = 0x8B30,
+    GL_ARRAY_BUFFER = 0x8892, GL_STREAM_DRAW = 0x88E0, GL_TRIANGLES = 0x0004, GL_LINES = 0x0001, GL_VERTEX_SHADER = 0x8B31, GL_FRAGMENT_SHADER = 0x8B30,
     GL_COMPILE_STATUS = 0x8B81, GL_LINK_STATUS = 0x8B82, GL_INFO_LOG_LENGTH = 0x8B84, GL_UNPACK_ALIGNMENT = 0x0CF5, GL_PACK_ALIGNMENT = 0x0D05,
     GL_ZERO = 0, GL_ONE = 1, GL_SRC_COLOR = 0x0300, GL_ONE_MINUS_SRC_COLOR = 0x0301, GL_SRC_ALPHA = 0x0302, GL_ONE_MINUS_SRC_ALPHA = 0x0303,
     GL_DST_ALPHA = 0x0304, GL_ONE_MINUS_DST_ALPHA = 0x0305, GL_DST_COLOR = 0x0306, GL_ONE_MINUS_DST_COLOR = 0x0307, GL_VERSION = 0x1F02,
@@ -40,7 +40,7 @@ enum {
  X(void, GenVertexArrays, (GLsizei, GLuint *)) X(void, BindVertexArray, (GLuint)) \
  X(void, GenBuffers, (GLsizei, GLuint *)) X(void, BindBuffer, (GLenum, GLuint)) X(void, BufferData, (GLenum, GLsizeiptr, const void *, GLenum)) \
  X(void, VertexAttribPointer, (GLuint, GLint, GLenum, GLboolean, GLsizei, const void *)) X(void, EnableVertexAttribArray, (GLuint)) \
- X(void, DrawArrays, (GLenum, GLint, GLsizei))
+ X(void, DrawArrays, (GLenum, GLint, GLsizei)) X(void, ClearDepth, (double))
 #define DECL(r, n, a) static r (*gl##n) a;
 GLFUNCS(DECL)
 
@@ -151,19 +151,29 @@ void plat_set_tex_stage(int stage, int type, uint32_t value) {
 void plat_set_viewport(int x, int y, int w, int h) {
     g_vp[0] = x; g_vp[1] = y; g_vp[2] = w; g_vp[3] = h; g_vpset = (w > 0 && h > 0 && !(x == 0 && y == 0 && w >= g_w && h >= g_h));
 }
-static void draw(const plat_vertex *v, int count) {
+static void draw(const plat_vertex *v, int count, unsigned mode) {
     apply_state();
     glUseProgram(g_prog); glUniform2f(g_uView, (float)g_w, (float)g_h); glUniform1i(g_uTex, 0);
     glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, g_cur ? g_tex[g_cur].id : g_white);
     glBindVertexArray(g_vao); glBindBuffer(GL_ARRAY_BUFFER, g_vbo);
     glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)count * sizeof(plat_vertex), v, GL_STREAM_DRAW);
-    glDrawArrays(GL_TRIANGLES, 0, count);
+    glDrawArrays(mode, 0, count);
 }
-void plat_draw_tris(const plat_vertex *v, int count) { if (g_ok && v && count >= 3) draw(v, count - count % 3); }
+void plat_draw_tris(const plat_vertex *v, int count) { if (g_ok && v && count >= 3) draw(v, count - count % 3, GL_TRIANGLES); }
+void plat_draw_lines(const plat_vertex *v, int count) { if (g_ok && v && count >= 2) draw(v, count - count % 2, GL_LINES); }
 void plat_clear(uint32_t c, int clear_z) {
     if (!g_ok) return;
     glDepthMask(1); glClearColor(((c >> 16) & 255) / 255.f, ((c >> 8) & 255) / 255.f, (c & 255) / 255.f, (c >> 24) / 255.f);
     glClear(GL_COLOR_BUFFER_BIT | (clear_z ? GL_DEPTH_BUFFER_BIT : 0));
+}
+void plat_set_current_viewport(void) {}
+int plat_get_render_state(int state) { return (state >= 0 && state < 64) ? g_rs[state] : 0; }
+void plat_clear_depth(void *viewport, int x, int y, int w, int h, float z) {
+    (void)viewport;
+    if (!g_ok) return;
+    glEnable(GL_SCISSOR_TEST); glScissor(x, g_h - y - h, w, h);
+    glDepthMask(1); glClearDepth((double)z); glClear(GL_DEPTH_BUFFER_BIT);
+    glClearDepth(1.0);
 }
 void plat_flip(void) { if (!g_ok) return; glFinish(); if (g_swap) g_swap(); }
 void plat_blit2d(int tex, int sx, int sy, int sw, int sh, int dx, int dy) {
@@ -177,7 +187,7 @@ void plat_blit2d(int tex, int sx, int sy, int sw, int sh, int dx, int dy) {
     V(3, x0, y0, u0, v0); V(4, x1, y1, u1, v1); V(5, x0, y1, u0, v1);
     int sv = g_cur, szt = g_zt, sb = g_blend, sbs = g_bs, sbd = g_bd;
     g_cur = tex; g_zt = 0; g_blend = 1; g_bs = 5; g_bd = 6;
-    draw(q, 6);
+    draw(q, 6, GL_TRIANGLES);
     g_cur = sv; g_zt = szt; g_blend = sb; g_bs = sbs; g_bd = sbd;
 }
 int plat_render_readback(uint32_t *out) {

@@ -25,8 +25,10 @@
 #include <stdlib.h>
 #include "../game/ported21.h"
 #include "../game/ported22.h"
+#include "../game/ported23.h"
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #define CHECK(c) do { if (!(c)) { printf("FAIL %s:%d %s\n", __FILE__, __LINE__, #c); return 1; } } while (0)
 static int test_director(void) {
     DIRECTOR_CAMERA c; memset(&c, 0, sizeof c);
@@ -449,10 +451,44 @@ static int test_p22(void) {
   P22_SetZWrite(1);
   return f;
 }
+static float f32t(int32_t b) { float f; memcpy(&f, &b, 4); return f; }
+static int32_t bitsf(float f) { int32_t b; memcpy(&b, &f, 4); return b; }
+static int test_p23(void) {
+  int f = 0;
+  int32_t in[11] = { bitsf(10.f), bitsf(20.f), 0, bitsf(255.f), bitsf(128.5f), bitsf(1.4f), 0, 0, bitsf(4.f), bitsf(8.f), bitsf(12.f) };
+  plat_vertex v;
+  P23_ScaleUV_A = 2.f; P23_ScaleUV_B = 3.f; P23_ZScale_A = 0.01f; P23_ZScale_B = 0.02f; P23_ZNum = 1.f; P23_ZDenA = 8.f; P23_ZBias = 0.f;
+  P23_ConvVertexA(in, &v);
+  if (v.x != 10.f || v.y != 20.f || v.rhw != 4.f) f++;
+  if (v.color != ((255u << 16) | (128u << 8) | 1u)) f++;           /* 128.5 -> 128 (к чётному) */
+  if (fabsf(v.z - (1.f - 4.f * 0.01f)) > 1e-6f) f++;
+  if (fabsf(v.u - 8.f * 2.f / 4.f) > 1e-6f || fabsf(v.v - 12.f * 2.f / 4.f) > 1e-6f) f++;
+  P23_ConvVertexB(in, &v);
+  if (fabsf(v.z - (1.f - 4.f * 0.02f)) > 1e-6f || fabsf(v.u - 8.f * 3.f / 4.f) > 1e-6f) f++;
+  P23_ZBias = 2.f;
+  P23_ConvVertexA(in, &v); if (fabsf(v.z - (1.f - 1.f / (8.f / 4.f + 2.f))) > 1e-6f) f++;
+  P23_ConvVertexB(in, &v); if (fabsf(v.z - (1.f - 1.f / (4.f + 2.f))) > 1e-6f) f++;
+  (void)f32t;
+  /* режимы смешивания: SRC=19 DEST=20 ALPHABLEND=27 */
+  P23_DevCaps = 0xffffffffu; P23_AlphaMode = 0; P22_AlphaFunc = 2;
+  P23_BlendCur = -1; P23_SetBlendMode(0, 0);
+  if (plat_get_render_state(19) != 1 || plat_get_render_state(20) != 4 || plat_get_render_state(27) != 1) f++;
+  P23_SetBlendMode(0, 5);
+  if (plat_get_render_state(20) != 4 || P23_AlphaMode != 1 || plat_get_render_state(25) != 2) f++;
+  P23_SetBlendMode(4, 0); if (plat_get_render_state(27) != 0 || P23_AlphaMode != 0) f++;
+  P23_DevCaps = 0; P23_SetBlendMode(2, 0); if (plat_get_render_state(27) != 0) f++;   /* нет поддержки -> режим 4 */
+  P23_SetBlendMode(2, 0); if (P23_BlendCur != 2) f++;
+  P22_DevReady = 0; P23_DrawLineA(in, in); P23_DrawLineB(in, in);
+  if (P23_ClearZ(NULL, 0) != 0) f++;
+  P23_InitRenderStates();
+  if (plat_get_render_state(23) != 4 || plat_get_render_state(27) != 0 || plat_get_render_state(31) != 1) f++;
+  P22_SetZFunc(3); P22_SetZWrite(1); plat_set_render_state(7, 1);  /* вернуть состояние для render_test */
+  return f;
+}
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

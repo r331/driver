@@ -33,7 +33,7 @@ Wine/CrossOver: `WINEDLLOVERRIDES="dinput=n,b" wine Game.exe`. Лог — re_dri
 - новая функция: game/<module>.c + строка в platform/win32/install.c + тест + статус ported в docs/functions.csv.
 
 ## Статус
-Перенесено 1257 функций (из ~3275 без CRT), отслеживается в docs/functions.csv (status=ported).
+Перенесено 1285 функций (из ~3275 без CRT), отслеживается в docs/functions.csv (status=ported).
 Director.c (17): FindCameraById, RenumberCameras, InsertCamera, DeleteCamera, AddDirectorCamera,
 SetCamera, GetCamera, FindCameraForFrame, FreeCameraList, FindNearestCamera, CameraFrameDistance,
 AddDefaultCamera, FreeDirectorBuffer, FreeDirectorData, BackupCameraState, DropCameraBackup, RestoreCameraBackup.
@@ -113,3 +113,4 @@ v0.51: +4 (ported17: SlotMapSide 0051bcc0, SlotFindIndex 0051bd09, ISqrt 00528e1
 - v0.67: OpenGL 3.3 бэкенд рендера (platform/sdl/plat_render.c) + offscreen-тест через OSMesa (tests/render_test.c, PNG); функций перенесено 0, всего 1267 из 3275
 - v0.68: SDL_audio микшер (platform/sdl/plat_snd.c: 44100 Гц стерео S16, 8/16 бит, моно/стерео, pitch, громкость/pan в сотых дБ как DirectSound, loop; plat_snd_open/close/mix) + tests/snd_test.c; функций перенесено 0, всего 1267 из 3275
 - v0.69: 11 render-функций состояния устройства (game/ported22.c: Begin/EndScene, ZFunc, ZWrite, AlphaRef/Func/Test, Cull, Viewport, фильтры, TexOp) над новыми plat_scene_*/plat_set_render_state/plat_set_tex_stage/plat_set_viewport (GL-вариант + COM-вариант в hook). ИСПРАВЛЕНИЕ hook: 81 хукнутая функция Game.exe заканчивается `ret N` (stdcall) — re_hook теперь ставит переходник (platform/win32/hook.c, таблица stdcall_tbl.h из tools/gen_stdcall.py), иначе стек терялся. Всего перенесено 1278 из 3275
+- v0.70: 7 render-функций (game/ported23.c): конвертеры вершин игры → plat_vertex (00421cfe/00421db8), линии (0041e462/0041e4b9), режимы смешивания 0041d9d2, начальные render-state 00421521, очистка Z 00420e93; новые plat_draw_lines, plat_set_current_viewport, plat_clear_depth, plat_get_render_state. Всего перенесено 1285 из 3275

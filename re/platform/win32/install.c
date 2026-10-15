@@ -11,6 +11,7 @@
 #include "../../game/ported20.h"
 #include "../../game/ported21.h"
 #include "../../game/ported22.h"
+#include "../../game/ported23.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1138,4 +1139,11 @@ void re_install_all(void) {
     re_hook(0x0041f6a9, (void*)P22_SetTexFilter, "P22_SetTexFilter");
     re_hook(0x0041e08a, (void*)P22_SetViewport, "P22_SetViewport");
     re_hook(0x0041e14f, (void*)P22_SetTexOp, "P22_SetTexOp");
+    re_hook(0x00421cfe, (void*)P23_ConvVertexA, "P23_ConvVertexA");
+    re_hook(0x00421db8, (void*)P23_ConvVertexB, "P23_ConvVertexB");
+    re_hook(0x0041e462, (void*)P23_DrawLineA, "P23_DrawLineA");
+    re_hook(0x0041e4b9, (void*)P23_DrawLineB, "P23_DrawLineB");
+    re_hook(0x0041d9d2, (void*)P23_SetBlendMode, "P23_SetBlendMode");
+    re_hook(0x00421521, (void*)P23_InitRenderStates, "P23_InitRenderStates");
+    re_hook(0x00420e93, (void*)P23_ClearZ, "P23_ClearZ");
 }

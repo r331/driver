@@ -24,7 +24,7 @@ address,name,layer,imports,callers,status
 00402653,thunk_FUN_0048ba31,render,COM_vtable,,todo
 0041ce90,FUN_0041ce90,render,DirectDrawEnumerateA,,todo
 0041d3ed,FUN_0041d3ed,render,COM_vtable,,todo
-0041d9d2,FUN_0041d9d2,render,COM_vtable,,todo
+0041d9d2,FUN_0041d9d2,render,COM_vtable,,ported
 0041dd37,FUN_0041dd37,render,COM_vtable,,ported
 0041ddc5,FUN_0041ddc5,render,COM_vtable,,ported
 0041de1d,FUN_0041de1d,render,COM_vtable,,ported
@@ -35,8 +35,8 @@ address,name,layer,imports,callers,status
 0041e215,FUN_0041e215,render,COM_vtable,,ported
 0041e28a,FUN_0041e28a,render,COM_vtable,,ported
 0041e404,FUN_0041e404,render,COM_vtable,,ported
-0041e462,FUN_0041e462,render,COM_vtable,,todo
-0041e4b9,FUN_0041e4b9,render,COM_vtable,,todo
+0041e462,FUN_0041e462,render,COM_vtable,,ported
+0041e4b9,FUN_0041e4b9,render,COM_vtable,,ported
 0041ec82,FUN_0041ec82,render,COM_vtable,,todo
 0041f2a0,FUN_0041f2a0,render,COM_vtable,,todo
 0041f57d,FUN_0041f57d,render,COM_vtable,,todo
@@ -47,7 +47,7 @@ address,name,layer,imports,callers,status
 00420cfe,FUN_00420cfe,render,COM_vtable,,todo
 00420d5d,FUN_00420d5d,render,COM_vtable,,todo
 00420dad,FUN_00420dad,render,COM_vtable,,todo
-00420e93,FUN_00420e93,render,COM_vtable,,todo
+00420e93,FUN_00420e93,render,COM_vtable,,ported
 00420ef6,FUN_00420ef6,render,COM_vtable,,todo
 0042101b,FUN_0042101b,render,COM_vtable,,todo
 0042106d,FUN_0042106d,render,COM_vtable,,todo
@@ -56,7 +56,7 @@ address,name,layer,imports,callers,status
 004212dc,FUN_004212dc,render,COM_vtable,,todo
 004213dc,FUN_004213dc,render,COM_vtable,,todo
 004214dd,FUN_004214dd,render,COM_vtable,,todo
-00421521,FUN_00421521,render,COM_vtable,,todo
+00421521,FUN_00421521,render,COM_vtable,,ported
 00422309,FUN_00422309,render,COM_vtable,,todo
 00422ae7,FUN_00422ae7,render,COM_vtable,,todo
 00422c55,FUN_00422c55,render,COM_vtable,,todo

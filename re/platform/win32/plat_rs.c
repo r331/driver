@@ -49,3 +49,16 @@ void plat_set_viewport(int x, int y, int w, int h) {
     vp.clip_x = 0; vp.clip_y = 0; vp.clip_w = (float)w; vp.clip_h = (float)h; vp.min_z = 0; vp.max_z = 1.0f;
     ((d3d_fn1p)VT(v, 0x44))(v, &vp);
 }
+void plat_draw_lines(const plat_vertex *v, int count) {
+    void *d = D3D_DEV;
+    typedef long (__attribute__((stdcall)) *dp_t)(void *, uint32_t, uint32_t, const void *, uint32_t, uint32_t);
+    ((dp_t)VT(d, 0x70))(d, 2, 0x1c4, v, (uint32_t)count, 0x18);
+}
+void plat_set_current_viewport(void) { void *d = D3D_DEV; ((d3d_fn1p)VT(d, 0x30))(d, D3D_VP); }
+int plat_get_render_state(int state) { (void)state; return 0; }
+void plat_clear_depth(void *viewport, int x, int y, int w, int h, float z) {
+    /* IDirect3DViewport3::Clear2(count, rects, flags=D3DCLEAR_ZBUFFER, color=0, z, stencil=0) */
+    typedef long (__attribute__((stdcall)) *cl_t)(void *, uint32_t, void *, uint32_t, uint32_t, float, uint32_t);
+    int32_t r[4] = { x, y, x + w, y + h };
+    ((cl_t)VT(viewport, 0x50))(viewport, 1, r, 2, 0, z, 0);
+}

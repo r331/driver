@@ -22,6 +22,10 @@ void plat_set_blend(int enable, int src, int dst);
 void plat_set_zbuffer(int test, int write);
 void plat_draw_tris(const plat_vertex *v, int count);
 void plat_clear(uint32_t color, int clear_z);
+void plat_draw_lines(const plat_vertex *v, int count);     /* список линий, count чётный */
+void plat_set_current_viewport(void);                      /* D3D SetCurrentViewport (SDL: no-op) */
+void plat_clear_depth(void *viewport, int x, int y, int w, int h, float z); /* очистка Z в прямоугольнике */
+int plat_get_render_state(int state);                      /* последнее установленное значение (для тестов; hook: 0) */
 void plat_flip(void);
 void plat_blit2d(int tex, int sx, int sy, int sw, int sh, int dx, int dy);
 /* Состояние устройства в терминах Direct3D 6/7 (номера D3DRENDERSTATETYPE / D3DTEXTURESTAGESTATETYPE и значения как в DX):

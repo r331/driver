@@ -1756,7 +1756,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041d9bd,FUN_0041d9bd,NoopFn0041d9bd,manual,Noop,,,7,ported
 0041d9c4,FUN_0041d9c4,NoopFn0041d9c4,manual,Noop,,,7,ported
 0041d9cb,FUN_0041d9cb,NoopFn0041d9cb,manual,Noop,,,7,ported
-0041d9d2,FUN_0041d9d2,,,,,,869,todo
+0041d9d2,FUN_0041d9d2,P23_SetBlendMode,manual,render,,,869,ported
 0041dd37,FUN_0041dd37,P22_SetAlphaTest,manual,render,,,135,ported
 0041ddbe,FUN_0041ddbe,NoopFn0041ddbe,manual,Noop,,,7,ported
 0041ddc5,FUN_0041ddc5,P22_SetAlphaFunc,manual,render,,,88,ported
@@ -1779,8 +1779,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041e404,FUN_0041e404,P22_SetZWrite,manual,render,,,82,ported
 0041e456,FUN_0041e456,NoopFn0041e456,manual,Noop,,,5,ported
 0041e45b,FUN_0041e45b,NoopFn0041e45b,manual,Noop,,,7,ported
-0041e462,FUN_0041e462,,,,,,87,todo
-0041e4b9,FUN_0041e4b9,,,,,,87,todo
+0041e462,FUN_0041e462,P23_DrawLineA,manual,render,,,87,ported
+0041e4b9,FUN_0041e4b9,P23_DrawLineB,manual,render,,,87,ported
 0041e510,FUN_0041e510,NoopFn0041e510,manual,Noop,,,7,ported
 0041e517,FUN_0041e517,NoopFn0041e517,manual,Noop,,,7,ported
 0041e51e,FUN_0041e51e,NoopFn0041e51e,manual,Noop,,,7,ported
@@ -1884,7 +1884,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00420cfe,FUN_00420cfe,,,,,,95,todo
 00420d5d,FUN_00420d5d,,,,,,80,todo
 00420dad,FUN_00420dad,,,,,,230,todo
-00420e93,FUN_00420e93,,,,,,99,todo
+00420e93,FUN_00420e93,P23_ClearZ,manual,render,,,99,ported
 00420ef6,FUN_00420ef6,,,,,,293,todo
 0042101b,FUN_0042101b,,,,,,82,todo
 0042106d,FUN_0042106d,,,,,,220,todo
@@ -1895,7 +1895,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004213a4,FUN_004213a4,,,,,,56,todo
 004213dc,FUN_004213dc,,,,,,257,todo
 004214dd,FUN_004214dd,,,,,,68,todo
-00421521,FUN_00421521,,,,,,504,todo
+00421521,FUN_00421521,P23_InitRenderStates,manual,render,,,504,ported
 00421719,FUN_00421719,,,,,,328,todo
 00421861,FUN_00421861,,,,,,391,todo
 004219e8,FUN_004219e8,,,,,,81,todo
@@ -1904,8 +1904,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00421c1d,FUN_00421c1d,MaskShift_00421C1D,manual,Misc,,,85,ported
 00421c72,FUN_00421c72,CountTrailingZeros00421C72,manual,SmallFuncs,,,57,ported
 00421cab,FUN_00421cab,SetZoom_00421CAB,manual,Ported8,,,83,ported
-00421cfe,FUN_00421cfe,,,,,,186,todo
-00421db8,FUN_00421db8,,,,,,180,todo
+00421cfe,FUN_00421cfe,P23_ConvVertexA,manual,render,,,186,ported
+00421db8,FUN_00421db8,P23_ConvVertexB,manual,render,,,180,ported
 00421e6c,FUN_00421e6c,,,,,,416,todo
 0042200c,FUN_0042200c,,,,,,82,todo
 0042205e,FUN_0042205e,,,,,,353,todo
