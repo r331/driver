@@ -12,4 +12,15 @@ int plat_window_open(const char *title, int w, int h, int fullscreen);
 int plat_poll_events(void); /* returns 0 on quit request */
 int plat_key_down(int scancode);
 void plat_window_close(void);
+/* --- render (declared; SDL/OpenGL impl in sdl/plat_render.c) --- */
+typedef struct { float x, y, z, rhw; uint32_t color, specular; float u, v; } plat_vertex;
+int plat_tex_create(int w, int h, const uint32_t *rgba);
+void plat_tex_bind(int tex);
+void plat_tex_free(int tex);
+void plat_set_blend(int enable, int src, int dst);
+void plat_set_zbuffer(int test, int write);
+void plat_draw_tris(const plat_vertex *v, int count);
+void plat_clear(uint32_t color, int clear_z);
+void plat_flip(void);
+void plat_blit2d(int tex, int sx, int sy, int sw, int sh, int dx, int dy);
 #endif
