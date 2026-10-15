@@ -70,6 +70,7 @@
 #include "../../game/ported79.h"
 #include "../../game/ported80.h"
 #include "../../game/ported81.h"
+#include "../../game/ported82.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1719,5 +1720,10 @@ void re_install_all(void) {
     re_hook(0x004eb490, (void*)P80_LoadModels, "P80_LoadModels");
     re_hook(0x004ed055, (void*)P80_LoadHeader, "P80_LoadHeader");
     re_hook(0x004cb619, (void*)P81_Light, "P81_Light");
+    re_hook(0x00427abe, (void*)P82_FrustumSetup2D, "P82_FrustumSetup2D");
+    re_hook(0x00427eea, (void*)P82_FrustumSetup3D, "P82_FrustumSetup3D");
+    re_hook(0x00427d5a, (void*)P82_SphereVis2D, "P82_SphereVis2D");
+    re_hook(0x004283d9, (void*)P82_SphereVis3D, "P82_SphereVis3D");
+    re_hook(0x004268ef, (void*)P82_AddLight, "P82_AddLight");
     re_hook(0x004e959a, (void*)P81_Limit, "P81_Limit");
 }

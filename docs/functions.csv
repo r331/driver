@@ -208,7 +208,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401514,thunk_FUN_0042da16,,,,,,5,todo
 0040151e,thunk_FUN_004a9850,,,,,,5,todo
 00401523,thunk_FUN_004f57d7,,,,,,5,todo
-0040152d,thunk_FUN_004283d9,,,,,,5,todo
+0040152d,thunk_FUN_004283d9,,,,,,5,ported
 00401537,thunk_FUN_0042486b,,,,,,5,ported
 0040153c,thunk_FUN_004248c6,,,,,,5,ported
 00401541,thunk_FUN_004c8eec,Thunk_004C8EEC,manual,Thunks,,,5,ported
@@ -564,7 +564,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401e10,thunk_FUN_004c862f,,,,,,5,ported
 00401e15,thunk_FUN_004eac70,,,,,,5,todo
 00401e1a,thunk_FUN_004cd875,,,,,,5,todo
-00401e1f,thunk_FUN_004268ef,,,,,,5,todo
+00401e1f,thunk_FUN_004268ef,,,,,,5,ported
 00401e24,thunk_FUN_005139d7,,,,,,5,todo
 00401e29,thunk_FUN_004c0c6f,,,,,,5,todo
 00401e2e,thunk_FUN_00502779,Thunk_00502779,manual,Thunks,,,5,ported
@@ -1052,7 +1052,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402a4a,thunk_FUN_004f1325,,,,,,5,todo
 00402a4f,thunk_FUN_004ec7f4,,,,,,5,ported
 00402a54,thunk_FUN_00499951,,,,,,5,todo
-00402a59,thunk_FUN_00427eea,,,,,,5,todo
+00402a59,thunk_FUN_00427eea,,,,,,5,ported
 00402a63,thunk_FUN_004a44d4,,,,,,5,todo
 00402a68,thunk_FUN_004d9596,,,,,,5,ported
 00402a6d,thunk_FUN_00522e64,,,,,,5,ported
@@ -1959,7 +1959,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0042655a,FUN_0042655a,DrvSetMode0042655A,manual,Ported6,,,38,ported
 00426580,FUN_00426580,P12_Fn00426580,manual,Misc12,,,107,ported
 004268e0,FUN_004268e0,Ui004268E0,manual,MenuUI,,,15,ported
-004268ef,FUN_004268ef,,,,,,461,todo
+004268ef,FUN_004268ef,AddLight,manual,Render,,,461,ported
 00426abc,FUN_00426abc,AddEntry_00426ABC,manual,Misc,,,120,ported
 00426b34,FUN_00426b34,SphereHits,manual,render,,,210,ported
 00426c06,FUN_00426c06,AllocEulerTab,manual,render,,,169,ported
@@ -1972,11 +1972,11 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0042793f,FUN_0042793f,P79_Radius,manual,map,,,201,ported
 00427a08,FUN_00427a08,ScaleVertices,manual,ui,,,105,ported
 00427a71,FUN_00427a71,ScaleNormalW,manual,ui,,,77,ported
-00427abe,FUN_00427abe,,,,,,668,todo
-00427d5a,FUN_00427d5a,,,,,,400,todo
-00427eea,FUN_00427eea,,,,,,1038,todo
+00427abe,FUN_00427abe,FrustumSetup2D,manual,Render,,,668,ported
+00427d5a,FUN_00427d5a,SphereVis2D,manual,Render,,,400,ported
+00427eea,FUN_00427eea,FrustumSetup3D,manual,Render,,,1038,ported
 004282f8,FUN_004282f8,P77_CameraPlane,manual,render,,,225,ported
-004283d9,FUN_004283d9,,,,,,665,todo
+004283d9,FUN_004283d9,SphereVis3D,manual,Render,,,665,ported
 00428672,FUN_00428672,,,,,,694,todo
 00428928,FUN_00428928,,,,,,577,todo
 00428b69,FUN_00428b69,,,,,,1498,todo
