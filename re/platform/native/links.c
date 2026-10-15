@@ -49,6 +49,7 @@
 #include "../../game/ported58.h"
 #include "../../game/ported59.h"
 #include "../../game/ported60.h"
+#include "../../game/ported61.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -71,6 +72,10 @@
 #include "../../game/ported8.h"
 #include "../../game/ported9.h"
 #include "../../game/ported10.h"
+void P61_Fn514BC7 (void *p, int32_t a, int32_t b) { InitObjState_00514BC7(p, a, b); }
+void P60_SetupCamN (int32_t n) { P61_SetupCamN(n); }
+void P60_CamPrepare (void *cam) { P61_CamPrepare(cam); }
+void P60_Fn514261 (void *p) { P61_SpawnPart(p); }
 void P57_Setup40A41C (void) { Copy54A838(); }
 void P57_Setup40831C (void) { MenuCopyPos(); }
 void P57_Setup41351C (void) { GlobalSet0041351C(); }

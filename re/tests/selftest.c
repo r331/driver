@@ -46,6 +46,7 @@
 #include "../game/ported58.h"
 #include "../game/ported59.h"
 #include "../game/ported60.h"
+#include "../game/ported61.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -2096,8 +2097,68 @@ static int test_p60(void) {
   return f;
 }
 
+static int32_t rd_i32(const uint8_t *p, uint32_t o) { int32_t v; memcpy(&v, p + o, 4); return v; }
+/* ported61 */
+static int test_p61(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p61 fail line %d\n",__LINE__); } } while (0)
+  P59_InitConsts(); P61_InitConsts();
+  uint8_t cam[0x8c]; int32_t v; uint16_t w;
+  /* 004c5499 / 004c536c: туда и обратно */
+  memset(cam, 0, sizeof cam);
+  P44_CamX = 10.4f; P44_CamY = -20.6f; P44_CamZ = 30.5f;               /* fistp: 10, -21, 30 (к чётному) */
+  P61_TgtX = 1.0f; P61_TgtY = 2.0f; P61_TgtZ = 3.0f; P61_OffX = 4.0f; P61_OffY = 5.0f; P61_OffZ = 6.0f;
+  P61_AngB8 = 7; P61_AngBA = 8; P61_AngBC = 9; P61_Dist8 = 100.0f; P61_DistC = 200.0f;
+  P61_V18 = 11; P61_V1C = 12; P61_V20 = 13; P61_V10 = 14; P59_Mode1137324 = 0x11; P60_Var1373C0 = 1;
+  P61_StoreCamState(cam);
+  v = rd_i32(cam, 0x4c); CK(v == 10); v = rd_i32(cam, 0x50); CK(v == -21); v = rd_i32(cam, 0x54); CK(v == 30);
+  v = rd_i32(cam, 0x5c); CK(v == 1); v = rd_i32(cam, 0x74); CK(v == 6); v = rd_i32(cam, 8); CK(v == 100); v = rd_i32(cam, 0xc); CK(v == 200);
+  v = rd_i32(cam, 0x18); CK(v == 11); v = rd_i32(cam, 0x10); CK(v == 14); v = rd_i32(cam, 0); CK(v == 0x11); v = rd_i32(cam, 0x48); CK(v == 1);
+  memcpy(&w, cam + 0x7e, 2); CK(w == 8);
+  P59_Mode1137324 = 3; P61_StoreCamState(cam); v = rd_i32(cam, 0x48); CK(v == 0);   /* вне режима 0x11 флаг сбрасывается */
+  /* обратно */
+  memset(cam, 0, sizeof cam);
+  v = 0x11; memcpy(cam, &v, 4); v = 77; memcpy(cam + 0x4c, &v, 4); v = -5; memcpy(cam + 0x50, &v, 4); v = 9; memcpy(cam + 0x54, &v, 4);
+  v = 1; memcpy(cam + 0x48, &v, 4); v = 500; memcpy(cam + 8, &v, 4); w = 0x123; memcpy(cam + 0x80, &w, 2);
+  P61_RestoreCamState(cam);
+  CK(P44_CamX == 77.0f && P44_CamY == -5.0f && P44_CamZ == 9.0f && P61_Dist8 == 500.0f && P61_AngBC == 0x123);
+  CK(P59_Mode1137324 == 0x11 && (uint8_t)P60_Var1373C0 == 1);
+  v = 3; memcpy(cam, &v, 4); v = 1; memcpy(cam + 0x48, &v, 4); P61_RestoreCamState(cam);
+  CK((uint8_t)P60_Var1373C0 == 0 && rd_i32(cam, 0x48) == 0);
+  /* 0049e5e7: машина 2 без поворота — смещение (5,-115,150) в единичной матрице */
+  memset(P60_Cars, 0, sizeof(p60_cars_t));
+  { uint8_t *car = (uint8_t *)P60_Cars + 2 * 0x148; v = 1000; memcpy(car + 0xc8, &v, 4); v = 40; memcpy(car + 0xcc, &v, 4); v = 2000; memcpy(car + 0xd0, &v, 4); }
+  P61_Heading = 0;
+  P61_SetupCamN(2);
+  CK(P59_AngA == 0 && P59_AngB == 0 && P59_AngC == 0);
+  CK(fabsf(P44_ViewMat[0] - 1.0f) < 1e-5f && fabsf(P44_ViewMat[4] - 1.0f) < 1e-5f && fabsf(P44_ViewMat[8] - 1.0f) < 1e-5f);
+  CK(fabsf(P44_CamX - 1005.0f) < 1e-2f && fabsf(P44_CamY - (-40.0f - 115.0f)) < 1e-2f && fabsf(P44_CamZ - 2150.0f) < 1e-2f);
+  S_00D1192C = 1; P61_SetupCamN(0);                                  /* машина 0: смещение из таблицы (0,-105,135) */
+  CK(fabsf(P44_CamX - 0.0f) < 1e-2f && fabsf(P44_CamY - (-105.0f)) < 1e-2f && fabsf(P44_CamZ - 135.0f) < 1e-2f);
+  /* 004c6d62 */
+  { uint8_t *car0 = (uint8_t *)P60_Cars; v = 100; memcpy(car0 + 0xc8, &v, 4); v = 0; memcpy(car0 + 0xd0, &v, 4); v = 50; memcpy(car0 + 0xcc, &v, 4);
+    v = 0x200; memcpy(car0 + 0x100, &v, 4); }
+  memset(cam, 0, sizeof cam); v = 2; memcpy(cam, &v, 4); v = -1; memcpy(cam + 0x10, &v, 4);        /* режим 2: фиксированные значения */
+  P61_CamPrepare(cam);
+  CK(rd_i32(cam, 0x10) == 0 && rd_i32(cam, 0x18) == 0x800 && rd_i32(cam, 8) == 0x500 && rd_i32(cam, 0xc) == 0x500 && rd_i32(cam, 0) == 0);
+  CK(rd_i32(cam, 0x70) == -0x100 && rd_i32(cam, 0x1c) == ((0x200 + 0x800) & 0xfff));
+  memset(cam, 0, sizeof cam); v = 1; memcpy(cam, &v, 4);
+  v = 100 + 3000; memcpy(cam + 0x5c, &v, 4); v = 4000; memcpy(cam + 0x64, &v, 4); v = -300; memcpy(cam + 0x60, &v, 4);
+  P61_CamPrepare(cam);                                               /* расстояние 5000 (3000;4000) */
+  CK(rd_i32(cam, 8) == 5000 && rd_i32(cam, 0xc) == 5000 && rd_i32(cam, 0x4c) == 3100 && rd_i32(cam, 0x54) == 4000);
+  CK(rd_i32(cam, 0x18) == ((P44_Atan2(3000, 4000) - 0x200) & 0xfff) && rd_i32(cam, 0) == 0);
+  memset(cam, 0, sizeof cam); v = 1; memcpy(cam, &v, 4); v = 100 + 30000; memcpy(cam + 0x5c, &v, 4);
+  P61_CamPrepare(cam); CK(rd_i32(cam, 8) == 15000);                  /* верхняя граница */
+  memset(cam, 0, sizeof cam); v = 9; memcpy(cam + 8, &v, 4); P61_CamPrepare(cam); CK(rd_i32(cam, 0xc) == 9 && rd_i32(cam, 0x1c) == 0);
+  /* 00514261: слот освобождается, если ячейка не нашлась (заглушка 005139d7 возвращает 0) */
+  { uint8_t p[0xa0]; memset(p, 0, sizeof p); float fl = 12.5f; memcpy(p + 0x84, &fl, 4); memcpy(p + 0x8c, &fl, 4);
+    P43_FreeCnt = 0; P61_SpawnPart(p); CK(rd_i32(p, 0x38) == 0); }
+  return f;
+}
+
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

@@ -18,7 +18,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401069,thunk_FUN_005128b7,,,,,,5,todo
 0040106e,thunk_FUN_004b4b27,,,,,,5,todo
 00401073,thunk_FUN_004a7d80,,,,,,5,todo
-00401078,thunk_FUN_004c6d62,,,,,,5,todo
+00401078,thunk_FUN_004c6d62,,,,,,5,ported
 0040107d,thunk_FUN_0040ab59,Thunk_0040AB59,manual,Thunks,,,5,ported
 00401082,thunk_FUN_004d611b,,,,,,5,ported
 00401087,thunk_FUN_004246d1,Thunk_004246D1,manual,Thunks,,,5,ported
@@ -137,7 +137,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401357,thunk_FUN_004a742a,,,,,,5,todo
 0040135c,thunk_FUN_0040aa82,,,,,,5,ported
 00401361,thunk_FUN_004082a0,,,,,,5,ported
-00401366,thunk_FUN_004c536c,,,,,,5,todo
+00401366,thunk_FUN_004c536c,,,,,,5,ported
 0040136b,thunk_FUN_004a2f77,,,,,,5,todo
 00401370,thunk_FUN_0049ea37,,,,,,5,todo
 00401375,thunk_FUN_004c17ae,,,,,,5,ported
@@ -485,7 +485,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401c03,thunk_FUN_0050a15b,,,,,,5,todo
 00401c17,thunk_FUN_00405cb4,,,,,,5,ported
 00401c1c,thunk_FUN_004b3e55,,,,,,5,todo
-00401c21,thunk_FUN_00514261,,,,,,5,todo
+00401c21,thunk_FUN_00514261,,,,,,5,ported
 00401c26,thunk_FUN_0051bd9c,,,,,,5,ported
 00401c2b,thunk_FUN_004f0f90,,,,,,5,todo
 00401c30,thunk_FUN_004ec154,,,,,,5,ported
@@ -709,7 +709,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004021b2,thunk_FUN_004de86c,,,,,,5,todo
 004021b7,thunk_FUN_0052763b,,,,,,5,ported
 004021bc,thunk_FUN_004cf100,Thunk_004CF100,manual,Thunks,,,5,ported
-004021c1,thunk_FUN_004c5499,,,,,,5,todo
+004021c1,thunk_FUN_004c5499,,,,,,5,ported
 004021d0,thunk_FUN_004c3f8f,Thunk_004C3F8F,manual,Thunks,,,5,ported
 004021da,thunk_FUN_004b9e2b,Thunk_004B9E2B,manual,Thunks,,,5,ported
 004021df,thunk_FUN_004d0102,,,,,,5,todo
@@ -1031,7 +1031,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004029dc,thunk_FUN_004f5d67,Thunk_004F5D67,manual,Thunks,,,5,ported
 004029e1,thunk_FUN_0040c867,Thunk_0040C867,manual,Thunks,,,5,ported
 004029e6,thunk_FUN_004f6774,,,,,,5,todo
-004029eb,thunk_FUN_0049e5e7,,,,,,5,todo
+004029eb,thunk_FUN_0049e5e7,,,,,,5,ported
 004029f0,thunk_FUN_004e3b19,Thunk_004E3B19,manual,Thunks,,,5,ported
 004029fa,thunk_FUN_004f5951,,,,,,5,ported
 004029ff,thunk_FUN_00523628,,,,,,5,ported
@@ -2169,7 +2169,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0049df91,FUN_0049df91,,,,,,475,todo
 0049e16c,FUN_0049e16c,,,,,,783,todo
 0049e47b,FUN_0049e47b,,,,,,364,todo
-0049e5e7,FUN_0049e5e7,,,,,,449,todo
+0049e5e7,FUN_0049e5e7,P61_SetupCamN,manual,camera,manual,,449,ported
 0049e7a8,FUN_0049e7a8,,,,,,361,todo
 0049e911,FUN_0049e911,,,,,,294,todo
 0049ea37,FUN_0049ea37,,,,,,458,todo
@@ -2415,8 +2415,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c5222,FUN_004c5222,SelectNewCamera,manual,Director.c,,,183,ported
 004c52d9,FUN_004c52d9,SyncCameraFromList,manual,Director,,,142,ported
 004c5367,FUN_004c5367,DirNopStub,manual,DirNodes.c,,,5,ported
-004c536c,FUN_004c536c,,,,,,301,todo
-004c5499,FUN_004c5499,,,,,,481,todo
+004c536c,FUN_004c536c,P61_RestoreCamState,manual,director,manual,,301,ported
+004c5499,FUN_004c5499,P61_StoreCamState,manual,director,manual,,481,ported
 004c567a,FUN_004c567a,CameraDump,manual,Director,,,317,ported
 004c57b7,FUN_004c57b7,GetCameraTypeName,manual,Director.c,,,43,ported
 004c582f,FUN_004c582f,CreateNewAutoCamera,debug_string,,,,658,named
@@ -2438,7 +2438,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c6715,FUN_004c6715,CameraFrameDistance,manual,Director,,,43,ported
 004c6740,FUN_004c6740,,,,,,359,todo
 004c68a7,FUN_004c68a7,,,,,,1053,todo
-004c6d62,FUN_004c6d62,,,,,,487,todo
+004c6d62,FUN_004c6d62,P61_CamPrepare,manual,director,manual,,487,ported
 004c8070,FUN_004c8070,ResetDirectorState,manual,Director,,,159,ported
 004c810f,FUN_004c810f,ClearDirectorTables,manual,Director.c,,,31,ported
 004c812e,FUN_004c812e,FreeDirectorData,manual,Director,,,15,ported
@@ -3015,7 +3015,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00514073,FUN_00514073,P43_AnimNext,manual,Ported43,,,144,ported
 00514103,FUN_00514103,AngleToDir00514103,manual,Ported6,,,98,ported
 00514165,FUN_00514165,,,,,,252,todo
-00514261,FUN_00514261,,,,,,209,todo
+00514261,FUN_00514261,P61_SpawnPart,manual,particles,manual,,209,ported
 00514332,FUN_00514332,,,,,,209,todo
 00514403,FUN_00514403,,,,,,209,todo
 005144d4,FUN_005144d4,,,,,,265,todo

@@ -49,6 +49,7 @@
 #include "../../game/ported58.h"
 #include "../../game/ported59.h"
 #include "../../game/ported60.h"
+#include "../../game/ported61.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1539,4 +1540,9 @@ void re_install_all(void) {
     re_hook(0x004c483e, (void*)ChangeCamera, "ChangeCamera");
     re_hook(0x004a399a, (void*)P60_ObjUpdate, "P60_ObjUpdate");
     re_hook(0x0051378b, (void*)P60_SpawnParticle, "P60_SpawnParticle");
+    re_hook(0x0049e5e7, (void*)P61_SetupCamN,       "P61_SetupCamN");
+    re_hook(0x004c5499, (void*)P61_StoreCamState,   "P61_StoreCamState");
+    re_hook(0x004c536c, (void*)P61_RestoreCamState, "P61_RestoreCamState");
+    re_hook(0x004c6d62, (void*)P61_CamPrepare,      "P61_CamPrepare");
+    re_hook(0x00514261, (void*)P61_SpawnPart,       "P61_SpawnPart");
 }
