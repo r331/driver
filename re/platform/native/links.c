@@ -59,6 +59,8 @@
 #include "../../game/ported68.h"
 #include "../../game/ported69.h"
 #include "../../game/ported70.h"
+#include "../../game/ported71.h"
+#include "../../game/ported72.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -83,6 +85,9 @@
 #include "../../game/ported10.h"
 void P66_DrawText (int32_t x, int32_t y, uint32_t txt, int32_t a, int32_t b, int32_t r, int32_t g, int32_t bl) { P70_ShadowText(x, y, txt, a, b, r, g, bl); }
 int32_t P62_Fn51CC55 (void *a, int32_t t, int32_t i) { return (int32_t)P64_RankPlace(a, t, i); }
+uint32_t P62_Fn515CCA (void *p, void *car) { return (uint32_t)P71_FaceCar(p, car); }
+void P61_Fn5144D4 (void *p, void *q) { P71_EdgeA(p, q); }
+void P61_Fn514779 (void *p, void *q) { P71_EdgeB(p, q); }
 void P61_Fn514F47 (void *p) { P68_AimSetup(p); }
 void P61_Fn514BC7 (void *p, int32_t a, int32_t b) { InitObjState_00514BC7(p, a, b); }
 void P60_SetupCamN (int32_t n) { P61_SetupCamN(n); }
@@ -115,6 +120,8 @@ void P55_Fn4264A7 (void) { Ui004264A7(); }
 int32_t P53_Fn4045E0 (void) { return (int32_t)P57_Menu4045E0(); }
 int32_t P52_Fn405F6F (int32_t a0, void *a1) { return (int32_t)P64_ReplayStart(a0, a1); }
 void P48_Fn516DA0 (void) { P58_LangStrings(); }
+int32_t P47_Fn51B111 (int32_t a0, int32_t a1) { return (int32_t)P72_RoadWord(a0, a1); }
+uint32_t P47_Fn51B566 (int32_t a0, int32_t a1) { return (uint32_t)P72_RoadDword(a0, a1); }
 int32_t P47_Fn40A3A0 (void) { return (int32_t)P57_Menu40A3A0(); }
 void P47_Fn405BFA (void) { P58_SaveConfig(); }
 int32_t P47_Fn406199 (int32_t a0) { return (int32_t)P70_LoadReplay(a0); }

@@ -59,6 +59,8 @@
 #include "../../game/ported68.h"
 #include "../../game/ported69.h"
 #include "../../game/ported70.h"
+#include "../../game/ported71.h"
+#include "../../game/ported72.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1637,4 +1639,15 @@ void re_install_all(void) {
     re_hook(0x0051755e, (void*)P70_ShadowText, "P70_ShadowText");
     re_hook(0x005062cc, (void*)P70_RadarNearest, "P70_RadarNearest");
     re_hook(0x0050784d, (void*)P70_RadarNearestB, "P70_RadarNearestB");
+    re_hook(0x005144d4, (void*)P71_EdgeA, "P71_EdgeA");
+    re_hook(0x00514779, (void*)P71_EdgeB, "P71_EdgeB");
+    re_hook(0x00514165, (void*)P71_Course, "P71_Course");
+    re_hook(0x00515bf1, (void*)P71_InPlanes, "P71_InPlanes");
+    re_hook(0x00515cca, (void*)P71_FaceCar, "P71_FaceCar");
+    re_hook(0x0051551e, (void*)P71_InitNear, "P71_InitNear");
+    re_hook(0x0051380b, (void*)P71_CountNear, "P71_CountNear");
+    re_hook(0x00503c03, (void*)P71_ScoreSetup, "P71_ScoreSetup");
+    re_hook(0x0051b111, (void*)P72_RoadWord, "P72_RoadWord");
+    re_hook(0x0051b566, (void*)P72_RoadDword, "P72_RoadDword");
+    re_hook(0x0051b65a, (void*)P72_RoadLookup, "P72_RoadLookup");
 }
