@@ -67,6 +67,7 @@
 #include "../../game/ported76.h"
 #include "../../game/ported77.h"
 #include "../../game/ported78.h"
+#include "../../game/ported79.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1704,4 +1705,12 @@ void re_install_all(void) {
     re_hook(0x004eafcf, (void*)P78_LoadLampsBlock, "P78_LoadLampsBlock");
     re_hook(0x004a31fc, (void*)P78_ChairAdd, "P78_ChairAdd");
     re_hook(0x004a2f77, (void*)P78_LoadChairs, "P78_LoadChairs");
+    re_hook(0x0042754a, (void*)P79_ModelList, "P79_ModelList");
+    re_hook(0x00427757, (void*)P79_Relocate, "P79_Relocate");
+    re_hook(0x004275ae, (void*)P79_Unrelocate, "P79_Unrelocate");
+    re_hook(0x0042793f, (void*)P79_Radius, "P79_Radius");
+    re_hook(0x0047560b, (void*)P79_VertClass, "P79_VertClass");
+    re_hook(0x004757d2, (void*)P79_MarkRecords, "P79_MarkRecords");
+    re_hook(0x00475906, (void*)P79_FindSameVerts, "P79_FindSameVerts");
+    re_hook(0x00475a3d, (void*)P79_Convert, "P79_Convert");
 }

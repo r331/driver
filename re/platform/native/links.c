@@ -67,6 +67,7 @@
 #include "../../game/ported76.h"
 #include "../../game/ported77.h"
 #include "../../game/ported78.h"
+#include "../../game/ported79.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -270,6 +271,11 @@ void Call004C372A (void) { FreeDirectorBuffer(); }
 void Call00421A39 (void) { P57_ResetTexNodes(); }
 void Call0052434A (int32_t a0) { SlotSetOff0052434A(a0); }
 void Call005243EB (void) { P48_FadeEnd(); }
+int32_t Call00475A3D (void *src, void *dst) { return (int32_t)P79_Convert(src, dst); }
+void Call00427757 (void *m) { P79_Relocate(m); }
+void Call0042793F (void *m, int32_t a1) { P79_Radius(m, a1); }
+void Call004757D2 (void *m) { P79_MarkRecords(m); }
+void Call00475906 (void *m) { P79_FindSameVerts(m); }
 void SetCameraPosition (float x, float y, float z) { PushVec3_00523C99(x, y, z); }
 void P46_Fn4D6354 (void) { P53_StepBounds(); }
 void P46_Fn51BE3C (void) { P58_BuildBlockIndex(); }

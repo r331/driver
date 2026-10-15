@@ -82,6 +82,7 @@
 #include "../game/ported50.h"
 #include "../game/ported51.h"
 #include "../game/ported52.h"
+#include "../game/ported79.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -3365,11 +3366,72 @@ static int test_p78(void) {
   return f;
 }
 
+static uint32_t rd_u32(const uint8_t *p, int o) { uint32_t v; memcpy(&v, p + o, 4); return v; }
+static int test_p79(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { fprintf(stderr, "p79 fail line %d: %s\n", __LINE__, #c); f = 1; } } while (0)
+  { void *saved = D_00c98ed0;
+    uint8_t *arena = (uint8_t *)calloc(1, 0x4000); uint8_t src[0x100]; memset(src, 0, sizeof src);
+    D_00c98ed0 = arena; P79_InitConsts();
+    CK(G2_TABLE_00550ACC[0] == 32 && G2_TABLE_00550ACC[7] == 104 && G2_TABLE_00550ACC[56] == 12 && G2_TABLE_00550ACC[56 + 0x37] == 32);
+    /* модель с диска: 3 вершины, 1 запись типа 0 (диск 12 байт → память 32), 1 нормаль, 5 байт данных */
+    uint16_t v16;
+    #define S16(o, v) do { v16 = (uint16_t)(v); memcpy(src + (o), &v16, 2); } while (0)
+    #define S32(o, v) do { uint32_t t_ = (uint32_t)(v); memcpy(src + (o), &t_, 4); } while (0)
+    S32(4, 0xffffffffu); S16(0x14, 3); S16(0x16, 1); S16(0x18, 1); S16(0x1a, 5);
+    S32(0x1c, 0x78); S32(0x20, 0x38); S32(0x24, 0x5c); S32(0x28, 0x6c); S32(0x2c, 0x80); S32(0x34, 0);
+    float vs[9] = {1, 0, 0, -0.5f, 2, 0, 0, 0, 3}; memcpy(src + 0x38, vs, 36);
+    float vv[4] = {1, 0, 0, 1}; memcpy(src + 0x5c, vv, 16);
+    float nn[3] = {0, 1, 0}; memcpy(src + 0x6c, nn, 12);
+    memcpy(src + 0x78, "ABCDE", 5);
+    src[0x80] = 0; S16(0x82, 7); S16(0x84, 8); S16(0x86, 9); src[0x88] = 10; src[0x89] = 20; src[0x8a] = 30;
+    uint8_t *m = arena + 0x100;
+    int32_t sz = P79_Convert(src, m);
+    CK(sz == 0x38 + 48 + 16 + 16 + 8 + 32);
+    CK(rd_u32(m, 0x20) == 0x38 && rd_u32(m, 0x24) == 0x38 + 48 && rd_u32(m, 0x28) == 0x38 + 64 && rd_u32(m, 0x1c) == 0x38 + 80 && rd_u32(m, 0x2c) == 0x38 + 88);
+    float w; memcpy(&w, m + 0x38 + 12, 4); CK(w == 1.0f);
+    memcpy(&w, m + 0x38 + 16, 4); CK(w == -0.5f);
+    memcpy(&w, m + 0x38 + 64 + 4, 4); CK(w == 1.0f);                       /* нормаль (0,1,0) */
+    CK(memcmp(m + 0x38 + 80, "ABCDE", 5) == 0);
+    { const uint8_t *r = m + 0x38 + 88; float a; memcpy(&a, r + 0x14, 4);
+      CK(r[0] == 0 && rd_u32(r, 8) == 7 && rd_u32(r, 0xc) == 8 && rd_u32(r, 0x10) == 9 && a == 10.0f);
+      memcpy(&a, r + 0x1c, 4); CK(a == 30.0f); }
+    /* переход ссылок: относительные → абсолютные (смещения арены) и обратно */
+    uint32_t keep[8]; for (int i = 0; i < 8; i++) keep[i] = rd_u32(m, 0x1c + i * 4);
+    uint32_t moff = (uint32_t)(m - arena);
+    P79_Relocate(m);
+    CK(rd_u32(m, 0x20) == 0x38 + moff && rd_u32(m, 0x2c) == 0x38 + 88 + moff && (m[3] & 0x80));
+    P79_Relocate(m); CK(rd_u32(m, 0x20) == 0x38 + moff);               /* повторно — без изменений */
+    /* радиус: режим 0 — с осью Y */
+    P79_Radius(m, 0); float r0, r1; memcpy(&r0, m + 0xc, 4);
+    P79_Radius(m, 1); memcpy(&r1, m + 0x10, 4);
+    CK(fabsf(r0 - 3.0f) < 1e-6f && fabsf(r1 - 3.0f) < 1e-6f);
+    P79_Unrelocate(m);
+    for (int i = 0; i < 8; i++) CK(rd_u32(m, 0x1c + i * 4) == keep[i]);
+    CK(!(m[3] & 0x80));
+    /* класс вершины и разметка записей: вершина (1,0,0,1) лежит на оси +X → класс 2 */
+    P79_Total = 0; P79_Outside = 0;
+    float ax[4] = {1.0f, 0, 0, 1}; CK(P79_VertClass(ax) == 2 && P79_Total == 1);
+    float ng[4] = {0, 0, -1.0f, 1}; CK(P79_VertClass(ng) == 4);
+    float no[4] = {0.5f, 0.5f, 0.5f, 1}; CK(P79_VertClass(no) == 0 && P79_Outside == 1 && P79_Total == 2);
+    int32_t all0 = P79_NumAll, sum0 = P79_SumTotal;
+    P79_Relocate(m);
+    P79_MarkRecords(m);
+    CK(P79_Total == 1 && P79_Outside == 0 && P79_NumAll == all0 + 1 && P79_SumTotal == sum0 + 1 && (m[2] & 0x30) == 0x30);
+    CK(P79_FindSameVerts(m) == 0 && (m + 0x38 + 88)[1] == (2 | 8) && rd_u32(m + 0x38 + 88, 4) == 0);
+    /* список записей */
+    uint32_t lst[2] = {0, 0}; P79_ModelList(m, lst);
+    CK(lst[0] == (uint32_t)(m + 0x38 + 88 - arena));
+    free(arena); D_00c98ed0 = saved; }
+#undef CK
+  return f;
+}
+
 /* RE_TRACE=1 печатает имя каждого теста перед запуском (поиск падения) */
 static int run_t_(const char *n, int r) { if (r) fprintf(stderr, "[test] %s returned %d\n", n, r); return r; }
 #define RUN_T(t) (getenv("RE_TRACE") ? (fprintf(stderr, "[test] %s\n", #t), run_t_(#t, t())) : t())
 int re_selftest(void) {
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
