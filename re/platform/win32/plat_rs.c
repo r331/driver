@@ -210,3 +210,16 @@ int32_t plat_di_enum_joysticks(void *di, plat_di_joy_cb cb) { g_joy_cb = cb; ret
 void *plat_event_create(void) { extern void *__attribute__((stdcall)) CreateEventA(void *, int, int, const char *); return CreateEventA(0, 0, 0, 0); }
 void plat_di_stub_setup(int j, uint32_t c, uint32_t m) { (void)j; (void)c; (void)m; }
 int plat_di_stub_init_stats(int *a, int *b, int *c, int *d) { *a = *b = *c = *d = 0; return 0; }
+
+/* --- FMV / DirectSound (IMultiMediaStream: SetState 0x1c; IStreamSample: Update 0x18; IDirectDrawSurface: Blt 0x14; IDirectSoundBuffer: SetFormat 0x38; IDirectSound: SetSpeakerConfig 0x24) --- */
+int32_t plat_mms_set_state(void *m, int st) { return ((dd_f1)VT(m, 0x1c))(m, (void *)(uintptr_t)st); }
+int32_t plat_sample_update(void *s) { return ((dd_f4)VT(s, 0x18))(s, 0, 0, 0, 0); }
+int32_t plat_dd_blt_from(void *d, const int32_t *r, void *s) { return ((dd_f6)VT(d, 0x14))(d, (void *)r, s, 0, (void *)0x01000000, 0); }
+int32_t plat_dd_fill_all(void *s, uint32_t px) {
+    uint32_t fx[25]; for (int i = 0; i < 25; i++) fx[i] = 0;
+    fx[0] = 100; fx[20] = px;
+    return ((dd_f6)VT(s, 0x14))(s, 0, 0, 0, (void *)0x01000400, fx); }
+int32_t plat_ds_set_format(void *p, const void *w) { return ((dd_f1)VT(p, 0x38))(p, (void *)w); }
+int32_t plat_ds_set_speaker_config(void *ds, uint32_t cfg) { return ((dd_f1)VT(ds, 0x24))(ds, (void *)(uintptr_t)cfg); }
+void plat_fmv_stub_fail(uint32_t m) { (void)m; }
+int plat_fmv_stub_stats(int *a, int *b, int32_t *c, int *d, uint32_t *e, int *f, uint8_t *g, uint32_t *h) { (void)a;(void)b;(void)c;(void)d;(void)e;(void)f;(void)g;(void)h; return 0; }

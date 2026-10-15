@@ -26,6 +26,7 @@
 #include "../../game/ported35.h"
 #include "../../game/ported36.h"
 #include "../../game/ported37.h"
+#include "../../game/ported38.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1226,4 +1227,11 @@ void re_install_all(void) {
     re_hook(0x004e3391, (void*)P36_PollInput, "P36_PollInput");
     /* 004e3cdf (P37_JoyEnumCb) не хукается: stdcall-колбэк, его вызывает только P37_InitInput через plat_di_enum_joysticks */
     re_hook(0x004e2ee0, (void*)P37_InitInput, "P37_InitInput");
+    re_hook(0x0048b2fd, (void*)P38_MmsRun, "P38_MmsRun");
+    re_hook(0x0048b32b, (void*)P38_MmsStop, "P38_MmsStop");
+    re_hook(0x0048b34c, (void*)P38_UpdateFrame, "P38_UpdateFrame");
+    re_hook(0x0048ae12, (void*)P38_FmvRelease, "P38_FmvRelease");
+    re_hook(0x0048b65d, (void*)P38_FmvStop, "P38_FmvStop");
+    re_hook(0x0048bdcc, (void*)P38_SetPrimaryFormat, "P38_SetPrimaryFormat");
+    re_hook(0x0048be68, (void*)P38_SetSpeakerConfig, "P38_SetSpeakerConfig");
 }

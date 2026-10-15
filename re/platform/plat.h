@@ -170,4 +170,13 @@ int     plat_di_stub_init_stats(int *devices, int *coops, int *props, int *queri
 void   *plat_dd_create(const void *guid);              /* DirectDrawCreate(guid, &dd, NULL); NULL — ошибка */
 int32_t plat_dd_get_display_flags(void *dd, uint32_t *pixfmt_flags); /* GetDisplayMode → ddpfPixelFormat.dwFlags; HRESULT */
 void    plat_dd_stub_display(uint32_t pixfmt_flags, int fail_create, int fail_mode);  /* тесты (SDL) */
+/* FMV (DirectShow MultiMedia Stream) и DirectSound: 0048ae12, 0048b2fd, 0048b32b, 0048b34c, 0048b65d, 0048bdcc, 0048be68 */
+int32_t plat_mms_set_state(void *mms, int state);                         /* IMultiMediaStream::SetState (1 — идти, 0 — стоп); 0 — успех */
+int32_t plat_sample_update(void *sample);                                 /* IStreamSample::Update(0,0,0,0); 0 — успех */
+int32_t plat_dd_blt_from(void *dst, const int32_t *rect4, void *src);     /* dst->Blt(rect, src, NULL, DDBLT_WAIT, NULL); 0 — успех */
+int32_t plat_dd_fill_all(void *surf, uint32_t pixel);                     /* Blt на всю поверхность: DDBLT_COLORFILL */
+int32_t plat_ds_set_format(void *primary, const void *wfx18);             /* IDirectSoundBuffer::SetFormat(WAVEFORMATEX, 18 байт) */
+int32_t plat_ds_set_speaker_config(void *ds, uint32_t cfg);               /* IDirectSound::SetSpeakerConfig */
+void    plat_fmv_stub_fail(uint32_t mask);                                /* тесты (SDL): бит 0 SetState, 1 Update, 2 Blt — отказ */
+int     plat_fmv_stub_stats(int *state, int *updates, int32_t *rect4, int *blts, uint32_t *fill_px, int *fills, uint8_t *fmt18, uint32_t *spk); /* тесты (SDL) */
 #endif

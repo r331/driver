@@ -40,6 +40,7 @@
 #include "../game/ported35.h"
 #include "../game/ported36.h"
 #include "../game/ported37.h"
+#include "../game/ported38.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -902,8 +903,46 @@ static int test_p35(void) {
 }
 int test_render(const char *png_path);
 int test_snd(void);
+static int test_p38(void) {
+  int f = 0, st, up, bl, fl; int32_t rc[4]; uint32_t fp, spk; uint8_t fmt[18];
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p38 fail line %d\n",__LINE__); } } while (0)
+  void *dd = plat_dd_create(NULL); uint32_t desc[31] = {0}; desc[0] = 0x7c; desc[1] = 7;
+  P38_Mms = NULL; P38_Sample = NULL; P38_Dest = NULL; P38_Src = NULL;
+  CK(P38_MmsRun() == 0); P38_MmsStop();
+  P38_Mms = dd; plat_fmv_stub_fail(0); CK(P38_MmsRun() == 1);
+  plat_fmv_stub_stats(&st, &up, rc, &bl, &fp, &fl, fmt, &spk); CK(st == 1);
+  P38_MmsStop(); plat_fmv_stub_stats(&st, &up, rc, &bl, &fp, &fl, fmt, &spk); CK(st == 0);
+  plat_fmv_stub_fail(1); CK(P38_MmsRun() == 0); plat_fmv_stub_fail(0);
+  /* кадр: полоса 120 → top = (480-240)/2 = 120, bottom = 360 */
+  P38_Sample = dd; P38_Dest = plat_dd_create_surface(dd, desc); P38_Src = plat_dd_create_surface(dd, desc); P38_Letter = 120;
+  CK(P38_UpdateFrame() == 1);
+  plat_fmv_stub_stats(&st, &up, rc, &bl, &fp, &fl, fmt, &spk); CK(up == 1 && bl == 1 && rc[0] == 0 && rc[1] == 120 && rc[2] == 640 && rc[3] == 360);
+  plat_fmv_stub_fail(2); CK(P38_UpdateFrame() == 0); plat_fmv_stub_fail(4); CK(P38_UpdateFrame() == 0); plat_fmv_stub_fail(0);
+  /* освобождение */
+  int base = plat_dd_stub_count();
+  P38_Obj824 = plat_dd_create_surface(dd, desc); P38_DD = plat_dd_create(NULL); P38_Obj814 = plat_dd_create(NULL);
+  CK(plat_dd_stub_count() == base + 3);
+  P38_FmvRelease();
+  CK(plat_dd_stub_count() == base - 2 && P38_Src == NULL && P38_Dest == NULL && P38_Obj824 == NULL && P38_DD == NULL && P38_Obj814 == NULL);
+  plat_fmv_stub_stats(&st, &up, rc, &bl, &fp, &fl, fmt, &spk); CK(fl == 1 && fp == 0 && plat_dd_last_coop() == 8);
+  P38_FmvRelease();   /* повторный вызов — безопасен */
+  /* остановка потока и таймера */
+  P38_Mms2 = dd; P38_TimerSlot = -1; P38_TimerFlag = 0; P38_FmvStop(); CK(P38_TimerFlag == 1 && P38_TimerSlot == -1);
+  plat_fmv_stub_stats(&st, &up, rc, &bl, &fp, &fl, fmt, &spk); CK(st == 0);
+  /* форматы звука */
+  P38_DsPrimary = dd; P38_SetPrimaryFormat(16, 22050);
+  plat_fmv_stub_stats(&st, &up, rc, &bl, &fp, &fl, fmt, &spk);
+  CK(fmt[0] == 1 && fmt[2] == 2 && *(uint32_t *)(fmt + 4) == 22050 && *(uint32_t *)(fmt + 8) == 88200 && fmt[12] == 4 && fmt[14] == 16 && fmt[16] == 0);
+  P38_Ds = dd; P38_SetSpeakerConfig(1); plat_fmv_stub_stats(&st, &up, rc, &bl, &fp, &fl, fmt, &spk); CK(spk == 3);
+  P38_SetSpeakerConfig(4); plat_fmv_stub_stats(&st, &up, rc, &bl, &fp, &fl, fmt, &spk); CK(spk == 5);
+  P38_SetSpeakerConfig(9); plat_fmv_stub_stats(&st, &up, rc, &bl, &fp, &fl, fmt, &spk); CK(spk == 4);
+  P38_SetSpeakerConfig(2); plat_fmv_stub_stats(&st, &up, rc, &bl, &fp, &fl, fmt, &spk); CK(spk == 2);
+  P38_Mms = P38_Mms2 = P38_Sample = P38_DsPrimary = P38_Ds = NULL; plat_dd_release(dd);
+#undef CK
+  return f;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

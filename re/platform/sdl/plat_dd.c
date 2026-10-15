@@ -49,3 +49,14 @@ static uint32_t g_disp_flags = 0x40; static int g_disp_fail_create, g_disp_fail_
 void *plat_dd_create(const void *guid) { (void)guid; return g_disp_fail_create ? NULL : mk(0); }
 int32_t plat_dd_get_display_flags(void *dd, uint32_t *f) { if (!dd || g_disp_fail_mode) return -1; *f = g_disp_flags; return 0; }
 void plat_dd_stub_display(uint32_t f, int fc, int fm) { g_disp_flags = f; g_disp_fail_create = fc; g_disp_fail_mode = fm; }
+/* --- FMV / DirectSound: учётные записи --- */
+static uint32_t g_fmv_fail; static int g_ms_state = -1, g_upd, g_blts, g_fills; static int32_t g_blt_rc[4]; static uint32_t g_fill_all_px, g_spk; static uint8_t g_fmt[18];
+int32_t plat_mms_set_state(void *m, int st) { if (!m || (g_fmv_fail & 1)) return -1; g_ms_state = st; return 0; }
+int32_t plat_sample_update(void *s) { if (!s || (g_fmv_fail & 2)) return -1; g_upd++; return 0; }
+int32_t plat_dd_blt_from(void *d, const int32_t *r, void *s) { if (!d || !s || (g_fmv_fail & 4)) return -1; if (r) memcpy(g_blt_rc, r, sizeof g_blt_rc); g_blts++; return 0; }
+int32_t plat_dd_fill_all(void *s, uint32_t px) { if (!s) return -1; g_fill_all_px = px; g_fills++; return 0; }
+int32_t plat_ds_set_format(void *p, const void *w) { if (!p || !w) return -1; memcpy(g_fmt, w, 18); return 0; }
+int32_t plat_ds_set_speaker_config(void *ds, uint32_t cfg) { if (!ds) return -1; g_spk = cfg; return 0; }
+void plat_fmv_stub_fail(uint32_t m) { g_fmv_fail = m; }
+int plat_fmv_stub_stats(int *st, int *u, int32_t *r, int *b, uint32_t *fp, int *f, uint8_t *fmt, uint32_t *spk) {
+    *st = g_ms_state; *u = g_upd; memcpy(r, g_blt_rc, sizeof g_blt_rc); *b = g_blts; *fp = g_fill_all_px; *f = g_fills; memcpy(fmt, g_fmt, 18); *spk = g_spk; return 1; }
