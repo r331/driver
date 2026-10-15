@@ -471,7 +471,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401b9a,thunk_FUN_004c622c,Thunk_004C622C,manual,Thunks,,,5,ported
 00401b9f,thunk_FUN_00418e70,,,,,,5,todo
 00401ba9,thunk_FUN_00425e9e,,,,,,5,ported
-00401bae,thunk_FUN_004ee4b7,,,,,,5,todo
+00401bae,thunk_FUN_004ee4b7,,,,,,5,ported
 00401bb8,thunk_FUN_004a4340,,,,,,5,todo
 00401bbd,thunk_FUN_0050e963,,,,,,5,ported
 00401bcc,thunk_FUN_0050b088,,,,,,5,todo
@@ -843,7 +843,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004024fa,thunk_FUN_004b5049,,,,,,5,todo
 004024ff,thunk_FUN_00525e7e,,,,,,5,ported
 0040250e,thunk_FUN_004c356d,Thunk_004C356D,manual,Thunks,,,5,ported
-00402513,thunk_FUN_004ed5f8,,,,,,5,todo
+00402513,thunk_FUN_004ed5f8,,,,,,5,ported
 00402518,thunk_FUN_00512174,,,,,,5,todo
 0040251d,thunk_FUN_00524611,,,,,,5,ported
 00402522,thunk_FUN_004e9006,,,,,,5,todo
@@ -913,7 +913,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004026a8,thunk_FUN_005235d3,Thunk_005235D3,manual,Thunks,,,5,ported
 004026ad,thunk_FUN_004f5c72,Thunk_004F5C72,manual,Thunks,,,5,ported
 004026b2,thunk_FUN_005281e1,,,,,,5,ported
-004026b7,thunk_FUN_004ee18b,,,,,,5,todo
+004026b7,thunk_FUN_004ee18b,,,,,,5,ported
 004026bc,thunk_FUN_004ee813,,,,,,5,ported
 004026c1,thunk_FUN_00493e3d,,,,,,5,ported
 004026c6,thunk_FUN_0040a3a0,,,,,,5,ported
@@ -2769,13 +2769,13 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004ed055,FUN_004ed055,P80_LoadHeader,manual,map,range,,1372,ported
 004ed5b1,FUN_004ed5b1,AllocMapBuffer300000,manual,map,assert,,33,ported
 004ed5d2,FUN_004ed5d2,FreeMapBuffer300000,manual,map,range,,38,ported
-004ed5f8,FUN_004ed5f8,,,map,range,,1194,todo
+004ed5f8,FUN_004ed5f8,P87_LoadTile,manual,Ported87,range,,1194,ported
 004edaa2,FUN_004edaa2,,,map,range,,614,todo
 004edd08,FUN_004edd08,,,map,range,,861,todo
 004ee065,FUN_004ee065,ResetObjs,manual,map,range,,196,ported
 004ee129,FUN_004ee129,P55_ResetSel,manual,map,range,,98,ported
-004ee18b,FUN_004ee18b,,,map,range,,812,todo
-004ee4b7,FUN_004ee4b7,,,map,range,,860,todo
+004ee18b,FUN_004ee18b,P87_DrawObjA,manual,Ported87,range,,812,ported
+004ee4b7,FUN_004ee4b7,P87_DrawObjB,manual,Ported87,range,,860,ported
 004ee813,FUN_004ee813,P76_CellFromPos,manual,ported76,range,,225,ported
 004ee8f4,FUN_004ee8f4,,,map,range,,2058,todo
 004ef309,FUN_004ef309,P55_RunTableA,manual,map,range,,91,ported

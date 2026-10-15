@@ -75,6 +75,7 @@
 #include "../../game/ported84.h"
 #include "../../game/ported85.h"
 #include "../../game/ported86.h"
+#include "../../game/ported87.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1745,4 +1746,7 @@ void re_install_all(void) {
     re_hook(0x0043593e, (void*)P86_TexQuadD, "P86_TexQuadD");
     re_hook(0x00432b77, (void*)P86_GouraudTri, "P86_GouraudTri");
     re_hook(0x00433017, (void*)P86_GouraudQuad, "P86_GouraudQuad");
+    re_hook(0x004ed5f8, (void*)P87_LoadTile, "P87_LoadTile");
+    re_hook(0x004ee18b, (void*)P87_DrawObjA, "P87_DrawObjA");
+    re_hook(0x004ee4b7, (void*)P87_DrawObjB, "P87_DrawObjB");
 }

@@ -89,6 +89,10 @@
     V(P56_Fn4E5284, 0x004e5284, (void *a0), (a0)) \
     V(P56_Fn4E5011, 0x004e5011, (int32_t a0, void *a1), (a0, a1)) \
     V(P56_Fn4E53B5, 0x004e53b5, (int32_t a0, void *a1), (a0, a1)) \
+    V(P87_Fn42982E, 0x0042982e, (uint32_t m, int32_t idx, float *pos, int32_t mode), (m, idx, pos, mode)) \
+    V(P87_Fn42A423, 0x0042a423, (uint32_t m, int32_t idx, float *pos, int32_t mode), (m, idx, pos, mode)) \
+    V(P87_Fn42A5DE, 0x0042a5de, (uint32_t m, int32_t idx, float *pos, int32_t mode), (m, idx, pos, mode)) \
+    V(P87_Fn4FEF26, 0x004fef26, (uint32_t m, const void *obj, int32_t r), (m, obj, r)) \
     V(P55_Fn4EE18B, 0x004ee18b, (uint32_t a0), (a0)) \
     V(P55_Fn4ED5F8, 0x004ed5f8, (int32_t a0, int32_t a1), (a0, a1)) \
     V(P55_Fn4EDAA2, 0x004edaa2, (void), ()) \
