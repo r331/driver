@@ -49,6 +49,9 @@ void plat_scene_end(void);
 void plat_set_render_state(int state, uint32_t value);
 void plat_set_tex_stage(int stage, int type, uint32_t value);   /* type 1 COLOROP, 16 MAGFILTER, 17 MINFILTER */
 void plat_set_viewport(int x, int y, int w, int h);
+uint32_t plat_get_tex_stage(int stage, int type);              /* GetTextureStageState (SDL: последнее установленное, 0 если нет) */
+void plat_draw_prim(int ptype, const plat_vertex *v, int count); /* DrawPrimitive(D3DPRIMITIVETYPE: 2 линии, 4 треугольники; FVF XYZRHW|DIFFUSE|SPECULAR|TEX1), count вершин */
+int  plat_draw_prim_last(int *ptype, int *count);               /* SDL (тесты): число вызовов и параметры последнего; hook: 0 */
 /* Константы смешивания = значения D3DBLEND (1 ZERO, 2 ONE, 3 SRCCOLOR, 4 INVSRCCOLOR, 5 SRCALPHA, 6 INVSRCALPHA, 7 DESTALPHA, 8 INVDESTALPHA, 9 DESTCOLOR, 10 INVDESTCOLOR).
    color/specular вершины = 0xAARRGGBB; x,y в пикселях окна, z 0..1, rhw = 1/w (0 → 1). */
 /* Подключение GL-контекста (SDL-окно или OSMesa); swap может быть NULL (offscreen). */
@@ -127,6 +130,7 @@ void    plat_post_quit(int code);                                /* PostQuitMess
 void    plat_post_close(void *hwnd);                             /* PostMessage(WM_CLOSE) */
 void    plat_set_cursor(int visible);                            /* SetCursor(стрелка / NULL) */
 int32_t plat_def_window_proc(void *hwnd, uint32_t msg, uint32_t wparam, int32_t lparam); /* DefWindowProc */
+void   *plat_dll_proc(void *mod, const char *name);              /* GetProcAddress; SDL: NULL */
 void   *plat_dll_load(const char *name);                         /* LoadLibrary; SDL: NULL (Glide на macOS нет) */
 void    plat_win_trap(int on);                                   /* тесты (SDL): окно не создаётся, вызовы только запоминаются */
 int     plat_win_state(int *cursor, int *prio, int *quit, int *closes, int *w, int *h, const char **title, plat_wndproc *proc); /* тесты: SDL — состояние; hook — 0 */

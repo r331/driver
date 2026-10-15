@@ -34,6 +34,7 @@
 #include "../game/ported29.h"
 #include "../game/ported30.h"
 #include "../game/ported31.h"
+#include "../game/ported33.h"
 #include "../game/ported32.h"
 #include <stdio.h>
 #include <string.h>
@@ -688,6 +689,25 @@ static int test_p31(void) {
   plat_win_trap(0);
   return f;
 }
+static int test_p33(void) {
+  int f = 0, pt = 0, cnt = 0;
+  memset(P32_Slots, 0, sizeof P32_Slots); memset(P33_Count, 0, sizeof P33_Count);
+  int calls0 = plat_draw_prim_last(&pt, &cnt);
+  int dummy_tex; P32_Slots[5].tex = &dummy_tex;
+  P33_Count[5] = 6; P33_Count[32] = 3;
+  P32_CurSlot = 7; plat_set_tex_stage(0, 1, 4);
+  P33_FlushBatches();
+  if (plat_draw_prim_last(&pt, &cnt) != calls0 + 2 || pt != 4 || cnt != 3) f++;   /* слот 5, затем слот 32 */
+  if (P33_Count[5] != 0 || P33_Count[32] != 0) f++;
+  if (P32_CurSlot != 7 || plat_get_tex_stage(0, 1) != 4) f++;              /* COLOROP восстановлен */
+  P33_FlushBatches();
+  if (plat_draw_prim_last(&pt, &cnt) != calls0 + 2) f++;                   /* пустые буферы — без вызовов */
+  P33_GlideOk = 0; if (P33_LoadGlideProcs() != 0) f++;
+  P33_GlideOk = 1; if (P33_LoadGlideProcs() != 1) f++;
+  if (P33_GlideCount() != 119 || strcmp(P33_GlideName(0), "_grAADrawLine@8") != 0 || P33_GlideName(119) != NULL || P33_GlideProc(0) != NULL) f++;
+  P33_GlideOk = 0;
+  return f;
+}
 static int test_p32(void) {
   int f = 0, dummy;
   P24_DD = plat_dd_create_clipper(&dummy);
@@ -752,7 +772,7 @@ static int test_p26(void) {
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

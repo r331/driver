@@ -1,6 +1,7 @@
 #include "ported22.h"
 #include "../platform/plat.h"
 #include "unported.h"
+#include "flush.h"
 GAME_VAR_DEF(int32_t, P22_DevReady, 0x00a421c0)
 GAME_VAR_DEF(int32_t, P22_AlphaRef, 0x0054ef54)
 GAME_VAR_DEF(int32_t, P22_ZFuncCur, 0x0054ef58)

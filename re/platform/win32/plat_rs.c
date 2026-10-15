@@ -49,6 +49,18 @@ void plat_set_viewport(int x, int y, int w, int h) {
     vp.clip_x = 0; vp.clip_y = 0; vp.clip_w = (float)w; vp.clip_h = (float)h; vp.min_z = 0; vp.max_z = 1.0f;
     ((d3d_fn1p)VT(v, 0x44))(v, &vp);
 }
+uint32_t plat_get_tex_stage(int stage, int type) {
+    void *d = D3D_DEV; uint32_t out = 0;
+    typedef long (__attribute__((stdcall)) *gt_t)(void *, uint32_t, uint32_t, uint32_t *);
+    ((gt_t)VT(d, 0x9c))(d, (uint32_t)stage, (uint32_t)type, &out);
+    return out;
+}
+void plat_draw_prim(int ptype, const plat_vertex *v, int count) {
+    void *d = D3D_DEV;
+    typedef long (__attribute__((stdcall)) *dp_t)(void *, uint32_t, uint32_t, const void *, uint32_t, uint32_t);
+    ((dp_t)VT(d, 0x70))(d, (uint32_t)ptype, 0x1c4, v, (uint32_t)count, 0x18);
+}
+int plat_draw_prim_last(int *ptype, int *count) { (void)ptype; (void)count; return 0; }
 void plat_draw_lines(const plat_vertex *v, int count) {
     void *d = D3D_DEV;
     typedef long (__attribute__((stdcall)) *dp_t)(void *, uint32_t, uint32_t, const void *, uint32_t, uint32_t);

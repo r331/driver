@@ -2,6 +2,7 @@
 #include "ported32.h"
 #include "noop.h"
 #include "unported.h"
+#include "flush.h"
 #include <stdio.h>
 #include <string.h>
 GAME_VAR_DEF(P32_SlotArr, P32_Slots, 0x00621c48)

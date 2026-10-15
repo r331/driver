@@ -151,6 +151,18 @@ void plat_set_tex_stage(int stage, int type, uint32_t value) {
 void plat_set_viewport(int x, int y, int w, int h) {
     g_vp[0] = x; g_vp[1] = y; g_vp[2] = w; g_vp[3] = h; g_vpset = (w > 0 && h > 0 && !(x == 0 && y == 0 && w >= g_w && h >= g_h));
 }
+uint32_t plat_get_tex_stage(int stage, int type) {
+    if (stage >= 0 && stage < 8 && type >= 0 && type < 32) return (uint32_t)g_tss[stage][type];
+    return 0;
+}
+static int g_dp_calls, g_dp_type, g_dp_count;
+static void draw(const plat_vertex *v, int count, unsigned mode);
+void plat_draw_prim(int ptype, const plat_vertex *v, int count) {
+    g_dp_calls++; g_dp_type = ptype; g_dp_count = count;
+    if (ptype == 4) plat_draw_tris(v, count);
+    else if (ptype == 2) plat_draw_lines(v, count);
+}
+int plat_draw_prim_last(int *ptype, int *count) { if (ptype) *ptype = g_dp_type; if (count) *count = g_dp_count; return g_dp_calls; }
 static void draw(const plat_vertex *v, int count, unsigned mode) {
     apply_state();
     glUseProgram(g_prog); glUniform2f(g_uView, (float)g_w, (float)g_h); glUniform1i(g_uTex, 0);

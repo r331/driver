@@ -58,7 +58,7 @@ address,name,layer,imports,callers,status
 004214dd,FUN_004214dd,render,COM_vtable,,ported
 00421521,FUN_00421521,render,COM_vtable,,ported
 00422309,FUN_00422309,render,COM_vtable,,ported
-00422ae7,FUN_00422ae7,render,COM_vtable,,todo
+00422ae7,FUN_00422ae7,render,COM_vtable,,ported
 00422c55,FUN_00422c55,render,COM_vtable,,ported
 0048ac1c,FUN_0048ac1c,render,DirectDrawCreate,,todo
 0048ae12,FUN_0048ae12,render,COM_vtable,,todo
@@ -121,7 +121,7 @@ address,name,layer,imports,callers,status
 004027a2,thunk_FUN_004bfc30,system,MessageBoxA,,ported
 00402851,thunk_FUN_005281b0,system,timeBeginPeriod,,ported
 00420b19,FUN_00420b19,system,MessageBoxA;DirectDrawCreate,,todo
-00424c40,FUN_00424c40,system,GetProcAddress,,todo
+00424c40,FUN_00424c40,system,GetProcAddress,,ported
 00425730,FUN_00425730,system,LoadLibraryA,,ported
 0048a940,FUN_0048a940,system,Sleep;SetForegroundWindow;ShowWindow;UpdateWindow,,todo
 004a5ac3,FUN_004a5ac3,system,MessageBoxA,,ported

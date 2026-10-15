@@ -204,7 +204,6 @@
     V(G6Call004A05FA, 0x004a05fa, (void), ()) \
     V(G6Call0048A239, 0x0048a239, (int32_t a0, int32_t a1), (a0, a1)) \
     V(G6Call00489F50, 0x00489f50, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
-    V(G6Call00422AE7, 0x00422ae7, (void), ()) \
     R(int32_t, G6Call0041D63B, 0x0041d63b, (int32_t a0, int32_t a1, int32_t a2, int32_t a3), (a0, a1, a2, a3)) \
     R(int32_t, G6Call00523CDA, 0x00523cda, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4), (a0, a1, a2, a3, a4)) \
     V(Call004BF910, 0x004bf910, (uint32_t a0, uint32_t a1, uint32_t a2), (a0, a1, a2)) \

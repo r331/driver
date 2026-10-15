@@ -1,6 +1,7 @@
 #include "ported23.h"
 #include "ported22.h"
 #include "unported.h"
+#include "flush.h"
 #include <math.h>
 #include <string.h>
 GAME_VAR_DEF(float, P23_ScaleUV_A, 0x0054ef60)

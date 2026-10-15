@@ -109,6 +109,7 @@ void plat_post_close(void *hwnd){ (void)hwnd; g_wclose++; }
 void plat_set_cursor(int visible){ g_wcur=visible?1:0; if(SDL_WasInit(SDL_INIT_VIDEO)) SDL_ShowCursor(g_wcur); }
 int32_t plat_def_window_proc(void *hwnd,uint32_t msg,uint32_t wp,int32_t lp){ (void)hwnd;(void)msg;(void)wp;(void)lp; return 0; }
 void *plat_dll_load(const char *name){ (void)name; return NULL; }
+void *plat_dll_proc(void *mod, const char *name){ (void)mod; (void)name; return NULL; }
 int plat_win_state(int *cur,int *prio,int *quit,int *closes,int *w,int *h,const char **title,plat_wndproc *proc){
     if(cur){ *cur=g_wcur; }
     if(prio){ *prio=g_wprio; }

@@ -1920,7 +1920,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004228eb,FUN_004228eb,,,,,,271,todo
 004229fa,FUN_004229fa,,,,,,198,todo
 00422ac0,FUN_00422ac0,CopyDwords,manual,Util,,,39,ported
-00422ae7,FUN_00422ae7,,,,,,366,todo
+00422ae7,FUN_00422ae7,FlushBatches,manual,Render,,,366,ported
 00422c55,FUN_00422c55,SelectSlotPalette,manual,Render,,,287,ported
 00424530,FUN_00424530,,,,,,178,todo
 004245e2,FUN_004245e2,GetVarB1C0D8,manual,UIMisc,,,10,ported
@@ -1942,7 +1942,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00424974,FUN_00424974,,,,,,142,todo
 00424a02,FUN_00424a02,CallIf424A02,manual,Menu,,,39,ported
 00424b70,FUN_00424b70,,,,,,208,todo
-00424c40,FUN_00424c40,,,,,,2764,todo
+00424c40,FUN_00424c40,LoadGlideProcs,manual,Render,,,2764,ported
 0042570c,FUN_0042570c,,,,,,36,todo
 00425730,FUN_00425730,LoadGlide,manual,WinMain,,,39,ported
 00425a50,FUN_00425a50,,,,,,194,todo

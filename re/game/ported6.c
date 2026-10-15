@@ -1,5 +1,6 @@
 #include "ported6.h"
 #include "engine.h"
+#include "flush.h"
 GAME_VAR_DEF(int32_t, G6_011368C4, 0x011368c4)
 GAME_VAR_DEF(int32_t, G6_01136920, 0x01136920)
 GAME_VAR_DEF(g6a_01145A60, G6_01145A60, 0x01145a60)
