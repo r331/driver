@@ -3,6 +3,7 @@
 #include "ported12.h"
 #include "ported14.h"
 #include "smallfuncs2.h"
+#include "ported33.h"
 #include "../platform/plat.h"
 #include <string.h>
 
@@ -174,7 +175,12 @@ static void native_texsrc(int32_t tmu, uint32_t addr, int32_t mask, uint32_t inf
   g_bound = P86_NativeHandle(P86_CurTex);
   plat_tex_bind(g_bound);
 }
+/* _grAlphaTestFunction@4 в native: GR_CMP_ALWAYS (7) — альфа-тест выключен (так рисуется всё непрозрачное,
+   в т.ч. асфальт — у его текселей ARGB1555 бит альфы 0), остальные функции — отбрасывание по альфе */
+static void native_alpha_test(int32_t fn) { plat_set_render_state(15, fn != 7); }
 void P86_NativeInit(void) {
+  P33_SetNativeProc("_grAlphaTestFunction@4", (void *)native_alpha_test);
+  native_alpha_test(7);                                /* состояние Glide после grSstWinOpen — GR_CMP_ALWAYS */
   P86_TexSrc = native_texsrc;
   P86_CurTex = -1;
   for (int t = 0; t < 6; t++) {

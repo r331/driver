@@ -173,6 +173,14 @@ void *P33_GlideProc(int i) {
 #endif
 }
 
+#ifndef RE_HOOK_BUILD
+int P33_SetNativeProc(const char *name, void *proc) {
+  for (int i = 0; i < P33_GlideCount(); i++)
+    if (strcmp(P33_GlideTab[i].name, name) == 0) { g_glide_native[i] = proc; return 1; }
+  return 0;
+}
+#endif
+
 int32_t P33_LoadGlideProcs(void) {
   if (P33_GlideOk == 0) return 0;
   void *mod = (void *)(intptr_t)P31_GlideModule;

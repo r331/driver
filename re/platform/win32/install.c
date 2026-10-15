@@ -82,6 +82,7 @@
 #include "../../game/ported91.h"
 #include "../../game/ported92.h"
 #include "../../game/ported93.h"
+#include "../../game/ported94.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1765,4 +1766,19 @@ void re_install_all(void) {
     re_hook(0x0042982e, (void*)P92_DrawAxis, "P92_DrawAxis");
     re_hook(0x0042a5de, (void*)P92_DrawSpin, "P92_DrawSpin");
     re_hook(0x004ec91e, (void*)P93_FindIcon, "P93_FindIcon");
+    re_hook(0x004a522a, (void*)P94_ReadIdent, "P94_ReadIdent");
+    re_hook(0x004e0fd4, (void*)P94_SpringStep, "P94_SpringStep");
+    re_hook(0x004dab80, (void*)P94_PackState, "P94_PackState");
+    re_hook(0x004da76a, (void*)P94_QuatToMat, "P94_QuatToMat");
+    re_hook(0x004da5e0, (void*)P94_InitCurves, "P94_InitCurves");
+    re_hook(0x00496569, (void*)P94_InViewCone, "P94_InViewCone");
+    re_hook(0x00490591, (void*)P94_BuildDirTab, "P94_BuildDirTab");
+    re_hook(0x004f2f2a, (void*)P94_RowSpans, "P94_RowSpans");
+    re_hook(0x004f4c3d, (void*)P94_NearestObjDist, "P94_NearestObjDist");
+    re_hook(0x004b9835, (void*)P94_Wobble, "P94_Wobble");
+    re_hook(0x005061c9, (void*)P94_RadarXY, "P94_RadarXY");
+    re_hook(0x004094e3, (void*)P94_ClampView, "P94_ClampView");
+    re_hook(0x004e5284, (void*)P94_FadeStep, "P94_FadeStep");
+    re_hook(0x004ab95c, (void*)P94_IconQuad, "P94_IconQuad");
+    re_hook(0x00507672, (void*)P94_MapToScreen, "P94_MapToScreen");
 }

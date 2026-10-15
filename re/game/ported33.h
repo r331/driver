@@ -18,3 +18,6 @@ int32_t P33_LoadGlideProcs(void); /* 00424c40: 119 функций glide2x.dll п
 void   *P33_GlideProc(int index); /* native: указатель из таблицы по номеру (в hook — читает ячейку Game.exe); NULL вне диапазона */
 int     P33_GlideCount(void);     /* 119 */
 const char *P33_GlideName(int index);
+#ifndef RE_HOOK_BUILD
+int     P33_SetNativeProc(const char *name, void *proc); /* native: подставить родную реализацию функции Glide по имени; 0 — имени нет в таблице */
+#endif

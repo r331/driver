@@ -53,15 +53,15 @@ static const char *VS =
  "  gl_Position = vec4(n * w, w); vCol = aCol.bgra; vSpec = aSpec.bgr; vUV = aUV; }\n";
 static const char *FS =
  "#version 330 core\n"
- "in vec4 vCol; in vec3 vSpec; in vec2 vUV; uniform sampler2D uTex; out vec4 oCol;\n"
- "void main(){ vec4 c = vCol * texture(uTex, vUV); if (c.a < 0.5) discard; oCol = vec4(c.rgb + vSpec, c.a); }\n";
+ "in vec4 vCol; in vec3 vSpec; in vec2 vUV; uniform sampler2D uTex; uniform int uAlphaTest; out vec4 oCol;\n"
+ "void main(){ vec4 c = vCol * texture(uTex, vUV); if (uAlphaTest != 0 && c.a < 0.5) discard; oCol = vec4(c.rgb + vSpec, c.a); }\n";
 
 typedef struct { int w, h; unsigned id; } tex_t;
 #define MAX_TEX 4096
 static tex_t g_tex[MAX_TEX];
 static int g_ok, g_w, g_h, g_cur;
 static unsigned g_prog, g_vao, g_vbo, g_white;
-static int g_uView, g_uTex, g_zt = 1, g_zw = 1, g_blend, g_bs = 5, g_bd = 6;
+static int g_uAlphaTest, g_at = 1, g_uView, g_uTex, g_zt = 1, g_zw = 1, g_blend, g_bs = 5, g_bd = 6;
 static int g_zf = 4, g_vp[4], g_vpset, g_rs[64], g_tss[8][32];
 static void (*g_swap)(void);
 
@@ -91,7 +91,7 @@ int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int 
     g_prog = glCreateProgram(); glAttachShader(g_prog, vs); glAttachShader(g_prog, fs); glLinkProgram(g_prog);
     GLint ok = 0; glGetProgramiv(g_prog, GL_LINK_STATUS, &ok);
     if (!ok) { char log[1024]; glGetProgramInfoLog(g_prog, sizeof log, NULL, log); plat_log("GL link: %s\n", log); return -3; }
-    g_uView = glGetUniformLocation(g_prog, "uView"); g_uTex = glGetUniformLocation(g_prog, "uTex");
+    g_uView = glGetUniformLocation(g_prog, "uView"); g_uTex = glGetUniformLocation(g_prog, "uTex"); g_uAlphaTest = glGetUniformLocation(g_prog, "uAlphaTest");
     glGenVertexArrays(1, &g_vao); glBindVertexArray(g_vao);
     glGenBuffers(1, &g_vbo); glBindBuffer(GL_ARRAY_BUFFER, g_vbo);
     /* plat_vertex: 4 float, 2 цвета (u8 x4), 2 float */
@@ -138,6 +138,7 @@ void plat_set_render_state(int state, uint32_t value) {
     switch (state) {
     case 7: g_zt = value != 0; break;
     case 14: g_zw = value != 0; break;
+    case 15: g_at = value != 0; break;   /* ALPHATESTENABLE: отбрасывать тексели с альфой < 0.5 (по умолчанию включён) */
     case 19: g_bs = (int)value; break;
     case 20: g_bd = (int)value; break;
     case 23: g_zf = (int)value; break;
@@ -165,7 +166,7 @@ void plat_draw_prim(int ptype, const plat_vertex *v, int count) {
 int plat_draw_prim_last(int *ptype, int *count) { if (ptype) *ptype = g_dp_type; if (count) *count = g_dp_count; return g_dp_calls; }
 static void draw(const plat_vertex *v, int count, unsigned mode) {
     apply_state();
-    glUseProgram(g_prog); glUniform2f(g_uView, (float)g_w, (float)g_h); glUniform1i(g_uTex, 0);
+    glUseProgram(g_prog); glUniform2f(g_uView, (float)g_w, (float)g_h); glUniform1i(g_uTex, 0); glUniform1i(g_uAlphaTest, g_at);
     glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, g_cur ? g_tex[g_cur].id : g_white);
     glBindVertexArray(g_vao); glBindBuffer(GL_ARRAY_BUFFER, g_vbo);
     glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)count * sizeof(plat_vertex), v, GL_STREAM_DRAW);
@@ -208,5 +209,6 @@ int plat_render_readback(uint32_t *out) {
     uint32_t *tmp = malloc((size_t)g_w * g_h * 4); if (!tmp) return -1;
     glReadPixels(0, 0, g_w, g_h, GL_RGBA, GL_UNSIGNED_BYTE, tmp);
     for (int y = 0; y < g_h; y++) memcpy(out + (size_t)y * g_w, tmp + (size_t)(g_h - 1 - y) * g_w, (size_t)g_w * 4);
+    for (size_t i = 0; i < (size_t)g_w * g_h; i++) out[i] |= 0xFF000000u;   /* у экрана (Glide/DirectDraw) нет альфы: пиксель кадра всегда непрозрачен */
     free(tmp); return 0;
 }

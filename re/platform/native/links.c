@@ -82,6 +82,7 @@
 #include "../../game/ported91.h"
 #include "../../game/ported92.h"
 #include "../../game/ported93.h"
+#include "../../game/ported94.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -132,6 +133,7 @@ void P57_Setup41269B (void) { MenuAllRowsTo2_0041269B(); }
 void P57_Setup412702 (void) { Ui00412702(); }
 void P57_Fn51CAA7 (void *f) { P76_LoadHsTables(f); }
 void P57_Fn51CB98 (void *f) { P62_SaveScores(f); }
+void P57_Fn507672 (float *x, float *y) { P94_MapToScreen(x, y); }
 void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
 void P87_Fn42982E (uint32_t m, int32_t idx, float *pos, int32_t mode) { P92_DrawAxis(m, idx, pos, mode); }
@@ -148,6 +150,7 @@ void P55_Fn4264A7 (void) { Ui004264A7(); }
 void N54_Fn4913CC (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4) { P75_TrafficPos(a0, a1, a2, a3, a4); }
 int32_t P53_Fn40EFD5 (void) { return (int32_t)P74_KeyScan(); }
 int32_t P53_Fn4045E0 (void) { return (int32_t)P57_Menu4045E0(); }
+void P52_Fn4AB95C (void) { P94_IconQuad(); }
 void P52_Fn5173D7 (float a0, float a1, int32_t a2, int32_t a3, int32_t a4) { P73_Text(a0, a1, a2, a3, a4); }
 int32_t P52_Fn405F6F (int32_t a0, void *a1) { return (int32_t)P64_ReplayStart(a0, a1); }
 void P48_Fn516DA0 (void) { P58_LangStrings(); }
@@ -264,6 +267,7 @@ void P4Call0041074D (void) { MenuHiliteWhite0041074D(); }
 void P4Call00411A9D (void) { MenuHiliteWhite00411A9D(); }
 void P4Call00415979 (void) { MenuWhite00415979(); }
 void G6Call004064B4 (int32_t a0, int32_t a1) { P13_Fn004064B4(a0, a1); }
+void G6Call004094E3 (void) { P94_ClampView(); }
 void G6Call004D5FFC (void) { Chain004D5FFC(); }
 void G6Call00524398 (void) { P43_CdFadeInit(); }
 void G6Call00523628 (void) { P48_ResetAll(); }
