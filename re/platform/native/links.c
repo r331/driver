@@ -63,6 +63,7 @@
 #include "../../game/ported72.h"
 #include "../../game/ported73.h"
 #include "../../game/ported74.h"
+#include "../../game/ported75.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -120,6 +121,7 @@ void P55_Fn5248CD (void) { P25_CDResume(); }
 void P55_Fn424530 (int32_t a0, int32_t a1, int32_t a2) { P74_DevSelect(a0, a1, a2); }
 int32_t P55_Fn4245E2 (void) { return (int32_t)GetVarB1C0D8(); }
 void P55_Fn4264A7 (void) { Ui004264A7(); }
+void N54_Fn4913CC (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4) { P75_TrafficPos(a0, a1, a2, a3, a4); }
 int32_t P53_Fn40EFD5 (void) { return (int32_t)P74_KeyScan(); }
 int32_t P53_Fn4045E0 (void) { return (int32_t)P57_Menu4045E0(); }
 void P52_Fn5173D7 (float a0, float a1, int32_t a2, int32_t a3, int32_t a4) { P73_Text(a0, a1, a2, a3, a4); }
@@ -130,6 +132,8 @@ uint32_t P47_Fn51B566 (int32_t a0, int32_t a1) { return (uint32_t)P72_RoadDword(
 int32_t P47_Fn40A3A0 (void) { return (int32_t)P57_Menu40A3A0(); }
 void P47_Fn405BFA (void) { P58_SaveConfig(); }
 int32_t P47_Fn406199 (int32_t a0) { return (int32_t)P70_LoadReplay(a0); }
+void N14_Fn4D6C5A (void) { P75_BgSound(); }
+void N14_Fn4D6DAC (void) { P75_CarSound(); }
 void N14_Fn4D2ADE (int32_t a0) { AddClamp4095_004D2ADE(a0); }
 void N14_Fn4A7EE9 (int32_t a0) { SetVarD1193C(a0); }
 void N14_Fn48A627 (void) { P12_Fn0048A627(); }
@@ -185,6 +189,7 @@ void Call004D611B (int32_t a0) { TryStartTrack_004D611B(a0); }
 void Call004D9478 (void) { CursorWrap004D9478(); }
 void Call004C1B46 (void) { FreeBufferD17EC8(); }
 void UiCall0041A8AB (void) { StepIfActive0041A8AB(); }
+void UiCall004EE065 (void) { P75_ResetObjs(); }
 void UiCall004184F5 (void) { P19_FadeStep(); }
 void UiCall005170AB (void) { P70_FadeColor(); }
 void UiCall00419DB3 (void) { MenuWhite00419DB3(); }

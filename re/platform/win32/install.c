@@ -63,6 +63,7 @@
 #include "../../game/ported72.h"
 #include "../../game/ported73.h"
 #include "../../game/ported74.h"
+#include "../../game/ported75.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1663,6 +1664,14 @@ void re_install_all(void) {
     re_hook(0x004a5afb, (void*)P74_ParseShorts, "P74_ParseShorts");
     re_hook(0x0051d440, (void*)P74_SkidInit, "P74_SkidInit");
     re_hook(0x0040efd5, (void*)P74_KeyScan, "P74_KeyScan");
+    re_hook(0x004913cc, (void*)P75_TrafficPos, "P75_TrafficPos");
+    re_hook(0x00492e42, (void*)P75_TrafficSpawn, "P75_TrafficSpawn");
+    re_hook(0x0049512b, (void*)P75_TrafficFill, "P75_TrafficFill");
+    re_hook(0x004d6c5a, (void*)P75_BgSound, "P75_BgSound");
+    re_hook(0x004d6dac, (void*)P75_CarSound, "P75_CarSound");
+    re_hook(0x004ee065, (void*)P75_ResetObjs, "P75_ResetObjs");
+    re_hook(0x004d68da, (void*)P75_CarVoice, "P75_CarVoice");
+    re_hook(0x0040dae1, (void*)P75_BmpToPage, "P75_BmpToPage");
     re_hook(0x0051bf82, (void*)P73_RoadSides, "P73_RoadSides");
     re_hook(0x00511e60, (void*)P73_ParticlesReset, "P73_ParticlesReset");
     re_hook(0x0049f031, (void*)P73_CatmullRom, "P73_CatmullRom");
