@@ -41,6 +41,7 @@
 #include "../../game/ported50.h"
 #include "../../game/ported51.h"
 #include "../../game/ported52.h"
+#include "../../game/ported53.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -140,6 +141,7 @@ void G6Call00426580 (int32_t a0) { P12_Fn00426580(a0); }
 void G6Call00516EB4 (int32_t a0, int32_t a1, int32_t a2) { SetRGB00516EB4(a0, a1, a2); }
 void G6Call00491360 (void) { P12_Fn00491360(); }
 void Call0042486B (int32_t a0, uint32_t a1, int32_t a2, uint32_t a3, int32_t a4) { P52_TexDownloadMipMap(a0, a1, a2, a3, a4); }
+int32_t G6Call0041D63B (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { return (int32_t)P53_TexLookup(a0, a1, a2, a3); }
 void Call004D94B7 (uint32_t a0, uint32_t a1) { CursorSet004D94B7(a0, a1); }
 int32_t Call00524473 (int32_t a0) { return (int32_t)IsSlotActive00524473(a0); }
 void Call004C64BD (void) { FreeCameraList(); }
@@ -148,3 +150,4 @@ void Call004C372A (void) { FreeDirectorBuffer(); }
 void Call0052434A (int32_t a0) { SlotSetOff0052434A(a0); }
 void Call005243EB (void) { P48_FadeEnd(); }
 void SetCameraPosition (float x, float y, float z) { PushVec3_00523C99(x, y, z); }
+void P46_Fn4D6354 (void) { P53_StepBounds(); }

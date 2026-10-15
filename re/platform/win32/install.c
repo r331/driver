@@ -41,6 +41,7 @@
 #include "../../game/ported50.h"
 #include "../../game/ported51.h"
 #include "../../game/ported52.h"
+#include "../../game/ported53.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1394,4 +1395,13 @@ void re_install_all(void) {
     re_hook(0x0048abdc, (void*)P52_FmvStart, "P52_FmvStart");
     re_hook(0x004a9e0a, (void*)P52_DrawLabel, "P52_DrawLabel");
     re_hook(0x00510728, (void*)P52_MenuReload, "P52_MenuReload");
+    re_hook(0x004d6354, (void*)P53_StepBounds, "P53_StepBounds");
+    re_hook(0x005101f0, (void*)P53_NameEntry, "P53_NameEntry");
+    re_hook(0x0041f76f, (void*)P53_SetTexSource, "P53_SetTexSource");
+    re_hook(0x0041d63b, (void*)P53_TexLookup, "P53_TexLookup");
+    re_hook(0x00500154, (void*)P53_CallWithState, "P53_CallWithState");
+    re_hook(0x004d303a, (void*)P53_ReadWholeFile, "P53_ReadWholeFile");
+    re_hook(0x004161b3, (void*)P53_MenuA, "P53_MenuA");
+    re_hook(0x004046c8, (void*)P53_MenuB, "P53_MenuB");
+    re_hook(0x00414638, (void*)P53_MenuC, "P53_MenuC");
 }
