@@ -51,6 +51,7 @@
 #include "../game/ported63.h"
 #include "../game/ported64.h"
 #include "../game/ported65.h"
+#include "../game/ported66.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -2402,6 +2403,80 @@ static int test_p65(void) {
   return f;
 }
 
+/* ported66 */
+static int t66_n, t66_nshadow, t66_cd, t66_fn, t66_cb;
+static int32_t t66_args[16][8]; static float t66_fx[16][2];
+void P66_DrawText(int32_t x, int32_t y, uint32_t txt, int32_t a, int32_t b, int32_t r, int32_t g, int32_t bl) {
+  if (t66_n < 16) { int32_t v[8] = { x, y, (int32_t)txt, a, b, r, g, bl }; memcpy(t66_args[t66_n], v, sizeof v); } t66_n++; }
+void P66_Draw5173D7(float x, float y, uint32_t txt, int32_t a, int32_t flags) {
+  if (t66_nshadow < 16) { t66_fx[t66_nshadow][0] = x; t66_fx[t66_nshadow][1] = y; t66_args[t66_nshadow][2] = (int32_t)txt; t66_args[t66_nshadow][4] = flags; } t66_nshadow++; (void)a; }
+void P66_Fn523829(void) { t66_fn++; }
+void P66_Fn427EEA(void) { t66_fn++; }
+void P66_Fn4EE8F4(int32_t a) { t66_fn += 10 * (a + 1); }
+void P66_Fn4169AF(void) { t66_cb++; }
+static int t66_a, t66_b;
+void P66_Fn4C3BC7(void) { t66_a++; }
+void P66_Fn4C68A7(int32_t a) { t66_b += a; }
+static int test_p66(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p66 fail line %d\n",__LINE__); } } while (0)
+  uint8_t tbl[16 * 3];
+  memset(tbl, 0, sizeof tbl);
+  int16_t v;
+  v = 10; memcpy(tbl + 0, &v, 2); v = 20; memcpy(tbl + 2, &v, 2); tbl[5] = 3; { uint32_t t = 0x1111; memcpy(tbl + 8, &t, 4); }
+  v = -5; memcpy(tbl + 16, &v, 2); v = 7; memcpy(tbl + 18, &v, 2); tbl[16 + 5] = 1; { uint32_t t = 0x2222; memcpy(tbl + 24, &t, 4); }
+  tbl[16 + 0xc] = 200; tbl[16 + 0xd] = 100; tbl[16 + 0xe] = 50;
+  P66_C255 = 255.0f; P66_C128 = 128.0f; P66_C2 = 2.0f;
+  P19_Cur = 0.5f; P59_NoKeyFlag = 0; P59_MenuLock = 0;
+  t66_n = t66_nshadow = 0;
+  P66_DrawTable(tbl);
+  CK(t66_n == 2 && t66_nshadow == 0);
+  CK(t66_args[0][0] == 10 && t66_args[0][1] == 20 && t66_args[0][2] == 0x1111 && t66_args[0][4] == 3);
+  CK(t66_args[0][5] == 127 && t66_args[0][6] == 127 && t66_args[0][7] == 64);        /* 255*0.5 усекается до 127 */
+  CK(t66_args[1][0] == -5 && t66_args[1][1] == 7 && t66_args[1][5] == 100 && t66_args[1][6] == 50 && t66_args[1][7] == 25);
+  /* режим с тенью: три вызова на пункт */
+  P59_MenuLock = 1; t66_n = t66_nshadow = 0;
+  P66_DrawTable(tbl);
+  CK(t66_n == 0 && t66_nshadow == 6);
+  CK(t66_fx[0][0] == 10.0f && t66_fx[1][0] == 12.0f && t66_fx[1][1] == 22.0f && t66_fx[2][0] == 10.0f);
+  CK(t66_args[0][4] == (3 | 0x10) && t66_args[2][4] == (3 | 4) && t66_args[3][4] == (1 | 0x10));
+  P59_MenuLock = 0;
+  /* начало кадра: сцена, режим 00426580 */
+  t66_fn = 0; G6_00D0DDC0 = 5; Q00B87E90 = 0; P66_LoadFlag = 1; P66_Scene = 0;
+  P66_FrameBegin();
+  CK(P66_Scene == 0x00cb8f20u && G6_00D0DDC0 == 0 && t66_fn == 2 + 10 + 20);
+  /* кадр экрана: окно неактивно — ничего; вложенность */
+  P31_Active = 0; P66_Nest = 0; t66_cb = 0; t66_n = 0;
+  P66_ScreenFrame(0, 0x004169afu);
+  CK(P66_Nest == 0 && t66_cb == 0);
+  P31_Active = 1; P66_Nest = 2;
+  P66_ScreenFrame(0, 0x004169afu);
+  CK(P66_Nest == 1 && t66_cb == 0);
+  P66_Nest = 0; P66_ScreenFrame(0x0054e6a0u, 0x004169afu);          /* адрес из образа игры в native не читается */
+  CK(t66_cb == 1 && t66_n == 0);
+  P31_Active = 0;
+  /* 004c862f: переключатель режима режиссёра */
+  DirectorUnk6C = 7;
+  P29_Flag48 = 1; P29_Mode = 1; t66_a = t66_b = 0; P66_DirSwitch();
+  CK(t66_a == 0 && t66_b == 0);
+  P29_Flag48 = 0; P29_Mode = 1; P66_DirSwitch();                       /* случай 0 */
+  CK(t66_a == 1 && t66_b == 7);
+  P29_Mode = 2; t66_a = t66_b = 0; P66_DirSwitch();                    /* случай 1 — ничего */
+  CK(t66_a == 0 && t66_b == 0);
+  P29_Mode = 5; t66_a = t66_b = 0; P66_DirSwitch();                    /* случай 4: 4c68a7, затем 4c3bc7 */
+  CK(t66_a == 1 && t66_b == 7);
+  P29_Mode = 12; t66_a = t66_b = 0; P66_DirSwitch();                   /* 0xb */
+  CK(t66_a == 1 && t66_b == 7);
+  P29_Mode = 13; t66_a = t66_b = 0; P66_DirSwitch();
+  CK(t66_a == 0 && t66_b == 0);
+  P29_Mode = 3; DirectorBuffer = (void *)&f; t66_a = t66_b = 0; P66_DirSwitch();   /* случай 2 с буфером */
+  CK(t66_a == 1 && t66_b == 7);
+  DirectorBuffer = NULL; P29_Mode = 0;
+#undef CK
+  return f;
+}
+
 /* ported64 */
 static void t64_put(const char *n, const char *d, size_t l) { FILE *f = fopen(n, "wb"); if (f) { fwrite(d, 1, l, f); fclose(f); } }
 static int test_p64(void) {
@@ -2459,7 +2534,7 @@ static int test_p64(void) {
 }
 
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_p62() | test_p63() | test_p64() | test_p65() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_p62() | test_p63() | test_p64() | test_p65() | test_p66() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

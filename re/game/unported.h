@@ -7,6 +7,14 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    V(P66_DrawText, 0x0051755e, (int32_t x, int32_t y, uint32_t txt, int32_t a, int32_t b, int32_t r, int32_t g, int32_t bl), (x, y, txt, a, b, r, g, bl)) \
+    V(P66_Draw5173D7, 0x005173d7, (float x, float y, uint32_t txt, int32_t a, int32_t flags), (x, y, txt, a, flags)) \
+    V(P66_Fn523829, 0x00523829, (void), ()) \
+    V(P66_Fn427EEA, 0x00427eea, (void), ()) \
+    V(P66_Fn4EE8F4, 0x004ee8f4, (int32_t a), (a)) \
+    V(P66_Fn4169AF, 0x004169af, (void), ()) \
+    V(P66_Fn4C3BC7, 0x004c3bc7, (void), ()) \
+    V(P66_Fn4C68A7, 0x004c68a7, (int32_t a), (a)) \
     V(P65_Fn4CFE69, 0x004cfe69, (uint32_t a0), (a0)) \
     R(int32_t, P63_Fn49521E, 0x0049521e, (void *r, int32_t a, int32_t b), (r, a, b)) \
     V(P62_Fn424A02, 0x00424a02, (uint32_t a, void *b), (a, b)) \

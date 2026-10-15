@@ -54,6 +54,7 @@
 #include "../../game/ported63.h"
 #include "../../game/ported64.h"
 #include "../../game/ported65.h"
+#include "../../game/ported66.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -134,6 +135,7 @@ void Call004126DF (void) { GlobalSet004126DF(); }
 void Call00523595 (void) { P48_SndShutdown(); }
 void Call0052360D (int32_t a0) { SoundSetVolB0052360D(a0); }
 void Call004184DE (uint32_t a0) { Ui004184DE(a0); }
+void Call0041846C (uint32_t a0, uint32_t a1) { P66_ScreenFrame(a0, a1); }
 void Call004086B4 (void) { StartTimer004086B4(); }
 void Call004086EA (void) { StopTimer4086EA(); }
 int32_t R12_4D97E9 (void) { return (int32_t)P48_AnyKey(); }

@@ -561,7 +561,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401e01,thunk_FUN_004d9663,,,,,,5,todo
 00401e06,thunk_FUN_0047560b,,,,,,5,todo
 00401e0b,thunk_FUN_0040c480,,,,,,5,todo
-00401e10,thunk_FUN_004c862f,,,,,,5,todo
+00401e10,thunk_FUN_004c862f,,,,,,5,ported
 00401e15,thunk_FUN_004eac70,,,,,,5,todo
 00401e1a,thunk_FUN_004cd875,,,,,,5,todo
 00401e1f,thunk_FUN_004268ef,,,,,,5,todo
@@ -660,7 +660,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402068,thunk_FUN_004c6691,Thunk_004C6691,manual,Thunks,,,5,ported
 00402072,thunk_FUN_004f89eb,Thunk_004F89EB,manual,Thunks,,,5,ported
 00402077,thunk_FUN_00413610,,,,,,5,ported
-0040208b,thunk_FUN_0041846c,,,,,,5,todo
+0040208b,thunk_FUN_0041846c,,,,,,5,ported
 00402090,thunk_FUN_0051d8ca,,,,,,5,ported
 00402095,thunk_FUN_004d26ea,,,,,,5,todo
 0040209a,thunk_FUN_00501c63,,,,,,5,todo
@@ -1660,15 +1660,15 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004183e8,FUN_004183e8,Ui004183E8,manual,MenuUI,,,15,ported
 004183f7,FUN_004183f7,P12_Fn004183F7,manual,Misc12,,,60,ported
 00418433,FUN_00418433,P12_Fn00418433,manual,Misc12,,,57,ported
-0041846c,FUN_0041846c,,,,,,114,todo
+0041846c,FUN_0041846c,P66_ScreenFrame,manual,Ported66,,,114,ported
 004184de,FUN_004184de,Ui004184DE,manual,UIMisc,,,23,ported
 004184f5,FUN_004184f5,FadeStep,manual,,,,221,ported
 004185d2,FUN_004185d2,,,,,,163,todo
 00418675,FUN_00418675,,,,,,529,todo
 00418886,FUN_00418886,Ui00418886,manual,MenuUI,,,22,ported
 0041889c,FUN_0041889c,Ui0041889C,manual,MenuUI,,,20,ported
-004188b0,FUN_004188b0,,,,,,204,todo
-0041897c,FUN_0041897c,,,,,,663,todo
+004188b0,FUN_004188b0,P66_FrameBegin,manual,Ported66,,,204,ported
+0041897c,FUN_0041897c,P66_DrawTable,manual,Ported66,,,663,ported
 00418e70,FUN_00418e70,,,,,,1150,todo
 0041938a,FUN_0041938a,,,,,,978,todo
 004197f8,FUN_004197f8,Ui004197F8,manual,UIMisc,,,28,ported
@@ -2443,7 +2443,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c810f,FUN_004c810f,ClearDirectorTables,manual,Director.c,,,31,ported
 004c812e,FUN_004c812e,FreeDirectorData,manual,Director,,,15,ported
 004c813d,FUN_004c813d,HandleDirector,debug_string,,,,468,named
-004c862f,FUN_004c862f,,,,,,73,todo
+004c862f,FUN_004c862f,P66_DirSwitch,manual,Ported66,,,73,ported
 004c875d,FUN_004c875d,SetDirectorMode,manual,Director,,,155,ported
 004c8e9e,FUN_004c8e9e,BackupCameraState,manual,Director,,,52,ported
 004c8ed2,FUN_004c8ed2,DropCameraBackup,manual,Director,,,26,ported

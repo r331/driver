@@ -87,3 +87,5 @@ v1.08: +17 функций (game/ported62.c): InitCamDefaults 0049c850, InitRende
 v1.09: +10 функций (game/ported63.c): трафик по узлам (NearOnNode, CountByNode, NearestAdd, NearestRec, CanEnter, CarSpeed), InPlanes, SphereHits, CatmullRom, Hermite. +8 thunk. Всего 1977 по functions.csv (без CRT, из 3275). native ctest ок (test_p63), hook собран.
 v1.10: +10 функций (game/ported64.c): сохранение повтора (SaveChunk, SaveReplay, ReplayStart), места в таблицах рекордов (Rank*, RankPlace). Всего 1990.
 v1.11: +9 функций (game/ported65.c): токены/числа скрипта, поиск по имени, подпись пункта меню, блиттеры 00529140/00529190 + обёртки, вызов скрипта 004d1529. Всего 2005.
+
+v1.12: +4 функции (game/ported66.c): кадр экрана 0041846c, подготовка кадра 004188b0, таблица пунктов 0041897c, переключатель режима режиссёра 004c862f. +2 thunk. Всего 2011.

@@ -54,6 +54,7 @@
 #include "../../game/ported63.h"
 #include "../../game/ported64.h"
 #include "../../game/ported65.h"
+#include "../../game/ported66.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1595,4 +1596,8 @@ void re_install_all(void) {
     re_hook(0x00407cb8, (void*)P65_SpriteKeyed, "P65_SpriteKeyed");
     re_hook(0x00407d07, (void*)P65_SpriteBlend, "P65_SpriteBlend");
     re_hook(0x004d1529, (void*)P65_ScriptCall, "P65_ScriptCall");
+    re_hook(0x004188b0, (void*)P66_FrameBegin, "P66_FrameBegin");
+    re_hook(0x0041897c, (void*)P66_DrawTable, "P66_DrawTable");
+    re_hook(0x0041846c, (void*)P66_ScreenFrame, "P66_ScreenFrame");
+    re_hook(0x004c862f, (void*)P66_DirSwitch, "P66_DirSwitch");
 }
