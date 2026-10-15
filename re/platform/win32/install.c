@@ -34,6 +34,7 @@
 #include "../../game/ported43.h"
 #include "../../game/ported44.h"
 #include "../../game/ported45.h"
+#include "../../game/ported46.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1301,4 +1302,11 @@ void re_install_all(void) {
     re_hook(0x0040ccb4, (void*)P45_Wait, "P45_Wait");
     re_hook(0x00417cbb, (void*)P45_PickColor, "P45_PickColor");
     re_hook(0x005266ed, (void*)P44_LookAt, "P44_LookAt");
+    re_hook(0x00422444, (void*)P46_FindTexNode, "P46_FindTexNode");
+    re_hook(0x0041d89c, (void*)P46_TexCall, "P46_TexCall");
+    re_hook(0x0041d5e7, (void*)P46_TexCall2, "P46_TexCall2");
+    re_hook(0x004d614a, (void*)P46_SetBounds, "P46_SetBounds");
+    re_hook(0x004defd1, (void*)P46_UpdateObjects, "P46_UpdateObjects");
+    re_hook(0x004ec7f4, (void*)P46_LoadMapA, "P46_LoadMapA");
+    re_hook(0x004ec4ce, (void*)P46_LoadMapB, "P46_LoadMapB");
 }

@@ -241,7 +241,12 @@
     V(Call0042793F, 0x0042793f, (void *m, int32_t a1), (m, a1)) \
     V(Call004757D2, 0x004757d2, (void *m), (m)) \
     V(Call00475906, 0x00475906, (void *m), (m)) \
-    V(SetCameraPosition, 0x00523c99, (float x, float y, float z), (x, y, z))
+    V(SetCameraPosition, 0x00523c99, (float x, float y, float z), (x, y, z)) \
+    V(P46_Fn4228EB, 0x004228eb, (void *node, int32_t a1), (node, a1)) \
+    V(P46_Fn42282F, 0x0042282f, (void *node, int32_t a1), (node, a1)) \
+    V(P46_Fn4D6354, 0x004d6354, (void), ()) \
+    V(P46_Fn4DF024, 0x004df024, (void *p, int32_t a1), (p, a1)) \
+    V(P46_Fn51BE3C, 0x0051be3c, (void), ())
 
 #ifdef RE_HOOK_BUILD
 #  define UNPORTED_V(name, addr, params, args) \
@@ -259,6 +264,13 @@ UNPORTED_LIST(UNPORTED_V, UNPORTED_R)
 static void (__stdcall * const G6Call0041F57D)(int32_t, int32_t, int32_t) __attribute__((unused)) = (void (__stdcall *)(int32_t, int32_t, int32_t))(uintptr_t)0x0041f57d;
 #else
 void G6Call0041F57D(int32_t a0, int32_t a1, int32_t a2);
+#endif
+
+/* 0041f4a1: stdcall, 4 аргумента (ret 0x10). */
+#ifdef RE_HOOK_BUILD
+static void (__stdcall * const P46Call0041F4A1)(int32_t, int32_t, int32_t, void *) __attribute__((unused)) = (void (__stdcall *)(int32_t, int32_t, int32_t, void *))(uintptr_t)0x0041f4a1;
+#else
+void P46Call0041F4A1(int32_t a0, int32_t a1, int32_t a2, void *a3);
 #endif
 
 #include "ported31.h"

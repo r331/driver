@@ -22,6 +22,7 @@
 #include "../game/ported18.h"
 #include "../game/ported19.h"
 #include "../game/ported13.h"
+#include "../game/ported46.h"
 #include <stdlib.h>
 #include "../game/ported21.h"
 #include "../game/ported22.h"
@@ -1221,6 +1222,29 @@ static int test_p44(void) {
 #undef CK
   return f;
 }
+static int test_p46(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p46 fail line %d\n",__LINE__); } } while (0)
+  P46_TexNode a = {0}, b = {0}, *o = NULL;
+  a.handle = 7; a.next = &b; b.handle = 9; b.next = NULL;
+  P46_TexHead = &a;
+  G6_00A421F0 = 0; CK(P46_FindTexNode(9, &o) == 0);
+  G6_00A421F0 = 1; CK(P46_FindTexNode(9, &o) == 1 && o == &b);
+  CK(P46_FindTexNode(7, &o) == 1 && o == &a);
+  CK(P46_FindTexNode(8, &o) == 0);
+  P46_SetBounds(1, 2, 3, 4);
+  { int32_t v[4]; memcpy(v, A_00B20330, 16); CK(G8_00B20344 == 0 && v[0] == 1 && v[3] == 4); }
+  uint8_t o1[8] = {1,0,0,0,0,0,0,0}, o2[8] = {0,0,0,1,0,0,0,0};
+  G6_00D0DDC0 = 2; G6_00B2F30C[0] = o1; G6_00B2F30C[1] = o2;
+  P46_UpdateObjects();
+  FILE *fp = tmpfile();
+  uint8_t src[16]; for (int i = 0; i < 16; i++) src[i] = (uint8_t)(i + 1);
+  fwrite(src, 1, 16, fp); rewind(fp);
+  P46_LoadMapA(fp, 16); CK(P46_MapBufA != 0);
+  fclose(fp);
+  return f;
+#undef CK
+}
 static int test_p45(void) {
   int f = 0;
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p45 fail line %d\n",__LINE__); } } while (0)
@@ -1236,7 +1260,7 @@ static int test_p45(void) {
   return f;
 }
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

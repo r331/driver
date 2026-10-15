@@ -34,6 +34,7 @@
 #include "../../game/ported43.h"
 #include "../../game/ported44.h"
 #include "../../game/ported45.h"
+#include "../../game/ported46.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -105,6 +106,7 @@ int IsKeyDown (int sc) { return (int)IsFlagSetNotMasked_004E383A(sc); }
 void Call00411A9D (void) { MenuHiliteWhite00411A9D(); }
 void P4Call0041A8CD (void) { P12_Fn0041A8CD(); }
 void P4Call004D2D85 (int32_t a0) { Call004D2D85(a0); }
+void P4Call0041D89C (int32_t a0, int32_t a1) { P46_TexCall(a0, a1); }
 void P4Call00528293 (int32_t a0) { P25_TimerStop(a0); }
 void P4Call004076E2 (void) { MenuWhite004076E2(); }
 void P4Call00409CFA (void) { MenuWhite00409CFA(); }
@@ -119,6 +121,7 @@ void G6Call0050E940 (int32_t a0) { SetLatchValue0050E940(a0); }
 void G6Call00418119 (int32_t a0) { Ui00418119(a0); }
 void G6Call00417CBB (void) { P45_PickColor(); }
 void G6Call004A2B70 (void) { ResetSlots_004A2B70(); }
+void G6Call004D614A (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { P46_SetBounds(a0, a1, a2, a3); }
 void G6Call00426580 (int32_t a0) { P12_Fn00426580(a0); }
 void G6Call00516EB4 (int32_t a0, int32_t a1, int32_t a2) { SetRGB00516EB4(a0, a1, a2); }
 void G6Call00491360 (void) { P12_Fn00491360(); }
