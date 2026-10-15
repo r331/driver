@@ -23,6 +23,7 @@
 #include "../game/ported19.h"
 #include "../game/ported13.h"
 #include "../game/ported46.h"
+#include "../game/ported47.h"
 #include <stdlib.h>
 #include "../game/ported21.h"
 #include "../game/ported22.h"
@@ -1245,6 +1246,31 @@ static int test_p46(void) {
   return f;
 #undef CK
 }
+static int test_p47(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p47 fail line %d\n",__LINE__); } } while (0)
+  FILE *fp = tmpfile(); char line[0x80];
+  fputs("abc\n", fp); rewind(fp);
+  CK(P47_ReadLine(fp, line) == 0 && strcmp(line, "abc\n") == 0);
+  CK(P47_ReadLine(fp, line) == -1);
+  fclose(fp);
+  CK(P47_Call51B111(1, 2) == 1);
+  CK(P47_NoFlags(1, 2) == 1);   /* заглушка 0051b566 возвращает 0 */
+  P14_00c810e8 = 3; P47_Slots[2] = 5; P47_Slots[1] = 6; P47_Limit = 99; P47_Flag = 7; G2_00D118A8 = 0;
+  P47_ResetPick();
+  CK(P47_Slots[2] == -1 && P47_Slots[1] == 6 && P47_Limit == 0x32 && P47_Flag == 0 && G2_00D118A8 == 1);
+  P14_00c810e8 = 9; P47_Limit = 10; P47_ResetPick(); CK(P47_Limit == 10 && P47_Slots[1] == 6);
+  P11_01271060 = 7; MenuOptBDFA50 = 3; G2_00575EE4 = 4;
+  CK(P47_TitleDispatch() == 0 && MenuOptBDFA50 == 3 && G2_00575EE4 == 4 && P45_Busy == 0);
+  P47_CamB = 1; P47_CameraModeText(); P47_DirText(0);
+  CK(P47_PrepareTemp(1) == 0);
+  D_00b1c0d4 = 0; P47_WinArg5 = 0; CK(P47_GlideWinOpen(1, 2, 3, 4, 5, 6, 7) == 0 && P47_WinArg5 == 0);
+  D_00b1c0d4 = 1; CK(P47_GlideWinOpen(1, 2, 3, 4, 5, 6, 7) == 0 && P47_WinArg5 == 5);   /* без Glide — NULL */
+  P47_SwapCnt = 0; P11_01270c38 = 2; P47_GlideSwap(); CK(P47_SwapCnt == 1 && P11_01270c38 == 1);
+  D_00b1c0d8 = 1; P47_TexTable(1, 2, 3, 4); D_00b1c0d4 = 0; P47_TexTable(1, 2, 3, 4);
+  return f;
+#undef CK
+}
 static int test_p45(void) {
   int f = 0;
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p45 fail line %d\n",__LINE__); } } while (0)
@@ -1260,7 +1286,7 @@ static int test_p45(void) {
   return f;
 }
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

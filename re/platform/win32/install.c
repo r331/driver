@@ -35,6 +35,7 @@
 #include "../../game/ported44.h"
 #include "../../game/ported45.h"
 #include "../../game/ported46.h"
+#include "../../game/ported47.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1309,4 +1310,16 @@ void re_install_all(void) {
     re_hook(0x004defd1, (void*)P46_UpdateObjects, "P46_UpdateObjects");
     re_hook(0x004ec7f4, (void*)P46_LoadMapA, "P46_LoadMapA");
     re_hook(0x004ec4ce, (void*)P46_LoadMapB, "P46_LoadMapB");
+    re_hook(0x0041c7ad, (void*)P47_ReadLine, "P47_ReadLine");
+    re_hook(0x004c6091, (void*)P47_Call51B111, "P47_Call51B111");
+    re_hook(0x00495886, (void*)P47_NoFlags, "P47_NoFlags");
+    re_hook(0x004f5951, (void*)P47_ResetPick, "P47_ResetPick");
+    re_hook(0x0040a73d, (void*)P47_TitleDispatch, "P47_TitleDispatch");
+    re_hook(0x0041a130, (void*)P47_LoadFlyby, "P47_LoadFlyby");
+    re_hook(0x004d9908, (void*)P47_CameraModeText, "P47_CameraModeText");
+    re_hook(0x004d9827, (void*)P47_DirText, "P47_DirText");
+    re_hook(0x00405f2e, (void*)P47_PrepareTemp, "P47_PrepareTemp");
+    re_hook(0x0042467f, (void*)P47_GlideWinOpen, "P47_GlideWinOpen");
+    re_hook(0x0042651a, (void*)P47_GlideSwap, "P47_GlideSwap");
+    re_hook(0x00424921, (void*)P47_TexTable, "P47_TexTable");
 }

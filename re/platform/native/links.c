@@ -35,6 +35,7 @@
 #include "../../game/ported44.h"
 #include "../../game/ported45.h"
 #include "../../game/ported46.h"
+#include "../../game/ported47.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -62,12 +63,14 @@ void N14_Fn4A7EE9 (int32_t a0) { SetVarD1193C(a0); }
 void N14_Fn48A627 (void) { P12_Fn0048A627(); }
 uint32_t N14_Fn503ECC (const uint8_t* a0) { return (uint32_t)PackRGB00503ECC(a0); }
 void Call0040CCB4 (uint32_t a0, uint32_t a1) { P45_Wait(a0, a1); }
+int32_t R12_405F2E (int32_t a0) { return (int32_t)P47_PrepareTemp(a0); }
 void Call004122C4 (void) { GlobalSet004122C4(); }
 void Call004126DF (void) { GlobalSet004126DF(); }
 void Call0052360D (int32_t a0) { SoundSetVolB0052360D(a0); }
 void Call004184DE (uint32_t a0) { Ui004184DE(a0); }
 void Call004086B4 (void) { StartTimer004086B4(); }
 void Call004086EA (void) { StopTimer4086EA(); }
+void Call00424921 (int32_t a0, int32_t a1, uint32_t a2, int32_t a3) { P47_TexTable(a0, a1, a2, a3); }
 void Call0048A68E (int32_t a0) { Dispatch0048A68E(a0); }
 void Call004B9D79 (void) { P16_StepParticles(); }
 void Call004D6190 (int32_t a0) { SetFirstFree_004D6190(a0); }
