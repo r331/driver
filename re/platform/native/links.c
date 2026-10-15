@@ -44,6 +44,7 @@
 #include "../../game/ported53.h"
 #include "../../game/ported54.h"
 #include "../../game/ported55.h"
+#include "../../game/ported56.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -66,6 +67,7 @@
 #include "../../game/ported8.h"
 #include "../../game/ported9.h"
 #include "../../game/ported10.h"
+int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
 void P55_Fn5248CD (void) { P25_CDResume(); }
 int32_t P55_Fn4245E2 (void) { return (int32_t)GetVarB1C0D8(); }
 void P55_Fn4264A7 (void) { Ui004264A7(); }
@@ -74,6 +76,7 @@ void N14_Fn4A7EE9 (int32_t a0) { SetVarD1193C(a0); }
 void N14_Fn48A627 (void) { P12_Fn0048A627(); }
 uint32_t N14_Fn503ECC (const uint8_t* a0) { return (uint32_t)PackRGB00503ECC(a0); }
 void Call0040CCB4 (uint32_t a0, uint32_t a1) { P45_Wait(a0, a1); }
+int32_t R12_405CB4 (int32_t a0) { return (int32_t)P56_SaveCheck(a0); }
 int32_t R12_405F2E (int32_t a0) { return (int32_t)P47_PrepareTemp(a0); }
 void Call004122C4 (void) { GlobalSet004122C4(); }
 void Call004126DF (void) { GlobalSet004126DF(); }
@@ -94,6 +97,7 @@ void Call004125B9 (void) { P55_NamesB(); }
 void Call0052369B (int32_t a0) { P48_SndPause(a0); }
 void Call00524873 (void) { P25_CDStop(); }
 void Call00524763 (void) { P25_CDClose(); }
+void Call0040C165 (void) { P56_ResetFrontend(); }
 void Call0048B65D (void) { P38_FmvStop(); }
 void Call0048B568 (void) { P50_FmvReleaseObjs(); }
 void Call005237B1 (void) { P48_StopAll(); }

@@ -44,6 +44,7 @@
 #include "../../game/ported53.h"
 #include "../../game/ported54.h"
 #include "../../game/ported55.h"
+#include "../../game/ported56.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1442,4 +1443,26 @@ void re_install_all(void) {
     re_hook(0x0040c533, (void*)P55_SetScreen, "P55_SetScreen");
     re_hook(0x00409d66, (void*)P55_MenuLangCall, "P55_MenuLangCall");
     re_hook(0x004e6175, (void*)P55_LoadPaper, "P55_LoadPaper");
+    re_hook(0x005105da, (void*)P56_ReplaySetup, "P56_ReplaySetup");
+    re_hook(0x004da8d9, (void*)P56_ObjSync, "P56_ObjSync");
+    re_hook(0x004daa36, (void*)P56_ObjInit, "P56_ObjInit");
+    re_hook(0x004d62ae, (void*)P56_LoopStart, "P56_LoopStart");
+    re_hook(0x004d6a47, (void*)P56_LoopUpdate, "P56_LoopUpdate");
+    re_hook(0x00523ec6, (void*)P56_SetVoicePos, "P56_SetVoicePos");
+    re_hook(0x0040c165, (void*)P56_ResetFrontend, "P56_ResetFrontend");
+    re_hook(0x004f5a57, (void*)P56_ChaseTick, "P56_ChaseTick");
+    re_hook(0x0051d8ca, (void*)P56_CopyBlock16, "P56_CopyBlock16");
+    re_hook(0x004e625e, (void*)P56_GhostInit, "P56_GhostInit");
+    re_hook(0x0049245a, (void*)P56_CarPosCheck, "P56_CarPosCheck");
+    re_hook(0x0051990a, (void*)P56_ReplayRead, "P56_ReplayRead");
+    re_hook(0x004e4f62, (void*)P56_HudTick, "P56_HudTick");
+    re_hook(0x004f3032, (void*)P56_DrawRowRects, "P56_DrawRowRects");
+    re_hook(0x005046f7, (void*)P56_BmpPage, "P56_BmpPage");
+    re_hook(0x00426c06, (void*)P56_AllocEulerTab, "P56_AllocEulerTab");
+    re_hook(0x0049ee5d, (void*)P56_Spline, "P56_Spline");
+    re_hook(0x0049f180, (void*)P56_QuatRot, "P56_QuatRot");
+    re_hook(0x00506b4b, (void*)P56_DrawSprite, "P56_DrawSprite");
+    re_hook(0x00518137, (void*)P56_ReplayPaths, "P56_ReplayPaths");
+    re_hook(0x004d263d, (void*)P56_CopsDebug, "P56_CopsDebug");
+    re_hook(0x00405cb4, (void*)P56_SaveCheck, "P56_SaveCheck");
 }

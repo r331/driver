@@ -16,7 +16,8 @@ GAME_VAR_DEF(p41_buf0_t, P41_Buf0, 0x00c98f00)
 GAME_VAR_DEF(p41_buf1_t, P41_Buf1, 0x00ce1f60)
 #define MAIN_HWND41 ((void *)(intptr_t)G6_00BDF9C0)
 
-static uint8_t *p41_ram; /* полный указатель на P41_Arena (в native адрес не влезает в 32 бита) */
+static uint8_t *p41_ram;
+uint8_t *P41_RamPtr(void) { return p41_ram; } /* полный указатель на P41_Arena (в native адрес не влезает в 32 бита) */
 
 /* Положить копию страницы в RAM-буфер и запомнить её адрес в слоте (005283b5 = memcpy). */
 static void store_page(int32_t slot, const void *src, int32_t size) {

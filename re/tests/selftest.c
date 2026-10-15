@@ -41,6 +41,7 @@
 #include "../game/ported53.h"
 #include "../game/ported54.h"
 #include "../game/ported55.h"
+#include "../game/ported56.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -1745,8 +1746,105 @@ static int test_p55(void) {
   P55_StopAudio(); CK(G6_00B5A778 == 0 && G6_00B87EFC == 0);
   return f;
 }
+
+static int test_p56(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p56 fail line %d\n",__LINE__); } } while (0)
+  /* 005105da */
+  G005F7E54 = 4; GameMode = 0; G8_00D118C0 = 100; P56_Blk84[1] = 0; P56_Blk84[5] = 7; P56_Blk11[3] = 9; G6_00B87E20 = 5;
+  P56_ReplaySetup();
+  CK(P56_Save84[5] == 7 && P56_Blk84[1] == 0xff0 && P56_Save84[1] == 0xff0 && P56_Save11[3] == 9 && DirectorLastFrame == 96 && G6_00B87E20 == 0);
+  G005F7E54 = 1; P56_Save84[5] = 0; P56_ReplaySetup(); CK(P56_Save84[5] == 0);
+  /* 004daa36 / 004da8d9 */
+  { uint32_t ob[0x148 / 4 + 1]; int32_t q[3] = {100, -200, 300}; memset(ob, 0xaa, sizeof ob);
+    P56_ObjInit((uint8_t *)ob, q);
+    CK(ob[0x24 / 4] == 1600 && (int32_t)ob[0x28 / 4] == -3200 && ob[0x2c / 4] == 4800);
+    CK(ob[0x18 / 4] == 100 && ob[0xc8 / 4] == 100 && (int32_t)ob[0x1c / 4] == -200 && ob[0xd0 / 4] == 300);
+    CK(ob[0x3c / 4] == 0x1000 && ob[0x58 / 4] == 0 && ob[0x5c / 4] == 0xffffd556u && ob[0x10 / 4] == 0 && G6_005624A0 == 0xf);
+    int32_t a[7] = {32, 0, 0, 0x1000, 0, 0, 0x1000}; uint32_t o2[0x148 / 4];
+    memset(o2, 0, sizeof o2); P56_ObjSync(a, (uint8_t *)o2);
+    /* s = 0x2000000 -> k = 0x1800 - 0x1000 = 0x800: (0x800*0x1000+0x800)>>12 = 0x800 */
+    CK(o2[0x18 / 4] == 2 && a[3] == 0x800 && a[6] == 0x800); }
+  /* 00523ec6 */
+  G8_00B91CF4 = 1; G8_00575F40 = 1; P48_Snd[3].flags = 0x31;
+  P56_SetVoicePos(3, 1.0f, 2.0f, 3.0f);
+  { float v[3]; memcpy(v, P48_Snd[3].data, 12); CK(v[0] == 1.0f && v[2] == 3.0f); CK(P48_Snd[3].flags == 0x13); }
+  P56_SetVoicePos(3, 4.0f, 5.0f, 6.0f);
+  { float v[3]; memcpy(v, P48_Snd[3].data + 12, 12); CK(v[1] == 2.0f); memcpy(v, P48_Snd[3].data, 12); CK(v[1] == 5.0f); }
+  P48_Snd[4].flags = 0; P56_SetVoicePos(4, 1, 1, 1); CK(P48_Snd[4].flags == 0);
+  G8_00575F40 = 0; P48_Snd[3].flags = 0x11; P56_SetVoicePos(3, 9, 9, 9); CK(P48_Snd[3].flags == 0x11);
+  P48_Snd[3].flags = 0;
+  /* 004d62ae / 004d6a47 */
+  P56_Cur = -1; TrafficRecs[0x54 + 2] = 1; P56_LoopStart(2); CK(P56_Cur == -1);
+  TrafficRecs[0x54 + 2] = 0; P56_LoopTab[1] = 77; G8_00D118C0 = 1; ObjPosTable[2 * 0x52] = 5; P56_LoopStart(2); CK(P56_Cur == 2);
+  P56_LoopUpdate(); CK(P56_Cur == -1);
+  P56_LoopUpdate(); CK(P56_Cur == -1);
+  /* 0040c165 */
+  P41_Arena = 0; P54_MapAPtr = DebugMalloc(16, "t", 1); P54_MapA = 4; Q00B87E90 = 0; G6_00B87EFC = 3; P56_AA30 = 0;
+  P56_ResetFrontend(); CK(P54_MapAPtr == NULL && P54_MapA == 0 && P56_AA30 == 0x3f000000u && G6_00B87EFC == 0);
+  /* 004f5a57 */
+  P56_Blk84[1] = 0xf1; P56_Blk84[2] = 0x32; P56_ChaseTick(); CK(P56_Blk84[2] == 0x33);
+  P56_ChaseTick(); CK(P56_Blk84[2] == 0x33);
+  P56_Blk84[1] = 0x10; P56_ChaseTick(); CK(P56_Blk84[1] == 0x7fff);
+  P56_Blk84[1] = 0x8000; P56_C81880 = 0; P56_ChaseTick(); CK(P56_C81880 == 1 && P56_Blk84[16] == 0x96 && P56_Blk84[10] == 0 && G2_00D118A8 == 1);
+  /* 0051d8ca */
+  { uint32_t s[16]; for (int i = 0; i < 16; i++) s[i] = 0x100 + i; P56_CopyBlock16(s); CK(P56_Blk16[0] == 0x100 && P56_Blk16[15] == 0x10f); }
+  /* 004e625e (значок не найден: в native заглушка) */
+  memset(P56_GhostBuf, 1, 16); P56_G4538 = 3; P56_GhostInit(); CK(P56_GhostBuf[0] == 0 && P56_G4538 == 0 && P56_GhostPtr == NULL);
+  /* 0049245a / 0051990a */
+  { uint8_t *car = (uint8_t *)calloc(0x41, 0x148); G0113A6C4 = car; memset(TrafficRecs, 0, sizeof(TRAFFIC_RECS_T));
+    TrafficRecs[2 * 0x54 + 6] = 5; uint32_t v = 11, w = 22, z = 33, lim = 10;
+    memcpy(car + 2 * 0x148 + 200, &v, 4); memcpy(car + 2 * 0x148 + 0xcc, &w, 4); memcpy(car + 2 * 0x148 + 0xd0, &z, 4); memcpy(car + 2 * 0x148 + 0x138, &lim, 4);
+    uint32_t out[3] = {0, 0, 0};
+    CK(P56_CarPosCheck(4, 10, out) == 1 && out[0] == 11 && out[1] == 22 && out[2] == 33);
+    CK(P56_CarPosCheck(4, 11, NULL) == 0);
+    uint8_t *rec = (uint8_t *)calloc(3, 0x1a4); uint32_t fr = 77, idx = 3; G8_00D118C0 = 77;
+    memcpy(rec + 0x1a4, &fr, 4); memcpy(rec + 0x1a4 + 4, &idx, 4); rec[0x1a4 + 8] = 0xab; rec[0x1a4 + 8 + 0x53] = 0xcd; rec[0x1a4 + 0x5c + 0x147] = 0xef;
+    P55_RecBase = rec; P55_RecCnt = 0; CK(P56_ReplayRead() == -1 && P55_RecCnt == 0);
+    P55_RecCnt = 1; CK(P56_ReplayRead() == 3 && P55_RecCnt == 2 && TrafficRecs[3 * 0x54] == 0xab && TrafficRecs[3 * 0x54 + 0x53] == 0xcd && car[3 * 0x148 + 0x147] == 0xef);
+    P55_RecCnt = 0x800; CK(P56_ReplayRead() == -1);
+    P55_RecBase = NULL; P55_RecCnt = 0; CK(P56_ReplayRead() == -1);
+    G0113A6C4 = NULL; free(car); free(rec); }
+  /* 004e4f62 */
+  P15_State = 4; G6_00B87EA0 = 0; G6_00B5A778 = 0; G00D044C8 = 5; P12_00d044d0 = 2; P56_D4470 = 1; P56_B87EA8 = 1; P56_HudTick(0);
+  CK(G00D044C8 == 6 && P12_00d044d0 == 1 && P56_D4470 == 0);
+  P15_State = 1; P56_HudTick(0); CK(G00D044C8 == 6);
+  /* 004f3032 */
+  { int16_t row[2 + 62]; memset(row, 0, sizeof row); row[3] = 4; P56_DrawRowRects(row, 1, 2); P56_DrawRowRects(NULL, 0, 0); }
+  /* 005046f7 */
+  { uint8_t bmp[16]; for (int i = 0; i < 16; i++) bmp[i] = (uint8_t)(i + 1); memset(P56_Page, 0, 600);
+    P56_BmpPage(0, bmp, 1, 1, 2, 2, 4); CK(P56_Page[0] == 6 && P56_Page[1] == 7 && P56_Page[256] == 10 && P56_Page[257] == 11 && P56_Page[2] == 0);
+    P56_BmpPage(0, NULL, 0, 0, 0, 0, 0); }
+  /* 00426c06 */
+  { uint8_t *t = P56_AllocEulerTab(512); CK(t != NULL); if (t) { float m0, m8; memcpy(&m0, t, 4); memcpy(&m8, t + 0x40 * 8 - 0x40, 4); CK(m0 > 0.99f && m0 < 1.01f); (void)m8; DebugFree(t); } P56_EulerTab = NULL; }
+  /* 0049ee5d */
+  { float o = -1; P56_Spline(0.0f, &o, 1.0f, 2.0f, 3.0f, 4.0f); CK(o == 2.0f);
+    P56_Spline(1.0f, &o, 1.0f, 2.0f, 3.0f, 4.0f); CK(o == 3.0f);
+    P56_Spline(0.5f, &o, 0.0f, 2.0f, 2.0f, 0.0f); CK(o > 2.0f && o < 2.5f); }
+  /* 0049f180 */
+  { float a[4] = {1, 2, 3, 9}; float b[5] = {0, 0, 0, 0, 1}; P56_QuatRot(a, b); CK(a[0] == 1 && a[1] == 2 && a[2] == 3 && a[3] == 0); }
+  /* 00506b4b */
+  P56_Sprite = NULL; P56_DrawSprite(); { uint8_t sp[16] = {0}; P56_Sprite = sp; P56_DrawSprite(); P56_Sprite = NULL; }
+  /* 00518137 */
+  strcpy(P56_PathName, "Run"); P56_ReplayPaths(7);
+  CK(strcmp(P56_PathLeader, "ReplayData\\Chase\\Run.LEADER") == 0 && strcmp(P56_PathPings, "ReplayData\\Chase\\Run.PINGS") == 0);
+  CK(strcmp(P56_PathCams, "ReplayData\\RepCams.7") == 0 && strcmp(P56_PathKey, "ReplayData\\KeyFrame.7") == 0 && strcmp(P56_PathStart, "ReplayData\\StartPos.7") == 0);
+  CK(strcmp(P56_PathPlayer, "ReplayData\\Chase\\Run.PLAYER") == 0 && strcmp(P56_PathPads, "ReplayData\\Chase\\Run.PADS") == 0);
+  /* 004d263d */
+  P56_CopsA = 1; P56_CopsB = 1; P56_CopsDebug(); CK(P56_CopsA == 0 && P56_CopsB == 0);
+  /* 00405cb4 */
+  { const char *nm = "SAVES\\GAME1.BIN"; uint8_t buf[8 + 0x38]; memset(buf, 3, sizeof buf); uint32_t mg = 0x57231356u, ck = (uint32_t)SumBytes(buf + 8, 0x38); memcpy(buf, &mg, 4); memcpy(buf + 4, &ck, 4);
+    CK(P56_SaveCheck(0) == 0);
+    FILE *fp = fopen(nm, "wb"); if (fp) { fwrite(buf, 1, sizeof buf, fp); fclose(fp); }
+    CK(P56_SaveCheck(0) == 1);
+    mg = 0; memcpy(buf, &mg, 4); fp = fopen(nm, "wb"); if (fp) { fwrite(buf, 1, sizeof buf, fp); fclose(fp); }
+    CK(P56_SaveCheck(0) == 0);
+    remove(nm); }
+  return f;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

@@ -17,3 +17,4 @@ extern p41_texsel_t P41_TexSel; extern int32_t P41_Offset; extern uint32_t P41_A
 extern p41_buf0_t P41_Buf0; extern p41_buf1_t P41_Buf1;
 #endif
 void P41_LoadTexPages(void *file); /* 004eb975: палитры, затем два прохода по страницам текстур (0x20000 или пара 0x10000) */
+uint8_t *P41_RamPtr(void); /* полный указатель на буфер страниц (native: P41_Arena его не вмещает) */

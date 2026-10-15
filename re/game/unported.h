@@ -7,6 +7,16 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    V(P56_CallSetVoice, 0x00523cda, (uint32_t a0, int32_t a1, float a2, float a3, float a4), (a0, a1, a2, a3, a4)) \
+    R(uint8_t *, P56_FindIcon, 0x004ec91e, (const char *a0), (a0)) \
+    V(P56_DrawText, 0x0051755e, (int32_t a0, int32_t a1, const char *a2, int32_t a3, int32_t a4, int32_t a5, int32_t a6, int32_t a7), (a0, a1, a2, a3, a4, a5, a6, a7)) \
+    V(P56_DrawSpr, 0x004d8511, (float a0, float a1, float a2, float a3, void *a4, int32_t a5, int32_t a6, int32_t a7, int32_t a8), (a0, a1, a2, a3, a4, a5, a6, a7, a8)) \
+    V(P56_Fn406479, 0x00406479, (void), ()) \
+    V(P56_Fn4DA76A, 0x004da76a, (int32_t *a0, uint8_t *a1), (a0, a1)) \
+    R(int32_t, P56_Fn40682D, 0x0040682d, (void *a0, int32_t a1), (a0, a1)) \
+    V(P56_Fn4E5284, 0x004e5284, (void *a0), (a0)) \
+    V(P56_Fn4E5011, 0x004e5011, (int32_t a0, void *a1), (a0, a1)) \
+    V(P56_Fn4E53B5, 0x004e53b5, (int32_t a0, void *a1), (a0, a1)) \
     V(P55_Fn4EE18B, 0x004ee18b, (uint32_t a0), (a0)) \
     V(P55_Fn4ED5F8, 0x004ed5f8, (int32_t a0, int32_t a1), (a0, a1)) \
     V(P55_Fn4EDAA2, 0x004edaa2, (void), ()) \
