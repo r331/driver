@@ -22,6 +22,7 @@
 #include "../../game/ported31.h"
 #include "../../game/ported33.h"
 #include "../../game/ported32.h"
+#include "../../game/ported34.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1209,4 +1210,7 @@ void re_install_all(void) {
     re_hook(0x00422309, (void*)P32_CreateSlotPalette, "P32_CreateSlotPalette");
     re_hook(0x00422c55, (void*)P32_SelectSlotPalette, "P32_SelectSlotPalette");
     re_hook(0x0041f57d, (void*)P32_SetPalette, "P32_SetPalette");
+    re_hook(0x004e31d5, (void*)P34_ReleaseInput, "P34_ReleaseInput");
+    re_hook(0x004e4076, (void*)P34_ReAcquire, "P34_ReAcquire");
+    re_hook(0x004e417f, (void*)P34_ReadKeyboard, "P34_ReadKeyboard");
 }

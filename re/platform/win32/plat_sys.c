@@ -61,3 +61,4 @@ void *plat_dll_load(const char *name){ return (void*)LoadLibraryA(name); }
 void *plat_dll_proc(void *mod, const char *name){ return (void*)GetProcAddress((HMODULE)mod, name); }
 void plat_win_trap(int on){ (void)on; }
 int plat_win_state(int *a,int *b,int *c,int *d,int *e,int *f,const char **g,plat_wndproc *h){ (void)a;(void)b;(void)c;(void)d;(void)e;(void)f;(void)g;(void)h; return 0; }
+void plat_event_close(void *h){ CloseHandle((HANDLE)h); }

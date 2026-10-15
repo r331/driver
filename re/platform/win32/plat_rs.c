@@ -131,3 +131,16 @@ void plat_set_texture(int stage, void *tex) { void *d = D3D_DEV; ((dd_f2)VT(d, 0
 void *plat_stub_last_texture(int *stage) { if (stage) *stage = 0; return 0; }
 int plat_stub_pal_stats(int *a, int *b) { *a = 0; *b = 0; return 0; }
 int plat_dd_stub_last_desc(uint32_t *d) { (void)d; return 0; }
+
+/* --- DirectInput (IDirectInputDevice vtable Game.exe): Release 8, GetDeviceState 0x24, SetDataFormat 0x2c, Acquire 0x1c, Unacquire 0x20 --- */
+void plat_di_release(void *o) { ((dd_f0)VT(o, 8))(o); }
+void plat_di_unacquire(void *d) { ((dd_f0)VT(d, 0x20))(d); }
+int32_t plat_di_set_format(void *d, int kind) {
+    static const uintptr_t fmt[3] = { 0x0052a610, 0x005295f0, 0x0052a8f0 };
+    if (kind < 0 || kind > 2) return -1;
+    return ((dd_f1)VT(d, 0x2c))(d, (void *)fmt[kind]);
+}
+int32_t plat_di_acquire(void *d) { return ((dd_f0)VT(d, 0x1c))(d); }
+int32_t plat_di_get_state(void *d, uint32_t size, void *buf) { return ((dd_f2)VT(d, 0x24))(d, (void *)(uintptr_t)size, buf); }
+int plat_di_stub_counts(int *r, int *u, int *e, int *k) { *r = *u = *e = *k = 0; return 0; }
+void plat_di_stub_fail_state(int on) { (void)on; }

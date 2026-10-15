@@ -36,6 +36,7 @@
 #include "../game/ported31.h"
 #include "../game/ported33.h"
 #include "../game/ported32.h"
+#include "../game/ported34.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -769,10 +770,33 @@ static int test_p26(void) {
   { char drv[64] = "x"; if (P26_FindCdDrive("no_such_file_\x01.xyz", drv) != 0 || drv[0] != 'x') f++; }
   return f;
 }
+static int test_p34(void) {
+  int f = 0, r, u, e, k;
+  static int dummy[8];
+  P34_Kbd = &dummy[0]; P34_Mouse = &dummy[1]; P34_Di = &dummy[2]; P34_Event = &dummy[3]; P34_Joy = &dummy[4];
+  P34_EffA[1] = &dummy[5]; P34_EffB[2] = &dummy[6]; P34_EffC[7] = &dummy[7]; P34_Reg24 = 9;
+  plat_di_stub_counts(&r, &u, &e, &k); int r0 = r, u0 = u, e0 = e;
+  P34_ReleaseInput();
+  plat_di_stub_counts(&r, &u, &e, &k);
+  if (r - r0 != 6 || u - u0 != 3 || e - e0 != 1) f++;       /* Release: kbd,mouse,A,B,C,Di; Unacquire: kbd,mouse,C */
+  if (P34_Kbd || P34_Mouse || P34_Di || P34_Event || P34_Joy || P34_EffA[1] || P34_EffB[2] || P34_EffC[7] || P34_Reg24) f++;
+  if (P34_ReAcquire(0) != 0 || P34_ReAcquire(3) != 0) f++;   /* устройства нет */
+  P34_Kbd = &dummy[0]; P34_Mouse = &dummy[1]; P34_Joy = &dummy[4];
+  if (P34_ReAcquire(1) != 1) f++;
+  plat_di_stub_counts(&r, &u, &e, &k); if (k != 1) f++;
+  if (P34_ReAcquire(2) != 1) f++;
+  plat_di_stub_counts(&r, &u, &e, &k); if (k != 2) f++;
+  memset(P34_Keys, 0x80, 0x100); P34_Keys[5] = 0x55;
+  if (P34_ReadKeyboard() != 1 || P34_KeysPrev[5] != 0x55 || P34_Keys[5] != 0) f++;   /* предыдущее = старое, новое — из устройства */
+  plat_di_stub_fail_state(1); memset(P34_Keys, 7, 0x100);
+  if (P34_ReadKeyboard() != 0 || P34_KeysPrev[0] != 7) f++;
+  plat_di_stub_fail_state(0); P34_Kbd = NULL;
+  return f;
+}
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

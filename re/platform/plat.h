@@ -134,4 +134,13 @@ void   *plat_dll_proc(void *mod, const char *name);              /* GetProcAddre
 void   *plat_dll_load(const char *name);                         /* LoadLibrary; SDL: NULL (Glide на macOS нет) */
 void    plat_win_trap(int on);                                   /* тесты (SDL): окно не создаётся, вызовы только запоминаются */
 int     plat_win_state(int *cursor, int *prio, int *quit, int *closes, int *w, int *h, const char **title, plat_wndproc *proc); /* тесты: SDL — состояние; hook — 0 */
+/* DirectInput (клавиатура/мышь/джойстик). Устройство — непрозрачный указатель; kind формата данных: 0 клавиатура, 1 мышь, 2 джойстик */
+void    plat_di_release(void *obj);                    /* IUnknown::Release */
+void    plat_di_unacquire(void *dev);                  /* IDirectInputDevice::Unacquire */
+int32_t plat_di_set_format(void *dev, int kind);       /* SetDataFormat; 0 — успех */
+int32_t plat_di_acquire(void *dev);                    /* Acquire; 0 — успех */
+int32_t plat_di_get_state(void *dev, uint32_t size, void *buf); /* GetDeviceState; 0 — успех */
+void    plat_event_close(void *h);                     /* CloseHandle события */
+int     plat_di_stub_counts(int *releases, int *unacquires, int *events_closed, int *last_kind); /* для тестов (SDL: счётчики, hook: нули) */
+void    plat_di_stub_fail_state(int on);               /* тест: GetDeviceState возвращает ошибку */
 #endif
