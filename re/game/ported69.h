@@ -1,0 +1,51 @@
+#pragma once
+#include "gvar.h"
+#include "unported.h"
+#include "ported4.h"
+#include "ported6.h"
+#include "ported12.h"
+#include "ported26.h"
+#include "ported33.h"
+#include "ported42.h"
+#include "ported44.h"
+#include "ported55.h"
+#include "menustate.h"
+#include <stdint.h>
+/* Шаг D: 6 функций — подписи отсчёта («3 2 1 GO», CHECKPOINT, FINISHED) по языку, подсчёт очков по порогам,
+   кадр сцены (Glide: смешивание/комбинирование цвета, туман), освобождение накладок, освобождение устройств Glide.
+   Все cdecl (метки __thiscall/__fastcall у 004a3630/004a0d5f/004246f0 ложные — ecx не читается). */
+typedef uint8_t P69_Blk[0x48];
+#define P69_Num3      GAME_VAR(uint32_t, P69_Num3, 0x01134298)
+#define P69_Num2      GAME_VAR(uint32_t, P69_Num2, 0x01134264)
+#define P69_Num1      GAME_VAR(uint32_t, P69_Num1, 0x01134294)
+#define P69_Go        GAME_VAR(uint32_t, P69_Go, 0x0113429c)
+#define P69_Check     GAME_VAR(uint32_t, P69_Check, 0x0113428c)
+#define P69_Finish    GAME_VAR(uint32_t, P69_Finish, 0x01134288)
+#define P69_MsgBlk    GAME_VAR(P69_Blk, P69_MsgBlk, 0x011342a0)      /* 0x48 байт, обнуляется */
+#define P69_MsgW      GAME_VAR(int32_t, P69_MsgW, 0x011342d4)         /* = 0x8c */
+#define P69_Score     GAME_VAR(int32_t, P69_Score, 0x011368c4)
+#define P69_Bonus     GAME_VAR(int32_t, P69_Bonus, 0x01136ac8)
+#define P69_ScoreCpy  GAME_VAR(int32_t, P69_ScoreCpy, 0x01271068)
+#define P69_BlendOn   GAME_VAR(uint8_t, P69_BlendOn, 0x0125f3e4)
+#define P69_OvlOn     GAME_VAR(int32_t, P69_OvlOn, 0x01123210)
+#define P69_DevOn     GAME_VAR(int32_t, P69_DevOn, 0x00b1c0d0)
+#define P69_TBASE     0x01136940u                                     /* адрес таблицы порогов (79 слов), указатели в 01136a80[] — её адреса */
+#define P69_TEND      0x01136a78u
+typedef uint32_t P69_ThrTab[79];
+typedef uint32_t P69_PtrTab[19];                                      /* 01136a80: [0] — служебное слово, [1..18] — указатели; индекс c читает [c+1]/[c] */
+typedef int32_t P69_Pts[18];
+#define P69_Thr       GAME_VAR(P69_ThrTab, P69_Thr, 0x01136940)
+#define P69_Ptrs      GAME_VAR(P69_PtrTab, P69_Ptrs, 0x01136a80)
+#define P69_PtsTab    GAME_VAR(P69_Pts, P69_PtsTab, 0x00551528)
+#ifndef RE_HOOK_BUILD
+extern uint32_t P69_Num3, P69_Num2, P69_Num1, P69_Go, P69_Check, P69_Finish; extern P69_Blk P69_MsgBlk;
+extern int32_t P69_MsgW, P69_Score, P69_Bonus, P69_ScoreCpy, P69_OvlOn, P69_DevOn; extern uint8_t P69_BlendOn;
+extern P69_ThrTab P69_Thr; extern P69_PtrTab P69_Ptrs; extern P69_Pts P69_PtsTab;
+#endif
+void    P69_SetupMsgs(void);              /* 004a3630: имена надписей отсчёта по языку P55_Lang (0/5 EN, 1 FR, 2 GR, 3 SP, 4 IT) */
+uint8_t P69_Bracket(uint32_t v);          /* 004a0cca: номер порога (0..0x12) в таблице, 0x12 — выше всех */
+int32_t P69_AddScore(int32_t v);          /* 004a0d5f: 0xff00 — бонус/120*100; иначе таблица очков по порогу; не больше 999999; всегда 0 */
+void    P69_ReleaseOverlays(void);        /* 004b3ddb: grAlphaBlendFunction(4,0,4,0) и 004b33d8 для 200 записей с флагом 2 */
+void    P69_SceneFrame(void);             /* 004aaea6: кадр сцены */
+void    P69_FreeDevices(void);            /* 004246f0: освободить указатели устройств Glide, обнулить, FreeGlide */
+void    P69_InitConsts(void);             /* native: таблицы очков (00551528) */

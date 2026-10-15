@@ -3,6 +3,7 @@
 #include "ported63.h"
 #include "ported66.h"
 #include "ported61.h"
+#include "ported69.h"
 #include "ported59.h"
 #include "ported56.h"
 #include "ported57.h"
@@ -196,5 +197,6 @@ void re_init_consts(void) {
   P61_InitConsts();
   P63_InitConsts();
   P66_InitConsts();
+  P69_InitConsts();
 #endif
 }

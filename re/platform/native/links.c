@@ -57,6 +57,7 @@
 #include "../../game/ported66.h"
 #include "../../game/ported67.h"
 #include "../../game/ported68.h"
+#include "../../game/ported69.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -228,6 +229,7 @@ uint32_t Call0048F3B4 (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { return 
 void Call00510784 (void) { P55_NamesD(); }
 void Call004C64BD (void) { FreeCameraList(); }
 void Call004D3402 (void) { P48_ShutdownSystems(); }
+void Call004246F0 (void) { P69_FreeDevices(); }
 void Call004C372A (void) { FreeDirectorBuffer(); }
 void Call00421A39 (void) { P57_ResetTexNodes(); }
 void Call0052434A (int32_t a0) { SlotSetOff0052434A(a0); }

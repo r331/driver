@@ -57,6 +57,7 @@
 #include "../../game/ported66.h"
 #include "../../game/ported67.h"
 #include "../../game/ported68.h"
+#include "../../game/ported69.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1619,4 +1620,10 @@ void re_install_all(void) {
     re_hook(0x0042476c, (void*)P68_LfbLock, "P68_LfbLock");
     re_hook(0x0040c480, (void*)P68_ScreenReset, "P68_ScreenReset");
     re_hook(0x004a67b0, (void*)P68_SpawnCar, "P68_SpawnCar");
+    re_hook(0x004a3630, (void*)P69_SetupMsgs, "P69_SetupMsgs");
+    re_hook(0x004a0cca, (void*)P69_Bracket, "P69_Bracket");
+    re_hook(0x004a0d5f, (void*)P69_AddScore, "P69_AddScore");
+    re_hook(0x004b3ddb, (void*)P69_ReleaseOverlays, "P69_ReleaseOverlays");
+    re_hook(0x004aaea6, (void*)P69_SceneFrame, "P69_SceneFrame");
+    re_hook(0x004246f0, (void*)P69_FreeDevices, "P69_FreeDevices");
 }

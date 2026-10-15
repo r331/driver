@@ -54,6 +54,7 @@
 #include "../game/ported66.h"
 #include "../game/ported67.h"
 #include "../game/ported68.h"
+#include "../game/ported69.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -2688,8 +2689,55 @@ static int test_p68(void) {
   return f;
 }
 
+/* ported69 */
+static int t69_ovl, t69_calls[4], t69_freed;
+void P69_Fn4B33D8(void *p) { (void)p; t69_ovl++; }
+void P69_Fn4B3E55(void) { t69_calls[0]++; }
+void P69_Fn4B2C4B(void) { t69_calls[1]++; }
+void P69_Fn4AAF3A(void) { t69_calls[2]++; }
+void P69_Fn4BA720(void) { t69_calls[3]++; }
+void CrtFree_0052CB70(uint32_t a) { t69_freed += (int)a; }
+static int test_p69(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p69 fail line %d\n",__LINE__); } } while (0)
+  P69_InitConsts();
+  /* 004a3630 */
+  P69_MsgBlk[3] = 9; P69_MsgW = 0; P55_Lang = 2; P69_SetupMsgs(); CK(P69_MsgW == 0x8c && P69_MsgBlk[3] == 0);
+  /* 004a0cca: сегменты порогов (10,20,30 | 40,50 | ...) */
+  memset(P69_Thr, 0, sizeof(P69_ThrTab)); memset(P69_Ptrs, 0, sizeof(P69_PtrTab));
+  P69_Thr[0] = 10; P69_Thr[1] = 20; P69_Thr[2] = 30; P69_Thr[3] = 40; P69_Thr[4] = 50;
+  P69_Ptrs[0] = P69_TBASE; P69_Ptrs[1] = P69_TBASE + 12; P69_Ptrs[2] = P69_TBASE + 20;
+  CK(P69_Bracket(20) == 0);
+  CK(P69_Bracket(40) == 1);
+  CK(P69_Bracket(100) == 0x12);
+  /* 004a0d5f */
+  P69_Score = 1000; P69_Bonus = 7;
+  CK(P69_AddScore(40) == 0 && P69_Score == 1150 && P69_ScoreCpy == 1150);
+  P69_Bonus = 250; CK(P69_AddScore(0xff00) == 0 && P69_Score == 1350 && P69_Bonus == 0);
+  P69_Score = 999900; P69_Bonus = 1200; P69_AddScore(0xff00); CK(P69_Score == 999999);
+  P69_Score = 5; P69_AddScore(100); CK(P69_Score == 5);   /* выше всех порогов — очки не начисляются */
+  /* 004b3ddb */
+  P69_BlendOn = 1; P69_OvlOn = 1; t69_ovl = 0; memset(P12_0110b260, 0, sizeof(p12_0110b260_t));
+  { uint16_t two = 2; memcpy((uint8_t *)P12_0110b260 + 0x3c * 5 + 0x22, &two, 2); memcpy((uint8_t *)P12_0110b260 + 0x3c * 199 + 0x22, &two, 2); }
+  P69_ReleaseOverlays(); CK(P69_BlendOn == 0 && t69_ovl == 2);
+  P69_OvlOn = 0; P69_ReleaseOverlays(); CK(t69_ovl == 2);
+  /* 004aaea6 */
+  G6_01270C34 = 0; MenuVar553850 = 0; memset(t69_calls, 0, sizeof t69_calls); P69_BlendOn = 0; P69_OvlOn = 0; P26_FxD = 1;
+  P69_SceneFrame(); CK(G6_01270C34 == 4 && P44_MatPtr == (float *)&P44_ViewMatT);
+  CK(t69_calls[0] == 1 && t69_calls[1] == 1 && t69_calls[2] == 1 && t69_calls[3] == 1);
+  P26_FxD = 0;
+  /* 004246f0 */
+  P69_DevOn = 1; P42_DevCount = 2; D_00b1c0d4 = 3; t69_freed = 0;
+  { uint32_t a = 100, b = 0, c = 7; memcpy(P42_DevNames[0] + 0x44, &a, 4); memcpy(P42_DevNames[1] + 0x44, &b, 4); memcpy(P42_DevNames[2] + 0x44, &c, 4); }
+  P69_FreeDevices(); CK(P69_DevOn == 0 && P42_DevCount == 0 && D_00b1c0d4 == 0 && t69_freed == 100);
+  P69_DevOn = 0; t69_freed = 0; P69_FreeDevices(); CK(t69_freed == 0);
+#undef CK
+  return f;
+}
+
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_p62() | test_p63() | test_p64() | test_p65() | test_p66() | test_p67() | test_p68() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_p62() | test_p63() | test_p64() | test_p65() | test_p66() | test_p67() | test_p68() | test_p69() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
