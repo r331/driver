@@ -83,6 +83,7 @@
 #include "../game/ported51.h"
 #include "../game/ported52.h"
 #include "../game/ported79.h"
+#include "../game/ported80.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -3232,8 +3233,6 @@ static int test_p76(void) {
 
 /* ported77: подмена неперенесённых вызовов */
 static int t77_calls[8];
-void P77_Fn4EB490(void *f) { (void)f; t77_calls[0]++; }
-void P77_Fn4ED055(void *f) { (void)f; t77_calls[1]++; }
 void P77_Fn501C63(void) { t77_calls[5]++; }
 void P77_Fn501770(void) { t77_calls[6]++; }
 void P77_Fn524BD8(void *p) { (void)p; t77_calls[7]++; G6_00B91D34 = G6_00B91D34 + 1; }
@@ -3427,11 +3426,98 @@ static int test_p79(void) {
   return f;
 }
 
+static int test_p80(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { fprintf(stderr, "p80 fail line %d: %s\n", __LINE__, #c); f = 1; } } while (0)
+  { void *saved = D_00c98ed0; P79_InitConsts();
+    uint8_t src[0x8c]; memset(src, 0, sizeof src);
+    uint16_t v16;
+    #define T16(o, v) do { v16 = (uint16_t)(v); memcpy(src + (o), &v16, 2); } while (0)
+    #define T32(o, v) do { uint32_t t_ = (uint32_t)(v); memcpy(src + (o), &t_, 4); } while (0)
+    T32(4, 0xffffffffu); T16(0x14, 3); T16(0x16, 1); T16(0x18, 1); T16(0x1a, 5);
+    T32(0x1c, 0x78); T32(0x20, 0x38); T32(0x24, 0x5c); T32(0x28, 0x6c); T32(0x2c, 0x80); T32(0x34, 0);
+    float vs[9] = {1, 0, 0, -0.5f, 2, 0, 0, 0, 3}; memcpy(src + 0x38, vs, 36);
+    float vv[4] = {1, 0, 0, 1}; memcpy(src + 0x5c, vv, 16);
+    float nn[3] = {0, 1, 0}; memcpy(src + 0x6c, nn, 12);
+    memcpy(src + 0x78, "ABCDE", 5);
+    src[0x80] = 0; T16(0x82, 0); T16(0x84, 1); T16(0x86, 2);
+    uint8_t file[4 + 4 + 0x8c]; int32_t hd[2] = {1, 0x8c}; memcpy(file, hd, 8); memcpy(file + 8, src, 0x8c);
+    FILE *fp = fopen("t80.blk", "wb"); fwrite(file, 1, sizeof file, fp); fclose(fp);
+    fp = fopen("t80.blk", "rb");
+    P80_LoadModels(fp);
+    fclose(fp); remove("t80.blk");
+    CK(P20_Count == 1 && D_00c98ed0 != saved);
+    uint8_t *m = (uint8_t *)P79_PTR(P79_ModelTab[0]);
+    CK(m[3] & 0x80);                                              /* ссылки раскрыты */
+    float r; memcpy(&r, m + 0xc, 4); CK(fabsf(r - 3.0f) < 1e-6f);
+    float *b = P80_Boxes[0];
+    CK(b[0] == -0.5f && b[1] == 0 && b[2] == 0 && b[3] == 1.0f && b[4] == 2.0f && b[5] == 3.0f && b[6] == 2.0f);
+    int32_t ri; memcpy(&ri, &b[7], 4); CK(ri == 2 && P11_00ba52d0 == 2);
+    CK(P80_Class[0] <= 7);
+    float out[8]; CK(P80_Bounds(out, 0) == out && memcmp(out, b, 32) == 0);
+    DebugFree(D_00c98ed0); D_00c98ed0 = saved; }
+
+  /* 004ed055: заголовок блока 2 */
+  { uint8_t fb[512]; size_t n = 0; int32_t w; float fl;
+#define F32(v) do { w = (v); memcpy(fb + n, &w, 4); n += 4; } while (0)
+#define FF(v) do { fl = (v); memcpy(fb + n, &fl, 4); n += 4; } while (0)
+    F32(64); F32(32); F32(3000); F32(2); F32(4); F32(5); F32(6); FF(0.25f); FF(0); FF(0); FF(2.0f);
+    F32(1); { uint8_t r[0x14] = {0}; r[2] = 7; r[4] = 1; r[8] = 2; r[12] = 3; r[16] = 4; memcpy(fb + n, r, 0x14); n += 0x14; }
+    F32(2); F32(10); F32(11); F32(3); memcpy(fb + n, "abc", 3); n += 3; F32(1); { uint8_t r[0x14]; memset(r, 9, 0x14); memcpy(fb + n, r, 0x14); n += 0x14; }
+    F32(0); F32(0); F32(0);
+#undef F32
+#undef FF
+    FILE *fp = fopen("t80.hdr", "wb"); fwrite(fb, 1, n, fp); fclose(fp);
+    void *sv0 = D_00d00230; void *sv1 = G6_00D00208; void *sv2 = D_00c98ed0;
+    D_00d00230 = calloc(1, 0x1000);
+    P8_00546020 = 1.0f; P80_InitConsts();
+    G00B87E4C = 0; P14_00b202d8 = 0; P14_00b202dc = 0; P14_00b87e84 = 0; P26_FxA = 0;
+    fp = fopen("t80.hdr", "rb");
+    P80_LoadHeader(fp);
+    CK((size_t)ftell(fp) == n);
+    fclose(fp); remove("t80.hdr");
+    CK(P21_GridDiv == 64 && P80_GridH == 32 && P80_Cell == 3000 && P76_NumSlots == 2 && P54_GridN == 4 && P80_Hdr5 == 5 && P80_Hdr6 == 6);
+    CK(P21_GridRadius == 15 && P21_GridStride == 31 && D_00d00204 == 961 && P80_HalfW == 32 && P80_HalfH == 16);
+    CK(P42_CellX == 96000 && P42_CellY == 48000 && P62_MapN == 8 && P80_InvMap == 0.125f && P80_Cols == 16 && P72_Rows == 8);
+    CK(P19_OutA == 0 && P19_OutB == 0 && P19_OutC == 1.0f && P19_Out68 == 0.25f && P80_SaveW == 0.25f);
+    CK(P54_Cnt1E0 == 1);
+    { const uint8_t *e = (const uint8_t *)G6_00D00208; float one; memcpy(&one, e + 0x14, 4);
+      CK(rd_u32(e, 0) == 0 && rd_u32(e, 4) == 7 && rd_u32(e, 8) == 1 && rd_u32(e, 0xc) == 2 && rd_u32(e, 0x10) == 3 && one == 1.0f && rd_u32(e, 0x18) == 4); }
+    CK(P80_LumpTab[0] == D_00d00230);
+    { const uint8_t *l = (const uint8_t *)P80_LumpTab[0];
+      CK(rd_u32(l, 0) == 2 && rd_u32(l, 4) == 10 && rd_u32(l, 8) == 11 && rd_u32(l, 12) == 3 && memcmp(l + 16, "abc", 3) == 0 && rd_u32(l, 19) == 1 && l[23] == 9);
+      CK(P80_LumpTab[1] == (const void *)(l + 23 + 0x14)); }
+    free(D_00d00230); DebugFree(G6_00D00208); DebugFree(G6_00D01268); DebugFree(G6_00CE0F20);
+    D_00d00230 = sv0; G6_00D00208 = sv1; D_00c98ed0 = sv2; }
+#undef CK
+  return f;
+}
+
+/* Необязательная проверка на настоящем файле уровня: RE_REAL_LEVEL=имя (файл в Levels/ рядом с рабочим каталогом) */
+static int test_real_level(void) {
+  const char *nm = getenv("RE_REAL_LEVEL");
+  if (!nm) return 0;
+  D_00d00230 = calloc(1, 0x1000000);
+  P77_LevelName = nm;
+  int32_t r = P77_LoadLevel();
+  fprintf(stderr, "real level %s: LoadLevel=%d models=%d slots=%d grid=%dx%d cell=%d\n", nm, (int)r, (int)P20_Count, (int)P76_NumSlots, (int)P21_GridDiv, (int)P80_GridH, (int)P80_Cell);
+  int bad = 0;
+  for (int i = 0; i < P20_Count && i < 1126; i++) {
+    float *b = P80_Boxes[i];
+    if (!(b[3] >= b[0] && b[4] >= b[1] && b[5] >= b[2]) || P80_Class[i] > 7) bad++;
+  }
+  fprintf(stderr, "real level: models with bad box/class: %d\n", bad);
+  if (P20_Count > 0) { float *b = P80_Boxes[0]; fprintf(stderr, "model0 box: %g %g %g .. %g %g %g\n", b[0], b[1], b[2], b[3], b[4], b[5]); }
+  return r == 1 && bad == 0 && P20_Count > 0 ? 0 : 1;
+}
+
 /* RE_TRACE=1 печатает имя каждого теста перед запуском (поиск падения) */
 static int run_t_(const char *n, int r) { if (r) fprintf(stderr, "[test] %s returned %d\n", n, r); return r; }
 #define RUN_T(t) (getenv("RE_TRACE") ? (fprintf(stderr, "[test] %s\n", #t), run_t_(#t, t())) : t())
 int re_selftest(void) {
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+  if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

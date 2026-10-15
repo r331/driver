@@ -58,8 +58,8 @@ int32_t P77_LoadLevel(void) {
     P27_ReadChunked(&size, 4, 1, f);
     switch (kind) {
     case 0:    P41_LoadTexPages(f); break;
-    case 1:    P77_Fn4EB490(f); break;
-    case 2:    P77_Fn4ED055(f); break;
+    case 1:    P80_LoadModels(f); break;
+    case 2:    P80_LoadHeader(f); break;
     case 4:    P78_LoadVerts(f, size); break;
     case 5:    P54_ReadMapA(f, size); break;
     case 6:    P57_SkipBlock(f, size); break;

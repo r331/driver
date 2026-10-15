@@ -1,4 +1,5 @@
 #include "ported4.h"
+#include "ported79.h"
 GAME_VAR_DEF(uint8_t, D_00549f8c, 0x00549f8c)
 GAME_VAR_DEF(uint8_t, D_00549f9c, 0x00549f9c)
 GAME_VAR_DEF(uint8_t, D_00549fdc, 0x00549fdc)
@@ -197,7 +198,15 @@ void ResetEffectsState(void) { P4Call004A3354(); D_01134ea0 = 0; }
 void StepIfActive0041A8AB(void) { if (D_005feda0 != 0) { P4Call0041A8CD(); D_005fea98++; } }
 void AllocMapBuffer300000(void) { D_00d00230 = DebugMalloc(0x300000, "D:\\Driver\\Game\\map.c", 0x6d1); }
 void FreeMapBuffer300000(void) { if (D_00d00230 != 0) { DebugFree(D_00d00230); D_00d00230 = 0; } }
-void AllocMapBuffer400000(void) { D_00c98ed0 = DebugMalloc(0x400000, "D:\\Driver\\Game\\map.c", 0xf7); }
+void AllocMapBuffer400000(void) {
+#ifdef RE_HOOK_BUILD
+  D_00c98ed0 = DebugMalloc(0x400000, "D:\\Driver\\Game\\map.c", 0xf7);
+#else
+  /* native: за 4 МБ арены карты — ещё 1 МБ под модели событий (ссылки моделей — 32-битные смещения от арены, см. ported79.h) */
+  D_00c98ed0 = DebugMalloc(0x500000, "D:\\Driver\\Game\\map.c", 0xf7);
+  P79_PoolReset();
+#endif
+}
 void FreeMapBuffer400000(void) { if (D_00c98ed0 != 0) { DebugFree(D_00c98ed0); D_00c98ed0 = 0; } }
 void FreeBufferD17EC8(void) { if (D_00d17ec8 != 0) { DebugFree(D_00d17ec8); D_00d17ec8 = 0; } }
 void FreeBuffer5FED98(void) { if (D_005fed98 != 0) { DebugFree(D_005fed98); D_005fed98 = 0; } }

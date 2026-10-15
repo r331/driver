@@ -16,12 +16,12 @@ typedef struct P46_TexNode {      /* узел списка текстур (го�
 _Static_assert(offsetof(P46_TexNode, next) == 0x1c, "P46_TexNode");
 #endif
 #define P46_TexHead   GAME_VAR(P46_TexNode *, P46_TexHead, 0x00a42180)
-#define P46_MapBufA   GAME_VAR(uint32_t, P46_MapBufA, 0x00b31ee4)
-#define P46_MapBufB   GAME_VAR(uint32_t, P46_MapBufB, 0x00b5a90c)
-#define P46_MapBufC   GAME_VAR(uint32_t, P46_MapBufC, 0x00bdfbc4)
+#define P46_MapBufA   GAME_VAR(void *, P46_MapBufA, 0x00b31ee4)
+#define P46_MapBufB   GAME_VAR(void *, P46_MapBufB, 0x00b5a90c)
+#define P46_MapBufC   GAME_VAR(void *, P46_MapBufC, 0x00bdfbc4)
 #ifndef RE_HOOK_BUILD
 extern P46_TexNode *P46_TexHead;
-extern uint32_t P46_MapBufA, P46_MapBufB, P46_MapBufC;
+extern void *P46_MapBufA, *P46_MapBufB, *P46_MapBufC;
 #endif
 int32_t P46_FindTexNode(int32_t handle, P46_TexNode **out);           /* 00422444: поиск узла по номеру (если списки включены), 1/0 */
 void    P46_TexCall(int32_t handle, int32_t arg);                       /* 0041d89c: сброс буферов, затем действие над узлом 004228eb */

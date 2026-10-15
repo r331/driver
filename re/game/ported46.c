@@ -1,13 +1,14 @@
 /* Диспетчеры текстур, границы, загрузка блоков карты — восстановлено из Game.exe (cdecl). */
 #include "ported46.h"
 #include "ported41.h"
+#include "ported58.h"
 #include "engine.h"
 #include "flush.h"
 #include <string.h>
 GAME_VAR_DEF(P46_TexNode *, P46_TexHead, 0x00a42180)
-GAME_VAR_DEF(uint32_t, P46_MapBufA, 0x00b31ee4)
-GAME_VAR_DEF(uint32_t, P46_MapBufB, 0x00b5a90c)
-GAME_VAR_DEF(uint32_t, P46_MapBufC, 0x00bdfbc4)
+GAME_VAR_DEF(void *, P46_MapBufA, 0x00b31ee4)
+GAME_VAR_DEF(void *, P46_MapBufB, 0x00b5a90c)
+GAME_VAR_DEF(void *, P46_MapBufC, 0x00bdfbc4)
 
 int32_t P46_FindTexNode(int32_t handle, P46_TexNode **out) {
   if (G6_00A421F0 == 0) return 0;
@@ -48,15 +49,15 @@ void P46_UpdateObjects(void) {
 }
 void P46_LoadMapA(void *file, int32_t size) {
   void *b = DebugMalloc(size, "D:\\Driver\\Game\\map.c", 0x42b);
-  P46_MapBufA = (uint32_t)(uintptr_t)b;
+  P46_MapBufA = b;
   if (b != NULL) P27_ReadChunked(b, size, 1, file);
 }
 void P46_LoadMapB(void *file, int32_t size) {
   void *b = DebugMalloc(size, "D:\\Driver\\Game\\map.c", 0x39f);
-  P46_MapBufB = (uint32_t)(uintptr_t)b;
+  P46_MapBufB = b;
   if (b != NULL) {
     P27_ReadChunked(b, size, 1, file);
-    P46_MapBufC = P46_MapBufB;
+    P46_MapBufC = P46_MapBufB; P58_BlkBuf = (int32_t *)b;   /* тот же адрес 00bdfbc4 (в native — отдельная переменная) */
     P46_Fn51BE3C();
   }
 }

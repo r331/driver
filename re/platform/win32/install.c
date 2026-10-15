@@ -68,6 +68,7 @@
 #include "../../game/ported77.h"
 #include "../../game/ported78.h"
 #include "../../game/ported79.h"
+#include "../../game/ported80.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1713,4 +1714,7 @@ void re_install_all(void) {
     re_hook(0x004757d2, (void*)P79_MarkRecords, "P79_MarkRecords");
     re_hook(0x00475906, (void*)P79_FindSameVerts, "P79_FindSameVerts");
     re_hook(0x00475a3d, (void*)P79_Convert, "P79_Convert");
+    re_hook(0x00426ce3, (void*)P80_Bounds, "P80_Bounds");
+    re_hook(0x004eb490, (void*)P80_LoadModels, "P80_LoadModels");
+    re_hook(0x004ed055, (void*)P80_LoadHeader, "P80_LoadHeader");
 }

@@ -37,6 +37,9 @@ extern int32_t P79_Total, P79_Outside, P79_SumTotal, P79_SumOut, P79_NumAll, P79
 extern float P79_ClsHi, P79_ClsLo;
 #endif
 void    P79_InitConsts(void);
+void    P79_PoolReset(void);                          /* native: пул моделей событий — 1 МБ после 4 МБ арены карты */
+void   *P79_EventAlloc(int32_t size);                 /* hook: DebugMalloc; native: кусок пула (ссылки должны быть смещениями арены) */
+void    P79_EventFree(void *p);                       /* hook: DebugFree; native: ничего (пул сбрасывается при новой арене) */
 void    P79_ModelList(void *m, uint32_t *out);        /* 0042754a */
 void    P79_Relocate(void *m);                        /* 00427757 */
 void    P79_Unrelocate(void *m);                      /* 004275ae */

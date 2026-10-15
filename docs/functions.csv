@@ -322,7 +322,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004017b7,thunk_FUN_004a2e14,,,,,,5,todo
 004017bc,thunk_FUN_00407c42,Thunk_00407C42,manual,Thunks,,,5,ported
 004017c1,thunk_FUN_004eafcf,Thunk_004EAFCF,manual,Thunks,,,5,ported
-004017c6,thunk_FUN_004eb490,,,,,,5,todo
+004017c6,thunk_FUN_004eb490,,,,,,5,ported
 004017cb,thunk_FUN_004a1d4c,,,,,,5,todo
 004017d0,thunk_FUN_004e39ac,,,,,,5,ported
 004017d5,thunk_FUN_004aff92,,,,,,5,todo
@@ -480,7 +480,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401bdb,thunk_FUN_0052647d,,,,,,5,ported
 00401be0,thunk_FUN_004abd69,,,,,,5,todo
 00401be5,thunk_FUN_004a995c,,,,,,5,todo
-00401bea,thunk_FUN_004ed055,,,,,,5,todo
+00401bea,thunk_FUN_004ed055,,,,,,5,ported
 00401bf4,thunk_FUN_004c9360,Thunk_004C9360,manual,Thunks,,,5,ported
 00401c03,thunk_FUN_0050a15b,,,,,,5,todo
 00401c17,thunk_FUN_00405cb4,,,,,,5,ported
@@ -736,7 +736,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040225c,thunk_FUN_004eb449,Thunk_004EB449,manual,Thunks,,,5,ported
 0040226b,thunk_FUN_004ecda8,,,,,,5,ported
 00402270,thunk_FUN_004a596b,Thunk_004A596B,manual,Thunks,,,5,ported
-00402275,thunk_FUN_00426ce3,,,,,,5,todo
+00402275,thunk_FUN_00426ce3,,,,,,5,ported
 0040227a,thunk_FUN_0040f09c,,,,,,5,ported
 0040227f,thunk_FUN_004fede5,,,,,,5,todo
 00402289,thunk_FUN_004fef26,,,,,,5,todo
@@ -1965,7 +1965,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00426c06,FUN_00426c06,AllocEulerTab,manual,render,,,169,ported
 00426caf,FUN_00426caf,Ui00426CAF,manual,UIMisc,,,23,ported
 00426cc6,FUN_00426cc6,Ui00426CC6,manual,UIMisc,,,29,ported
-00426ce3,FUN_00426ce3,,,,,,2151,todo
+00426ce3,FUN_00426ce3,P80_Bounds,manual,map,,,2151,ported
 0042754a,FUN_0042754a,P79_ModelList,manual,map,,,100,ported
 004275ae,FUN_004275ae,P79_Unrelocate,manual,map,,,425,ported
 00427757,FUN_00427757,P79_Relocate,manual,map,,,488,ported
@@ -2727,7 +2727,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004eb3c0,FUN_004eb3c0,P55_LoadFrustum,manual,,,,137,ported
 004eb449,FUN_004eb449,AllocMapBuffer400000,manual,map,assert,,33,ported
 004eb46a,FUN_004eb46a,FreeMapBuffer400000,manual,map,range,,38,ported
-004eb490,FUN_004eb490,,,map,assert,,831,todo
+004eb490,FUN_004eb490,P80_LoadModels,manual,map,assert,,831,ported
 004eb7cf,FUN_004eb7cf,ReadBlocks_004EB7CF,manual,map,range,,66,ported
 004eb811,FUN_004eb811,P78_LoadVerts,manual,map,assert,,356,ported
 004eb975,FUN_004eb975,LoadTexPages,manual,map,assert,,2015,ported
@@ -2754,7 +2754,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004ece84,FUN_004ece84,CellIndex,manual,map,range,,100,ported
 004ecee8,FUN_004ecee8,P76_InBox,manual,ported76,range,,213,ported
 004ecfbd,FUN_004ecfbd,P21_GridCellSet,manual,ported21,range,,152,ported
-004ed055,FUN_004ed055,,,map,range,,1372,todo
+004ed055,FUN_004ed055,P80_LoadHeader,manual,map,range,,1372,ported
 004ed5b1,FUN_004ed5b1,AllocMapBuffer300000,manual,map,assert,,33,ported
 004ed5d2,FUN_004ed5d2,FreeMapBuffer300000,manual,map,range,,38,ported
 004ed5f8,FUN_004ed5f8,,,map,range,,1194,todo

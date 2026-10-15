@@ -22,6 +22,26 @@ void P79_InitConsts(void) {
 #endif
 }
 
+static uint32_t g_pool = 0x400000;
+void P79_PoolReset(void) { g_pool = 0x400000; }
+void *P79_EventAlloc(int32_t size) {
+#ifdef RE_HOOK_BUILD
+  return DebugMalloc(size, "D:\\Driver\\Game\\map.c", 0x3ed);
+#else
+  if (size < 0 || g_pool + (uint32_t)size > 0x500000) return NULL;
+  void *p = (uint8_t *)D_00c98ed0 + g_pool;
+  g_pool += ((uint32_t)size + 15u) & ~15u;
+  return p;
+#endif
+}
+void P79_EventFree(void *p) {
+#ifdef RE_HOOK_BUILD
+  DebugFree(p);
+#else
+  (void)p;
+#endif
+}
+
 static uint32_t rd32(const void *p, int o) { uint32_t v; memcpy(&v, (const uint8_t *)p + o, 4); return v; }
 static void wr32(void *p, int o, uint32_t v) { memcpy((uint8_t *)p + o, &v, 4); }
 static uint16_t rd16(const void *p, int o) { uint16_t v; memcpy(&v, (const uint8_t *)p + o, 2); return v; }

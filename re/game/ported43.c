@@ -15,6 +15,7 @@
 #include "ported51.h"
 #include "ported44.h"
 #include "ported79.h"
+#include "ported80.h"
 #include <math.h>
 #include <string.h>
 GAME_VAR_DEF(p43_sintab_t, P43_Sin, 0x00b94280)
@@ -199,6 +200,7 @@ void re_init_consts(void) {
   P57_InitConsts();
   P58_InitConsts();
   P79_InitConsts();
+  P80_InitConsts();
   P59_InitConsts();
   P61_InitConsts();
   P63_InitConsts();
