@@ -22,9 +22,9 @@ extern p14_00c810c4_t P14_00c810c4;
 #endif
 typedef int32_t p14_00d078b0_t;
 #define g_00d078b0 P14_00d078b0
-#define P14_00d078b0 GAME_VAR(p14_00d078b0_t,P14_00d078b0,0x00d078b0)
+#define P14_00d078b0 CARTAB_VAR(p14_00d078b0_t,P14_00d078b0,0x00d078b0)
 #ifndef RE_HOOK_BUILD
-extern p14_00d078b0_t P14_00d078b0;
+
 #endif
 typedef int32_t p14_00d0778c_t;
 #define g_00d0778c P14_00d0778c

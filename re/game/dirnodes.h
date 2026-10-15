@@ -50,7 +50,7 @@ extern uint32_t DirSelectedColor; extern uint32_t NodeIconTexArr[];
 
 #define DirUseDI GAME_VAR(int32_t, DirUseDI, 0x00d17ba0)
 #define KeyArr(a) ((uint8_t*)(uintptr_t)(a))
-#define CamParamTbl GAME_VAR(int32_t, CamParamTbl, 0x00d0788c)
+#define CamParamTbl CARTAB_VAR(int32_t, CamParamTbl, 0x00d0788c)
 #ifndef RE_HOOK_BUILD
 extern int32_t DirUseDI; extern uint8_t KeyState[0x200]; extern int32_t CamParamTblArr[0x52*4];
 #endif

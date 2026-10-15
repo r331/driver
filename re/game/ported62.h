@@ -42,7 +42,7 @@
 #define P62_ModelNames GAME_VAR(const char *, P62_ModelNames, 0x00b1ff60)
 #define P62_ModelCount GAME_VAR(int32_t, P62_ModelCount, 0x01134124)
 #define P62_NoErr    GAME_VAR(int32_t, P62_NoErr, 0x00bdf9c8)
-#define P62_Spd      GAME_VAR(int32_t, P62_Spd, 0x00d078d0)
+#define P62_Spd      CARTAB_VAR(int32_t, P62_Spd, 0x00d078d0)
 #define P62_Unit     GAME_VAR(const char *, P62_Unit, 0x00c55ccc)
 #define P62_Blink    GAME_VAR(int32_t, P62_Blink, 0x00c8092c)
 #define P62_HudOff1  GAME_VAR(int32_t, P62_HudOff1, 0x00b87ea0)
@@ -78,7 +78,7 @@ typedef uint8_t p62_hs3_t[0x2c * 4];
 #define P62_Hs6      GAME_VAR(p62_hs3_t, P62_Hs6, 0x00b5c138)
 #ifndef RE_HOOK_BUILD
 extern int32_t P62_I14428C, P62_C82434, P62_C82500, P62_I137388, P62_I13738C, P62_I137390, P62_I270C44, P62_I252A80, P62_I252B78,
-  P62_I270C48, P62_I252B68, P62_Max, P62_MapN, P62_ModelCount, P62_NoErr, P62_Spd,
+  P62_I270C48, P62_I252B68, P62_Max, P62_MapN, P62_ModelCount, P62_NoErr,
   P62_Blink, P62_HudOff1, P62_HudOff2, P62_Frame, P62_Alt, P62_Menu1271060, P62_Menu1271064, P62_BusyA, P62_BusyB, P62_BusyC,
   P62_BusyD, P62_BusyE, P62_MapW, P62_MapH, P62_Map1C10, P62_Map1C24, P62_MapC64, P62_Map2C40, P62_Map1C0C, P62_MapCC90;
 extern float P62_F136C54, P62_F252A94, P62_F25F3F4, P62_F25F404;

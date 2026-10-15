@@ -27,7 +27,7 @@ GAME_VAR_DEF(p28_blk2_t, P28_Dst2, 0x0055a6f4)
 GAME_VAR_DEF(int32_t, P28_DbgFlag, 0x00dbb450)
 GAME_VAR_DEF(int32_t, P28_ShineFlag, 0x0055c974)
 GAME_VAR_DEF(int32_t, P28_BadGuyFlag, 0x00b87f04)
-#define P28_Ptr(v) ((const uint8_t *)(uintptr_t)(uint32_t)(v))
+#define P28_Ptr(v) ((const uint8_t *)P79_PTR(v))   /* v1.44: ссылки моделей — uint32 (P79_PTR: hook — адрес, native — арена карты) */
 #define MAIN_HWND ((void *)(intptr_t)G6_00BDF9C0)
 #define MAP_C "D:\\Driver\\Game\\map.c"
 
@@ -63,8 +63,8 @@ void P28_LoadEventModels(void *file) {
   DebugFree(tmp);
 }
 
-static int32_t find_model(const char *name, const char *msg) {
-  int32_t m = P20_FindNameValue(name);
+static uint32_t find_model(const char *name, const char *msg) {
+  uint32_t m = (uint32_t)P20_FindNameValue(name);
   if (m == 0 && msg != NULL) plat_message_box(MAIN_HWND, msg, "ERROR IN _LEVEL_ DATA", 0);
   return m;
 }
@@ -97,13 +97,13 @@ void P28_LoadCarModels(void) {
   }
   for (int i = 0; i < 9; i++) {
     snprintf(name, sizeof name, "CIVCAR%dCLEAN", i + 1);
-    P28_CarClean[3 + i] = P20_FindNameValue(name);
+    P28_CarClean[3 + i] = (uint32_t)P20_FindNameValue(name);
     if (P28_CarClean[3 + i] == 0) plat_message_box(MAIN_HWND, "Could not find clean civ car model.\n Change name in LEV file.", name, 0);
     snprintf(name, sizeof name, "CIVCAR%dDAM", i + 1);
-    P28_CarDam[3 + i] = P20_FindNameValue(name);
+    P28_CarDam[3 + i] = (uint32_t)P20_FindNameValue(name);
     if (P28_CarDam[3 + i] == 0) plat_message_box(MAIN_HWND, "Could not find damaged civ car model.\n  Change name in LEV file.", name, 0);
     snprintf(name, sizeof name, "CIVCAR%dLOW", i + 1);
-    P28_CarLow[3 + i] = P20_FindNameValue(name);
+    P28_CarLow[3 + i] = (uint32_t)P20_FindNameValue(name);
     if (P28_CarLow[3 + i] == 0) plat_message_box(MAIN_HWND, "Could not find low civ car model.\n  Change name in LEV file.", name, 0);
   }
   /* дельты вершин «целая − повреждённая» / 4096 */

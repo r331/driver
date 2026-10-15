@@ -7,7 +7,7 @@
 typedef uint32_t p28_evtab_t[0x270];   /* адреса моделей событий (стандарт v1.42: re_ptr/re_addr) */
 #define P28_EventModels GAME_VAR(p28_evtab_t, P28_EventModels, 0x00d11a60)
 #define P28_EventCount  GAME_VAR(int32_t, P28_EventCount, 0x00d12418)
-typedef int32_t p28_models_t[12];
+typedef uint32_t p28_models_t[12];   /* v1.44: ссылки на модели (uint32: hook — адрес Game.exe, native — ссылка арены P79_PTR) */
 #define P28_CarClean GAME_VAR(p28_models_t, P28_CarClean, 0x010ddfe0)
 #define P28_CarDam   GAME_VAR(p28_models_t, P28_CarDam, 0x010de020)
 #define P28_CarLow   GAME_VAR(p28_models_t, P28_CarLow, 0x010de080)

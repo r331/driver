@@ -45,6 +45,7 @@ static const re_region_t k_regions[] = {
   { 0x005755fcu, (uint8_t *)P97_Str22k, sizeof P97_Str22k },
   { 0x00575608u, (uint8_t *)P97_Str44k, sizeof P97_Str44k },
   { 0x005532ccu, P98_FaceBlk, sizeof P98_FaceBlk },              /* имена лиц титров (00552e1c → сюда) */
+  { P99_CARS_ADDR, (uint8_t *)P99_Cars, sizeof P99_Cars },       /* v1.44: таблица игроков/машин 00d077c0 (0x148 × 66) */
 };
 /* таблица функций: адрес Game.exe → перенесённая native-функция */
 static const re_fnent_t k_fns[] = {

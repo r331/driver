@@ -87,6 +87,7 @@
 #include "../../game/ported96.h"
 #include "../../game/ported97.h"
 #include "../../game/ported98.h"
+#include "../../game/ported99.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -319,8 +320,10 @@ void Call004C372A (void) { FreeDirectorBuffer(); }
 void Call00421A39 (void) { P57_ResetTexNodes(); }
 void Call0052434A (int32_t a0) { SlotSetOff0052434A(a0); }
 void Call004D9663 (void) { P96_LoadBar(); }
+void Call004C1B6C (int32_t a0) { P99_CarOpsReset(a0); }
 void Call005243EB (void) { P48_FadeEnd(); }
 void Call004C2042 (void) { P98_ClearCarData(); }
+void Call004C0218 (int32_t a0) { P99_CarModelClean(a0); }
 int32_t Call00475A3D (void *src, void *dst) { return (int32_t)P79_Convert(src, dst); }
 void Call00427757 (void *m) { P79_Relocate(m); }
 void Call0042793F (void *m, int32_t a1) { P79_Radius(m, a1); }

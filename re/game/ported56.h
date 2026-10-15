@@ -42,7 +42,7 @@ typedef char     p56_s360_t[0x360];
 #define P56_Blk11    GAME_VAR(p56_blk11_t, P56_Blk11, 0x01271060)
 #define P56_Save11   GAME_VAR(p56_blk11_t, P56_Save11, 0x00b5a448)
 #define P56_Blk16    GAME_VAR(p56_blk10_t, P56_Blk16, 0x00b5c898)
-#define P56_Objs     GAME_VAR(p56_obj_t, P56_Objs, 0x00d077c0)
+#define P56_Objs     CARTAB_VAR(p56_obj_t, P56_Objs, 0x00d077c0)
 #define P56_LoopTab  GAME_VAR(p56_snd4_t, P56_LoopTab, 0x00560378)
 #define P56_Cur      GAME_VAR(int32_t, P56_Cur, 0x005603c8)
 #define P56_B2EA48   GAME_VAR(int32_t, P56_B2EA48, 0x00b2ea48)
@@ -78,7 +78,7 @@ typedef char     p56_s360_t[0x360];
 #define P56_SaveBuf  GAME_VAR(p56_save_t, P56_SaveBuf, 0x012852a0)
 #ifndef RE_HOOK_BUILD
 extern p56_blk84_t P56_Blk84, P56_Save84; extern p56_blk11_t P56_Blk11, P56_Save11; extern p56_blk10_t P56_Blk16;
-extern p56_obj_t P56_Objs; extern p56_snd4_t P56_LoopTab;
+ extern p56_snd4_t P56_LoopTab;
 extern int32_t P56_Cur, P56_B2EA48, P56_B268, P56_C81880, P56_F7E58, P56_G4538, P56_G3908, P56_B87EA8, P56_D4470, P56_CopsA, P56_CopsB;
 extern uint32_t P56_AA30; extern p56_ghost_t P56_GhostBuf; extern uint8_t *P56_GhostPtr, *P56_EulerTab, *P56_Sprite; extern p56_page_t P56_Page;
 extern float P56_C546120, P56_C54611C, P56_C546A38, P56_F573FA0, P56_F573FA4;

@@ -4,8 +4,6 @@
 
 GAME_VAR_DEF(p88_cell_t, P88_CellA, 0x00c97a00)
 GAME_VAR_DEF(p88_cell_t, P88_CellB, 0x00cff9a0)
-GAME_VAR_DEF(int32_t, P88_ObjX, 0x00d0cbd0)
-GAME_VAR_DEF(int32_t, P88_ObjZ, 0x00d0cbd8)
 GAME_VAR_DEF(int32_t, P88_Mode575, 0x00575efc)
 
 /* заполнить описатель по координатам блока карты */

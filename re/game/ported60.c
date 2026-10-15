@@ -2,7 +2,6 @@
 #include <math.h>
 #include <string.h>
 
-GAME_VAR_DEF(p60_cars_t, P60_Cars, 0x00d077c0)
 GAME_VAR_DEF(int32_t, P60_Var1373C0, 0x011373c0)
 GAME_VAR_DEF(int32_t, P60_PartLimit, 0x005759a4)
 

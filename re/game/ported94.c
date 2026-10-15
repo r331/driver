@@ -19,8 +19,6 @@
 #include "smallfuncs2.h"
 #include <string.h>
 
-GAME_VAR_DEF(int16_t, P94_Heading, 0x00d078aa)
-GAME_VAR_DEF(int32_t, P94_HeadingI, 0x00d078c0)
 GAME_VAR_DEF(float, P94_RadarK, 0x00b32978)
 GAME_VAR_DEF(int32_t, P94_MapW, 0x00b32a30)
 GAME_VAR_DEF(int32_t, P94_MapH, 0x00b52a34)

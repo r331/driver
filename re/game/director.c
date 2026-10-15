@@ -222,7 +222,6 @@ int IsCameraCarFarEnough(const DIRECTOR_CAMERA *cam) {
 }
 
 GAME_VAR_DEF(TRAFFIC_RECS_T, TrafficRecs, 0x011443e0)
-GAME_VAR_DEF(OBJPOS_T, ObjPosTable, 0x00d07888)
 GAME_VAR_DEF(DIRTABLE_T, DirTableA, 0x0055f088)
 GAME_VAR_DEF(DIRTABLE_T, DirTableB, 0x0055f030)
 /* 004c57b7 — название типа камеры */

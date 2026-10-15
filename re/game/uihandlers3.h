@@ -172,9 +172,9 @@ extern int32_t G00D11804;
 #ifndef RE_HOOK_BUILD
 extern int32_t G00BDF984;
 #endif
-#define G00D078F8 GAME_VAR(int32_t, G00D078F8, 0x00d078f8)
+#define G00D078F8 CARTAB_VAR(int32_t, G00D078F8, 0x00d078f8)
 #ifndef RE_HOOK_BUILD
-extern int32_t G00D078F8;
+
 #endif
 #define G00B31E18 GAME_VAR(int32_t, G00B31E18, 0x00b31e18)
 #ifndef RE_HOOK_BUILD

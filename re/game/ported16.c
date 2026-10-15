@@ -3,7 +3,6 @@
 GAME_VAR_DEF(int32_t, P16_ParticleCount, 0x011171a0)
 GAME_VAR_DEF(uint8_t, P16_ParticleBase, 0x0110e160)
 GAME_VAR_DEF(int32_t, P16_IdleMode, 0x00c810c4)
-GAME_VAR_DEF(int32_t, P16_Level, 0x00d078b0)
 GAME_VAR_DEF(int32_t, P16_FlagA, 0x00b5a778)
 GAME_VAR_DEF(int32_t, P16_FlagB, 0x00b87ee4)
 GAME_VAR_DEF(int32_t, P16_IdleCounter, 0x00d0778c)

@@ -5,8 +5,8 @@
    кривые, конус обзора, таблица направлений), строки маски сектора, ближайший объект радара, «качание» по таблице синусов,
    координаты радара, пределы дальности, шаг затемнения финиша, прямоугольник значка. Все cdecl. */
 
-#define P94_Heading   GAME_VAR(int16_t, P94_Heading, 0x00d078aa)   /* курс игрока (поле +0x22 записи 00d07888) */
-#define P94_HeadingI  GAME_VAR(int32_t, P94_HeadingI, 0x00d078c0)  /* курс игрока, int (поле +0x38 записи 00d07888) */
+#define P94_Heading   CARTAB_VAR(int16_t, P94_Heading, 0x00d078aa)   /* курс игрока (поле +0x22 записи 00d07888) */
+#define P94_HeadingI  CARTAB_VAR(int32_t, P94_HeadingI, 0x00d078c0)  /* курс игрока, int (поле +0x38 записи 00d07888) */
 #define P94_RadarK    GAME_VAR(float, P94_RadarK, 0x00b32978)      /* масштаб радара */
 #define P94_MapW      GAME_VAR(int32_t, P94_MapW, 0x00b32a30)      /* ширина/высота карты в 004?? (координаты карты → экран) */
 #define P94_MapH      GAME_VAR(int32_t, P94_MapH, 0x00b52a34)
@@ -33,7 +33,7 @@ typedef int32_t p94_dirtab_t[128][4];
 typedef int16_t p94_curveA_t[0x1004];
 typedef int16_t p94_curveB_t[0xa0];
 #ifndef RE_HOOK_BUILD
-extern int16_t P94_Heading; extern int32_t P94_HeadingI; extern float P94_RadarK;
+ extern float P94_RadarK;
 extern int32_t P94_MapW, P94_MapH, P94_MapX0, P94_MapY0;
 extern int32_t P94_FadeDir, P94_FadeVal; extern float P94_FadePos, P94_FadeSpeed;
 extern uint8_t *P94_IconRec; extern uint8_t P94_QuadPage; extern p94_quad_t P94_Quad;

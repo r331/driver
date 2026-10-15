@@ -7,8 +7,6 @@
 #define DS_FILE "D:\\Driver\\Game\\DirectorStorage.c"
 GAME_VAR_DEF(int32_t, WaypointDirty, 0x00d17b30)
 GAME_VAR_DEF(int32_t, WaypointCount, 0x00d17b40)
-GAME_VAR_DEF(int32_t, PlayerPosX, 0x00d07888)
-GAME_VAR_DEF(int32_t, PlayerPosZ, 0x00d07890)
 
 /* после записи содержимого чанка в заголовок пишется реальный размер */
 static void finish_chunk(void *f, long start, CHUNK_HEADER *h) {

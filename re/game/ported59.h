@@ -27,9 +27,9 @@ typedef uint8_t p59_u8x64_t[64];
 typedef int16_t p59_sin_t[4096];
 #define P59_CamF1       GAME_VAR(float, P59_CamF1, 0x01270c24)
 #define P59_CamLim      GAME_VAR(float, P59_CamLim, 0x005460e8)      /* 2000.0 */
-#define P59_PosX        GAME_VAR(int32_t, P59_PosX, 0x00d07888)
-#define P59_PosY        GAME_VAR(int32_t, P59_PosY, 0x00d0788c)
-#define P59_PosZ        GAME_VAR(int32_t, P59_PosZ, 0x00d07890)
+#define P59_PosX        CARTAB_VAR(int32_t, P59_PosX, 0x00d07888)
+#define P59_PosY        CARTAB_VAR(int32_t, P59_PosY, 0x00d0788c)
+#define P59_PosZ        CARTAB_VAR(int32_t, P59_PosZ, 0x00d07890)
 #define P59_VX          GAME_VAR(float, P59_VX, 0x00b1c270)
 #define P59_VY          GAME_VAR(float, P59_VY, 0x00b1c274)
 #define P59_VZ          GAME_VAR(float, P59_VZ, 0x00b1c278)
@@ -50,7 +50,7 @@ typedef int16_t p59_sin_t[4096];
 #define P59_PickTab     GAME_VAR(p59_i32x18_t, P59_PickTab, 0x00562ae0) /* пары (текст, звук) для 9 предметов */
 #define P59_NearN       GAME_VAR(int32_t, P59_NearN, 0x00c7d7e0)
 #define P59_NearList    GAME_VAR(p59_u8x64_t, P59_NearList, 0x00c7d860)
-#define P59_CarRecs     GAME_VAR(p59_u8x64k_t, P59_CarRecs, 0x00d07908)
+#define P59_CarRecs     CARTAB_VAR(p59_u8x64k_t, P59_CarRecs, 0x00d07908)
 #define P59_Sin         GAME_VAR(p59_sin_t, P59_Sin, 0x00576f10)
 typedef uint8_t p59_rep_t[0x38];
 typedef uint32_t p59_hdr_t[2];
@@ -60,11 +60,11 @@ typedef uint32_t p59_hdr_t[2];
 #define P59_NoKeyFlag   GAME_VAR(int32_t, P59_NoKeyFlag, 0x005feda0)
 #define P59_MenuLock    GAME_VAR(int32_t, P59_MenuLock, 0x005fea54)
 #ifndef RE_HOOK_BUILD
-extern float P59_CamF1, P59_CamLim, P59_VX, P59_VY, P59_VZ; extern int32_t P59_PosX, P59_PosY, P59_PosZ;
+extern float P59_CamF1, P59_CamLim, P59_VX, P59_VY, P59_VZ;
 extern uint16_t P59_AngA, P59_AngB, P59_AngC; extern uint8_t P59_Mode1137324, *P59_CarsTab;
 extern p59_tab_c39dc0_t P59_C39DC0; extern p59_tab_bf1c48_t P59_BF1C48; extern int32_t P59_ModelCount;
 extern p59_u8x9_t P59_Flags9; extern int8_t P59_Picked; extern int32_t P59_S4654, P59_S44CC, P59_S4790, P59_S3904;
-extern p59_i32x18_t P59_PickTab; extern int32_t P59_NearN; extern p59_u8x64_t P59_NearList; extern p59_u8x64k_t P59_CarRecs;
+extern p59_i32x18_t P59_PickTab; extern int32_t P59_NearN; extern p59_u8x64_t P59_NearList;
 extern p59_sin_t P59_Sin; extern p59_hdr_t P59_Hdr; extern p59_rep_t P59_Rep57B6B8; extern float P59_One;
 extern int32_t P59_NoKeyFlag, P59_MenuLock;
 extern char *P59_VarStr[77]; /* native: буферы строковых переменных MScript (в Game.exe указатель лежит в записи таблицы) */

@@ -71,7 +71,7 @@ typedef uint8_t p58_cfg_t[0x10c];
 #define P58_LangNo      GAME_VAR(int32_t, P58_LangNo, 0x00c557fc)
 #define P58_Langs       GAME_VAR(p58_names_t, P58_Langs, 0x005759e4)
 #define P58_Objs        GAME_VAR(p58_objs_t, P58_Objs, 0x00c80ce0)
-#define P58_ObjSpare    GAME_VAR(uint8_t, P58_ObjSpare, 0x00d0cbd0)
+#define P58_ObjSpare    CARTAB_VAR(uint8_t, P58_ObjSpare, 0x00d0cbd0)
 #define P58_S32980      GAME_VAR(int32_t, P58_S32980, 0x00b32980)
 #define P58_SB87EB0     GAME_VAR(int32_t, P58_SB87EB0, 0x00b87eb0)
 #define P58_ListB31EC4  GAME_VAR(p58_slot_t *, P58_ListB31EC4, 0x00b31ec4)
@@ -92,7 +92,7 @@ extern uint32_t P58_S5FE9B4, P58_S5FE9B0, P58_S5FE9B8, P58_TabPtr, P58_S54DFC8, 
     P58_SC559D8, P58_SC559E0, P58_SC559E4, P58_SC559E8, P58_SC559EC;
 extern p58_blkidx_t P58_BlkIdx; extern int32_t *P58_BlkBuf;
 extern int32_t P58_DemoFlag, P58_S5F7E5C, P58_DemoNo, P58_LangNo, P58_S32980, P58_SB87EB0, P58_CntB31EBC, P58_GridW, P58_GridH, P58_CfgOn, P58_CfgLock;
-extern p58_names_t P58_Demos, P58_Langs; extern p58_objs_t P58_Objs; extern uint8_t P58_ObjSpare;
+extern p58_names_t P58_Demos, P58_Langs; extern p58_objs_t P58_Objs;
 extern p58_slot_t *P58_ListB31EC4; extern void **P58_Grid; extern p58_font_t P58_Font; extern p58_cfg_t P58_Cfg; extern p56_hdr_t P58_CfgHdr;
 #endif
 void P58_InitConsts(void);                          /* native: строки таблиц DEMOn/LANG из .data */

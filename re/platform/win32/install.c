@@ -87,6 +87,7 @@
 #include "../../game/ported96.h"
 #include "../../game/ported97.h"
 #include "../../game/ported98.h"
+#include "../../game/ported99.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1890,4 +1891,35 @@ void re_install_all(void) {
     re_hook(0x004f5012, (void*)P98_ScriptRange, "P98_ScriptRange");
     re_hook(0x0051564f, (void*)P98_PartCheck, "P98_PartCheck");
     re_hook(0x004c2b9a, (void*)P98_DirCamKeys, "P98_DirCamKeys");
+    re_hook(0x00506a07, (void*)P99_RadarXform, "P99_RadarXform");
+    re_hook(0x004d6ae7, (void*)P99_GearBox, "P99_GearBox");
+    re_hook(0x004c3427, (void*)P99_CamCheckDist, "P99_CamCheckDist");
+    re_hook(0x004c5e08, (void*)P99_CamCheckPlayer, "P99_CamCheckPlayer");
+    re_hook(0x004d2b5d, (void*)P99_CopsNear, "P99_CopsNear");
+    re_hook(0x0051b7a3, (void*)P99_RoadAtCar, "P99_RoadAtCar");
+    re_hook(0x0049c99c, (void*)P99_FreeCamMove, "P99_FreeCamMove");
+    re_hook(0x0049e47b, (void*)P99_CamBehind, "P99_CamBehind");
+    re_hook(0x004e9427, (void*)P99_MarkerReset, "P99_MarkerReset");
+    re_hook(0x004a1b2d, (void*)P99_TrafficAhead, "P99_TrafficAhead");
+    re_hook(0x004a6e84, (void*)P99_CopTarget, "P99_CopTarget");
+    re_hook(0x004c0218, (void*)P99_CarModelClean, "P99_CarModelClean");
+    re_hook(0x004c1b6c, (void*)P99_CarOpsReset, "P99_CarOpsReset");
+    re_hook(0x004a2e14, (void*)P99_ChairHit, "P99_ChairHit");
+    re_hook(0x00496eb4, (void*)P99_JunctionBlock, "P99_JunctionBlock");
+    re_hook(0x004f4d3c, (void*)P99_ScriptMsgs, "P99_ScriptMsgs");
+    re_hook(0x00412d7d, (void*)P99_MenuDim, "P99_MenuDim");
+    re_hook(0x00514c9f, (void*)P99_PartAhead, "P99_PartAhead");
+    re_hook(0x00420854, (void*)P99_DDEnumFmt, "P99_DDEnumFmt");
+    re_hook(0x004f638d, (void*)P99_ScriptFree, "P99_ScriptFree");
+    re_hook(0x004d3444, (void*)P99_MapFree, "P99_MapFree");
+    re_hook(0x0049ea37, (void*)P99_CamScriptStep, "P99_CamScriptStep");
+    re_hook(0x004f8862, (void*)P99_VarSetStr, "P99_VarSetStr");
+    re_hook(0x004a5338, (void*)P99_CmdAppend, "P99_CmdAppend");
+    re_hook(0x004a4340, (void*)P99_EventAdd, "P99_EventAdd");
+    re_hook(0x0051358d, (void*)P99_PartOnChair, "P99_PartOnChair");
+    re_hook(0x004f568a, (void*)P99_GoalCheck, "P99_GoalCheck");
+    re_hook(0x004a7920, (void*)P99_PathAhead, "P99_PathAhead");
+    re_hook(0x00526aeb, (void*)P99_SegCross, "P99_SegCross");
+    re_hook(0x00526cd5, (void*)P99_SegClip, "P99_SegClip");
+    re_hook(0x0050f569, (void*)P99_MenuItems, "P99_MenuItems");
 }

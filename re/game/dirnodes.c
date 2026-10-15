@@ -130,7 +130,7 @@ void DrawNodeMarker(DIR_NODE *n) {
 #ifndef RE_HOOK_BUILD
 uint8_t KeyState[0x200]; int32_t CamParamTblArr[0x52*4];
 #  define KS(a) KeyState[(a)-0x00d04b00]
-#  define CPT(i) CamParamTblArr[i]
+#  define CPT(i) (((int32_t *)&CamParamTbl)[i])   /* v1.44: поле +0xcc таблицы машин P99_Cars */
 #else
 #  define KS(a) (*(uint8_t*)(uintptr_t)(a))
 #  define CPT(i) (((int32_t*)(uintptr_t)0x00d0788c)[i])

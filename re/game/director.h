@@ -41,11 +41,11 @@ typedef uint8_t TRAFFIC_RECS_T[0x40 * 0x54];
 typedef int32_t OBJPOS_T[0x52 * 65];
 typedef uint8_t DIRTABLE_T[64];
 #define TrafficRecs GAME_VAR(TRAFFIC_RECS_T, TrafficRecs, 0x011443e0)
-#define ObjPosTable GAME_VAR(OBJPOS_T, ObjPosTable, 0x00d07888)
+#define ObjPosTable CARTAB_VAR(OBJPOS_T, ObjPosTable, 0x00d07888)
 #define DirTableA   GAME_VAR(DIRTABLE_T, DirTableA, 0x0055f088)
 #define DirTableB   GAME_VAR(DIRTABLE_T, DirTableB, 0x0055f030)
 #ifndef RE_HOOK_BUILD
-extern TRAFFIC_RECS_T TrafficRecs; extern OBJPOS_T ObjPosTable; extern DIRTABLE_T DirTableA, DirTableB;
+extern TRAFFIC_RECS_T TrafficRecs; extern DIRTABLE_T DirTableA, DirTableB;
 extern int32_t DirectorUnk64, DirectorUnk6C, DirectorUnk7C, DirectorUnk84, DirectorUnk88, DirectorUnk8C, GameMode;
 extern int32_t NumCameras; extern DIRECTOR_CAMERA *CurCamera; extern DIRECTOR_CAMERA **CameraList;
 extern int32_t DirectorLastFrame, CamBackupValid, DirectorBufferCount;

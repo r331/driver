@@ -70,7 +70,7 @@ typedef void (*p97_gr1_fn)(int32_t);
 #define P97_MsgBuf    GAME_VAR(p97_txt64_t, P97_MsgBuf, 0x00c80c60)
 #define P97_C810A8    GAME_VAR(int32_t, P97_C810A8, 0x00c810a8)
 #define P97_C81490    GAME_VAR(int32_t, P97_C81490, 0x00c81490)
-#define P97_D078CC    GAME_VAR(int32_t, P97_D078CC, 0x00d078cc)
+#define P97_D078CC    CARTAB_VAR(int32_t, P97_D078CC, 0x00d078cc)
 #define P97_BlinkA    GAME_VAR(p97_i2_t, P97_BlinkA, 0x0054e360)        /* .data {50, 20}: яркость, шаг */
 #define P97_BlinkB    GAME_VAR(p97_i2_t, P97_BlinkB, 0x0054e4f0)        /* .data {50, 20} */
 #define P97_IconL     GAME_VAR(int32_t, P97_IconL, 0x005fea3c)
@@ -107,7 +107,7 @@ extern p97_u4_t P97_OnOff, P97_SpkStr; extern p97_u2_t P97_BitsStr, P97_RateStr;
 extern p97_s8_t P97_Str8bit, P97_Str16bit; extern p97_s12_t P97_Str22k, P97_Str44k;
 extern p97_sndmenu_t P97_SndMenu; extern p97_menuA_t P97_KeyMenuA; extern p97_menuB_t P97_KeyMenuB; extern p97_menuC_t P97_OptMenuA, P97_OptMenuB;
 extern p97_i6_t P97_OptTabA, P97_OptTabB; extern p97_txt32_t P97_FpsTxtA, P97_FpsTxtB; extern p97_txt64_t P97_MsgBuf;
-extern int32_t P97_C810A8, P97_C81490, P97_D078CC, P97_IconL, P97_IconR; extern p97_i2_t P97_BlinkA, P97_BlinkB;
+extern int32_t P97_C810A8, P97_C81490, P97_IconL, P97_IconR; extern p97_i2_t P97_BlinkA, P97_BlinkB;
 extern p97_debris_t P97_Debris; extern uint8_t *P97_FadeIcon;
 extern int32_t P97_B2A8, P97_B2A4, P97_B2A0, P97_129584, P97_B274, P97_B2B0, P97_D9DC, P97_D9D8, P97_B264, P97_B260, P97_B290, P97_B214, P97_D9E0, P97_B28C, P97_B288;
 extern p97_b2c0_t P97_B2C0; extern p97_b220_t P97_B220; extern p97_d11980_t P97_D11980; extern uint16_t P97_D11A44;
