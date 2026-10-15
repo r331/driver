@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 int  re_selftest(void);
+void re_init_consts(void);
 static int file_exists(const char *dir, const char *name) {
     char p[1024]; snprintf(p, sizeof p, "%s/%s", dir, name);
     FILE *f = fopen(p, "rb"); if (f) fclose(f); return f != NULL;
@@ -15,6 +16,7 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "--data") && i + 1 < argc) data = argv[++i];
         else if (!strcmp(argv[i], "--frames") && i + 1 < argc) frames = atoi(argv[++i]);
     }
+    re_init_consts();
     if (selftest) return re_selftest();
     if (!file_exists(data, "FSIN.DAT")) {
         fprintf(stderr, "Не найдены данные игры: укажите папку Data_Files с вашего диска: --data <путь>\n");

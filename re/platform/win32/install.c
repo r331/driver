@@ -31,6 +31,7 @@
 #include "../../game/ported40.h"
 #include "../../game/ported41.h"
 #include "../../game/ported42.h"
+#include "../../game/ported43.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1260,4 +1261,20 @@ void re_install_all(void) {
     re_hook(0x004245ec, (void*)P42_GetDeviceName, "P42_GetDeviceName");
     re_hook(0x004e964a, (void*)P42_SetViewAngles, "P42_SetViewAngles");
     re_hook(0x004ece84, (void*)P42_CellIndex, "P42_CellIndex");
+    re_hook(0x00524398, (void*)P43_CdFadeInit, "P43_CdFadeInit");
+    re_hook(0x00526521, (void*)P43_NormalizeToOut, "P43_NormalizeToOut");
+    re_hook(0x005260d7, (void*)P43_Normalize, "P43_Normalize");
+    re_hook(0x0052605d, (void*)P43_Cross, "P43_Cross");
+    re_hook(0x005271f2, (void*)P43_Len3, "P43_Len3");
+    re_hook(0x00527255, (void*)P43_Len4, "P43_Len4");
+    re_hook(0x005265e3, (void*)P43_Orthonormalize, "P43_Orthonormalize");
+    re_hook(0x0052680b, (void*)P43_PointInPoly, "P43_PointInPoly");
+    re_hook(0x005261ad, (void*)P43_EulerMatrix, "P43_EulerMatrix");
+    re_hook(0x00526ed7, (void*)P43_ClipT, "P43_ClipT");
+    re_hook(0x00527010, (void*)P43_NormalizeCopy, "P43_NormalizeCopy");
+    re_hook(0x005273a3, (void*)P43_MatToQuat, "P43_MatToQuat");
+    re_hook(0x00527429, (void*)P43_QuatToMat, "P43_QuatToMat");
+    re_hook(0x0052647d, (void*)P43_ProjectGrid, "P43_ProjectGrid");
+    re_hook(0x0051200f, (void*)P43_FreeSlot, "P43_FreeSlot");
+    re_hook(0x00514073, (void*)P43_AnimNext, "P43_AnimNext");
 }

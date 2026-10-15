@@ -45,6 +45,8 @@
 #include "../game/ported40.h"
 #include "../game/ported41.h"
 #include "../game/ported42.h"
+#include "../game/ported43.h"
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -1103,8 +1105,64 @@ static int test_p39(void) {
 #undef CK
   return f;
 }
+static int fa(float a, float b) { return fabsf(a - b) < 1e-4f; }
+static int test_p43(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p43 fail line %d\n",__LINE__); } } while (0)
+  P8_00546020 = 1.0f; P8_00546024 = 0.0f; P43_Eps = 1e-6f; P43_Four = 4.0f;
+  float v[3] = {3, 0, 4}; CK(fa(P43_Len3(v), 5.0f));
+  float z[3] = {0, 0, 0}; CK(P43_Len3(z) == 0.0f);
+  float w[5] = {1, 2, 2, 0, 4}; CK(fa(P43_Len4(w), sqrtf(1 + 4 + 4 + 16)));
+  P43_Normalize(v); CK(fa(v[0], 0.6f) && fa(v[2], 0.8f));
+  P43_NormalizeToOut(0, 5, 0); CK(fa(P19_OutA, 0) && fa(P19_OutB, 1.0f) && fa(P19_OutC, 0));
+  float o[3]; P43_NormalizeCopy(z, o); CK(o[0] == 0 && o[1] == 0 && o[2] == 0);
+  float a[3] = {1, 0, 0}, b[3] = {0, 1, 0}, c[4] = {9, 9, 9, 7};
+  CK(P43_Cross(c, a, b) == c && fa(c[0], 0) && fa(c[1], 0) && fa(c[2], 1) && c[3] == 7);
+  /* ортонормировка: перекошенная матрица -> столбцы единичные и взаимно перпендикулярные */
+  float m[9] = {1, 0.3f, 0.1f, 0.2f, 1, 0.1f, 0.0f, 0.4f, 2};
+  P43_Orthonormalize(m);
+  float cx[3] = {m[0], m[3], m[6]}, cy[3] = {m[1], m[4], m[7]}, cz[3] = {m[2], m[5], m[8]};
+  CK(fa(P43_Len3(cx), 1) && fa(P43_Len3(cy), 1) && fa(P43_Len3(cz), 1));
+  CK(fa(cx[0]*cy[0] + cx[1]*cy[1] + cx[2]*cy[2], 0) && fa(cx[0]*cz[0] + cx[1]*cz[1] + cx[2]*cz[2], 0));
+  /* углы -> матрица -> кватернион -> матрица */
+  for (int i = 0; i < 4096; i++) P43_Sin[i] = sinf((float)i * 6.28318530718f / 4096.0f);
+  for (int i = 4096; i < 5120; i++) P43_Sin[i] = P43_Sin[i - 4096];
+  int16_t ang[3] = {0, 0, 0}; float e[9]; P43_EulerMatrix(e, ang);
+  CK(fa(e[0], 1) && fa(e[4], 1) && fa(e[8], 1) && fa(e[1], 0) && fa(e[5], 0));
+  ang[0] = 1024; ang[1] = 0; ang[2] = 0; P43_EulerMatrix(e, ang);   /* 90° вокруг оси 0 */
+  CK(fa(e[4], 0) && fa(e[5], -1) && fa(e[7], 1) && fa(e[8], 0));
+  float q[5] = {0, 0, 0, 0, 0}, r[9]; P43_MatToQuat(e, q);
+  CK(fa(q[4], sqrtf(0.5f) * 1.0f * 1.0f) || fa(q[4], 0.70710678f));
+  P43_QuatToMat(q, r); for (int i = 0; i < 9; i++) CK(fa(r[i], e[i]));
+  /* многоугольник: квадрат 0..10 (вершины по 4 float) */
+  float sq[16] = {0,0,0,0, 10,0,0,0, 10,10,0,0, 0,10,0,0};
+  CK(P43_PointInPoly(4, sq, 5, 5) == 1 && P43_PointInPoly(4, sq, 15, 5) == 0 && P43_PointInPoly(4, sq, 5, -1) == 0);
+  /* отсечение: t0=0, t1=1 */
+  float t0 = 0, t1 = 1;
+  CK(P43_ClipT(2, 1, &t0, &t1) == 1 && fa(t0, 0.5f));
+  t0 = 0; t1 = 1; CK(P43_ClipT(1, 2, &t0, &t1) == 0);
+  t0 = 0; t1 = 1; CK(P43_ClipT(0, 1, &t0, &t1) == 0 && P43_ClipT(0, -1, &t0, &t1) == 1);
+  /* CD-фейд */
+  G6_00B91CF4 = 1; P43_FadeOn = 0; P43_FadeLen = 8.0f; P43_FadeDiv = 4.0f;
+  P43_CdFadeInit(); CK(P43_FadeOn == 1 && P43_FadeSteps == 10 && fa(P43_FadeStep, 2.0f) && fa(P43_FadeA, 8.0f));
+  P43_FadeLen = 100.0f; P43_CdFadeInit(); CK(fa(P43_FadeA, 8.0f));
+  /* слоты */
+  uint8_t slot[0x70]; memset(slot, 0xaa, sizeof slot);
+  uint32_t fl = 0x10; memcpy(slot + 0xc, &fl, 4); int16_t id = 77; memcpy(slot + 2, &id, 2);
+  P43_FreeCnt = 5; P43_FreeSlot(slot);
+  CK(P43_FreeCnt == 4 && P43_FreeList[4] == 77); memcpy(&fl, slot + 0xc, 4); CK(fl == 0);
+  P43_FreeSlot(slot); CK(P43_FreeCnt == 4);
+  P43_AnimTab[1] = 111; P43_AnimTab[2] = 222;
+  memset(slot, 0, sizeof slot); int32_t lim = 3, cur = 5, pos2 = 1; int16_t kind = 2; uint32_t flg = 0x3123;
+  memcpy(slot, &kind, 2); memcpy(slot + 0xc, &flg, 4); memcpy(slot + 0x2c, &lim, 4); memcpy(slot + 0x30, &cur, 4); memcpy(slot + 0x34, &pos2, 4);
+  P43_AnimNext(slot);
+  memcpy(&flg, slot + 0xc, 4); memcpy(&lim, slot + 0x2c, 4); memcpy(&cur, slot + 0x30, 4); int32_t mode; memcpy(&mode, slot + 0x1c, 4);
+  CK(flg == 0x0123 && mode == 2 && lim == 222 && cur == 1);
+#undef CK
+  return f;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
