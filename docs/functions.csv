@@ -2044,7 +2044,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0048bcc0,FUN_0048bcc0,,,,,,123,todo
 0048bd3b,FUN_0048bd3b,NoopFn0048bd3b,manual,Noop,,,5,ported
 0048bd40,FUN_0048bd40,,,,,,37,todo
-0048bd65,FUN_0048bd65,,,,,,103,todo
+0048bd65,FUN_0048bd65,P26_WaveSetVolume,manual,ported26,,,103,ported
 0048bdcc,FUN_0048bdcc,,,,,,156,todo
 0048be68,FUN_0048be68,,,,,,84,todo
 0048bf52,FUN_0048bf52,,,,,,72,todo
@@ -2232,7 +2232,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004a59c6,FUN_004a59c6,SkipLine004A59C6,manual,SmallFuncs,,,44,ported
 004a59f2,FUN_004a59f2,,,,,,145,todo
 004a5a83,FUN_004a5a83,,,,,,64,todo
-004a5ac3,FUN_004a5ac3,,,,,,56,todo
+004a5ac3,FUN_004a5ac3,P26_ErrorInLine,manual,ported26,,,56,ported
 004a5afb,FUN_004a5afb,,,,,,199,todo
 004a6370,FUN_004a6370,FillThresholds_004A6370,manual,Misc,,,86,ported
 004a63c6,FUN_004a63c6,,,,,,61,todo
@@ -2357,7 +2357,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004bb060,FUN_004bb060,,,,,,191,todo
 004bb11f,FUN_004bb11f,FindOrAdd_004BB11F,manual,Misc,,,112,ported
 004bf2a0,FUN_004bf2a0,DebugLog,manual,,,,189,todo
-004bf35d,FUN_004bf35d,,,,,,91,todo
+004bf35d,FUN_004bf35d,P26_LogTime,manual,ported26,,,91,ported
 004bf400,FUN_004bf400,RoundSet_004BF400,manual,Misc,,,82,ported
 004bf452,FUN_004bf452,Pack565Bytes004BF452,manual,Menu,,,31,ported
 004bf471,FUN_004bf471,NoopFn004bf471,manual,Noop,,,5,ported
@@ -2550,7 +2550,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d30a3,FUN_004d30a3,,,,,,85,todo
 004d30f8,FUN_004d30f8,,,file,assert,,150,todo
 004d318e,FUN_004d318e,,,file,assert,,158,todo
-004d322c,FUN_004d322c,,,,,,212,todo
+004d322c,FUN_004d322c,P26_FindCdDrive,manual,ported26,,,212,ported
 004d33c0,FUN_004d33c0,,,,,,66,todo
 004d3402,FUN_004d3402,,,,,,36,todo
 004d3426,FUN_004d3426,InitMapState4D3426,manual,Menu,,,30,ported
@@ -2594,7 +2594,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d7a21,FUN_004d7a21,,,,,,277,todo
 004d7b36,FUN_004d7b36,RingAdvance004D7B36,manual,SmallFuncs,,,42,ported
 004d7b60,FUN_004d7b60,PlayTrack004D7B60,manual,Menu,,,19,ported
-004d7b73,FUN_004d7b73,,,,,,211,todo
+004d7b73,FUN_004d7b73,P26_FindWheelModels,manual,ported26,,,211,ported
 004d7c46,FUN_004d7c46,,,,,,421,todo
 004d7deb,FUN_004d7deb,,,,,,422,todo
 004d7f91,FUN_004d7f91,,,,,,585,todo
@@ -2850,7 +2850,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004fc3f4,FUN_004fc3f4,,,,,,391,todo
 004fc57b,FUN_004fc57b,FreeBuf004FC57B,manual,Ported6,,,48,ported
 004fc5ab,FUN_004fc5ab,,,,,,54,todo
-004fc5e1,FUN_004fc5e1,,,,,,239,todo
+004fc5e1,FUN_004fc5e1,P26_RandomFx,manual,ported26,,,239,ported
 004fe830,FUN_004fe830,ResolveTable_004FE830,manual,Misc,,,57,ported
 004fe869,FUN_004fe869,,,,,,752,todo
 004feb59,FUN_004feb59,,,,,,652,todo

@@ -28,6 +28,7 @@
 #include "../game/ported23.h"
 #include "../game/ported24.h"
 #include "../game/ported25.h"
+#include "../game/ported26.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -554,10 +555,28 @@ static int test_p25(void) {
   if (P25_TimerCnt != 0) f++;
   return f;
 }
+static int test_p26(void) {
+  int f = 0;
+  P26_WaveSetVolume(0x8000); if (plat_wave_volume() != 0x80008000u) f++;
+  P26_WaveSetVolume(0x20000); if (plat_wave_volume() != 0xffffffffu) f++;
+  P26_WaveSetVolume((uint32_t)-1); if (plat_wave_volume() != 0) f++;
+  const char *tx, *ti; int n0 = plat_message_box_last(&tx, &ti);
+  G2_01134120 = 77; P26_ErrorInLine("boom");
+  int n1 = plat_message_box_last(&tx, &ti);
+  if (n1 != n0 + 1 || strcmp(tx, "boom") || strcmp(ti, "Error in line 77")) f++;
+  P26_FindWheelModels();   /* имена не найдены (заглушка/пустая таблица) — 4 сообщения, если FindNameValue вернул 0 */
+  int n2 = plat_message_box_last(&tx, &ti);
+  if (P26_ModelHubcap == 0 && n2 < n1 + 1) f++;
+  if (P26_ModelHubcap == 0 && strcmp(ti, "ERROR IN _LEVEL_ DATA")) f++;
+  /* RandomFx: при любых тиках результат в допустимых значениях, неверный набор -> 0 */
+  for (int i = 0; i < 20; i++) { P14_00b87e84 = i & 1; P26_RandomFx(i - 5); if (P26_FxA > 1 || P26_FxB > 1 || P26_FxC > 1 || P26_FxD > 1) f++; plat_sleep_ms(1); }
+  { char drv[64] = "x"; if (P26_FindCdDrive("no_such_file_\x01.xyz", drv) != 0 || drv[0] != 'x') f++; }
+  return f;
+}
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

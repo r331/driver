@@ -63,3 +63,4 @@
 - v0.12: +ReadDirectorKeys, ClampCameraHeight (51 всего)
 - v0.13: +CameraDump (52 всего)
 - v0.19: +18 MenuState (88 всего)
+- v0.73: +6 функций (ported26: системные обёртки над plat_message_box/utc/wave/cd_roots), всего 1316

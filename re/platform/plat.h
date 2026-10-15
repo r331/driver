@@ -6,6 +6,12 @@
 uint32_t plat_time_ms(void);
 void plat_sleep_ms(uint32_t ms);
 void plat_local_hms(int *h, int *m, int *s); /* GetLocalTime */
+void plat_utc_hms(int *h, int *m, int *s);   /* GetSystemTime (UTC) */
+int  plat_message_box(void *hwnd, const char *text, const char *title, unsigned flags); /* MessageBoxA: flags 0x10 ошибка, 0x30 предупреждение */
+int  plat_cd_roots(char *buf, int size);      /* корни CD/DVD-приводов через \0, список завершён пустой строкой (GetLogicalDriveStrings + DRIVE_CDROM); возвращает число байт, 0 — нет */
+void plat_wave_set_volume(uint32_t lr);      /* waveOutSetVolume(0, lr): (R<<16)|L; SDL: запоминает для микшера */
+uint32_t plat_wave_volume(void);             /* последнее значение (тесты) */
+int  plat_message_box_last(const char **text, const char **title); /* число вызовов и последний текст (тесты; hook: 0) */
 void plat_log(const char *fmt, ...);
 void *plat_file_open(const char *path, const char *mode); /* case-insensitive lookup */
 /* --- window & input --- */

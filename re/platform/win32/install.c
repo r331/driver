@@ -14,6 +14,7 @@
 #include "../../game/ported23.h"
 #include "../../game/ported24.h"
 #include "../../game/ported25.h"
+#include "../../game/ported26.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1168,6 +1169,12 @@ void re_install_all(void) {
     re_hook(0x005248a0, (void*)P25_CDStop, "P25_CDStop2");
     re_hook(0x005248cd, (void*)P25_CDResume, "P25_CDResume");
     re_hook(0x00524917, (void*)P25_CDSetVolume, "P25_CDSetVolume");
+    re_hook(0x0048bd65, (void*)P26_WaveSetVolume, "P26_WaveSetVolume");
+    re_hook(0x004a5ac3, (void*)P26_ErrorInLine, "P26_ErrorInLine");
+    re_hook(0x004bf35d, (void*)P26_LogTime, "P26_LogTime");
+    re_hook(0x004d7b73, (void*)P26_FindWheelModels, "P26_FindWheelModels");
+    re_hook(0x004d322c, (void*)P26_FindCdDrive, "P26_FindCdDrive");
+    re_hook(0x004fc5e1, (void*)P26_RandomFx, "P26_RandomFx");
     re_hook(0x005281b0, (void*)P25_TimersInit, "P25_TimersInit");
     re_hook(0x005281e1, (void*)P25_TimersShutdown, "P25_TimersShutdown");
     re_hook(0x00528221, (void*)P25_TimerStart, "P25_TimerStart");
