@@ -7,6 +7,21 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    V(P52_Fn4E6310, 0x004e6310, (void), ()) \
+    V(P52_Fn4E5A1A, 0x004e5a1a, (void), ()) \
+    V(P52_Fn4E5B78, 0x004e5b78, (void), ()) \
+    V(P52_Fn4ABD69, 0x004abd69, (void), ()) \
+    V(P52_Fn4AB127, 0x004ab127, (void), ()) \
+    V(P52_Fn4AB500, 0x004ab500, (void), ()) \
+    V(P52_Fn4AB808, 0x004ab808, (void), ()) \
+    V(P52_Fn4AB95C, 0x004ab95c, (void), ()) \
+    V(P52_Fn4ABA7C, 0x004aba7c, (void), ()) \
+    R(int32_t, P52_Fn48B3E8, 0x0048b3e8, (int32_t a0), (a0)) \
+    R(int32_t, P52_Fn48B5E3, 0x0048b5e3, (void), ()) \
+    V(P52_Fn5173D7, 0x005173d7, (float a0, float a1, int32_t a2, int32_t a3, int32_t a4), (a0, a1, a2, a3, a4)) \
+    V(P52_Fn519408, 0x00519408, (void), ()) \
+    R(int32_t, P52_Fn405F6F, 0x00405f6f, (int32_t a0, void *a1), (a0, a1)) \
+    V(P52_Fn41D53C, 0x0041d53c, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4), (a0, a1, a2, a3, a4)) \
     V(P48_Fn516DA0, 0x00516da0, (void), ()) \
     R(int32_t, P47_Fn51B111, 0x0051b111, (int32_t a0, int32_t a1), (a0, a1)) \
     R(uint32_t, P47_Fn51B566, 0x0051b566, (int32_t a0, int32_t a1), (a0, a1)) \

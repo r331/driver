@@ -54,6 +54,7 @@
 #include "../game/ported49.h"
 #include "../game/ported50.h"
 #include "../game/ported51.h"
+#include "../game/ported52.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -1565,8 +1566,35 @@ static int test_p51(void) {
 #undef CK
   return f;
 }
+static int test_p52(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p52 fail line %d\n",__LINE__); } } while (0)
+  P21_FrameFlagB = 0; P21_FrameFlagA = 5; P21_FrameMin = 9; MenuVar575EF8 = 0;
+  P52_MenuStepToggle(); CK(P21_FrameFlagB == 1 && P21_FrameFlagA == 0 && P21_FrameMin == 1 && MenuVar575EF8 == 4);
+  P52_MenuStepToggle(); CK(P21_FrameMin == 2 && P21_FrameFlagA == 0);
+  P21_FrameMin = 5; P52_MenuStepToggle(); CK(P21_FrameFlagA == 1 && P21_FrameMin == 5);
+  P52_MenuStepToggle(); CK(P21_FrameFlagA == 0 && P21_FrameFlagB == 0);
+  P52_ResetA = 7; P52_ResetB = 9; P52_ResetC = 5; P52_Ones0 = P52_Ones1 = P52_Ones2 = P52_Ones3 = 0;
+  P52_ResetSlots(); CK(P52_ResetA == 0 && P52_ResetB == 0 && P52_ResetC == 0);
+  CK(P52_Ones0 == 1 && P52_Ones1 == 1 && P52_Ones2 == 1 && P52_Ones3 == 1);
+  P52_MenuA = P52_MenuB = P52_MenuC = 3; GameMode = 4; P52_MenuCnt = 2;
+  P52_MenuReload(); CK(P52_MenuA == 0 && P52_MenuB == 0 && P52_MenuC == 0);
+  P52_FogOn = 1; P26_FxD = 0; P52_GlideFogSetup(); CK(P26_FxD == 1);
+  P52_GlideFogSetup(); CK(P26_FxD == 1);
+  P52_FogOn = 0; P26_FxD = 0; P52_GlideFogSetup(); CK(P26_FxD == 0);
+  P52_NoTrail = 0; P52_GlideFogMode();
+  D_00b1c0d4 = 0; P52_TexDownloadMipMap(1, 2, 3, 4, 5); D_00b1c0d4 = 1; D_00b1c0d8 = 0; P52_TexDownloadMipMap(1, 2, 3, 4, 5);
+  D_00b1c0d8 = 1; P52_TexDownloadMipMap(1, 2, 3, 4, 5);
+  D_00b87e30 = 4; P11_00b87e38 = 0xc9; P12_00d044d0 = 1; P52_HudDispatch();
+  D_00b87e30 = 5; G6_00B87EA0 = 1; P52_HudDispatch(); D_00b87e30 = 0; P52_HudDispatch();
+  CK(P52_FmvStart(0) == 0);
+  P52_ColorTab[8] = 1; P52_ColorTab[9] = 2; P52_ColorTab[10] = 3;
+  P52_DrawLabel(0, 0x10, 2); P52_DrawLabel(0, -1000, 2);
+#undef CK
+  return f;
+}
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

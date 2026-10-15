@@ -40,6 +40,7 @@
 #include "../../game/ported49.h"
 #include "../../game/ported50.h"
 #include "../../game/ported51.h"
+#include "../../game/ported52.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1384,4 +1385,13 @@ void re_install_all(void) {
     re_hook(0x0048f7fe, (void*)P51_NodeKind, "P51_NodeKind");
     re_hook(0x004d0071, (void*)P51_SteerHeading, "P51_SteerHeading");
     re_hook(0x004a50f7, (void*)P51_SkipNumber, "P51_SkipNumber");
+    re_hook(0x0042626e, (void*)P52_GlideFogSetup, "P52_GlideFogSetup");
+    re_hook(0x004264bd, (void*)P52_GlideFogMode, "P52_GlideFogMode");
+    re_hook(0x0042486b, (void*)P52_TexDownloadMipMap, "P52_TexDownloadMipMap");
+    re_hook(0x00510084, (void*)P52_MenuStepToggle, "P52_MenuStepToggle");
+    re_hook(0x004e59b9, (void*)P52_HudDispatch, "P52_HudDispatch");
+    re_hook(0x004aad65, (void*)P52_ResetSlots, "P52_ResetSlots");
+    re_hook(0x0048abdc, (void*)P52_FmvStart, "P52_FmvStart");
+    re_hook(0x004a9e0a, (void*)P52_DrawLabel, "P52_DrawLabel");
+    re_hook(0x00510728, (void*)P52_MenuReload, "P52_MenuReload");
 }
