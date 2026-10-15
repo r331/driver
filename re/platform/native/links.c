@@ -51,6 +51,7 @@
 #include "../../game/ported60.h"
 #include "../../game/ported61.h"
 #include "../../game/ported62.h"
+#include "../../game/ported63.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -210,6 +211,7 @@ void Call0042486B (int32_t a0, uint32_t a1, int32_t a2, uint32_t a3, int32_t a4)
 int32_t G6Call0041D63B (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { return (int32_t)P53_TexLookup(a0, a1, a2, a3); }
 void Call004D94B7 (uint32_t a0, uint32_t a1) { CursorSet004D94B7(a0, a1); }
 int32_t Call00524473 (int32_t a0) { return (int32_t)IsSlotActive00524473(a0); }
+uint32_t Call0048F3B4 (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { return (uint32_t)P63_CountByNode(a0, a1, a2, a3); }
 void Call00510784 (void) { P55_NamesD(); }
 void Call004C64BD (void) { FreeCameraList(); }
 void Call004D3402 (void) { P48_ShutdownSystems(); }

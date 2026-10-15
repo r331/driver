@@ -51,6 +51,7 @@
 #include "../../game/ported60.h"
 #include "../../game/ported61.h"
 #include "../../game/ported62.h"
+#include "../../game/ported63.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1563,4 +1564,14 @@ void re_install_all(void) {
     re_hook(0x004ec336, (void*)P62_LoadMapHeader, "P62_LoadMapHeader");
     re_hook(0x00514c72, (void*)P62_ParticleSet, "P62_ParticleSet");
     re_hook(0x00515813, (void*)P62_ParticleInit, "P62_ParticleInit");
+    re_hook(0x0048ea2c, (void*)P63_NearOnNode, "P63_NearOnNode");
+    re_hook(0x0048f3b4, (void*)P63_CountByNode, "P63_CountByNode");
+    re_hook(0x0048f4ad, (void*)P63_NearestAdd, "P63_NearestAdd");
+    re_hook(0x0048f5d8, (void*)P63_NearestRec, "P63_NearestRec");
+    re_hook(0x0048f1c6, (void*)P63_CanEnter, "P63_CanEnter");
+    re_hook(0x004901c0, (void*)P63_CarSpeed, "P63_CarSpeed");
+    re_hook(0x004966fd, (void*)P63_InPlanes, "P63_InPlanes");
+    re_hook(0x00426b34, (void*)P63_SphereHits, "P63_SphereHits");
+    re_hook(0x0049ef12, (void*)P63_CatmullRom, "P63_CatmullRom");
+    re_hook(0x0049ed20, (void*)P63_Hermite, "P63_Hermite");
 }

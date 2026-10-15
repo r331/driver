@@ -1,5 +1,6 @@
 /* Векторная математика, CD-фейд, слоты — восстановлено из Game.exe (cdecl). */
 #include "ported43.h"
+#include "ported63.h"
 #include "ported61.h"
 #include "ported59.h"
 #include "ported56.h"
@@ -192,5 +193,6 @@ void re_init_consts(void) {
   P58_InitConsts();
   P59_InitConsts();
   P61_InitConsts();
+  P63_InitConsts();
 #endif
 }
