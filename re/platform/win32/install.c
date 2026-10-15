@@ -36,6 +36,7 @@
 #include "../../game/ported45.h"
 #include "../../game/ported46.h"
 #include "../../game/ported47.h"
+#include "../../game/ported48.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1322,4 +1323,26 @@ void re_install_all(void) {
     re_hook(0x0042467f, (void*)P47_GlideWinOpen, "P47_GlideWinOpen");
     re_hook(0x0042651a, (void*)P47_GlideSwap, "P47_GlideSwap");
     re_hook(0x00424921, (void*)P47_TexTable, "P47_TexTable");
+    re_hook(0x00523e07, (void*)P48_FreeVoice, "P48_FreeVoice");
+    re_hook(0x00523ffd, (void*)P48_SetVoiceVolume, "P48_SetVoiceVolume");
+    re_hook(0x00523711, (void*)P48_SetMasterVolume, "P48_SetMasterVolume");
+    re_hook(0x005237b1, (void*)P48_StopAll, "P48_StopAll");
+    re_hook(0x00524b7e, (void*)P48_FreeSample, "P48_FreeSample");
+    re_hook(0x00523628, (void*)P48_ResetAll, "P48_ResetAll");
+    re_hook(0x00523595, (void*)P48_SndShutdown, "P48_SndShutdown");
+    re_hook(0x0052369b, (void*)P48_SndPause, "P48_SndPause");
+    re_hook(0x005243eb, (void*)P48_FadeEnd, "P48_FadeEnd");
+    re_hook(0x005242e7, (void*)P48_GetVoiceVolume, "P48_GetVoiceVolume");
+    re_hook(0x004d97e9, (void*)P48_AnyKey, "P48_AnyKey");
+    re_hook(0x0041a1b5, (void*)P48_PosToInts, "P48_PosToInts");
+    re_hook(0x00425f52, (void*)P48_GlideCheck, "P48_GlideCheck");
+    re_hook(0x004d3402, (void*)P48_ShutdownSystems, "P48_ShutdownSystems");
+    re_hook(0x004d33c0, (void*)P48_StartupSystems, "P48_StartupSystems");
+    re_hook(0x004d020b, (void*)P48_OpSet3, "P48_OpSet3");
+    re_hook(0x004d107e, (void*)P48_OpSet4, "P48_OpSet4");
+    re_hook(0x004d116c, (void*)P48_OpRampDown, "P48_OpRampDown");
+    re_hook(0x004d121b, (void*)P48_OpRampUp, "P48_OpRampUp");
+    re_hook(0x004d142c, (void*)P48_OpFlags, "P48_OpFlags");
+    re_hook(0x004d1672, (void*)P48_OpRepeat, "P48_OpRepeat");
+    re_hook(0x004d0d7c, (void*)P48_OpTurn, "P48_OpTurn");
 }

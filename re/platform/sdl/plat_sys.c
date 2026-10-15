@@ -122,3 +122,8 @@ int plat_win_state(int *cur,int *prio,int *quit,int *closes,int *w,int *h,const 
     if(proc){ *proc=g_wproc; }
     return 1;
 }
+
+static int g_com;
+int plat_com_init(void){ g_com++; return 0; }
+void plat_com_uninit(void){ if(g_com>0) g_com--; }
+int plat_com_count(void){ return g_com; }

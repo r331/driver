@@ -50,6 +50,7 @@
 #include "../game/ported43.h"
 #include "../game/ported44.h"
 #include "../game/ported45.h"
+#include "../game/ported48.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -1271,6 +1272,117 @@ static int test_p47(void) {
   return f;
 #undef CK
 }
+static int p48_freed[8], p48_nfreed, p48_cnt0, p48_samples[8], p48_nsamp, p48_pauses, p48_k38, p48_k54;
+static void p48_drv40(int32_t s) { if (p48_nfreed < 8) p48_freed[p48_nfreed++] = s; }
+static void p48_drv2c(int32_t s) { if (p48_nsamp < 8) p48_samples[p48_nsamp++] = s; }
+static void p48_drv00(void) { p48_cnt0++; }
+static void p48_drv08(void) { p48_pauses++; }
+static void p48_drv0c(void) { p48_pauses += 10; }
+static void p48_drv38(int32_t a, int32_t b, int32_t c) { (void)a; (void)b; (void)c; p48_k38++; }
+static void p48_drv54(int32_t a, int32_t b, int32_t c, int32_t d) { (void)b; (void)c; (void)d; p48_k54 += a + 1; }
+static void p48_put16(uint8_t *p, uint16_t v) { memcpy(p, &v, 2); }
+static void p48_put32(uint8_t *p, uint32_t v) { memcpy(p, &v, 4); }
+static void p48_putf(uint8_t *p, float v) { memcpy(p, &v, 4); }
+static uint16_t p48_get16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
+static uint32_t p48_get32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }
+static float p48_getf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
+static int test_p48(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p48 fail line %d\n",__LINE__); } } while (0)
+  P48_Drv40 = p48_drv40; P48_Drv2C = p48_drv2c; P48_Drv00 = p48_drv00; P48_Drv08 = p48_drv08; P48_Drv0C = p48_drv0c; P48_Drv38 = p48_drv38; P48_Drv54 = p48_drv54;
+  for (int i = 0; i < 10001; i++) P48_VolTab[i] = 0x50000u + (uint32_t)i;
+  G6_00B91CF4 = 1; G8_00575F40 = 1; P43_FadeLen = 1.0f;
+  memset(P48_Snd, 0, 20 * sizeof(P48_Slot));
+  for (int i = 0; i < 20; i++) P48_Snd[i].id = 0xffff;
+  /* громкость голоса */
+  P48_Snd[3].flags = 1; P48_Snd[3].defVol = -500;
+  P48_SetVoiceVolume(3, 0x7fff);
+  CK(P48_Snd[3].vol == -500 && P48_Snd[3].scaled == (int16_t)9500 && (P48_Snd[3].flags & 8));
+  P48_SetVoiceVolume(3, -20000); CK(P48_Snd[3].vol == -10000 && P48_Snd[3].scaled == 0);
+  P48_SetVoiceVolume(3, 77); CK(P48_Snd[3].vol == 0 && P48_Snd[3].scaled == 10000);
+  P43_FadeLen = 0.5f; P48_SetVoiceVolume(3, -1000); CK(P48_Snd[3].scaled == 4500);
+  P48_Snd[4].flags = 0; P48_SetVoiceVolume(4, -1); CK(P48_Snd[4].vol == 0 && P48_Snd[4].scaled == 0);
+  CK(P48_GetVoiceVolume(3) == (uint16_t)-1000 && P48_GetVoiceVolume(4) == 0);
+  G8_00575F40 = 0; CK(P48_GetVoiceVolume(3) == 0); G8_00575F40 = 1;
+  /* мастер-громкость */
+  P48_Snd[5].flags = 0x10; P48_Snd[5].vol = -2000;
+  P48_SetMasterVolume(2.0f); CK(P43_FadeLen == 1.0f && P48_Snd[3].scaled == 9000 && P48_Snd[5].scaled == 8000);
+  P48_SetMasterVolume(-1.0f); CK(P43_FadeLen == 0.0f && P48_Snd[3].scaled == 0);
+  P48_SetMasterVolume(0.25f); CK(P43_FadeLen == 0.25f && P48_Snd[3].scaled == 2250);
+  /* свободный голос, сэмплы */
+  p48_nfreed = 0; P48_FreeVoice(3);
+  CK(p48_nfreed == 1 && p48_freed[0] == 3 && P48_Snd[3].flags == 0 && P48_Snd[3].id == 0xffff);
+  P48_FreeVoice(7); CK(p48_nfreed == 1 && P48_Snd[7].id == 0xffff);   /* пустой слот — драйвер не зовём */
+  P48_Snd[9].id = 6; P48_Snd[9].flags = 1; P48_Snd[10].id = 6; P48_Snd[10].flags = 2; p48_nfreed = 0; p48_nsamp = 0;
+  P48_FreeSample(6);
+  CK(p48_nfreed == 2 && p48_freed[0] == 9 && p48_freed[1] == 10 && p48_nsamp == 1 && p48_samples[0] == 6 && P48_Samples[48] == 4 && P48_Snd[10].id == 0xffff);
+  /* остановить всё / сброс / выключение */
+  WF00575F14 = 0.75f; P43_FadeOn = 1; P43_FadeSteps = 4; P43_FadeB = 5; P43_FadeA = 2.0f; P43_FadeStep = 3.0f;
+  P48_Snd[1].flags = 1; P48_Snd[1].vol = -100; p48_nfreed = 0;
+  P48_StopAll();
+  CK(p48_nfreed == 2 && P43_FadeOn == 0 && P43_FadeLen == 0.75f && P43_FadeSteps == 0 && P43_FadeB == 0 && P43_FadeA == 0.0f && P43_FadeStep == 0.0f);
+  G6_00B91D34 = 3; G6_00B91BC4[2] = 9; p48_nsamp = 0;
+  P48_ResetAll();
+  CK(p48_nsamp == 3 && p48_samples[2] == 2 && G6_00B91D34 == 0 && G6_00B91BC4[2] == 0);
+  P48_Snd[2].flags = 1; P48_Snd[2].vol = -300; P43_FadeOn = 1; P43_FadeLen = 0.5f; WF00575F14 = 1.0f; P48_Snd[2].scaled = 0;
+  P48_FadeEnd(); CK(P43_FadeOn == 0 && P43_FadeLen == 1.0f && P48_Snd[2].scaled == 9700);
+  P48_FadeEnd(); CK(P43_FadeLen == 1.0f);
+  p48_pauses = 0; p48_k38 = 0; p48_k54 = 0; P48_Snd[0].flags = 1; P48_Snd[2].flags = 1; P48_Snd[1].flags = 0;
+  P48_SndPause(1); CK(p48_pauses == 0 && p48_k54 == 0);
+  P48_SndPause(0); CK(p48_pauses == 11 && p48_k38 == 1 && p48_k54 == (0 + 1) + (2 + 1));
+  p48_cnt0 = 0; P48_SndShutdown();
+  CK(p48_cnt0 == 1 && G6_00B91CF4 == 0 && P48_B91D30 == 0 && G6_00B91D34 == 0);
+  P48_SndShutdown(); CK(p48_cnt0 == 1);
+  /* ввод, позиция, Glide */
+  memset(P34_Keys, 0, 256); CK(P48_AnyKey() == 0);
+  P34_Keys[255] = 1; CK(P48_AnyKey() == 0);   /* индекс 255 не проверяется */
+  P34_Keys[254] = 1; CK(P48_AnyKey() == 1); P34_Keys[254] = 0; P34_Keys[0] = 1; CK(P48_AnyKey() == 1); P34_Keys[0] = 0; P34_Keys[255] = 0;
+  P48_Pos[0] = 1.9f; P48_Pos[1] = -2.9f; P48_Pos[2] = 1e6f; { int32_t o[3]; P48_PosToInts(o); CK(o[0] == 1 && o[1] == -2 && o[2] == 1000000); }
+  CK(P48_GlideCheck() == 0);
+  /* подсистемы */
+  int com0 = plat_com_count();
+  CK(P48_StartupSystems() == 1 && plat_com_count() == com0 + 1);
+  P48_ShutdownSystems(); CK(plat_com_count() == com0);
+  /* операции скрипта */
+  uint8_t ctx[0x60], prog[64]; uint16_t fl = 0;
+  memset(ctx, 0xaa, sizeof ctx); memset(prog, 0, sizeof prog);
+  P10_ScriptCtx = ctx; S_00D12410 = &fl;
+  p48_put16(prog + 2, 0x1234); p48_put32(prog + 4, 11); p48_put32(prog + 8, 22); p48_put32(prog + 12, 33);
+  P10_ScriptPtr = prog; fl = 0; p48_put16(ctx + 0x48, 0xffff);
+  CK(P48_OpSet3() == 1 && P10_ScriptPtr == prog + 16 && p48_get16(ctx + 0x4a) == 0x1234 && p48_get32(ctx) == 11 && p48_get32(ctx + 4) == 22 && p48_get32(ctx + 8) == 33 && p48_get16(ctx + 0x48) == 4);
+  p48_put16(ctx + 0x4a, 7); fl = 0x10; P10_ScriptPtr = prog; P48_OpSet3(); CK(p48_get16(ctx + 0x4a) == 7);
+  p48_put32(prog + 2, 5); p48_put32(prog + 6, 6); p48_put32(prog + 10, 7); p48_put32(prog + 14, 8);
+  P10_ScriptPtr = prog; CK(P48_OpSet4() == 1 && P10_ScriptPtr == prog + 18 && p48_get32(ctx + 0x44) == 5 && p48_get32(ctx + 0x28) == 6 && p48_get32(ctx + 0x2c) == 7 && p48_get32(ctx + 0x30) == 8);
+  /* спуск к пределу: 10 - 4 = 6 > 5 — не достигли, указатель назад */
+  p48_putf(prog + 2, 5.0f); p48_putf(prog + 6, 4.0f); p48_putf(ctx + 0x44, 10.0f); p48_put16(ctx + 0x48, 0);
+  P10_ScriptPtr = prog; CK(P48_OpRampDown() == 0 && P10_ScriptPtr == prog && p48_getf(ctx + 0x44) == 6.0f && (p48_get16(ctx + 0x48) & 0x40));
+  CK(P48_OpRampDown() == 1 && P10_ScriptPtr == prog + 10 && p48_getf(ctx + 0x44) == 5.0f);   /* 6-4=2 <= 5 -> предел */
+  p48_putf(prog + 2, 5.0f); p48_putf(prog + 6, 1.0f); p48_putf(ctx + 0x44, 1.0f);
+  P10_ScriptPtr = prog; CK(P48_OpRampUp() == 0 && P10_ScriptPtr == prog && p48_getf(ctx + 0x44) == 2.0f);
+  p48_putf(ctx + 0x44, 4.5f); CK(P48_OpRampUp() == 1 && P10_ScriptPtr == prog + 10 && p48_getf(ctx + 0x44) == 5.0f);
+  /* флаги */
+  p48_put16(prog + 2, 1); p48_put16(prog + 4, 1); p48_put16(ctx + 0x48, 0x0001); P10_ScriptPtr = prog;
+  CK(P48_OpFlags() == 1 && P10_ScriptPtr == prog + 6 && p48_get16(ctx + 0x48) == 0x21);
+  p48_put16(prog + 4, 0); P10_ScriptPtr = prog; P48_OpFlags(); CK(p48_get16(ctx + 0x48) == 0x01);
+  p48_put16(prog + 2, 2); p48_put16(prog + 4, 0x55); P10_ScriptPtr = prog; P48_OpFlags(); CK(p48_get16(ctx + 0x40) == 0x55);
+  p48_put16(prog + 2, 3); p48_put16(ctx + 0x40, 9); P10_ScriptPtr = prog; P48_OpFlags(); CK(p48_get16(ctx + 0x40) == 9 && P10_ScriptPtr == prog + 6);
+  /* повтор: [2]=3 (старт), [4]=счётчик, [6]=шаг назад */
+  memset(prog, 0, sizeof prog); p48_put16(prog + 2, 3); p48_put16(prog + 4, 0); p48_put16(prog + 6, 6);
+  P10_ScriptPtr = prog + 20; p48_put16(prog + 22, 3); p48_put16(prog + 24, 0); p48_put16(prog + 26, 8);
+  CK(P48_OpRepeat() == 1 && p48_get16(prog + 24) == 3 && P10_ScriptPtr == prog + 28);  /* счётчик был 0 — взведён */
+  P10_ScriptPtr = prog + 20; CK(P48_OpRepeat() == 1 && p48_get16(prog + 24) == 2 && P10_ScriptPtr == prog + 26 - 8);
+  /* поворот */
+  memset(prog, 0, sizeof prog); p48_putf(prog + 2, 3.14159274f); p48_put16(prog + 6, 1);
+  p48_putf(ctx + 0x44, 1.0f); p48_put16(ctx + 0x48, 0); p48_put16(ctx + 0x12, 0);
+  P10_ScriptPtr = prog; /* шаг = 1024 / (pi*pi/2) = 207 */
+  int r = P48_OpTurn();
+  CK(p48_get16(ctx + 0x48) == 0x1c0 && p48_get16(ctx + 0x12) == (uint16_t)(0x400 + 207));
+  CK(r == 0 && P10_ScriptPtr == prog);        /* осталось 0x800 - (0x400+207) = 817 >= 207 */
+  p48_put16(ctx + 0x12, 0x400 + 700); p48_put16(ctx + 0x48, 0x100);
+  r = P48_OpTurn(); CK(r == 1 && P10_ScriptPtr == prog + 8 && p48_get16(ctx + 0x48) == 0x80);
+  return f;
+#undef CK
+}
 static int test_p45(void) {
   int f = 0;
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p45 fail line %d\n",__LINE__); } } while (0)
@@ -1286,7 +1398,7 @@ static int test_p45(void) {
   return f;
 }
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

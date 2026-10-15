@@ -72,3 +72,4 @@
 - v0.86: +7 функций (ported39: Lock/Unlock/GetSurfaceFormat/Present/QueryDD4/QueryD3D/CreateFrontBack), всего 1365
 - v0.87: +4 функции (ported40: память текстур Glide — ResetTexMem/UploadTexSlot/UploadTexSlotPair/DownloadSlotPalette), всего 1369
 | v0.91 | математика ч.2 (ported44) + меню (ported45), native-линковка перенесённых функций; всего 1571 |
+| v0.94 | звуковые слоты и мастер-громкость, запуск/остановка подсистем, 7 операций скрипта (ported48); всего 1638 |

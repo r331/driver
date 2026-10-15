@@ -5,5 +5,5 @@ set -e; cd "$(dirname "$0")"
 case "${1:-native}" in
 native) cmake -S . -B build-native -DCMAKE_BUILD_TYPE=Release && cmake --build build-native -j && (cd build-native && ctest --output-on-failure) ;;
 hook)   mkdir -p build && i686-w64-mingw32-gcc -std=c11 -O1 -Wall -DRE_HOOK_BUILD -shared -static-libgcc \
-          -o build/DINPUT.dll game/*.c platform/win32/*.c -Wl,--kill-at -Wl,--enable-stdcall-fixup -lwinmm -lgdi32 -luser32 -lddraw && echo "OK: build/DINPUT.dll" ;;
+          -o build/DINPUT.dll game/*.c platform/win32/*.c -Wl,--kill-at -Wl,--enable-stdcall-fixup -lwinmm -lgdi32 -luser32 -lddraw -lole32 && echo "OK: build/DINPUT.dll" ;;
 esac

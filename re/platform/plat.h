@@ -19,6 +19,9 @@ int  plat_screensaver_get(void);              /* SystemParametersInfo(SPI_GETSCR
 void plat_screensaver_set(int on);            /* SPI_SETSCREENSAVEACTIVE */
 void plat_set_crash_handler(void (*fn)(void)); /* SetUnhandledExceptionFilter: fn вызывается при аварии, потом процесс завершается; NULL — снять */
 void (*plat_crash_handler(void))(void);       /* текущий обработчик (тесты) */
+int  plat_com_init(void);                     /* CoInitialize(NULL): число активных вызовов (SDL: счётчик, hook: WinAPI) */
+void plat_com_uninit(void);                   /* CoUninitialize */
+int  plat_com_count(void);                    /* init минус uninit (тесты; hook: 0) */
 void plat_log(const char *fmt, ...);
 void *plat_file_open(const char *path, const char *mode); /* case-insensitive lookup */
 /* --- window & input --- */

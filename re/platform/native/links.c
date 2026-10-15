@@ -36,6 +36,7 @@
 #include "../../game/ported45.h"
 #include "../../game/ported46.h"
 #include "../../game/ported47.h"
+#include "../../game/ported48.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -66,18 +67,22 @@ void Call0040CCB4 (uint32_t a0, uint32_t a1) { P45_Wait(a0, a1); }
 int32_t R12_405F2E (int32_t a0) { return (int32_t)P47_PrepareTemp(a0); }
 void Call004122C4 (void) { GlobalSet004122C4(); }
 void Call004126DF (void) { GlobalSet004126DF(); }
+void Call00523595 (void) { P48_SndShutdown(); }
 void Call0052360D (int32_t a0) { SoundSetVolB0052360D(a0); }
 void Call004184DE (uint32_t a0) { Ui004184DE(a0); }
 void Call004086B4 (void) { StartTimer004086B4(); }
 void Call004086EA (void) { StopTimer4086EA(); }
+int32_t R12_4D97E9 (void) { return (int32_t)P48_AnyKey(); }
 void Call00424921 (int32_t a0, int32_t a1, uint32_t a2, int32_t a3) { P47_TexTable(a0, a1, a2, a3); }
 void Call0048A68E (int32_t a0) { Dispatch0048A68E(a0); }
 void Call004B9D79 (void) { P16_StepParticles(); }
 void Call004D6190 (int32_t a0) { SetFirstFree_004D6190(a0); }
 void Call004E3391 (void) { P36_PollInput(); }
+void Call0052369B (int32_t a0) { P48_SndPause(a0); }
 void Call00524873 (void) { P25_CDStop(); }
 void Call00524763 (void) { P25_CDClose(); }
 void Call0048B65D (void) { P38_FmvStop(); }
+void Call005237B1 (void) { P48_StopAll(); }
 void Call0052436A (void) { InitChannels_0052436A(); }
 void Call0052479E (int32_t a0) { P25_PlayCDTrack(a0); }
 int32_t Call0042655A (int32_t a0) { return (int32_t)DrvSetMode0042655A(a0); }
@@ -119,6 +124,7 @@ void P4Call00415979 (void) { MenuWhite00415979(); }
 void G6Call004064B4 (int32_t a0, int32_t a1) { P13_Fn004064B4(a0, a1); }
 void G6Call004D5FFC (void) { Chain004D5FFC(); }
 void G6Call00524398 (void) { P43_CdFadeInit(); }
+void G6Call00523628 (void) { P48_ResetAll(); }
 void G6Call0041A16C (void) { FreeBuffer5FED98(); }
 void G6Call0050E940 (int32_t a0) { SetLatchValue0050E940(a0); }
 void G6Call00418119 (int32_t a0) { Ui00418119(a0); }
@@ -131,6 +137,8 @@ void G6Call00491360 (void) { P12_Fn00491360(); }
 void Call004D94B7 (uint32_t a0, uint32_t a1) { CursorSet004D94B7(a0, a1); }
 int32_t Call00524473 (int32_t a0) { return (int32_t)IsSlotActive00524473(a0); }
 void Call004C64BD (void) { FreeCameraList(); }
+void Call004D3402 (void) { P48_ShutdownSystems(); }
 void Call004C372A (void) { FreeDirectorBuffer(); }
 void Call0052434A (int32_t a0) { SlotSetOff0052434A(a0); }
+void Call005243EB (void) { P48_FadeEnd(); }
 void SetCameraPosition (float x, float y, float z) { PushVec3_00523C99(x, y, z); }

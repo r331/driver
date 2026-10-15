@@ -1,6 +1,7 @@
 /* hook-вариант plat: система через WinAPI (только в DLL-сборке) */
 #include "../plat.h"
 #include <windows.h>
+#include <objbase.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
@@ -65,3 +66,7 @@ void *plat_dll_proc(void *mod, const char *name){ return (void*)GetProcAddress((
 void plat_win_trap(int on){ (void)on; }
 int plat_win_state(int *a,int *b,int *c,int *d,int *e,int *f,const char **g,plat_wndproc *h){ (void)a;(void)b;(void)c;(void)d;(void)e;(void)f;(void)g;(void)h; return 0; }
 void plat_event_close(void *h){ CloseHandle((HANDLE)h); }
+
+int plat_com_init(void){ return (int)CoInitialize(NULL); }
+void plat_com_uninit(void){ CoUninitialize(); }
+int plat_com_count(void){ return 0; }
