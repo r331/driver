@@ -33,3 +33,4 @@
 - 2026-10-14 19:15: шаг B (часть): plat_local_hms (GetLocalTime) в sdl и win32; native+hook собраны, ctest ок. Следующий: перенос обёртки 004d986e (часы) и timeGetTime-тонков, GL-бэкенд, SDL_audio.
 - 2026-10-14 19:20: шаг C: перенесена 004d986e (P21_DrawClock, над plat_local_hms), хук в install.c; native+hook собраны, ctest ок. Следующий: thunk 0040155f, timeGetTime-обёртки, GL-бэкенд.
 - 2026-10-14 19:35: шаг C: перенесена 004d53e8 (P21_DrawFps, FPS-счётчик над plat_time_ms), хук; native+hook собраны, ctest ок. Следующий: 004d78f3/004bf910 (timeGetTime), GL-бэкенд, SDL_audio.
+- 2026-10-14 19:45: шаг C: перенесена 004d78f3 (P21_FrameTicks, 20мс тики кадра над plat_time_ms), хук; native+hook собраны, ctest ок. Следующий: 004bf910 (FPS в буфер), GL-бэкенд, SDL_audio.

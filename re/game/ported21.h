@@ -43,3 +43,13 @@ void P21_DrawClock(void); /* 004d986e: HH:MM:SS clock, uses plat_local_hms */
 extern uint32_t P21_FpsLast, P21_FpsVal; extern int32_t P21_FpsCnt;
 #endif
 void P21_DrawFps(void); /* 004d53e8: FPS counter text (plat_time_ms) */
+#define P21_FrameFlagA  GAME_VAR(int32_t, P21_FrameFlagA, 0x00575f38)
+#define P21_FrameFlagB  GAME_VAR(int32_t, P21_FrameFlagB, 0x00575f34)
+#define P21_FrameMin    GAME_VAR(int32_t, P21_FrameMin, 0x00575eec)
+#define P21_FrameBase   GAME_VAR(uint32_t, P21_FrameBase, 0x00b2c3a0)
+#define P21_FrameTotal  GAME_VAR(int32_t, P21_FrameTotal, 0x00b87e78)
+#ifndef RE_HOOK_BUILD
+extern int32_t P21_FrameFlagA, P21_FrameFlagB, P21_FrameMin, P21_FrameTotal;
+extern uint32_t P21_FrameBase;
+#endif
+uint32_t P21_FrameTicks(void); /* 004d78f3: 20ms frame ticks, capped at 10 */

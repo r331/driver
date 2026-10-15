@@ -104,3 +104,23 @@ void P21_DrawFps(void) {
   Call004D94B7(0, (uint32_t)y);
   Call004D90F4((int32_t)(intptr_t)buf);
 }
+
+GAME_VAR_DEF(int32_t, P21_FrameFlagA, 0x00575f38)
+GAME_VAR_DEF(int32_t, P21_FrameFlagB, 0x00575f34)
+GAME_VAR_DEF(int32_t, P21_FrameMin, 0x00575eec)
+GAME_VAR_DEF(uint32_t, P21_FrameBase, 0x00b2c3a0)
+GAME_VAR_DEF(int32_t, P21_FrameTotal, 0x00b87e78)
+uint32_t P21_FrameTicks(void) {
+  uint32_t n = 0, r;
+  Call00522323();
+  if (P21_FrameFlagA == 0) {
+    if (P21_FrameFlagB == 0) { P21_FrameTotal++; return 1; }
+    while (n < (uint32_t)P21_FrameMin) n = (plat_time_ms() - P21_FrameBase) / 20;
+  } else {
+    while (n == 0) n = (plat_time_ms() - P21_FrameBase) / 20;
+  }
+  P21_FrameBase += n * 20;
+  r = n < 11 ? n : 10;
+  P21_FrameTotal += (int32_t)r;
+  return r;
+}

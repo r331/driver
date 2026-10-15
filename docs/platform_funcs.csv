@@ -132,7 +132,7 @@ address,name,layer,imports,callers,status
 004c875d,SetDirectorMode,system,timeGetTime,,named
 004d322c,FUN_004d322c,system,GetDriveTypeA,,todo
 004d53e8,FUN_004d53e8,system,timeGetTime,,ported
-004d78f3,FUN_004d78f3,system,timeGetTime,,todo
+004d78f3,FUN_004d78f3,system,timeGetTime,,ported
 004d7b73,FUN_004d7b73,system,MessageBoxA,,todo
 004d8c80,FUN_004d8c80,system,MessageBoxA,,todo
 004d986e,FUN_004d986e,system,GetLocalTime,,ported

@@ -2590,7 +2590,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d6ef2,FUN_004d6ef2,,,,,,282,todo
 004d74e0,FUN_004d74e0,,,,,,646,todo
 004d7766,FUN_004d7766,,,,,,397,todo
-004d78f3,FUN_004d78f3,,,,,,302,todo
+004d78f3,FUN_004d78f3,P21_FrameTicks,manual,,,,302,ported
 004d7a21,FUN_004d7a21,,,,,,277,todo
 004d7b36,FUN_004d7b36,RingAdvance004D7B36,manual,SmallFuncs,,,42,ported
 004d7b60,FUN_004d7b60,PlayTrack004D7B60,manual,Menu,,,19,ported
