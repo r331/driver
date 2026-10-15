@@ -118,7 +118,7 @@ address,name,layer,imports,callers,status
 004026b2,thunk_FUN_005281e1,system,timeEndPeriod,,ported
 004026df,thunk_FUN_004a5ac3,system,MessageBoxA,,ported
 00402757,thunk_FUN_004e31d5,system,CloseHandle,,todo
-004027a2,thunk_FUN_004bfc30,system,MessageBoxA,,todo
+004027a2,thunk_FUN_004bfc30,system,MessageBoxA,,ported
 00402851,thunk_FUN_005281b0,system,timeBeginPeriod,,ported
 00420b19,FUN_00420b19,system,MessageBoxA;DirectDrawCreate,,todo
 00424c40,FUN_00424c40,system,GetProcAddress,,todo
@@ -127,7 +127,7 @@ address,name,layer,imports,callers,status
 004a5ac3,FUN_004a5ac3,system,MessageBoxA,,ported
 004bf35d,FUN_004bf35d,system,GetSystemTime,,ported
 004bf910,FUN_004bf910,system,timeGetTime,,ported
-004bfc30,FUN_004bfc30,system,MessageBoxA,,todo
+004bfc30,FUN_004bfc30,system,MessageBoxA,,ported
 004c17ae,FUN_004c17ae,system,MessageBoxA,,ported
 004c875d,SetDirectorMode,system,timeGetTime,,named
 004d322c,FUN_004d322c,system,GetDriveTypeA,,ported

@@ -233,6 +233,13 @@
     V(Call004C1B6C, 0x004c1b6c, (int32_t a0), (a0)) \
     R(int32_t, Call004EC91E, 0x004ec91e, (const char* a0), (a0)) \
     V(SetDirectorMode_004C875D, 0x004c875d, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
+    V(Call004C2042, 0x004c2042, (void), ()) \
+    V(Call004C0218, 0x004c0218, (int32_t a0), (a0)) \
+    R(int32_t, Call00475A3D, 0x00475a3d, (void *src, void *dst), (src, dst)) \
+    V(Call00427757, 0x00427757, (void *m), (m)) \
+    V(Call0042793F, 0x0042793f, (void *m, int32_t a1), (m, a1)) \
+    V(Call004757D2, 0x004757d2, (void *m), (m)) \
+    V(Call00475906, 0x00475906, (void *m), (m)) \
     V(SetCameraPosition, 0x00523c99, (float x, float y, float z), (x, y, z))
 
 #ifdef RE_HOOK_BUILD

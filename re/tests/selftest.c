@@ -30,6 +30,7 @@
 #include "../game/ported25.h"
 #include "../game/ported26.h"
 #include "../game/ported27.h"
+#include "../game/ported28.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -585,6 +586,28 @@ static int test_p27(void) {
   if (D_00d17ec8 == NULL) f++;
   return f;
 }
+static int test_p28(void) {
+  int f = 0;
+  /* события: старые записи освобождаются, файл с нулевым числом моделей */
+  FILE *tf = tmpfile(); if (!tf) return 1;
+  int32_t zero = 0; fwrite(&zero, 4, 1, tf); rewind(tf);
+  P28_EventCount = 2; P28_EventModels[0] = DebugMalloc(16, "t", 1); P28_EventModels[1] = NULL;
+  P27_ReadBytes = 0; P27_ReadLimit = 0x7fffffff; P27_ProgressOn = 0;
+  P28_LoadEventModels(tf);
+  if (P28_EventCount != 0 || P28_EventModels[0] != NULL) f++;
+  fclose(tf);
+  /* машины: имена не найдены -> сообщения «ERROR IN _LEVEL_ DATA», блоки таблиц копируются */
+  const char *tx, *ti; int n0 = plat_message_box_last(&tx, &ti);
+  S_00D1192C = 2; P28_BadGuyFlag = 1;
+  for (int i = 0; i < 6 * 0x50; i++) P28_Src1[2 * 0x1e0 + i] = (uint8_t)(i + 1);
+  for (int i = 0; i < 0x170; i++) P28_Src2[2 * 0x170 + i] = (uint8_t)(i * 3);
+  P28_LoadCarModels();
+  int n1 = plat_message_box_last(&tx, &ti);
+  if (n1 <= n0) f++;
+  if (P28_Dst1[0x50 * 5 + 7] != (uint8_t)(0x50 * 5 + 7 + 1) || P28_Dst2[100] != (uint8_t)(300)) f++;
+  if (P28_CarClean[0] != 0 || P28_CarLow[0] != P28_CarClean[0] || P28_CarOpsSize[3] != 0) f++;
+  return f;
+}
 static int test_p26(void) {
   int f = 0;
   P26_WaveSetVolume(0x8000); if (plat_wave_volume() != 0x80008000u) f++;
@@ -606,7 +629,7 @@ static int test_p26(void) {
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

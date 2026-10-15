@@ -2367,7 +2367,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004bf4a1,FUN_004bf4a1,,,,,,150,todo
 004bf8a1,FUN_004bf8a1,ClearEntry_004BF8A1,manual,Misc,,,111,ported
 004bf910,P21_FpsToBuf,manual,,,,,369,ported
-004bfc30,FUN_004bfc30,,,,,,1502,todo
+004bfc30,FUN_004bfc30,LoadCarModels,manual,map,,,1502,ported
 004c020e,FUN_004c020e,Call004C020E,manual,UIMisc,,,10,ported
 004c0218,FUN_004c0218,,,,,,274,todo
 004c032a,FUN_004c032a,,,,,,1425,todo
@@ -2741,7 +2741,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004ec4ce,FUN_004ec4ce,,,map,assert,,84,todo
 004ec522,FUN_004ec522,ReadTable_004EC522,manual,map,range,,52,ported
 004ec556,FUN_004ec556,ReadTable_004EC556,manual,map,range,,52,ported
-004ec58a,FUN_004ec58a,,,map,assert,,546,todo
+004ec58a,FUN_004ec58a,LoadEventModels,manual,map,assert,,546,ported
 004ec7ac,FUN_004ec7ac,,,map,assert,,72,todo
 004ec7f4,FUN_004ec7f4,,,map,assert,,67,todo
 004ec837,FUN_004ec837,P20_FindNameNoCase,manual,ported20,range,,113,ported
