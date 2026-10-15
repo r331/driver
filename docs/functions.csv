@@ -386,7 +386,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401960,thunk_FUN_004c6264,Thunk_004C6264,manual,Thunks,,,5,ported
 00401965,thunk_FUN_0048ba20,,,,,,5,todo
 0040196a,thunk_FUN_004d9013,Thunk_004D9013,manual,Thunks,,,5,ported
-00401979,thunk_FUN_0042a423,,,,,,5,todo
+00401979,thunk_FUN_0042a423,,,,,,5,ported
 00401983,thunk_FUN_004b3ddb,,,,,,5,ported
 00401988,thunk_FUN_00528688,,,,,,5,ported
 0040198d,thunk_FUN_004f638d,,,,,,5,todo
@@ -1982,7 +1982,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00428b69,FUN_00428b69,DrawModel,manual,render,,,1498,ported
 00429143,FUN_00429143,DrawModelIdx,manual,render,,,1771,ported
 0042982e,FUN_0042982e,,,,,,1442,todo
-0042a423,FUN_0042a423,,,,,,443,todo
+0042a423,FUN_0042a423,P90_DrawSingle,manual,render,,,443,ported
 0042a5de,FUN_0042a5de,,,,,,1043,todo
 0042a9f1,FUN_0042a9f1,,,,,,3546,todo
 0042b7cb,FUN_0042b7cb,,,,,,1468,todo

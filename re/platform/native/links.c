@@ -78,6 +78,7 @@
 #include "../../game/ported87.h"
 #include "../../game/ported88.h"
 #include "../../game/ported89.h"
+#include "../../game/ported90.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -130,6 +131,7 @@ void P57_Fn51CAA7 (void *f) { P76_LoadHsTables(f); }
 void P57_Fn51CB98 (void *f) { P62_SaveScores(f); }
 void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
+void P87_Fn42A423 (uint32_t m, int32_t idx, float *pos, int32_t mode) { P90_DrawSingle(m, idx, pos, mode); }
 void P55_Fn4ED5F8 (int32_t a0, int32_t a1) { P87_LoadTile(a0, a1); }
 void P55_Fn4EDAA2 (void) { P88_StreamTiles(); }
 int32_t P55_Fn405E79 (int32_t a0, void *a1) { return (int32_t)P58_SaveSlot(a0, a1); }
