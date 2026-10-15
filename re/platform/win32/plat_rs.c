@@ -142,6 +142,8 @@ int32_t plat_di_set_format(void *d, int kind) {
 }
 int32_t plat_di_acquire(void *d) { return ((dd_f0)VT(d, 0x1c))(d); }
 int32_t plat_di_get_state(void *d, uint32_t size, void *buf) { return ((dd_f2)VT(d, 0x24))(d, (void *)(uintptr_t)size, buf); }
+int32_t plat_di_poll(void *d) { return ((dd_f0)VT(d, 0x64))(d); }
+void plat_di_stub_joy(int32_t x, int32_t y, int32_t rc) { (void)x; (void)y; (void)rc; }
 int plat_di_stub_counts(int *r, int *u, int *e, int *k) { *r = *u = *e = *k = 0; return 0; }
 void plat_di_stub_fail_state(int on) { (void)on; }
 

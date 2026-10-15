@@ -38,6 +38,7 @@
 #include "../game/ported32.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
+#include "../game/ported36.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -794,6 +795,45 @@ static int test_p34(void) {
   plat_di_stub_fail_state(0); P34_Kbd = NULL;
   return f;
 }
+static int test_p36(void) {
+  int f = 0; static int dev[4]; uint32_t m;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p36 fail line %d\n",__LINE__); } } while (0)
+  P34_Kbd = &dev[0]; P34_Mouse = &dev[1]; P34_Joy = &dev[2];
+  CK(P36_AcquireDevice(0) == 1 && P36_AcquireDevice(1) == 1 && P36_AcquireDevice(2) == 1 && P36_AcquireDevice(3) == 0);
+  P34_Mouse = NULL; CK(P36_AcquireDevice(1) == 0); P34_Mouse = &dev[1];
+  /* выбор джойстика */
+  P36_JoyCount = 2; P36_JoyAxisCap[1] = 77; P36_JoyAux[1] = 88; P34_EffC[1] = &dev[3]; P34_EffA[1] = &dev[1]; P34_EffB[1] = &dev[2];
+  CK(P36_SelectJoystick(1) == 1 && P34_Reg24 == 1 && P36_JoyFlag == 77 && Q00B31E2C == 88 && P34_Joy == &dev[3] && P34_FfA == &dev[1] && P34_FfB == &dev[2] && G00B31E18 == 1);
+  CK(P36_SelectJoystick(2) == 0 && P34_Reg24 == 0 && P34_Joy == NULL && P34_FfA == NULL && P36_JoyFlag == 0 && G00B31E18 == 0);
+  CK(P36_SelectJoystick(-1) == 0);
+  P34_EffC[1] = NULL; P34_EffA[1] = NULL; P34_EffB[1] = NULL; P36_JoyCount = 0;
+  /* кнопки геймпада */
+  memset(P34_Keys, 0, 0x100); P36_KeyCfg[4] = 0x10; P36_KeyCfg[7] = 0x11; P36_KeyCfg[15] = 0x12;
+  P36_Pad0 = 1; P36_Pad5 = 1; P36_PadMode = 0; P34_Keys[0x10] = 0x80; P34_Keys[0x11] = 1; P34_Keys[0x12] = 0x80;
+  m = 0xffff; P36_GetPadButtons(&m); CK(m == (8 | 1 | 0x100) && P36_Pad0 == 0 && P36_Pad5 == 0);
+  P36_PadMode = 2; m = 0xffff; P36_GetPadButtons(&m); CK(m == 0);
+  P36_PadMode = 0;
+  /* опрос ввода */
+  P31_Active = 0; CK(P36_PollInput() == 0);
+  P31_Active = 1; P35_InputMode = 0; P36_JoyX = 9; P21_AxisValue = 9; P36_PrevFlag = 5; P34_Kbd = &dev[0];
+  CK(P36_PollInput() == 1 && P36_JoyX == 0 && P21_AxisValue == 0 && P36_PrevFlag == 0);
+  P35_InputMode = 1; CK(P36_PollInput() == 0);
+  P35_InputMode = 2; P36_JoyPresent = 0; CK(P36_PollInput() == 0 && P35_InputMode == 0);
+  P35_InputMode = 2; P36_JoyPresent = 1; P34_Joy = &dev[2]; Q00B87EF0 = 0;
+  G6_00B87EFC = 0; P36_PadMode = 2; CK(P36_PollInput() == 1);   /* меню геймпада: ничего не читаем */
+  P36_PadMode = 0; memset(P34_Keys, 0, 0x100);
+  P36_KeyCfg[4] = 0x20; P36_KeyCfg[5] = 0x21; P36_KeyCfg[8] = 0x22; P36_JoyFlag = 1; P36_JoyState[0] = 0;
+  plat_di_stub_joy(-100, 0, 0); CK(P36_PollInput() == 1 && P36_JoyX == -100 && P34_Keys[0x20] == 0x80 && P34_Keys[0x21] == 0 && P34_Keys[0x22] == 0x80 && P36_PrevFlag == 1);
+  plat_di_stub_joy(20, 0, 1); CK(P36_PollInput() == 1 && P36_PrevJoyX == -100 && P34_Keys[0x20] == 0 && P34_Keys[0x21] == 0x80);   /* Poll=1 тоже успех */
+  plat_di_stub_joy(0, 0, -1); CK(P36_PollInput() == 0);
+  plat_di_stub_joy(0, 0, 0); plat_di_stub_fail_state(1); CK(P36_PollInput() == 0); plat_di_stub_fail_state(0);
+  /* режим меню (b87efc != 0) — стрелки */
+  G6_00B87EFC = 1; Q00B87F00 = 0; memset(P34_Keys, 0, 0x100); plat_di_stub_joy(-50, 30, 0);
+  CK(P36_PollInput() == 1 && P34_Keys[0xcb] == 0x80 && P34_Keys[0xcd] == 0 && P34_Keys[0xd0] == 0x80 && P34_Keys[0xc8] == 0);
+  G6_00B87EFC = 0; plat_di_stub_joy(0, 0, 0); P35_InputMode = 0; P34_Kbd = NULL; P34_Joy = NULL; P36_JoyFlag = 0;
+#undef CK
+  return f;
+}
 static int test_p35(void) {
   int f = 0, c, ck, s, sk; int32_t dx, dy, mag;
   static int dev;
@@ -834,7 +874,7 @@ static int test_p35(void) {
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

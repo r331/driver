@@ -2654,8 +2654,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004e12e4,FUN_004e12e4,P16_IdleTimer,manual,ported16,,,149,ported
 004e2ee0,FUN_004e2ee0,,,,,,757,todo
 004e31d5,FUN_004e31d5,ReleaseInput,manual,Input,manual,,444,ported
-004e3391,FUN_004e3391,,,,,,984,todo
-004e3769,FUN_004e3769,,,,,,199,todo
+004e3391,FUN_004e3391,P36_PollInput,manual,Input,,,984,ported
+004e3769,FUN_004e3769,P36_SelectJoystick,manual,Input,,,199,ported
 004e3830,FUN_004e3830,GetB31E18,manual,UIMisc,,,10,ported
 004e383a,FUN_004e383a,IsFlagSetNotMasked_004E383A,manual,Ported8,,,55,ported
 004e3871,FUN_004e3871,AnyKeyHeld_004E3871,manual,Misc,,,67,ported
@@ -2664,12 +2664,12 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004e38fe,FUN_004e38fe,GlobalSet004E38FE,manual,GlobalSets,,,19,ported
 004e3911,FUN_004e3911,GlobalSet004E3911,manual,GlobalSets,,,19,ported
 004e3924,FUN_004e3924,IsButtonActive,manual,ported9,,,136,ported
-004e39ac,FUN_004e39ac,,,,,,365,todo
+004e39ac,FUN_004e39ac,P36_GetPadButtons,manual,Input,,,365,ported
 004e3b19,FUN_004e3b19,ReturnZero004E3B19,manual,SmallFuncs,,,7,ported
 004e3b20,FUN_004e3b20,SetB31E00,manual,UIMisc,,,28,ported
 004e3b3c,FUN_004e3b3c,P35_UpdateForce,manual,Input,,,419,ported
 004e3cdf,FUN_004e3cdf,,,,,,799,todo
-004e3ffe,FUN_004e3ffe,,,,,,120,todo
+004e3ffe,FUN_004e3ffe,P36_AcquireDevice,manual,Input,,,120,ported
 004e4076,FUN_004e4076,DIReAcquire,manual,Input,manual,,265,ported
 004e417f,FUN_004e417f,ReadKeyboard,manual,Input,manual,,86,ported
 004e41d5,FUN_004e41d5,P35_CreateEffectA,manual,Input,,,198,ported

@@ -24,6 +24,7 @@
 #include "../../game/ported32.h"
 #include "../../game/ported34.h"
 #include "../../game/ported35.h"
+#include "../../game/ported36.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1218,4 +1219,8 @@ void re_install_all(void) {
     re_hook(0x004e429b, (void*)P35_CreateEffectB, "P35_CreateEffectB");
     re_hook(0x004e3b3c, (void*)P35_UpdateForce, "P35_UpdateForce");
     re_hook(0x00420b19, (void*)P35_GetDirectDrawInterface, "P35_GetDirectDrawInterface");
+    re_hook(0x004e3ffe, (void*)P36_AcquireDevice, "P36_AcquireDevice");
+    re_hook(0x004e3769, (void*)P36_SelectJoystick, "P36_SelectJoystick");
+    re_hook(0x004e39ac, (void*)P36_GetPadButtons, "P36_GetPadButtons");
+    re_hook(0x004e3391, (void*)P36_PollInput, "P36_PollInput");
 }

@@ -140,6 +140,8 @@ void    plat_di_unacquire(void *dev);                  /* IDirectInputDevice::Un
 int32_t plat_di_set_format(void *dev, int kind);       /* SetDataFormat; 0 — успех */
 int32_t plat_di_acquire(void *dev);                    /* Acquire; 0 — успех */
 int32_t plat_di_get_state(void *dev, uint32_t size, void *buf); /* GetDeviceState; 0 — успех */
+int32_t plat_di_poll(void *dev);                       /* IDirectInputDevice2::Poll; 0 или 1 (DI_NOEFFECT) — успех */
+void    plat_di_stub_joy(int32_t x, int32_t y, int32_t poll_rc); /* тест (SDL): что вернёт джойстик (lX, lY) и Poll */
 void    plat_event_close(void *h);                     /* CloseHandle события */
 int     plat_di_stub_counts(int *releases, int *unacquires, int *events_closed, int *last_kind); /* для тестов (SDL: счётчики, hook: нули) */
 void    plat_di_stub_fail_state(int on);               /* тест: GetDeviceState возвращает ошибку */
