@@ -62,6 +62,7 @@
 #include "../../game/ported71.h"
 #include "../../game/ported72.h"
 #include "../../game/ported73.h"
+#include "../../game/ported74.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1652,6 +1653,16 @@ void re_install_all(void) {
     re_hook(0x0051b566, (void*)P72_RoadDword, "P72_RoadDword");
     re_hook(0x0051b65a, (void*)P72_RoadLookup, "P72_RoadLookup");
     re_hook(0x005173d7, (void*)P73_Text, "P73_Text");
+    re_hook(0x00493ece, (void*)P74_FreeTraffic, "P74_FreeTraffic");
+    re_hook(0x004ffad8, (void*)P74_ShiftRows, "P74_ShiftRows");
+    re_hook(0x005186ce, (void*)P74_ResetHud, "P74_ResetHud");
+    re_hook(0x004229fa, (void*)P74_Conv8to16, "P74_Conv8to16");
+    re_hook(0x00424530, (void*)P74_DevSelect, "P74_DevSelect");
+    re_hook(0x004a7f0e, (void*)P74_Dist, "P74_Dist");
+    re_hook(0x004a4f7d, (void*)P74_ParseFloat, "P74_ParseFloat");
+    re_hook(0x004a5afb, (void*)P74_ParseShorts, "P74_ParseShorts");
+    re_hook(0x0051d440, (void*)P74_SkidInit, "P74_SkidInit");
+    re_hook(0x0040efd5, (void*)P74_KeyScan, "P74_KeyScan");
     re_hook(0x0051bf82, (void*)P73_RoadSides, "P73_RoadSides");
     re_hook(0x00511e60, (void*)P73_ParticlesReset, "P73_ParticlesReset");
     re_hook(0x0049f031, (void*)P73_CatmullRom, "P73_CatmullRom");

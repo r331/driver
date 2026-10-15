@@ -376,7 +376,11 @@
     V(P58_Fn506C96, 0x00506c96, (void *a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5), (a0, a1, a2, a3, a4, a5)) \
     V(P58_Fn40CFDF, 0x0040cfdf, (int32_t x, int32_t y, uint32_t tbl, const char *name, int32_t a4), (x, y, tbl, name, a4)) \
     V(P58_Fn406875, 0x00406875, (void *a0), (a0)) \
-    V(P58_Fn413E37, 0x00413e37, (void), ())
+    V(P58_Fn413E37, 0x00413e37, (void), ()) \
+    V(P74_Fn41CE90, 0x0041ce90, (void), ()) \
+    V(P74_Fn424B70, 0x00424b70, (void), ()) \
+    R(int32_t, P74_Fn41CEDE, 0x0041cede, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
+    V(P74_Fn4A4D84, 0x004a4d84, (char **pp, int32_t a, int32_t b), (pp, a, b))
 
 #ifdef RE_HOOK_BUILD
 #  define UNPORTED_V(name, addr, params, args) \

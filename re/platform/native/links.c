@@ -62,6 +62,7 @@
 #include "../../game/ported71.h"
 #include "../../game/ported72.h"
 #include "../../game/ported73.h"
+#include "../../game/ported74.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -116,8 +117,10 @@ int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); 
 int32_t P55_Fn405E79 (int32_t a0, void *a1) { return (int32_t)P58_SaveSlot(a0, a1); }
 int32_t P55_Fn405FDB (int32_t a0, void *a1) { return (int32_t)P59_ReplayCheck(a0, a1); }
 void P55_Fn5248CD (void) { P25_CDResume(); }
+void P55_Fn424530 (int32_t a0, int32_t a1, int32_t a2) { P74_DevSelect(a0, a1, a2); }
 int32_t P55_Fn4245E2 (void) { return (int32_t)GetVarB1C0D8(); }
 void P55_Fn4264A7 (void) { Ui004264A7(); }
+int32_t P53_Fn40EFD5 (void) { return (int32_t)P74_KeyScan(); }
 int32_t P53_Fn4045E0 (void) { return (int32_t)P57_Menu4045E0(); }
 void P52_Fn5173D7 (float a0, float a1, int32_t a2, int32_t a3, int32_t a4) { P73_Text(a0, a1, a2, a3, a4); }
 int32_t P52_Fn405F6F (int32_t a0, void *a1) { return (int32_t)P64_ReplayStart(a0, a1); }
@@ -162,6 +165,8 @@ void Call0048A68E (int32_t a0) { Dispatch0048A68E(a0); }
 void Call004B9D79 (void) { P16_StepParticles(); }
 void Call0050F289 (void) { P55_StopAudio(); }
 void Call004D6190 (int32_t a0) { SetFirstFree_004D6190(a0); }
+void Call00493ECE (int32_t a0) { P74_FreeTraffic(a0); }
+void Call005186CE (void) { P74_ResetHud(); }
 void Call004E3391 (void) { P36_PollInput(); }
 void Call0041219E (void) { P55_NamesA(); }
 void Call004125B9 (void) { P55_NamesB(); }
