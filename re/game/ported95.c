@@ -1,6 +1,7 @@
 /* Пачка простых/листовых функций — восстановлено из Game.exe (004d2500, 004d29e1, 00405450, 004e5d64, 004ba57a, 004ba64d, 004ba457,
    004c5f69, 004d6ef2, 004c08bb, 004ab808, 0040b0fe, 00507de2, 0049f418, 0048f6c1, 004d65fa, 00405abe, 00509d27, 004d0f28, 00507310). */
 #include "ported95.h"
+#include "reptr.h"
 #include "director.h"
 #include "globalsets.h"
 #include "menustate.h"
@@ -114,28 +115,9 @@ static int32_t ftol(double v) { return (int32_t)v; }   /* __ftol: усечени
 static int32_t Abs(int32_t v) { return v < 0 ? -v : v; }
 
 /* ---- ссылки списка глубины ---- */
-uint8_t *P95_ObjPtr(uint32_t ref) {
-  if (ref == 0) return NULL;
-#ifdef RE_HOOK_BUILD
-  return (uint8_t *)(uintptr_t)ref;
-#else
-  if (ref >= 0x010f5160u && ref < 0x010f5160u + sizeof P95_ObjA) return P95_ObjA + (ref - 0x010f5160u);
-  if (ref >= 0x0110e500u && ref < 0x0110e500u + sizeof P95_ObjB) return P95_ObjB + (ref - 0x0110e500u);
-  if (ref >= 0x011237c0u && ref < 0x011237c0u + sizeof P95_ObjC) return P95_ObjC + (ref - 0x011237c0u);
-  return NULL;
-#endif
-}
-uint32_t P95_ObjRef(const uint8_t *rec) {
-  if (rec == NULL) return 0;
-#ifdef RE_HOOK_BUILD
-  return (uint32_t)(uintptr_t)rec;
-#else
-  if (rec >= P95_ObjA && rec < P95_ObjA + sizeof P95_ObjA) return 0x010f5160u + (uint32_t)(rec - P95_ObjA);
-  if (rec >= P95_ObjB && rec < P95_ObjB + sizeof P95_ObjB) return 0x0110e500u + (uint32_t)(rec - P95_ObjB);
-  if (rec >= P95_ObjC && rec < P95_ObjC + sizeof P95_ObjC) return 0x011237c0u + (uint32_t)(rec - P95_ObjC);
-  return 0;
-#endif
-}
+/* v1.42: частный случай общего реестра re_ptr/re_addr (game/reptr.c; массивы P95_ObjA/B/C там в статических областях) */
+uint8_t *P95_ObjPtr(uint32_t ref) { return (uint8_t *)re_ptr(ref); }
+uint32_t P95_ObjRef(const uint8_t *rec) { return re_addr(rec); }
 
 /* вставка записи в список 010ffb40 по убыванию z (+zoff): после первого, у которого следующего нет или z не больше */
 static void Insert(uint8_t *p, int zoff) {

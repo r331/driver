@@ -85,6 +85,7 @@
 #include "../../game/ported94.h"
 #include "../../game/ported95.h"
 #include "../../game/ported96.h"
+#include "../../game/ported97.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1828,4 +1829,34 @@ void re_install_all(void) {
     re_hook(0x00513cc7, (void*)P96_PartRunA, "P96_PartRunA");
     re_hook(0x00513ce0, (void*)P96_PartRunB, "P96_PartRunB");
     re_hook(0x0052008e, (void*)P96_ShadowInit, "P96_ShadowInit");
+    re_hook(0x0051c900, (void*)P97_HsInit, "P97_HsInit");
+    re_hook(0x00523cda, (void*)P97_SndStart, "P97_SndStart");
+    re_hook(0x004a681a, (void*)P97_ResetCars, "P97_ResetCars");
+    re_hook(0x005074e5, (void*)P97_MapIcon, "P97_MapIcon");
+    re_hook(0x0048bbd5, (void*)P97_SndDrvInit, "P97_SndDrvInit");
+    re_hook(0x004d9ad4, (void*)P97_LfbSnap, "P97_LfbSnap");
+    re_hook(0x0050bc2b, (void*)P97_MarkCells, "P97_MarkCells");
+    re_hook(0x004f4f10, (void*)P97_ObjsFromScript, "P97_ObjsFromScript");
+    re_hook(0x004cff7e, (void*)P97_ScriptResetCur, "P97_ScriptResetCur");
+    re_hook(0x004cf6b2, (void*)P97_ScriptSave, "P97_ScriptSave");
+    re_hook(0x004cf772, (void*)P97_ScriptLoad, "P97_ScriptLoad");
+    re_hook(0x004d156a, (void*)P97_ScriptOpNext, "P97_ScriptOpNext");
+    re_hook(0x00500090, (void*)P97_ScriptEach, "P97_ScriptEach");
+    re_hook(0x0050f7b2, (void*)P97_SndMenuInit, "P97_SndMenuInit");
+    re_hook(0x0040fc9a, (void*)P97_KeyMenuAInit, "P97_KeyMenuAInit");
+    re_hook(0x00410e89, (void*)P97_KeyMenuBInit, "P97_KeyMenuBInit");
+    re_hook(0x0040ea70, (void*)P97_OptMenuAInit, "P97_OptMenuAInit");
+    re_hook(0x00419b35, (void*)P97_OptMenuBInit, "P97_OptMenuBInit");
+    re_hook(0x0040c8a0, (void*)P97_MenuCall0, "P97_MenuCall0");
+    re_hook(0x004185d2, (void*)P97_MenuCall2, "P97_MenuCall2");
+    re_hook(0x004f58c6, (void*)P97_GoalReached, "P97_GoalReached");
+    re_hook(0x004f57d7, (void*)P97_GoalCops, "P97_GoalCops");
+    re_hook(0x004f5c89, (void*)P97_AddTime, "P97_AddTime");
+    re_hook(0x004d2c95, (void*)P97_CopsSee, "P97_CopsSee");
+    re_hook(0x004c2ab0, (void*)P97_DirKeys, "P97_DirKeys");
+    re_hook(0x00417479, (void*)P97_BlinkAStep, "P97_BlinkAStep");
+    re_hook(0x00417fff, (void*)P97_BlinkBStep, "P97_BlinkBStep");
+    re_hook(0x004afcf7, (void*)P97_SpawnSmoke, "P97_SpawnSmoke");
+    re_hook(0x004ad128, (void*)P97_KickDebris, "P97_KickDebris");
+    re_hook(0x004e5a1a, (void*)P97_FadeIconDraw, "P97_FadeIconDraw");
 }

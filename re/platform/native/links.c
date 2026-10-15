@@ -85,6 +85,7 @@
 #include "../../game/ported94.h"
 #include "../../game/ported95.h"
 #include "../../game/ported96.h"
+#include "../../game/ported97.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -118,6 +119,7 @@ void P60_SetupCamN (int32_t n) { P61_SetupCamN(n); }
 void P60_CamPrepare (void *cam) { P61_CamPrepare(cam); }
 void P60_Fn514261 (void *p) { P61_SpawnPart(p); }
 int32_t P59_Fn417970 (void) { return (int32_t)P67_Menu417970(); }
+void P57_MenuInit (uint32_t tbl, int32_t n) { P97_MenuCall0(tbl, n); }
 void P57_Setup40A41C (void) { Copy54A838(); }
 void P57_Setup40831C (void) { MenuCopyPos(); }
 void P57_Setup41351C (void) { GlobalSet0041351C(); }
@@ -133,9 +135,11 @@ void P57_Setup4122E7 (void) { Ui004122E7(); }
 void P57_Setup412487 (void) { SetupMenuTable00412487(); }
 void P57_Setup41269B (void) { MenuAllRowsTo2_0041269B(); }
 void P57_Setup412702 (void) { Ui00412702(); }
+void P57_Fn51C900 (void) { P97_HsInit(); }
 void P57_Fn51CAA7 (void *f) { P76_LoadHsTables(f); }
 void P57_Fn51CB98 (void *f) { P62_SaveScores(f); }
 void P57_Fn507672 (float *x, float *y) { P94_MapToScreen(x, y); }
+void P56_CallSetVoice (uint32_t a0, int32_t a1, float a2, float a3, float a4) { P97_SndStart(a0, a1, a2, a3, a4); }
 void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
 void P87_Fn42982E (uint32_t m, int32_t idx, float *pos, int32_t mode) { P92_DrawAxis(m, idx, pos, mode); }
@@ -152,6 +156,7 @@ void P55_Fn4264A7 (void) { Ui004264A7(); }
 void N54_Fn4913CC (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4) { P75_TrafficPos(a0, a1, a2, a3, a4); }
 int32_t P53_Fn40EFD5 (void) { return (int32_t)P74_KeyScan(); }
 int32_t P53_Fn4045E0 (void) { return (int32_t)P57_Menu4045E0(); }
+void P52_Fn4E5A1A (void) { P97_FadeIconDraw(); }
 void P52_Fn4AB808 (void) { P95_PoolIconInit(); }
 void P52_Fn4AB95C (void) { P94_IconQuad(); }
 void P52_Fn5173D7 (float a0, float a1, int32_t a2, int32_t a3, int32_t a4) { P73_Text(a0, a1, a2, a3, a4); }
@@ -222,6 +227,8 @@ void Call0048B568 (void) { P50_FmvReleaseObjs(); }
 void Call005237B1 (void) { P48_StopAll(); }
 void Call0052436A (void) { InitChannels_0052436A(); }
 void Call0052479E (int32_t a0) { P25_PlayCDTrack(a0); }
+void Call0040EA70 (void) { P97_OptMenuAInit(); }
+void Call00419B35 (void) { P97_OptMenuBInit(); }
 int32_t Call0042655A (int32_t a0) { return (int32_t)DrvSetMode0042655A(a0); }
 void Call004D611B (int32_t a0) { TryStartTrack_004D611B(a0); }
 void Call004A2C98 (void) { P96_DropFarChairs(); }
@@ -261,6 +268,7 @@ void DrawSprite (int x, int y, uint32_t tex, int a, int b, int c, int d, int e) 
 int IsKeyDown (int sc) { return (int)IsFlagSetNotMasked_004E383A(sc); }
 void Call00411A9D (void) { MenuHiliteWhite00411A9D(); }
 void Call0041AFCA (void) { P55_NamesC(); }
+void Call0050F7B2 (void) { P97_SndMenuInit(); }
 void P4Call004A3354 (void) { P58_FreeGrid(); }
 void P4Call0041A8CD (void) { P12_Fn0041A8CD(); }
 void P4Call0051AA5B (void) { P54_AllocRoadbits(); }
@@ -294,6 +302,7 @@ void G6Call00516EB4 (int32_t a0, int32_t a1, int32_t a2) { SetRGB00516EB4(a0, a1
 void G6Call00491360 (void) { P12_Fn00491360(); }
 void Call0042486B (int32_t a0, uint32_t a1, int32_t a2, uint32_t a3, int32_t a4) { P52_TexDownloadMipMap(a0, a1, a2, a3, a4); }
 int32_t G6Call0041D63B (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { return (int32_t)P53_TexLookup(a0, a1, a2, a3); }
+int32_t G6Call00523CDA (int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4) { return (int32_t)P97_SndStart(a0, a1, a2, a3, a4); }
 void Call004D94B7 (uint32_t a0, uint32_t a1) { CursorSet004D94B7(a0, a1); }
 int32_t Call00524473 (int32_t a0) { return (int32_t)IsSlotActive00524473(a0); }
 uint32_t Call0048F3B4 (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { return (uint32_t)P63_CountByNode(a0, a1, a2, a3); }
@@ -315,3 +324,4 @@ void Call00475906 (void *m) { P79_FindSameVerts(m); }
 void SetCameraPosition (float x, float y, float z) { PushVec3_00523C99(x, y, z); }
 void P46_Fn4D6354 (void) { P53_StepBounds(); }
 void P46_Fn51BE3C (void) { P58_BuildBlockIndex(); }
+void P58_Fn4185D2 (uint32_t tbl, int32_t a1, uint32_t tbl2) { P97_MenuCall2(tbl, a1, tbl2); }

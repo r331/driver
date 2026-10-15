@@ -1,4 +1,5 @@
 #include "ported15.h"
+#include "reptr.h"
 #include <string.h>
 GAME_VAR_DEF(uint8_t *, P15_MenuText, 0x005fe9b0)
 GAME_VAR_DEF(uint8_t *, P15_MenuItems, 0x005fe9b8)
@@ -17,7 +18,7 @@ static void w32(uint8_t *p, uint32_t v) { memcpy(p, &v, 4); }
 static uint32_t r32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }
 static float rf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
 static void wf(uint8_t *p, float v) { memcpy(p, &v, 4); }
-static uint8_t *rp(const uint8_t *p) { return (uint8_t *)(uintptr_t)r32(p); }
+static uint8_t *rp(const uint8_t *p) { return (uint8_t *)re_ptr((uint32_t)r32(p)); }   /* v1.42: поле-указатель = адрес Game.exe */
 
 /* заголовок подсказки: +0 ширина u16, +2 высота u16... фактически: u16 w@0, u16 h@2, u32 text@4 */
 static void set_hint(uint32_t text_addr, uint16_t a, uint16_t b) {
