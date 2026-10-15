@@ -9,6 +9,7 @@
 #include "ported77.h"
 #include "ported80.h"
 #include "ported82.h"
+#include "ported84.h"
 #include <stdint.h>
 /* Шаг D, ported83 (веха 1, рендер мира), обе cdecl:
    00428672  P83_BoxVis(p, r) — как P82_SphereVis3D, но порядок плоскостей иной (левая, правая, дальняя, ближняя при res==0, верхняя, нижняя),
@@ -19,6 +20,7 @@
 typedef float p83_m9_t[9];
 typedef float p83_v16_t[16];
 #define P83_LightVec  GAME_VAR(p83_v16_t, P83_LightVec, 0x01249680)    /* 4 вектора по 4 float подряд */
+#ifdef RE_HOOK_BUILD
 #define P83_Mat0      GAME_VAR(p83_m9_t, P83_Mat0, 0x01209680)
 #define P83_Mat1      GAME_VAR(p83_m9_t, P83_Mat1, 0x01219680)
 #define P83_Mat2      GAME_VAR(p83_m9_t, P83_Mat2, 0x01229680)
@@ -27,10 +29,19 @@ typedef float p83_v16_t[16];
 #define P83_Flag1     GAME_VAR(int32_t, P83_Flag1, 0x011f1060)
 #define P83_Flag2     GAME_VAR(int32_t, P83_Flag2, 0x011f2060)
 #define P83_Flag3     GAME_VAR(int32_t, P83_Flag3, 0x011f3060)
+#else
+/* в native матрицы и флаги света — записи 0/1024/2048/3072 кэша матриц ported84 */
+#define P83_Mat0      (P84_MatCache[0])
+#define P83_Mat1      (P84_MatCache[1024])
+#define P83_Mat2      (P84_MatCache[2048])
+#define P83_Mat3      (P84_MatCache[3072])
+#define P83_Flag0     (P84_MatFlag[0])
+#define P83_Flag1     (P84_MatFlag[1024])
+#define P83_Flag2     (P84_MatFlag[2048])
+#define P83_Flag3     (P84_MatFlag[3072])
+#endif
 #ifndef RE_HOOK_BUILD
-extern p83_m9_t P83_Mat0, P83_Mat1, P83_Mat2, P83_Mat3;
 extern p83_v16_t P83_LightVec;
-extern int32_t P83_Flag0, P83_Flag1, P83_Flag2, P83_Flag3;
 #endif
 int32_t P83_BoxVis(const float *p, float r);       /* 00428672 */
 void    P83_LightMatrices(void);                   /* 00428928 */

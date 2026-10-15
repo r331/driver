@@ -336,7 +336,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040180c,thunk_FUN_0049cad4,,,,,,5,todo
 00401811,thunk_FUN_0048ebc8,,,,,,5,ported
 00401816,thunk_FUN_00424661,Thunk_00424661,manual,Thunks,,,5,ported
-0040181b,thunk_FUN_00428b69,,,,,,5,todo
+0040181b,thunk_FUN_00428b69,,,,,,5,ported
 00401820,thunk_FUN_00407160,,,,,,5,ported
 00401825,thunk_FUN_004c6740,,,,,,5,todo
 0040182a,thunk_FUN_00527123,Thunk_00527123,manual,Thunks,,,5,ported
@@ -878,7 +878,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004025c2,thunk_FUN_0048c43c,,,,,,5,todo
 004025cc,thunk_FUN_005222cf,,,,,,5,todo
 004025d1,thunk_FUN_0041a16c,Thunk_0041A16C,manual,Thunks,,,5,ported
-004025e0,thunk_FUN_00429143,,,,,,5,todo
+004025e0,thunk_FUN_00429143,,,,,,5,ported
 004025e5,thunk_FUN_004ffad8,,,,,,5,ported
 004025ea,thunk_FUN_0040b6fd,,,,,,5,todo
 004025ef,thunk_FUN_00514f47,,,,,,5,ported
@@ -1979,8 +1979,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004283d9,FUN_004283d9,SphereVis3D,manual,Render,,,665,ported
 00428672,FUN_00428672,BoxVis,manual,Ported83,,,694,ported
 00428928,FUN_00428928,LightMatrices,manual,Ported83,,,577,ported
-00428b69,FUN_00428b69,,,,,,1498,todo
-00429143,FUN_00429143,,,,,,1771,todo
+00428b69,FUN_00428b69,DrawModel,manual,render,,,1498,ported
+00429143,FUN_00429143,DrawModelIdx,manual,render,,,1771,ported
 0042982e,FUN_0042982e,,,,,,1442,todo
 0042a423,FUN_0042a423,,,,,,443,todo
 0042a5de,FUN_0042a5de,,,,,,1043,todo

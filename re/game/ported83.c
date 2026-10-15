@@ -2,14 +2,6 @@
 #include <string.h>
 
 GAME_VAR_DEF(p83_v16_t, P83_LightVec, 0x01249680)
-GAME_VAR_DEF(p83_m9_t, P83_Mat0, 0x01209680)
-GAME_VAR_DEF(p83_m9_t, P83_Mat1, 0x01219680)
-GAME_VAR_DEF(p83_m9_t, P83_Mat2, 0x01229680)
-GAME_VAR_DEF(p83_m9_t, P83_Mat3, 0x01239680)
-GAME_VAR_DEF(int32_t, P83_Flag0, 0x011f0060)
-GAME_VAR_DEF(int32_t, P83_Flag1, 0x011f1060)
-GAME_VAR_DEF(int32_t, P83_Flag2, 0x011f2060)
-GAME_VAR_DEF(int32_t, P83_Flag3, 0x011f3060)
 
 typedef long double ld;
 

@@ -15,6 +15,7 @@
 #include "ported51.h"
 #include "ported44.h"
 #include "ported79.h"
+#include "ported84.h"
 #include "ported80.h"
 #include <math.h>
 #include <string.h>
@@ -200,6 +201,7 @@ void re_init_consts(void) {
   P57_InitConsts();
   P58_InitConsts();
   P79_InitConsts();
+  P84_InitConsts();
   P80_InitConsts();
   P59_InitConsts();
   P61_InitConsts();

@@ -87,6 +87,7 @@
 #include "../game/ported81.h"
 #include "../game/ported82.h"
 #include "../game/ported83.h"
+#include "../game/ported84.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -3609,9 +3610,66 @@ static int test_real_level(void) {
 /* RE_TRACE=1 печатает имя каждого теста перед запуском (поиск падения) */
 static int run_t_(const char *n, int r) { if (r) fprintf(stderr, "[test] %s returned %d\n", n, r); return r; }
 #define RUN_T(t) (getenv("RE_TRACE") ? (fprintf(stderr, "[test] %s\n", #t), run_t_(#t, t())) : t())
+
+static int p84_calls, p84_last_arg; static uint32_t p84_types[8];
+static void p84_h0(uint32_t a) { p84_types[p84_calls++ & 7] = 0; p84_last_arg = (int)a; G2_011F4064 += 32; }
+static void p84_h16(uint32_t a) { p84_types[p84_calls++ & 7] = 16; p84_last_arg = (int)a; G2_011F4064 += 32; }
+static int test_p84(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { fprintf(stderr, "p84 fail line %d: %s\n", __LINE__, #c); f = 1; } } while (0)
+  re_init_consts();
+  { void *saved = D_00c98ed0; uint8_t *arena = (uint8_t *)calloc(1, 0x4000);
+    uint8_t *m = arena + 0x100; float *pl = (float *)(arena + 0x200); float *nn = (float *)(arena + 0x280); uint8_t *rec = arena + 0x300;
+    uint16_t u16; uint32_t u32; int32_t i32;
+    float ident[16 * 8]; float pos[3] = { 0, 0, 0 };
+    D_00c98ed0 = arena; P84_InitConsts();
+    CK(P84_Arg[0] == 0 && P84_Arg[32] == 1 && P84_Lit[16] == 1 && P84_Lit[0] == 0);
+    memset(ident, 0, sizeof ident);
+    for (int k = 0; k < 8; k++) ident[k * 16] = ident[k * 16 + 4] = ident[k * 16 + 8] = 1.0f;
+    memset(P44_ViewMat, 0, sizeof(p44_m9_t)); P44_ViewMat[0] = P44_ViewMat[4] = P44_ViewMat[8] = 1.0f;
+    u16 = 1; memcpy(m + 2, &u16, 2); u16 = 3; memcpy(m + 0x16, &u16, 2); u16 = 1; memcpy(m + 0x18, &u16, 2);
+    u32 = P79_OFF(pl); memcpy(m + 0x24, &u32, 4); u32 = P79_OFF(nn); memcpy(m + 0x28, &u32, 4); u32 = P79_OFF(rec); memcpy(m + 0x2c, &u32, 4);
+    pl[0] = 0; pl[1] = 0; pl[2] = 1; pl[3] = 5;            /* плоскость 0: лицом, свет +1 */
+    pl[4] = 0; pl[5] = 0; pl[6] = 1; pl[7] = -5;           /* плоскость 1: спиной */
+    pl[8] = 0; pl[9] = 0; pl[10] = -1; pl[11] = 5;         /* плоскость 2: лицом, свет −1 */
+    nn[0] = 0; nn[1] = 0; nn[2] = 1; nn[3] = 0;
+    rec[0] = 16; rec[1] = 8; i32 = 0; memcpy(rec + 4, &i32, 4);
+    rec[32] = 16; rec[33] = 8; i32 = 1; memcpy(rec + 36, &i32, 4);
+    rec[64] = 16; rec[65] = 8; i32 = 2; memcpy(rec + 68, &i32, 4);
+    rec[96] = 0; rec[97] = 0; i32 = 0; memcpy(rec + 100, &i32, 4);
+    u16 = 4; memcpy(m + 0x16, &u16, 2);
+    memset(P84_Handlers, 0, sizeof P84_Handlers);
+    P84_Handlers[2][0] = (uintptr_t)p84_h0; P84_Handlers[2][16] = (uintptr_t)p84_h16;
+    P84_SelectTables(0); G2_011F43B0 = 0; P84_Mirror = 0;
+    P19_OutA = 0; P19_OutB = 0; P19_OutC = 1; P19_Out68 = 0.25f;
+    p84_calls = 0; P44_XformTag = 10;
+    P84_DrawModel(P79_OFF(m), ident, pos, 5);
+    CK(p84_calls == 3 && p84_types[0] == 16 && p84_types[1] == 16 && p84_types[2] == 0);
+    CK(P84_Vis[0] == 1 && P84_Vis[1] == 0 && P84_Vis[2] == 1);
+    CK(P84_LightIn[0] == 1.0f && P84_LightIn[2] == 0.25f && P84_NormLight[0] == 1.0f);
+    CK(P44_XformTag == 11 && P84_Planes == pl && P44_BiasZ == 0.0f);
+    /* зеркало: ось X отражена, матрица света не меняется */
+    P84_Mirror = 1; pos[0] = 3; p84_calls = 0;
+    P84_DrawModel(P79_OFF(m), ident, pos, 5);
+    CK(p84_calls == 3 && P44_BiasX == -3.0f && P44_MatPtr[0] == -1.0f && P44_MatPtr[4] == 1.0f);
+    P84_Mirror = 0; pos[0] = 0;
+    /* кэш матриц */
+    P56_EulerTab = (uint8_t *)ident; P47_SwapCnt = 77; P84_MatFlag[3] = 0; P84_MatCache[3][0] = 9.0f;
+    p84_calls = 0; P84_DrawModelIdx(P79_OFF(m), 0, pos, 5);
+    CK(p84_calls == 3 && P84_MatFlag[0] == 77 && P84_MatCache[0][0] == 1.0f && P84_MatCache[0][4] == 1.0f);
+    P84_MatCache[0][0] = 5.0f; p84_calls = 0; P84_DrawModelIdx(P79_OFF(m), 0, pos, 5);   /* кэш свежий — не пересчитывается */
+    CK(P84_MatCache[0][0] == 5.0f && p84_calls == 3);
+    P84_MatCache[0][0] = 1.0f; P84_MatFlag[0] = 0; memset(P84_Handlers, 0, sizeof P84_Handlers);
+    p84_calls = 0; P84_DrawModel(P79_OFF(m), ident, pos, 5); CK(p84_calls == 0);          /* без обработчиков не падает */
+    D_00c98ed0 = saved; free(arena);
+  }
+  return f;
+}
+
 int re_selftest(void) {
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

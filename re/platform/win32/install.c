@@ -72,6 +72,7 @@
 #include "../../game/ported81.h"
 #include "../../game/ported82.h"
 #include "../../game/ported83.h"
+#include "../../game/ported84.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1729,4 +1730,6 @@ void re_install_all(void) {
     re_hook(0x004e959a, (void*)P81_Limit, "P81_Limit");
     re_hook(0x00428672, (void*)P83_BoxVis, "P83_BoxVis");
     re_hook(0x00428928, (void*)P83_LightMatrices, "P83_LightMatrices");
+    re_hook(0x00428b69, (void*)P84_DrawModel, "P84_DrawModel");
+    re_hook(0x00429143, (void*)P84_DrawModelIdx, "P84_DrawModelIdx");
 }
