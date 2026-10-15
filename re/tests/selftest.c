@@ -49,6 +49,7 @@
 #include "../game/ported61.h"
 #include "../game/ported62.h"
 #include "../game/ported63.h"
+#include "../game/ported64.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -2330,8 +2331,64 @@ static int test_p62(void) {
   return f;
 }
 
+/* ported64 */
+static void t64_put(const char *n, const char *d, size_t l) { FILE *f = fopen(n, "wb"); if (f) { fwrite(d, 1, l, f); fclose(f); } }
+static int test_p64(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p64 fail line %d\n",__LINE__); } } while (0)
+  /* 00406272 / 00406096 / 00405f6f: запись SAVES\REPLAY1.BIN из трёх временных файлов */
+  t64_put("REPLAYDATA\\USER\\$TEMP$.CFG", "CFGDATA", 7);
+  t64_put("REPLAYDATA\\USER\\$TEMP$.CAMS", "CAMS", 4);
+  t64_put("REPLAYDATA\\USER\\$TEMP$.PADS", "PADSPADS", 8);
+  CK(P64_ReplayStart(0, "MyReplay") == 1);
+  { uint8_t b[256]; size_t n = 0; FILE *fp = fopen("SAVES\\REPLAY1.BIN", "rb");
+    CK(fp != NULL);
+    if (fp) { n = fread(b, 1, sizeof b, fp); fclose(fp); }
+    CK(n == 8 + 0x38 + (8 + 7) + (8 + 4) + (8 + 8));
+    CK(rd_i32(b, 0) == 0x38910457 && memcmp(b + 8, "MyReplay", 9) == 0);
+    CK(rd_i32(b, 4) == SumBytes(b + 8, 0x38));
+    CK(rd_i32(b, 8 + 0x38) == 0x21474643 && rd_i32(b, 8 + 0x38 + 4) == 7 && memcmp(b + 8 + 0x38 + 8, "CFGDATA", 7) == 0);
+    CK(rd_i32(b, 8 + 0x38 + 15) == 0x534d4143 && rd_i32(b, 8 + 0x38 + 27) == 0x53444150); }
+  CK(P59_ReplayCheck(0, NULL) == 1);
+  /* нет файла PADS: запись отменяется и файл удаляется */
+  remove("REPLAYDATA\\USER\\$TEMP$.PADS");
+  CK(P64_SaveReplay(0) == 0);
+  { FILE *fp = fopen("SAVES\\REPLAY1.BIN", "rb"); CK(fp == NULL); if (fp) fclose(fp); }
+  remove("REPLAYDATA\\USER\\$TEMP$.CFG"); remove("REPLAYDATA\\USER\\$TEMP$.CAMS");
+  CK(P64_SaveChunk(NULL, "no\\such\\file", 1) == 0);
+  /* таблица рекордов: 5 строк по 0x2c, результат +0x10, время +0x14 (PackRGB: младший компонент +0x20), занято +0x18 */
+  uint8_t T[5 * 0x2c], E[0x48];
+  memset(T, 0, sizeof T); memset(E, 0, sizeof E);
+  for (int i = 0; i < 5; i++) { wr_i32(T, i * 0x2c + 0x18, 8); wr_i32(T, i * 0x2c + 0x10, 100 - 10 * i); wr_i32(T, i * 0x2c + 0x20, 10 * (i + 1)); }
+  P64_CurTable = T; P64_NativeTable = T;
+  wr_i32(E, 0x40, 1); wr_i32(E, 0x1c, 25);    /* время 25 */
+  CK(P64_RankTimeMore(E) == 2);               /* первая строка с большим временем (30) */
+  CK(P64_RankTimeB(E) == 2);
+  CK(P64_RankTimeLess(E) == 0);               /* первая строка с меньшим временем (10) */
+  wr_i32(E, 0x1c, 5); CK(P64_RankTimeLess(E) == -1 || P64_RankTimeLess(E) == 0);
+  wr_i32(E, 0x1c, 60); CK(P64_RankTimeMore(E) == -1);
+  wr_i32(T, 4 * 0x2c + 0x18, 0); CK(P64_RankTimeMore(E) == 4);   /* свободная строка */
+  wr_i32(T, 4 * 0x2c + 0x18, 8);
+  wr_i32(E, 8, 85); wr_i32(E, 0x1c, 7);
+  CK(P64_RankBestFirst(E) == 2 && P64_RankScoreB(E) == 2);   /* 85 > 80 */
+  wr_i32(E, 8, 80); wr_i32(E, 0x1c, 5);  CK(P64_RankBestFirst(E) == 2 + 0 || P64_RankBestFirst(E) == 3);
+  wr_i32(E, 8, 80); wr_i32(E, 0x1c, 35); CK(P64_RankBestFirst(E) == 2);   /* равный результат, время 30 < 35 → в строке 2 */
+  wr_i32(E, 0x40, 0); CK(P64_RankBestFirst(E) == -1 && P64_RankTimeMore(E) == -1);
+  wr_i32(E, 0x2c, 8); wr_i32(E, 0x34, 5);  CK(P64_RankTop(E) == 0);       /* 10 > 5 → лучший */
+  wr_i32(E, 0x34, 10); CK(P64_RankTop(E) == -1);
+  wr_i32(E, 0x2c, 3); CK(P64_RankTop(E) == -1);
+  /* 0051cc55: выбор по типу */
+  wr_i32(E, 0x40, 1); wr_i32(E, 0x1c, 25);
+  P42_HighScores[1] = 1;      /* таблица типа 2, индекс 1 */
+  CK(P64_RankPlace(E, 2, 1) == 2 && rd_i32(E, 0xc) == 1);
+  CK(P64_RankPlace(E, 2, 2) == -1 && rd_i32(E, 0xc) == 0);   /* таблицы нет */
+  P42_HighScores[8 + 1] = 1; wr_i32(E, 8, 85); CK(P64_RankPlace(E, 1, 1) == 2);
+  return f;
+}
+
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_p62() | test_p63() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_p61() | test_p62() | test_p63() | test_p64() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

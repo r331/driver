@@ -52,6 +52,7 @@
 #include "../../game/ported61.h"
 #include "../../game/ported62.h"
 #include "../../game/ported63.h"
+#include "../../game/ported64.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -74,6 +75,7 @@
 #include "../../game/ported8.h"
 #include "../../game/ported9.h"
 #include "../../game/ported10.h"
+int32_t P62_Fn51CC55 (void *a, int32_t t, int32_t i) { return (int32_t)P64_RankPlace(a, t, i); }
 void P61_Fn514BC7 (void *p, int32_t a, int32_t b) { InitObjState_00514BC7(p, a, b); }
 void P60_SetupCamN (int32_t n) { P61_SetupCamN(n); }
 void P60_CamPrepare (void *cam) { P61_CamPrepare(cam); }
@@ -102,6 +104,7 @@ void P55_Fn5248CD (void) { P25_CDResume(); }
 int32_t P55_Fn4245E2 (void) { return (int32_t)GetVarB1C0D8(); }
 void P55_Fn4264A7 (void) { Ui004264A7(); }
 int32_t P53_Fn4045E0 (void) { return (int32_t)P57_Menu4045E0(); }
+int32_t P52_Fn405F6F (int32_t a0, void *a1) { return (int32_t)P64_ReplayStart(a0, a1); }
 void P48_Fn516DA0 (void) { P58_LangStrings(); }
 int32_t P47_Fn40A3A0 (void) { return (int32_t)P57_Menu40A3A0(); }
 void P47_Fn405BFA (void) { P58_SaveConfig(); }

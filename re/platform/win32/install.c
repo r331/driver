@@ -52,6 +52,7 @@
 #include "../../game/ported61.h"
 #include "../../game/ported62.h"
 #include "../../game/ported63.h"
+#include "../../game/ported64.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1574,4 +1575,14 @@ void re_install_all(void) {
     re_hook(0x00426b34, (void*)P63_SphereHits, "P63_SphereHits");
     re_hook(0x0049ef12, (void*)P63_CatmullRom, "P63_CatmullRom");
     re_hook(0x0049ed20, (void*)P63_Hermite, "P63_Hermite");
+    re_hook(0x00406272, (void*)P64_SaveChunk, "P64_SaveChunk");
+    re_hook(0x00406096, (void*)P64_SaveReplay, "P64_SaveReplay");
+    re_hook(0x00405f6f, (void*)P64_ReplayStart, "P64_ReplayStart");
+    re_hook(0x0051cf17, (void*)P64_RankBestFirst, "P64_RankBestFirst");
+    re_hook(0x0051ce94, (void*)P64_RankTimeMore, "P64_RankTimeMore");
+    re_hook(0x0051cfda, (void*)P64_RankTimeLess, "P64_RankTimeLess");
+    re_hook(0x0051d05d, (void*)P64_RankTimeB, "P64_RankTimeB");
+    re_hook(0x0051d0e0, (void*)P64_RankScoreB, "P64_RankScoreB");
+    re_hook(0x0051d1a3, (void*)P64_RankTop, "P64_RankTop");
+    re_hook(0x0051cc55, (void*)P64_RankPlace, "P64_RankPlace");
 }
