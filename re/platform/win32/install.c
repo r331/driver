@@ -48,6 +48,7 @@
 #include "../../game/ported57.h"
 #include "../../game/ported58.h"
 #include "../../game/ported59.h"
+#include "../../game/ported60.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1531,4 +1532,11 @@ void re_install_all(void) {
     re_hook(0x00405fdb, (void*)P59_ReplayCheck, "P59_ReplayCheck");
     re_hook(0x00417d56, (void*)P59_MenuKeys, "P59_MenuKeys");
     re_hook(0x0040d4b3, (void*)P59_ReadBlock, "P59_ReadBlock");
+    re_hook(0x004c5c5d, (void*)P60_NextTrafficCar, "P60_NextTrafficCar");
+    re_hook(0x004c4b3a, (void*)AddTripodCamera, "AddTripodCamera");
+    re_hook(0x004c4cee, (void*)ChangeTripodCamera, "ChangeTripodCamera");
+    re_hook(0x004c459f, (void*)AddCamera, "AddCamera");
+    re_hook(0x004c483e, (void*)ChangeCamera, "ChangeCamera");
+    re_hook(0x004a399a, (void*)P60_ObjUpdate, "P60_ObjUpdate");
+    re_hook(0x0051378b, (void*)P60_SpawnParticle, "P60_SpawnParticle");
 }

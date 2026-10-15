@@ -403,7 +403,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004019c9,thunk_FUN_00405450,,,,,,5,todo
 004019d3,thunk_FUN_004c988e,Thunk_004C988E,manual,Thunks,,,5,ported
 004019d8,thunk_FUN_004949f0,,,,,,5,todo
-004019dd,thunk_FUN_004c483e,,,,,,5,todo
+004019dd,thunk_FUN_004c483e,,,,,,5,ported
 004019e2,thunk_FUN_00426caf,Thunk_00426CAF,manual,Thunks,,,5,ported
 004019e7,thunk_FUN_004cdda6,,,,,,5,todo
 004019ec,thunk_FUN_004c9621,Thunk_004C9621,manual,Thunks,,,5,ported
@@ -908,7 +908,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040268f,thunk_FUN_004fc57b,Thunk_004FC57B,manual,Thunks,,,5,ported
 00402694,thunk_FUN_004ab127,,,,,,5,todo
 00402699,thunk_FUN_00518bbc,,,,,,5,todo
-0040269e,thunk_FUN_004a399a,,,,,,5,todo
+0040269e,thunk_FUN_004a399a,,,,,,5,ported
 004026a3,thunk_FUN_004b8d49,,,,,,5,todo
 004026a8,thunk_FUN_005235d3,Thunk_005235D3,manual,Thunks,,,5,ported
 004026ad,thunk_FUN_004f5c72,Thunk_004F5C72,manual,Thunks,,,5,ported
@@ -992,7 +992,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004028dd,thunk_FUN_004eb46a,Thunk_004EB46A,manual,Thunks,,,5,ported
 004028e2,thunk_FUN_004a63c6,,,,,,5,ported
 004028f6,thunk_FUN_004ad6f5,,,,,,5,todo
-00402900,thunk_FUN_0051378b,,,,,,5,todo
+00402900,thunk_FUN_0051378b,,,,,,5,ported
 00402905,thunk_FUN_004f8e0c,,,,,,5,todo
 0040290a,thunk_FUN_0051879f,,,,,,5,todo
 0040290f,thunk_FUN_004b4095,,,,,,5,todo
@@ -1038,7 +1038,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402a04,thunk_FUN_00475a3d,,,,,,5,todo
 00402a09,thunk_FUN_0040b0fe,,,,,,5,todo
 00402a0e,thunk_FUN_00490f3a,,,,,,5,todo
-00402a13,thunk_FUN_004c459f,,,,,,5,todo
+00402a13,thunk_FUN_004c459f,,,,,,5,ported
 00402a18,thunk_FUN_0048eca3,,,,,,5,ported
 00402a1d,thunk_FUN_0042570c,,,,,,5,ported
 00402a22,thunk_FUN_004c1f9b,Thunk_004C1F9B,manual,Thunks,,,5,ported
@@ -2206,7 +2206,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004a3354,FUN_004a3354,P58_FreeGrid,manual,,,,173,ported
 004a3630,FUN_004a3630,,,,,,117,todo
 004a3808,FUN_004a3808,,,,,,402,todo
-004a399a,FUN_004a399a,,,,,,92,todo
+004a399a,FUN_004a399a,ObjUpdate,manual,objects,,,92,ported
 004a39f6,FUN_004a39f6,P14_Fn004A39F6,manual,misc,,,138,ported
 004a3a80,FUN_004a3a80,WrapCounter004A3A80,manual,SmallFuncs,,,39,ported
 004a3aa7,FUN_004a3aa7,,,,,,217,todo
@@ -2409,8 +2409,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c41ec,FUN_004c41ec,GetNodeParent,manual,DirNodes.c,,,58,ported
 004c4226,FUN_004c4226,FindNodeAtPixel,manual,DirNodes.c,,,131,ported
 004c42a9,FUN_004c42a9,DrawCornerIndicator,manual,DirNodes,,,62,ported
-004c459f,FUN_004c459f,AddCamera,debug_string,,,,118,named
-004c483e,FUN_004c483e,ChangeCamera,debug_string,,,,118,named
+004c459f,FUN_004c459f,AddCamera,manual,Director,,,118,ported
+004c483e,FUN_004c483e,ChangeCamera,manual,Director,,,118,ported
 004c4ef9,FUN_004c4ef9,,,,,,809,todo
 004c5222,FUN_004c5222,SelectNewCamera,manual,Director.c,,,183,ported
 004c52d9,FUN_004c52d9,SyncCameraFromList,manual,Director,,,142,ported
@@ -3001,7 +3001,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00512de7,FUN_00512de7,,,,,,1204,todo
 0051329b,FUN_0051329b,,,,,,754,todo
 0051358d,FUN_0051358d,,,,,,510,todo
-0051378b,FUN_0051378b,,,,,,128,todo
+0051378b,FUN_0051378b,SpawnParticle,manual,particles,,,128,ported
 0051380b,FUN_0051380b,,,,,,250,todo
 00513905,FUN_00513905,,,,,,210,todo
 005139d7,FUN_005139d7,,,,,,362,todo
@@ -3615,3 +3615,6 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0053fa70,FUN_0053fa70,,,CRT,range,,67,todo
 0053fac0,__strcmpi,__strcmpi,ghidra,CRT,range,,140,named
 0053fb50,FUN_0053fb50,,,CRT,crt,,250,todo
+004c5c5d,,NextTrafficCar,manual,Director,,,,ported
+004c4b3a,,AddTripodCamera,manual,Director,,,,ported
+004c4cee,,ChangeTripodCamera,manual,Director,,,,ported

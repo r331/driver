@@ -45,6 +45,7 @@
 #include "../game/ported57.h"
 #include "../game/ported58.h"
 #include "../game/ported59.h"
+#include "../game/ported60.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -2048,8 +2049,55 @@ static int test_p59(void) {
   return f;
 }
 
+/* ported60 */
+static int test_p60(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p60 fail line %d\n",__LINE__); } } while (0)
+  P59_InitConsts();
+  uint8_t *cam = (uint8_t *)&DirectorCam; int32_t v;
+  /* 004c5c5d */
+  memset(TrafficRecs, 0, sizeof(TRAFFIC_RECS_T)); memset(P60_Cars, 0, sizeof(p60_cars_t));
+  P59_PosX = 1000; P59_PosZ = 1000;
+  { uint8_t *rec = (uint8_t *)TrafficRecs + 2 * 0x54; rec[5] = 1; rec[0xc] = 1; rec[1] = 4;        /* машина №3 */
+    v = 1000 + 100; memcpy((uint8_t *)P60_Cars + 3 * 0x148 + 0xc8, &v, 4); v = 1000; memcpy((uint8_t *)P60_Cars + 3 * 0x148 + 0xd0, &v, 4);
+    CK(P60_NextTrafficCar(0) == 3 && P60_NextTrafficCar(1) == 3 && P60_NextTrafficCar(3) == 0);
+    v = 1000 + 30100; memcpy((uint8_t *)P60_Cars + 3 * 0x148 + 0xc8, &v, 4); CK(P60_NextTrafficCar(0) == 0);   /* слишком далеко */
+    v = 1000 + 100; memcpy((uint8_t *)P60_Cars + 3 * 0x148 + 0xc8, &v, 4); rec[1] = 3; CK(P60_NextTrafficCar(0) == 0); rec[1] = 4; }
+  /* 004c4b3a / 004c4cee */
+  memset(cam, 0, 0x8c); v = 5; memcpy(cam + 0x4c, &v, 4); v = 7; memcpy(cam + 0x54, &v, 4); v = 9; memcpy(cam + 0x10, &v, 4);
+  AddTripodCamera(0x14);
+  memcpy(&v, cam, 4); CK(v == 0x11); memcpy(&v, cam + 0x5c, 4); CK(v == 5); memcpy(&v, cam + 0x64, 4); CK(v == 7); memcpy(&v, cam + 0x10, 4); CK(v == 0);
+  AddTripodCamera(0x16); memcpy(&v, cam + 0x48, 4); CK(v == 1); AddTripodCamera(0x16); memcpy(&v, cam + 0x48, 4); CK(v == 0);
+  memset(cam, 0, 0x8c); v = 0; memcpy(cam + 0x4c, &v, 4);
+  { uint8_t *car0 = (uint8_t *)P60_Cars; v = 100; memcpy(car0 + 0xc8, &v, 4); v = 0; memcpy(car0 + 0xd0, &v, 4); v = 300; memcpy(car0 + 0xcc, &v, 4); }
+  AddTripodCamera(0x15); memcpy(&v, cam, 4); CK(v == 0x10);
+  { int32_t a; memcpy(&a, cam + 0x18, 4); CK(a == ((-P44_Atan2(100, 0)) & 0xfff)); uint16_t w; memcpy(&w, cam + 0x7e, 2); CK(w == (uint16_t)a); }
+  memset(cam, 0, 0x8c); v = -1; memcpy(cam + 0x10, &v, 4);
+  ChangeTripodCamera(0x19); memcpy(&v, cam, 4); CK(v == 0x10);
+  { int32_t p, q; memcpy(&p, cam + 0x20, 4); CK(p == P44_Atan2(300, 100)); q = p; uint16_t w; memcpy(&w, cam + 0x7c, 2); CK(w == (uint16_t)q); }
+  memset(cam, 0, 0x8c); ChangeTripodCamera(0x18); memcpy(&v, cam, 4); CK(v == 0x11);
+  /* 004c459f / 004c483e */
+  { DIR_NODE n[4]; memset(n, 0, sizeof n); n[0].id = 0xb; n[0].link1 = 0x40; n[1].id = 0xf; n[1].link1 = 0x41; n[2].id = 0x20; n[3].id = 0xffff;
+    DIR_NODE *old = DirNodeTable; DirNodeTable = n;
+    memset(cam, 0, 0x8c); DirectorUnk7C = 0;
+    AddCamera(0xb); memcpy(&v, cam, 4); CK(v == 0x11 && DirectorUnk7C == 0x40);
+    memset(cam, 0, 0x8c); ChangeCamera(0xf); memcpy(&v, cam, 4); CK(v == 0x11 && DirectorUnk7C == 0x41);
+    memset(cam, 0, 0x8c); v = 4; memcpy(cam + 0x4c, &v, 4); n[0].id = 0xb; AddCamera(0x20);              /* неизвестный id — только лог */
+    memcpy(&v, cam, 4); CK(v == 0);
+    DirNodeTable = old; }
+  /* 004a399a */
+  { uint8_t o[0x40]; memset(o, 0, sizeof o); v = 1; memcpy(o + 0x10, &v, 4); v = 77; memcpy(o + 0x24, &v, 4);
+    P60_ObjUpdate(o); memcpy(&v, o + 0x24, 4); CK(v == 0); P60_ObjUpdate(NULL); }
+  /* 0051378b */
+  { uint8_t p[0x20]; memset(p, 0, sizeof p); P43_FreeCnt = 0; P60_PartLimit = 5;
+    CK(P60_SpawnParticle(p, 0) == 1 && p[0] == 1); memcpy(&v, p + 0x1c, 4); CK(v == 1);
+    memset(p, 0, sizeof p); CK(P60_SpawnParticle(p, 1) == 0 && p[0] == 0); P43_FreeCnt = 9; CK(P60_SpawnParticle(p, 0) == 0); P43_FreeCnt = 0; }
+  return f;
+}
+
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_p59() | test_p60() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

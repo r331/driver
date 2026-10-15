@@ -7,6 +7,10 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    V(P60_SetupCamN, 0x0049e5e7, (int32_t n), (n)) \
+    V(P60_CamPrepare, 0x004c6d62, (void *cam), (cam)) \
+    V(P60_Fn4CA802, 0x004ca802, (void *o), (o)) \
+    V(P60_Fn514261, 0x00514261, (void *p), (p)) \
     R(int32_t, P59_Fn4A6A57, 0x004a6a57, (const void *a, const void *b, const void *c), (a, b, c)) \
     V(P59_Fn4A5634, 0x004a5634, (const char *a, int32_t i), (a, i)) \
     R(int32_t, P59_Fn417970, 0x00417970, (void), ()) \
