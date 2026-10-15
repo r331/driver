@@ -42,6 +42,7 @@
 #include "../game/ported54.h"
 #include "../game/ported55.h"
 #include "../game/ported56.h"
+#include "../game/ported57.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -1843,8 +1844,45 @@ static int test_p56(void) {
     remove(nm); }
   return f;
 }
+/* 0040c8f1 (опрос меню) не перенесён: в тестах «пользователь» сразу выходит из экрана (-1), чтобы циклы меню завершались. */
+int32_t P57_MenuStep(uint32_t tbl, int32_t *state) { (void)tbl; (void)state; return -1; }
+
+static int test_p57(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p57 fail line %d\n",__LINE__); } } while (0)
+  const char *tmp = "/tmp/re_p57_test.bin";
+  /* 004d30a3 / 00406b51 */
+  remove(tmp);
+  CK(P57_FileExists(tmp) == 0);
+  { uint8_t buf[100]; for (int i = 0; i < 100; i++) buf[i] = (uint8_t)i;
+    CK(P57_WriteFile(tmp, buf, 100) == 1); CK(P57_FileExists(tmp) == 1);
+    /* 004ec2ec: пропуск блока читает size байт */
+    FILE *fp = fopen(tmp, "rb"); CK(fp != NULL);
+    if (fp) { P57_SkipBlock(fp, 60); CK(ftell(fp) == 60); fclose(fp); } }
+  CK(P57_WriteFile("/nonexistent_dir_p57/x.bin", tmp, 1) == 0);
+  /* 004c92c0 / 004c9310 */
+  CK(LoadDirector("/nonexistent_dir_p57/x.dir") == 0);
+  CK(SaveDirector("/nonexistent_dir_p57/x.dir") == 0);
+  CK(SaveDirector(tmp) == 1); CK(LoadDirector(tmp) == 1);
+  /* 004c93b1: без точек пути ничего не делает */
+  WaypointDirty = 0; WaypointCount = 0; DirectorLastFrame = 123; G8_00D118C0 = 1000;
+  P57_SaveDirectorIfAny(tmp); CK(DirectorLastFrame == 123);
+  remove(tmp);
+  /* 00406439 / 00406479: SAVES\SCORES.HI — относительный путь, файл создаётся и стирается */
+  P57_SaveScores(); CK(P57_FileExists("SAVES\\SCORES.HI") == 1); P57_LoadScores(); remove("SAVES\\SCORES.HI");
+  /* 00421a39 */
+  P31_DDVal5 = 5; P32_CurHandle = (void *)1; P57_ResetTexNodes(); CK(P31_DDVal5 == 0 && P32_CurHandle == NULL);
+  /* 0040cd17 */
+  P45_Busy = 7; P45_Step = 0; P57_MenuDone(); CK(P45_Busy == 0 && P45_Step == 5);
+  /* 005075f6: (x/1500 + W/2, -y/1500 + H/2) до вызова 00507672 */
+  P57_InitConsts(); P19_DivC = 2.0f; P57_ScrW = 640; S_00C808A0 = 480;
+  { float x = 150.0f, y = 300.0f; P57_ScreenToView(&x, &y); CK(fabsf(x - 320.1f) < 1e-3f && fabsf(y - 239.8f) < 1e-3f); }
+  return f;
+}
+
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

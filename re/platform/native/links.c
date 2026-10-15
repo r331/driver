@@ -45,6 +45,7 @@
 #include "../../game/ported54.h"
 #include "../../game/ported55.h"
 #include "../../game/ported56.h"
+#include "../../game/ported57.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -67,15 +68,45 @@
 #include "../../game/ported8.h"
 #include "../../game/ported9.h"
 #include "../../game/ported10.h"
+void P57_Setup40A41C (void) { Copy54A838(); }
+void P57_Setup40831C (void) { MenuCopyPos(); }
+void P57_Setup41351C (void) { GlobalSet0041351C(); }
+void P57_Setup41390C (void) { GlobalSet0041390C(); }
+void P57_Setup40A5C6 (void) { GlobalSet0040A5C6(); }
+void P57_Setup413691 (void) { GlobalSet00413691(); }
+void P57_Setup413B7C (void) { GlobalSet00413B7C(); }
+void P57_Setup41640C (void) { GlobalSet0041640C(); }
+void P57_Setup40479B (void) { SetPcarName0040479B(); }
+void P57_Setup412087 (void) { SetupMenuTable00412087(); }
+void P57_Setup412280 (void) { MenuAllRowsTo2_00412280(); }
+void P57_Setup4122E7 (void) { Ui004122E7(); }
+void P57_Setup412487 (void) { SetupMenuTable00412487(); }
+void P57_Setup41269B (void) { MenuAllRowsTo2_0041269B(); }
+void P57_Setup412702 (void) { Ui00412702(); }
+void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
 void P55_Fn5248CD (void) { P25_CDResume(); }
 int32_t P55_Fn4245E2 (void) { return (int32_t)GetVarB1C0D8(); }
 void P55_Fn4264A7 (void) { Ui004264A7(); }
+int32_t P53_Fn4045E0 (void) { return (int32_t)P57_Menu4045E0(); }
+int32_t P47_Fn40A3A0 (void) { return (int32_t)P57_Menu40A3A0(); }
 void N14_Fn4D2ADE (int32_t a0) { AddClamp4095_004D2ADE(a0); }
 void N14_Fn4A7EE9 (int32_t a0) { SetVarD1193C(a0); }
 void N14_Fn48A627 (void) { P12_Fn0048A627(); }
 uint32_t N14_Fn503ECC (const uint8_t* a0) { return (uint32_t)PackRGB00503ECC(a0); }
 void Call0040CCB4 (uint32_t a0, uint32_t a1) { P45_Wait(a0, a1); }
+int32_t R12_4082A0 (void) { return (int32_t)P57_Menu4082A0(); }
+int32_t R12_413B00 (void) { return (int32_t)P57_Menu413B00(); }
+int32_t R12_4134A0 (void) { return (int32_t)P57_Menu4134A0(); }
+int32_t R12_413890 (void) { return (int32_t)P57_Menu413890(); }
+int32_t R12_416390 (void) { return (int32_t)P57_Menu416390(); }
+int32_t R12_40A540 (void) { return (int32_t)P57_Menu40A540(); }
+int32_t R12_404850 (void) { return (int32_t)P57_Menu404850(); }
+int32_t R12_413610 (void) { return (int32_t)P57_Menu413610(); }
+int32_t R12_411FD0 (void) { return (int32_t)P57_Menu411FD0(); }
+int32_t R12_40E870 (void) { return (int32_t)P57_Menu40E870(); }
+int32_t R12_4123D0 (void) { return (int32_t)P57_Menu4123D0(); }
+int32_t R12_40F2D0 (void) { return (int32_t)P57_Menu40F2D0(); }
 int32_t R12_405CB4 (int32_t a0) { return (int32_t)P56_SaveCheck(a0); }
 int32_t R12_405F2E (int32_t a0) { return (int32_t)P47_PrepareTemp(a0); }
 void Call004122C4 (void) { GlobalSet004122C4(); }
@@ -126,6 +157,7 @@ void UiCall0041266F (void) { MenuRowsTo2_0041266F(); }
 void UiCall00412643 (void) { MenuRowsTo3_00412643(); }
 void UiCall00412487 (void) { SetupMenuTable00412487(); }
 void UiCall00417AA2 (void) { SetColorWhite00417AA2(); }
+void MenuAction40CD17 (void) { P57_MenuDone(); }
 void MenuRefresh (void) { P54_MenuTexSel(); }
 void Call004076E2 (void) { MenuWhite004076E2(); }
 void * FindCameraRecordForFrame (int frame) { return (void *)FindCameraForFrame(frame); }
@@ -164,6 +196,7 @@ void Call00510784 (void) { P55_NamesD(); }
 void Call004C64BD (void) { FreeCameraList(); }
 void Call004D3402 (void) { P48_ShutdownSystems(); }
 void Call004C372A (void) { FreeDirectorBuffer(); }
+void Call00421A39 (void) { P57_ResetTexNodes(); }
 void Call0052434A (int32_t a0) { SlotSetOff0052434A(a0); }
 void Call005243EB (void) { P48_FadeEnd(); }
 void SetCameraPosition (float x, float y, float z) { PushVec3_00523C99(x, y, z); }

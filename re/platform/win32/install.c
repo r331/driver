@@ -45,6 +45,7 @@
 #include "../../game/ported54.h"
 #include "../../game/ported55.h"
 #include "../../game/ported56.h"
+#include "../../game/ported57.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1465,4 +1466,29 @@ void re_install_all(void) {
     re_hook(0x00518137, (void*)P56_ReplayPaths, "P56_ReplayPaths");
     re_hook(0x004d263d, (void*)P56_CopsDebug, "P56_CopsDebug");
     re_hook(0x00405cb4, (void*)P56_SaveCheck, "P56_SaveCheck");
+    re_hook(0x0040a3a0, (void*)P57_Menu40A3A0, "P57_Menu40A3A0");
+    re_hook(0x004082a0, (void*)P57_Menu4082A0, "P57_Menu4082A0");
+    re_hook(0x0040e870, (void*)P57_Menu40E870, "P57_Menu40E870");
+    re_hook(0x004134a0, (void*)P57_Menu4134A0, "P57_Menu4134A0");
+    re_hook(0x00413890, (void*)P57_Menu413890, "P57_Menu413890");
+    re_hook(0x0040a540, (void*)P57_Menu40A540, "P57_Menu40A540");
+    re_hook(0x0040f2d0, (void*)P57_Menu40F2D0, "P57_Menu40F2D0");
+    re_hook(0x00413610, (void*)P57_Menu413610, "P57_Menu413610");
+    re_hook(0x00413b00, (void*)P57_Menu413B00, "P57_Menu413B00");
+    re_hook(0x00416390, (void*)P57_Menu416390, "P57_Menu416390");
+    re_hook(0x004045e0, (void*)P57_Menu4045E0, "P57_Menu4045E0");
+    re_hook(0x00404850, (void*)P57_Menu404850, "P57_Menu404850");
+    re_hook(0x00411fd0, (void*)P57_Menu411FD0, "P57_Menu411FD0");
+    re_hook(0x004123d0, (void*)P57_Menu4123D0, "P57_Menu4123D0");
+    re_hook(0x0040cd17, (void*)P57_MenuDone, "P57_MenuDone");
+    re_hook(0x004c93b1, (void*)P57_SaveDirectorIfAny, "P57_SaveDirectorIfAny");
+    re_hook(0x00406439, (void*)P57_LoadScores, "P57_LoadScores");
+    re_hook(0x00406479, (void*)P57_SaveScores, "P57_SaveScores");
+    re_hook(0x00406b51, (void*)P57_FileExists, "P57_FileExists");
+    re_hook(0x004d30a3, (void*)P57_WriteFile, "P57_WriteFile");
+    re_hook(0x004ec2ec, (void*)P57_SkipBlock, "P57_SkipBlock");
+    re_hook(0x00421a39, (void*)P57_ResetTexNodes, "P57_ResetTexNodes");
+    re_hook(0x005075f6, (void*)P57_ScreenToView, "P57_ScreenToView");
+    re_hook(0x004c92c0, (void*)SaveDirector, "SaveDirector");
+    re_hook(0x004c9310, (void*)LoadDirector, "LoadDirector");
 }

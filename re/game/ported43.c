@@ -1,6 +1,7 @@
 /* Векторная математика, CD-фейд, слоты — восстановлено из Game.exe (cdecl). */
 #include "ported43.h"
 #include "ported56.h"
+#include "ported57.h"
 #include "ported51.h"
 #include "ported44.h"
 #include <math.h>
@@ -184,5 +185,6 @@ void re_init_consts(void) {
   P44_InitTables();
   P51_Half = 0.5f; P19_DivW = 640.0f; P19_DivH = 480.0f;
   P56_InitConsts();
+  P57_InitConsts();
 #endif
 }

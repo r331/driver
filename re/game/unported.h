@@ -7,6 +7,29 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    V(P57_MenuInit, 0x0040c8a0, (uint32_t tbl, int32_t n), (tbl, n)) \
+    R(int32_t, P57_MenuStep, 0x0040c8f1, (uint32_t tbl, int32_t *state), (tbl, state)) \
+    V(P57_Setup40A41C, 0x0040a41c, (void), ()) \
+    V(P57_Setup40831C, 0x0040831c, (void), ()) \
+    V(P57_Setup41351C, 0x0041351c, (void), ()) \
+    V(P57_Setup41390C, 0x0041390c, (void), ()) \
+    V(P57_Setup40A5C6, 0x0040a5c6, (void), ()) \
+    V(P57_Setup413691, 0x00413691, (void), ()) \
+    V(P57_Setup413B7C, 0x00413b7c, (void), ()) \
+    V(P57_Setup41640C, 0x0041640c, (void), ()) \
+    V(P57_Setup40479B, 0x0040479b, (void), ()) \
+    V(P57_Setup4048DD, 0x004048dd, (void), ()) \
+    V(P57_Setup412087, 0x00412087, (void), ()) \
+    V(P57_Setup412280, 0x00412280, (void), ()) \
+    V(P57_Setup4122E7, 0x004122e7, (void), ()) \
+    V(P57_Setup412487, 0x00412487, (void), ()) \
+    V(P57_Setup41269B, 0x0041269b, (void), ()) \
+    V(P57_Setup412702, 0x00412702, (void), ()) \
+    V(P57_Fn51C900, 0x0051c900, (void), ()) \
+    V(P57_Fn51CAA7, 0x0051caa7, (void *f), (f)) \
+    V(P57_Fn51CB98, 0x0051cb98, (void *f), (f)) \
+    V(P57_Fn4221BF, 0x004221bf, (int32_t i), (i)) \
+    V(P57_Fn507672, 0x00507672, (float *x, float *y), (x, y)) \
     V(P56_CallSetVoice, 0x00523cda, (uint32_t a0, int32_t a1, float a2, float a3, float a4), (a0, a1, a2, a3, a4)) \
     R(uint8_t *, P56_FindIcon, 0x004ec91e, (const char *a0), (a0)) \
     V(P56_DrawText, 0x0051755e, (int32_t a0, int32_t a1, const char *a2, int32_t a3, int32_t a4, int32_t a5, int32_t a6, int32_t a7), (a0, a1, a2, a3, a4, a5, a6, a7)) \
