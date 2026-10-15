@@ -1,5 +1,6 @@
 /* Блок карты в слоты и рисование объектов карты — восстановлено из Game.exe (004ed5f8, 004ee18b, 004ee4b7). */
 #include "ported87.h"
+#include "ported92.h"
 #include <string.h>
 
 GAME_VAR_DEF(int32_t, P87_CntA, 0x00b31edc)
@@ -10,12 +11,10 @@ GAME_VAR_DEF(p87_lumps_t, P87_SlotLumpA, 0x00d00220)
 
 #ifdef RE_HOOK_BUILD
 #  define P87_LIST_END ((void **)0x00cfe7a0)
-#  define P87_AxisPath 1
 static void list_init(void) {}
 #else
 static void *p87_list[256];
 #  define P87_LIST_END (&p87_list[256])
-#  define P87_AxisPath 0
 static void list_init(void) { if (!P87_ListPtr) P87_ListPtr = p87_list; }
 #endif
 
@@ -112,15 +111,13 @@ static void draw_obj(const uint8_t *obj, int kind) {
   int32_t ang = rd32(obj + 0x18);
   int32_t low = ((int32_t *)P80_Boxes[mi])[7] < 200;           /* 00cf56fc + модель·0x20 */
   if (kind == 0 && (flags & 0x80)) {
-    P87_Fn42A5DE(mref, ang, p, vis == 2 ? 1 : 0);
+    P92_DrawSpin(mref, ang, p, vis == 2 ? 1 : 0);   /* 0042a5de */
   } else if (kind == 1 && (flags & 0x4000) == 0 && (flags & 0x2400) != 0 && rd16(mdl + 0x16) == 1) {
     P87_Fn42A423(mref, ang, p, vis == 1 ? 0 : vis == 2 ? 1 : 0);
   } else {
     int32_t mode = vis == 1 ? 0 : vis == 2 ? 1 : (low ? 0 : 2);
-    /* native: 0042982e (осевой вариант рисования модели) ещё не перенесена — временно общий путь 00429143 (тот же обход записей) */
-    if (P87_AxisPath && (flags & 0x4000) == 0 && (ang & 0x3ff) == 0 && (flags & 0x30) != 0) { P87_Fn42982E(mref, ang, p, mode); }
-    else
-    P84_DrawModelIdx(mref, ang, p, mode);
+    if ((flags & 0x4000) == 0 && (ang & 0x3ff) == 0 && (flags & 0x30) != 0) P92_DrawAxis(mref, ang, p, mode);   /* 0042982e */
+    else P84_DrawModelIdx(mref, ang, p, mode);
   }
   P44_MatPtr = (float *)P44_ViewMatT;
 }

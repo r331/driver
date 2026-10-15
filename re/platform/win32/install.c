@@ -80,6 +80,7 @@
 #include "../../game/ported89.h"
 #include "../../game/ported90.h"
 #include "../../game/ported91.h"
+#include "../../game/ported92.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1760,4 +1761,6 @@ void re_install_all(void) {
     re_hook(0x004ee8f4, (void*)P89_DrawMap, "P89_DrawMap");
     re_hook(0x0042a423, (void*)P90_DrawSingle, "P90_DrawSingle");
     re_hook(0x004a66ef, (void*)P91_ReleaseTraffic, "P91_ReleaseTraffic");
+    re_hook(0x0042982e, (void*)P92_DrawAxis, "P92_DrawAxis");
+    re_hook(0x0042a5de, (void*)P92_DrawSpin, "P92_DrawSpin");
 }

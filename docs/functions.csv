@@ -50,7 +50,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040110e,thunk_FUN_0048f7fe,,,,,,5,ported
 00401118,thunk_FUN_0051b974,,,,,,5,todo
 0040111d,thunk_FUN_004ac702,Thunk_004AC702,manual,Thunks,,,5,ported
-00401122,thunk_FUN_0042a5de,,,,,,5,todo
+00401122,thunk_FUN_0042a5de,,,,,,5,ported
 00401127,thunk_FUN_0048c47e,,,,,,5,todo
 0040112c,thunk_FUN_0051aacd,,,,,,5,ported
 00401131,thunk_FUN_004b9933,,,,,,5,ported
@@ -866,7 +866,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040257c,thunk_FUN_004079aa,,,,,,5,todo
 00402581,thunk_FUN_004262ce,,,,,,5,todo
 00402586,thunk_FUN_004a6a57,,,,,,5,todo
-0040258b,thunk_FUN_0042982e,,,,,,5,todo
+0040258b,thunk_FUN_0042982e,,,,,,5,ported
 00402595,thunk_FUN_004c09e6,,,,,,5,todo
 0040259a,thunk_FUN_004ab0df,Thunk_004AB0DF,manual,Thunks,,,5,ported
 0040259f,thunk_FUN_004a2c5b,Thunk_004A2C5B,manual,Thunks,,,5,ported
@@ -1981,9 +1981,9 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00428928,FUN_00428928,LightMatrices,manual,Ported83,,,577,ported
 00428b69,FUN_00428b69,DrawModel,manual,render,,,1498,ported
 00429143,FUN_00429143,DrawModelIdx,manual,render,,,1771,ported
-0042982e,FUN_0042982e,,,,,,1442,todo
+0042982e,FUN_0042982e,P92_DrawAxis,manual,,,,1442,ported
 0042a423,FUN_0042a423,P90_DrawSingle,manual,render,,,443,ported
-0042a5de,FUN_0042a5de,,,,,,1043,todo
+0042a5de,FUN_0042a5de,P92_DrawSpin,manual,,,,1043,ported
 0042a9f1,FUN_0042a9f1,,,,,,3546,todo
 0042b7cb,FUN_0042b7cb,,,,,,1468,todo
 0042d2b0,FUN_0042d2b0,Reset0042D2B0,manual,UIMisc,,,25,ported
