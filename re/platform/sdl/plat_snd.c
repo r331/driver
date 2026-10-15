@@ -19,5 +19,7 @@ void plat_snd_play(int h,int l){snd_t*s=S(h); if(s){s->playing=1;s->loop=l;}}
 void plat_snd_stop(int h){snd_t*s=S(h); if(s) s->playing=0;}
 void plat_snd_set(int h,int v,int p,int n){snd_t*s=S(h); if(s){s->vol=v;s->pitch=p;s->pan=n;}}
 void plat_snd_pos3d(int h,float x,float y,float z){snd_t*s=S(h); if(s){s->x=x;s->y=y;s->z=z;}}
-int plat_cd_play(int t){(void)t;return 0;}
-void plat_cd_stop(void){}
+static int g_cd_track=0;
+int plat_cd_play(int t){ if(t<1||t>99) return 0; g_cd_track=t; return 1;}
+void plat_cd_stop(void){ g_cd_track=0; }
+int plat_cd_current(void){ return g_cd_track; }

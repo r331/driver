@@ -32,4 +32,5 @@ void plat_snd_set(int h, int volume, int pitch_hz, int pan);
 void plat_snd_pos3d(int h, float x, float y, float z);
 int  plat_cd_play(int track);
 void plat_cd_stop(void);
+int  plat_cd_current(void);
 #endif

@@ -21,3 +21,4 @@ void plat_snd_set(int h,int v,int p,int n){(void)h;(void)v;(void)p;(void)n;}
 void plat_snd_pos3d(int h,float x,float y,float z){(void)h;(void)x;(void)y;(void)z;}
 int plat_cd_play(int t){(void)t;return 0;}
 void plat_cd_stop(void){}
+int plat_cd_current(void){return 0;}
