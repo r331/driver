@@ -325,7 +325,18 @@
     V(P46_Fn42282F, 0x0042282f, (void *node, int32_t a1), (node, a1)) \
     V(P46_Fn4D6354, 0x004d6354, (void), ()) \
     V(P46_Fn4DF024, 0x004df024, (void *p, int32_t a1), (p, a1)) \
-    V(P46_Fn51BE3C, 0x0051be3c, (void), ())
+    V(P46_Fn51BE3C, 0x0051be3c, (void), ()) \
+    V(P58_Fn407E2F, 0x00407e2f, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, void *a4, int32_t a5), (a0, a1, a2, a3, a4, a5)) \
+    V(P58_Fn4185D2, 0x004185d2, (uint32_t tbl, int32_t a1, uint32_t tbl2), (tbl, a1, tbl2)) \
+    R(int32_t, P58_Fn418675, 0x00418675, (uint32_t tbl, int32_t cur), (tbl, cur)) \
+    V(P58_Fn416605, 0x00416605, (void), ()) \
+    R(int32_t, P58_Fn416794, 0x00416794, (void), ()) \
+    V(P58_Fn51763A, 0x0051763a, (const char *a0, int32_t a1), (a0, a1)) \
+    V(P58_Fn4AA4EA, 0x004aa4ea, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, void *a4, int32_t a5), (a0, a1, a2, a3, a4, a5)) \
+    V(P58_Fn506C96, 0x00506c96, (void *a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5), (a0, a1, a2, a3, a4, a5)) \
+    V(P58_Fn40CFDF, 0x0040cfdf, (int32_t x, int32_t y, uint32_t tbl, const char *name, int32_t a4), (x, y, tbl, name, a4)) \
+    V(P58_Fn406875, 0x00406875, (void *a0), (a0)) \
+    V(P58_Fn413E37, 0x00413e37, (void), ())
 
 #ifdef RE_HOOK_BUILD
 #  define UNPORTED_V(name, addr, params, args) \

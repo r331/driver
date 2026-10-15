@@ -43,6 +43,7 @@
 #include "../game/ported55.h"
 #include "../game/ported56.h"
 #include "../game/ported57.h"
+#include "../game/ported58.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -1881,8 +1882,92 @@ static int test_p57(void) {
   return f;
 }
 
+/* ported58: опрос меню/цикл экранов переопределены, иначе циклы не выходят */
+int32_t P58_Fn418675(uint32_t tbl, int32_t cur) { (void)tbl; (void)cur; return -1; }
+int32_t P58_Fn416794(void) { return 7; }
+static int test_p58(void) {
+  int f = 0;
+#undef CK
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p58 fail line %d\n",__LINE__); } } while (0)
+  /* 00524e22 */
+  CK(P58_ParseInt((const uint8_t *)"123") == 123); CK(P58_ParseInt((const uint8_t *)"-45 x") == -45);
+  CK(P58_ParseInt((const uint8_t *)"12a") == 0); CK(P58_ParseInt((const uint8_t *)"") == 0);
+  /* 00417e0d */
+  P58_MenuSel = 1; P58_MenuSwitch(); CK(P58_MenuIdx == 1 && P58_MenuFn == 0x00401dc5);
+  P58_MenuSel = 4; P58_MenuSwitch(); CK(P58_MenuIdx == 4 && P58_MenuFn == 0x004013c5);
+  /* 00413381 / 004133b4 */
+  { int32_t x = 0, y = 0; memset(P58_Cheats, 0, sizeof P58_Cheats);
+    P58_Cheats[0].name = "AB"; P58_Cheats[0].var = &x; P58_Cheats[1].name = "CD"; P58_Cheats[1].var = &y;
+    P58_CheatByName("CD"); CK(x == 0 && y == 1); P58_CheatByName("ZZ"); CK(x == 0);
+    P58_CheatsAll(); CK(x == 1 && y == 1); memset(P58_Cheats, 0, sizeof P58_Cheats); }
+  /* 0040b1cc: ширина = сумма по глифам */
+  { memset(P58_Font, 0, sizeof P58_Font);
+    uint8_t *t = &P58_Font[0] + 0x806; int16_t a = 7, b = 3, fl = 1;
+    memcpy(t + 0xc, &a, 2); memcpy(t + 0xa, &b, 2);
+    memcpy(t + 0xe + 'A' * 8, &fl, 2); t['A' * 8 + 0x14] = 10;        /* 'A': 10 + 3 */
+    CK(P58_TextWidth((const uint8_t *)"AB", 1) == 13.0f + 7.0f); CK(P58_TextWidth((const uint8_t *)"", 1) == 0.0f); }
+  /* 00407dba: список пунктов (записи 20 байт): обходит до бита 4, считает всех */
+  { int16_t it[40]; memset(it, 0, sizeof it); it[4] = 8; it[14] = 8; it[24] = 4;
+    P58_ItemList = it; P58_ItemsDraw(5); P58_ItemList = NULL; P58_ItemsDraw(5); }
+  /* 004efc03 / 004f5dcd / 004f8d6d / 004eb19b / 004a3354: освобождение */
+  { P58_Tab4EFC03 = (p58_rec_t *)DebugMalloc(3 * (int)sizeof(p58_rec_t), "t", 1); P58_Cnt4EFC03 = 3;
+    for (int i = 0; i < 3; i++) P58_Tab4EFC03[i].p = DebugMalloc(8, "t", 1);
+    P58_FreeRecs(); CK(P58_Tab4EFC03 == NULL && P58_Cnt4EFC03 == 0); }
+  { P58_CntC814E8 = 2; P58_PtrsC816A0 = (void **)DebugMalloc(2 * (int)sizeof(void *), "t", 1);
+    P58_PtrsC816A0[0] = DebugMalloc(4, "t", 1); P58_PtrsC816A0[1] = DebugMalloc(4, "t", 1);
+    P58_LimC810AC = (int32_t *)DebugMalloc(8, "t", 1); P58_LimC810AC[0] = 10; P58_LimC810AC[1] = 20;
+    /* 004f6011: v/0x32 = 3 -> первый, 15 -> второй, 40 -> нет (флаги погони) */
+    CK(P58_FindChunk(3 * 0x32) == P58_PtrsC816A0[0]); CK(P58_FindChunk(15 * 0x32) == P58_PtrsC816A0[1]);
+    CK(P58_FindChunk(0) == NULL); CK(P56_Blk84[1] != 0xff0);
+    CK(P58_FindChunk(40 * 0x32) == NULL && P56_Blk84[1] == 0xff0 && P56_Blk84[10] == 1 && P56_Blk84[16] == 0x5a);
+    P58_FreeLists(); CK(P58_CntC814E8 == 0 && P58_PtrsC816A0 == NULL && P58_LimC810AC == NULL); }
+  { p58_list_t l; l.count = 2; l.items = (void **)DebugMalloc(2 * (int)sizeof(void *), "t", 1);
+    for (int i = 0; i < 2; i++) { void **e = (void **)DebugMalloc((int)sizeof(void *), "t", 1); *e = (i == 0) ? DebugMalloc(4, "t", 1) : NULL; l.items[i] = e; }
+    P58_FreeNames(&l); CK(l.count == 0 && l.items == NULL); P58_FreeNames(&l); }
+  { P58_CntB31EBC = 2; P58_ListB31EC4 = (p58_slot_t *)DebugMalloc(2 * (int)sizeof(p58_slot_t), "t", 1);
+    P58_ListB31EC4[0].p = DebugMalloc(4, "t", 1); P58_ListB31EC4[1].p = NULL;
+    P58_FreeList(); CK(P58_ListB31EC4 == NULL && P58_CntB31EBC == 0); }
+  { P58_GridW = 2; P58_GridH = 2; P58_Grid = (void **)DebugMalloc(4 * (int)sizeof(void *), "t", 1);
+    for (int i = 0; i < 4; i++) P58_Grid[i] = NULL;
+    p58_cell_t *c = (p58_cell_t *)DebugMalloc((int)sizeof(p58_cell_t), "t", 1); c->items = DebugMalloc(4, "t", 1); P58_Grid[2] = c;
+    P58_FreeGrid(); CK(P58_Grid == NULL && P58_GridW == 0 && P58_GridH == 0); }
+  /* 0051be3c: две записи; у первой счётчик 1 -> шаг 15 слов */
+  { int32_t buf[24]; memset(buf, 0, sizeof buf); buf[0] = 2; buf[1] = 3; buf[2] = 1 << 16; buf[16] = 7;
+    P58_BlkBuf = buf; P58_BuildBlockIndex();
+    CK(P58_BlkIdx[3] == &buf[1] && P58_BlkIdx[7] == &buf[16] && P58_BlkIdx[4] == NULL); }
+  /* 00415f67 */
+  P58_SC559D8 = 1; P58_SC559E0 = 2; P58_SC559E4 = 3; P58_SC559E8 = 4; P58_SC559EC = 5;
+  P58_Page = 3; P58_PrepPage(); CK(P58_TabPtr == 0x0054e070 && P58_S54DFC8 == 1 && P58_S54E008 == 5);
+  P58_Page = 9; P58_PrepPage(); CK(P58_Page == 1 && P58_TabPtr == 0x0054e020);
+  /* 00408600: после последнего демо — снова с 0 */
+  P58_InitConsts(); P58_DemoNo = 3; P58_PlayDemo(-1); CK(P58_DemoNo == 0 && P58_DemoFlag == 0 && P58_S5F7E5C == 0);
+  P58_PlayDemo(2); CK(P58_DemoNo == 0);
+  /* 00516da0, 004a9b1a, 00506bff, 0040cf35 — только вызовы, не падают */
+  P58_LangNo = 9; P58_LangStrings(); CK(P58_LangNo == 0);
+  P58_DrawLogo(); P58_SB87EB0 = 0; memset(P58_Objs, 0, sizeof P58_Objs); P58_Objs[2][0x10] = 1; P58_DrawObjs(); P58_SB87EB0 = 1; P58_DrawObjs(); P58_SB87EB0 = 0;
+  P58_Backgrounds();
+  /* 00419f00 / 00419ab0 / 00413d70 / 00416540: циклы меню выходят */
+  CK(P58_Menu419F00() == -1); CK(P58_Menu419AB0() == -1); CK(P58_Menu413D70() == 0);
+  P58_S5FE9F8 = 2; CK(P58_Menu416540() == 7);
+  /* 00405e79: файл SAVES\GAME3.BIN с подписью и суммой */
+  { uint8_t sb[0x38]; memset(sb, 0, sizeof sb); memcpy(sb, "slot", 4);
+    uint32_t hdr[2] = { 0x57231356u, (uint32_t)SumBytes(sb, 0x38) };
+    FILE *fp = fopen("SAVES\\GAME3.BIN", "wb"); CK(fp != NULL);
+    if (fp) { fwrite(hdr, 1, 8, fp); fwrite(sb, 1, 0x38, fp); fclose(fp);
+      char out[0x40]; memset(out, 'x', sizeof out);
+      CK(P58_SaveSlot(2, out) == 1 && strcmp(out, "slot") == 0); CK(P58_SaveSlot(7, out) == 0);
+      hdr[1] ^= 1; fp = fopen("SAVES\\GAME3.BIN", "wb"); fwrite(hdr, 1, 8, fp); fwrite(sb, 1, 0x38, fp); fclose(fp);
+      CK(P58_SaveSlot(2, out) == 0); remove("SAVES\\GAME3.BIN"); } }
+  /* 00405bfa: CONFIG.DAT = 8 + 0x10c байт, только при включённом сохранении */
+  remove("config.dat"); P58_CfgOn = 0; P58_SaveConfig(); { FILE *fp = fopen("config.dat", "rb"); CK(fp == NULL); if (fp) fclose(fp); }
+  P58_CfgOn = 1; P58_CfgLock = 0; P58_SaveConfig();
+  { FILE *fp = fopen("config.dat", "rb"); CK(fp != NULL); if (fp) { fseek(fp, 0, SEEK_END); CK(ftell(fp) == 8 + 0x10c); fclose(fp); } }
+  CK(P58_CfgHdr[0] == 0x93587031u); remove("config.dat"); P58_CfgOn = 0;
+  return f;
+}
+
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_p55() | test_p56() | test_p57() | test_p58() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

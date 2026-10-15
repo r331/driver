@@ -2,6 +2,7 @@
 #include "ported43.h"
 #include "ported56.h"
 #include "ported57.h"
+#include "ported58.h"
 #include "ported51.h"
 #include "ported44.h"
 #include <math.h>
@@ -186,5 +187,6 @@ void re_init_consts(void) {
   P51_Half = 0.5f; P19_DivW = 640.0f; P19_DivH = 480.0f;
   P56_InitConsts();
   P57_InitConsts();
+  P58_InitConsts();
 #endif
 }

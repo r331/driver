@@ -46,6 +46,7 @@
 #include "../../game/ported55.h"
 #include "../../game/ported56.h"
 #include "../../game/ported57.h"
+#include "../../game/ported58.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -85,17 +86,21 @@ void P57_Setup41269B (void) { MenuAllRowsTo2_0041269B(); }
 void P57_Setup412702 (void) { Ui00412702(); }
 void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
+int32_t P55_Fn405E79 (int32_t a0, void *a1) { return (int32_t)P58_SaveSlot(a0, a1); }
 void P55_Fn5248CD (void) { P25_CDResume(); }
 int32_t P55_Fn4245E2 (void) { return (int32_t)GetVarB1C0D8(); }
 void P55_Fn4264A7 (void) { Ui004264A7(); }
 int32_t P53_Fn4045E0 (void) { return (int32_t)P57_Menu4045E0(); }
+void P48_Fn516DA0 (void) { P58_LangStrings(); }
 int32_t P47_Fn40A3A0 (void) { return (int32_t)P57_Menu40A3A0(); }
+void P47_Fn405BFA (void) { P58_SaveConfig(); }
 void N14_Fn4D2ADE (int32_t a0) { AddClamp4095_004D2ADE(a0); }
 void N14_Fn4A7EE9 (int32_t a0) { SetVarD1193C(a0); }
 void N14_Fn48A627 (void) { P12_Fn0048A627(); }
 uint32_t N14_Fn503ECC (const uint8_t* a0) { return (uint32_t)PackRGB00503ECC(a0); }
 void Call0040CCB4 (uint32_t a0, uint32_t a1) { P45_Wait(a0, a1); }
 int32_t R12_4082A0 (void) { return (int32_t)P57_Menu4082A0(); }
+int32_t R12_413D70 (void) { return (int32_t)P58_Menu413D70(); }
 int32_t R12_413B00 (void) { return (int32_t)P57_Menu413B00(); }
 int32_t R12_4134A0 (void) { return (int32_t)P57_Menu4134A0(); }
 int32_t R12_413890 (void) { return (int32_t)P57_Menu413890(); }
@@ -143,6 +148,7 @@ void UiCall004184F5 (void) { P19_FadeStep(); }
 void UiCall00419DB3 (void) { MenuWhite00419DB3(); }
 void UiCall0041A085 (void) { SetColorWhite0041A085(); }
 void UiCall00417620 (void) { LoadSliderIcons00417620(); }
+void UiCall00419AB0 (void) { P58_Menu419AB0(); }
 void UiCall0041B059 (void) { Ui0041B059(); }
 void UiCall0041AF29 (int32_t a0) { MenuWhite0041AF29(a0); }
 void UiCall0041F2A0 (void) { P31_ReleaseDirectDraw(); }
@@ -156,6 +162,7 @@ void UiCall00412087 (void) { SetupMenuTable00412087(); }
 void UiCall0041266F (void) { MenuRowsTo2_0041266F(); }
 void UiCall00412643 (void) { MenuRowsTo3_00412643(); }
 void UiCall00412487 (void) { SetupMenuTable00412487(); }
+void UiCall00408600 (int32_t a0) { P58_PlayDemo(a0); }
 void UiCall00417AA2 (void) { SetColorWhite00417AA2(); }
 void MenuAction40CD17 (void) { P57_MenuDone(); }
 void MenuRefresh (void) { P54_MenuTexSel(); }
@@ -164,6 +171,7 @@ void * FindCameraRecordForFrame (int frame) { return (void *)FindCameraForFrame(
 int IsKeyDown (int sc) { return (int)IsFlagSetNotMasked_004E383A(sc); }
 void Call00411A9D (void) { MenuHiliteWhite00411A9D(); }
 void Call0041AFCA (void) { P55_NamesC(); }
+void P4Call004A3354 (void) { P58_FreeGrid(); }
 void P4Call0041A8CD (void) { P12_Fn0041A8CD(); }
 void P4Call0051AA5B (void) { P54_AllocRoadbits(); }
 void P4Call004D2D85 (int32_t a0) { Call004D2D85(a0); }
@@ -201,3 +209,4 @@ void Call0052434A (int32_t a0) { SlotSetOff0052434A(a0); }
 void Call005243EB (void) { P48_FadeEnd(); }
 void SetCameraPosition (float x, float y, float z) { PushVec3_00523C99(x, y, z); }
 void P46_Fn4D6354 (void) { P53_StepBounds(); }
+void P46_Fn51BE3C (void) { P58_BuildBlockIndex(); }

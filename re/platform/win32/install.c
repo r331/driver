@@ -46,6 +46,7 @@
 #include "../../game/ported55.h"
 #include "../../game/ported56.h"
 #include "../../game/ported57.h"
+#include "../../game/ported58.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1491,4 +1492,29 @@ void re_install_all(void) {
     re_hook(0x005075f6, (void*)P57_ScreenToView, "P57_ScreenToView");
     re_hook(0x004c92c0, (void*)SaveDirector, "SaveDirector");
     re_hook(0x004c9310, (void*)LoadDirector, "LoadDirector");
+    re_hook(0x00417e0d, (void*)P58_MenuSwitch, "P58_MenuSwitch");
+    re_hook(0x00413381, (void*)P58_CheatsAll, "P58_CheatsAll");
+    re_hook(0x004133b4, (void*)P58_CheatByName, "P58_CheatByName");
+    re_hook(0x00407dba, (void*)P58_ItemsDraw, "P58_ItemsDraw");
+    re_hook(0x004efc03, (void*)P58_FreeRecs, "P58_FreeRecs");
+    re_hook(0x004f5dcd, (void*)P58_FreeLists, "P58_FreeLists");
+    re_hook(0x004f8d6d, (void*)P58_FreeNames, "P58_FreeNames");
+    re_hook(0x00419f00, (void*)P58_Menu419F00, "P58_Menu419F00");
+    re_hook(0x00419ab0, (void*)P58_Menu419AB0, "P58_Menu419AB0");
+    re_hook(0x00413d70, (void*)P58_Menu413D70, "P58_Menu413D70");
+    re_hook(0x00416540, (void*)P58_Menu416540, "P58_Menu416540");
+    re_hook(0x00415f67, (void*)P58_PrepPage, "P58_PrepPage");
+    re_hook(0x0051be3c, (void*)P58_BuildBlockIndex, "P58_BuildBlockIndex");
+    re_hook(0x00408600, (void*)P58_PlayDemo, "P58_PlayDemo");
+    re_hook(0x00516da0, (void*)P58_LangStrings, "P58_LangStrings");
+    re_hook(0x004a9b1a, (void*)P58_DrawLogo, "P58_DrawLogo");
+    re_hook(0x00506bff, (void*)P58_DrawObjs, "P58_DrawObjs");
+    re_hook(0x00524e22, (void*)P58_ParseInt, "P58_ParseInt");
+    re_hook(0x004eb19b, (void*)P58_FreeList, "P58_FreeList");
+    re_hook(0x004a3354, (void*)P58_FreeGrid, "P58_FreeGrid");
+    re_hook(0x004f6011, (void*)P58_FindChunk, "P58_FindChunk");
+    re_hook(0x0040cf35, (void*)P58_Backgrounds, "P58_Backgrounds");
+    re_hook(0x00405e79, (void*)P58_SaveSlot, "P58_SaveSlot");
+    re_hook(0x00405bfa, (void*)P58_SaveConfig, "P58_SaveConfig");
+    re_hook(0x0040b1cc, (void*)P58_TextWidth, "P58_TextWidth");
 }
