@@ -24,6 +24,14 @@ void plat_draw_tris(const plat_vertex *v, int count);
 void plat_clear(uint32_t color, int clear_z);
 void plat_flip(void);
 void plat_blit2d(int tex, int sx, int sy, int sw, int sh, int dx, int dy);
+/* Состояние устройства в терминах Direct3D 6/7 (номера D3DRENDERSTATETYPE / D3DTEXTURESTAGESTATETYPE и значения как в DX):
+   state: 7 ZENABLE, 14 ZWRITEENABLE, 15 ALPHATESTENABLE, 19 SRCBLEND, 20 DESTBLEND, 22 CULLMODE, 23 ZFUNC (1..8 = D3DCMP), 24 ALPHAREF, 25 ALPHAFUNC, 27 ALPHABLENDENABLE.
+   В SDL-варианте применяется к GL, в hook-варианте уходит в IDirect3DDevice3 игры. */
+void plat_scene_begin(void);
+void plat_scene_end(void);
+void plat_set_render_state(int state, uint32_t value);
+void plat_set_tex_stage(int stage, int type, uint32_t value);   /* type 1 COLOROP, 16 MAGFILTER, 17 MINFILTER */
+void plat_set_viewport(int x, int y, int w, int h);
 /* Константы смешивания = значения D3DBLEND (1 ZERO, 2 ONE, 3 SRCCOLOR, 4 INVSRCCOLOR, 5 SRCALPHA, 6 INVSRCALPHA, 7 DESTALPHA, 8 INVDESTALPHA, 9 DESTCOLOR, 10 INVDESTCOLOR).
    color/specular вершины = 0xAARRGGBB; x,y в пикселях окна, z 0..1, rhw = 1/w (0 → 1). */
 /* Подключение GL-контекста (SDL-окно или OSMesa); swap может быть NULL (offscreen). */

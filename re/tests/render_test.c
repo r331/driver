@@ -64,6 +64,17 @@ int test_render(const char *png_path) {
     plat_draw_tris(n, 6); plat_draw_tris(f, 6);
     /* 5) blit2d из текстуры 4x4: левая верхняя клетка 2x2 (белая, у линейного фильтра берём пиксель в центре) -> (200,150) */
     plat_blit2d(tx, 0, 0, 2, 2, 200, 150);
+    /* 6) ZFUNC через plat_set_render_state: GREATER(D3DCMP 5) — дальний (z .7) проходит поверх красного (.5), ближний (.3) нет */
+    {
+        #define QUAD(arr, x0, y0, x1, y1, z, c) plat_vertex arr[6] = { { x0, y0, z, 1, c }, { x1, y0, z, 1, c }, { x1, y1, z, 1, c }, { x0, y0, z, 1, c }, { x1, y1, z, 1, c }, { x0, y1, z, 1, c } }
+        uint32_t blu = 0xFF0000FF;
+        QUAD(r1, 232, 130, 250, 150, .5f, red); QUAD(r2, 232, 155, 250, 175, .5f, red);
+        QUAD(g1, 232, 130, 250, 150, .3f, grn); QUAD(b2, 232, 155, 250, 175, .7f, blu);
+        plat_draw_tris(r1, 6); plat_draw_tris(r2, 6);
+        plat_set_render_state(23, 5);
+        plat_draw_tris(g1, 6); plat_draw_tris(b2, 6);
+        plat_set_render_state(23, 4);
+    }
     plat_flip();
     uint32_t *px = malloc(W * H * 4); CHECK(plat_render_readback(px) == 0);
     CHECK(near_px(PX(250, 5), 0x20, 0x40, 0xC0));          /* фон */
@@ -76,6 +87,8 @@ int test_render(const char *png_path) {
     CHECK(near_px(PX(145, 165), 255, 0, 0));                /* z-тест: красный впереди */
     CHECK(near_px(PX(175, 175), 0, 255, 0));                /* зелёный виден вне красного */
     CHECK(near_px(PX(201, 151), 255, 255, 255));            /* blit2d */
+    CHECK(near_px(PX(240, 140), 255, 0, 0));                /* ZFUNC GREATER: ближний зелёный не прошёл */
+    CHECK(near_px(PX(240, 165), 0, 0, 255));                /* ZFUNC GREATER: дальний синий прошёл */
     CHECK(png_write_rgba(png_path, px, W, H) == 0);
     printf("render: OK (%s)\n", png_path);
     free(px); plat_tex_free(tx); plat_render_shutdown();

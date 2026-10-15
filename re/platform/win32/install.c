@@ -10,6 +10,7 @@
 #include "../../game/ported19.h"
 #include "../../game/ported20.h"
 #include "../../game/ported21.h"
+#include "../../game/ported22.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1126,4 +1127,15 @@ void re_install_all(void) {
     re_hook(0x004d53e8, (void*)P21_DrawFps, "P21_DrawFps");
     re_hook(0x004d78f3, (void*)P21_FrameTicks, "P21_FrameTicks");
     re_hook(0x004bf910, (void*)P21_FpsToBuf, "P21_FpsToBuf");
+    re_hook(0x0041e037, (void*)P22_BeginScene, "P22_BeginScene");
+    re_hook(0x0041e056, (void*)P22_EndScene, "P22_EndScene");
+    re_hook(0x0041de1d, (void*)P22_SetAlphaRef, "P22_SetAlphaRef");
+    re_hook(0x0041e28a, (void*)P22_SetZFunc, "P22_SetZFunc");
+    re_hook(0x0041ddc5, (void*)P22_SetAlphaFunc, "P22_SetAlphaFunc");
+    re_hook(0x0041e404, (void*)P22_SetZWrite, "P22_SetZWrite");
+    re_hook(0x0041e215, (void*)P22_SetCull, "P22_SetCull");
+    re_hook(0x0041dd37, (void*)P22_SetAlphaTest, "P22_SetAlphaTest");
+    re_hook(0x0041f6a9, (void*)P22_SetTexFilter, "P22_SetTexFilter");
+    re_hook(0x0041e08a, (void*)P22_SetViewport, "P22_SetViewport");
+    re_hook(0x0041e14f, (void*)P22_SetTexOp, "P22_SetTexOp");
 }

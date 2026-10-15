@@ -21,12 +21,13 @@ enum {
     GL_ARRAY_BUFFER = 0x8892, GL_STREAM_DRAW = 0x88E0, GL_TRIANGLES = 0x0004, GL_VERTEX_SHADER = 0x8B31, GL_FRAGMENT_SHADER = 0x8B30,
     GL_COMPILE_STATUS = 0x8B81, GL_LINK_STATUS = 0x8B82, GL_INFO_LOG_LENGTH = 0x8B84, GL_UNPACK_ALIGNMENT = 0x0CF5, GL_PACK_ALIGNMENT = 0x0D05,
     GL_ZERO = 0, GL_ONE = 1, GL_SRC_COLOR = 0x0300, GL_ONE_MINUS_SRC_COLOR = 0x0301, GL_SRC_ALPHA = 0x0302, GL_ONE_MINUS_SRC_ALPHA = 0x0303,
-    GL_DST_ALPHA = 0x0304, GL_ONE_MINUS_DST_ALPHA = 0x0305, GL_DST_COLOR = 0x0306, GL_ONE_MINUS_DST_COLOR = 0x0307, GL_VERSION = 0x1F02
+    GL_DST_ALPHA = 0x0304, GL_ONE_MINUS_DST_ALPHA = 0x0305, GL_DST_COLOR = 0x0306, GL_ONE_MINUS_DST_COLOR = 0x0307, GL_VERSION = 0x1F02,
+    GL_NEVER = 0x0200, GL_LESS = 0x0201, GL_EQUAL = 0x0202, GL_GREATER = 0x0204, GL_NOTEQUAL = 0x0205, GL_GEQUAL = 0x0206, GL_SCISSOR_TEST = 0x0C11
 };
 #define GLFUNCS(X) \
  X(void, Enable, (GLenum)) X(void, Disable, (GLenum)) X(void, BlendFunc, (GLenum, GLenum)) X(void, DepthFunc, (GLenum)) \
  X(void, DepthMask, (GLboolean)) X(void, ClearColor, (GLfloat, GLfloat, GLfloat, GLfloat)) X(void, Clear, (GLbitfield)) \
- X(void, Viewport, (GLint, GLint, GLsizei, GLsizei)) X(void, ReadPixels, (GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, void *)) \
+ X(void, Viewport, (GLint, GLint, GLsizei, GLsizei)) X(void, Scissor, (GLint, GLint, GLsizei, GLsizei)) X(void, ReadPixels, (GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, void *)) \
  X(void, PixelStorei, (GLenum, GLint)) X(void, Finish, (void)) X(const unsigned char *, GetString, (GLenum)) \
  X(void, GenTextures, (GLsizei, GLuint *)) X(void, DeleteTextures, (GLsizei, const GLuint *)) X(void, BindTexture, (GLenum, GLuint)) \
  X(void, TexImage2D, (GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const void *)) X(void, TexParameteri, (GLenum, GLenum, GLint)) \
@@ -61,6 +62,7 @@ static tex_t g_tex[MAX_TEX];
 static int g_ok, g_w, g_h, g_cur;
 static unsigned g_prog, g_vao, g_vbo, g_white;
 static int g_uView, g_uTex, g_zt = 1, g_zw = 1, g_blend, g_bs = 5, g_bd = 6;
+static int g_zf = 4, g_vp[4], g_vpset, g_rs[64], g_tss[8][32];
 static void (*g_swap)(void);
 
 static unsigned blendf(int d3d) {
@@ -75,7 +77,9 @@ static unsigned compile(unsigned type, const char *src) {
     return s;
 }
 static void apply_state(void) {
-    if (g_zt) { glEnable(GL_DEPTH_TEST); glDepthFunc(GL_LEQUAL); } else glDisable(GL_DEPTH_TEST);
+    static const unsigned zf[9] = { GL_LEQUAL, GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS };
+    if (g_zt) { glEnable(GL_DEPTH_TEST); glDepthFunc(zf[g_zf >= 1 && g_zf <= 8 ? g_zf : 4]); } else glDisable(GL_DEPTH_TEST);
+    if (g_vpset) { glEnable(GL_SCISSOR_TEST); glScissor(g_vp[0], g_h - g_vp[1] - g_vp[3], g_vp[2], g_vp[3]); } else glDisable(GL_SCISSOR_TEST);
     glDepthMask(g_zw ? 1 : 0);
     if (g_blend) { glEnable(GL_BLEND); glBlendFunc(blendf(g_bs), blendf(g_bd)); } else glDisable(GL_BLEND);
 }
@@ -126,6 +130,27 @@ void plat_tex_free(int tex) {
 }
 void plat_set_blend(int e, int s, int d) { g_blend = e; if (e) { g_bs = s; g_bd = d; } }
 void plat_set_zbuffer(int t, int w) { g_zt = t; g_zw = w; }
+void plat_scene_begin(void) {}
+void plat_scene_end(void) {}
+void plat_set_render_state(int state, uint32_t value) {
+    if (state < 0 || state >= 64) return;
+    g_rs[state] = (int)value;
+    switch (state) {
+    case 7: g_zt = value != 0; break;
+    case 14: g_zw = value != 0; break;
+    case 19: g_bs = (int)value; break;
+    case 20: g_bd = (int)value; break;
+    case 23: g_zf = (int)value; break;
+    case 27: g_blend = value != 0; break;
+    default: break;   /* остальные (альфа-тест, cull) пока только запоминаются */
+    }
+}
+void plat_set_tex_stage(int stage, int type, uint32_t value) {
+    if (stage >= 0 && stage < 8 && type >= 0 && type < 32) g_tss[stage][type] = (int)value;
+}
+void plat_set_viewport(int x, int y, int w, int h) {
+    g_vp[0] = x; g_vp[1] = y; g_vp[2] = w; g_vp[3] = h; g_vpset = (w > 0 && h > 0 && !(x == 0 && y == 0 && w >= g_w && h >= g_h));
+}
 static void draw(const plat_vertex *v, int count) {
     apply_state();
     glUseProgram(g_prog); glUniform2f(g_uView, (float)g_w, (float)g_h); glUniform1i(g_uTex, 0);

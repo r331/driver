@@ -24,6 +24,7 @@
 #include "../game/ported13.h"
 #include <stdlib.h>
 #include "../game/ported21.h"
+#include "../game/ported22.h"
 #include <stdio.h>
 #include <string.h>
 #define CHECK(c) do { if (!(c)) { printf("FAIL %s:%d %s\n", __FILE__, __LINE__, #c); return 1; } } while (0)
@@ -427,10 +428,31 @@ static int test_p21(void) {
   if (P21_GridCellSet(10 + 5, map, 5, 1)) f++;
   return f;
 }
+static int test_p22(void) {
+  int f = 0;
+  P22_DevReady = 0; P22_BeginScene(); P22_EndScene(); P22_SetCull(1); P22_SetViewport(1, 2, 3, 4);
+  if (P22_VpW != 0 && P22_VpX != 0) f++;                                  /* без устройства viewport не трогаем */
+  P22_ZFuncCur = 0; P22_SetZFunc(0); if (P22_ZFuncCur != 0) f++;
+  P22_SetZFunc(5); if (P22_ZFuncCur != 5) f++;
+  P22_AlphaRef = 0; P22_SetAlphaFunc(7); if (P22_AlphaFunc != 8 || P22_AlphaRef != 7) f++;
+  P22_SetAlphaFunc(3); if (P22_AlphaFunc != 2) f++;
+  P22_SetZWrite(1); if (P22_ZWriteOff != 0) f++;
+  P22_SetZWrite(0); if (P22_ZWriteOff != 1) f++;
+  P22_AtestA = 0; P22_AtestB = 0; P22_SetAlphaTest(0, 0, 1, 2); if (P22_AtestA != 1 || P22_AtestB != 2) f++;
+  P22_DevReady = 1; P22_SetViewport(10, 20, 110, 80);
+  if (P22_VpX != 10 || P22_VpY != 20 || P22_VpW != 100 || P22_VpH != 60) f++;
+  P22_TexOpCur = 0; P22_TexVarA = 5; P22_TexVarB = 9;
+  P22_SetTexOp(0, 0, 0, 0, 2); if (P22_TexVarA != 0x20 || P22_TexVarB != 5) f++;
+  P22_SetTexOp(0, 0, 0, 0, 1); if (P22_TexVarA != 5) f++;
+  P22_SetViewport(0, 0, 0, 0); P22_DevReady = 0;
+  P22_SetZFunc(3);  /* вернуть LEQUAL: состояние plat_* глобальное, дальше идёт render_test */
+  P22_SetZWrite(1);
+  return f;
+}
 int test_render(const char *png_path);
 int test_snd(void);
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

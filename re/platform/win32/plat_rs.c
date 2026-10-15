@@ -29,3 +29,23 @@ int plat_render_attach(void *(*g)(const char *), void (*s)(void), int w, int h){
 int plat_render_offscreen(int w, int h){(void)w;(void)h;return -1;}
 int plat_render_readback(uint32_t *o){(void)o;return -1;}
 void plat_render_shutdown(void){}
+
+/* --- состояние устройства: IDirect3DDevice3 / IDirect3DViewport3 игры (глобалы Game.exe) --- */
+typedef long (__attribute__((stdcall)) *d3d_fn0)(void *);
+typedef long (__attribute__((stdcall)) *d3d_fn2)(void *, uint32_t, uint32_t);
+typedef long (__attribute__((stdcall)) *d3d_fn3)(void *, uint32_t, uint32_t, uint32_t);
+typedef long (__attribute__((stdcall)) *d3d_fn1p)(void *, void *);
+#define D3D_DEV  (*(void **)0x00a42160)
+#define D3D_VP   (*(void **)0x00a42164)
+#define VT(o, off) ((*(void ***)(o))[(off) / 4])
+void plat_scene_begin(void) { void *d = D3D_DEV; ((d3d_fn0)VT(d, 0x24))(d); }
+void plat_scene_end(void)   { void *d = D3D_DEV; ((d3d_fn0)VT(d, 0x28))(d); }
+void plat_set_render_state(int state, uint32_t value) { void *d = D3D_DEV; ((d3d_fn2)VT(d, 0x58))(d, (uint32_t)state, value); }
+void plat_set_tex_stage(int stage, int type, uint32_t value) { void *d = D3D_DEV; ((d3d_fn3)VT(d, 0xa0))(d, (uint32_t)stage, (uint32_t)type, value); }
+void plat_set_viewport(int x, int y, int w, int h) {
+    void *v = D3D_VP;
+    struct { uint32_t size; int32_t x, y, w, h; float clip_x, clip_y, clip_w, clip_h, min_z, max_z; } vp;
+    vp.size = 0x2c; vp.x = x; vp.y = y; vp.w = w; vp.h = h;
+    vp.clip_x = 0; vp.clip_y = 0; vp.clip_w = (float)w; vp.clip_h = (float)h; vp.min_z = 0; vp.max_z = 1.0f;
+    ((d3d_fn1p)VT(v, 0x44))(v, &vp);
+}
