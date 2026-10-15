@@ -158,26 +158,27 @@ extern uint8_t P11_005d592e;
 #ifndef RE_HOOK_BUILD
 extern uint8_t P11_005d57ae;
 #endif
+typedef uint8_t p11_big_t[0x40000];   /* таблицы уровня (ReadTable_*): в native нужен реальный объём, счётчик ограничен */
 typedef uint8_t p11_slots_t[0x400 * 0x46];   /* 0x400 записей по 0x46 байт: первые 0x40 — список индексов (0xff — конец) */
 #define P11_0125f420 GAME_VAR(p11_slots_t, P11_0125f420, 0x0125f420)
 #ifndef RE_HOOK_BUILD
 extern p11_slots_t P11_0125f420;
 #endif
-#define P11_00bf1c40 GAME_VAR(uint8_t, P11_00bf1c40, 0x00bf1c40)
+#define P11_00bf1c40 GAME_VAR(p11_big_t, P11_00bf1c40, 0x00bf1c40)
 #ifndef RE_HOOK_BUILD
-extern uint8_t P11_00bf1c40;
+extern p11_big_t P11_00bf1c40;
 #endif
-#define P11_00c1ed80 GAME_VAR(uint8_t, P11_00c1ed80, 0x00c1ed80)
+#define P11_00c1ed80 GAME_VAR(p11_big_t, P11_00c1ed80, 0x00c1ed80)
 #ifndef RE_HOOK_BUILD
-extern uint8_t P11_00c1ed80;
+extern p11_big_t P11_00c1ed80;
 #endif
-#define P11_00c12c60 GAME_VAR(uint8_t, P11_00c12c60, 0x00c12c60)
+#define P11_00c12c60 GAME_VAR(p11_big_t, P11_00c12c60, 0x00c12c60)
 #ifndef RE_HOOK_BUILD
-extern uint8_t P11_00c12c60;
+extern p11_big_t P11_00c12c60;
 #endif
-#define P11_00c1cd20 GAME_VAR(uint8_t, P11_00c1cd20, 0x00c1cd20)
+#define P11_00c1cd20 GAME_VAR(p11_big_t, P11_00c1cd20, 0x00c1cd20)
 #ifndef RE_HOOK_BUILD
-extern uint8_t P11_00c1cd20;
+extern p11_big_t P11_00c1cd20;
 #endif
 #define P11_00c80c60 GAME_VAR(uint8_t, P11_00c80c60, 0x00c80c60)
 #ifndef RE_HOOK_BUILD
@@ -234,11 +235,11 @@ uint32_t ScriptReadShort3_004D02C6(void);
 uint32_t ScriptReadVec3_004D033F(void);
 void TryStartTrack_004D611B(uint32_t a);
 void DrawBanner_004F5D98(void);
-void ReadBlocks_004EB7CF(uint32_t f);
-void ReadTable_004EC466(uint32_t f);
-void ReadTable_004EC49A(uint32_t f);
-void ReadTable_004EC522(uint32_t f);
-void ReadTable_004EC556(uint32_t f);
+void ReadBlocks_004EB7CF(void *f);
+void ReadTable_004EC466(void *f);
+void ReadTable_004EC49A(void *f);
+void ReadTable_004EC522(void *f);
+void ReadTable_004EC556(void *f);
 void FreeBuffer_004F30E6(void);
 void ResolveTable_004FE830(void);
 void BackOrDirector_005103C4(void);

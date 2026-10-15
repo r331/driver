@@ -1,4 +1,5 @@
 #include "ported11.h"
+#include "ported27.h"
 #include "ported29.h"
 GAME_VAR_DEF(int32_t, P11_00b87e7c, 0x00b87e7c)
 GAME_VAR_DEF(int32_t, P11_005c6760, 0x005c6760)
@@ -37,10 +38,10 @@ GAME_VAR_DEF(uint8_t, P11_0057b740, 0x0057b740)
 GAME_VAR_DEF(uint8_t, P11_005d592e, 0x005d592e)
 GAME_VAR_DEF(uint8_t, P11_005d57ae, 0x005d57ae)
 GAME_VAR_DEF(p11_slots_t, P11_0125f420, 0x0125f420)
-GAME_VAR_DEF(uint8_t, P11_00bf1c40, 0x00bf1c40)
-GAME_VAR_DEF(uint8_t, P11_00c1ed80, 0x00c1ed80)
-GAME_VAR_DEF(uint8_t, P11_00c12c60, 0x00c12c60)
-GAME_VAR_DEF(uint8_t, P11_00c1cd20, 0x00c1cd20)
+GAME_VAR_DEF(p11_big_t, P11_00bf1c40, 0x00bf1c40)
+GAME_VAR_DEF(p11_big_t, P11_00c1ed80, 0x00c1ed80)
+GAME_VAR_DEF(p11_big_t, P11_00c12c60, 0x00c12c60)
+GAME_VAR_DEF(p11_big_t, P11_00c1cd20, 0x00c1cd20)
 GAME_VAR_DEF(uint8_t, P11_00c80c60, 0x00c80c60)
 GAME_VAR_DEF(uint8_t, P11_00552e18, 0x00552e18)
 GAME_VAR_DEF(uint8_t, P11_00579710, 0x00579710)
@@ -103,29 +104,22 @@ void DrawBanner_004F5D98(void) {
   if (0 < P11_00c81494) DrawSprite(0x140, 0x50, ADDR(P11_00c80c60), 0, 1, 0xff, 0xff, 0xff);
 }
 
-void ReadBlocks_004EB7CF(uint32_t f) {
-  for (int32_t i = 0; i < 0x400; i++) Call004D9596(ADDR(P11_0125f420) + i*0x46, 0x46, 1, f);
+void ReadBlocks_004EB7CF(void *f) {
+  for (int32_t i = 0; i < 0x400; i++) P27_ReadChunked(&P11_0125f420[i * 0x46], 0x46, 1, f);
 }
 
-void ReadTable_004EC466(uint32_t f) {
-  Call004D9596(ADDR(P11_00b5a8e8), 1, 4, f);
-  Call004D9596(ADDR(P11_00bf1c40), (uint32_t)P11_00b5a8e8, 0x42, f);
+/* Общая часть таблиц уровня: число записей (4 байта), затем записи по esz байт; в native счётчик ограничен размером массива. */
+static void read_table(void *f, int32_t *cnt, void *dst, int32_t esz) {
+  P27_ReadChunked(cnt, 1, 4, f);
+#ifndef RE_HOOK_BUILD
+  if (*cnt < 0 || (int64_t)*cnt * esz > (int64_t)sizeof(p11_big_t)) { *cnt = 0; return; }
+#endif
+  P27_ReadChunked(dst, *cnt, esz, f);
 }
-
-void ReadTable_004EC49A(uint32_t f) {
-  Call004D9596(ADDR(P11_00b5a8ec), 1, 4, f);
-  Call004D9596(ADDR(P11_00c1ed80), (uint32_t)P11_00b5a8ec, 0x2c, f);
-}
-
-void ReadTable_004EC522(uint32_t f) {
-  Call004D9596(ADDR(P11_00b5a8e8), 1, 4, f);
-  Call004D9596(ADDR(P11_00c12c60), (uint32_t)P11_00b5a8e8, 0x14, f);
-}
-
-void ReadTable_004EC556(uint32_t f) {
-  Call004D9596(ADDR(P11_00b5a8ec), 1, 4, f);
-  Call004D9596(ADDR(P11_00c1cd20), (uint32_t)P11_00b5a8ec, 8, f);
-}
+void ReadTable_004EC466(void *f) { read_table(f, &P11_00b5a8e8, P11_00bf1c40, 0x42); }
+void ReadTable_004EC49A(void *f) { read_table(f, &P11_00b5a8ec, P11_00c1ed80, 0x2c); }
+void ReadTable_004EC522(void *f) { read_table(f, &P11_00b5a8e8, P11_00c12c60, 0x14); }
+void ReadTable_004EC556(void *f) { read_table(f, &P11_00b5a8ec, P11_00c1cd20, 8); }
 
 void FreeBuffer_004F30E6(void) {
   if (P11_00b31efc != 0) Call004D8F30((uint32_t)P11_00b31efc);

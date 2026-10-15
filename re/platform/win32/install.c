@@ -65,6 +65,7 @@
 #include "../../game/ported74.h"
 #include "../../game/ported75.h"
 #include "../../game/ported76.h"
+#include "../../game/ported77.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1685,6 +1686,15 @@ void re_install_all(void) {
     re_hook(0x004ee813, (void*)P76_CellFromPos, "P76_CellFromPos");
     re_hook(0x004e8f1e, (void*)P76_AngleColor, "P76_AngleColor");
     re_hook(0x0051caa7, (void*)P76_LoadHsTables, "P76_LoadHsTables");
+    re_hook(0x004eca08, (void*)P77_OpenLevel, "P77_OpenLevel");
+    re_hook(0x004ecade, (void*)P77_LoadLevel, "P77_LoadLevel");
+    re_hook(0x00524496, (void*)P77_LoadBank, "P77_LoadBank");
+    re_hook(0x00407160, (void*)P77_Menu407160, "P77_Menu407160");
+    re_hook(0x00414c30, (void*)P77_Menu414C30, "P77_Menu414C30");
+    re_hook(0x00408770, (void*)P77_Menu408770, "P77_Menu408770");
+    re_hook(0x00509c40, (void*)P77_ResetTables, "P77_ResetTables");
+    re_hook(0x004f8643, (void*)P77_ListAdd, "P77_ListAdd");
+    re_hook(0x004282f8, (void*)P77_CameraPlane, "P77_CameraPlane");
     re_hook(0x0051bf82, (void*)P73_RoadSides, "P73_RoadSides");
     re_hook(0x00511e60, (void*)P73_ParticlesReset, "P73_ParticlesReset");
     re_hook(0x0049f031, (void*)P73_CatmullRom, "P73_CatmullRom");

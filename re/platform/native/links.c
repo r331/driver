@@ -65,6 +65,7 @@
 #include "../../game/ported74.h"
 #include "../../game/ported75.h"
 #include "../../game/ported76.h"
+#include "../../game/ported77.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -155,6 +156,9 @@ int32_t R12_411FD0 (void) { return (int32_t)P57_Menu411FD0(); }
 int32_t R12_40E870 (void) { return (int32_t)P57_Menu40E870(); }
 int32_t R12_4123D0 (void) { return (int32_t)P57_Menu4123D0(); }
 int32_t R12_40F2D0 (void) { return (int32_t)P57_Menu40F2D0(); }
+int32_t R12_408770 (void) { return (int32_t)P77_Menu408770(); }
+int32_t R12_414C30 (void) { return (int32_t)P77_Menu414C30(); }
+int32_t R12_407160 (void) { return (int32_t)P77_Menu407160(); }
 int32_t R12_405CB4 (int32_t a0) { return (int32_t)P56_SaveCheck(a0); }
 int32_t R12_405F2E (int32_t a0) { return (int32_t)P47_PrepareTemp(a0); }
 void Call004122C4 (void) { GlobalSet004122C4(); }
@@ -180,6 +184,7 @@ void Call004125B9 (void) { P55_NamesB(); }
 void Call0052369B (int32_t a0) { P48_SndPause(a0); }
 void Call00524873 (void) { P25_CDStop(); }
 void Call00524763 (void) { P25_CDClose(); }
+void Call00408770 (void) { P77_Menu408770(); }
 void Call004072BE (void) { P65_SetNameFields(); }
 void Call0040C165 (void) { P56_ResetFrontend(); }
 void Call0048B65D (void) { P38_FmvStop(); }
@@ -198,6 +203,8 @@ void UiCall005170AB (void) { P70_FadeColor(); }
 void UiCall00419DB3 (void) { MenuWhite00419DB3(); }
 void UiCall0041A085 (void) { SetColorWhite0041A085(); }
 void UiCall00417620 (void) { LoadSliderIcons00417620(); }
+void UiCall00414C30 (void) { P77_Menu414C30(); }
+void UiCall00407160 (void) { P77_Menu407160(); }
 void UiCall00419AB0 (void) { P58_Menu419AB0(); }
 void UiCall0041B059 (void) { Ui0041B059(); }
 void UiCall0041AF29 (int32_t a0) { MenuWhite0041AF29(a0); }
@@ -226,6 +233,7 @@ void Call0041AFCA (void) { P55_NamesC(); }
 void P4Call004A3354 (void) { P58_FreeGrid(); }
 void P4Call0041A8CD (void) { P12_Fn0041A8CD(); }
 void P4Call0051AA5B (void) { P54_AllocRoadbits(); }
+void P4Call004ECADE (void) { P77_LoadLevel(); }
 void P4Call004D2D85 (int32_t a0) { Call004D2D85(a0); }
 void P4Call0041D89C (int32_t a0, int32_t a1) { P46_TexCall(a0, a1); }
 void P4Call00528293 (int32_t a0) { P25_TimerStop(a0); }
