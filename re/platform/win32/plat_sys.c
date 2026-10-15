@@ -59,6 +59,7 @@ void plat_post_quit(int code){ PostQuitMessage(code); }
 void plat_post_close(void *hwnd){ PostMessageA((HWND)hwnd,WM_CLOSE,0,0); }
 void plat_set_cursor(int visible){ SetCursor(visible?LoadCursorA(NULL,(LPCSTR)0x7f00):NULL); }
 int32_t plat_def_window_proc(void *hwnd,uint32_t msg,uint32_t wp,int32_t lp){ return (int32_t)DefWindowProcA((HWND)hwnd,msg,wp,(LPARAM)lp); }
+void plat_dll_unload(void *mod){ FreeLibrary((HMODULE)mod); }
 void *plat_dll_load(const char *name){ return (void*)LoadLibraryA(name); }
 void *plat_dll_proc(void *mod, const char *name){ return (void*)GetProcAddress((HMODULE)mod, name); }
 void plat_win_trap(int on){ (void)on; }

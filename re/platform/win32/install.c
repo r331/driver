@@ -30,6 +30,7 @@
 #include "../../game/ported39.h"
 #include "../../game/ported40.h"
 #include "../../game/ported41.h"
+#include "../../game/ported42.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1249,4 +1250,14 @@ void re_install_all(void) {
     re_hook(0x00489f50, (void*)P40_UploadSlotPair, "P40_UploadSlotPair");
     re_hook(0x004efc7c, (void*)P40_DownloadPalette, "P40_DownloadPalette");
     re_hook(0x004eb975, (void*)P41_LoadTexPages, "P41_LoadTexPages");
+    re_hook(0x004f6333, (void*)P42_FindCommand, "P42_FindCommand");
+    re_hook(0x004fc5ab, (void*)P42_FindCommandById, "P42_FindCommandById");
+    re_hook(0x004f64dd, (void*)P42_FindVar, "P42_FindVar");
+    re_hook(0x0051cd43, (void*)P42_GetHighScore, "P42_GetHighScore");
+    re_hook(0x0042570c, (void*)P42_FreeGlide, "P42_FreeGlide");
+    re_hook(0x0041eb51, (void*)P42_VersionString, "P42_VersionString");
+    re_hook(0x004d6209, (void*)P42_ActionBound, "P42_ActionBound");
+    re_hook(0x004245ec, (void*)P42_GetDeviceName, "P42_GetDeviceName");
+    re_hook(0x004e964a, (void*)P42_SetViewAngles, "P42_SetViewAngles");
+    re_hook(0x004ece84, (void*)P42_CellIndex, "P42_CellIndex");
 }

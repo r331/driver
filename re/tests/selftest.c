@@ -44,6 +44,7 @@
 #include "../game/ported39.h"
 #include "../game/ported40.h"
 #include "../game/ported41.h"
+#include "../game/ported42.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -944,6 +945,46 @@ static int test_p38(void) {
 #undef CK
   return f;
 }
+static int test_p42(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p42 fail line %d\n",__LINE__); } } while (0)
+  memset(P42_Cmds, 0, sizeof P42_Cmds); memset(P42_Vars, 0, sizeof P42_Vars);
+  strcpy(P42_Cmds[0].name, "CHECKPOINT"); P42_Cmds[0].id = 0;
+  strcpy(P42_Cmds[1].name, "SET");        P42_Cmds[1].id = 2;
+  void *e = (void *)1;
+  CK(P42_FindCommand("SET", &e) == 0 && e == &P42_Cmds[1]);
+  CK(P42_FindCommand("NOPE", &e) == 9 && e == NULL);
+  CK(P42_FindCommandById(2) == P42_Cmds[1].name && P42_FindCommandById(0) == P42_Cmds[0].name && P42_FindCommandById(7) == NULL);
+  strcpy(P42_Vars[0].name, "EVENTSCRIPT"); P42_Vars[0].type = 1;
+  strcpy(P42_Vars[1].name, "MAX_COPS");    P42_Vars[1].type = 3;
+  P42_Vars[2].type = 0x7f;
+  CK(P42_FindVar("MAX_COPS") == 1 && P42_FindVar("EVENTSCRIPT") == 0 && P42_FindVar("X") == -1);
+  P42_HighScores[0] = 11; P42_HighScores[8 + 2] = 22; P42_HighScores[16 + 1] = 33; P42_HighScores[20 + 3] = 44; P42_HighScores[24] = 55; P42_HighScores[28 + 1] = 66;
+  CK(P42_GetHighScore(2, 0) == 11 && P42_GetHighScore(1, 2) == 22 && P42_GetHighScore(3, 1) == 33);
+  CK(P42_GetHighScore(6, 3) == 44 && P42_GetHighScore(0xb, 3) == 44 && P42_GetHighScore(7, 0) == 55 && P42_GetHighScore(0xc, 1) == 66);
+  CK(P42_GetHighScore(4, 0) == 0);
+  P31_GlideModule = 0; P42_FreeGlide(); CK(P31_GlideModule == 0);
+  P31_GlideModule = 5; P42_FreeGlide(); CK(P31_GlideModule == 0);
+  char buf[32]; P42_VersionString(buf); CK(strcmp(buf, "2.43 (D3D)") == 0);
+  int32_t m1 = -1, v = 7;
+  G8_00B20344 = 1; memcpy(&A_00B20330[4], &m1, 4); CK(P42_ActionBound() == 0);
+  memcpy(&A_00B20330[4], &v, 4); CK(P42_ActionBound() == 1);
+  G8_00B20344 = 0; memcpy(&A_00B20330[0], &m1, 4); memcpy(&A_00B20330[4], &m1, 4);
+  D_00b1c0d4 = 0; CK(P42_GetDeviceName(1, buf) == -1);
+  D_00b1c0d4 = 1; P42_DevCount = 2; strcpy((char *)P42_DevNames[0], "Voodoo"); strcpy((char *)P42_DevNames[1], "Banshee");
+  CK(P42_GetDeviceName(1, buf) == 1 && strcmp(buf, "Banshee") == 0);
+  CK(P42_GetDeviceName(5, buf) == 0 && strcmp(buf, "Voodoo") == 0 && P42_GetDeviceName(-3, buf) == 0);
+  P42_AngBase = 0x100; P42_AngZ = 9;
+  P42_SetViewAngles(1024, 512, 0, 2.0f);
+  CK(P42_AngY == 0x800 && P42_AngX == ((0x100 + 1024) & 0xfff) && P42_AngZ == 0);
+  P42_SetViewAngles(4097, -1, 0, 1.0f);
+  CK(P42_AngY == 1 && P42_AngX == ((0x100 - 1) & 0xfff));
+  P42_CellX = 100; P42_CellY = 200; P42_CellScale = 0.5f; P21_GridDiv = 10;
+  const float pos[3] = {20.0f, 0.0f, 40.0f};
+  CK(P42_CellIndex(pos) == 60 + 120 * 10);
+#undef CK
+  return f;
+}
 static int test_p41(void) {
   int f = 0;
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p41 fail line %d\n",__LINE__); } } while (0)
@@ -1063,7 +1104,7 @@ static int test_p39(void) {
   return f;
 }
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
