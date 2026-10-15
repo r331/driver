@@ -64,6 +64,7 @@
 #include "../../game/ported73.h"
 #include "../../game/ported74.h"
 #include "../../game/ported75.h"
+#include "../../game/ported76.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1672,6 +1673,18 @@ void re_install_all(void) {
     re_hook(0x004ee065, (void*)P75_ResetObjs, "P75_ResetObjs");
     re_hook(0x004d68da, (void*)P75_CarVoice, "P75_CarVoice");
     re_hook(0x0040dae1, (void*)P75_BmpToPage, "P75_BmpToPage");
+    re_hook(0x0041e926, (void*)P76_TriA1, "P76_TriA1");
+    re_hook(0x0041ea2a, (void*)P76_TriB1, "P76_TriB1");
+    re_hook(0x0041f825, (void*)P76_TriA2, "P76_TriA2");
+    re_hook(0x0041f929, (void*)P76_TriB2, "P76_TriB2");
+    re_hook(0x0048a525, (void*)P76_MarkSlots, "P76_MarkSlots");
+    re_hook(0x00424b70, (void*)P76_GlideRegister, "P76_GlideRegister");
+    re_hook(0x0040dbee, (void*)P76_TileFill, "P76_TileFill");
+    re_hook(0x004a3aa7, (void*)P76_FlashStep, "P76_FlashStep");
+    re_hook(0x004ecee8, (void*)P76_InBox, "P76_InBox");
+    re_hook(0x004ee813, (void*)P76_CellFromPos, "P76_CellFromPos");
+    re_hook(0x004e8f1e, (void*)P76_AngleColor, "P76_AngleColor");
+    re_hook(0x0051caa7, (void*)P76_LoadHsTables, "P76_LoadHsTables");
     re_hook(0x0051bf82, (void*)P73_RoadSides, "P73_RoadSides");
     re_hook(0x00511e60, (void*)P73_ParticlesReset, "P73_ParticlesReset");
     re_hook(0x0049f031, (void*)P73_CatmullRom, "P73_CatmullRom");

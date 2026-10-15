@@ -158,9 +158,10 @@ extern uint8_t P11_005d592e;
 #ifndef RE_HOOK_BUILD
 extern uint8_t P11_005d57ae;
 #endif
-#define P11_0125f420 GAME_VAR(uint8_t, P11_0125f420, 0x0125f420)
+typedef uint8_t p11_slots_t[0x400 * 0x46];   /* 0x400 записей по 0x46 байт: первые 0x40 — список индексов (0xff — конец) */
+#define P11_0125f420 GAME_VAR(p11_slots_t, P11_0125f420, 0x0125f420)
 #ifndef RE_HOOK_BUILD
-extern uint8_t P11_0125f420;
+extern p11_slots_t P11_0125f420;
 #endif
 #define P11_00bf1c40 GAME_VAR(uint8_t, P11_00bf1c40, 0x00bf1c40)
 #ifndef RE_HOOK_BUILD

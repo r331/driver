@@ -64,6 +64,7 @@
 #include "../../game/ported73.h"
 #include "../../game/ported74.h"
 #include "../../game/ported75.h"
+#include "../../game/ported76.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -112,6 +113,7 @@ void P57_Setup4122E7 (void) { Ui004122E7(); }
 void P57_Setup412487 (void) { SetupMenuTable00412487(); }
 void P57_Setup41269B (void) { MenuAllRowsTo2_0041269B(); }
 void P57_Setup412702 (void) { Ui00412702(); }
+void P57_Fn51CAA7 (void *f) { P76_LoadHsTables(f); }
 void P57_Fn51CB98 (void *f) { P62_SaveScores(f); }
 void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
@@ -165,6 +167,7 @@ void Call004086B4 (void) { StartTimer004086B4(); }
 void Call004086EA (void) { StopTimer4086EA(); }
 int32_t R12_4D97E9 (void) { return (int32_t)P48_AnyKey(); }
 void Call00424921 (int32_t a0, int32_t a1, uint32_t a2, int32_t a3) { P47_TexTable(a0, a1, a2, a3); }
+void Call0048A525 (int32_t a0) { P76_MarkSlots(a0); }
 void Call0048A68E (int32_t a0) { Dispatch0048A68E(a0); }
 void Call004B9D79 (void) { P16_StepParticles(); }
 void Call0050F289 (void) { P55_StopAudio(); }
