@@ -42,6 +42,7 @@
 #include "../../game/ported51.h"
 #include "../../game/ported52.h"
 #include "../../game/ported53.h"
+#include "../../game/ported54.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -114,11 +115,13 @@ void UiCall0041266F (void) { MenuRowsTo2_0041266F(); }
 void UiCall00412643 (void) { MenuRowsTo3_00412643(); }
 void UiCall00412487 (void) { SetupMenuTable00412487(); }
 void UiCall00417AA2 (void) { SetColorWhite00417AA2(); }
+void MenuRefresh (void) { P54_MenuTexSel(); }
 void Call004076E2 (void) { MenuWhite004076E2(); }
 void * FindCameraRecordForFrame (int frame) { return (void *)FindCameraForFrame(frame); }
 int IsKeyDown (int sc) { return (int)IsFlagSetNotMasked_004E383A(sc); }
 void Call00411A9D (void) { MenuHiliteWhite00411A9D(); }
 void P4Call0041A8CD (void) { P12_Fn0041A8CD(); }
+void P4Call0051AA5B (void) { P54_AllocRoadbits(); }
 void P4Call004D2D85 (int32_t a0) { Call004D2D85(a0); }
 void P4Call0041D89C (int32_t a0, int32_t a1) { P46_TexCall(a0, a1); }
 void P4Call00528293 (int32_t a0) { P25_TimerStop(a0); }
@@ -132,6 +135,7 @@ void G6Call004D5FFC (void) { Chain004D5FFC(); }
 void G6Call00524398 (void) { P43_CdFadeInit(); }
 void G6Call00523628 (void) { P48_ResetAll(); }
 void G6Call0041A16C (void) { FreeBuffer5FED98(); }
+void G6Call0040C5BE (int32_t a0) { P54_ClearSwap(a0); }
 void G6Call0050E940 (int32_t a0) { SetLatchValue0050E940(a0); }
 void G6Call00418119 (int32_t a0) { Ui00418119(a0); }
 void G6Call00417CBB (void) { P45_PickColor(); }

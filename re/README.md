@@ -33,6 +33,7 @@ Wine/CrossOver: `WINEDLLOVERRIDES="dinput=n,b" wine Game.exe`. Лог — re_dri
 - новая функция: game/<module>.c + строка в platform/win32/install.c + тест + статус ported в docs/functions.csv.
 
 ## Статус
+v1.00: +16 функций (game/ported54.c): MenuTexSel 0040500d, TexSource 004248c6, ClearBuffers 0041de46 (stdcall), ClearSwap 0040c5be, FreeTab4 004f3c16, FreeRoadbits 0051aacd, AllocRoadbits 0051aa5b, AllocMapBufs 004ecda8, DefaultKeys 0040748a, InitInputMode 0040724c, ObjTick 00493f9a, ObjInit 00493e3d, GetTexture2 0042200c, ReadNames 004ec7ac, ReadMapA 004ec280, ReadMapB 004ec3fd (+10 thunk-ов). Перенесено 1735 функций (из ~3275 без CRT), отслеживается в docs/functions.csv.
 v0.97: +11 функций (game/ported51.c): PitchJitterSfx 004d69ed, ScalePair 004d8487, PrefixMatch 004a59f2, SkipToLine 004a5a83, FileSize 004d3000, DirFromHeading 004a63c6, InitCarSlot 00491928, TrafficConflict 0048eb25, NodeKind 0048f7fe, SteerHeading 004d0071, SkipNumber 004a50f7 (+10 thunk-ов). Всего 1682 (по docs/functions.csv, без CRT).
 Перенесено 1682 функции (из ~3275 без CRT), отслеживается в docs/functions.csv (status=ported).
 v0.77: +6 функций (game/ported30.c, WinMain.c): FatalError (00522369), CrashHandler (00522759, тело), CrashHandlerInstall/Remove (0052273c/0052274c), InitWindowGlobals (005223be), Exit (0052e400). Новое в plat.h: plat_exit, plat_screensaver_get/set, plat_set_crash_handler (SDL: signal; hook: SetUnhandledExceptionFilter / CRT-выход 0052e480). Всего 1328 (по docs/functions.csv).

@@ -42,6 +42,7 @@
 #include "../../game/ported51.h"
 #include "../../game/ported52.h"
 #include "../../game/ported53.h"
+#include "../../game/ported54.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1404,4 +1405,20 @@ void re_install_all(void) {
     re_hook(0x004161b3, (void*)P53_MenuA, "P53_MenuA");
     re_hook(0x004046c8, (void*)P53_MenuB, "P53_MenuB");
     re_hook(0x00414638, (void*)P53_MenuC, "P53_MenuC");
+    re_hook(0x0040500d, (void*)P54_MenuTexSel, "P54_MenuTexSel");
+    re_hook(0x004248c6, (void*)P54_TexSource, "P54_TexSource");
+    re_hook(0x0041de46, (void*)P54_ClearBuffers, "P54_ClearBuffers");
+    re_hook(0x0040c5be, (void*)P54_ClearSwap, "P54_ClearSwap");
+    re_hook(0x004f3c16, (void*)P54_FreeTab4, "P54_FreeTab4");
+    re_hook(0x0051aacd, (void*)P54_FreeRoadbits, "P54_FreeRoadbits");
+    re_hook(0x0051aa5b, (void*)P54_AllocRoadbits, "P54_AllocRoadbits");
+    re_hook(0x004ecda8, (void*)P54_AllocMapBufs, "P54_AllocMapBufs");
+    re_hook(0x0040748a, (void*)P54_DefaultKeys, "P54_DefaultKeys");
+    re_hook(0x0040724c, (void*)P54_InitInputMode, "P54_InitInputMode");
+    re_hook(0x00493f9a, (void*)P54_ObjTick, "P54_ObjTick");
+    re_hook(0x00493e3d, (void*)P54_ObjInit, "P54_ObjInit");
+    re_hook(0x0042200c, (void*)P54_GetTexture2, "P54_GetTexture2");
+    re_hook(0x004ec7ac, (void*)P54_ReadNames, "P54_ReadNames");
+    re_hook(0x004ec280, (void*)P54_ReadMapA, "P54_ReadMapA");
+    re_hook(0x004ec3fd, (void*)P54_ReadMapB, "P54_ReadMapB");
 }

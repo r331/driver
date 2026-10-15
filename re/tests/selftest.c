@@ -39,6 +39,7 @@
 #include "../game/ported33.h"
 #include "../game/ported32.h"
 #include "../game/ported53.h"
+#include "../game/ported54.h"
 #include "../game/ported34.h"
 #include "../game/ported35.h"
 #include "../game/ported36.h"
@@ -1616,6 +1617,51 @@ static int test_p53(void) {
 #undef CK
   return f;
 }
+static int test_p54(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p54 fail line %d\n",__LINE__); } } while (0)
+  /* 0040500d: значки строк меню */
+  memset(P54_SelTab, 0, sizeof(p54_i16_t)); P54_SelTab[0] = 0; P54_SelTab[1] = 5; P54_SelTab[2] = 8; P54_SelTab[3] = 77; P54_SelTab[4] = -1;
+  P54_IconIdx[3] = 9; P54_IconIdx[4] = 10; P12_00c55820[9] = 0xAAAA; P12_00c55820[10] = 0xBBBB;
+  MenuOptBDFA44 = 3; MenuOptB87E9C = 4;
+  P54_MenuTexSel();
+  CK(P54_Out[8] == 0xAAAA && P54_Out[16] == 0xBBBB && P54_Out[24] == 0x0057b668u);
+  /* 004f3c16 / 0051aacd / 0051aa5b: таблицы буферов */
+  P54_Tab4[0] = DebugMalloc(16, "t", 1); P54_Tab4[2] = DebugMalloc(16, "t", 2); P54_Tab4[1] = NULL; P54_Tab4[3] = NULL;
+  P54_FreeTab4(); CK(P54_Tab4[0] == NULL && P54_Tab4[2] == NULL);
+  P54_AllocRoadbits(); CK(P54_RoadId[0] == -1 && P54_RoadId[3] == -1 && P54_RoadA[3] != NULL && P54_RoadB[0] != NULL);
+  P54_FreeRoadbits(); CK(P54_RoadA[0] == NULL && P54_RoadB[3] == NULL);
+  P54_GridN = 4; P54_Cnt1E0 = 0x10;
+  P54_AllocMapBufs(); CK(G6_00D01268 != NULL && G6_00D00208 != NULL && G6_00CE0F20 != NULL);
+  DebugFree(G6_00D01268); DebugFree(G6_00D00208); DebugFree(G6_00CE0F20);
+  /* 0040748a / 0040724c */
+  for (int i = 0; i < 15; i++) P54_KeySrc[i] = 0x100 + i;
+  Q0057B72C = 0; CK(P54_DefaultKeys() == 0);
+  { uint32_t v; memcpy(&v, &P36_KeyCfg[16], 4); CK(v == 0x104 && P54_KeySrc[6] == 0x100 && P54_KeySrc[10] == 0x104); }
+  Q0057B72C = 1; P54_DefaultKeys(); CK(P54_Keys3[0] == 0x10c && P54_Keys3[2] == 0x10e);
+  P35_InputMode = 0; for (int i = 0; i < 6; i++) P54_Src6[i] = 0x200 + i;
+  P54_InitInputMode(); CK(Q0057B72C == 0 && P54_Dst[0] == 0x200 && P54_Dst[4] == 0x201 && P54_Dst[12] == 0x202 && P54_Dst[24] == 0x205);
+  /* 00493f9a / 00493e3d: объект-счётчик */
+  { uint8_t o[0x50]; memset(o, 0, sizeof o); o[8] = 7; o[0xb] = 3;
+    P54_ObjTick(o); CK(o[8] == 0 && o[0xb] == 2);
+    o[0xb] = 0; int32_t m1 = -1; memcpy(o + 0x28, &m1, 4); P54_ObjTick(o); CK(o[0xb] == 0);
+    P54_G40 = 11; P54_G44 = 22; o[0x13] = 0xff; o[1] = 9;
+    P54_ObjInit(o); { int32_t a, b; memcpy(&a, o + 0x40, 4); memcpy(&b, o + 0x44, 4); CK(a == 11 && b == 22 && o[1] == 3 && o[0x13] == 0xfb); } }
+  /* 0041de46 / 004248c6 / 0040c5be: без устройства/Glide — ничего не делают */
+  P22_DevReady = 0; P54_ClearBuffers(0, 0, 0);
+  D_00b1c0d4 = 0; P54_TexSource(1, 2, 3, NULL, 5);
+  P54_ClearSwap(2);
+  CK(P54_GetTexture2(NULL) == NULL);
+  /* 004ec7ac / 004ec280 / 004ec3fd: чтение блоков карты из файла */
+  { FILE *fp = fopen("p54_test.bin", "wb"); uint8_t src[64]; for (int i = 0; i < 64; i++) src[i] = (uint8_t)i;
+    fwrite(src, 1, 64, fp); fclose(fp);
+    fp = fopen("p54_test.bin", "rb"); P54_ReadNames(fp, 16); CK(P20_Names != NULL && (uint8_t)P20_Names[5] == 5); DebugFree(P20_Names);
+    rewind(fp); P54_ReadMapA(fp, 20); CK(P54_MapA == 0x03020100 && P54_MapAPtr != NULL && ((uint8_t *)P54_MapAPtr)[0] == 4); DebugFree(P54_MapAPtr);
+    rewind(fp); P54_ReadMapB(fp, 24); CK(P54_MapB1 == 0x03020100 && P54_MapB2 == 0x07060504 && ((uint8_t *)P54_MapBPtr)[0] == 8); DebugFree(P54_MapBPtr);
+    fclose(fp); remove("p54_test.bin"); }
+#undef CK
+  return f;
+}
 static int test_p52(void) {
   int f = 0;
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p52 fail line %d\n",__LINE__); } } while (0)
@@ -1644,7 +1690,7 @@ static int test_p52(void) {
   return f;
 }
 int re_selftest(void) {
-    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = test_director() | test_director2() | test_storage() | test_read() | test_nodes() | test_menu() | test_menu2() | test_menu3() | test_menu4() | test_menu5() | test_ui() | test_ui3() | test_ui4() | test_p4() | test_p5() | test_p6() | test_p7() | test_p8() | test_p9() | test_p11() | test_p12() | test_p13() | test_p14() | test_ported15() | test_ported16() | test_ported17() | test_ported18() | test_ported19() | test_p21() | test_p22() | test_p23() | test_p24() | test_p25() | test_p26() | test_p27() | test_p28() | test_p29() | test_p30() | test_p31() | test_p32() | test_p33() | test_p34() | test_p35() | test_p36() | test_p37() | test_p38() | test_p39() | test_p40() | test_p41() | test_p42() | test_p43() | test_p44() | test_p45() | test_p46() | test_p47() | test_p48() | test_p49() | test_p50() | test_p51() | test_p52() | test_p53() | test_p54() | test_snd() | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }
