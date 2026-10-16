@@ -32,7 +32,21 @@ typedef int32_t p125_mrk_t[6];
 extern int32_t P125_C814E0, P125_C814E4, P125_C81690, P125_C81694, P125_D118E4, P125_D11680, P125_CF56C0, P125_DirD17C0C;
 extern p125_pick_t P125_Pick; extern int32_t P125_PickIdx; extern p125_droptime_t P125_DropTime; extern p125_fps_t P125_FpsStr;
 extern p125_mrk_t P125_MrkSave; extern int32_t P125_ModelNamesSize;
-extern int32_t P125_ShrR, P125_ShrG, P125_ShrB, P125_ShlR, P125_ShlG, P125_ShlB;
+/* v2.02: 005c6748..005c675c — слова [1..6] формата LFB 005c6744 (P100_LfbFmt, пишет P100_LfbFormat 004078d0); прежде отдельные
+   native-объекты с нулями — палитра меню 004079aa сводилась к синему каналу */
+extern int32_t P100_LfbFmt[7];
+#undef P125_ShrR
+#undef P125_ShrG
+#undef P125_ShrB
+#undef P125_ShlR
+#undef P125_ShlG
+#undef P125_ShlB
+#define P125_ShrR (P100_LfbFmt[1])
+#define P125_ShrG (P100_LfbFmt[2])
+#define P125_ShrB (P100_LfbFmt[3])
+#define P125_ShlR (P100_LfbFmt[4])
+#define P125_ShlG (P100_LfbFmt[5])
+#define P125_ShlB (P100_LfbFmt[6])
 #endif
 int32_t P125_LevelLoad(void);                                   /* 004d35b2: экран загрузки, сброс состояния, загрузка уровня; 1 — успех */
 void    P125_ReplayNodeAction(int32_t id);                      /* 004c43b6: действие узла меню повтора (корень по +0x18) */

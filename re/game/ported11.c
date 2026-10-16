@@ -1,4 +1,5 @@
 #include "ported11.h"
+#include "ported152.h"
 #include "ported27.h"
 #include "globalsets.h"
 #include "ported29.h"
@@ -55,7 +56,7 @@ void SndHelper_00407D97(uint8_t a, uint8_t b) {
 }
 
 void SndHelper_00407D56(int32_t x, int32_t y, uint32_t p3, uint32_t p4, uint32_t p5) {
-  (void)p3; Call005291ED(ADDR(P11_0057b740) + (uint32_t)(y * 0x280) + (uint32_t)x, p4 & 0xfffffffcu, p5, (uint32_t)P11_005c6760);
+  (void)p3; P152_ScreenFill(x, y, (int32_t)(p4 & 0xfffffffcu), (int32_t)p5, (uint8_t)P11_005c6760);   /* v2.02: 005291ed перенесена; буфер — P65_Screen (P11_0057b740 был отдельным native-объектом) */
 }
 
 void CopySlots_0040AA82(uint32_t n) {

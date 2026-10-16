@@ -1,4 +1,4 @@
-# Native-сборка как игра: разрывы (v2.00–v2.01, 2026-10-16)
+# Native-сборка как игра: разрывы (v2.00–v2.02, 2026-10-16)
 
 Сборка `re/build-native/driver` (SDL2 + OpenGL 3.3, Linux arm64, Mesa 25 под Xvfb).
 Запуск игры: `work/run_game.sh [кадров] [png]` — каталог `work/run_game` (симлинки на все файлы
@@ -28,7 +28,7 @@
 | 6 | `P151_Reopen` → `P47_GlideWinOpen` → `P151_WinOpen` 0041ed98 (режим 7, 640×480, Flip) | проходит, `00b87e20 = 1` |
 | 7 | `P48_StartupSystems` (DirectInput, DirectSound, CD) | проходит; «InitCDAudio: Open CD device failed» |
 | 8 | `P140_Frontend`: `P140_KeysLoad`, `P126_ShowBmpFade` COPYRIGHT.BMP, GT.BMP, REFLECT.BMP | **v2.01: картинка есть** (плитки 256×256 через D3D-эмуляцию → GL, с затемнением) — out/native_v2.01.png (кадр 30, COPYRIGHT), out/native_v2.01_gt.png (кадр 70, GT); REFLECT — кадр 120 |
-| 9 | `P150_PlayFmv` (пропуск), `P136_FrontInit`, главное меню 0054cc90 — цикл `for(;;)` в P140_Frontend | **v2.01: цикл меню идёт** (300 кадров, выход 0), но **экран меню чёрный**; ~140 раз «InitCDAudio» за 300 кадров (вероятно, P12_Fn004129DF(-1) по счётчику > 0x2c — демо/заставка по таймеру; не проверено) |
+| 9 | `P150_PlayFmv` (пропуск), `P136_FrontInit`, главное меню 0054cc90 — цикл `for(;;)` в P140_Frontend | **v2.02: главное меню видно** — фон BKGRND1A..F, логотип DRIVER, значки пунктов (машины, флаг, хлопушка, конусы, полицейский) — out/native_v2.02.png (кадр 300); подписи пунктов (шрифт P117_TextList/P116_Text) на снимке не видны — не проверено, рисуются ли |
 | 10 | `P132_MenuLoop` / `P136_GameLoop` → `P145_LevelLoad` → `P131_GameFrame` | не достигнуто |
 
 Проверено: 60 кадров, выход 0 (release, `work/run_game.sh 60`), md5 FRUSTRUM.DAT до/после
@@ -85,9 +85,49 @@
 9. **WM_ACTIVATEAPP**: SDL-цикл сообщений шлёт оконной процедуре 0x1c(1) при первом проходе и при FOCUS_GAINED/LOST — иначе
    P140_Frontend крутился в `if (P31_Active == 0) continue` без кадров.
 
+## Исправлено в v2.02 (по порядку, в каком мешало)
+
+Как рисуется меню (выяснено): P119_MenuFrame 0040cb9f → P58_Backgrounds (6 × 0040cfdf = P67_DrawIcon: P93_FindIcon + P65_SpriteKeyed
+в **программный 8-битный буфер P65_Screen 0057b740**, 640×480), P98_ItemsDraw (значки пунктов — тот же путь; текстовые пункты —
+00407d56 → заливка 005291ed), P117_TextList; затем P105_LfbToMenu 00407c4c: grLfbLock(1) (D3D-эмуляция → Lock задней поверхности
+SDL) и перевод индексов через палитру P101_PalLfb (P101_Pal16, 565) в LFB, P58_ItemsDraw; P47_GlideSwap → наложение LFB при Flip.
+Glide-значки в меню не участвуют. Lock работал; пустым было всё до него:
+
+1. **Палитра FRONTEND.TSD — псевдонимы.** P137_LoadTsd пишет палитры в таблицу 01252be0 (P14_01252be0, 64 × 0x400), а P136_FrontInit
+   брал 012533e0/012537e0 из отдельных native-объектов P136_TsdPalA/B (нули) → P101_PalLfb = 0, LFB чёрный. Теперь в native
+   P136_TsdPalA/B/P136_MapPal — макросы над слотами 2/3/23 P14_01252be0, P136_MapPalOn (01252afc) — над P12_01252aa0[23].
+2. **Сдвиги каналов 005c6748..5c675c — псевдонимы.** P125_ShrR..ShlB были отдельными нулевыми объектами, а пишет их P100_LfbFormat 004078d0
+   как слова [1..6] P100_LfbFmt 005c6744 → вся палитра в синем канале. Теперь макросы над P100_LfbFmt[1..6].
+3. **P56_FindIcon (004ec91e) в игре — шпион selftest** (возвращал NULL → значки не рисовались). 23 шпиона tests/selftest.c вне selftest
+   передают вызов переносу: P56_FindIcon → P93_FindIcon, P57_MenuStep → P114_MenuStep, P58_Fn418675 → P110_MenuSel, P58_Fn4AA4EA →
+   P110_IconRect, P67_Fn40ABAC → P116_Text, P66_Draw5173D7 → P73_Text, P67_Stream → P77_LoadBank, P66_Fn427EEA → P82_FrustumSetup3D,
+   P76_Fn4268EF → P82_AddLight, P75_Fn4EDD08 → P88_CellUpdate, P68_Fn514A47 → P98_PartAim, P69_Fn4BA720 → P98_DrawSix,
+   P67_Fn514165 → P71_Course, P67_Fn51500C → P101_PartTurn, P61_Fn5139D7 → P101_PickCell, P63_Fn49521E → P102_TrafficAhead,
+   P77_Fn501C63 → P102_HudInit, Call00414D1F → P103_OptionsInit, P75_Fn4958B7 → P107_TrafficRow, P66_Fn4C68A7 → P112_DirTimeline,
+   P69_Fn4B3E55 → P114_DebrisAll, P66_Fn523829 → P115_SndUpdate, P74_Fn4A4D84 → P120_ParseCamInt. Слабые заглушки LoadIconByName/
+   Call004EC91E (тот же 004ec91e) — platform/native/game_fwd.c → re_addr(P93_FindIcon(…)). Шпионов из `--skip` без передачи не осталось.
+4. **Таблицы меню .data по адресам (блокер 4, массивы).** P45_Wait(0054cb98, 0054cc50), P97_MenuCall0/P114_MenuStep(0054cc90) читают
+   таблицы и строки через re_ptr — областей не было (NULL). tools/gen_data_init.py теперь пишет и **game/data_image.c** — изменяемую копию
+   инициализированных .rdata+.data Game.exe 00546000..0057c000 (217332 байта, без хвостовых нулей); `re_ptr_set_image` (game/reptr.c) —
+   запасная область re_ptr/re_addr после g_dyn и k_regions, включается только в игре (platform/native/main.c). Native-переменные с теми же
+   адресами с копией не связаны (блокер 3 — по-прежнему сводить псевдонимы).
+5. **P65_Texs: 16 → 64 страницы.** FRONTEND.TSD — 28 страниц; значки меню на страницах ≥ 16 читали за таблицу (ASan: global-buffer-overflow
+   в P65_SpriteKeyed). В Game.exe за 01145a64 свободно до 01146f20. P65_SpriteKeyed/P65_SpriteBlend в native проверяют страницу и границы буфера.
+6. **005291ed перенесена** — P152_FillRows (game/ported152.c, test_p152): заливка rows строк с шагом 0x280, ширина вверх до 32 байт;
+   00407d56 (SndHelper_00407D56) пишет в P65_Screen (P11_0057b740 был отдельным native-объектом) через P152_ScreenFill с границей 640×480.
+   V-строка Call005291ED удалена; hook — re_hook(0x005291ed, P152_FillRows).
+
+**InitCDAudio ~140 раз за 300 кадров — не демо и не ошибка порта.** P119_MenuFrame (0040cb9f) на каждом кадре меню делает
+`if (Q00B87E90 != 0 && P25_CdPlaying == 0) { InitCDAudio(); PlayCDTrack(2); }`; без CD открытие MCI не удаётся, флаг не ставится — попытка
+на каждом кадре меню (в оригинале так же, сверено с переносом 0040cb9f). Сколько кадров меню — столько попыток (~140 из 300, остальное — заставки).
+Ветка `0x2c < 005d577c → 004129df(-1)` в P140_Frontend — отдельный путь (не проверено, что она делает в native). Можно гасить повтор в
+native (plat CD: «нет устройства» → не пытаться), но это отступление — не делалось.
+
 ## Блокеры в порядке, в каком они мешают запуску
 
-0. **v2.01: экран главного меню чёрный.** Цикл меню P140_Frontend идёт (P114_MenuStep/P119_MenuFrame), фон рисуется P67_DrawIcon
+0. ~~v2.01: экран главного меню чёрный~~ — **исправлено в v2.02** (см. выше). Осталось: подписи пунктов (P117_TextList → P116_Text, шрифт
+   005d57a0) на снимке не видны — не выяснено; ввод (блокер 8) — без клавиш меню не листается, дальше P140_Frontend игра не идёт.
+00. (было) **v2.01: экран главного меню чёрный.** Цикл меню P140_Frontend идёт (P114_MenuStep/P119_MenuFrame), фон рисуется P67_DrawIcon
    (BKGRND1A..), но на снимке кадра 300 — чёрный экран. Не выяснено: рисует ли P67_DrawIcon в программный буфер (P65_Screen) с
    выводом через LFB-Lock задней поверхности (P105, наложение при Flip) или через Glide-значки; плюс «not ported: Call005291ED»
    (005291ed, 102 байта — вызывается из ported11 с адресом 0057b740 + y·0x280 + x: копия/заливка строки буфера, не перенесена).
@@ -98,7 +138,7 @@
 2. **64-битные указатели через int32.** 35 мест `(int32_t|uint32_t)(uintptr_t)&…` в re/game (напр. `P40_UploadSlot`: `info = (uint32_t)(uintptr_t)&P40_Blocks[b].info[0]`, аргумент `Call0042486B`), плюс таблица Glide с типами `FnIntI` для аргументов-указателей. Нужно: аудит ячеек Glide с аргументом-указателем (grTexDownloadMipMap, grTexSource, grDrawPolygonVertexList, grLfbLock, grSstQueryHardware …) → `intptr_t`/re_addr+re_ptr; поля структур — re_addr.
 3. **Несколько native-объектов на один адрес Game.exe.** 310 адресов с более чем одним `GAME_VAR_DEF` (D_/G/P…): запись в один псевдоним не видна читателю другого (так ломались 00b1c0d4 и 005d577c). Нужно: сводить в один объект (макрос-псевдоним), начиная с путей загрузки/меню; инструмент поиска — work/own191.py.
 4. **Начальные значения .data.** v2.01: скаляры — game/data_init.c (347, только игра). Осталось: массивы/структуры (g8_bytes_t, p99_rgb_t …) и поля-адреса (int32-адреса .data копируются как есть — `re_ptr` их находит только в зарегистрированных областях).
-5. **Шпионы selftest в игровом бинарнике.** tests/selftest.c линкуется в driver; 41 имя из `--skip` (work/skip_v196.txt) в игре — шпионы, а не перенос (исправлено 2 в v2.00, ещё 16 в v2.01 — список выше; остальные ~23 — P67_*, P66_*, P56_FindIcon, P57_MenuStep, P58_Fn418675 …). Нужно: каждый шпион вне selftest передаёт вызов настоящей функции (по образцу v2.00) либо вынести тесты из игрового бинарника.
+5. **Шпионы selftest в игровом бинарнике.** v2.02: все шпионы из `--skip` вне selftest передают вызов переносу (выше). Было: tests/selftest.c линкуется в driver; 41 имя из `--skip` (work/skip_v196.txt) в игре — шпионы, а не перенос (исправлено 2 в v2.00, ещё 16 в v2.01 — список выше; остальные ~23 — P67_*, P66_*, P56_FindIcon, P57_MenuStep, P58_Fn418675 …). Нужно: каждый шпион вне selftest передаёт вызов настоящей функции (по образцу v2.00) либо вынести тесты из игрового бинарника.
 6. **Заглушки unported.h, у которых есть перенос.** 365 строк V/R; часть не связана в links.c (две найдены запуском). Нужно: по журналу «not ported» при каждом новом шаге запуска связывать с перенесёнными функциями (адреса → re_ptr/re_fn).
 7. **Колбэки по адресу Game.exe.** `re_fn` знает только функции из k_fns (game/reptr.c); таймер 00408710 там не было (обойдено в links.c). Нужно: зарегистрировать все адреса, передаваемые в TimerStart/таблицы меню/обработчики.
 8. **DirectInput → клавиатура SDL.** `plat_di_get_state` в SDL возвращает «ничего не нажато» (platform/sdl/plat_di.c); `P48_AnyKey`/меню не получают клавиш. Нужно: буфер 256 DIK из `SDL_GetKeyboardState` (таблица SDL_Scancode → DIK), события SDL в `plat_pump_messages`, мышь/джойстик — потом.

@@ -319,7 +319,7 @@ int32_t P137_LoadTsd(const char *name) {
     if (blk == NULL) return 0;                           /* native: 0040d4b3 уже закрыл файл */
     P122_MapNames((const uint8_t *)h, (const char *)blk, (uint8_t)k);
     uint8_t *page = base + P41_Offset;
-    if (k < 16) P65_Texs[k].p = page;
+    if (k < 64) P65_Texs[k].p = page;   /* v2.02: 64 страницы (было 16) */
     memcpy(page, blk + h[2], 0x10000);
     P41_Offset += 0x10000;
     P98_DebugFree(blk);

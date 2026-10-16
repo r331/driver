@@ -15,7 +15,7 @@ typedef int32_t p65_ints_t[64];
 typedef const char *p65_strtab_t[128];                       /* 0x00c55820: указатели на строки (0x40 — 0x00c55920, 0x41 — 0x00c55924, 0xc — 0x00c55850) */
 typedef uint8_t p65_screen_t[640 * 480];
 typedef struct { void *p; uint8_t pad[16 - sizeof(void *)]; } p65_tex_t;   /* 16 байт в Game.exe: поле +0 — указатель на страницу */
-typedef p65_tex_t p65_texs_t[16];
+typedef p65_tex_t p65_texs_t[64];   /* v2.02: 64 (было 16): FRONTEND.TSD — 28 страниц; в Game.exe до 01146f20 свободно 0x14bc байт */
 typedef uint8_t p65_blend_t[0x10000];                        /* 0x012752a0: [dst<<8 | src] → цвет */
 typedef char p65_name_t[20];
 #define P65_Line   GAME_VAR(char *, P65_Line, 0x00c81684)

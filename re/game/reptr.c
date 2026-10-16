@@ -14,6 +14,7 @@ void     re_ptr_unregister(const void *native) { (void)native; }
 re_fn_t  re_fn(uint32_t addr) { return (re_fn_t)(uintptr_t)addr; }
 uint32_t re_fn_addr(re_fn_t fn) { return (uint32_t)(uintptr_t)fn; }
 void     re_fn_register(uint32_t addr, re_fn_t fn) { (void)addr; (void)fn; }
+void     re_ptr_set_image(uint32_t base, void *p, uint32_t size) { (void)base; (void)p; (void)size; }
 #else
 #include "ported26.h"
 #include "ported38.h"
@@ -206,12 +207,16 @@ static uint32_t g_ndyn, g_next_syn = 0x80000000u;
 static re_fnent_t g_fns[RE_FN_MAX];
 static uint32_t g_nfns;
 
+/* v2.02: запасная область — образ .rdata+.data Game.exe (game/data_image.c), только в режиме игры */
+static uint8_t *g_img; static uint32_t g_img_base, g_img_size;
+void re_ptr_set_image(uint32_t base, void *p, uint32_t size) { g_img = (uint8_t *)p; g_img_base = base; g_img_size = size; }
 void *re_ptr(uint32_t addr) {
   if (addr == 0) return NULL;
   for (uint32_t i = 0; i < g_ndyn; i++)
     if (addr >= g_dyn[i].addr && addr - g_dyn[i].addr < g_dyn[i].size) return g_dyn[i].p + (addr - g_dyn[i].addr);
   for (size_t i = 0; i < sizeof k_regions / sizeof k_regions[0]; i++)
     if (addr >= k_regions[i].addr && addr - k_regions[i].addr < k_regions[i].size) return k_regions[i].p + (addr - k_regions[i].addr);
+  if (g_img != NULL && addr >= g_img_base && addr - g_img_base < g_img_size) return g_img + (addr - g_img_base);   /* v2.02 */
   return NULL;
 }
 uint32_t re_addr(const void *pv) {
@@ -221,6 +226,7 @@ uint32_t re_addr(const void *pv) {
     if (p >= g_dyn[i].p && p < g_dyn[i].p + g_dyn[i].size) return g_dyn[i].addr + (uint32_t)(p - g_dyn[i].p);
   for (size_t i = 0; i < sizeof k_regions / sizeof k_regions[0]; i++)
     if (p >= k_regions[i].p && p < k_regions[i].p + k_regions[i].size) return k_regions[i].addr + (uint32_t)(p - k_regions[i].p);
+  if (g_img != NULL && p >= g_img && p < g_img + g_img_size) return g_img_base + (uint32_t)(p - g_img);   /* v2.02 */
   return re_ptr_register_dyn((void *)(uintptr_t)p, 1);
 }
 void re_ptr_register(uint32_t addr, void *native, uint32_t size) {

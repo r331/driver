@@ -19,6 +19,7 @@ void     re_ptr_unregister(const void *native);
 re_fn_t  re_fn(uint32_t addr);
 uint32_t re_fn_addr(re_fn_t fn);
 void     re_fn_register(uint32_t addr, re_fn_t fn);
+void     re_ptr_set_image(uint32_t base, void *p, uint32_t size);  /* v2.02: запасная область re_ptr — образ .data Game.exe (только игра) */
 
 /* чтение/запись 32-битного поля-указателя записи */
 static inline uint32_t re_rd_addr(const void *field) { const uint8_t *b = (const uint8_t *)field;

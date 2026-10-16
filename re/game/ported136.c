@@ -87,13 +87,9 @@
 GAME_VAR_DEF(p136_rot_t, P136_WheelRot, 0x00b1fce0)
 GAME_VAR_DEF(p136_rot_t, P136_WheelRotB, 0x00b1fde8)
 GAME_VAR_DEF(p136_path_t, P136_EvPath, 0x01134140)
-GAME_VAR_DEF(p136_pal_t, P136_TsdPalA, 0x012533e0)
-GAME_VAR_DEF(p136_pal_t, P136_TsdPalB, 0x012537e0)
 GAME_VAR_DEF(p136_pal16_t, P136_Pal16, 0x01271680)
 GAME_VAR_DEF(p136_path_t, P136_MapName, 0x00c80fa0)
 GAME_VAR_DEF(int32_t, P136_MapScroll, 0x00c80884)
-GAME_VAR_DEF(p136_pal_t, P136_MapPal, 0x012587e0)
-GAME_VAR_DEF(int32_t, P136_MapPalOn, 0x01252afc)
 
 typedef long double ld;
 static void wf(uint8_t *v, uint32_t off, float f) { memcpy(v + off, &f, 4); }

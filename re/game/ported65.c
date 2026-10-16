@@ -121,11 +121,17 @@ void P65_BlitBlend(const void *page, uint8_t *dst, int32_t w, int32_t h, int32_t
 
 /* 00407cb8 */
 void P65_SpriteKeyed(int32_t x, int32_t y, int32_t tex, int32_t u, int32_t v, int32_t w, int32_t h) {
+#ifndef RE_HOOK_BUILD
+  if (tex < 0 || tex >= 64 || P65_Texs[tex].p == NULL || x < 0 || y < 0 || w <= 0 || h <= 0 || (int64_t)(y + h - 1) * 0x280 + x + w > 0x4b000) return;   /* v2.02: native — границы */
+#endif
   P65_BlitKeyed(P65_Texs[tex].p, (uint8_t *)P65_Screen + (ptrdiff_t)y * 0x280 + x, w, h, u, v);
 }
 
 /* 00407d07 */
 void P65_SpriteBlend(int32_t x, int32_t y, int32_t tex, int32_t u, int32_t v, int32_t w, int32_t h) {
+#ifndef RE_HOOK_BUILD
+  if (tex < 0 || tex >= 64 || P65_Texs[tex].p == NULL || x < 0 || y < 0 || w <= 0 || h <= 0 || (int64_t)(y + h - 1) * 0x280 + x + w > 0x4b000) return;   /* v2.02: native — границы */
+#endif
   P65_BlitBlend(P65_Texs[tex].p, (uint8_t *)P65_Screen + (ptrdiff_t)y * 0x280 + x, w, h, u, v);
 }
 

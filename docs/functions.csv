@@ -3282,7 +3282,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00528e12,FUN_00528e12,ISqrt,manual,ported17,,,107,ported
 00529140,FUN_00529140,P65_BlitKeyed,manual,render,manual,,80,ported
 00529190,FUN_00529190,P65_BlitBlend,manual,render,manual,,93,ported
-005291ed,FUN_005291ed,,,,,,102,ported
+005291ed,FUN_005291ed,P152_FillRows,manual,ported152,,,102,ported
 00529253,FUN_00529253,,,,,,126,ported
 005292d1,FUN_005292d1,,,,,,195,ported
 0052955c,DirectDrawEnumerateA,DirectDrawEnumerateA,ghidra,,,,6,ported

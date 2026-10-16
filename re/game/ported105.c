@@ -128,6 +128,8 @@
 #include <string.h>
 #include "ported104.h"
 #include "../platform/plat.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef RE_HOOK_BUILD
 #  define P105_STD __attribute__((stdcall))
@@ -148,6 +150,9 @@ int32_t P105_LfbToMenu(void) {
   memset(info, 0, sizeof info);
   uint32_t n = 0x1c; memcpy(info, &n, 4);
   uint32_t ok = P68_LfbLock(1, info);
+#ifndef RE_HOOK_BUILD
+  { static int dbg=-1; if(dbg<0) dbg=getenv("RE_TRACE_MENU")!=0; if(dbg) fprintf(stderr,"[menu] lfb ok=%u d4=%d d8=%d pix=%08x dst=%08x\n",ok,(int)D_00b1c0d4,(int)D_00b1c0d8,P100_PixFn,(unsigned)rd32(info+4)); }
+#endif
   if (ok != 0) {
     P105_PixDst = (uint32_t)rd32(info + 4);
     uint8_t *dst = (uint8_t *)re_ptr(P105_PixDst);
@@ -155,6 +160,10 @@ int32_t P105_LfbToMenu(void) {
       if (P100_PixFn == 0x0040232eu) P101_Pal16((const uint8_t *)P65_Screen, dst, 0x280, 0x1e0);
       else if (P100_PixFn == 0x00402306u) P101_Pal32((const uint8_t *)P65_Screen, dst, 0x280, 0x1e0);
     }
+#ifndef RE_HOOK_BUILD
+    { static int dbg=-1; if(dbg<0) dbg=getenv("RE_TRACE_MENU")!=0; if(dbg){ int nz=0,np=0,nd=0; const uint8_t*sc=(const uint8_t*)P65_Screen; for(int i=0;i<0x4b000;i++) nz+=sc[i]!=0; for(int i=0;i<256;i++) np+=P101_PalLfb[i]!=0; if(dst) for(int i=0;i<640*480*2;i+=2) nd+=(dst[i]|dst[i+1])!=0;
+      int h[256]={0}; for(int i=0;i<0x4b000;i++) h[sc[i]]++; int d=0; for(int i=0;i<256;i++) d+=h[i]!=0; fprintf(stderr,"[menu] screen nz=%d pal nz=%d dst nz=%d pitch=%d distinct=%d h255=%d pal255=%08x pal10=%08x\n",nz,np,nd,(int)P100_LfbPitch,d,h[255],P101_PalLfb[255],P101_PalLfb[10]);} }
+#endif
     P58_ItemsDraw((int32_t)P105_PixDst);
     Dev0042480D(1);
   }

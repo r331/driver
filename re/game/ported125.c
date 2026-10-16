@@ -94,12 +94,6 @@ GAME_VAR_DEF(p125_droptime_t, P125_DropTime, 0x00bde780)
 GAME_VAR_DEF(p125_fps_t, P125_FpsStr, 0x00b5a48c)
 GAME_VAR_DEF(p125_mrk_t, P125_MrkSave, 0x01271070)
 GAME_VAR_DEF(int32_t, P125_ModelNamesSize, 0x00b1ff64)
-GAME_VAR_DEF(int32_t, P125_ShrR, 0x005c6748)
-GAME_VAR_DEF(int32_t, P125_ShrG, 0x005c674c)
-GAME_VAR_DEF(int32_t, P125_ShrB, 0x005c6750)
-GAME_VAR_DEF(int32_t, P125_ShlR, 0x005c6754)
-GAME_VAR_DEF(int32_t, P125_ShlG, 0x005c6758)
-GAME_VAR_DEF(int32_t, P125_ShlB, 0x005c675c)
 #endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }

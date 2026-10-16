@@ -140,6 +140,7 @@
 #include "../../game/ported149.h"
 #include "../../game/ported150.h"
 #include "../../game/ported151.h"
+#include "../../game/ported152.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2384,6 +2385,8 @@ void re_install_all(void) {
     re_hook(0x00420038, (void*)P151_CheckDev, "P151_CheckDev");
     re_hook(0x00425f7b, (void*)P151_Reopen, "P151_Reopen");
     re_hook(0x00521f10, (void*)P151_WinMain, "P151_WinMain");
+    /* v2.02: ported152 — заливка строк экрана меню 005291ed (cdecl) */
+    re_hook(0x005291ed, (void*)P152_FillRows, "P152_FillRows");
     re_hook(0x005224a8, (void*)P31_WndProc, "P31_WndProc");
     re_hook(0x004e9bbf, (void*)P140_MrkFly, "P140_MrkFly");
     re_hook(0x0041b8ac, (void*)P141_LadderLine, "P141_LadderLine");

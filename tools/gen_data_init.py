@@ -4,6 +4,10 @@
 каждой скалярной переменной (int8/16/32, uint8/16/32, float, double) и для ненулевых байтов инициализированной части
 секции (не .text) пишет запись в game/data_init.c. re_init_data_game() применяет запись, только если native-значение
 после re_init_consts всё ещё нулевое; вызывается из platform/native/main.c в режиме игры (не в selftest).
+v2.02: также game/data_image.c — копия инициализированных .rdata+.data Game.exe (00546000..0057c000, без хвостовых нулей) для
+re_ptr: адрес Game.exe, не покрытый ни одной native-областью (g_dyn, k_regions), в режиме игры читается из этой копии —
+таблицы меню (0054cb98, 0054cc50, 0054cc90 …), строки по адресам внутри них (блокер 4, массивы/структуры). Копия изменяема;
+native-переменные с теми же адресами с ней не связаны (как и прежде — блокер 3).
 Запуск: python3 tools/gen_data_init.py (из корня проекта)."""
 import re, struct, glob, os
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -49,3 +53,20 @@ out.append('}')
 out.append('#endif')
 open(os.path.join(ROOT, 're/game/data_init.c'), 'w').write('\n'.join(out) + '\n')
 print(len(ents), 'записей')
+
+# v2.02: образ .rdata+.data
+IMG_A, IMG_E = 0x00546000, 0x0057c000
+img = bytearray()
+for a in range(IMG_A, IMG_E, 0x1000):
+    b = rd(a, 0x1000)
+    img += b if b is not None else bytes(0x1000)
+while img and img[-1] == 0: img.pop()
+o = ['/* Автогенерация: tools/gen_data_init.py (v2.02). Образ инициализированных .rdata+.data Game.exe с 0x%08x, %d байт:' % (IMG_A, len(img)),
+     '   re_ptr_set_image() в режиме игры (platform/native/main.c) — запасная область re_ptr для адресов вне native-областей. */',
+     '#include <stdint.h>', '#ifndef RE_HOOK_BUILD', 'const uint32_t re_data_image_base = 0x%08xu, re_data_image_size = %du;' % (IMG_A, len(img)),
+     'uint8_t re_data_image[%d] = {' % len(img)]
+for i in range(0, len(img), 32):
+    o.append(''.join('%d,' % x for x in img[i:i + 32]))
+o += ['};', '#endif']
+open(os.path.join(ROOT, 're/game/data_image.c'), 'w').write('\n'.join(o) + '\n')
+print('образ', len(img), 'байт')
