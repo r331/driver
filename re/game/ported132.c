@@ -347,6 +347,17 @@ void P132_GameDraw(void) {
     P66_DirSwitch();
   }
   if (G6_00B5A778 != 0) P116_PauseMenu();
+#ifndef RE_HOOK_BUILD
+  /* v2.10: RE_COPDBG=N — рейтинг Felony / активные копы / последнее нарушение раз в N кадров (те же переменные, что строка отладки) */
+  { static int k; const char *e = getenv("RE_COPDBG"); if (e && (k++ % (atoi(e) > 0 ? atoi(e) : 50)) == 0)
+      fprintf(stderr, "[cop] кадр %d felony %d cops %d sugg %d max %d last %d spd %d\n", (int)P62_Frame, (int)G2_00D11A5C,
+              (int)G0112B284, (int)P97_D9E0, (int)P62_Max, (int)P95_ChanLast, (int)P62_Spd);
+      if (e && (k % (atoi(e) > 0 ? atoi(e) : 50)) == 1) for (int32_t q = 0; q < 8; q++) {   /* копы 0112da00: +0x32d — занят */
+        const uint32_t *c = &P12_0112da00[q * 0x336]; if (c[0x32d] == 0) continue;
+        int32_t dx = (int32_t)c[0x319] - P99_Cars[0].pos[0], dz = (int32_t)c[0x31b] - P99_Cars[0].pos[2];
+        fprintf(stderr, "[cop]   коп %d pos %d %d дист %.0f видит %d car %08x seen %d\n", q, (int)c[0x319], (int)c[0x31b],
+                sqrt((double)dx * dx + (double)dz * dz), (int)c[0x333], (unsigned)c[0x334], (int)P95_SndReady); } }
+#endif
   if (S_00B5A77C == 0) {
     if (P12_00b87ef8 != 0) P114_CreditsDraw();
     if ((P11_00b87e7c | G00B87E7C) == 0) {

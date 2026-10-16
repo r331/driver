@@ -474,13 +474,16 @@ static void spin_end(uint8_t *p) {
 #ifndef RE_HOOK_BUILD
 /* v2.09: RE_PEDDBG=1 — раз в 100 вызовов: включены ли пешеходы, лимит, точки появления, занятые слоты */
 static void ped_dbg(void) {
-  static int n; static int on = -1; if (on < 0) on = getenv("RE_PEDDBG") != NULL; if (!on || (n++ % 100) != 0) return;
+  static int n; static int on = -1; if (on < 0) on = getenv("RE_PEDDBG") != NULL; if (!on || (n++ % (getenv("RE_PEDN") ? atoi(getenv("RE_PEDN")) : 100)) != 0) return;
   int act = 0, t[4] = { 0 }; const uint8_t *q = A_00C56780;
   float dmin = 1e30f;
   for (int i = 0; i < 0x40; i++, q += 0xb4) if (((uint32_t)rd32(q + 0xc) & 0x10) != 0) { act++; int16_t k = (int16_t)rd16(q); if (k >= 0 && k < 4) t[k]++;
       float fx, fz; memcpy(&fx, q + 0x84, 4); memcpy(&fz, q + 0x8c, 4); fx -= (float)P99_Cars[0].pos[0]; fz -= (float)P99_Cars[0].pos[2];
-      float d = sqrtf(fx * fx + fz * fz); if (d < dmin) dmin = d; }
-  if (act) fprintf(stderr, "[ped] nearest %.0f\n", dmin);
+      float d = sqrtf(fx * fx + fz * fz); if (d < dmin) dmin = d;
+      if (i < 3) fprintf(stderr, "[ped]  #%d тип %d pos %.0f %.0f fl %x\n", i, k, fx + (float)P99_Cars[0].pos[0], fz + (float)P99_Cars[0].pos[2], (unsigned)rd32(q + 0xc)); }
+  { extern int32_t P113_PedStat[5];
+    if (act) fprintf(stderr, "[ped] nearest %.0f draw: calls %d near %d frustum %d grid %d mind %d\n", dmin, P113_PedStat[0], P113_PedStat[1],
+                     P113_PedStat[2], P113_PedStat[3], P113_PedStat[4]); P113_PedStat[4] = 0x7fffffff; }
   fprintf(stderr, "[ped] call %d on %d limit %d ebc %d dustN %d used %d active %d (type0 %d 1 %d 2 %d 3 %d) car %d %d\n", n - 1, P106_PartOn, P60_PartLimit,
       P95_B87EBC, P102_DustN, G6_00C56764, act, t[0], t[1], t[2], t[3], P99_Cars[0].pos[0], P99_Cars[0].pos[2]);
 }
@@ -488,6 +491,15 @@ static void ped_dbg(void) {
 void P106_PartTick(void) {
 #ifndef RE_HOOK_BUILD
   ped_dbg();
+  /* v2.10: RE_PEDNEAR=K — отладка видимости: первый активный пешеход каждый такт ставится перед машиной игрока
+     (машина + K/1000 · (машина − камера) по XZ), чтобы проверить, рисует ли P113_PartDraw → P100_DrawParts модель */
+  { static int on = -1; static float kk; if (on < 0) { on = getenv("RE_PEDNEAR") != NULL; if (on) kk = (float)atof(getenv("RE_PEDNEAR")) / 1000.0f; }
+    if (on) { uint8_t *q = A_00C56780;
+      for (int i = 0; i < 0x40; i++, q += 0xb4) if (((uint32_t)rd32(q + 0xc) & 0x10) != 0) {
+        float cx = (float)P99_Cars[0].pos[0], cz = (float)P99_Cars[0].pos[2];
+        float f[3] = { cx + kk * (cx - P44_CamX), 0.0f, cz + kk * (cz - P44_CamZ) };
+        f[1] = (float)-P100_RoadHeightF(f);
+        memcpy(q + 0x84, f, 12); break; } } }
 #endif
   if (P106_PartOn == 0 || P60_PartLimit == 0) return;
   P73_C5670C++;

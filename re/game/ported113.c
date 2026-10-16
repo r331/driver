@@ -195,6 +195,9 @@ void P113_Heli(int32_t mode) {
 }
 
 /* ---- 005129e1 ---- */
+#ifndef RE_HOOK_BUILD
+int32_t P113_PedStat[5] = { 0, 0, 0, 0, 0x7fffffff };   /* вызовы, ближе 15001, в пирамиде, в сетке света, мин. дист. */
+#endif
 void P113_PartDraw(uint8_t *p) {
   int32_t ty = rd32(p + 0x1c) - 1;
   int32_t k = rd32(p + 0x34);
@@ -230,10 +233,22 @@ void P113_PartDraw(uint8_t *p) {
   P11_00ba52d0 = (int32_t)lrintf(dx); int32_t ax = P11_00ba52d0 < 0 ? -P11_00ba52d0 : P11_00ba52d0;
   P11_00ba52d0 = (int32_t)lrintf(dz); int32_t az = P11_00ba52d0 < 0 ? -P11_00ba52d0 : P11_00ba52d0;
   int32_t d = ax < az ? az + ax / 2 : ax + az / 2;
+#ifndef RE_HOOK_BUILD
+  P113_PedStat[0]++; if (d < P113_PedStat[4]) P113_PedStat[4] = d;   /* v2.10: RE_PEDDBG — сколько отсеяно на каждом шаге */
+#endif
   if (d >= 0x3a99) return;
+#ifndef RE_HOOK_BUILD
+  P113_PedStat[1]++;
+#endif
   P100_PartMode = P82_SphereVis3D(P100_PartBase, 800.0f);       /* 0x44480000 */
   if (P100_PartMode == 0) return;
+#ifndef RE_HOOK_BUILD
+  P113_PedStat[2]++;
+#endif
   if (P76_InBox(P100_PartBase, (const uint8_t *)P82_LightGrid, P82_CellCX, P82_CellCY) == 0) return;
+#ifndef RE_HOOK_BUILD
+  P113_PedStat[3]++;
+#endif
   int16_t ang[3] = { rd16s(p + 0x5c), rd16s(p + 0x5e), rd16s(p + 0x60) };
   float q[5], pos[3] = { 0.0f, 0.0f, 0.0f };
   P44_EulerToQuat(ang, q);

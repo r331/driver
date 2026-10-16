@@ -21,7 +21,12 @@ int test_snd(void) {
     plat_snd_stop(h);
     uint8_t p8[10]; memset(p8, 255, sizeof p8);                           /* 8 бит стерео, 255 → ≈ +1.0 */
     int h2 = plat_snd_create(p8, sizeof p8, 44100, 2, 8); CHK(h2 > 0 && h2 != h);
-    plat_snd_set(h2, 0, 44100, 0); plat_snd_play(h2, 0); plat_snd_mix(out, 2); CHK(out[0] > 32000);
+    plat_snd_set(h2, 0, 44100, 0); plat_snd_play(h2, 0); plat_snd_mix(out, 2);
+    CHK(out[0] > 30000 && out[0] < 32767);                                /* v2.10: мягкий ограничитель — ≈ +1.0 → 0.93, без насыщения */
+    { extern float dsm_soft_limit(float x); float prev = 0.0f;           /* ниже 0.7 — без изменений; монотонно; |y| < 1 даже при 8× */
+      CHK(dsm_soft_limit(0.5f) == 0.5f && dsm_soft_limit(-0.7f) == -0.7f);
+      for (int i = 1; i <= 800; i++) { float y = dsm_soft_limit(i / 100.0f); CHK(y >= prev && y <= 1.0f); prev = y; }
+      CHK(dsm_soft_limit(1.0f) < 0.95f && dsm_soft_limit(-8.0f) >= -1.0f); }
     plat_snd_destroy(h); plat_snd_destroy(h2);
     CHK(plat_snd_create(NULL, 10, 44100, 1, 16) == 0);
     printf("snd mixer ok\n"); return 0;

@@ -1,3 +1,6 @@
+#if defined(__linux__) && !defined(_GNU_SOURCE)
+#define _GNU_SOURCE   /* v2.10: dladdr, ucontext (RE_CRASH_BT) */
+#endif
 #include "../plat.h"
 #include <SDL.h>
 #include <stdio.h>
@@ -90,24 +93,47 @@ void plat_screensaver_set(int on){
 #if defined(__GLIBC__)
 #include <execinfo.h>
 #endif
+#include <signal.h>
+#if defined(__GLIBC__)
+#include <ucontext.h>
+#include <dlfcn.h>
+#endif
 /* v2.03: RE_CRASH_BT=1 — стек в stderr перед обработчиком игры (glibc backtrace; адреса — addr2line -f -e driver) */
-static void crash_sig(int sig){
+static void crash_sig(int sig, siginfo_t *si, void *uc){
     signal(sig,SIG_DFL);
 #if defined(__GLIBC__)
-    if (getenv("RE_CRASH_BT")) { void *bt[48]; int n = backtrace(bt, 48); fprintf(stderr, "[crash] сигнал %d, стек:\n", sig); backtrace_symbols_fd(bt, n, 2); }
+    if (getenv("RE_CRASH_BT")) {
+        void *bt[48]; int n = backtrace(bt, 48); uintptr_t pc = 0, lr = 0;
+        /* v2.10: PC/LR из контекста сигнала — backtrace из обработчика видит только сам обработчик */
+#if defined(__aarch64__)
+        pc = (uintptr_t)((ucontext_t *)uc)->uc_mcontext.pc; lr = (uintptr_t)((ucontext_t *)uc)->uc_mcontext.regs[30];
+#elif defined(__x86_64__)
+        pc = (uintptr_t)((ucontext_t *)uc)->uc_mcontext.gregs[REG_RIP];
+#endif
+        Dl_info di; uintptr_t base = dladdr((void *)crash_sig, &di) ? (uintptr_t)di.dli_fbase : 0;
+        fprintf(stderr, "[crash] сигнал %d, адрес %p, pc +0x%lx lr +0x%lx, стек:\n", sig, si ? si->si_addr : NULL,
+                (unsigned long)(pc - base), (unsigned long)(lr - base));
+        backtrace_symbols_fd(bt, n, 2);
+    }
+#else
+    (void)si; (void)uc;
 #endif
     if(g_crash) g_crash(); _Exit(1);
 }
 void plat_set_crash_handler(void (*fn)(void)){
     g_crash=fn;
-    void (*h)(int)= fn?crash_sig:SIG_DFL;
     if (getenv("RE_NO_CRASH")) return;   /* v2.01: отладка — сигналы видит ASan/gdb */
+    struct sigaction sa; memset(&sa, 0, sizeof sa);
+    if (fn) { sa.sa_sigaction = crash_sig; sa.sa_flags = SA_SIGINFO; } else sa.sa_handler = SIG_DFL;
+    sigemptyset(&sa.sa_mask);
+#define signal(s, h_) sigaction((s), &sa, NULL)
     /* v2.01: SIGILL не перехватывается — Mesa (llvmpipe, arm64) пробует инструкции CPU через SIGILL при первой загрузке
        текстуры; обработчик игры превращал это в «Application Error» */
     signal(SIGSEGV,h); signal(SIGFPE,h);
 #ifdef SIGBUS
     signal(SIGBUS,h);
 #endif
+#undef signal
 }
 void (*plat_crash_handler(void))(void){ return g_crash; }
 

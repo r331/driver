@@ -759,9 +759,11 @@ void ShutdownAudio004183A3(void) {
     G6_00B87EEC = 0; G6_00B87EFC = 0; G6Call0040C5BE(4);
 }
 void MenuBack005103EC(void) { G005F7E54 = 2; G6_00B87E20 = 0; G6Call0050E940(0); }
-void SoundMenuIn00419814(void) { FnPtr01270E80(2); Call0042655A(G0054E540); G6_01270DE4(3); }
-void SoundMenuOut0051082A(void) { FnPtr01270E80(2); Call0042655A(G6_005755C8); G6_01270DE4(3); }
-void SoundMenuSave0051080E(void) { G6_005755C8 = Call0042655A(0); FnPtr01270E80(0); }
+/* v2.10: ячейка 01270e80 (grDepthBufferMode, метка 0041e3b0 — нет в k_fns) в native = NULL, как в остальных местах — проверка;
+   без неё Esc (пауза-меню, P116_PauseMenu → 0051080e) падал переходом по нулевому адресу */
+void SoundMenuIn00419814(void) { if (FnPtr01270E80) FnPtr01270E80(2); Call0042655A(G0054E540); if (G6_01270DE4) G6_01270DE4(3); }
+void SoundMenuOut0051082A(void) { if (FnPtr01270E80) FnPtr01270E80(2); Call0042655A(G6_005755C8); if (G6_01270DE4) G6_01270DE4(3); }
+void SoundMenuSave0051080E(void) { G6_005755C8 = Call0042655A(0); if (FnPtr01270E80) FnPtr01270E80(0); }
 int32_t DrvCall004246D1(int32_t a) { return G00B1C0D4 == 0 ? 1 : G6_01270D20(a); }
 int32_t DrvSetMode0042655A(int32_t a) { int32_t old = G6_00B1C224; G6_00B1C224 = a; G6_01270D28(a); return old; }
 void ClearHandles005223BE(void) { G6_00BDF9C0 = 0; G6_00BDF9C4 = 0; G6Call004A2B70(); }

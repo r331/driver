@@ -130,26 +130,43 @@ static void gains3d(const dsm_buf *b, float *gl, float *gr) {
   *gl = g * (p > 0 ? 1.0f - 0.7f * p : 1.0f);
   *gr = g * (p < 0 ? 1.0f + 0.7f * p : 1.0f);
 }
+/* v2.10: мягкий ограничитель — голоса суммируются в float (нормировано к 1.0), до порога DSM_KNEE сигнал не меняется,
+   выше — tanh-колено: y = K + (1 − K)·tanh((x − K)/(1 − K)) — непрерывно, гладко (производная 1 на пороге) и |y| < 1,
+   поэтому жёсткого клиппинга (насыщения 32767) больше нет; до v2.09 сумма 8 голосов двигателя обрезалась (62 отсчёта в пике). */
+#define DSM_KNEE 0.7f
+static float dsm_soft(float x) {
+  float a = fabsf(x);
+  if (a <= DSM_KNEE) return x;
+  float y = DSM_KNEE + (1.0f - DSM_KNEE) * tanhf((a - DSM_KNEE) / (1.0f - DSM_KNEE));
+  return x < 0 ? -y : y;
+}
+float dsm_soft_limit(float x) { return dsm_soft(x); }   /* для теста */
 void dsm_mix(int16_t *out, int frames) {
-  for (int h = 0; h < DSM_MAX; h++) {
-    dsm_buf *b = g_bufs[h];
-    if (!b || b->kind != K_SEC || !b->playing || !b->pcm) continue;
-    int fb = b->ch * (b->bits / 8); int64_t total = b->pcm->bytes / (uint32_t)fb;
-    if (total < 1) { b->playing = 0; continue; }
-    double step = (double)(b->freq ? b->freq : (uint32_t)b->rate) / 44100.0;
-    float g = db_gain(b->vol), g3l, g3r; gains3d(b, &g3l, &g3r);
-    float gl = g * g3l, gr = g * g3r;
-    for (int f = 0; f < frames; f++) {
-      int64_t i0 = (int64_t)b->pos; if (i0 >= total) i0 = total - 1;
-      float fr = (float)(b->pos - (double)i0); int64_t i1 = i0 + 1;
-      if (i1 >= total) i1 = b->loop ? 0 : i0;
-      float l = smp(b, i0, 0) * (1 - fr) + smp(b, i1, 0) * fr, r = b->ch > 1 ? smp(b, i0, 1) * (1 - fr) + smp(b, i1, 1) * fr : l;
-      int a = out[2 * f] + (int)(l * gl * 32767.0f), c = out[2 * f + 1] + (int)(r * gr * 32767.0f);
-      out[2 * f] = (int16_t)(a > 32767 ? 32767 : a < -32768 ? -32768 : a);
-      out[2 * f + 1] = (int16_t)(c > 32767 ? 32767 : c < -32768 ? -32768 : c);
-      b->pos += step;
-      if (b->pos >= (double)total) { if (b->loop) b->pos -= (double)total; else { b->playing = 0; b->pos = 0; break; } }
+  enum { CH = 1024 };
+  static float acc[2 * CH];
+  for (int base = 0; base < frames; base += CH) {
+    int n = frames - base < CH ? frames - base : CH;
+    int16_t *o = out + 2 * base;
+    for (int i = 0; i < 2 * n; i++) acc[i] = o[i] / 32768.0f;   /* то, что уже смешано до нас (plat_snd) */
+    for (int h = 0; h < DSM_MAX; h++) {
+      dsm_buf *b = g_bufs[h];
+      if (!b || b->kind != K_SEC || !b->playing || !b->pcm) continue;
+      int fb = b->ch * (b->bits / 8); int64_t total = b->pcm->bytes / (uint32_t)fb;
+      if (total < 1) { b->playing = 0; continue; }
+      double step = (double)(b->freq ? b->freq : (uint32_t)b->rate) / 44100.0;
+      float g = db_gain(b->vol), g3l, g3r; gains3d(b, &g3l, &g3r);
+      float gl = g * g3l, gr = g * g3r;
+      for (int f = 0; f < n; f++) {
+        int64_t i0 = (int64_t)b->pos; if (i0 >= total) i0 = total - 1;
+        float fr = (float)(b->pos - (double)i0); int64_t i1 = i0 + 1;
+        if (i1 >= total) i1 = b->loop ? 0 : i0;
+        float l = smp(b, i0, 0) * (1 - fr) + smp(b, i1, 0) * fr, r = b->ch > 1 ? smp(b, i0, 1) * (1 - fr) + smp(b, i1, 1) * fr : l;
+        acc[2 * f] += l * gl; acc[2 * f + 1] += r * gr;
+        b->pos += step;
+        if (b->pos >= (double)total) { if (b->loop) b->pos -= (double)total; else { b->playing = 0; b->pos = 0; break; } }
+      }
     }
+    for (int i = 0; i < 2 * n; i++) { float y = dsm_soft(acc[i]) * 32760.0f;   /* tanhf в float доходит до 1.0 только при x ≫ 1 — запас до 32767 */ o[i] = (int16_t)lrintf(y); }
   }
 }
 int dsm_active(void) { int n = 0; for (int h = 0; h < DSM_MAX; h++) if (g_bufs[h] && g_bufs[h]->kind == K_SEC && g_bufs[h]->playing) n++; return n; }

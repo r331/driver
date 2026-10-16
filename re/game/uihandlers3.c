@@ -372,7 +372,7 @@ void Ui004184DE(int32_t a0) {
     G005FEA5C = a0; G005FEA60 = 1;
 }
 void Ui004197F8(void) {
-    G0054E540 = Call0042655A(0); FnPtr01270E80(0);
+    G0054E540 = Call0042655A(0); if (FnPtr01270E80) FnPtr01270E80(0);   /* v2.10: NULL в native */
 }
 void Ui0041A1EC(int32_t a0) {
     G005FEB00 = a0;
