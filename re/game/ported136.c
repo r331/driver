@@ -192,6 +192,10 @@ void P136_DrawWheels(int32_t car, const float *mat, int32_t mode) {
     static const uint32_t vo[8] = { 0x84, 0x88, 0x94, 0x98, 0xa4, 0xa8, 0xb4, 0xb8 };
     if (car == 0 && ((const int32_t *)(const void *)P98_CarBufC)[3 - i] == 0) m = P26_ModelDam;
     else m = (i & 1) ? mr : mf;
+#ifndef RE_HOOK_BUILD
+    { static int k; if (getenv("RE_WHEELDBG") && k++ < 16) fprintf(stderr, "[wheel] car %d i %d m %08x hub %08x clean %08x fast %08x dam %08x off %u mode %d\n", car, i, (unsigned)m,
+        (unsigned)P26_ModelHubcap, (unsigned)P26_ModelClean, (unsigned)P26_ModelFast, (unsigned)P26_ModelDam, off, mode); }
+#endif
     if (m == 0 || off + 6 > sizeof(S_00D0CC60)) continue;
     memcpy(&wx, &S_00D0CC60[off], 2); memcpy(&wy, &S_00D0CC60[off + 2], 2); memcpy(&wz, &S_00D0CC60[off + 4], 2);
     p[0] = (float)((i & 2) == 0 ? 0x19 - wx : -0x19 - wx);
@@ -202,6 +206,10 @@ void P136_DrawWheels(int32_t car, const float *mat, int32_t mode) {
     p[0] += ox; p[1] += oy; p[2] += oz;
     P44_MatPtr = P44_ViewMatT;
     P44_Xform(p);
+#ifndef RE_HOOK_BUILD
+    { static int k; if (getenv("RE_WHEELDBG") && k++ < 8) fprintf(stderr, "[wheel] sin %f %f rot %d i %u w %d %d %d f78 %d p %.1f %.1f %.1f cam %.0f %.0f %.0f car %d %d %d\n", P43_Sin[256], P43_Sin[1024], (int)P136_WheelRot[car], i, wx, wy, wz, (int)c->f78[i][0], p[0], p[1], p[2],
+        P44_CamX, P44_CamY, P44_CamZ, (int)c->pos[0], (int)c->pos[1], (int)c->pos[2]); }
+#endif
     {
       uint8_t *mdl = (uint8_t *)P79_PTR((uint32_t)m);
       uint8_t *v = (uint8_t *)P79_PTR(*(uint32_t *)(mdl + 0x20));
@@ -222,7 +230,10 @@ static const char *var_str(int32_t i) {
 #ifdef RE_HOOK_BUILD
   return (const char *)(uintptr_t)P42_Vars[i].addr;
 #else
-  return P59_VarStr[i];
+  /* v2.07: строку пишут два setter-а — P59_VarSetString (004f8a2d, в native — P59_VarStr) и P99_VarSetStr (EVENTSCRIPT ← .DES
+     в P138_LoadMission: re_wr_ptr в поле +0x24 записи); в Game.exe это одно поле. Читаем оба. */
+  if (P59_VarStr[i] != NULL) return P59_VarStr[i];
+  return P42_Vars[i].addr != 0 ? (const char *)re_rd_ptr((uint8_t *)&P42_Vars[i] + 0x24) : NULL;
 #endif
 }
 void P136_CompileEvents(void) {

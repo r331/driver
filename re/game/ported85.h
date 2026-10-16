@@ -101,6 +101,9 @@ extern int32_t P85_TrisBy[4]; /* то же по режимам смешиван�
 extern uint8_t P85_LastBlend; /* последний режим смешивания, переданный P85_BlendFn (native) */
 #endif
 void P85_InitConsts(void);
+#ifndef RE_HOOK_BUILD
+#define P85_OOW_NEAR 1e-30f   /* v2.07: метка вершины ближе z = 1 (только игра) */
+#endif
 void P85_Project(p85_vtx *v);          /* 00528ac8 */
 void P85_FlatTri(uint32_t arg);        /* 0042f7d9 */
 void P85_FlatQuad(uint32_t arg);       /* 0042fc29 */

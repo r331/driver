@@ -122,7 +122,9 @@ void P85_Project(p85_vtx *v) {
 #ifndef RE_HOOK_BUILD
     /* v2.05, отступление native: z вне таблицы 1/z (за камерой или ≥ 0xdbba) — в оригинале такие вершины уходят в набор с
        отсечением (не перенесён); только в игре (вне игры — прежнее поведение тестов города): oow = 0 — P85_CallRaster такой треугольник не рисует (вместо чтения за границей таблицы). */
-    if ((zi < 1 || zi >= (int32_t)(sizeof(p12_00ba53a0_t) / sizeof(float))) && re_ptr_has_image()) { v->oow = 0.0f; v->x = 0; v->y = 0; return; }
+    if ((zi < 1 || zi >= (int32_t)(sizeof(p12_00ba53a0_t) / sizeof(float))) && re_ptr_has_image()) {
+      /* v2.07: ближе z = 1 — метка P85_OOW_NEAR (u·oow остаётся восстановимым), P85_CallRaster отсекает треугольник по z = 1 */
+      v->oow = zi < 1 ? P85_OOW_NEAR : 0.0f; v->x = 0; v->y = 0; return; }
 #endif
     v->oow = ((const float *)&P12_00ba53a0[0])[zi];
   }
@@ -166,9 +168,59 @@ void P85_SetBlend(uint8_t m) {
   }
   P85_BlendCur = m;
 }
+#ifndef RE_HOOK_BUILD
+/* v2.07, отступление native (только игра): отсечение по ближней плоскости z = 1 для обработчиков без отсечения.
+   В оригинале такие полигоны рисует набор с отсечением (00436ab0.., не перенесён); до v2.07 треугольник с вершиной ближе z = 1
+   пропускался целиком — у камеры пропадали пол и стены (чёрные дыры). P85_PutVtx запоминает координаты камеры вершины;
+   новая вершина на z = 1 проецируется как в P85_Project, u/v (хранятся как u·oow) — с учётом перспективы, цвет — линейно. */
+static struct { float vx, vy, z, oow, x; int ok; } s_cam[3];
+static float near_oow(void) { return ((const float *)&P12_00ba53a0[0])[1]; }
+static void near_vtx(p85_rv *o, const p85_rv *a, const p85_rv *b, int ia, int ib) {
+  float za = s_cam[ia].z, zb = s_cam[ib].z, t = (1.0f - za) / (zb - za);
+  float vx = s_cam[ia].vx + t * (s_cam[ib].vx - s_cam[ia].vx), vy = s_cam[ia].vy + t * (s_cam[ib].vy - s_cam[ia].vy);
+  float w = near_oow(), kk = w * P43_ScaleA;
+  *o = *a;
+  o->r = a->r + t * (b->r - a->r); o->g = a->g + t * (b->g - a->g); o->b = a->b + t * (b->b - a->b);
+  o->a = a->a + t * (b->a - a->a); o->z = a->z + t * (b->z - a->z); o->ooz = a->ooz + t * (b->ooz - a->ooz);
+  for (int k = 0; k < 2; k++) {
+    float ua = a->tmu[k] / a->oow, ub = b->tmu[k] / b->oow;
+    o->tmu[k] = (ua + t * (ub - ua)) * w;
+  }
+  o->oow = w;
+  o->x = (kk * vx + P43_OffX) - P43_Half;
+  o->y = (kk * vy + P43_OffY) - P43_Half;
+}
+static int near_clip_raster(void) {
+  p85_rv in[3], out[4];
+  int n = 0, inside[3], cnt = 0;
+  for (int i = 0; i < 3; i++) {
+    if (!(s_cam[i].ok && s_cam[i].oow == P85_RV[i].oow && s_cam[i].x == P85_RV[i].x)) return 0;   /* вершина не из P85_PutVtx */
+    if (!(P85_RV[i].oow > 0.0f)) return 0;                                                          /* дальняя — пропуск, как в v2.05 */
+    inside[i] = P85_RV[i].oow != P85_OOW_NEAR && s_cam[i].z >= 1.0f; cnt += inside[i];
+  }
+  if (cnt == 0) return 0;
+  memcpy(in, P85_RV, sizeof in);
+  for (int i = 0; i < 3; i++) {
+    int j = (i + 1) % 3;
+    if (inside[i]) out[n++] = in[i];
+    if (inside[i] != inside[j]) near_vtx(&out[n++], inside[i] ? &in[i] : &in[j], inside[i] ? &in[j] : &in[i], inside[i] ? i : j, inside[i] ? j : i);
+  }
+  for (int k = 1; k + 1 < n; k++) {
+    P85_RV[0] = out[0]; P85_RV[1] = out[k]; P85_RV[2] = out[k + 1];
+    if ((uint8_t)P82_Edge == 0) P85_RasterA(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
+    else P85_RasterB(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
+  }
+  memcpy(P85_RV, in, sizeof in);   /* обработчик четырёхугольника использует RV[0], RV[1] повторно */
+  return 1;
+}
+#endif
 void P85_CallRaster(void) {
 #ifndef RE_HOOK_BUILD
-  if (re_ptr_has_image() && (!(P85_RV[0].oow > 0.0f) || !(P85_RV[1].oow > 0.0f) || !(P85_RV[2].oow > 0.0f))) return;   /* v2.05: только игра, см. P85_Project */
+  if (re_ptr_has_image() && (!(P85_RV[0].oow > 0.0f) || !(P85_RV[1].oow > 0.0f) || !(P85_RV[2].oow > 0.0f) ||
+      P85_RV[0].oow == P85_OOW_NEAR || P85_RV[1].oow == P85_OOW_NEAR || P85_RV[2].oow == P85_OOW_NEAR)) {   /* v2.05/v2.07: только игра, см. P85_Project */
+    (void)near_clip_raster();
+    return;
+  }
 #endif
   if ((uint8_t)P82_Edge == 0) P85_RasterA(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
   else P85_RasterB(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
@@ -191,7 +243,12 @@ int P85_EdgeReject(const p85_vtx *const *vs, int n) {
   }
   return 0;
 }
-void P85_PutVtx(p85_rv *r, const p85_vtx *v) { r->x = v->x; r->y = v->y; r->oow = v->oow; }
+void P85_PutVtx(p85_rv *r, const p85_vtx *v) {
+  r->x = v->x; r->y = v->y; r->oow = v->oow;
+#ifndef RE_HOOK_BUILD
+  { ptrdiff_t i = r - &P85_RV[0]; if (i >= 0 && i < 3) { s_cam[i].vx = v->vx; s_cam[i].vy = v->vy; s_cam[i].z = v->z; s_cam[i].oow = v->oow; s_cam[i].x = v->x; s_cam[i].ok = 1; } }
+#endif
+}
 /* цвет записи → r,g,b трёх вершин; lit: умножается на освещённость плоскости (P84_LightIn[номер], как fmul → fstp во float) */
 static void put_color(const uint8_t *rec, int off, int lit) {
   float k = lit ? P84_LightIn[*(const int32_t *)(rec + 4)] : 1.0f;

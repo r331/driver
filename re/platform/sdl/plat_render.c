@@ -202,6 +202,9 @@ void plat_draw_prim(int ptype, const plat_vertex *v, int count) {
     if (getenv("RE_TRACE_DD") && g_dp_calls < 60 && v && count >= 3) fprintf(stderr, "[gl] v1 %.1f %.1f uv %.5f %.5f v2 %.1f %.1f uv %.5f %.5f\n", v[1].x, v[1].y, v[1].u, v[1].v, v[2].x, v[2].y, v[2].u, v[2].v);
     if (getenv("RE_TRACE_DD") && g_dp_calls < 60) fprintf(stderr, "[gl] draw_prim %d n=%d tex %d v0 %.1f %.1f %.3f %.3f col %08x uv %.3f %.3f zt %d zf %d bl %d %d %d at %d vp %d %d %d %d %d tss %d %d %d %d\n", ptype, count, g_cur,
         v ? v[0].x : 0, v ? v[0].y : 0, v ? v[0].z : 0, v ? v[0].rhw : 0, v ? v[0].color : 0, v ? v[0].u : 0, v ? v[0].v : 0, g_zt, g_zf, g_blend, g_bs, g_bd, g_at, g_vpset, g_vp[0], g_vp[1], g_vp[2], g_vp[3], g_tss[0][1], g_tss[0][2], g_tss[0][3], g_tss[0][4]);
+    { static int k; if (getenv("RE_ATDBG") && g_at && g_af == 2 && k++ < 6 && v && count) fprintf(stderr, "[at] z %f rhw %f xy %.0f %.0f bl %d %d %d zt %d zw %d zf %d n %d tex %d col %08x aref %d tss c %d %d %d a %d %d %d\n", v[0].z, v[0].rhw, v[0].x, v[0].y, g_blend, g_bs, g_bd, g_zt, g_zw, g_zf, count, g_cur, v[0].color, g_aref,
+        g_tss[0][1], g_tss[0][2], g_tss[0][3], g_tss[0][4], g_tss[0][5], g_tss[0][6]); }
+    { static int k; static int armed; if (g_at && g_af == 2) armed = 1; if (getenv("RE_ZDBG") && armed && k++ < 40 && v && count) fprintf(stderr, "[z] n %d tex %d z %f rhw %f xy %.0f %.0f zt %d zf %d at %d af %d\n", count, g_cur, v[0].z, v[0].rhw, v[0].x, v[0].y, g_zt, g_zf, g_at, g_af); }
     if (ptype == 4) plat_draw_tris(v, count);
     else if (ptype == 2) plat_draw_lines(v, count);
 }

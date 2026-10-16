@@ -237,9 +237,24 @@ static void draw_core(uint8_t *mdl, const float *modmat, const float *viewm, con
     const float *n = (const float *)P79_PTR(*(uint32_t *)(mdl + 0x28));
     for (int i = 0; i < nnrm; i++, n += 4) P84_NormLight[i] = shade(dot3(n, lx, ly, lz));
   }
+#ifndef RE_HOOK_BUILD
+  static int s_md = -2; if (s_md == -2) s_md = getenv("RE_MDLDBG") ? (int)strtol(getenv("RE_MDLDBG"), NULL, 16) : -1;
+  int dbgm = (s_md >= 0 && P79_OFF(mdl) == (uint32_t)s_md); static int s_mdk;
+  if (dbgm && s_mdk < 3) fprintf(stderr, "[mdl] %06x flags %04x nrec %d tab %p\n", (unsigned)s_md, flags, nrec, (const void *)tab);
+  if (dbgm && s_mdk < 1) { const float *vv = (const float *)P79_PTR(*(uint32_t *)(mdl + 0x20)); const uint16_t *h = (const uint16_t *)mdl;
+    fprintf(stderr, "[mdl] hdr"); for (int q = 0; q < 0x1c; q++) fprintf(stderr, " %04x", h[q]); fprintf(stderr, "\n");
+    for (int q = 0; q < 16; q++) fprintf(stderr, "[mdl]  v%d %.1f %.1f %.1f %.1f\n", q, vv[q*4], vv[q*4+1], vv[q*4+2], vv[q*4+3]);
+    const uint8_t *r = (const uint8_t *)P79_PTR(*(uint32_t *)(mdl + 0x2c)); fprintf(stderr, "[mdl]  rec0"); for (int q = 0; q < 40; q++) fprintf(stderr, " %02x", r[q]); fprintf(stderr, "\n"); }
+#endif
   for (int i = 0; i < nrec; i++) {
     uint8_t *rec = G2_011F4064;
     uint32_t type = rec[0];
+#ifndef RE_HOOK_BUILD
+    if (dbgm && s_mdk < 3) fprintf(stderr, "[mdl]  rec %d type %u f1 %02x plane %d vis %d h %s\n", i, type, rec[1], *(int32_t *)(rec + 4), P84_Vis[*(int32_t *)(rec + 4)],
+        tab[type] == (uintptr_t)P85_SkipRecord ? "SKIP" : "ok");
+    if (dbgm && s_mdk < 3) { float cc[3]; memcpy(cc, rec + 0x38, 12); fprintf(stderr, "[mdl]   lit %d lightin %f col %.1f %.1f %.1f lv %f %f %f\n", P84_Lit[type], P84_LightIn[*(int32_t *)(rec + 4)], cc[0], cc[1], cc[2], lx, ly, lz); }
+    if (dbgm && i == nrec - 1) s_mdk++;
+#endif
     int32_t pi = *(int32_t *)(rec + 4);
     float *pl = P84_Planes + (size_t)pi * 4;
     uint8_t *vis = &P84_Vis[pi];

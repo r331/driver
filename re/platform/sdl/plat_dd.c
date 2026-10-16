@@ -74,6 +74,9 @@ static void gs_upload(dd_obj *o, int overlay) {
         if (o->pal) for (int i = 0; i < 1024; i++) pz += o->pal->pal_rgba[i] != 0;
         TR("upload %p %dx%d bpp %d nz %d pal %p palnz %d rgba0 %08x mid %08x\n", (void *)o, o->w, o->h, o->bpp, nz, (void *)o->pal, pz, rgba[0], rgba[o->w * o->h / 2 + o->w / 2]); }
     if (o->gltex) plat_tex_update(o->gltex, o->w, o->h, rgba); else o->gltex = plat_tex_create(o->w, o->h, rgba);
+    if (getenv("RE_ATDBG")) { int a0 = 0, a255 = 0, nz = 0; for (int i = 0; i < o->w * o->h; i++) { unsigned a = rgba[i] >> 24; a0 += a == 0; a255 += a == 255; nz += (rgba[i] & 0xffffff) != 0; }
+        fprintf(stderr, "[tex] gl %d %dx%d bpp %d pf %08x masks %08x %08x %08x %08x ck %d %x-%x a0 %d a255 %d nz %d\n", o->gltex, o->w, o->h, o->bpp, o->pf[1], o->pf[4], o->pf[5], o->pf[6], o->pf[7],
+            o->has_ck, o->ck_lo, o->ck_hi, a0, a255, nz); }
     free(rgba); o->dirty = 0;
 }
 static dd_obj *g_gs_back, *g_gs_primary;

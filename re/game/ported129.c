@@ -14,6 +14,8 @@
      −900) в клетках радара; клетки 0x37×0x37 с площадью пересечения (P128_ClipAreaN) > 50000 получают биты 0x22/24/28/30
      в P77_C5FE00. Многоугольник 00c7d820 оригинала (список со ссылками) — локальный массив точек в native. */
 #include "ported129.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include "ported128.h"
 #include "unported.h"
 #include "engine.h"
@@ -108,7 +110,7 @@ static void add32(uint8_t *p, int32_t d) { wr32(p, (int32_t)((uint32_t)rd32(p) +
 static int32_t f12(int32_t v) { return (int32_t)((uint32_t)v + 0x800u) >> 12; }
 static const uint8_t *model(int32_t mi) {
   if ((uint32_t)mi >= 1126u) return NULL;                                              /* защита */
-  return (const uint8_t *)re_ptr(P79_ModelTab[mi]);
+  return P79_ModelTab[mi] ? (const uint8_t *)P79_PTR(P79_ModelTab[mi]) : NULL;   /* v2.07: ссылка арены карты (в hook — адрес) */
 }
 static uint32_t mflags(int32_t mi) { const uint8_t *m = model(mi); return m ? (uint32_t)rd32(m + 8) : 0; }
 static uint16_t mflags2(int32_t mi) { const uint8_t *m = model(mi); return m ? rdu16(m + 2) : 0; }
@@ -270,14 +272,18 @@ int32_t P129_ObjHit(uint8_t *c, int32_t *box, uint8_t *obj) {
 
 /* ---- 00500937 ---- */
 void P129_ObjBoxes(uint8_t *obj, const float *pos, uint8_t *car, int32_t idx, uint32_t mdl, int32_t defer) {
-  const uint8_t *m = (const uint8_t *)re_ptr(mdl);
+  const uint8_t *m = mdl ? (const uint8_t *)P79_PTR(mdl) : NULL;                       /* v2.07: P79_PTR, не re_ptr */
   if (m == NULL || obj == NULL || pos == NULL || car == NULL) return;                  /* защита */
-  const uint8_t *L = (const uint8_t *)re_ptr((uint32_t)rd32(m + 0x34));
+  const uint8_t *L = rd32(m + 0x34) ? (const uint8_t *)P79_PTR((uint32_t)rd32(m + 0x34)) : NULL;
   if (L == NULL) return;
   P11_00ba52d0 = fround(rdf(m + 0x10));
   int32_t r = P11_00ba52d0 + 0x488 + rd32(car + 0x110);
   int32_t dx = (int32_t)fabs((double)(rdf(obj + 8) - pos[0]));
   int32_t dz = (int32_t)fabs((double)(rdf(obj + 0x10) - pos[2]));
+#ifndef RE_HOOK_BUILD
+  { static int k; if (getenv("RE_COLDBG2") && k++ < 60) fprintf(stderr, "[colb] obj %d mdl %08x L %08x n %d rad %d r %d dx %d dz %d opos %.0f %.0f %.0f ang %d\n", rdu16(obj + 4), mdl,
+      (unsigned)rd32(m + 0x34), rd32(L), fround(rdf(m + 0x10)), r, dx, dz, rdf(obj + 8), rdf(obj + 0xc), rdf(obj + 0x10), rd32(obj + 0x18)); }
+#endif
   if (!(M(dx, dx) + M(dz, dz) < M(r, r))) return;
   int32_t n = rd32(L);
   const uint8_t *e = L + 4;
@@ -325,6 +331,10 @@ void P129_CarObjects(int32_t car) {
   P129_BoxN = 0;
   P97_ScriptEachP(pos, c, car);
   if (P95_BDFA14 != 0) P53_CallWithStateP(pos, c, car);
+#ifndef RE_HOOK_BUILD
+  static int s_cdbg = -1; if (s_cdbg < 0) s_cdbg = getenv("RE_COLDBG") ? atoi(getenv("RE_COLDBG")) : 0;
+  int32_t dbg_objs = 0, dbg_node0 = node; static int s_ck;
+#endif
   for (int32_t guard = 0; node != -1 && guard < 0x14000; guard++) {                     /* guard — защита */
     if (node < 0 || node >= 0x14000) break;                                             /* защита */
     const int32_t *nd = (const int32_t *)((const uint8_t *)G6_00CE0F20 + (size_t)node * 8);
@@ -332,7 +342,14 @@ void P129_CarObjects(int32_t car) {
     int32_t mi = rd32(o + 4);
     P129_ObjBoxes(o, pos, c, car, (uint32_t)mi < 1126u ? P79_ModelTab[mi] : 0, 1);
     node = nd[1];
+#ifndef RE_HOOK_BUILD
+    dbg_objs++;
+#endif
   }
+#ifndef RE_HOOK_BUILD
+  if (s_cdbg > 0 && car == 0 && (s_ck++ % s_cdbg) == 0)
+    fprintf(stderr, "[col] car0 pos %.0f %.0f %.0f g %d,%d cell %d node0 %d objs %d boxes %d\n", pos[0], pos[1], pos[2], gx, gz, cell, dbg_node0, dbg_objs, P129_BoxN);
+#endif
   int32_t n = P129_BoxN < 60 ? P129_BoxN : 60;                                          /* защита */
   for (int32_t i = 0; i < n; i++) {
     if (P129_Boxes[i][4] == 0) continue;
