@@ -116,6 +116,7 @@
 #include "../../game/ported125.h"
 #include "../../game/ported126.h"
 #include "../../game/ported127.h"
+#include "../../game/ported128.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2255,6 +2256,16 @@ void re_install_all(void) {
     re_hook(0x0050ee00, (void*)P127_Pause, "P127_Pause");
     re_hook(0x004f472b, (void*)P127_ScriptTick, "P127_ScriptTick");
     re_hook(0x004131a0, (void*)P127_NameEntry, "P127_NameEntry");
+    re_hook(0x004a706a, (void*)P128_CopMapPos, "P128_CopMapPos");
+    re_hook(0x0049dc73, (void*)P128_FreeCam, "P128_FreeCam");
+    re_hook(0x004cd3fb, (void*)P128_ModelHit, "P128_ModelHit");
+    re_hook(0x004c032a, (void*)P128_CarDeform, "P128_CarDeform");
+    re_hook(0x004949f0, (void*)P128_TrafficNode, "P128_TrafficNode");
+    re_hook(0x0050c087, (void*)P128_CopPath, "P128_CopPath");
+    re_hook(0x0050d4a2, (void*)P128_CopRoute, "P128_CopRoute");
+    re_hook(0x004a742a, (void*)P128_CopReplan, "P128_CopReplan");
+    re_hook(0x00490bcb, (void*)P128_TrafficDraw, "P128_TrafficDraw");
+    re_hook(0x0050a15b, (void*)P128_ClipArea, "P128_ClipArea");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");

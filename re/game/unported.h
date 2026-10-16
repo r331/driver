@@ -111,7 +111,6 @@
     R(int32_t, P55_Fn425F7B, 0x00425f7b, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(P55_Fn4264A7, 0x004264a7, (void), ()) \
     V(P55_Fn4E7450, 0x004e7450, (int32_t a0, const char *a1), (a0, a1)) \
-    V(N54_Fn4949F0, 0x004949f0, (void *a0), (a0)) \
     V(N54_Fn4913CC, 0x004913cc, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4), (a0, a1, a2, a3, a4)) \
     R(int32_t, P53_Fn40EFD5, 0x0040efd5, (void), ()) \
     R(int32_t, P53_Fn42248B, 0x0042248b, (void *a0, int32_t a1, int32_t a2, int32_t a3), (a0, a1, a2, a3)) \
@@ -303,7 +302,6 @@
     V(P4Call0041D89C, 0x0041d89c, (int32_t a0, int32_t a1), (a0, a1)) \
     V(P4Call004CA98D, 0x004ca98d, (int32_t a0, int32_t a1), (a0, a1)) \
     V(P4Call00528293, 0x00528293, (int32_t a0), (a0)) \
-    V(P4Call004C032A, 0x004c032a, (int32_t a0), (a0)) \
     V(P4Call004076E2, 0x004076e2, (void), ()) \
     V(P4Call00409CFA, 0x00409cfa, (void), ()) \
     V(P4Call0041074D, 0x0041074d, (void), ()) \
@@ -329,6 +327,7 @@
     V(G6Call004BA64D, 0x004ba64d, (void), ()) \
     V(G6Call004D614A, 0x004d614a, (int32_t a0, int32_t a1, int32_t a2, int32_t a3), (a0, a1, a2, a3)) \
     V(G6Call00519D22, 0x00519d22, (int32_t a0), (a0)) \
+    V(P128_Fn4A1037, 0x004a1037, (int32_t car, int32_t rec), (car, rec)) /* отрисовка машины; не перенесена (v1.73) */ \
     V(G6Call00426580, 0x00426580, (int32_t a0), (a0)) \
     V(G6Call00516EB4, 0x00516eb4, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(G6Call00500E1D, 0x00500e1d, (int32_t a0), (a0)) \
@@ -394,8 +393,6 @@
     V(P74_Fn4A4D84, 0x004a4d84, (char **pp, int32_t a, int32_t b), (pp, a, b)) \
     V(P121_Fn4B955C, 0x004b955c, (int32_t *a, int32_t *b, int32_t n, int32_t kind), (a, b, n, kind)) \
     R(int32_t, P121_Fn5233BE, 0x005233be, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
-    V(P121_Fn4A706A, 0x004a706a, (uint32_t *rec, int32_t *a, int32_t *b, int32_t c), (rec, a, b, c)) \
-    R(int32_t, P121_Fn4CD3FB, 0x004cd3fb, (float x, float y, float z, uint32_t w), (x, y, z, w)) \
 
 #ifdef RE_HOOK_BUILD
 #  define UNPORTED_V(name, addr, params, args) \

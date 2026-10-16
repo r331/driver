@@ -1,3 +1,4 @@
+#include "ported128.h"
 #include "ported54.h"
 #include "ported33.h"
 #include <string.h>
@@ -152,7 +153,7 @@ void P54_ObjTick(uint8_t *o) {
   if (o[0xb] == 0) {
     int32_t link; memcpy(&link, o + 0x28, 4);
     if (link == -1) return;
-    if ((Rand_004D9078() & 0x1f) == o[0]) N54_Fn4949F0(o);
+    if ((Rand_004D9078() & 0x1f) == o[0]) P128_TrafficNode(o);
   } else {
     o[0xb]--;
   }

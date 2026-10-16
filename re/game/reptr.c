@@ -49,6 +49,14 @@ typedef struct { uint32_t addr; re_fn_t fn; } re_fnent_t;
 
 /* статические области: GAME_VAR-массивы, на которые в таблицах игры лежат адреса */
 static const re_region_t k_regions[] = {
+  { 0x0112da40u, (uint8_t *)P12_0112da00 + 0x40, 0xc74 },   /* v1.73: пути копов (+0x40..+0xcb4 записей 0112da00, до P74_Cars) */
+  { 0x0112e718u, (uint8_t *)P12_0112da00 + 0xd18, 0xc74 },
+  { 0x0112f3f0u, (uint8_t *)P12_0112da00 + 0x19f0, 0xc74 },
+  { 0x011300c8u, (uint8_t *)P12_0112da00 + 0x26c8, 0xc74 },
+  { 0x01130da0u, (uint8_t *)P12_0112da00 + 0x33a0, 0xc74 },
+  { 0x01131a78u, (uint8_t *)P12_0112da00 + 0x4078, 0xc74 },
+  { 0x01132750u, (uint8_t *)P12_0112da00 + 0x4d50, 0xc74 },
+  { 0x01133428u, (uint8_t *)P12_0112da00 + 0x5a28, 0xc74 },
   { 0x00574f08u, P117_MenuA, sizeof P117_MenuA },               /* v1.62: .data меню паузы (game/p117_data.h) */
   { 0x00575088u, P117_MenuB, sizeof P117_MenuB },
   { 0x00575370u, P117_MenuC, sizeof P117_MenuC },

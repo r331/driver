@@ -1,7 +1,7 @@
 address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040100a,thunk_FUN_0049ef12,,,,,,5,ported
 0040100f,thunk_FUN_005001bb,,,,,,5,todo
-00401019,thunk_FUN_0050d4a2,,,,,,5,todo
+00401019,thunk_FUN_0050d4a2,,,,,,5,ported
 0040101e,thunk_FUN_00496372,,,,,,5,ported
 00401023,thunk_FUN_00523ffd,,,,,,5,ported
 0040102d,thunk_FUN_004ec556,,,,,,5,ported
@@ -14,7 +14,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401055,thunk_FUN_004d9478,Thunk_004D9478,manual,Thunks,,,5,ported
 0040105a,thunk_FUN_004c372a,Thunk_004C372A,manual,Thunks,,,5,ported
 0040105f,thunk_FUN_0052797a,Thunk_0052797A,manual,Thunks,,,5,ported
-00401064,thunk_FUN_004f1a19,,,,,,5,todo
+00401064,thunk_FUN_004f1a19,,,,,,5,ported
 00401069,thunk_FUN_005128b7,,,,,,5,ported
 0040106e,thunk_FUN_004b4b27,,,,,,5,ported
 00401073,thunk_FUN_004a7d80,,,,,,5,ported
@@ -86,7 +86,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401230,thunk_FUN_004c36da,Thunk_004C36DA,manual,Thunks,,,5,ported
 00401235,thunk_FUN_004f892a,,,,,,5,ported
 0040123a,thunk_FUN_004fc0c7,Thunk_004FC0C7,manual,Thunks,,,5,ported
-0040123f,thunk_FUN_004a706a,,,,,,5,todo
+0040123f,thunk_FUN_004a706a,,,,,,5,ported
 00401244,thunk_FUN_004ecee8,,,,,,5,ported
 00401249,thunk_FUN_004e3b3c,,,,,,5,ported
 0040124e,thunk_FUN_00524473,Thunk_00524473,manual,Thunks,,,5,ported
@@ -110,10 +110,10 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004012b7,thunk_FUN_004ca0c0,Thunk_004CA0C0,manual,Thunks,,,5,ported
 004012c6,thunk_FUN_004c812e,Thunk_004C812E,manual,Thunks,,,5,ported
 004012cb,thunk_FUN_00406479,,,,,,5,ported
-004012d0,thunk_FUN_0050c087,,,,,,5,todo
+004012d0,thunk_FUN_0050c087,,,,,,5,ported
 004012d5,thunk_FUN_00525900,,,,,,5,ported
 004012da,thunk_FUN_005191c5,,,,,,5,ported
-004012df,thunk_FUN_004f472b,,,,,,5,todo
+004012df,thunk_FUN_004f472b,,,,,,5,ported
 004012e4,thunk_FUN_00405f6f,,,,,,5,ported
 004012e9,thunk_FUN_00523cda,,,,,,5,ported
 004012ee,thunk_FUN_0042eaa6,,,,,,5,ported
@@ -133,8 +133,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040133e,thunk_FUN_004a45eb,,,,,,5,ported
 00401343,thunk_FUN_004d4bfb,,,,,,5,todo
 00401348,thunk_FUN_00407c27,Thunk_00407C27,manual,Thunks,,,5,ported
-0040134d,thunk_FUN_00490bcb,,,,,,5,todo
-00401357,thunk_FUN_004a742a,,,,,,5,todo
+0040134d,thunk_FUN_00490bcb,,,,,,5,ported
+00401357,thunk_FUN_004a742a,,,,,,5,ported
 0040135c,thunk_FUN_0040aa82,,,,,,5,ported
 00401361,thunk_FUN_004082a0,,,,,,5,ported
 00401366,thunk_FUN_004c536c,,,,,,5,ported
@@ -228,7 +228,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401591,thunk_FUN_005144d4,,,,,,5,ported
 00401596,thunk_FUN_00407cb8,,,,,,5,ported
 0040159b,thunk_FUN_004a5505,,,,,,5,ported
-004015a0,thunk_FUN_004de381,,,,,,5,todo
+004015a0,thunk_FUN_004de381,,,,,,5,ported
 004015a5,thunk_FUN_004f4c3d,,,,,,5,ported
 004015aa,thunk_FUN_00406096,,,,,,5,ported
 004015af,thunk_FUN_004ed5b1,Thunk_004ED5B1,manual,Thunks,,,5,ported
@@ -247,7 +247,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004015f0,thunk_FUN_004a2c12,Thunk_004A2C12,manual,Thunks,,,5,ported
 004015f5,thunk_FUN_0049f418,,,,,,5,ported
 004015fa,thunk_FUN_00523c99,Thunk_00523C99,manual,Thunks,,,5,ported
-004015ff,thunk_FUN_004c032a,,,,,,5,todo
+004015ff,thunk_FUN_004c032a,,,,,,5,ported
 00401604,thunk_FUN_004901c0,,,,,,5,ported
 0040160e,thunk_FUN_004c0218,,,,,,5,ported
 00401613,thunk_FUN_004d9078,Thunk_004D9078,manual,Thunks,,,5,ported
@@ -402,7 +402,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004019c4,thunk_FUN_004ba81f,,,,,,5,todo
 004019c9,thunk_FUN_00405450,,,,,,5,ported
 004019d3,thunk_FUN_004c988e,Thunk_004C988E,manual,Thunks,,,5,ported
-004019d8,thunk_FUN_004949f0,,,,,,5,todo
+004019d8,thunk_FUN_004949f0,,,,,,5,ported
 004019dd,thunk_FUN_004c483e,,,,,,5,ported
 004019e2,thunk_FUN_00426caf,Thunk_00426CAF,manual,Thunks,,,5,ported
 004019e7,thunk_FUN_004cdda6,,,,,,5,ported
@@ -482,7 +482,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401be5,thunk_FUN_004a995c,,,,,,5,ported
 00401bea,thunk_FUN_004ed055,,,,,,5,ported
 00401bf4,thunk_FUN_004c9360,Thunk_004C9360,manual,Thunks,,,5,ported
-00401c03,thunk_FUN_0050a15b,,,,,,5,todo
+00401c03,thunk_FUN_0050a15b,,,,,,5,ported
 00401c17,thunk_FUN_00405cb4,,,,,,5,ported
 00401c1c,thunk_FUN_004b3e55,,,,,,5,ported
 00401c21,thunk_FUN_00514261,,,,,,5,ported
@@ -540,7 +540,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401d7f,thunk_FUN_004f8643,,,,,,5,ported
 00401d89,thunk_FUN_004c92c0,,,,,,5,ported
 00401d8e,thunk_FUN_0041d3ed,,,,,,5,ported
-00401d93,thunk_FUN_004131a0,,,,,,5,todo
+00401d93,thunk_FUN_004131a0,,,,,,5,ported
 00401d98,thunk_FUN_004c93e6,Thunk_004C93E6,manual,Thunks,,,5,ported
 00401d9d,thunk_FUN_00513cc7,,,,,,5,ported
 00401da2,thunk_FUN_00424b70,,,,,,5,ported
@@ -562,7 +562,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401e06,thunk_FUN_0047560b,,,,,,5,ported
 00401e0b,thunk_FUN_0040c480,,,,,,5,ported
 00401e10,thunk_FUN_004c862f,,,,,,5,ported
-00401e15,thunk_FUN_004eac70,,,,,,5,todo
+00401e15,thunk_FUN_004eac70,,,,,,5,ported
 00401e1a,thunk_FUN_004cd875,,,,,,5,ported
 00401e1f,thunk_FUN_004268ef,,,,,,5,ported
 00401e24,thunk_FUN_005139d7,,,,,,5,ported
@@ -693,7 +693,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040214e,thunk_FUN_004e8440,,,,,,5,ported
 00402153,thunk_FUN_004a6403,,,,,,5,ported
 00402158,thunk_FUN_0050e9ab,,,,,,5,ported
-0040215d,thunk_FUN_004c582f,,,,,,5,todo
+0040215d,thunk_FUN_004c582f,,,,,,5,ported
 00402162,thunk_FUN_004bf452,Thunk_004BF452,manual,Thunks,,,5,ported
 0040216c,thunk_FUN_0049ec01,,,,,,5,ported
 00402176,thunk_FUN_004cb097,Thunk_004CB097,manual,Thunks,,,5,ported
@@ -714,7 +714,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004021da,thunk_FUN_004b9e2b,Thunk_004B9E2B,manual,Thunks,,,5,ported
 004021df,thunk_FUN_004d0102,,,,,,5,ported
 004021e4,thunk_FUN_004268e0,Thunk_004268E0,manual,Thunks,,,5,ported
-004021e9,thunk_FUN_004ad3b5,,,,,,5,todo
+004021e9,thunk_FUN_004ad3b5,,,,,,5,ported
 004021ee,thunk_FUN_004d30f8,,,,,,5,ported
 004021f3,thunk_FUN_004ec8a8,,,,,,5,ported
 004021f8,thunk_FUN_005186ce,,,,,,5,ported
@@ -819,7 +819,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402464,thunk_FUN_004f60b7,,,,,,5,ported
 00402469,thunk_FUN_0042754a,,,,,,5,ported
 0040246e,thunk_FUN_004dc91b,,,,,,5,ported
-00402473,thunk_FUN_004cd3fb,,,,,,5,todo
+00402473,thunk_FUN_004cd3fb,,,,,,5,ported
 00402478,thunk_FUN_004086ea,Thunk_004086EA,manual,Thunks,,,5,ported
 00402482,thunk_FUN_00491928,,,,,,5,ported
 00402487,thunk_FUN_004e3391,,,,,,5,ported
@@ -925,7 +925,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004026e4,thunk_FUN_005270bd,Thunk_005270BD,manual,Thunks,,,5,ported
 004026e9,thunk_FUN_004dd7ec,,,,,,5,ported
 004026f3,thunk_FUN_00502fe2,,,,,,5,ported
-004026f8,thunk_FUN_00494e01,,,,,,5,todo
+004026f8,thunk_FUN_00494e01,,,,,,5,ported
 004026fd,thunk_FUN_0042d2b0,Thunk_0042D2B0,manual,Thunks,,,5,ported
 00402702,thunk_FUN_004f4f10,,,,,,5,ported
 00402707,thunk_FUN_004cb102,,,,,,5,ported
@@ -1058,7 +1058,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402a6d,thunk_FUN_00522e64,,,,,,5,ported
 00402a77,thunk_FUN_004d61cf,Thunk_004D61CF,manual,Thunks,,,5,ported
 00402a7c,thunk_FUN_004aaf3a,,,,,,5,todo
-00402a81,thunk_FUN_0050b957,,,,,,5,todo
+00402a81,thunk_FUN_0050b957,,,,,,5,ported
 00402a86,thunk_FUN_004275ae,,,,,,5,ported
 00402a8b,thunk_FUN_0041a1ec,Thunk_0041A1EC,manual,Thunks,,,5,ported
 00402a90,thunk_FUN_0052434a,Thunk_0052434A,manual,Thunks,,,5,ported
@@ -2112,7 +2112,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004902a8,FUN_004902a8,,,,,,745,ported
 00490591,FUN_00490591,P94_BuildDirTab,manual,,,,360,ported
 004906f9,FUN_004906f9,P126_PlayerStart,port,,,,1234,ported
-00490bcb,FUN_00490bcb,,,,,,879,todo
+00490bcb,FUN_00490bcb,P128_TrafficDraw,port,Ported128,,,879,ported
 00490f3a,FUN_00490f3a,P107_TrafficLights,,ported107,,,671,ported
 004911d9,FUN_004911d9,P98_TrafficSpin,manual,,,,391,ported
 00491360,FUN_00491360,P12_Fn00491360,manual,Misc12,,,108,ported
@@ -2144,7 +2144,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004946d5,FUN_004946d5,NoopFn004946d5,manual,Noop,,,5,ported
 004946da,FUN_004946da,InitFlags004946DA,manual,SmallFuncs,,,39,ported
 00494701,FUN_00494701,P100_TrafficSlot,manual,Ported100,,,661,ported
-004949f0,FUN_004949f0,,,,,,972,todo
+004949f0,FUN_004949f0,P128_TrafficNode,port,Ported128,,,972,ported
 00494e01,FUN_00494e01,P127_TrafficLane,,,,,665,ported
 0049509a,FUN_0049509a,P21_CountActiveEntries,manual,ported21,,,145,ported
 0049512b,FUN_0049512b,TrafficFill,manual,,,,243,ported
@@ -2174,7 +2174,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0049c99c,FUN_0049c99c,P99_FreeCamMove,manual,,,,312,ported
 0049cad4,FUN_0049cad4,,,,,,2910,todo
 0049d84a,FUN_0049d84a,,,,,,1065,todo
-0049dc73,FUN_0049dc73,,,,,,798,todo
+0049dc73,FUN_0049dc73,P128_FreeCam,port,Ported128,,,798,ported
 0049df91,FUN_0049df91,,,,,,475,ported
 0049e16c,FUN_0049e16c,,,,,,783,todo
 0049e47b,FUN_0049e47b,P99_CamBehind,manual,,,,364,ported
@@ -2254,8 +2254,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004a6a57,FUN_004a6a57,,,,,,886,ported
 004a6dcd,FUN_004a6dcd,P59_NearCars,manual,,,,183,ported
 004a6e84,FUN_004a6e84,P99_CopTarget,manual,,,,486,ported
-004a706a,FUN_004a706a,,,,,,960,todo
-004a742a,FUN_004a742a,,,,,,902,todo
+004a706a,FUN_004a706a,P128_CopMapPos,port,Ported128,,,960,ported
+004a742a,FUN_004a742a,P128_CopReplan,port,Ported128,,,902,ported
 004a77b0,FUN_004a77b0,P112_ChaseTick,,ported112,,,368,ported
 004a7920,FUN_004a7920,P99_PathAhead,manual,,,,391,ported
 004a7aa7,FUN_004a7aa7,,,,,,729,ported
@@ -2379,7 +2379,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004bfc30,FUN_004bfc30,LoadCarModels,manual,map,,,1502,ported
 004c020e,FUN_004c020e,Call004C020E,manual,UIMisc,,,10,ported
 004c0218,FUN_004c0218,P99_CarModelClean,manual,,,,274,ported
-004c032a,FUN_004c032a,,,,,,1425,todo
+004c032a,FUN_004c032a,P128_CarDeform,port,Ported128,,,1425,ported
 004c08bb,FUN_004c08bb,P95_InitDebris,manual,,,,254,ported
 004c09b9,FUN_004c09b9,GlobalSet004C09B9,manual,GlobalSets,,,45,ported
 004c09e6,FUN_004c09e6,P100_MarkerSpawn,manual,Ported100,,,649,ported
@@ -2498,7 +2498,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004cc1a2,FUN_004cc1a2,,,,,,1506,todo
 004cc784,FUN_004cc784,PushEntry_004CC784,manual,Misc,,,125,ported
 004cc801,FUN_004cc801,,,,,,3066,ported
-004cd3fb,FUN_004cd3fb,,,,,,1146,todo
+004cd3fb,FUN_004cd3fb,P128_ModelHit,port,Ported128,,,1146,ported
 004cd875,FUN_004cd875,,,,,,287,ported
 004cd994,FUN_004cd994,,,,,,401,todo
 004cdb25,FUN_004cdb25,,,,,,641,todo
@@ -2924,15 +2924,15 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00509c40,FUN_00509c40,P77_ResetTables,manual,misc,,,231,ported
 00509d27,FUN_00509d27,P95_DrawLineRGB,manual,,,,317,ported
 00509e64,FUN_00509e64,,,,,,759,ported
-0050a15b,FUN_0050a15b,,,,,,3885,todo
+0050a15b,FUN_0050a15b,P128_ClipArea,port,Ported128,,,3885,ported
 0050b088,FUN_0050b088,,,,,,2198,todo
 0050b957,FUN_0050b957,P127_MapWindow,,,,,724,ported
 0050bc2b,FUN_0050bc2b,P97_MarkCells,manual,,,,222,ported
 0050bd09,FUN_0050bd09,P110_RadarGrid,,ported110,,,775,ported
 0050c010,FUN_0050c010,P12_Fn0050C010,manual,Misc12,,,119,ported
-0050c087,FUN_0050c087,,,,,,2119,todo
+0050c087,FUN_0050c087,P128_CopPath,port,Ported128,,,2119,ported
 0050cfeb,FUN_0050cfeb,P114_PathDraw,manual,Ported114,,,1207,ported
-0050d4a2,FUN_0050d4a2,,,,,,1082,todo
+0050d4a2,FUN_0050d4a2,P128_CopRoute,port,Ported128,,,1082,ported
 0050d97a,FUN_0050d97a,P14_Fn0050D97A,manual,misc,,,84,ported
 0050e940,FUN_0050e940,SetLatchValue0050E940,manual,SmallFuncs,,,35,ported
 0050e963,FUN_0050e963,P12_Fn0050E963,manual,Misc12,,,72,ported

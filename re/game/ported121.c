@@ -9,6 +9,7 @@
    00415014 — переключение звукового устройства (005233be), банк TITLE/MOTEL.DSS;
    004a7d80 — позиция машины → запись копа P12_0112da00 (шаг 0x336 слов), 004a706a в свой кадр;
    004d602e — такт звуков у камеры. */
+#include "ported128.h"
 #include "ported121.h"
 #include "cartab.h"
 #include "unported.h"
@@ -381,13 +382,13 @@ void P121_CopSync(uint8_t *p) {
   r[0x32f] = 0;                            /* 0112e6bc */
   if (P62_Frame % 8 == (int32_t)p[5] - 1) {
     int32_t a = 0, b = 0;
-    P121_Fn4A706A(r, &a, &b, 1);
+    P128_CopMapPos(r, &a, &b, 1);
   }
 }
 
 /* ---- 004d602e ---- */
 void P121_CamSounds(void) {
-  int32_t r = P121_Fn4CD3FB(P44_CamX, P44_CamY, P44_CamZ, P121_CamW);
+  int32_t r = P128_ModelHit(P44_CamX, P44_CamY, P44_CamZ, P121_CamW);
   if (r == 0) { if (P116_SndB2035C != 0) Call0052360D(1); }
   else if (P116_SndB2035C == 0) Call0052360D(6);
   P116_SndB2035C = r;

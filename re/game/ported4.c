@@ -1,3 +1,4 @@
+#include "ported128.h"
 #include "ported4.h"
 #include "ported79.h"
 GAME_VAR_DEF(uint8_t, D_00549f8c, 0x00549f8c)
@@ -163,7 +164,7 @@ void CallIfD14EE4(void) { if (D_00d14ee4 != 0) P4Call004CA98D(D_00d14ee0, D_00d1
 void LoadShort3FromPtr(const int16_t* p) { D_00b93e48 = p[0]; D_00b93e4c = p[1]; D_00b93e50 = p[2]; }
 void StopTimer4086EA(void) { if (D_0054a144 != -1) P4Call00528293(D_0054a144); D_005d577c = 0; }
 void InitMapState4D3426(void) { D_00b87e30 = 0; AllocMapBuffer300000(); P4Call0051AA5B(); P4Call004ECADE(); }
-void DrainStackC200F(void) { while (D_00dbb450 != 0) { D_00dbb450--; P4Call004C032A(D_010de120[D_00dbb450]); } }
+void DrainStackC200F(void) { while (D_00dbb450 != 0) { D_00dbb450--; P128_CarDeform(D_010de120[D_00dbb450]); } }
 void FillOnes4EF997(uint8_t* p) { for (int32_t i = 0; i < D_00d00204; i++) *p++ = 1; }
 void ReleaseSlot4A2C5B(int32_t idx) { if (0 < D_01134528) { D_01134554[idx * 6] = 0; D_01134528--; D_01134ec0[D_01134528] = idx; } }
 void TickTimer4F5D67(void) { if (D_00c81494 < 1) { D_00c81494 = 0; D_00c80ca0 = 0; } else D_00c81494--; }
