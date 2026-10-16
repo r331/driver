@@ -13,11 +13,12 @@
    004eac70 — огни фонарей: сетка P58_ListB31EC4 (ширина P78_LampHdr[2]), записи 0x28 {тип, радиус float, x, y, z, —,
      r, g, b}; __ftol — (int32_t) радиуса +4; 5 записей 00c818c0 (флаги 00c80f80).
    0050ee00 — Pause: адреса меню .data 00574710..00574ea0 (native — P127_PauseMenu в k_regions) в 00b5a730.
-   004f472b — такт скрипта миссии; 004f8e0c (команда скрипта) не перенесена — R-строка P127_Fn4F8E0C.
+   004f472b — такт скрипта миссии; 004f8e0c (команда скрипта) — P146_ScriptCmd (v1.91).
    004131a0 — ввод имени (.data 0054cf80 — P127_NameMenu в k_regions, курсор 005fe97c — P127_Cursor);
      __ftol — (int32_t)(ширина / 2.0) + 0x141; возвращаемое значение — мусор eax 004133b4 (void). */
 #include "ported129.h"
 #include "ported127.h"
+#include "ported146.h"
 #include "p127_data.h"
 #include "unported.h"
 #include "engine.h"
@@ -604,7 +605,7 @@ void P127_ScriptTick(void) {
   }
   while (P127_ScrPos < P77_ListN && P14_00c810c4 != 0xff0) {
     int32_t pos = P127_ScrPos;
-    int32_t r = P127_Fn4F8E0C(P77_List[pos]);
+    int32_t r = P146_ScriptCmd(P77_List[pos]);
     if (r == 0xd) break;
 #ifndef RE_HOOK_BUILD
     if (P127_ScrPos == pos) break;                         /* защита: заглушка 004f8e0c не двигает позицию */

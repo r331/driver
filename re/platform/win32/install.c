@@ -134,6 +134,7 @@
 #include "../../game/ported143.h"
 #include "../../game/ported144.h"
 #include "../../game/ported145.h"
+#include "../../game/ported146.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2359,6 +2360,8 @@ void re_install_all(void) {
     re_hook(0x004b73f3, (void*)P143_LampGlow, "P143_LampGlow");
     re_hook(0x004b588e, (void*)P144_FlagFx, "P144_FlagFx");
     re_hook(0x004d38b7, (void*)P145_LevelLoad, "P145_LevelLoad");
+    re_hook(0x004f8e0c, (void*)P146_ScriptCmd, "P146_ScriptCmd");
+    re_hook(0x004a37d9, (void*)P146_MsgPos, "P146_MsgPos");
     re_hook(0x004b9287, (void*)P132_Smoke, "P132_Smoke");
     re_hook(0x004ca135, (void*)P132_Lights, "P132_Lights");
     re_hook(0x0049f20a, (void*)P132_LoadFlyby, "P132_LoadFlyby");

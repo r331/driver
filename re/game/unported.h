@@ -15,7 +15,7 @@
     R(int32_t, P131_Fn4F68A1, 0x004f68a1, (void *cmd), (cmd)) \
     R(int32_t, P58_Fn416794, 0x00416794, (void), ())   /* шпион теста; перенесено как P124_MotelKeys (--skip) */ \
     V(P98_Fn4ACCF0, 0x004accf0, (uint32_t rec, int32_t a), (rec, a)) \
-    R(int32_t, P127_Fn4F8E0C, 0x004f8e0c, (void *cmd), (cmd)) \
+    R(int32_t, P146_Fn503DDF, 0x00503ddf, (void), ())   /* 0x74 команды скрипта (через thunk 00401c62); 6 слов 00c812bc → 00b32a10 / 01271070, 00503ef4 / 00503e83 (v1.91) */ \
     V(P97_Fn52498E, 0x0052498e, (int32_t voice, int32_t sample, float a, float b, float c), (voice, sample, a, b, c)) \
     V(P97_Fn4262CE, 0x004262ce, (float x0, float y0, float x1, float y1, int32_t c), (x0, y0, x1, y1, c)) \
     V(P96_Fn4D7F91, 0x004d7f91, (float x, float y, float w, float h, int32_t c0, int32_t c1, int32_t c2, int32_t c3, int32_t c4, int32_t c5, int32_t c6, int32_t c7, int32_t c8, int32_t c9, int32_t c10, int32_t c11), (x, y, w, h, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11)) \
