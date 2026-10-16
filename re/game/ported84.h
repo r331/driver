@@ -60,3 +60,13 @@ void P84_SelectTables(int32_t alt);                 /* как в инициал�
 void P84_InitConsts(void);
 void P84_DrawModel(uint32_t m, const float *mat, const float *pos, int32_t mode);          /* 00428b69 */
 void P84_DrawModelIdx(uint32_t m, int32_t idx, const float *pos, int32_t mode);            /* 00429143 */
+/* v1.81: варианты 00428b69. */
+void P84_DrawModelC(uint32_t m, const float *mat, const float *pos, int32_t mode);         /* 0042b7cb: аргумент обработчика 2/3, свет плоскости 0.01 */
+void P84_DrawCar(uint32_t m, const float *mat, const float *pos, int32_t mode, int32_t car, int32_t shine, int32_t a7, float shk); /* 0042a9f1 */
+#define P84_TexFiltOn GAME_VAR(int32_t, P84_TexFiltOn, 0x01252bc0)   /* v1.81: кэш grTexFilterMode(0,1,1) */
+#define P84_ShineK    GAME_VAR(float, P84_ShineK, 0x01159d58)        /* v1.81: сила блика (param_8·50 / 100) */
+typedef uint8_t p84_uv_t[0x200];
+#define P84_ShineUV   GAME_VAR(p84_uv_t, P84_ShineUV, 0x01159d80)    /* v1.81: UV блика по нормалям (u8 пары, до 256) */
+#ifndef RE_HOOK_BUILD
+extern int32_t P84_TexFiltOn; extern float P84_ShineK; extern p84_uv_t P84_ShineUV;
+#endif

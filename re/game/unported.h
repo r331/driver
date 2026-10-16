@@ -7,6 +7,8 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    R(int32_t, P136_Fn40D07B, 0x0040d07b, (const char *name), (name)) /* загрузка .TSD фронтенда; не перенесена (v1.81) */ \
+    V(P136_Fn4D38B7, 0x004d38b7, (void), ()) \
     V(P133_Fn4A7FEC, 0x004a7fec, (uint8_t *rec), (rec)) \
     V(P132_Fn4DACEE, 0x004dacee, (void), ()) \
     V(P132_Fn4E9BBF, 0x004e9bbf, (void), ()) \
