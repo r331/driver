@@ -705,7 +705,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402199,thunk_FUN_00406199,,,,,,5,ported
 0040219e,thunk_FUN_004cff7e,,,,,,5,ported
 004021a3,thunk_FUN_00408600,,,,,,5,ported
-004021ad,thunk_FUN_0051dd1b,,,,,,5,todo
+004021ad,thunk_FUN_0051dd1b,,,,,,5,ported
 004021b2,thunk_FUN_004de86c,,,,,,5,todo
 004021b7,thunk_FUN_0052763b,,,,,,5,ported
 004021bc,thunk_FUN_004cf100,Thunk_004CF100,manual,Thunks,,,5,ported
@@ -924,7 +924,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004026df,thunk_FUN_004a5ac3,,,,,,5,ported
 004026e4,thunk_FUN_005270bd,Thunk_005270BD,manual,Thunks,,,5,ported
 004026e9,thunk_FUN_004dd7ec,,,,,,5,ported
-004026f3,thunk_FUN_00502fe2,,,,,,5,todo
+004026f3,thunk_FUN_00502fe2,,,,,,5,ported
 004026f8,thunk_FUN_00494e01,,,,,,5,todo
 004026fd,thunk_FUN_0042d2b0,Thunk_0042D2B0,manual,Thunks,,,5,ported
 00402702,thunk_FUN_004f4f10,,,,,,5,ported
@@ -933,7 +933,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402711,thunk_FUN_004f6333,,,,,,5,ported
 0040271b,thunk_FUN_005248cd,,,,,,5,ported
 00402720,thunk_FUN_004911d9,,,,,,5,ported
-00402725,thunk_FUN_0051e1b7,,,,,,5,todo
+00402725,thunk_FUN_0051e1b7,,,,,,5,ported
 00402734,thunk_FUN_004129df,,,,,,5,ported
 00402748,thunk_FUN_00514a47,,,,,,5,ported
 0040274d,thunk_FUN_0051dc18,,,,,,5,todo
@@ -1292,7 +1292,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040ccb4,FUN_0040ccb4,WaitLoop,manual,Menu,range,,99,ported
 0040cd17,FUN_0040cd17,P57_MenuDone,manual,frontend/frontend,range,,88,ported
 0040cd6f,FUN_0040cd6f,P98_ItemsDraw,manual,frontend/frontend,range,,194,ported
-0040ce31,FUN_0040ce31,,,frontend/frontend,range,,260,todo
+0040ce31,FUN_0040ce31,,,frontend/frontend,range,,260,ported
 0040cf35,FUN_0040cf35,P58_Backgrounds,manual,frontend/frontend,range,,170,ported
 0040cfdf,FUN_0040cfdf,P67_DrawIcon,manual,frontend/frontend,range,,156,ported
 0040d07b,FUN_0040d07b,,,frontend/frontend,assert,,1080,todo
@@ -2886,7 +2886,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00502787,FUN_00502787,P110_Gauge,,ported110,,,1383,ported
 00502cee,FUN_00502cee,P109_ScriptMarkers,,ported109,,,392,ported
 00502e76,FUN_00502e76,,,,,,364,todo
-00502fe2,FUN_00502fe2,DrawFullscreenMap,debug_string,,,DrawFullscreenMap,748,named
+00502fe2,FUN_00502fe2,DrawFullscreenMap,debug_string,,,DrawFullscreenMap,748,ported
 005032ce,FUN_005032ce,,,,,,47,todo
 00503c03,FUN_00503c03,P71_ScoreSetup,manual,misc,,,225,ported
 00503e83,FUN_00503e83,P14_Fn00503E83,manual,misc,,,73,ported
@@ -2900,7 +2900,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 005047ab,FUN_005047ab,DownloadPageFromBmp,manual,,,,187,ported
 00504866,FUN_00504866,P109_RadarArrows,,ported109,,,420,ported
 00504a0a,FUN_00504a0a,P108_RadarArrow,,ported108,,,675,ported
-00504cad,FUN_00504cad,,,,,,3751,todo
+00504cad,FUN_00504cad,,,,,,3751,ported
 00505b54,FUN_00505b54,P109_RadarTraffic,,ported109,,,727,ported
 00505e2b,FUN_00505e2b,P108_RadarCar,,ported108,,,926,ported
 005061c9,FUN_005061c9,P94_RadarXY,manual,,,,259,ported
@@ -3135,8 +3135,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0051d8ca,FUN_0051d8ca,CopyBlock16,manual,replays,,,180,ported
 0051d97e,FUN_0051d97e,,,,,,666,ported
 0051dc18,FUN_0051dc18,,,,,,259,todo
-0051dd1b,FUN_0051dd1b,,,,,,1180,todo
-0051e1b7,FUN_0051e1b7,,,,,,1191,todo
+0051dd1b,FUN_0051dd1b,,,,,,1180,ported
+0051e1b7,FUN_0051e1b7,,,,,,1191,ported
 0051e65e,FUN_0051e65e,,,,,,3352,ported
 0051f376,FUN_0051f376,,,,,,3352,ported
 0052008e,FUN_0052008e,P96_ShadowInit,manual,Ported96,,,490,ported

@@ -123,6 +123,7 @@
 #include "../game/ported114.h"
 #include "../game/ported115.h"
 #include "../game/ported116.h"
+#include "../game/ported117.h"
 #include "../game/menu57.h"
 #include <stdio.h>
 #include <string.h>
@@ -4798,6 +4799,33 @@ static int test_p103(void) {
 }
 static int t111_n;
 static void t111_r(const p85_rv *a, const p85_rv *b, const p85_rv *c) { (void)a; (void)b; (void)c; t111_n++; }
+static int test_p117(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p117 fail line %d\n",__LINE__); } } while (0)
+  /* .data меню паузы зарегистрирована: P97_SndMenu внутри P117_MenuA, пункт 0 меню звука — строка 156 */
+  CK(re_ptr(0x00574f38u) == (void *)P97_SndMenu && re_ptr(0x00575370u) == (void *)&P117_MenuC[0] && re_addr(&P117_MenuB[0x14]) == 0x0057509cu);
+  CK(P117_MenuA[5] == 1 && P117_MenuA[8] == 156 && (P117_MenuA[0x13c - 0x14 + 5] & 0x10) != 0);
+  /* 0051dd1b: колесо 1 — запись в таблицу A по счётчику, адрес записи в P117_SkidLastA, продолжение помечает прошлую */
+  { int32_t e = P13_00575ec0, d = P74_SkidD[1], b = P74_SkidB[1], st = P117_SkidStA[1], fl = P102_D0DD80; uint32_t la = P117_SkidLastA[1];
+    p102_i16_t c, pc; memcpy(c, P102_Corners, sizeof c); memcpy(pc, P117_PrevCorn, sizeof pc);
+    P13_00575ec0 = 1; P74_SkidD[1] = 3; P74_SkidB[1] = 0; P117_SkidStA[1] = 0; P102_D0DD80 = 1;
+    P102_Corners[4] = 1000; P102_Corners[5] = 0; P102_Corners[6] = 0; P117_PrevCorn[4] = 1000; P117_PrevCorn[5] = 0; P117_PrevCorn[6] = 100;
+    P117_SkidRecA(1);
+    uint8_t *r = &P116_SkidRecA[0x4800 + 3 * 0x48]; float x, y, z; memcpy(&x, r + 0x38, 4); memcpy(&y, r + 0x3c, 4); memcpy(&z, r + 0x40, 4);
+    CK(P74_SkidD[1] == 4 && P117_SkidStA[1] == 1 && P117_SkidLastA[1] == 0x00b5c950u + 0x4800 + 3 * 0x48 && r[0] == 0 && x == 1000.0f && y == -20.0f && z == 0.0f);
+    P117_SkidRecA(1); int16_t q; memcpy(&q, r + 2, 2);
+    CK(P74_SkidD[1] == 5 && r[0x48] == 1 && q == 0);
+    P117_SkidRecA(1); memcpy(&q, r + 0x48 + 2, 2); CK(q == 1);
+    memcpy(P102_Corners, c, sizeof c); memcpy(P117_PrevCorn, pc, sizeof pc);
+    P13_00575ec0 = e; P74_SkidD[1] = d; P74_SkidB[1] = b; P117_SkidStA[1] = st; P102_D0DD80 = fl; P117_SkidLastA[1] = la; }
+  /* 00502fe2 / 00504cad: без значков — выход */
+  { uint8_t *m = P102_MapIcon2; P102_MapIcon2 = NULL; P117_FullMap(); P102_MapIcon2 = m;
+    uint8_t *ri = P100_RadarIcon; P100_RadarIcon = NULL; P117_Radar(); P100_RadarIcon = ri; }
+  /* 0040ce31: пустой список (адрес строки 0) — только сброс; без списка — выход */
+  { static uint8_t lst[16]; uint32_t pa = P45_PtrA; P45_PtrA = 0; P117_TextList(); P45_PtrA = re_addr(lst); P117_TextList(); P45_PtrA = pa; }
+#undef CK
+  return f;
+}
 static int test_p116(void) {
   int f = 0;
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p116 fail line %d\n",__LINE__); } } while (0)
@@ -5592,7 +5620,7 @@ static int test_p86(void) {
 
 int re_selftest(void) {
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_p110) | RUN_T(test_p111) | RUN_T(test_p112) | RUN_T(test_p113) | RUN_T(test_p114) | RUN_T(test_p115) | RUN_T(test_p116) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_p110) | RUN_T(test_p111) | RUN_T(test_p112) | RUN_T(test_p113) | RUN_T(test_p114) | RUN_T(test_p115) | RUN_T(test_p116) | RUN_T(test_p117) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

@@ -1,5 +1,6 @@
 #include "ported11.h"
 #include "ported27.h"
+#include "globalsets.h"
 #include "ported29.h"
 GAME_VAR_DEF(int32_t, P11_00b87e7c, 0x00b87e7c)
 GAME_VAR_DEF(int32_t, P11_005c6760, 0x005c6760)
@@ -49,9 +50,6 @@ GAME_VAR_DEF(uint8_t, P11_00b98280, 0x00b98280)
 GAME_VAR_DEF(uint8_t, P11_011f4080, 0x011f4080)
 GAME_VAR_DEF(uint8_t, P11_00b1c268, 0x00b1c268)
 GAME_VAR_DEF(uint8_t, P11_011effa0, 0x011effa0)
-GAME_VAR_DEF(uint8_t, P11_00575370, 0x00575370)
-GAME_VAR_DEF(uint8_t, P11_00574f08, 0x00574f08)
-GAME_VAR_DEF(uint8_t, P11_00575088, 0x00575088)
 void SndHelper_00407D97(uint8_t a, uint8_t b) {
   if (P11_00b87e7c == 0) Call004BF910(ADDR(P11_0057b740), a, b);
 }
@@ -135,19 +133,19 @@ void BackOrDirector_005103C4(void) {
 
 void SwitchPanel_005104B9(void) {
   P11_00b5a734 = P11_00b5a730; P11_00575554 = P11_00575550;
-  P11_00b5a730 = (uint32_t)ADDR(P11_00575370); P11_00575550 = 1;
+  P11_00b5a730 = (int32_t)0x00575370u; G00B5A730 = P11_00b5a730; P11_00575550 = 1;   /* v1.62: адрес .data меню; псевдоним G00B5A730 */
   Call00510784();
 }
 
 void SwitchPanel_0051066A(void) {
   P11_00b5a734 = P11_00b5a730; P11_00575554 = P11_00575550;
-  P11_00b5a730 = (uint32_t)ADDR(P11_00574f08); P11_00575550 = 1;
+  P11_00b5a730 = (int32_t)0x00574f08u; G00B5A730 = P11_00b5a730; P11_00575550 = 1;   /* v1.62: адрес .data меню; псевдоним G00B5A730 */
   Call0050F7B2();
 }
 
 void SwitchPanel_0051069E(void) {
   P11_00b5a734 = P11_00b5a730; P11_00575554 = P11_00575550;
-  P11_00b5a730 = (uint32_t)ADDR(P11_00575088); P11_00575550 = 1;
+  P11_00b5a730 = (int32_t)0x00575088u; G00B5A730 = P11_00b5a730; P11_00575550 = 1;   /* v1.62: адрес .data меню; псевдоним G00B5A730 */
   Call0050FAB0();
 }
 

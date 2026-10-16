@@ -13,6 +13,7 @@
 #include "ported110.h"
 #include "ported114.h"
 #include "ported97.h"
+#include "ported117.h"
 #include "unported.h"
 #include "p111_data.h"
 #include <math.h>
@@ -133,7 +134,7 @@ void P116_PauseMenu(void) {
       }
     } else P99_MenuItems(items);
   } else {
-    P116_FullMap();
+    P117_FullMap();
     P12_Fn00426580(0x18);
   }
   SoundMenuOut0051082A();

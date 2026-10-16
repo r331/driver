@@ -4,6 +4,7 @@
 #include "unported.h"
 #include "menustate.h"
 #include "ported10.h"
+#include "ported117.h"
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
@@ -212,17 +213,17 @@ extern uint8_t P11_00b1c268;
 #ifndef RE_HOOK_BUILD
 extern uint8_t P11_011effa0;
 #endif
-#define P11_00575370 GAME_VAR(uint8_t, P11_00575370, 0x00575370)
+#define P11_00575370 (P117_MenuC[0])   /* v1.62: .data меню (game/p117_data.h) */
 #ifndef RE_HOOK_BUILD
-extern uint8_t P11_00575370;
+
 #endif
-#define P11_00574f08 GAME_VAR(uint8_t, P11_00574f08, 0x00574f08)
+#define P11_00574f08 (P117_MenuA[0])   /* v1.62: .data меню (game/p117_data.h) */
 #ifndef RE_HOOK_BUILD
-extern uint8_t P11_00574f08;
+
 #endif
-#define P11_00575088 GAME_VAR(uint8_t, P11_00575088, 0x00575088)
+#define P11_00575088 (P117_MenuB[0])   /* v1.62: .data меню (game/p117_data.h) */
 #ifndef RE_HOOK_BUILD
-extern uint8_t P11_00575088;
+
 #endif
 void SndHelper_00407D97(uint8_t a, uint8_t b);
 void SndHelper_00407D56(int32_t x, int32_t y, uint32_t p3, uint32_t p4, uint32_t p5);

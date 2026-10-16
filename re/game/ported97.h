@@ -1,4 +1,5 @@
 #pragma once
+#include "ported117.h"
 #include "gvar.h"
 #include "reptr.h"
 #include <stdint.h>
@@ -58,7 +59,7 @@ typedef void (*p97_gr1_fn)(int32_t);
 #define P97_Str16bit  GAME_VAR(p97_s8_t, P97_Str16bit, 0x005755f4)
 #define P97_Str22k    GAME_VAR(p97_s12_t, P97_Str22k, 0x005755fc)
 #define P97_Str44k    GAME_VAR(p97_s12_t, P97_Str44k, 0x00575608)
-#define P97_SndMenu   GAME_VAR(p97_sndmenu_t, P97_SndMenu, 0x00574f38)   /* пункты меню звука, шаг 0x28 */
+#define P97_SndMenu   (&P117_MenuA[0x30])   /* 00574f38: пункты меню звука, шаг 0x28 (v1.62 — внутри .data меню P117_MenuA) */
 #define P97_KeyMenuA  GAME_VAR(p97_menuA_t, P97_KeyMenuA, 0x0054c030)
 #define P97_KeyMenuB  GAME_VAR(p97_menuB_t, P97_KeyMenuB, 0x0054c350)
 #define P97_OptMenuA  GAME_VAR(p97_menuC_t, P97_OptMenuA, 0x0054acc0)
@@ -105,7 +106,7 @@ extern p97_lfblock_fn P97_LfbLock; extern p97_gr5_fn P97_GrAlpha; extern p97_gr1
 extern p97_pat_t P97_CellPat; extern int32_t P97_ScrObjOn;
 extern p97_u4_t P97_OnOff, P97_SpkStr; extern p97_u2_t P97_BitsStr, P97_RateStr;
 extern p97_s8_t P97_Str8bit, P97_Str16bit; extern p97_s12_t P97_Str22k, P97_Str44k;
-extern p97_sndmenu_t P97_SndMenu; extern p97_menuA_t P97_KeyMenuA; extern p97_menuB_t P97_KeyMenuB; extern p97_menuC_t P97_OptMenuA, P97_OptMenuB;
+extern p97_menuA_t P97_KeyMenuA; extern p97_menuB_t P97_KeyMenuB; extern p97_menuC_t P97_OptMenuA, P97_OptMenuB;
 extern p97_i6_t P97_OptTabA, P97_OptTabB; extern p97_txt32_t P97_FpsTxtA, P97_FpsTxtB; extern p97_txt64_t P97_MsgBuf;
 extern int32_t P97_C810A8, P97_C81490, P97_IconL, P97_IconR; extern p97_i2_t P97_BlinkA, P97_BlinkB;
 extern p97_debris_t P97_Debris; extern uint8_t *P97_FadeIcon;

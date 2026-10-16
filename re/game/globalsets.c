@@ -1,4 +1,6 @@
 #include "globalsets.h"
+#include "ported117.h"
+#include "ported102.h"
 GAME_VAR_DEF(int32_t, G0054A8E0, 0x0054a8e0)
 GAME_VAR_DEF(int32_t, G0054A8F0, 0x0054a8f0)
 GAME_VAR_DEF(int32_t, G0054A900, 0x0054a900)
@@ -374,4 +376,7 @@ void GlobalSet0051D811(void) {
     G00B5C88C = G00B5C944;
     G00B5C890 = G00B5C948;
     G00B5C894 = G00B5C94C;
+#ifndef RE_HOOK_BUILD
+    for (int i = 0; i < 16; i++) P117_PrevCorn[i] = P102_Corners[i];   /* v1.62: в native углы пишет P102_PlayerCorners */
+#endif
 }

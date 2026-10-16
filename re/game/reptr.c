@@ -1,4 +1,6 @@
 /* Реестр «адрес Game.exe ↔ native-объект» (v1.42). См. reptr.h. */
+#include "ported117.h"
+#include "ported116.h"
 #include "ported112.h"
 #include "reptr.h"
 #ifdef RE_HOOK_BUILD
@@ -45,6 +47,11 @@ typedef struct { uint32_t addr; re_fn_t fn; } re_fnent_t;
 
 /* статические области: GAME_VAR-массивы, на которые в таблицах игры лежат адреса */
 static const re_region_t k_regions[] = {
+  { 0x00574f08u, P117_MenuA, sizeof P117_MenuA },               /* v1.62: .data меню паузы (game/p117_data.h) */
+  { 0x00575088u, P117_MenuB, sizeof P117_MenuB },
+  { 0x00575370u, P117_MenuC, sizeof P117_MenuC },
+  { 0x00b5c950u, P116_SkidRecA, sizeof P116_SkidRecA },         /* v1.62: таблицы следов шин (адреса записей в P117_SkidLastA/B) */
+  { 0x00b6e950u, P116_SkidRecB, sizeof P116_SkidRecB },
   { 0x010f5160u, P95_ObjA, sizeof P95_ObjA },
   { 0x0110e500u, P95_ObjB, sizeof P95_ObjB },
   { 0x011237c0u, P95_ObjC, sizeof P95_ObjC },

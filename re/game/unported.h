@@ -32,7 +32,7 @@
     R(int32_t, P68_Fn41B1C0, 0x0041b1c0, (void), ()) \
     V(P68_Fn41B3AB, 0x0041b3ab, (void), ()) \
     V(P67_Fn40ABAC, 0x0040abac, (uint32_t a), (a)) \
-    V(P116_FullMap, 0x00502fe2, (void), ()) \
+    V(P117_Fn4B8F4E, 0x004b8f4e, (float *pos, int32_t a, int32_t b, int32_t type, int32_t c, float *mat, int32_t d), (pos, a, b, type, c, mat, d)) \
     R(int32_t, P67_Fn514C9F, 0x00514c9f, (void *p, int32_t a, int32_t b), (p, a, b)) \
     V(P67_Fn51500C, 0x0051500c, (void *p), (p)) \
     V(P67_Fn514165, 0x00514165, (void *p), (p)) \
