@@ -108,6 +108,7 @@
 #include "../../game/ported117.h"
 #include "../../game/ported118.h"
 #include "../../game/ported119.h"
+#include "../../game/ported120.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2169,6 +2170,15 @@ void re_install_all(void) {
     re_hook(0x0048fbcf, (void*)P119_TrafficSpeed, "P119_TrafficSpeed");
     re_hook(0x004928c9, (void*)P119_TrafficParked, "P119_TrafficParked");
     re_hook(0x0050230a, (void*)P119_Hud, "P119_Hud");
+    re_hook(0x004af93c, (void*)P120_ObjBShade, "P120_ObjBShade");
+    re_hook(0x004cd875, (void*)P120_ScriptReset, "P120_ScriptReset");
+    re_hook(0x004ad6f5, (void*)P120_CarDebris, "P120_CarDebris");
+    re_hook(0x004afe3c, (void*)P120_CarSmoke, "P120_CarSmoke");
+    re_hook(0x004b00ad, (void*)P120_CarSparks, "P120_CarSparks");
+    re_hook(0x004f60b7, (void*)P120_DebugInfo, "P120_DebugInfo");
+    re_hook(0x004a4d84, (void*)P120_ParseCamInt, "P120_ParseCamInt");
+    re_hook(0x004fbeb2, (void*)P120_ConeRec, "P120_ConeRec");
+    re_hook(0x005032ce, (void*)P120_HudTimes, "P120_HudTimes");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");

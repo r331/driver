@@ -2227,7 +2227,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004a44d4,FUN_004a44d4,,,compiler,assert,,279,todo
 004a45eb,FUN_004a45eb,,,compiler,assert,,643,todo
 004a4a5f,FUN_004a4a5f,,,compiler,range,,805,todo
-004a4d84,FUN_004a4d84,,,compiler,range,,324,todo
+004a4d84,FUN_004a4d84,,,compiler,range,,324,ported
 004a4f7d,FUN_004a4f7d,P74_ParseFloat,manual,Misc74,range,,170,ported
 004a50a2,FUN_004a50a2,SkipInteger,manual,compiler,range,,85,ported
 004a50f7,FUN_004a50f7,P51_SkipNumber,manual,Ported51,range,,163,ported
@@ -2304,7 +2304,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004ad244,FUN_004ad244,,,,,,369,todo
 004ad3b5,FUN_004ad3b5,,,,,,541,todo
 004ad5d2,FUN_004ad5d2,P96_AddObjB,manual,Ported96,,,291,ported
-004ad6f5,FUN_004ad6f5,,,,,,322,todo
+004ad6f5,FUN_004ad6f5,,,,,,322,ported
 004ad837,FUN_004ad837,P106_CarBrakeLights,,ported106,,,1941,ported
 004adfcc,FUN_004adfcc,P106_CarTailLights,,ported106,,,1839,ported
 004ae6fb,FUN_004ae6fb,P106_CarHeadSpots,,ported106,,,1462,ported
@@ -2314,12 +2314,12 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004af2f8,FUN_004af2f8,NoopFn004af2f8,manual,Noop,,,5,ported
 004af2fd,FUN_004af2fd,,,,,,796,ported
 004af619,FUN_004af619,,,,,,803,ported
-004af93c,FUN_004af93c,,,,,,272,todo
+004af93c,FUN_004af93c,,,,,,272,ported
 004afa4c,FUN_004afa4c,,,,,,683,todo
 004afcf7,FUN_004afcf7,P97_SpawnSmoke,manual,,,,325,ported
-004afe3c,FUN_004afe3c,,,,,,342,todo
+004afe3c,FUN_004afe3c,,,,,,342,ported
 004aff92,FUN_004aff92,,,,,,283,ported
-004b00ad,FUN_004b00ad,,,,,,425,todo
+004b00ad,FUN_004b00ad,,,,,,425,ported
 004b0256,FUN_004b0256,,,,,,618,ported
 004b04c0,FUN_004b04c0,P96_SpawnDust,manual,Ported96,,,298,ported
 004b05ea,FUN_004b05ea,P111_DebrisIcon,,ported111,,,2788,ported
@@ -2498,7 +2498,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004cc784,FUN_004cc784,PushEntry_004CC784,manual,Misc,,,125,ported
 004cc801,FUN_004cc801,,,,,,3066,ported
 004cd3fb,FUN_004cd3fb,,,,,,1146,todo
-004cd875,FUN_004cd875,,,,,,287,todo
+004cd875,FUN_004cd875,,,,,,287,ported
 004cd994,FUN_004cd994,,,,,,401,todo
 004cdb25,FUN_004cdb25,,,,,,641,todo
 004cdda6,FUN_004cdda6,P110_ScriptSprites,,ported110,,,842,ported
@@ -2828,7 +2828,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004f5dcd,FUN_004f5dcd,P58_FreeLists,manual,MScript,range,,136,ported
 004f5e55,FUN_004f5e55,AddDashMessage,debug_string,MScript,assert,,444,named
 004f6011,FUN_004f6011,P58_FindChunk,manual,MScript,range,,166,ported
-004f60b7,FUN_004f60b7,,,MScript,range,,358,todo
+004f60b7,FUN_004f60b7,,,MScript,range,,358,ported
 004f621d,FUN_004f621d,,,MScript,range,,278,todo
 004f6333,FUN_004f6333,FindScriptCommand,manual,MScript,range,,90,ported
 004f638d,FUN_004f638d,P99_ScriptFree,manual,,range,,336,ported
@@ -2855,7 +2855,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004fbbc5,FUN_004fbbc5,DrawTextLine004FBBC5,manual,MScript,range,,55,ported
 004fbbfc,FUN_004fbbfc,,,MScript,assert,,666,todo
 004fbe96,FUN_004fbe96,LoadTrail004FBE96,manual,Menu,,,28,ported
-004fbeb2,FUN_004fbeb2,,,,,,251,todo
+004fbeb2,FUN_004fbeb2,,,,,,251,ported
 004fbfad,FUN_004fbfad,,,,,,282,todo
 004fc0c7,FUN_004fc0c7,Fwd004FC0C7,manual,Menu,,,18,ported
 004fc0d9,FUN_004fc0d9,,,,,,795,todo
@@ -2887,7 +2887,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00502cee,FUN_00502cee,P109_ScriptMarkers,,ported109,,,392,ported
 00502e76,FUN_00502e76,,,,,,364,todo
 00502fe2,FUN_00502fe2,DrawFullscreenMap,debug_string,,,DrawFullscreenMap,748,ported
-005032ce,FUN_005032ce,,,,,,47,todo
+005032ce,FUN_005032ce,,,,,,47,ported
 00503c03,FUN_00503c03,P71_ScoreSetup,manual,misc,,,225,ported
 00503e83,FUN_00503e83,P14_Fn00503E83,manual,misc,,,73,ported
 00503ecc,FUN_00503ecc,PackRGB00503ECC,manual,SmallFuncs,,,40,ported

@@ -392,7 +392,7 @@
     V(P74_Fn41CE90, 0x0041ce90, (void), ()) \
     V(P74_Fn424B70, 0x00424b70, (void), ()) \
     R(int32_t, P74_Fn41CEDE, 0x0041cede, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
-    V(P74_Fn4A4D84, 0x004a4d84, (char **pp, int32_t a, int32_t b), (pp, a, b))
+    V(P74_Fn4A4D84, 0x004a4d84, (char **pp, int32_t a, int32_t b), (pp, a, b)) \
 
 #ifdef RE_HOOK_BUILD
 #  define UNPORTED_V(name, addr, params, args) \
