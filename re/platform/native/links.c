@@ -102,6 +102,7 @@
 #include "../../game/ported111.h"
 #include "../../game/ported112.h"
 #include "../../game/ported113.h"
+#include "../../game/ported114.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -165,6 +166,7 @@ void P57_Fn51CB98 (void *f) { P62_SaveScores(f); }
 void P57_Fn4221BF (int32_t i) { P107_TexRelease(i); }
 void P57_Fn507672 (float *x, float *y) { P94_MapToScreen(x, y); }
 void P56_CallSetVoice (uint32_t a0, int32_t a1, float a2, float a3, float a4) { P97_SndStart(a0, a1, a2, a3, a4); }
+void P56_DrawSpr (float a0, float a1, float a2, float a3, void *a4, int32_t a5, int32_t a6, int32_t a7, int32_t a8) { P114_DrawSpr(a0, a1, a2, a3, a4, a5, a6, a7, a8); }
 void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
 void P56_Fn4E5011 (int32_t a0, void *a1) { P103_GhostState(); }
@@ -194,6 +196,7 @@ void P52_Fn4ABA7C (void) { P102_SixInit(); }
 int32_t P52_Fn48B5E3 (void) { return (int32_t)P108_FmvStart(); }
 void P52_Fn5173D7 (float a0, float a1, int32_t a2, int32_t a3, int32_t a4) { P73_Text(a0, a1, a2, a3, a4); }
 int32_t P52_Fn405F6F (int32_t a0, void *a1) { return (int32_t)P64_ReplayStart(a0, a1); }
+void P52_Fn41D53C (int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4) { P114_TexDownloadMip(a0, a1, a2, a3, a4); }
 void P48_Fn516DA0 (void) { P58_LangStrings(); }
 int32_t P47_Fn51B111 (int32_t a0, int32_t a1) { return (int32_t)P72_RoadWord(a0, a1); }
 uint32_t P47_Fn51B566 (int32_t a0, int32_t a1) { return (uint32_t)P72_RoadDword(a0, a1); }

@@ -102,6 +102,7 @@
 #include "../../game/ported111.h"
 #include "../../game/ported112.h"
 #include "../../game/ported113.h"
+#include "../../game/ported114.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2111,6 +2112,18 @@ void re_install_all(void) {
     re_hook(0x005129e1, (void*)P113_PartDraw, "P113_PartDraw");
     re_hook(0x004e969f, (void*)P113_Heli, "P113_Heli");
     re_hook(0x004048dd, (void*)P113_MenuOpts, "P113_MenuOpts");
+    re_hook(0x0041d53c, (void*)P114_TexDownloadMip, "P114_TexDownloadMip");
+    re_hook(0x004e5fd7, (void*)P114_PaperMark, "P114_PaperMark");
+    re_hook(0x004a995c, (void*)P114_CreditsDraw, "P114_CreditsDraw");
+    re_hook(0x005128b7, (void*)P114_PartModels, "P114_PartModels");
+    re_hook(0x004f5afe, (void*)P114_Timer, "P114_Timer");
+    re_hook(0x004e8bd0, (void*)P114_ColorFlash, "P114_ColorFlash");
+    re_hook(0x0050cfeb, (void*)P114_PathDraw, "P114_PathDraw");
+    re_hook(0x004b3e55, (void*)P114_DebrisAll, "P114_DebrisAll");
+    re_hook(0x004d8511, (void*)P114_DrawSpr, "P114_DrawSpr");
+    re_hook(0x0049f474, (void*)P114_CamFadeFrame, "P114_CamFadeFrame");
+    re_hook(0x005073f1, (void*)P114_RadarMarks, "P114_RadarMarks");
+    re_hook(0x0040c8f1, (void*)P114_MenuStep, "P114_MenuStep");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");
