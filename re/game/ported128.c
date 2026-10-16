@@ -31,6 +31,7 @@
 #include "p128_data.h"
 #include "ported127.h"
 #include "unported.h"
+#include "ported137.h"
 #include "engine.h"
 #include "crt.h"
 #include "reptr.h"
@@ -720,7 +721,7 @@ void P128_CopReplan(uint8_t *rec) {
 
 /* ---- 00490bcb ---- */
 static void draw_one(uint32_t i) {
-  P128_Fn4A1037((int32_t)i + 1, (int32_t)i);
+  P137_DrawCar((int32_t)i + 1, (int32_t)i);
   P107_TrafficLights((int32_t)i + 1, TrafficRecs + i * 0x54);
 }
 void P128_TrafficDraw(void) {

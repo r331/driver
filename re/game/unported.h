@@ -7,7 +7,9 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
-    R(int32_t, P136_Fn40D07B, 0x0040d07b, (const char *name), (name)) /* загрузка .TSD фронтенда; не перенесена (v1.81) */ \
+    V(P137_Fn520278, 0x00520278, (int32_t car), (car)) /* тень машины; не перенесена (v1.82) */ \
+    V(Call0048A940, 0x0048a940, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
+    V(Call004FBFAD, 0x004fbfad, (void), ()) \
     V(P136_Fn4D38B7, 0x004d38b7, (void), ()) \
     V(P133_Fn4A7FEC, 0x004a7fec, (uint8_t *rec), (rec)) \
     V(P132_Fn4DACEE, 0x004dacee, (void), ()) \
@@ -317,7 +319,6 @@
     V(G6Call00524398, 0x00524398, (void), ()) \
     V(G6Call00523628, 0x00523628, (void), ()) \
     V(G6Call0041A16C, 0x0041a16c, (void), ()) \
-    V(G6Call004D4663, 0x004d4663, (void), ()) \
     V(G6Call0040C5BE, 0x0040c5be, (int32_t a0), (a0)) \
     V(G6Call0050E940, 0x0050e940, (int32_t a0), (a0)) \
     V(G6Call00418119, 0x00418119, (int32_t a0), (a0)) \
@@ -329,7 +330,6 @@
     V(G6Call004BA64D, 0x004ba64d, (void), ()) \
     V(G6Call004D614A, 0x004d614a, (int32_t a0, int32_t a1, int32_t a2, int32_t a3), (a0, a1, a2, a3)) \
     V(G6Call00519D22, 0x00519d22, (int32_t a0), (a0)) \
-    V(P128_Fn4A1037, 0x004a1037, (int32_t car, int32_t rec), (car, rec)) /* отрисовка машины; не перенесена (v1.73) */ \
     V(G6Call00426580, 0x00426580, (int32_t a0), (a0)) \
     V(G6Call00516EB4, 0x00516eb4, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(G6Call00491360, 0x00491360, (void), ()) \

@@ -23,6 +23,7 @@
 #include "reptr.h"
 #include "cartab.h"
 #include "unported.h"
+#include "ported137.h"
 #include "director.h"
 #include "globalsets.h"
 #include "menustate.h"
@@ -264,7 +265,7 @@ void P132_GameDraw(void) {
     NoopFn004d1a89();
     P109_DropsDraw(0);
     Reset0042D2B0();
-    P128_Fn4A1037(S_00D11878, -1);
+    P137_DrawCar(S_00D11878, -1);
     if (P95_C818B8 != 0) P98_DrawMarker();
     if (P26_FxD != 0) grd40(0);
     P116_SkidsA();

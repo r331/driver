@@ -620,7 +620,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401f8c,thunk_FUN_004c8070,Thunk_004C8070,manual,Thunks,,,5,ported
 00401f91,thunk_FUN_004f5d98,,,,,,5,ported
 00401f96,thunk_FUN_00503ecc,Thunk_00503ECC,manual,Thunks,,,5,ported
-00401f9b,thunk_FUN_004f3490,,,,,,5,todo
+00401f9b,thunk_FUN_004f3490,,,,,,5,ported
 00401fa0,thunk_FUN_0051be3c,,,,,,5,ported
 00401fa5,thunk_FUN_004b10ce,,,,,,5,ported
 00401faa,thunk_FUN_00524763,,,,,,5,ported
@@ -697,7 +697,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402162,thunk_FUN_004bf452,Thunk_004BF452,manual,Thunks,,,5,ported
 0040216c,thunk_FUN_0049ec01,,,,,,5,ported
 00402176,thunk_FUN_004cb097,Thunk_004CB097,manual,Thunks,,,5,ported
-0040217b,thunk_FUN_004f388e,,,,,,5,todo
+0040217b,thunk_FUN_004f388e,,,,,,5,ported
 00402180,thunk_FUN_004932d5,,,,,,5,ported
 00402185,thunk_FUN_004f4d3c,,,,,,5,ported
 0040218a,thunk_FUN_004c32c1,,,,,,5,ported
@@ -770,7 +770,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040234c,thunk_FUN_004b9835,,,,,,5,ported
 00402351,thunk_FUN_0049245a,,,,,,5,ported
 0040235b,thunk_FUN_004ba31b,,,,,,5,ported
-00402365,thunk_FUN_004d4663,,,,,,5,todo
+00402365,thunk_FUN_004d4663,,,,,,5,ported
 0040236f,thunk_FUN_004757d2,,,,,,5,ported
 00402374,thunk_FUN_004a50f7,,,,,,5,ported
 00402379,thunk_FUN_004bf910,,,,,,5,ported
@@ -901,7 +901,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402667,thunk_FUN_0049509a,,,,,,5,ported
 0040266c,thunk_FUN_004ee8f4,,,,,,5,ported
 00402671,thunk_FUN_004f568a,,,,,,5,ported
-0040267b,thunk_FUN_004a1037,,,,,,5,todo
+0040267b,thunk_FUN_004a1037,,,,,,5,ported
 00402680,thunk_FUN_0048f899,,,,,,5,ported
 00402685,thunk_FUN_004af2fd,,,,,,5,ported
 0040268a,thunk_FUN_0042626e,,,,,,5,ported
@@ -1295,7 +1295,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040ce31,FUN_0040ce31,,,frontend/frontend,range,,260,ported
 0040cf35,FUN_0040cf35,P58_Backgrounds,manual,frontend/frontend,range,,170,ported
 0040cfdf,FUN_0040cfdf,P67_DrawIcon,manual,frontend/frontend,range,,156,ported
-0040d07b,FUN_0040d07b,,,frontend/frontend,assert,,1080,todo
+0040d07b,FUN_0040d07b,P137_LoadTsd,port,frontend/frontend,assert,,1080,ported
 0040d4b3,FUN_0040d4b3,P59_ReadBlock,manual,frontend/frontend,assert,,185,ported
 0040d56c,FUN_0040d56c,,,,,,380,ported
 0040d6e8,FUN_0040d6e8,P124_ReadBmp,manual,ported124.c,,,307,ported
@@ -2198,7 +2198,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004a0cca,FUN_004a0cca,ScoreBracket,manual,HUD,,,149,ported
 004a0d5f,FUN_004a0d5f,AddScore,manual,HUD,,,150,ported
 004a1010,FUN_004a1010,CopySlotTemplate004A1010,manual,SmallFuncs,,,39,ported
-004a1037,FUN_004a1037,,,,,,2806,todo
+004a1037,FUN_004a1037,P137_DrawCar,port,ported137,port,,2806,ported
 004a1b2d,FUN_004a1b2d,P99_TrafficAhead,manual,,,,516,ported
 004a1d31,FUN_004a1d31,Get138Entry148,manual,UIMisc,,,27,ported
 004a1d4c,FUN_004a1d4c,P136_DrawWheels,port,ported136,port,,2177,ported
@@ -2571,7 +2571,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d3444,FUN_004d3444,P99_MapFree,manual,,,,366,ported
 004d35b2,FUN_004d35b2,P125_LevelLoad,port,,,,773,ported
 004d38b7,FUN_004d38b7,,,,,,3064,todo
-004d4663,FUN_004d4663,,,,,,1024,todo
+004d4663,FUN_004d4663,P137_LevelEnd,port,ported137,port,,1024,ported
 004d4a63,FUN_004d4a63,P131_GameFrame,port,ported131,port,,408,ported
 004d4bfb,FUN_004d4bfb,P132_GameLogic,port,ported132,port,,970,ported
 004d4fc5,FUN_004d4fc5,P132_GameDraw,port,ported132,port,,1059,ported
@@ -2801,8 +2801,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004f2f2a,FUN_004f2f2a,P94_RowSpans,manual,,,,264,ported
 004f3032,FUN_004f3032,DrawRowRects,manual,hud,,,180,ported
 004f30e6,FUN_004f30e6,FreeBuffer_004F30E6,manual,Misc,,,58,ported
-004f3490,FUN_004f3490,,,,,,1022,todo
-004f388e,FUN_004f388e,,,motion_c,assert,,904,todo
+004f3490,FUN_004f3490,P137_LoadMcd,port,ported137,port,,1022,ported
+004f388e,FUN_004f388e,P137_MotionInit,port,motion_c,assert,,904,ported
 004f3c16,FUN_004f3c16,FreeTab4,manual,Misc,,,94,ported
 004f3c74,FUN_004f3c74,P100_DrawParts,manual,Ported100,,,516,ported
 004f3e78,FUN_004f3e78,P12_Fn004F3E78,manual,Misc12,,,107,ported

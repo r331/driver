@@ -25,6 +25,7 @@
 #include "reptr.h"
 #include "cartab.h"
 #include "unported.h"
+#include "ported137.h"
 #include "globalsets.h"
 #include "menustate.h"
 #include "smallfuncs.h"
@@ -249,7 +250,7 @@ void P136_GameLoop(int32_t replay) {
       if (UiVar01251A70 != 0) P131_GameFrame();
       Call00522323();
     }
-    G6Call004D4663();
+    P137_LevelEnd();
     GameMode = G005F7E54;
     switch (G005F7E54) {
     case 2: done = 1; break;
@@ -291,7 +292,7 @@ int32_t P136_FrontInit(void) {
   if (P100_LfbFormat() == 0) P30_FatalError("Failed to allocate display");
   G6_00B87EFC = 1;
   P56_F7E58 = 1;
-  if (P136_Fn40D07B("DATA\\FRONTEND.TSD") == 0) return 0;
+  if (P137_LoadTsd("DATA\\FRONTEND.TSD") == 0) return 0;
   P125_BlendTable(P136_TsdPalB, P100_Pal32, 0x71, 0xff);
   P125_BlendTable(P136_TsdPalA, P136_Pal16, 0x71, 0xff);
   _Static_assert(sizeof(P101_PalLfb) == 0x400 && sizeof(P136_Pal16) == 0x400, "pal16");

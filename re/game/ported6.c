@@ -1,5 +1,6 @@
 #include "ported129.h"
 #include "ported6.h"
+#include "ported137.h"
 #include "ported40.h"
 #include "engine.h"
 #include "flush.h"
@@ -223,7 +224,7 @@ int32_t PoolAlloc0051210C(void) {
 /* ---- обёртки с вызовами ---- */
 void ShutdownAudio004183A3(void) {
     if (Q00B87E90 != 0) { Call00524873(); Call00524763(); }
-    G6Call00523628(); G6Call0041A16C(); G6Call004D4663();
+    G6Call00523628(); G6Call0041A16C(); P137_LevelEnd();
     G6_00B87EEC = 0; G6_00B87EFC = 0; G6Call0040C5BE(4);
 }
 void MenuBack005103EC(void) { G005F7E54 = 2; G6_00B87E20 = 0; G6Call0050E940(0); }
