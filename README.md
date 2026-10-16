@@ -24,13 +24,13 @@
 python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv')) if x['module']!='CRT']; print(sum(x['status']=='ported' for x in r), 'из', len(r))"
 ```
 
-**Native как игра — v2.08:**
-- работает: заставки и главное меню, режим **Take A Ride** в Майами — езда по городу (стриминг блоков карты), трафик, столкновения со стенами, HUD (Damage/Felony, радар, спидометр);
-- нет звука: DirectSound заменён SDL-заглушками;
-- FMV-ролики пропускаются;
-- пешеходы не проверены (на улицах не замечены; в Undercover — «Could not find required models»);
-- Undercover (гараж/интервью) — частично;
-- копы/погоня, ночь и другие города (SF, LA, NY) не проверены.
+**Native как игра — v2.10** (проверено сценариями `RE_KEYS` под Xvfb, Linux arm64):
+- работает: заставки и главное меню, режим **Take A Ride** в Майами — езда по городу (стриминг блоков карты), трафик, столкновения, HUD (Damage/Felony, радар, спидометр);
+- управление машиной: газ, тормоз/задний ход, ручник, резкий руль, смена камеры (вид с капота), пауза по Esc с меню (Continue / Restart / Sound Setup / Gfx Details / Film Director / Quick Replay / Show Map / Exit) — см. «Управление»;
+- звук: DirectSound эмулируется собственным микшером (SDL_audio или запись в WAV), двигатель и шумы слышны, мягкий ограничитель — без клиппинга; музыки нет (в оригинале — CD-audio);
+- пешеходы: 12–16 активны, модель рисуется (проверено, когда пешеход стоит перед машиной); на обычном прогоне они появляются в ~34 500 единиц от игрока, а рисуются ближе 15 000 — чтобы увидеть, надо подъехать;
+- копы: одна патрульная машина появляется (1 активный коп, предел 4), но в проверенных прогонах она не видела игрока — Felony оставался 0, погоня не проверена;
+- не проверены: гудок (в записи звука разницы нет), Undercover (гараж/интервью — частично), ночь и другие города (SF, LA, NY); FMV-ролики пропускаются.
 
 Подробно: [docs/NATIVE_GAPS.md](docs/NATIVE_GAPS.md) (разрывы native, переключатели отладки), [docs/PLATFORM_PLAN.md](docs/PLATFORM_PLAN.md) (журнал переноса по шагам),
 [re/README.md](re/README.md) (правила переноса и история версий).
@@ -132,9 +132,28 @@ RE_KEYS="300:LEFT,340:LEFT,380:LEFT,460:RETURN,560:RETURN,660:RETURN,700:APOSTRO
 
 ### Управление
 
-- меню: стрелки, Enter — выбор;
-- машина (раскладка Driver PC по умолчанию): газ — `'` (апостроф), руль — `Z` / `X`; стрелка вверх в этой раскладке газом не является;
-- геймпад (первый SDL GameController): крестовина и левый стик → стрелки, A/Start → Enter, B/Back → Esc, X → пробел.
+Раскладка Driver PC по умолчанию (`P37_InitInput`, таблица 0054b7a8; биты клавиш машины — `P36_GetPadButtons` → `P107_CarInput`).
+«Проверено» — сценарием `RE_KEYS` (скорость/руль из `RE_CARDBG`, снимки PNG), v2.10.
+
+| Действие | Клавиша | Проверено |
+|---|---|---|
+| газ | `'` (апостроф) | да — скорость растёт |
+| тормоз / задний ход | `/` | да — скорость падает до 0, затем машина едет назад |
+| руль влево / вправо | `Z` / `X` | да |
+| ручник | `Enter` | да — скорость падает до 0 даже с нажатым газом |
+| резкий руль (быстрее и до 511 вместо 352) | `пробел` | да — по значению руля |
+| смена камеры (сзади → капот → …) | `1` | да — снимок с капота |
+| ТВ-камера / неподвижная | `2` | нет |
+| взгляд влево / вправо / назад | `J` / `K` / `L` | нет |
+| гудок (сирена в режиме копа) | `H` | нет — в записи звука разницы не слышно |
+| круиз-контроль | `C` | нет |
+| бит 0x40 (`\`, пробуксовка на старте) | `\` | нет |
+| дальность прорисовки − / + | `F1` / `F2` | нет |
+| дальность зеркала − / + | `F3` / `F4` | нет |
+| пауза (меню паузы) | `Esc` | да — снимок меню паузы |
+| снимок экрана (BMP) | `F12` | нет |
+
+Меню: стрелки, Enter — выбор. Геймпад (первый SDL GameController): крестовина и левый стик → стрелки, A/Start → Enter, B/Back → Esc, X → пробел.
 
 ### Переменные окружения
 
@@ -186,14 +205,15 @@ Driver — собственность её правообладателей (Ref
 A decompilation and C port of **Driver** (PC, 1999, Reflections / GT Interactive), based on `Game.exe` built 1999-09-10
 (MD5 `8e19d76a4bd5f3838a5c5cbf1cc5cfb5`). **No game files are included** — you need your own copy of the game (CD).
 
-- **Status:** 3292 of 3292 non-CRT functions are marked `ported` in `docs/functions.csv`. The native build (v2.08) runs the menus and
-  *Take A Ride* in Miami (driving, traffic, HUD); no sound yet (SDL stubs for DirectSound), FMV is skipped, pedestrians unverified,
-  Undercover partially working. See `docs/NATIVE_GAPS.md`.
+- **Status:** 3292 of 3292 non-CRT functions are marked `ported` in `docs/functions.csv`. The native build (v2.10) runs the menus and
+  *Take A Ride* in Miami (driving, traffic, HUD, brake/reverse, handbrake, bonnet camera, Esc pause menu) with sound (own DirectSound
+  mixer, soft limiter; no CD music). Pedestrians are rendered but appear far from the player; one patrol cop spawns, felony/pursuit not
+  verified; FMV is skipped, Undercover partially working. See `docs/NATIVE_GAPS.md`.
 - **Build (Linux, verified on arm64):** `apt-get install build-essential cmake libsdl2-dev libgl-dev libegl-dev libosmesa6-dev`, then
   `cmake -S re -B build-native -DCMAKE_BUILD_TYPE=Release && cmake --build build-native -j && (cd build-native && ctest --output-on-failure)`.
   macOS: `brew install cmake sdl2` and the same commands — not tested on a real Mac.
 - **Run:** `./build-native/driver --data <run dir>`, where the run dir symlinks your `Data_Files` and holds copies of `Scripts` and `ReplayData`
-  (the game writes there). Controls: arrows/Enter in menus, `'` throttle, `Z`/`X` steering, gamepad supported.
+  (the game writes there). Controls: arrows/Enter in menus, `'` throttle, `/` brake/reverse, `Z`/`X` steering, Enter handbrake, `1` camera, Esc pause, gamepad supported.
 - **Hook build:** `sh re/build.sh hook` (MinGW i686) produces a proxy `DINPUT.dll`; put it next to `Game.exe`, check `re_driver.log`.
   Windows run not tested.
 - Driver is the property of its rights holders; this repository contains none of their files.
