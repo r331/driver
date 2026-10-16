@@ -7,6 +7,12 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    R(int32_t, P131_Fn417B80, 0x00417b80, (uint32_t tab), (tab)) \
+    R(int32_t, P131_Fn4F68A1, 0x004f68a1, (void *cmd), (cmd)) \
+    V(P131_Fn4B9287, 0x004b9287, (float *pos, int32_t *vel, int32_t n, int32_t b, int32_t c, int32_t d, int32_t e, float f, int32_t g), (pos, vel, n, b, c, d, e, f, g)) \
+    V(P131_Fn49CAD4, 0x0049cad4, (void), ()) \
+    V(P131_Fn4D4BFB, 0x004d4bfb, (void), ()) \
+    V(P131_Fn4D4FC5, 0x004d4fc5, (void), ()) \
     R(int32_t, P58_Fn416794, 0x00416794, (void), ())   /* шпион теста; перенесено как P124_MotelKeys (--skip) */ \
     V(P98_Fn4ACCF0, 0x004accf0, (uint32_t rec, int32_t a), (rec, a)) \
     V(P98_Fn4BA81F, 0x004ba81f, (uint8_t *rec), (rec)) \
@@ -98,7 +104,6 @@
     V(P87_Fn42982E, 0x0042982e, (uint32_t m, int32_t idx, float *pos, int32_t mode), (m, idx, pos, mode)) \
     V(P87_Fn42A423, 0x0042a423, (uint32_t m, int32_t idx, float *pos, int32_t mode), (m, idx, pos, mode)) \
     V(P87_Fn42A5DE, 0x0042a5de, (uint32_t m, int32_t idx, float *pos, int32_t mode), (m, idx, pos, mode)) \
-    V(P87_Fn4FEF26, 0x004fef26, (uint32_t m, const void *obj, int32_t r), (m, obj, r)) \
     V(P55_Fn4ED5F8, 0x004ed5f8, (int32_t a0, int32_t a1), (a0, a1)) \
     V(P55_Fn4EDAA2, 0x004edaa2, (void), ()) \
     R(int32_t, P55_Fn405E79, 0x00405e79, (int32_t a0, void *a1), (a0, a1)) \

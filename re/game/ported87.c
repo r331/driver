@@ -1,6 +1,7 @@
 /* Блок карты в слоты и рисование объектов карты — восстановлено из Game.exe (004ed5f8, 004ee18b, 004ee4b7). */
 #include "ported87.h"
 #include "ported92.h"
+#include "ported131.h"
 #include <string.h>
 
 GAME_VAR_DEF(int32_t, P87_CntA, 0x00b31edc)
@@ -91,7 +92,7 @@ static void draw_obj(const uint8_t *obj, int kind) {
   if (vis == 0) return;
   uint32_t flags = rd16(mdl + 2);
   if (flags & 4) {
-    P87_Fn4FEF26(mref, obj, vis);
+    P131_MissionObj(mref, (const uint8_t *)obj, vis);
     P44_MatPtr = (float *)P44_ViewMatT;
     return;
   }

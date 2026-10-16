@@ -119,6 +119,7 @@
 #include "../../game/ported128.h"
 #include "../../game/ported129.h"
 #include "../../game/ported130.h"
+#include "../../game/ported131.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2270,6 +2271,16 @@ void re_install_all(void) {
     re_hook(0x004cadb5, (void*)P130_Lightning, "P130_Lightning");
     re_hook(0x004cba1d, (void*)P130_RainStep, "P130_RainStep");
     re_hook(0x004cdb25, (void*)P130_SnowStep, "P130_SnowStep");
+    re_hook(0x0041b7d1, (void*)P131_MenuPick, "P131_MenuPick");
+    re_hook(0x004f621d, (void*)P131_ScriptLine, "P131_ScriptLine");
+    re_hook(0x0049e911, (void*)P131_FlybyStart, "P131_FlybyStart");
+    re_hook(0x004d4a63, (void*)P131_GameFrame, "P131_GameFrame");
+    re_hook(0x004cc1a2, (void*)P131_Splash, "P131_Splash");
+    re_hook(0x004cbc1e, (void*)P131_RainDraw, "P131_RainDraw");
+    re_hook(0x004fef26, (void*)P131_MissionObj, "P131_MissionObj");
+    re_hook(0x00507925, (void*)P131_RadarArrow, "P131_RadarArrow");
+    re_hook(0x004ef9cd, (void*)P131_LoadCosDen, "P131_LoadCosDen");
+    re_hook(0x0049e7a8, (void*)P131_CamShake, "P131_CamShake");
     re_hook(0x004cd3fb, (void*)P128_ModelHit, "P128_ModelHit");
     re_hook(0x004c032a, (void*)P128_CarDeform, "P128_CarDeform");
     re_hook(0x004949f0, (void*)P128_TrafficNode, "P128_TrafficNode");
