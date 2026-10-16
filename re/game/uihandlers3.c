@@ -146,8 +146,9 @@ void Dev00424633(void) {
 void Dev00424647(void) {
     if (G00B1C0D4 != 0) { FnPtr01271020(); FnPtr01270EB0(); }
 }
-int32_t GameCall00424661(int32_t a0) {
-    return G00B1C0D4 == 0 ? 0 : FnPtr01270E50(a0);
+int32_t GameCall00424661(intptr_t a0) {
+    /* v2.00: grSstQueryHardware(GrHwConfiguration *) — указатель не режется до int32 в native (64 бит) */
+    return G00B1C0D4 == 0 ? 0 : ((int32_t (*)(intptr_t))FnPtr01270E50)(a0);
 }
 void Dev004246BD(void) {
     if (G00B1C0D4 != 0) FnPtr01271020();

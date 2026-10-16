@@ -93,7 +93,8 @@ int re_crt_mkdir(const char *path) {
 #  ifdef _WIN32
   return _mkdir(path);
 #  else
-  return mkdir(path, 0777);
+  char np[1024]; plat_path_native(path, np, sizeof np);   /* v2.00: '\\' → '/' */
+  return mkdir(np, 0777);
 #  endif
 }
 p140_keystr_t P140_KeyStr = P140_KEYSTR_INIT;   /* 0054b4b4, .data */
@@ -194,7 +195,7 @@ void P140_KeysLoad(void) {
   (void)g_regkeys;
 #endif
   for (size_t i = 0; i < sizeof k_keyptr / sizeof k_keyptr[0]; i++)
-    P140_KeyName[k_keyptr[i][0] / 4] = base + (uint32_t)k_keyptr[i][1] * 0x10u;
+    P140_KeyName[(k_keyptr[i][0] - 0x80u) / 4] = base + (uint32_t)k_keyptr[i][1] * 0x10u;   /* v2.00: смещения от 0054b000 (индекс = скан-код DIK); раньше писало за таблицу 0054b080 (до 0054b518) и в hook */
 }
 
 /* ---- 004127f0 ---- */

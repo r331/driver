@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "ported151.h"
 #include "ported55.h"
 #include "ported116.h"
@@ -202,13 +203,21 @@ void P55_StopAudio(void) {
   if (P55_B87EB8 != 0 && GameMode == 0) P47_Fn405BFA();
 }
 
+#ifndef RE_HOOK_BUILD
+#include <stdlib.h>
+#define TRACE_GI(...) do { if (getenv("RE_TRACE")) { fprintf(stderr, "[trace] GlideInit: " __VA_ARGS__); fputc('\n', stderr); } } while (0)
+#else
+#define TRACE_GI(...) ((void)0)
+#endif
 void P55_GlideInit(int32_t a, int32_t b, int32_t mode) {
   (void)a; (void)b;
   P55_Fn424530(P55_V57B6FC, P55_V1285428, P55_V1285424);
-  if (P48_GlideCheck() == 0) return;
+  TRACE_GI("devsel idx=%d devcount=%d ok=%d kind_d3d=%d", (int)P55_V57B6FC, (int)P42_DevCount, (int)G00B1C0D8, (int)G00B1C0D8);
+  if (P48_GlideCheck() == 0) { TRACE_GI("GlideCheck=0"); return; }
   P55_BDFA18 = P55_Fn4245E2() == 0;
   P31_WindowMode = mode != 1;
   if (P151_Reopen(G6_00BDF9C0, P31_WindowMode, 0) != 0) G6_00B87E20 = 1;
+  TRACE_GI("Reopen -> b87e20=%d", (int)G6_00B87E20);
   P55_GlideDevInfo(P55_GlideInfo);
 }
 

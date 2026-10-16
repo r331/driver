@@ -372,11 +372,11 @@ extern void* D_005fed98;
 #ifndef RE_HOOK_BUILD
 extern int32_t D_005feda0;
 #endif
-#define D_00b1c0d4 GAME_VAR(int32_t, D_00b1c0d4, 0x00b1c0d4)
+#define D_00b1c0d4 GAME_VAR(int32_t, G00B1C0D4, 0x00b1c0d4)   /* v2.00: один native-объект с G00B1C0D4 (uihandlers3) */
 #ifndef RE_HOOK_BUILD
 extern int32_t D_00b1c0d4;
 #endif
-#define D_00b1c0d8 GAME_VAR(int32_t, D_00b1c0d8, 0x00b1c0d8)
+#define D_00b1c0d8 GAME_VAR(int32_t, G00B1C0D8, 0x00b1c0d8)   /* v2.00: один native-объект с G00B1C0D8 */
 #ifndef RE_HOOK_BUILD
 extern int32_t D_00b1c0d8;
 #endif

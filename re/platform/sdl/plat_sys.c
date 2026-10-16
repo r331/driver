@@ -46,7 +46,7 @@ int plat_message_box(void *hwnd,const char *text,const char *title,unsigned flag
     (void)hwnd; g_mb_count++;
     snprintf(g_mb_text,sizeof g_mb_text,"%s",text?text:""); snprintf(g_mb_title,sizeof g_mb_title,"%s",title?title:"");
     fprintf(stderr,"[%s] %s\n",g_mb_title,g_mb_text);
-    SDL_ShowSimpleMessageBox((flags&0x10)?SDL_MESSAGEBOX_ERROR:((flags&0x30)==0x30?SDL_MESSAGEBOX_WARNING:SDL_MESSAGEBOX_INFORMATION),g_mb_title,g_mb_text,g_win);
+    if(!getenv("RE_NO_MSGBOX")) SDL_ShowSimpleMessageBox((flags&0x10)?SDL_MESSAGEBOX_ERROR:((flags&0x30)==0x30?SDL_MESSAGEBOX_WARNING:SDL_MESSAGEBOX_INFORMATION),g_mb_title,g_mb_text,g_win);
     return 1;
 }
 int plat_message_box_last(const char **text,const char **title){ if(text)*text=g_mb_text; if(title)*title=g_mb_title; return g_mb_count; } /* тесты */
@@ -99,6 +99,7 @@ void *plat_game_window_create(void *hinst,int32_t show,const char *title,int w,i
 void plat_pump_messages(void){
     if(!SDL_WasInit(SDL_INIT_VIDEO)) return;
     SDL_Event e; while(SDL_PollEvent(&e)) if(e.type==SDL_QUIT) g_wquit=1;
+    if(!g_wtrap) plat_frame_tick("pump");
 }
 void plat_set_priority(int level){
     g_wprio=level;
@@ -140,3 +141,73 @@ void *plat_window_active(void) { return (g_win || g_wtrap) ? (void *)(intptr_t)1
 void *plat_cursor_set(void *c) { void *old = (void *)(intptr_t)g_wcur; plat_set_cursor(c != NULL); return old; }
 void *plat_current_process(void) { return (void *)(intptr_t)-1; }
 void *plat_load_accelerators(void *hinst, const char *name) { (void)hinst; (void)name; return NULL; }
+
+/* --- v2.00: пути игры (Windows) → native: '\\' → '/', каждый компонент ищется без учёта регистра --- */
+static int ci_component(const char *dir, const char *name, char *out, size_t n) {
+    DIR *d = opendir(*dir ? dir : "."); if (!d) return 0;
+    struct dirent *e; int ok = 0;
+    while ((e = readdir(d))) if (!strcasecmp(e->d_name, name)) { snprintf(out, n, "%s", e->d_name); ok = 1; break; }
+    closedir(d); return ok;
+}
+int plat_path_native(const char *path, char *out, int size) {
+    char tmp[PATH_MAX], res[PATH_MAX] = "", comp[256];
+    if (!path || !out || size <= 0) return 0;
+    snprintf(tmp, sizeof tmp, "%s", path);
+    for (char *c = tmp; *c; c++) if (*c == '\\') *c = '/';
+    const char *p = tmp; int found = 1;
+    if (*p == '/') { strcpy(res, "/"); while (*p == '/') p++; }
+    while (*p) {
+        const char *q = strchr(p, '/'); size_t l = q ? (size_t)(q - p) : strlen(p);
+        if (l >= sizeof comp) l = sizeof comp - 1;
+        memcpy(comp, p, l); comp[l] = 0;
+        char real[256];
+        const char *use = comp;
+        if (found && strcmp(comp, ".") && strcmp(comp, "..") && ci_component(res, comp, real, sizeof real)) use = real;
+        else if (strcmp(comp, ".") && strcmp(comp, "..")) found = 0;
+        size_t rl = strlen(res);
+        snprintf(res + rl, sizeof res - rl, "%s%s", (rl && res[rl - 1] != '/') ? "/" : "", use);
+        if (!q) break;
+        p = q; while (*p == '/') p++;
+    }
+    snprintf(out, (size_t)size, "%s", res);
+    return found;
+}
+void *plat_fopen_game(const char *path, const char *mode) {
+    if (!path || !mode) return NULL;
+    char np[PATH_MAX];
+    plat_path_native(path, np, sizeof np);
+    FILE *f = fopen(np, mode);
+    if (!f) f = fopen(path, mode);   /* каталога нет — как раньше, путь как есть (симметрично для записи и чтения) */
+    return f;
+}
+
+/* --- v2.00: кадры запуска игры: RE_MAX_FRAMES=N — после N-го plat_flip выход 0; RE_SHOT_PNG=путь — снимок кадра N
+       (или первого, если RE_SHOT_FIRST=1); RE_MAX_PUMPS=N — выход после N циклов сообщений без кадров (защита) --- */
+int png_write_rgba(const char *path, const uint32_t *px, int w, int h);   /* tests/render_test.c */
+static int g_frames, g_pumps, g_shot_done;
+static void frame_shot(void) {
+    const char *png = getenv("RE_SHOT_PNG"); int w = 0, h = 0;
+    if (!png || !*png || !g_win) return;
+    SDL_GL_GetDrawableSize(g_win, &w, &h);
+    if (w <= 0 || h <= 0) return;
+    uint32_t *px = malloc((size_t)w * h * 4); if (!px) return;
+    if (plat_render_readback(px) == 0 && png_write_rgba(png, px, w, h) == 0) { fprintf(stderr, "[frame] снимок %s (%dx%d), кадр %d\n", png, w, h, g_frames); g_shot_done = 1; }
+    free(px);
+}
+void plat_frame_tick(const char *where) {
+    static int maxf = -2, maxp = -2;
+    if (maxf == -2) { const char *e = getenv("RE_MAX_FRAMES"); maxf = e ? atoi(e) : -1; e = getenv("RE_MAX_PUMPS"); maxp = e ? atoi(e) : -1; }
+    if (where && !strcmp(where, "flip")) {
+        g_frames++;
+        if (g_frames == 1) fprintf(stderr, "[frame] первый кадр (plat_flip)\n");
+        const char *sf = getenv("RE_SHOT_FIRST");
+        if (!g_shot_done && sf && *sf == '1') frame_shot();
+        if (maxf > 0 && g_frames >= maxf) {
+            if (!g_shot_done) frame_shot();
+            fprintf(stderr, "[frame] RE_MAX_FRAMES=%d достигнут — выход\n", maxf); fflush(NULL); _Exit(0);
+        }
+    } else {
+        g_pumps++;
+        if (maxp > 0 && g_pumps >= maxp) { fprintf(stderr, "[frame] RE_MAX_PUMPS=%d (кадров %d) — выход\n", maxp, g_frames); fflush(NULL); _Exit(0); }
+    }
+}

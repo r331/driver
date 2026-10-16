@@ -1,4 +1,6 @@
 /* Автогенерация: tools/gen_native_links.py. Ещё не перенесённые вызовы в native уходят в слабые заглушки stubs.c; здесь — перенесённые. */
+#include <stdio.h>
+#include "../../game/engine.h"
 #include "../../game/unported.h"
 #include "../../game/ported11.h"
 #include "../../game/ported12.h"
@@ -428,3 +430,14 @@ void P58_Fn416605 (void) { P100_ReplayMenuInit(); }
 void P58_Fn51763A (const char *a0, int32_t a1) { P98_LoadLang(a0, a1); }
 void P58_Fn406875 (void *a0) { P102_ConfigSnap(a0); }
 void P58_Fn413E37 (void) { P100_PadMenuInit(); }
+
+/* v2.00: заглушки unported.h, у которых уже есть перенос (найдены запуском игры: «not ported» в журнале) */
+uint32_t R12_40DAE1(uint32_t a0, int32_t a1, int32_t a2) {   /* 0040dae1 BmpToPage → адрес страницы (re_addr) */
+  const uint8_t *src = (const uint8_t *)re_ptr(a0);
+  return src ? re_addr(P75_BmpToPage(src, a1, a2)) : 0; }
+/* 00408710: счётчик секунд экрана (таймер 1000 мс); в native у 005d577c три объекта — пишутся все */
+static void tm_inc_5d577c(void) { int32_t v = MenuCounter5D577C + 1; MenuCounter5D577C = v; D_005d577c = v; G005D577C = v; }
+int32_t Call00528221(int32_t a0, int32_t a1, uint32_t a2) {    /* 00528221 TimerStart: колбэк — адрес Game.exe → re_fn */
+  void (*cb)(void) = a2 == 0x00408710u ? tm_inc_5d577c : (void (*)(void))re_fn(a2);
+  if (cb == NULL) { char m[64]; snprintf(m, sizeof m, "TimerStart: no native callback %08x", (unsigned)a2); DebugLog(m); }
+  return P25_TimerStart((uint32_t)a0, (uint32_t)a1, cb); }

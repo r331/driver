@@ -103,7 +103,7 @@ void P48_PosToInts(int32_t *out) {
 }
 int32_t P48_GlideCheck(void) {
   Dev00424633();
-  return GameCall00424661((int32_t)(uintptr_t)&P48_GlideBuf) == 1;
+  return GameCall00424661((intptr_t)&P48_GlideBuf) == 1;
 }
 void P48_ShutdownSystems(void) {
   ResetEffectsState();

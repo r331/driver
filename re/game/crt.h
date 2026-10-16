@@ -23,7 +23,8 @@
 #  define g_fwrite(p, s, n, f) fwrite((p), (s), (n), (FILE*)(f))
 #  define g_ftell(f)           ftell((FILE*)(f))
 #  define g_fseek(f, o, w)     fseek((FILE*)(f), (o), (w))
-#  define g_fopen(n, m)        ((void*)fopen((n), (m)))
+void *plat_fopen_game(const char *path, const char *mode);   /* v2.00: пути Windows → native */
+#  define g_fopen(n, m)        plat_fopen_game((n), (m))
 #  define g_fclose(f)          fclose((FILE*)(f))
 #  define g_fgets(b, n, f)     fgets((b), (n), (FILE*)(f))
 #  define g_fgetc(f)           fgetc((FILE*)(f))

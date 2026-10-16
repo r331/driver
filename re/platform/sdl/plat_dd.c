@@ -78,7 +78,8 @@ void plat_client_to_screen(void *h, int32_t *pt) { (void)h; pt[0] += 100; pt[1] 
 int32_t plat_dd_clipper_set_hwnd(void *c, void *h) { (void)h; if (!c) return -1; g_clip_sets++; return 0; }
 int32_t plat_dd_blt_rect(void *d, const int32_t *dr, void *s, const int32_t *sr) {
     if (!d || !s) return -1; memcpy(g_drc, dr, sizeof g_drc); memcpy(g_src_rc, sr, sizeof g_src_rc); g_blts_rc++; return 0; }
-int32_t plat_dd_flip(void *s, uint32_t fl) { if (!s) return -1; g_flips++; g_flip_flags = fl; return g_flip_hr; }
+static int g_game_present;   /* v2.00: 1 — игра (plat_dd_stub_enum с 0x100): Flip показывает кадр GL */
+int32_t plat_dd_flip(void *s, uint32_t fl) { if (!s) return -1; g_flips++; g_flip_flags = fl; if (g_game_present) plat_flip(); return g_flip_hr; }
 void plat_dd_stub_surface(int lf, int pff, uint32_t bits, uint32_t r, uint32_t g, uint32_t b, int32_t fhr) {
     g_lk_fail = lf; g_pf_fail = pff; g_pf_bits = bits; g_pf_m[0] = r; g_pf_m[1] = g; g_pf_m[2] = b; g_flip_hr = fhr; (void)g_rects_n; }
 int plat_dd_stub_surface_stats(int *lk, int *ul, int *fl, uint32_t *ff, int *bl, int32_t *dr, int32_t *sr, int *cs) {
@@ -148,7 +149,7 @@ int plat_ds_stub_prop(uint8_t *g, uint32_t *id, uint32_t *len, uint32_t *d0, int
    драйвер 0 — основной (guid NULL) «Primary Display Driver», остальные с guid {i}; устройства — «SDL HAL i»
    (D3DDEVICEDESC: dwSize 0xfc, dwFlags 0, dcmColorModel = 2 у HAL, 0 у последнего при n_dev > 1) --- */
 static int g_dde_n = 1, g_d3de_n = 1; static uint32_t g_dde_fail;
-void plat_dd_stub_enum(int n_dd, int n_dev, uint32_t fm) { g_dde_n = n_dd; g_d3de_n = n_dev; g_dde_fail = fm; }
+void plat_dd_stub_enum(int n_dd, int n_dev, uint32_t fm) { g_dde_n = n_dd; g_d3de_n = n_dev; g_dde_fail = fm; g_game_present = (fm & 0x100) != 0; }
 int32_t plat_dd_enumerate(plat_dd_enum_cb cb, void *ctx) {
     if (g_dde_fail & 1) return -1;
     for (int i = 0; i < g_dde_n; i++) {
@@ -162,7 +163,12 @@ int32_t plat_d3d_enum_devices(void *d3d, plat_d3d_dev_cb cb, void *ctx) {
     for (int i = 0; i < g_d3de_n; i++) {
         uint32_t hw[63] = { 0xfc, 0, (g_d3de_n > 1 && i == g_d3de_n - 1) ? 0u : 2u }, hel[63] = { 0xfc, 0, 1 };
         hw[3] = 0x1000u + (uint32_t)i; uint8_t g[16] = { 0x3d, (uint8_t)i };
-        char nm[32]; snprintf(nm, sizeof nm, "SDL HAL %d", i);
+        if (g_dde_fail & 0x100) {   /* v2.00: игра (не тест) — GL-устройство как HAL D3DDEVICEDESC: COLORMODEL|DEVCAPS, RGB,
+                                       FLOATTLVERTEX|DRAWPRIMTLVERTEX|HWRASTERIZATION, текстуры 1..2048 */
+            memset(hw, 0, sizeof hw); hw[0] = 0xfc; hw[1] = 3; hw[2] = 2; hw[3] = 0x1u | 0x400u | 0x80000u;
+            hw[43] = 1; hw[44] = 1; hw[45] = 2048; hw[46] = 2048;
+            memcpy(hel, hw, sizeof hel); }
+        char nm[32]; snprintf(nm, sizeof nm, (g_dde_fail & 0x100) ? "SDL OpenGL %d" : "SDL HAL %d", i);
         if (cb(g, "SDL Direct3D stub", nm, hw, hel, ctx) == 0) break;
     }
     return 0; }

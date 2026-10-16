@@ -24,6 +24,11 @@ void plat_com_uninit(void);                   /* CoUninitialize */
 int  plat_com_count(void);                    /* init минус uninit (тесты; hook: 0) */
 void plat_log(const char *fmt, ...);
 void *plat_file_open(const char *path, const char *mode); /* case-insensitive lookup */
+/* v2.00: fopen для путей игры: '\\' → '/', поиск каждого компонента без учёта регистра (native); hook — fopen как есть */
+void *plat_fopen_game(const char *path, const char *mode);
+int plat_path_native(const char *path, char *out, int size);   /* 1 — все компоненты найдены */
+/* v2.00: запуск игры — счётчик кадров (RE_MAX_FRAMES) и снимок (RE_SHOT_PNG); зовётся из plat_flip и цикла сообщений */
+void plat_frame_tick(const char *where);
 /* --- window & input --- */
 int plat_window_open(const char *title, int w, int h, int fullscreen);
 int plat_poll_events(void); /* returns 0 on quit request */

@@ -227,7 +227,7 @@ uint16_t RetZero0041FA36(void); /* 0041fa36 */
 int32_t GetVarB1C0D8(void); /* 004245e2 */
 void Dev00424633(void); /* 00424633 */
 void Dev00424647(void); /* 00424647 */
-int32_t GameCall00424661(int32_t a0); /* 00424661 */
+int32_t GameCall00424661(intptr_t a0); /* 00424661; v2.00: адрес GrHwConfiguration — intptr_t (64 бит native) */
 void Dev004246BD(void); /* 004246bd */
 int32_t Dev0042480D(int32_t a0); /* 0042480d */
 void Dev00424858(void); /* 00424858 */

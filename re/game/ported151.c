@@ -22,6 +22,13 @@
      00b87d0c → фатальная ошибка), 005226b5(hinst, show, 2), ускорители, таймеры, приоритет процесса, курсор, хранитель экрана,
      004d33c0 → фронтенд/игра/меню → завершение подсистем; код 0xc9 — MessageBox «The lead car went out of range!». */
 #include "ported151.h"
+#ifndef RE_HOOK_BUILD
+#include <stdio.h>
+#include <stdlib.h>
+#define RE_TRACE_FAIL() do { if (getenv("RE_TRACE")) fprintf(stderr, "[trace] %s: 0 at %s:%d\n", __func__, __FILE__, __LINE__); } while (0)
+#else
+#define RE_TRACE_FAIL() ((void)0)
+#endif
 #include "ported6.h"
 #include "ported11.h"
 #include "ported12.h"
@@ -188,18 +195,18 @@ int32_t P151_WinOpen(int32_t hwnd, int32_t mode, int32_t a2, int32_t a3, int32_t
   P32_DevInfo = (uint8_t *)re_rd_ptr((uint8_t *)&P74_DevTab[0] + (size_t)P151_DevIdx * 0x4c + 0x48);
   uint8_t *dv = P32_DevInfo;
   P31_DDObj0 = P35_GetDirectDrawInterface(re_rd_ptr(dv));
-  if (P31_DDObj0 == NULL) { P31_ReleaseDirectDraw(); return 0; }
+  if (P31_DDObj0 == NULL) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
   P24_DD = P39_QueryDD4(P31_DDObj0);
-  if (P24_DD == NULL) return 0;
+  if (P24_DD == NULL) { RE_TRACE_FAIL(); return 0; }
   P31_DDObj1 = P39_QueryD3D(P24_DD);
-  if (P31_DDObj1 == NULL) return 0;
+  if (P31_DDObj1 == NULL) { RE_TRACE_FAIL(); return 0; }
   if (P24_RestoreMode == 0) {
-    if (plat_dd_set_cooperative(P24_DD, P24_Hwnd, 8) != 0) { P31_ReleaseDirectDraw(); return 0; }
+    if (plat_dd_set_cooperative(P24_DD, P24_Hwnd, 8) != 0) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
     int32_t rc[4]; plat_window_client_rect(P24_Hwnd, rc);
     w = rc[2]; h = rc[3];
-    if (P39_CreateFrontBack(w, h) == 0) { P31_ReleaseDirectDraw(); return 0; }
+    if (P39_CreateFrontBack(w, h) == 0) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
   } else {
-    if (plat_dd_set_cooperative(P24_DD, P24_Hwnd, 0x11) != 0) { P31_ReleaseDirectDraw(); return 0; }
+    if (plat_dd_set_cooperative(P24_DD, P24_Hwnd, 0x11) != 0) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
     switch (mode) {
     case 1: w = 0x140; h = 0xf0; break;
     case 3: w = 0x200; h = 0x180; break;
@@ -208,18 +215,18 @@ int32_t P151_WinOpen(int32_t hwnd, int32_t mode, int32_t a2, int32_t a3, int32_t
     case 0xc: w = 0x400; h = 0x300; break;
     case 0xd: w = 0x500; h = 0x400; break;
     case 0xe: w = 0x640; h = 0x4b0; break;
-    default: P31_ReleaseDirectDraw(); return 0;
+    default: P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; }
     }
-    if (P24_SetDisplayMode(P24_DD, w, h) == 0) { P31_ReleaseDirectDraw(); return 0; }
-    if (P24_CreatePrimarySurface() == 0) { P31_ReleaseDirectDraw(); return 0; }
+    if (P24_SetDisplayMode(P24_DD, w, h) == 0) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
+    if (P24_CreatePrimarySurface() == 0) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
   }
-  if (P32_CreateZSurface(P24_Back) == 0) { P31_ReleaseDirectDraw(); return 0; }
+  if (P32_CreateZSurface(P24_Back) == 0) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
   void *dev = P24_CreateDevice(P31_DDObj1, re_rd_ptr(dv + 0x14), P24_Back);
   P31_DDObj2 = dev;
 #ifndef RE_HOOK_BUILD
   P33_Device = dev;
 #endif
-  if (dev == NULL) { P31_ReleaseDirectDraw(); return 0; }
+  if (dev == NULL) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
   uint32_t c18 = rd32(dv + 0x394), cc = rd32(dv + 0x398);
   uint32_t caps = (cc & 0x10) != 0;
   if (cc & 8) caps |= 2;
@@ -229,11 +236,11 @@ int32_t P151_WinOpen(int32_t hwnd, int32_t mode, int32_t a2, int32_t a3, int32_t
   if ((rd32(dv + 0x38c) & 0x40000) != 0 && (rd32(dv + 0x354) & 0x40000) != 0) v = caps | 0x18;
   P23_DevCaps = v;
   P31_DDObj3 = P24_CreateViewport(P31_DDObj1);
-  if (P31_DDObj3 == NULL) { P31_ReleaseDirectDraw(); return 0; }
-  if (P24_AddViewport(P31_DDObj2, P31_DDObj3, w, h) == 0) { P31_ReleaseDirectDraw(); return 0; }
+  if (P31_DDObj3 == NULL) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
+  if (P24_AddViewport(P31_DDObj2, P31_DDObj3, w, h) == 0) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
   if (P151_No8bit == 0) G6_00A421F0 = (int32_t)rd32(dv + 0x588);
   else { G6_00A421F0 = 1; NoopFn0042243f(); }                            /* «User requested no 8bit support» */
-  if (P109_EmulInit() == 0) { P31_ReleaseDirectDraw(); return 0; }
+  if (P109_EmulInit() == 0) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
   P23_InitRenderStates();
   P22_VpX = 0; P22_VpY = 0; P22_VpW = w; P22_VpH = h;
   P24_ModeW = w; P24_ModeH = h; P22_DevReady = 1;
@@ -303,7 +310,7 @@ int32_t P151_Reopen(int32_t hwnd, int32_t mode, int32_t keep) {
   InitFpuCw_005283E2();
   call_i1(SLOT(0x01270e88u, "_grSstSelect@4"), 0);
   if (mode == 0) {
-    if (P47_GlideWinOpen(hwnd, 0xff, 0, 0, fs, 2, 1) == 0) return 0;
+    if (P47_GlideWinOpen(hwnd, 0xff, 0, 0, fs, 2, 1) == 0) { RE_TRACE_FAIL(); return 0; }
   } else if (mode == 1) {
     int32_t res;
     switch (P19_ScrW) {
@@ -314,9 +321,9 @@ int32_t P151_Reopen(int32_t hwnd, int32_t mode, int32_t keep) {
     case 0x400: res = 0xc; break;
     case 0x500: res = 0xd; break;
     case 0x640: res = 0xe; break;
-    default: return 0;
+    default: { RE_TRACE_FAIL(); return 0; }
     }
-    if (P47_GlideWinOpen(hwnd, res, 0, 0, fs, 2, 1) == 0) return 0;
+    if (P47_GlideWinOpen(hwnd, res, 0, 0, fs, 2, 1) == 0) { RE_TRACE_FAIL(); return 0; }
   }
 #ifdef RE_HOOK_BUILD
   *(uint32_t *)(uintptr_t)0x011effe0u = P55_BDFA18 == 0 ? 0x0055082cu : 0x00550cfcu;
@@ -409,7 +416,13 @@ int32_t P151_WinMain(int32_t hinst, int32_t prev, int32_t cmd, int32_t show) {
   P98_Range[8] = 0;                                   /* 00b87e80 */
   P95_BDF9D0 = 4;
   P95_575F1C = 0;
+#ifdef RE_HOOK_BUILD
   if (P133_LoadConfig() == 0) lang_fatal();
+#else
+  /* v2.00: config.dat пишет Driver Configuration (setup); в native его может не быть — настройки по умолчанию
+     (P133_LoadConfig уже вызвал P95_DefaultOptions) и запись config.dat (00405bfa) вместо фатальной ошибки */
+  if (P133_LoadConfig() == 0) { P124_DebugLog("[native] config.dat: settings by default"); P58_SaveConfig(); }
+#endif
   P55_GlideInit(hinst, show, 2);
   if (G6_00B87E20 == 0) lang_fatal();
   plat_load_accelerators((void *)(intptr_t)G6_00BDF9C4, "ACCELERATOR");

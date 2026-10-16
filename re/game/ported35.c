@@ -6,7 +6,11 @@ GAME_VAR_DEF(int32_t, P35_PadX, 0x00d07790)
 GAME_VAR_DEF(int32_t, P35_FfX, 0x00b31e04)
 GAME_VAR_DEF(int32_t, P35_FfY, 0x00b31e08)
 GAME_VAR_DEF(int32_t, P35_FfPending, 0x00b31e10)
+#ifdef RE_HOOK_BUILD
 GAME_VAR_DEF(int32_t, P35_ReqBpp, 0x00549ccc)
+#else
+int32_t P35_ReqBpp = 0x10;   /* v2.00: начальное значение .data 00549ccc = 16 (в native GAME_VAR_DEF без инициализатора давал 0) */
+#endif
 GAME_VAR_DEF(uint8_t, P35_InputMode, 0x00562a44)
 
 /* GUID_ConstantForce {13541C20-8E33-11D0-9AD0-00A0C9A06E35} — данные игры по 00546510 */
