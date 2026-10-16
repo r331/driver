@@ -97,6 +97,7 @@
 #include "../../game/ported106.h"
 #include "../../game/ported107.h"
 #include "../../game/ported108.h"
+#include "../../game/ported109.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -119,7 +120,10 @@
 #include "../../game/ported8.h"
 #include "../../game/ported9.h"
 #include "../../game/ported10.h"
+void P97_Fn52498E (int32_t voice, int32_t sample, float a, float b, float c) { P109_SndPlay(voice, sample, a, b, c); }
 void P97_Fn4262CE (float x0, float y0, float x1, float y1, int32_t c) { P107_Line(x0, y0, x1, y1, c); }
+void P96_Fn4D7F91 (float x, float y, float w, float h, int32_t c0, int32_t c1, int32_t c2, int32_t c3, int32_t c4, int32_t c5, int32_t c6, int32_t c7, int32_t c8, int32_t c9, int32_t c10, int32_t c11) { P109_GradRect(x, y, w, h, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11); }
+void P96_Fn40B6FD (float x, float y, float w, float h, float u0, float v0, float u1, float v1, int32_t page, const uint8_t *rgb) { P109_IconDraw(x, y, w, h, u0, v0, u1, v1, page, rgb); }
 int32_t P96_Fn50F304 (uint32_t script, int32_t pos) { return (int32_t)P107_MenuNav(script, pos); }
 void P66_DrawText (int32_t x, int32_t y, uint32_t txt, int32_t a, int32_t b, int32_t r, int32_t g, int32_t bl) { P70_ShadowText(x, y, txt, a, b, r, g, bl); }
 int32_t P62_Fn51CC55 (void *a, int32_t t, int32_t i) { return (int32_t)P64_RankPlace(a, t, i); }

@@ -97,6 +97,7 @@
 #include "../../game/ported106.h"
 #include "../../game/ported107.h"
 #include "../../game/ported108.h"
+#include "../../game/ported109.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2087,4 +2088,17 @@ void re_install_all(void) {
     re_hook(0x004d7c46, (void*)P108_FillRect, "P108_FillRect");
     re_hook(0x004d7deb, (void*)P108_FillRectB, "P108_FillRectB");
     re_hook(0x00507eea, (void*)P108_MapTexRect, "P108_MapTexRect");
+    re_hook(0x0052498e, (void*)P109_SndPlay, "P109_SndPlay");
+    re_hook(0x004d7f91, (void*)P109_GradRect, "P109_GradRect");
+    re_hook(0x004d81da, (void*)P109_GradRectS, "P109_GradRectS");
+    re_hook(0x0040dce0, (void*)P109_TileDraw, "P109_TileDraw");
+    re_hook(0x0040b6fd, (void*)P109_IconDraw, "P109_IconDraw");
+    re_hook(0x00522a50, (void*)P109_DropsDraw, "P109_DropsDraw");
+    re_hook(0x004219e8, (void*)P109_EmulInit, "P109_EmulInit");
+    re_hook(0x00421719, (void*)P109_SlotUpload8, "P109_SlotUpload8");
+    re_hook(0x00421861, (void*)P109_SlotUpload16, "P109_SlotUpload16");
+    re_hook(0x00502cee, (void*)P109_ScriptMarkers, "P109_ScriptMarkers");
+    re_hook(0x00504866, (void*)P109_RadarArrows, "P109_RadarArrows");
+    re_hook(0x005191c5, (void*)P109_InputTick, "P109_InputTick");
+    re_hook(0x00505b54, (void*)P109_RadarTraffic, "P109_RadarTraffic");
 }
