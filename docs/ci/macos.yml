@@ -23,6 +23,12 @@ jobs:
         run: file re/build-native/driver; otool -L re/build-native/driver
       - name: ctest (selftest без данных игры)
         run: cd re/build-native && ctest --output-on-failure -L nodata
+      - name: Диагностика selftest (lldb, только при падении)
+        if: failure()
+        run: |
+          cd re/build-native && mkdir -p dbg && cd dbg
+          RE_TRACE=1 RE_NO_CRASH=1 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy ../driver --selftest 2>&1 | grep -v DIReAcquire | tail -40 || true
+          RE_NO_CRASH=1 SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy lldb --batch -o run -k "bt 25" -k "register read pc lr" -k "disassemble -p -c 12" -k quit -- ../driver --selftest 2>&1 | grep -v "DIReAcquire\|\[debug\]" | tail -80 || true
       - name: Запуск без данных (ожидается сообщение и код 1)
         run: |
           set +e; re/build-native/driver; rc=$?; echo "rc=$rc"; test $rc -eq 1
