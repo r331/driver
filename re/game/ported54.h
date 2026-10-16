@@ -24,7 +24,7 @@
 /* Мелкие функции (шаг D): выбор текстур значков меню, Glide-обёртки, очистка/обмен кадров, таблицы буферов roadbits/map,
    раскладка клавиш, объекты-счётчики (00493f9a/00493e3d), QueryInterface для IDirect3DTexture2.
    Все cdecl, кроме 0041de46 (stdcall ret 0xc — переходник в re_hook). */
-typedef int32_t  p54_i16_t[64];
+typedef int32_t  p54_i16_t[12];   /* v1.58: 0057b578..0057b5a8 (дальше — таблица меню 0057b5a8) */
 typedef int32_t  p54_i32_t[32];
 typedef uint32_t p54_out_t[0x220];
 typedef uint32_t p54_keysrc_t[15];
@@ -33,7 +33,8 @@ typedef uint32_t p54_dst_t[32];
 typedef uint32_t p54_src6_t[6];
 typedef int32_t  p54_i4_t[4];
 typedef void    *p54_p4_t[4];
-#define P54_SelTab   GAME_VAR(p54_i16_t, P54_SelTab, 0x0057b578)    /* какие значки в меню (-1 — конец) */
+#include "menu57.h"
+#define P54_SelTab   MENU57_VAR(p54_i16_t, P54_SelTab, 0x0057b578)  /* какие значки в меню (-1 — конец); v1.58 — в P57_MenuTab */
 #define P54_IconIdx  GAME_VAR(p54_i32_t, P54_IconIdx, 0x00549c60)   /* номер опции → индекс значка в P12_00c55820 */
 #define P54_Out      GAME_VAR(p54_out_t, P54_Out, 0x00549b08)       /* выход: по 0x20 байт на строку, значок в первом слове */
 #define P54_KeySrc   GAME_VAR(p54_keysrc_t, P54_KeySrc, 0x0054b7a8) /* раскладка по умолчанию (5 слов), копия [6..10], 3 слова [12..14] */
@@ -54,7 +55,7 @@ typedef void    *p54_p4_t[4];
 #define P54_G40      GAME_VAR(int32_t, P54_G40, 0x01139a30)
 #define P54_G44      GAME_VAR(int32_t, P54_G44, 0x01139a2c)
 #ifndef RE_HOOK_BUILD
-extern p54_i16_t P54_SelTab; extern p54_i32_t P54_IconIdx; extern p54_out_t P54_Out;
+extern p54_i32_t P54_IconIdx; extern p54_out_t P54_Out;
 extern p54_keysrc_t P54_KeySrc; extern p54_keys3_t P54_Keys3; extern p54_dst_t P54_Dst; extern p54_src6_t P54_Src6;
 extern p54_i4_t P54_RoadId; extern p54_p4_t P54_RoadA, P54_RoadB, P54_Tab4;
 extern int32_t P54_MapA, P54_MapB1, P54_MapB2, P54_GridN, P54_Cnt1E0, P54_G40, P54_G44;

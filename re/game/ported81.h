@@ -13,10 +13,9 @@
 #define P81_NegY  GAME_VAR(float, P81_NegY, 0x01209664)
 #define P81_PosZ  GAME_VAR(float, P81_PosZ, 0x01209640)
 #define P81_NegZ  GAME_VAR(float, P81_NegZ, 0x01209610)
-#define P81_Span   GAME_VAR(float, P81_Span, 0x00d026b4)
+#include "ported53.h"   /* P81_Span = P53_Mrk[5] (00d026b4) */
 #define P81_Flag   GAME_VAR(int32_t, P81_Flag, 0x00d02708)
 #ifndef RE_HOOK_BUILD
-extern float P81_Span;
 extern int32_t P81_Flag;
 extern float P81_PosX, P81_NegX, P81_PosY, P81_NegY, P81_PosZ, P81_NegZ;
 #endif

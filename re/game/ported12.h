@@ -423,6 +423,12 @@ void P12_Fn0050C010(void);
 void P12_Fn00516E76(void);
 void P12_Fn004DC8EA(void);
 void P12_Fn004E5982(int32_t a, int32_t b, int32_t c);
-void P12_Fn004F3E78(int32_t a, int32_t b, int32_t c);
+/* v1.58: буфер интерполированных кватернионов деталей 00c81ba0 (шаг 0x14, до 00c82020) */
+typedef float p12_lerp_t[0x120];
+#define P12_PartLerp GAME_VAR(p12_lerp_t, P12_PartLerp, 0x00c81ba0)
+#ifndef RE_HOOK_BUILD
+extern p12_lerp_t P12_PartLerp;
+#endif
+void P12_Fn004F3E78(const float *a, const float *b, float t);   /* 004f3e78: a/b — кадры пути (заголовок 0x10 + записи 0x14) */
 void P12_Fn00504699(int32_t a, int32_t b);
 void P12_Fn00525CB7(int32_t p);

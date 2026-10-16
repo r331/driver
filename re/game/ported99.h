@@ -25,8 +25,7 @@ typedef uint8_t p99_vis_t[0x2000];
 #define P99_MrkB      GAME_VAR(int32_t, P99_MrkB, 0x00d0263c)
 #define P99_Mrk2660   GAME_VAR(int32_t, P99_Mrk2660, 0x00d02660)
 #define P99_Mrk2664   GAME_VAR(int32_t, P99_Mrk2664, 0x00d02664)
-#define P99_Mrk26B0   GAME_VAR(int32_t, P99_Mrk26B0, 0x00d026b0)
-#define P99_Mrk26B8   GAME_VAR(int32_t, P99_Mrk26B8, 0x00d026b8)
+#include "ported53.h"   /* P99_Mrk26B0/B8 = P53_Mrk[4]/[6] */
 #define P99_Mrk270C   GAME_VAR(int32_t, P99_Mrk270C, 0x00d0270c)
 #define P99_Mrk2710   GAME_VAR(int32_t, P99_Mrk2710, 0x00d02710)
 #define P99_Mrk2730   GAME_VAR(int32_t, P99_Mrk2730, 0x00d02730)
@@ -41,7 +40,7 @@ typedef uint8_t p99_vis_t[0x2000];
 #ifndef RE_HOOK_BUILD
 extern const p99_gear_t P99_GearTab;
 extern p99_b8_t P99_D17ECC; extern p99_vis_t P99_Vis;
-extern int32_t P99_MrkA, P99_MrkB, P99_Mrk2660, P99_Mrk2664, P99_Mrk26B0, P99_Mrk26B8, P99_Mrk270C,
+extern int32_t P99_MrkA, P99_MrkB, P99_Mrk2660, P99_Mrk2664, P99_Mrk270C,
   P99_Mrk2710, P99_Mrk2730, P99_Mrk2734, P99_Mrk2738, P99_Mrk2750, P99_Mrk2760, P99_Mrk2764, P99_Mrk2768;
 extern int16_t P99_RoadPick;
 #endif

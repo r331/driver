@@ -8,7 +8,6 @@
 #endif
 #define P54_MAP_C  "D:\\Driver\\Game\\map.c"
 #define P54_ROAD_C "D:\\Driver\\Game\\roadbits.c"
-GAME_VAR_DEF(p54_i16_t, P54_SelTab, 0x0057b578)
 GAME_VAR_DEF(p54_i32_t, P54_IconIdx, 0x00549c60)
 GAME_VAR_DEF(p54_out_t, P54_Out, 0x00549b08)
 GAME_VAR_DEF(p54_keysrc_t, P54_KeySrc, 0x0054b7a8)
@@ -36,8 +35,8 @@ static void *glide_proc(const char *name) {
 }
 
 void P54_MenuTexSel(void) {
-  /* Ограничение i < 64 — защита от таблицы без конца (в оригинале конец всегда -1). */
-  for (int32_t i = 0; i < 64; i++) {
+  /* Ограничение i < 12 (v1.58: размер 0057b578..0057b5a8) — защита от таблицы без конца (в оригинале конец всегда -1). */
+  for (int32_t i = 0; i < (int32_t)(sizeof(p54_i16_t) / 4); i++) {
     int32_t opt;
     switch (P54_SelTab[i]) {
     case 0: opt = MenuOptBDFA44; break;

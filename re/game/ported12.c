@@ -312,10 +312,17 @@ void P12_Fn004DC8EA(void) {
 void P12_Fn004E5982(int32_t a, int32_t b, int32_t c) {
   if (c == 0 || g_00d044d0 == 0) { Call0052A910(0x00d04680, g_00c55820[a], 0); g_00d044d0 = b; }
 }
-void P12_Fn004F3E78(int32_t a, int32_t b, int32_t c) {
-  a += 0x10; b += 0x10;
-  for (int32_t i = 0; i < g_00c821a0; i++) {
-    Call00527885(a, b, c, 0x00c81ba0u + (uint32_t)i * 0x14); a += 0x14; b += 0x14;
+GAME_VAR_DEF(p12_lerp_t, P12_PartLerp, 0x00c81ba0)
+void P12_Fn004F3E78(const float *a, const float *b, float t) {
+  const uint8_t *pa = (const uint8_t *)a + 0x10, *pb = (const uint8_t *)b + 0x10;
+  int32_t n = g_00c821a0;
+#ifndef RE_HOOK_BUILD
+  if (a == NULL || b == NULL) return;
+  if (n > (int32_t)(sizeof(p12_lerp_t) / 0x14)) n = (int32_t)(sizeof(p12_lerp_t) / 0x14);
+#endif
+  for (int32_t i = 0; i < n; i++) {
+    Lerp4_00527885((const float *)pa, (const float *)pb, t, (float *)((uint8_t *)P12_PartLerp + i * 0x14));
+    pa += 0x14; pb += 0x14;
   }
 }
 void P12_Fn00504699(int32_t a, int32_t b) {

@@ -1,3 +1,4 @@
+#include "ported113.h"
 #include "ported57.h"
 #include "crt.h"
 #include <string.h>
@@ -113,7 +114,7 @@ int32_t P57_Menu4045E0(void) {
 /* 00404850: как выше, но перед каждым опросом копирует состояние в 57b65c; после цикла — 00405bfa. */
 int32_t P57_Menu404850(void) {
   int32_t r;
-  P57_Setup4048DD(); S_0057B658 = 0;
+  P113_MenuOpts(); S_0057B658 = 0;
   P57_MenuInit(0x0057b5a8, 0);
   Call0040CCB4(0x00549ae8, 0x00549b00);
   for (;;) {

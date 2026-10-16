@@ -3,10 +3,7 @@
 GAME_VAR_DEF(int32_t, P53_MenuSel, 0x01271064)
 GAME_VAR_DEF(int32_t, P53_FlagF9F4, 0x00bdf9f4)
 GAME_VAR_DEF(uint32_t, P53_Var2640, 0x00d02640)
-GAME_VAR_DEF(uint32_t, P53_Var26A0, 0x00d026a0)
-GAME_VAR_DEF(uint32_t, P53_Var26A4, 0x00d026a4)
-GAME_VAR_DEF(uint32_t, P53_Var26A8, 0x00d026a8)
-GAME_VAR_DEF(uint32_t, P53_Var26AC, 0x00d026ac)
+GAME_VAR_DEF(p53_mrk_t, P53_Mrk, 0x00d026a0)
 GAME_VAR_DEF(int32_t, P53_Var2634, 0x00d02634)
 GAME_VAR_DEF(int16_t, P53_Ang2702, 0x00d02702)
 GAME_VAR_DEF(p53_modetab_t, P53_ModeTab, 0x0054d890)
@@ -69,7 +66,7 @@ int32_t P53_TexLookup(int32_t handle, int32_t b, int32_t c, int32_t d) {
 void P53_CallWithState(int32_t a, int32_t b, int32_t c) {
   uint32_t st[8];
   memset(st, 0, sizeof st);
-  st[1] = P53_Var2640; st[2] = P53_Var26A0; st[3] = P53_Var26A4; st[4] = P53_Var26A8; st[5] = P53_Var26AC;
+  st[1] = P53_Var2640; memcpy(&st[2], &P53_Mrk[0], 16);   /* 00d026a0..ac — биты float */
   st[6] = (uint32_t)(-(int32_t)P53_Ang2702) & 0xfffu;
   P53_Fn500937(st, a, b, c, P53_Var2634, 0);
 }

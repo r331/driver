@@ -74,7 +74,6 @@
     V(P57_Setup413B7C, 0x00413b7c, (void), ()) \
     V(P57_Setup41640C, 0x0041640c, (void), ()) \
     V(P57_Setup40479B, 0x0040479b, (void), ()) \
-    V(P57_Setup4048DD, 0x004048dd, (void), ()) \
     V(P57_Setup412087, 0x00412087, (void), ()) \
     V(P57_Setup412280, 0x00412280, (void), ()) \
     V(P57_Setup4122E7, 0x004122e7, (void), ()) \

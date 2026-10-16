@@ -34,6 +34,10 @@ void     re_fn_register(uint32_t addr, re_fn_t fn) { (void)addr; (void)fn; }
 #include "ported65.h"
 #include "smallfuncs.h"
 #include "smallfuncs2.h"
+#include "menu57.h"
+#include "uihandlers4.h"
+#include "menustate.h"
+#include "ported12.h"
 #include <string.h>
 
 typedef struct { uint32_t addr; uint8_t *p; uint32_t size; } re_region_t;
@@ -69,9 +73,18 @@ static const re_region_t k_regions[] = {
   { 0x00c56780u, A_00C56780, 0x2d00 },                          /* v1.48: пул частиц 0x40 × 0xb4 */
   { P104_MENUGFX_ADDR0, P104_MenuGfx.b, P104_MENUGFX_SIZE0 },     /* v1.49: .data экрана графики 0054a170..0054a6f8 (game/menugfx.h) */
   { 0x00cfe760u, (uint8_t *)P104_Buf760, sizeof P104_Buf760 },  /* v1.49: буфер 00562d7c */
+  { P57_MENU_ADDR, P57_MenuTab.b, P57_MENU_SIZE },              /* v1.58: .data меню опций 0057b578..0057b658 (game/menu57.h) */
 };
 /* таблица функций: адрес Game.exe → перенесённая native-функция */
 static const re_fnent_t k_fns[] = {
+  /* v1.58: обработчики таблицы меню опций 0057b5a8 (004048dd) */
+  { 0x00404e52u, (re_fn_t)MenuRowsTo3_00404E52 },  { 0x00404e7eu, (re_fn_t)MenuRowsIf0To2_00404E7E },
+  { 0x00404eb0u, (re_fn_t)ToggleBDFA44_Call40500D }, { 0x00404ec9u, (re_fn_t)ToggleBDFA48_Call40500D },
+  { 0x00404ee2u, (re_fn_t)ToggleBDFA4C_Call40500D }, { 0x00404efbu, (re_fn_t)ToggleBDFA50_Call40500D },
+  { 0x00404f14u, (re_fn_t)ToggleBDFA54_Call40500D }, { 0x00404f2du, (re_fn_t)ToggleB87E9C_Call40500D },
+  { 0x00404f46u, (re_fn_t)ToggleBDFA58_Call40500D }, { 0x00404f5fu, (re_fn_t)Set575EF0_4Ret0 },
+  { 0x00404f70u, (re_fn_t)P12_Fn00404F70 },        { 0x00404faeu, (re_fn_t)P12_Fn00404FAE },
+  { 0x00404ffeu, (re_fn_t)MenuCallAction40CD17 },
   { 0x0048bcc0u, (re_fn_t)P50_SoundShutdown }, { 0x0048bd3bu, (re_fn_t)NoopFn0048bd3b },
   { 0x0048bd40u, (re_fn_t)P49_Commit },        { 0x0048bd65u, (re_fn_t)P26_WaveSetVolume },
   { 0x0048bf52u, (re_fn_t)P106_EaxPreset },

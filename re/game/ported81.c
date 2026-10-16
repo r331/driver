@@ -2,7 +2,6 @@
 #include <math.h>
 #include <string.h>
 
-GAME_VAR_DEF(float, P81_Span, 0x00d026b4)
 GAME_VAR_DEF(int32_t, P81_Flag, 0x00d02708)
 GAME_VAR_DEF(float, P81_PosX, 0x011f0050)
 GAME_VAR_DEF(float, P81_NegX, 0x01209648)

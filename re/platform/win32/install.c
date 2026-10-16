@@ -101,6 +101,7 @@
 #include "../../game/ported110.h"
 #include "../../game/ported111.h"
 #include "../../game/ported112.h"
+#include "../../game/ported113.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2107,6 +2108,9 @@ void re_install_all(void) {
     re_hook(0x004d09fd, (void*)P112_OpMoveTo, "P112_OpMoveTo");
     re_hook(0x004d1765, (void*)P112_OpMoveCur, "P112_OpMoveCur");
     re_hook(0x004d0734, (void*)P112_OpMoveCurve, "P112_OpMoveCurve");
+    re_hook(0x005129e1, (void*)P113_PartDraw, "P113_PartDraw");
+    re_hook(0x004e969f, (void*)P113_Heli, "P113_Heli");
+    re_hook(0x004048dd, (void*)P113_MenuOpts, "P113_MenuOpts");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");

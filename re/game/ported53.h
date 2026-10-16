@@ -24,10 +24,17 @@
 #define P53_MenuSel   GAME_VAR(int32_t, P53_MenuSel, 0x01271064)   /* выбранная строка меню */
 #define P53_FlagF9F4  GAME_VAR(int32_t, P53_FlagF9F4, 0x00bdf9f4)
 #define P53_Var2640   GAME_VAR(uint32_t, P53_Var2640, 0x00d02640)
-#define P53_Var26A0   GAME_VAR(uint32_t, P53_Var26A0, 0x00d026a0)
-#define P53_Var26A4   GAME_VAR(uint32_t, P53_Var26A4, 0x00d026a4)
-#define P53_Var26A8   GAME_VAR(uint32_t, P53_Var26A8, 0x00d026a8)
-#define P53_Var26AC   GAME_VAR(uint32_t, P53_Var26AC, 0x00d026ac)
+/* v1.58: маркер-вертолёт 00d026a0..00d026bb — одна float-таблица P53_Mrk: позиция a0/a4/a8 (+ac), скорость b0/b4/b8.
+   Прежние P53_Var26A0..AC, P99_Mrk26B0/B8, P81_Span — макросы над ней (P81_Span = скорость по y, 00d026b4). */
+typedef float p53_mrk_t[7];
+#define P53_Mrk       GAME_VAR(p53_mrk_t, P53_Mrk, 0x00d026a0)
+#define P53_Var26A0   (P53_Mrk[0])
+#define P53_Var26A4   (P53_Mrk[1])
+#define P53_Var26A8   (P53_Mrk[2])
+#define P53_Var26AC   (P53_Mrk[3])
+#define P99_Mrk26B0   (P53_Mrk[4])
+#define P81_Span      (P53_Mrk[5])
+#define P99_Mrk26B8   (P53_Mrk[6])
 #define P53_Var2634   GAME_VAR(int32_t, P53_Var2634, 0x00d02634)
 #define P53_Ang2702   GAME_VAR(int16_t, P53_Ang2702, 0x00d02702)
 typedef uint32_t p53_modetab_t[12 * 8];
@@ -36,7 +43,7 @@ typedef uint8_t  p53_textab_t[32 * 32];
 #define P53_TexTab    GAME_VAR(p53_textab_t, P53_TexTab, 0x00621c4c)     /* по 0x20 байт, первое поле — дескриптор */
 #ifndef RE_HOOK_BUILD
 extern int32_t P53_MenuSel, P53_FlagF9F4, P53_Var2634;
-extern uint32_t P53_Var2640, P53_Var26A0, P53_Var26A4, P53_Var26A8, P53_Var26AC;
+extern uint32_t P53_Var2640; extern p53_mrk_t P53_Mrk;
 extern int16_t P53_Ang2702;
 extern p53_modetab_t P53_ModeTab; extern p53_textab_t P53_TexTab;
 #endif
