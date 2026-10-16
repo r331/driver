@@ -71,6 +71,7 @@
 #include "ported134.h"
 #include "smallfuncs2.h"
 #include "unported.h"
+#include "ported147.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -158,7 +159,7 @@ int32_t P131_ScriptLine(void) {
       r = P122_SetVar(NULL, NULL);
       if (r != 0) return r;
     } else {
-      r = P131_Fn4F68A1(cmd);
+      r = P147_ParseCmd(cmd);
       if (r != 0xb) return r;
     }
   }

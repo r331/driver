@@ -12,9 +12,10 @@
      P109_C81268; 00575f30 — MenuVar575F30/P13_00575f30/G00575F30; 00d118a8, 00d11a5c, 00d14ee0/e4 — P14_* и G2_/D_;
      0112b268 — P47_Flag/P56_B268; 01271070 — P125_MrkSave и P56_Blk11[4..9]; 012710a0 — P8_012710a0 и P56_Blk11[16];
      00d02702 — P42_AngX/P53_Ang2702. Строки ошибок — литералы .data 0056f468..00570090. .rdata 00546a00 = 3.86f.
-   0x74: 00401c62 → 00503ddf (найдена только через thunk, не перенесена) — R-строка P146_Fn503DDF. */
+   0x74: 00401c62 → 00503ddf (найдена только через thunk) — перенесена в v1.92 как P147_ScoreRec. */
 #include "ported146.h"
 #include "unported.h"
+#include "ported147.h"
 #include "reptr.h"
 #include "cartab.h"
 #include "menustate.h"
@@ -386,7 +387,7 @@ int32_t P146_ScriptCmd(void *cmd) {
     P124_DebugLog("Script error, Return without GoSub!");
     break;
   case 0x73: r = 0; P124_DebugLog((const char *)(p + 2)); break;
-  case 0x74: { r = 0xb; int32_t v = P146_Fn503DDF(); P109_C81268 = v; B84(0x00c81268u) = v; break; }
+  case 0x74: { r = 0xb; int32_t v = P147_ScoreRec(); P109_C81268 = v; B84(0x00c81268u) = v; break; }
   case 0x75: r = 0xb; snprintf(buf, sizeof buf, "BANK%d.DSS", a1); P77_LoadBank(buf, 0xf000); break;
   case 0x76: r = 0xb; TryStartTrack_004D611B((uint32_t)(a1 + 0xf000)); break;
   case 0x77: {

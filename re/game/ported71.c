@@ -1,3 +1,6 @@
+#include "ported56.h"
+#include "ported125.h"
+#include "ported147.h"
 #include "ported71.h"
 #include <math.h>
 #include <string.h>
@@ -161,6 +164,13 @@ void P71_ScoreSetup(void) {
   P8_012710a0 = 0; P69_ScoreCpy = 0;
   P71_S1271084 = 0; P71_S1271080 = 0; P71_S127107C = 0; P71_S1271074 = 0;
   P71_S127109C = 0; P71_S1271098 = 0; P71_S1271094 = 0; P71_S127108C = 0;
+#ifndef RE_HOOK_BUILD
+  /* v1.92: native-псевдонимы тех же слов (00b32a10 — P147_Rec2A10, 01271070.. — P125_MrkSave/P56_Blk11, 012710a0 — P56_Blk11[16]) */
+  P147_Rec2A10[1] = 0; P147_Rec2A10[3] = 0; P147_Rec2A10[4] = 0; P147_Rec2A10[5] = 0;
+  P125_MrkSave[1] = 0; P125_MrkSave[3] = 0; P125_MrkSave[4] = 0; P125_MrkSave[5] = 0;
+  P56_Blk11[5] = 0; P56_Blk11[7] = 0; P56_Blk11[8] = 0; P56_Blk11[9] = 0;
+  P56_Blk11[11] = 0; P56_Blk11[13] = 0; P56_Blk11[14] = 0; P56_Blk11[15] = 0; P56_Blk11[16] = 0;
+#endif
   int32_t mode = P62_Menu1271060, sel = P62_Menu1271064, r;
   switch (mode) {
   case 1:

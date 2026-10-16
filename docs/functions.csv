@@ -106,7 +106,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040129e,thunk_FUN_00407c4c,,,,,,5,ported
 004012a3,thunk_FUN_004183f7,,,,,,5,ported
 004012a8,thunk_FUN_004d2ade,Thunk_004D2ADE,manual,Thunks,,,5,ported
-004012b2,thunk_FUN_004f68a1,,,,,,5,todo
+004012b2,thunk_FUN_004f68a1,,,,,,5,ported
 004012b7,thunk_FUN_004ca0c0,Thunk_004CA0C0,manual,Thunks,,,5,ported
 004012c6,thunk_FUN_004c812e,Thunk_004C812E,manual,Thunks,,,5,ported
 004012cb,thunk_FUN_00406479,,,,,,5,ported
@@ -2839,7 +2839,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004f652e,FUN_004f652e,P96_ParseWord,manual,MScript,range,,228,ported
 004f6612,FUN_004f6612,P96_ParseQuoted,manual,MScript,range,,354,ported
 004f6774,FUN_004f6774,P65_NextToken,manual,MScript,range,,301,ported
-004f68a1,FUN_004f68a1,,,MScript,range,,295,todo
+004f68a1,FUN_004f68a1,P147_ParseCmd,port,MScript,range,,6798,ported
 004f8485,FUN_004f8485,,,MScript,range,,446,ported
 004f8643,FUN_004f8643,P77_ListAdd,manual,MScript,assert,,242,ported
 004f8735,FUN_004f8735,GetScriptErrorText,manual,Script,range,,35,ported
@@ -2892,6 +2892,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00502fe2,FUN_00502fe2,DrawFullscreenMap,debug_string,,,DrawFullscreenMap,748,ported
 005032ce,FUN_005032ce,,,,,,47,ported
 00503c03,FUN_00503c03,P71_ScoreSetup,manual,misc,,,225,ported
+00503ddf,FUN_00503ddf,P147_ScoreRec,port,MScript,thunk,,164,ported
 00503e83,FUN_00503e83,P14_Fn00503E83,manual,misc,,,73,ported
 00503ecc,FUN_00503ecc,PackRGB00503ECC,manual,SmallFuncs,,,40,ported
 00503ef4,FUN_00503ef4,P14_Fn00503EF4,manual,misc,,,130,ported
