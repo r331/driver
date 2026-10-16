@@ -92,6 +92,7 @@
 #include "../../game/ported101.h"
 #include "../../game/ported102.h"
 #include "../../game/ported103.h"
+#include "../../game/ported104.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -165,6 +166,7 @@ void N54_Fn4913CC (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4) 
 int32_t P53_Fn40EFD5 (void) { return (int32_t)P74_KeyScan(); }
 int32_t P53_Fn4045E0 (void) { return (int32_t)P57_Menu4045E0(); }
 void P52_Fn4E5A1A (void) { P97_FadeIconDraw(); }
+void P52_Fn4AB127 (void) { P104_DebrisTabs(); }
 void P52_Fn4AB500 (void) { P100_DebrisInit(); }
 void P52_Fn4AB808 (void) { P95_PoolIconInit(); }
 void P52_Fn4AB95C (void) { P94_IconQuad(); }
@@ -275,6 +277,7 @@ void UiCall0040C480 (int32_t a0) { P68_ScreenReset(a0); }
 void UiCall00408600 (int32_t a0) { P58_PlayDemo(a0); }
 void UiCall00417AA2 (void) { SetColorWhite00417AA2(); }
 void MenuAction40CD17 (void) { P57_MenuDone(); }
+void MenuRedraw (void) { P104_GfxMenuInit(); }
 void MenuRefresh (void) { P54_MenuTexSel(); }
 void Call004076E2 (void) { MenuWhite004076E2(); }
 void * FindCameraRecordForFrame (int frame) { return (void *)FindCameraForFrame(frame); }

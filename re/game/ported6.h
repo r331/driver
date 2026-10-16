@@ -1,5 +1,6 @@
 /* Партия v0.41 */
 #pragma once
+#include "menugfx.h"
 #include "menutab.h"
 #include "ported5.h"
 #include "smallfuncs.h"
@@ -59,9 +60,8 @@ extern FnV1 G6_01270DE4;
 #ifndef RE_HOOK_BUILD
 extern g6a_00549F84 G6_00549F84;
 #endif
-#define G6_0054A25C GAME_VAR(g6a_0054A25C, G6_0054A25C, 0x0054a25c)
+#define G6_0054A25C MENUGFX_VAR(g6a_0054A25C, G6_0054A25C, 0x0054a25c)
 #ifndef RE_HOOK_BUILD
-extern g6a_0054A25C G6_0054A25C;
 #endif
 #define G6_0054DBCC MENUTAB_VAR(g6a_0054DBCC, G6_0054DBCC, 0x0054dbcc)
 #define G6_0054E56C GAME_VAR(g6a_0054E56C, G6_0054E56C, 0x0054e56c)

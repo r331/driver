@@ -1,5 +1,6 @@
 /* Партия v0.39: обработчики пунктов меню (phase 0 — пометить, 2 — вызвать), освобождение буферов, мелкие функции. */
 #pragma once
+#include "menugfx.h"
 #include "menutab.h"
 #include "gvar.h"
 #include "engine.h"
@@ -24,137 +25,104 @@ extern uint8_t D_00549fec;
 #ifndef RE_HOOK_BUILD
 extern int32_t D_0054a144;
 #endif
-#define D_0054a254 GAME_VAR(uint8_t, D_0054a254, 0x0054a254)
+#define D_0054a254 MENUGFX_VAR(uint8_t, D_0054a254, 0x0054a254)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a254;
 #endif
-#define D_0054a264 GAME_VAR(uint8_t, D_0054a264, 0x0054a264)
+#define D_0054a264 MENUGFX_VAR(uint8_t, D_0054a264, 0x0054a264)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a264;
 #endif
-#define D_0054a274 GAME_VAR(uint8_t, D_0054a274, 0x0054a274)
+#define D_0054a274 MENUGFX_VAR(uint8_t, D_0054a274, 0x0054a274)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a274;
 #endif
-#define D_0054a284 GAME_VAR(uint8_t, D_0054a284, 0x0054a284)
+#define D_0054a284 MENUGFX_VAR(uint8_t, D_0054a284, 0x0054a284)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a284;
 #endif
-#define D_0054a294 GAME_VAR(uint8_t, D_0054a294, 0x0054a294)
+#define D_0054a294 MENUGFX_VAR(uint8_t, D_0054a294, 0x0054a294)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a294;
 #endif
-#define D_0054a2a4 GAME_VAR(uint8_t, D_0054a2a4, 0x0054a2a4)
+#define D_0054a2a4 MENUGFX_VAR(uint8_t, D_0054a2a4, 0x0054a2a4)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a2a4;
 #endif
-#define D_0054a2b4 GAME_VAR(uint8_t, D_0054a2b4, 0x0054a2b4)
+#define D_0054a2b4 MENUGFX_VAR(uint8_t, D_0054a2b4, 0x0054a2b4)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a2b4;
 #endif
-#define D_0054a2c4 GAME_VAR(uint8_t, D_0054a2c4, 0x0054a2c4)
+#define D_0054a2c4 MENUGFX_VAR(uint8_t, D_0054a2c4, 0x0054a2c4)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a2c4;
 #endif
-#define D_0054a2d4 GAME_VAR(uint8_t, D_0054a2d4, 0x0054a2d4)
+#define D_0054a2d4 MENUGFX_VAR(uint8_t, D_0054a2d4, 0x0054a2d4)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a2d4;
 #endif
-#define D_0054a2e4 GAME_VAR(uint8_t, D_0054a2e4, 0x0054a2e4)
+#define D_0054a2e4 MENUGFX_VAR(uint8_t, D_0054a2e4, 0x0054a2e4)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a2e4;
 #endif
-#define D_0054a2f4 GAME_VAR(uint8_t, D_0054a2f4, 0x0054a2f4)
+#define D_0054a2f4 MENUGFX_VAR(uint8_t, D_0054a2f4, 0x0054a2f4)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a2f4;
 #endif
-#define D_0054a304 GAME_VAR(uint8_t, D_0054a304, 0x0054a304)
+#define D_0054a304 MENUGFX_VAR(uint8_t, D_0054a304, 0x0054a304)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a304;
 #endif
-#define D_0054a314 GAME_VAR(uint8_t, D_0054a314, 0x0054a314)
+#define D_0054a314 MENUGFX_VAR(uint8_t, D_0054a314, 0x0054a314)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a314;
 #endif
-#define D_0054a324 GAME_VAR(uint8_t, D_0054a324, 0x0054a324)
+#define D_0054a324 MENUGFX_VAR(uint8_t, D_0054a324, 0x0054a324)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a324;
 #endif
-#define D_0054a334 GAME_VAR(uint8_t, D_0054a334, 0x0054a334)
+#define D_0054a334 MENUGFX_VAR(uint8_t, D_0054a334, 0x0054a334)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a334;
 #endif
-#define D_0054a344 GAME_VAR(uint8_t, D_0054a344, 0x0054a344)
+#define D_0054a344 MENUGFX_VAR(uint8_t, D_0054a344, 0x0054a344)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a344;
 #endif
-#define D_0054a354 GAME_VAR(uint8_t, D_0054a354, 0x0054a354)
+#define D_0054a354 MENUGFX_VAR(uint8_t, D_0054a354, 0x0054a354)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a354;
 #endif
-#define D_0054a364 GAME_VAR(uint8_t, D_0054a364, 0x0054a364)
+#define D_0054a364 MENUGFX_VAR(uint8_t, D_0054a364, 0x0054a364)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a364;
 #endif
-#define D_0054a374 GAME_VAR(uint8_t, D_0054a374, 0x0054a374)
+#define D_0054a374 MENUGFX_VAR(uint8_t, D_0054a374, 0x0054a374)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a374;
 #endif
-#define D_0054a384 GAME_VAR(uint8_t, D_0054a384, 0x0054a384)
+#define D_0054a384 MENUGFX_VAR(uint8_t, D_0054a384, 0x0054a384)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a384;
 #endif
-#define D_0054a394 GAME_VAR(uint8_t, D_0054a394, 0x0054a394)
+#define D_0054a394 MENUGFX_VAR(uint8_t, D_0054a394, 0x0054a394)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a394;
 #endif
-#define D_0054a3a4 GAME_VAR(uint8_t, D_0054a3a4, 0x0054a3a4)
+#define D_0054a3a4 MENUGFX_VAR(uint8_t, D_0054a3a4, 0x0054a3a4)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a3a4;
 #endif
-#define D_0054a3b4 GAME_VAR(uint8_t, D_0054a3b4, 0x0054a3b4)
+#define D_0054a3b4 MENUGFX_VAR(uint8_t, D_0054a3b4, 0x0054a3b4)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a3b4;
 #endif
-#define D_0054a3c4 GAME_VAR(uint8_t, D_0054a3c4, 0x0054a3c4)
+#define D_0054a3c4 MENUGFX_VAR(uint8_t, D_0054a3c4, 0x0054a3c4)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a3c4;
 #endif
-#define D_0054a3d4 GAME_VAR(uint8_t, D_0054a3d4, 0x0054a3d4)
+#define D_0054a3d4 MENUGFX_VAR(uint8_t, D_0054a3d4, 0x0054a3d4)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a3d4;
 #endif
-#define D_0054a3e4 GAME_VAR(uint8_t, D_0054a3e4, 0x0054a3e4)
+#define D_0054a3e4 MENUGFX_VAR(uint8_t, D_0054a3e4, 0x0054a3e4)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a3e4;
 #endif
-#define D_0054a3f4 GAME_VAR(uint8_t, D_0054a3f4, 0x0054a3f4)
+#define D_0054a3f4 MENUGFX_VAR(uint8_t, D_0054a3f4, 0x0054a3f4)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a3f4;
 #endif
-#define D_0054a404 GAME_VAR(uint8_t, D_0054a404, 0x0054a404)
+#define D_0054a404 MENUGFX_VAR(uint8_t, D_0054a404, 0x0054a404)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a404;
 #endif
-#define D_0054a414 GAME_VAR(uint8_t, D_0054a414, 0x0054a414)
+#define D_0054a414 MENUGFX_VAR(uint8_t, D_0054a414, 0x0054a414)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a414;
 #endif
-#define D_0054a424 GAME_VAR(uint8_t, D_0054a424, 0x0054a424)
+#define D_0054a424 MENUGFX_VAR(uint8_t, D_0054a424, 0x0054a424)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a424;
 #endif
-#define D_0054a434 GAME_VAR(uint8_t, D_0054a434, 0x0054a434)
+#define D_0054a434 MENUGFX_VAR(uint8_t, D_0054a434, 0x0054a434)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a434;
 #endif
-#define D_0054a444 GAME_VAR(uint8_t, D_0054a444, 0x0054a444)
+#define D_0054a444 MENUGFX_VAR(uint8_t, D_0054a444, 0x0054a444)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a444;
 #endif
-#define D_0054a454 GAME_VAR(uint8_t, D_0054a454, 0x0054a454)
+#define D_0054a454 MENUGFX_VAR(uint8_t, D_0054a454, 0x0054a454)
 #ifndef RE_HOOK_BUILD
-extern uint8_t D_0054a454;
 #endif
 #define D_0054c044 GAME_VAR(uint8_t, D_0054c044, 0x0054c044)
 #ifndef RE_HOOK_BUILD

@@ -1,4 +1,5 @@
 #pragma once
+#include "menugfx.h"
 #include "gvar.h"
 #include "unported.h"
 #include "engine.h"
@@ -62,11 +63,11 @@ typedef uint32_t p55_glide_t[16];
 #define P55_BDFA18   GAME_VAR(int32_t, P55_BDFA18, 0x00bdfa18)
 #define P55_GlideInfo GAME_VAR(p55_glide_t, P55_GlideInfo, 0x00bdfa80)
 #define P55_B87EB8   GAME_VAR(int32_t, P55_B87EB8, 0x00b87eb8)
-#define P55_A680     GAME_VAR(int32_t, P55_A680, 0x0054a680)
-#define P55_A684     GAME_VAR(int32_t, P55_A684, 0x0054a684)
-#define P55_A688     GAME_VAR(int32_t, P55_A688, 0x0054a688)
-#define P55_A68C     GAME_VAR(int32_t, P55_A68C, 0x0054a68c)
-#define P55_A690     GAME_VAR(int32_t, P55_A690, 0x0054a690)
+#define P55_A680 MENUGFX_VAR(int32_t, P55_A680, 0x0054a680)
+#define P55_A684 MENUGFX_VAR(int32_t, P55_A684, 0x0054a684)
+#define P55_A688 MENUGFX_VAR(int32_t, P55_A688, 0x0054a688)
+#define P55_A68C MENUGFX_VAR(int32_t, P55_A68C, 0x0054a68c)
+#define P55_A690 MENUGFX_VAR(int32_t, P55_A690, 0x0054a690)
 #define P55_Paper0   GAME_VAR(int32_t, P55_Paper0, 0x00d03900)
 #define P55_Paper1   GAME_VAR(int32_t, P55_Paper1, 0x00d0448c)
 #define P55_Paper2   GAME_VAR(int32_t, P55_Paper2, 0x00d038fc)
@@ -74,7 +75,7 @@ typedef uint32_t p55_glide_t[16];
 #ifndef RE_HOOK_BUILD
 extern int32_t P55_CntA, P55_CntB, P55_Flag38C, P55_VarC0, P55_Var20, P55_VarD2C, P55_VarD28, P55_VarD24, P55_VarD20;
 extern int32_t P55_PopCnt, P55_PopSkip, P55_PopB2AC, P55_A4219C, P55_A421A0, P55_RecCnt, P55_V57B6FC, P55_V1285428;
-extern int32_t P55_V1285424, P55_BDFA18, P55_B87EB8, P55_A680, P55_A684, P55_A688, P55_A68C, P55_A690;
+extern int32_t P55_V1285424, P55_BDFA18, P55_B87EB8;
 extern int32_t P55_Paper0, P55_Paper1, P55_Paper2, P55_Lang;
 extern uint8_t P55_VarC6; extern const char *P55_DefName; extern uint8_t *P55_RecBase;
 extern p55_tabA_t P55_TabA; extern p55_tabB_t P55_TabB; extern p55_flags8_t P55_FlagsC; extern p55_pop_t P55_PopTab;

@@ -92,6 +92,7 @@
 #include "../../game/ported101.h"
 #include "../../game/ported102.h"
 #include "../../game/ported103.h"
+#include "../../game/ported104.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2037,4 +2038,9 @@ void re_install_all(void) {
     re_hook(0x004dcb62, (void*)P103_RoadHeight, "P103_RoadHeight");
     re_hook(0x004dd262, (void*)P103_GroundAt, "P103_GroundAt");
     re_hook(0x00512de7, (void*)P103_PartPath, "P103_PartPath");
+    re_hook(0x00409622, (void*)P104_GfxMenuInit, "P104_GfxMenuInit");
+    re_hook(0x004e4bdc, (void*)P104_MissionInit, "P104_MissionInit");
+    re_hook(0x0049565b, (void*)P104_TrafficTurn, "P104_TrafficTurn");
+    re_hook(0x004ab127, (void*)P104_DebrisTabs, "P104_DebrisTabs");
+    re_hook(0x004c1c23, (void*)P104_CarDents, "P104_CarDents");
 }

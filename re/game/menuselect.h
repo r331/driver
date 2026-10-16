@@ -1,5 +1,6 @@
 /* Menu select/leave handlers: переключение подсветки пунктов меню. */
 #pragma once
+#include "menugfx.h"
 #include "menutab.h"
 #include "menustate.h"
 #include "gvar.h"
@@ -10,40 +11,40 @@
 #define MenuB00549FDC GAME_VAR(uint8_t, MenuB00549FDC, 0x00549fdc)
 #define MenuB00549FEC GAME_VAR(uint8_t, MenuB00549FEC, 0x00549fec)
 #define MenuI0054A060 GAME_VAR(int32_t, MenuI0054A060, 0x0054a060)
-#define MenuB0054A254 GAME_VAR(uint8_t, MenuB0054A254, 0x0054a254)
-#define MenuB0054A264 GAME_VAR(uint8_t, MenuB0054A264, 0x0054a264)
-#define MenuB0054A274 GAME_VAR(uint8_t, MenuB0054A274, 0x0054a274)
-#define MenuB0054A284 GAME_VAR(uint8_t, MenuB0054A284, 0x0054a284)
-#define MenuB0054A294 GAME_VAR(uint8_t, MenuB0054A294, 0x0054a294)
-#define MenuB0054A2A4 GAME_VAR(uint8_t, MenuB0054A2A4, 0x0054a2a4)
-#define MenuB0054A2B4 GAME_VAR(uint8_t, MenuB0054A2B4, 0x0054a2b4)
-#define MenuB0054A2C4 GAME_VAR(uint8_t, MenuB0054A2C4, 0x0054a2c4)
-#define MenuB0054A2D4 GAME_VAR(uint8_t, MenuB0054A2D4, 0x0054a2d4)
-#define MenuB0054A2E4 GAME_VAR(uint8_t, MenuB0054A2E4, 0x0054a2e4)
-#define MenuB0054A2F4 GAME_VAR(uint8_t, MenuB0054A2F4, 0x0054a2f4)
-#define MenuB0054A304 GAME_VAR(uint8_t, MenuB0054A304, 0x0054a304)
-#define MenuB0054A314 GAME_VAR(uint8_t, MenuB0054A314, 0x0054a314)
-#define MenuB0054A324 GAME_VAR(uint8_t, MenuB0054A324, 0x0054a324)
-#define MenuB0054A334 GAME_VAR(uint8_t, MenuB0054A334, 0x0054a334)
-#define MenuB0054A344 GAME_VAR(uint8_t, MenuB0054A344, 0x0054a344)
-#define MenuB0054A354 GAME_VAR(uint8_t, MenuB0054A354, 0x0054a354)
-#define MenuB0054A364 GAME_VAR(uint8_t, MenuB0054A364, 0x0054a364)
-#define MenuB0054A374 GAME_VAR(uint8_t, MenuB0054A374, 0x0054a374)
-#define MenuB0054A384 GAME_VAR(uint8_t, MenuB0054A384, 0x0054a384)
-#define MenuB0054A394 GAME_VAR(uint8_t, MenuB0054A394, 0x0054a394)
-#define MenuB0054A3A4 GAME_VAR(uint8_t, MenuB0054A3A4, 0x0054a3a4)
-#define MenuB0054A3B4 GAME_VAR(uint8_t, MenuB0054A3B4, 0x0054a3b4)
-#define MenuB0054A3C4 GAME_VAR(uint8_t, MenuB0054A3C4, 0x0054a3c4)
-#define MenuB0054A3D4 GAME_VAR(uint8_t, MenuB0054A3D4, 0x0054a3d4)
-#define MenuB0054A3E4 GAME_VAR(uint8_t, MenuB0054A3E4, 0x0054a3e4)
-#define MenuB0054A3F4 GAME_VAR(uint8_t, MenuB0054A3F4, 0x0054a3f4)
-#define MenuB0054A404 GAME_VAR(uint8_t, MenuB0054A404, 0x0054a404)
-#define MenuB0054A414 GAME_VAR(uint8_t, MenuB0054A414, 0x0054a414)
-#define MenuB0054A424 GAME_VAR(uint8_t, MenuB0054A424, 0x0054a424)
-#define MenuB0054A434 GAME_VAR(uint8_t, MenuB0054A434, 0x0054a434)
-#define MenuB0054A444 GAME_VAR(uint8_t, MenuB0054A444, 0x0054a444)
-#define MenuB0054A454 GAME_VAR(uint8_t, MenuB0054A454, 0x0054a454)
-#define MenuI0054A694 GAME_VAR(int32_t, MenuI0054A694, 0x0054a694)
+#define MenuB0054A254 MENUGFX_VAR(uint8_t, MenuB0054A254, 0x0054a254)
+#define MenuB0054A264 MENUGFX_VAR(uint8_t, MenuB0054A264, 0x0054a264)
+#define MenuB0054A274 MENUGFX_VAR(uint8_t, MenuB0054A274, 0x0054a274)
+#define MenuB0054A284 MENUGFX_VAR(uint8_t, MenuB0054A284, 0x0054a284)
+#define MenuB0054A294 MENUGFX_VAR(uint8_t, MenuB0054A294, 0x0054a294)
+#define MenuB0054A2A4 MENUGFX_VAR(uint8_t, MenuB0054A2A4, 0x0054a2a4)
+#define MenuB0054A2B4 MENUGFX_VAR(uint8_t, MenuB0054A2B4, 0x0054a2b4)
+#define MenuB0054A2C4 MENUGFX_VAR(uint8_t, MenuB0054A2C4, 0x0054a2c4)
+#define MenuB0054A2D4 MENUGFX_VAR(uint8_t, MenuB0054A2D4, 0x0054a2d4)
+#define MenuB0054A2E4 MENUGFX_VAR(uint8_t, MenuB0054A2E4, 0x0054a2e4)
+#define MenuB0054A2F4 MENUGFX_VAR(uint8_t, MenuB0054A2F4, 0x0054a2f4)
+#define MenuB0054A304 MENUGFX_VAR(uint8_t, MenuB0054A304, 0x0054a304)
+#define MenuB0054A314 MENUGFX_VAR(uint8_t, MenuB0054A314, 0x0054a314)
+#define MenuB0054A324 MENUGFX_VAR(uint8_t, MenuB0054A324, 0x0054a324)
+#define MenuB0054A334 MENUGFX_VAR(uint8_t, MenuB0054A334, 0x0054a334)
+#define MenuB0054A344 MENUGFX_VAR(uint8_t, MenuB0054A344, 0x0054a344)
+#define MenuB0054A354 MENUGFX_VAR(uint8_t, MenuB0054A354, 0x0054a354)
+#define MenuB0054A364 MENUGFX_VAR(uint8_t, MenuB0054A364, 0x0054a364)
+#define MenuB0054A374 MENUGFX_VAR(uint8_t, MenuB0054A374, 0x0054a374)
+#define MenuB0054A384 MENUGFX_VAR(uint8_t, MenuB0054A384, 0x0054a384)
+#define MenuB0054A394 MENUGFX_VAR(uint8_t, MenuB0054A394, 0x0054a394)
+#define MenuB0054A3A4 MENUGFX_VAR(uint8_t, MenuB0054A3A4, 0x0054a3a4)
+#define MenuB0054A3B4 MENUGFX_VAR(uint8_t, MenuB0054A3B4, 0x0054a3b4)
+#define MenuB0054A3C4 MENUGFX_VAR(uint8_t, MenuB0054A3C4, 0x0054a3c4)
+#define MenuB0054A3D4 MENUGFX_VAR(uint8_t, MenuB0054A3D4, 0x0054a3d4)
+#define MenuB0054A3E4 MENUGFX_VAR(uint8_t, MenuB0054A3E4, 0x0054a3e4)
+#define MenuB0054A3F4 MENUGFX_VAR(uint8_t, MenuB0054A3F4, 0x0054a3f4)
+#define MenuB0054A404 MENUGFX_VAR(uint8_t, MenuB0054A404, 0x0054a404)
+#define MenuB0054A414 MENUGFX_VAR(uint8_t, MenuB0054A414, 0x0054a414)
+#define MenuB0054A424 MENUGFX_VAR(uint8_t, MenuB0054A424, 0x0054a424)
+#define MenuB0054A434 MENUGFX_VAR(uint8_t, MenuB0054A434, 0x0054a434)
+#define MenuB0054A444 MENUGFX_VAR(uint8_t, MenuB0054A444, 0x0054a444)
+#define MenuB0054A454 MENUGFX_VAR(uint8_t, MenuB0054A454, 0x0054a454)
+#define MenuI0054A694 MENUGFX_VAR(int32_t, MenuI0054A694, 0x0054a694)
 #define MenuB0054C044 GAME_VAR(uint8_t, MenuB0054C044, 0x0054c044)
 #define MenuB0054C054 GAME_VAR(uint8_t, MenuB0054C054, 0x0054c054)
 #define MenuB0054C064 GAME_VAR(uint8_t, MenuB0054C064, 0x0054c064)
@@ -152,40 +153,6 @@ extern uint8_t MenuB00549FCC;
 extern uint8_t MenuB00549FDC;
 extern uint8_t MenuB00549FEC;
 extern int32_t MenuI0054A060;
-extern uint8_t MenuB0054A254;
-extern uint8_t MenuB0054A264;
-extern uint8_t MenuB0054A274;
-extern uint8_t MenuB0054A284;
-extern uint8_t MenuB0054A294;
-extern uint8_t MenuB0054A2A4;
-extern uint8_t MenuB0054A2B4;
-extern uint8_t MenuB0054A2C4;
-extern uint8_t MenuB0054A2D4;
-extern uint8_t MenuB0054A2E4;
-extern uint8_t MenuB0054A2F4;
-extern uint8_t MenuB0054A304;
-extern uint8_t MenuB0054A314;
-extern uint8_t MenuB0054A324;
-extern uint8_t MenuB0054A334;
-extern uint8_t MenuB0054A344;
-extern uint8_t MenuB0054A354;
-extern uint8_t MenuB0054A364;
-extern uint8_t MenuB0054A374;
-extern uint8_t MenuB0054A384;
-extern uint8_t MenuB0054A394;
-extern uint8_t MenuB0054A3A4;
-extern uint8_t MenuB0054A3B4;
-extern uint8_t MenuB0054A3C4;
-extern uint8_t MenuB0054A3D4;
-extern uint8_t MenuB0054A3E4;
-extern uint8_t MenuB0054A3F4;
-extern uint8_t MenuB0054A404;
-extern uint8_t MenuB0054A414;
-extern uint8_t MenuB0054A424;
-extern uint8_t MenuB0054A434;
-extern uint8_t MenuB0054A444;
-extern uint8_t MenuB0054A454;
-extern int32_t MenuI0054A694;
 extern uint8_t MenuB0054C044;
 extern uint8_t MenuB0054C054;
 extern uint8_t MenuB0054C064;
