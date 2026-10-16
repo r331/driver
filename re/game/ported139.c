@@ -89,6 +89,7 @@
 #include "ported131.h"
 #include "ported135.h"
 #include "ported138.h"
+#include "ported143.h"
 
 GAME_VAR_DEF(p139_u6_t, P139_C818A0, 0x00c818a0)
 GAME_VAR_DEF(int32_t, P139_LineNo, 0x00c80c54)
@@ -251,7 +252,7 @@ void P139_Effects(void) {
     else if (fl & 0x40000) P111_Flare((const float *)o);
     else if (fl & 0x80) P110_GlowB(o);
     else if (fl & 0x100) P110_GlowA(o);
-    else if (fl & 0x20) P139_Fn4B73F3(o);
+    else if (fl & 0x20) P143_LampGlow(o);
     else if (fl & 0x40) P110_GlowC(o);
     else if (fl & 8) P135_SparkQuad(o);
     else if (fl & 0x8000) P108_SmokeA(o);

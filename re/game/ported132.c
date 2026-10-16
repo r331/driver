@@ -101,6 +101,7 @@
 #include "uihandlers2.h"
 #include "uihandlers3.h"
 #include "uihandlers4.h"
+#include "ported143.h"
 
 static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 static float rdf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
@@ -301,7 +302,7 @@ void P132_GameDraw(void) {
       if (o) P60_ObjUpdate(o);
       CallIfD14EE4();
     }
-    if (P26_FxD == 0) P132_Fn4B418D();
+    if (P26_FxD == 0) P143_SunFlare();
     if (live) P121_ScriptHud();
     if ((MenuVarB31F04 | P13_00b31f04 | G00B31F04) != 0) P133_MirrorDraw();
     if (P97_ScrObjOn != 0) {

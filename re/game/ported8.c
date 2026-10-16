@@ -27,7 +27,6 @@ GAME_VAR_DEF(int32_t, P8_00b5a768, 0x00b5a768)
 GAME_VAR_DEF(int32_t, P8_011171a4, 0x011171a4)
 GAME_VAR_DEF(int32_t, P8_010ffd0c, 0x010ffd0c)
 GAME_VAR_DEF(int32_t, P8_010fb0d0, 0x010fb0d0)
-GAME_VAR_DEF(int32_t, P8_005536ac, 0x005536ac)
 GAME_VAR_DEF(int32_t, P8_00b93e48, 0x00b93e48)
 GAME_VAR_DEF(int32_t, P8_00b93e4c, 0x00b93e4c)
 GAME_VAR_DEF(int32_t, P8_00b93e50, 0x00b93e50)
@@ -47,7 +46,6 @@ GAME_VAR_DEF(float, P8_00d17af4, 0x00d17af4)
 GAME_VAR_DEF(float, P8_00d17b24, 0x00d17b24)
 GAME_VAR_DEF(float, P8_00d17b2c, 0x00d17b2c)
 GAME_VAR_DEF(g8_bytes_t, P8_0054E834, 0x0054e834)
-GAME_VAR_DEF(g8_bytes_t, P8_005536EC, 0x005536ec)
 uint32_t IsFlagSetNotMasked_004E383A(uint32_t i) { i &= 0xff; return (A_00D04B00[i] == 0 || A_00D04B00[0x100 + i] != 0) ? 0 : 1; }
 void NoopFn004F89EB(void) { }
 void StepSpeedA_004B9E2B(uint8_t *p) { float f; int32_t a, b; memcpy(&f, p + 4, 4); f -= P8_00546020; memcpy(p + 4, &f, 4); memcpy(&a, p + 0x50, 4); memcpy(&b, p + 0x60, 4); a += b; memcpy(p + 0x50, &a, 4); }

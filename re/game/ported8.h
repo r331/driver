@@ -110,10 +110,8 @@ extern int32_t P8_010ffd0c;
 #ifndef RE_HOOK_BUILD
 extern int32_t P8_010fb0d0;
 #endif
-#define P8_005536ac GAME_VAR(int32_t, P8_005536ac, 0x005536ac)
-#ifndef RE_HOOK_BUILD
-extern int32_t P8_005536ac;
-#endif
+#include "ported143.h"
+#define P8_005536ac (*(int32_t *)&P143_Fx[1])            /* v1.88: значок SUN2 (+4 записи 005536a8) — макрос над P143_Fx */
 #define P8_00b93e48 GAME_VAR(int32_t, P8_00b93e48, 0x00b93e48)
 #ifndef RE_HOOK_BUILD
 extern int32_t P8_00b93e48;
@@ -214,10 +212,7 @@ extern float P8_00d17b2c;
 #ifndef RE_HOOK_BUILD
 extern g8_bytes_t P8_0054E834;
 #endif
-#define P8_005536EC GAME_VAR(g8_bytes_t, P8_005536EC, 0x005536ec)
-#ifndef RE_HOOK_BUILD
-extern g8_bytes_t P8_005536EC;
-#endif
+#define P8_005536EC ((uint8_t *)&P143_Fx[0x11])          /* v1.88: значки CARLIGHT (+4 записей 005536e8, шаг 0x1c) — макрос над P143_Fx */
 uint32_t IsFlagSetNotMasked_004E383A(uint32_t i);
 void NoopFn004F89EB(void);
 void StepSpeedA_004B9E2B(uint8_t *p);

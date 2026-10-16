@@ -303,7 +303,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401749,thunk_FUN_004aef57,,,,,,5,ported
 0040174e,thunk_FUN_0040f0e7,Thunk_0040F0E7,manual,Thunks,,,5,ported
 00401753,thunk_FUN_004d2b16,Thunk_004D2B16,manual,Thunks,,,5,ported
-00401758,thunk_FUN_004b418d,,,,,,5,todo
+00401758,thunk_FUN_004b418d,,,,,,5,ported
 0040175d,thunk_FUN_004a59f2,,,,,,5,ported
 00401762,thunk_FUN_0048f3b4,,,,,,5,ported
 00401767,thunk_FUN_00528ac8,,,,,,5,ported
@@ -580,7 +580,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401e7e,thunk_FUN_00413d70,,,,,,5,ported
 00401e83,thunk_FUN_004d7f91,,,,,,5,ported
 00401e88,thunk_FUN_004f5012,,,,,,5,ported
-00401e92,thunk_FUN_004b73f3,,,,,,5,todo
+00401e92,thunk_FUN_004b73f3,,,,,,5,ported
 00401e9c,thunk_FUN_00522369,,,,,,5,ported
 00401ea1,thunk_FUN_0040f0fb,,,,,,5,ported
 00401ea6,thunk_FUN_00489ed6,,,,,,5,ported
@@ -2334,13 +2334,13 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004b3e55,FUN_004b3e55,P114_DebrisAll,manual,Ported114,,,348,ported
 004b3fb1,FUN_004b3fb1,,,,,,228,ported
 004b4095,FUN_004b4095,P98_IconFlush,manual,,,,248,ported
-004b418d,FUN_004b418d,,,,,,2458,todo
+004b418d,FUN_004b418d,,,,,,2458,ported
 004b4b27,FUN_004b4b27,P108_Sprite,,ported108,,,1314,ported
 004b5049,FUN_004b5049,P107_CarLight,,ported107,,,917,ported
 004b53de,FUN_004b53de,P110_GlowA,,ported110,,,1200,ported
 004b588e,FUN_004b588e,,,,,,5469,todo
 004b6deb,FUN_004b6deb,P111_Flare,,ported111,,,1544,ported
-004b73f3,FUN_004b73f3,,,,,,3775,todo
+004b73f3,FUN_004b73f3,,,,,,3775,ported
 004b82b2,FUN_004b82b2,P110_GlowC,,ported110,,,1471,ported
 004b8871,FUN_004b8871,P110_GlowB,,ported110,,,1240,ported
 004b8d49,FUN_004b8d49,P125_SmokePuffs,port,,,,517,ported

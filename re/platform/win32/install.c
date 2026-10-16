@@ -131,6 +131,7 @@
 #include "../../game/ported140.h"
 #include "../../game/ported141.h"
 #include "../../game/ported142.h"
+#include "../../game/ported143.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2352,6 +2353,8 @@ void re_install_all(void) {
     re_hook(0x004a7fec, (void*)P142_CopDrive, "P142_CopDrive");
     re_hook(0x004df024, (void*)P142_WheelPhys, "P142_WheelPhys");
     re_hook(0x004dacee, (void*)P142_CarsStep, "P142_CarsStep");
+    re_hook(0x004b418d, (void*)P143_SunFlare, "P143_SunFlare");
+    re_hook(0x004b73f3, (void*)P143_LampGlow, "P143_LampGlow");
     re_hook(0x004b9287, (void*)P132_Smoke, "P132_Smoke");
     re_hook(0x004ca135, (void*)P132_Lights, "P132_Lights");
     re_hook(0x0049f20a, (void*)P132_LoadFlyby, "P132_LoadFlyby");
