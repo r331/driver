@@ -809,7 +809,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00402432,thunk_FUN_00528293,,,,,,5,ported
 00402437,thunk_FUN_00515813,,,,,,5,ported
 0040243c,thunk_FUN_0040c20b,,,,,,5,ported
-00402441,thunk_FUN_004dacee,,,,,,5,todo
+00402441,thunk_FUN_004dacee,,,,,,5,ported
 00402446,thunk_FUN_00528bb7,,,,,,5,ported
 0040244b,thunk_FUN_004f8a2d,,,,,,5,ported
 00402450,thunk_FUN_005284ac,Thunk_005284AC,manual,Thunks,,,5,ported
@@ -2264,7 +2264,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004a7e6e,FUN_004a7e6e,P14_Fn004A7E6E,manual,misc,,,123,ported
 004a7ee9,FUN_004a7ee9,SetVarD1193C,manual,Menu,,,37,ported
 004a7f0e,FUN_004a7f0e,P74_Dist,manual,Misc74,,,222,ported
-004a7fec,FUN_004a7fec,,,,,,3134,todo
+004a7fec,FUN_004a7fec,,,,,,3134,ported
 004a9850,FUN_004a9850,P98_CreditsInit,manual,,,,250,ported
 004a994a,FUN_004a994a,Inc0B1FFBC,manual,UIMisc,,,18,ported
 004a995c,FUN_004a995c,P114_CreditsDraw,manual,Ported114,,,287,ported
@@ -2647,7 +2647,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004daa36,FUN_004daa36,ObjInit,manual,objects,,,145,ported
 004daac7,FUN_004daac7,P59_ObjDir,manual,,,,185,ported
 004dab80,FUN_004dab80,P94_PackState,manual,,,,366,ported
-004dacee,FUN_004dacee,,,,,,7106,todo
+004dacee,FUN_004dacee,,,,,,7106,ported
 004dc8b0,FUN_004dc8b0,MenuAddItem004DC8B0,manual,Ported6,,,58,ported
 004dc8ea,FUN_004dc8ea,P12_Fn004DC8EA,manual,Misc12,,,49,ported
 004dc91b,FUN_004dc91b,P100_RoadHeightF,manual,Ported100,,,583,ported
@@ -2661,7 +2661,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004dea35,FUN_004dea35,,,,,,356,ported
 004deb99,FUN_004deb99,,,,,,1080,ported
 004defd1,FUN_004defd1,UpdateObjects,manual,Ported46,,,83,ported
-004df024,FUN_004df024,,,,,,8112,todo
+004df024,FUN_004df024,,,,,,8112,ported
 004e0fd4,FUN_004e0fd4,P94_SpringStep,manual,,,,271,ported
 004e10e3,FUN_004e10e3,P126_WheelSmoke,port,,,,329,ported
 004e122c,FUN_004e122c,AddVelocity004E122C,manual,ui/widgets,,,184,ported

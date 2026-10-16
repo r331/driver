@@ -15,6 +15,7 @@
    Отступления native: строки читаются в локальный буфер (оригинал пишет в буфер имени), '\r' срезается, файл
    закрывается и при ошибке, индекс ключа 0..0x3e; деление на 0 в 004b9287 — 1; NULL-указатели функций пропускаются. */
 #include "ported140.h"
+#include "ported142.h"
 #include "ported132.h"
 #include "ported133.h"
 #include <string.h>
@@ -220,7 +221,7 @@ void P132_GameLogic(void) {
   }
   P127_PlayerSkid(0);
   if ((G6_00B87EAC | G8_00B87EAC) != 0 || (P58_SB87EB0 | G6_00B87EB0 | G8_00B87EB0) != 0) P119_CarSkids(0x41);
-  if (live) P132_Fn4DACEE(); else P35_PadX = 0;
+  if (live) P142_CarsStep(); else P35_PadX = 0;
   P14_Fn004E12E4();
   DrainStackC200F();
   CopyBDF984();

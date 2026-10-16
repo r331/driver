@@ -14,8 +14,6 @@
     V(P139_Fn4B73F3, 0x004b73f3, (const uint8_t *a0), (a0)) /* эффект флага 0x20 из 004aaf3a; не перенесена (v1.84) */ \
     V(Call0048A940, 0x0048a940, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(P136_Fn4D38B7, 0x004d38b7, (void), ()) \
-    V(P133_Fn4A7FEC, 0x004a7fec, (uint8_t *rec), (rec)) \
-    V(P132_Fn4DACEE, 0x004dacee, (void), ()) \
     V(P132_Fn42D384, 0x0042d384, (void), ()) /* D3D — не трогать */ \
     V(P132_Fn4B418D, 0x004b418d, (void), ()) \
     R(int32_t, P131_Fn4F68A1, 0x004f68a1, (void *cmd), (cmd)) \
@@ -371,7 +369,6 @@
     V(P46_Fn4228EB, 0x004228eb, (void *node, int32_t a1), (node, a1)) \
     V(P46_Fn42282F, 0x0042282f, (void *node, int32_t a1), (node, a1)) \
     V(P46_Fn4D6354, 0x004d6354, (void), ()) \
-    V(P46_Fn4DF024, 0x004df024, (void *p, int32_t a1), (p, a1)) \
     V(P46_Fn51BE3C, 0x0051be3c, (void), ()) \
     V(P58_Fn407E2F, 0x00407e2f, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, void *a4, int32_t a5), (a0, a1, a2, a3, a4, a5)) \
     V(P58_Fn4185D2, 0x004185d2, (uint32_t tbl, int32_t a1, uint32_t tbl2), (tbl, a1, tbl2)) \

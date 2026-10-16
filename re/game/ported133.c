@@ -18,6 +18,7 @@
      скрипта, P98_GrD40) пропускаются; тип записи трафика > 7 — без обработчика; число записей ≤ 0x40; в native зеркало
      возвращает прежние P66_Scene/G2_ScriptStack (оригинал пишет 00b31f00 и 00d14f00). */
 #include "ported133.h"
+#include "ported142.h"
 #include <string.h>
 #include <math.h>
 #include "crt.h"
@@ -393,7 +394,7 @@ static void traffic_fn(uint8_t *r) {
   case 1: P54_ObjTick(r); break;
   case 2: P103_TrafficTick(r); break;
   case 3: P119_TrafficStep(r); break;
-  case 4: P133_Fn4A7FEC(r); break;
+  case 4: P142_CopDrive(r); break;
   case 5: P134_TrafficHold(r); break;
   case 6: ActorStep00494678(r); break;
   case 7: NoopFn004946d0(); break;

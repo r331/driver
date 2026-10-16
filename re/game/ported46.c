@@ -1,5 +1,6 @@
 /* Диспетчеры текстур, границы, загрузка блоков карты — восстановлено из Game.exe (cdecl). */
 #include "ported112.h"
+#include "ported142.h"
 #include "ported46.h"
 #include "ported41.h"
 #include "ported58.h"
@@ -45,7 +46,7 @@ void P46_SetBounds(int32_t a, int32_t b, int32_t c, int32_t d) {
 void P46_UpdateObjects(void) {
   for (int32_t i = 0; i < G6_00D0DDC0; i++) {
     uint8_t *o = G6_00B2F30C[i];
-    P46_Fn4DF024(o, o[3] == 1);
+    P142_WheelPhys(o, o[3] == 1);
   }
 }
 void P46_LoadMapA(void *file, int32_t size) {
