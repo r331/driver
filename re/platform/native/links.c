@@ -95,6 +95,7 @@
 #include "../../game/ported104.h"
 #include "../../game/ported105.h"
 #include "../../game/ported106.h"
+#include "../../game/ported107.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -117,6 +118,8 @@
 #include "../../game/ported8.h"
 #include "../../game/ported9.h"
 #include "../../game/ported10.h"
+void P97_Fn4262CE (float x0, float y0, float x1, float y1, int32_t c) { P107_Line(x0, y0, x1, y1, c); }
+int32_t P96_Fn50F304 (uint32_t script, int32_t pos) { return (int32_t)P107_MenuNav(script, pos); }
 void P66_DrawText (int32_t x, int32_t y, uint32_t txt, int32_t a, int32_t b, int32_t r, int32_t g, int32_t bl) { P70_ShadowText(x, y, txt, a, b, r, g, bl); }
 int32_t P62_Fn51CC55 (void *a, int32_t t, int32_t i) { return (int32_t)P64_RankPlace(a, t, i); }
 uint32_t P62_Fn515CCA (void *p, void *car) { return (uint32_t)P71_FaceCar(p, car); }
@@ -149,6 +152,7 @@ void P57_Setup412702 (void) { Ui00412702(); }
 void P57_Fn51C900 (void) { P97_HsInit(); }
 void P57_Fn51CAA7 (void *f) { P76_LoadHsTables(f); }
 void P57_Fn51CB98 (void *f) { P62_SaveScores(f); }
+void P57_Fn4221BF (int32_t i) { P107_TexRelease(i); }
 void P57_Fn507672 (float *x, float *y) { P94_MapToScreen(x, y); }
 void P56_CallSetVoice (uint32_t a0, int32_t a1, float a2, float a3, float a4) { P97_SndStart(a0, a1, a2, a3, a4); }
 void P56_Fn406479 (void) { P57_SaveScores(); }
@@ -299,6 +303,7 @@ void P4Call0051AA5B (void) { P54_AllocRoadbits(); }
 void P4Call004ECADE (void) { P77_LoadLevel(); }
 void P4Call004D2D85 (int32_t a0) { Call004D2D85(a0); }
 void P4Call0041D89C (int32_t a0, int32_t a1) { P46_TexCall(a0, a1); }
+void P4Call004CA98D (int32_t a0, int32_t a1) { P107_CountModel(a0, a1); }
 void P4Call00528293 (int32_t a0) { P25_TimerStop(a0); }
 void P4Call004076E2 (void) { MenuWhite004076E2(); }
 void P4Call00409CFA (void) { MenuWhite00409CFA(); }
@@ -329,6 +334,7 @@ int32_t G6Call0041D63B (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { return
 int32_t G6Call00523CDA (int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4) { return (int32_t)P97_SndStart(a0, a1, a2, a3, a4); }
 void Call004D94B7 (uint32_t a0, uint32_t a1) { CursorSet004D94B7(a0, a1); }
 int32_t Call00524473 (int32_t a0) { return (int32_t)IsSlotActive00524473(a0); }
+void Call004A9F45 (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4) { P107_Rect(a0, a1, a2, a3, a4); }
 uint32_t Call0048F3B4 (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { return (uint32_t)P63_CountByNode(a0, a1, a2, a3); }
 void Call00510784 (void) { P55_NamesD(); }
 void Call0050FAB0 (void) { P96_ClampOptions(); }

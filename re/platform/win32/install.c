@@ -95,6 +95,7 @@
 #include "../../game/ported104.h"
 #include "../../game/ported105.h"
 #include "../../game/ported106.h"
+#include "../../game/ported107.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2061,4 +2062,15 @@ void re_install_all(void) {
     re_hook(0x004ef66a, (void*)P106_SkyModels, "P106_SkyModels");
     re_hook(0x00512174, (void*)P106_PartTick, "P106_PartTick");
     re_hook(0x0048bf52, (void*)P106_EaxPreset, "P106_EaxPreset");
+    re_hook(0x00490f3a, (void*)P107_TrafficLights, "P107_TrafficLights");
+    re_hook(0x004221bf, (void*)P107_TexRelease, "P107_TexRelease");
+    re_hook(0x004262ce, (void*)P107_Line, "P107_Line");
+    re_hook(0x004ca98d, (void*)P107_CountModel, "P107_CountModel");
+    re_hook(0x004a9f45, (void*)P107_Rect, "P107_Rect");
+    re_hook(0x004aa217, (void*)P107_RectGrad, "P107_RectGrad");
+    re_hook(0x00506fa0, (void*)P107_Compass, "P107_Compass");
+    re_hook(0x004b5049, (void*)P107_CarLight, "P107_CarLight");
+    re_hook(0x0050f304, (void*)P107_MenuNav, "P107_MenuNav");
+    re_hook(0x004ddaca, (void*)P107_CarInput, "P107_CarInput");
+    re_hook(0x004958b7, (void*)P107_TrafficRow, "P107_TrafficRow");
 }
