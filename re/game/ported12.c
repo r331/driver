@@ -1,4 +1,5 @@
 #include "ported139.h"
+#include "ported140.h"
 #include "ported138.h"
 #include "ported129.h"
 #include "ported124.h"
@@ -233,7 +234,7 @@ uint32_t P12_Fn0041AECF(void) {
 }
 void P12_Fn0041AF85(void) {
   g_005feef0 = 0; g_005feef4 = 0; g_005feef8 = 0;
-  Call00405D60(g_005feeec, 0x005fee60u + (uint32_t)g_005feeec * 0x11);
+  P140_SaveGame(g_005feeec, (const char *)P12_005fee60 + g_005feeec * 0x11);
   Call0041AFCA();
 }
 int32_t P12_Fn00426580(int32_t p) {

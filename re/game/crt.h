@@ -15,6 +15,7 @@
 #  define g_fscanf ((int  (__cdecl*)(void*, const char*, ...))0x0052e1c0)
 #  define g_malloc ((void* (__cdecl*)(size_t))0x0052c130)
 #  define g_free   ((void  (__cdecl*)(void*))0x0052cb70)
+#  define g_mkdir  ((int   (__cdecl*)(const char*))0x0053fa70)   /* v1.85: _mkdir */
 #else
 #  include <stdio.h>
 #  define g_fread(p, s, n, f)  fread((p), (s), (n), (FILE*)(f))
@@ -31,4 +32,6 @@
 #  include <stdlib.h>
 #  define g_malloc(n)          malloc((n))
 #  define g_free(p)            free((p))
+int re_crt_mkdir(const char *path);   /* v1.85: _mkdir (native — game/ported140.c) */
+#  define g_mkdir(n)           re_crt_mkdir((n))
 #endif

@@ -128,6 +128,7 @@
 #include "../../game/ported137.h"
 #include "../../game/ported138.h"
 #include "../../game/ported139.h"
+#include "../../game/ported140.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -416,4 +417,3 @@ void P58_Fn416605 (void) { P100_ReplayMenuInit(); }
 void P58_Fn51763A (const char *a0, int32_t a1) { P98_LoadLang(a0, a1); }
 void P58_Fn406875 (void *a0) { P102_ConfigSnap(a0); }
 void P58_Fn413E37 (void) { P100_PadMenuInit(); }
-void P121_Fn4B955C (int32_t *a, int32_t *b, int32_t n, int32_t kind) { P125_ObjABurst(a, b, n, kind); }

@@ -14,6 +14,7 @@
      флаг +0x28 |= 1, последний ключ дублируется, P99_CamLast = последний + 1.
    Отступления native: строки читаются в локальный буфер (оригинал пишет в буфер имени), '\r' срезается, файл
    закрывается и при ошибке, индекс ключа 0..0x3e; деление на 0 в 004b9287 — 1; NULL-указатели функций пропускаются. */
+#include "ported140.h"
 #include "ported132.h"
 #include "ported133.h"
 #include <string.h>
@@ -198,7 +199,7 @@ void P132_GameLogic(void) {
   if (live) P112_ScriptTriggers();
   P101_Drips();
   if (P95_BDFA14 != 0) P113_Heli(0);
-  if (P95_C818B8 != 0) P132_Fn4E9BBF();
+  if (P95_C818B8 != 0) P140_MrkFly();
   if (live) { Call004A2C08(); P106_PartTick(); P12_Fn0048EBC8(); }
   if (P26_FxC != 0) { P130_SnowSpawn(); P130_SnowStep(); }
   P103_D118E0 = (P103_D118E0 + 0x3c) & 0xfff;

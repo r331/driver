@@ -128,6 +128,7 @@
 #include "../../game/ported137.h"
 #include "../../game/ported138.h"
 #include "../../game/ported139.h"
+#include "../../game/ported140.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2336,6 +2337,14 @@ void re_install_all(void) {
     re_hook(0x0040fa60, (void*)P139_KeyMenuA, "P139_KeyMenuA");
     re_hook(0x00410c30, (void*)P139_KeyMenuB, "P139_KeyMenuB");
     re_hook(0x0041b1c0, (void*)P139_LadderLoad, "P139_LadderLoad");
+    re_hook(0x00405d60, (void*)P140_SaveGame, "P140_SaveGame");
+    re_hook(0x0040ec30, (void*)P140_KeysLoad, "P140_KeysLoad");
+    re_hook(0x004127f0, (void*)P140_Frontend, "P140_Frontend");
+    re_hook(0x0041b3ab, (void*)P140_LadderRun, "P140_LadderRun");
+    re_hook(0x0048bf9a, (void*)P140_SndLoadWav, "P140_SndLoadWav");
+    re_hook(0x005233be, (void*)P140_SndInit, "P140_SndInit");
+    re_hook(0x00524bd8, (void*)P140_BankLine, "P140_BankLine");
+    re_hook(0x004e9bbf, (void*)P140_MrkFly, "P140_MrkFly");
     re_hook(0x004b9287, (void*)P132_Smoke, "P132_Smoke");
     re_hook(0x004ca135, (void*)P132_Lights, "P132_Lights");
     re_hook(0x0049f20a, (void*)P132_LoadFlyby, "P132_LoadFlyby");

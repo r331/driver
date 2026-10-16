@@ -9,6 +9,7 @@
    00415014 — переключение звукового устройства (005233be), банк TITLE/MOTEL.DSS;
    004a7d80 — позиция машины → запись копа P12_0112da00 (шаг 0x336 слов), 004a706a в свой кадр;
    004d602e — такт звуков у камеры. */
+#include "ported140.h"
 #include "ported128.h"
 #include "ported121.h"
 #include "cartab.h"
@@ -337,7 +338,7 @@ int32_t P121_SndNextDev(void) {
   if (G6_00B91D2C == 1) {
     P12_00b87e58 = 0;
     Call00523595();
-    P121_Fn5233BE(P12_00b87e58, P12_00b87e5c, P12_00575f50);
+    P140_SndInit(P12_00b87e58, P12_00b87e5c, P12_00575f50);
   } else {
 #ifndef RE_HOOK_BUILD
     int32_t guard = G6_00B91D2C + 1;
@@ -347,7 +348,7 @@ int32_t P121_SndNextDev(void) {
       if (k == start) break;
       if (G6_00B91D2C <= k) k = 0;
       Call00523595();
-      if (P121_Fn5233BE(k, P12_00b87e5c, P12_00575f50) != 0) break;
+      if (P140_SndInit(k, P12_00b87e5c, P12_00575f50) != 0) break;
 #ifndef RE_HOOK_BUILD
       if (--guard <= 0) break;   /* native: заглушка 005233be всегда 0 — без выхода по кругу при start ≥ числа устройств */
 #endif

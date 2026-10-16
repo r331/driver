@@ -7,6 +7,9 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    R(void *, P140_Fn48C192, 0x0048c192, (void *ds, void *wav, int32_t a2), (ds, wav, a2)) /* DirectSound: буфер из образа WAV (из 0048bf9a); COM — не переносится (v1.85) */ \
+    R(void *, P140_Fn48CAD6, 0x0048cad6, (void *buf), (buf)) /* DirectSound: IKsPropertySet буфера (из 0048bf9a); COM (v1.85) */ \
+    R(int32_t, P140_Fn48BA31, 0x0048ba31, (int32_t drv, int32_t arg, int32_t wnd), (drv, arg, wnd)) /* выбор/запуск звукового драйвера (из 005233be); 0 — ошибка; не перенесена (v1.85) */ \
     V(P139_Fn4B588E, 0x004b588e, (const uint8_t *a0), (a0)) /* эффект флага 0x20000 из 004aaf3a; не перенесена (v1.84) */ \
     V(P139_Fn4B73F3, 0x004b73f3, (const uint8_t *a0), (a0)) /* эффект флага 0x20 из 004aaf3a; не перенесена (v1.84) */ \
     R(int32_t, P139_Fn41B8AC, 0x0041b8ac, (char *a0), (a0)) /* строка MLADDER из 0041b1c0; 0 — ошибка; не перенесена (v1.84) */ \
@@ -14,7 +17,6 @@
     V(P136_Fn4D38B7, 0x004d38b7, (void), ()) \
     V(P133_Fn4A7FEC, 0x004a7fec, (uint8_t *rec), (rec)) \
     V(P132_Fn4DACEE, 0x004dacee, (void), ()) \
-    V(P132_Fn4E9BBF, 0x004e9bbf, (void), ()) \
     V(P132_Fn42D384, 0x0042d384, (void), ()) /* D3D — не трогать */ \
     V(P132_Fn4B418D, 0x004b418d, (void), ()) \
     R(int32_t, P131_Fn4F68A1, 0x004f68a1, (void *cmd), (cmd)) \
@@ -157,7 +159,6 @@
     V(N14_Fn4A7EE9, 0x004a7ee9, (int32_t a0), (a0)) \
     V(N14_Fn48A627, 0x0048a627, (void), ()) \
     R(uint32_t, N14_Fn503ECC, 0x00503ecc, (const uint8_t* a0), (a0)) \
-    V(Call00405D60, 0x00405d60, (int32_t a0, uint32_t a1), (a0, a1)) \
     V(Call0040CCB4, 0x0040ccb4, (uint32_t a0, uint32_t a1), (a0, a1)) \
     R(int32_t, R12_4082A0, 0x004082a0, (void), ()) \
     R(int32_t, R12_413D70, 0x00413d70, (void), ()) \
@@ -388,7 +389,6 @@
     R(int32_t, P74_Fn41CEDE, 0x0041cede, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(P74_Fn4A4D84, 0x004a4d84, (char **pp, int32_t a, int32_t b), (pp, a, b)) \
     V(P121_Fn4B955C, 0x004b955c, (int32_t *a, int32_t *b, int32_t n, int32_t kind), (a, b, n, kind)) \
-    R(int32_t, P121_Fn5233BE, 0x005233be, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
 
 #ifdef RE_HOOK_BUILD
 #  define UNPORTED_V(name, addr, params, args) \
