@@ -2,6 +2,7 @@
    (0051c900, 00523cda, 004a681a, 005074e5, 0048bbd5, 004d9ad4, 0050bc2b, 004f4f10, 004cff7e, 004cf6b2, 004cf772, 004d156a,
    00500090, 0050f7b2, 0040fc9a, 00410e89, 0040ea70, 00419b35, 0040c8a0, 004185d2, 004f58c6, 004f57d7, 004f5c89, 004d2c95,
    004c2ab0, 00417479, 00417fff, 004afcf7, 004ad128, 004e5a1a). */
+#include "ported115.h"
 #include "ported97.h"
 #include "reptr.h"
 #include "director.h"
@@ -522,18 +523,18 @@ static uint32_t blink(int32_t *st) {
 }
 void P97_BlinkAStep(void) {
   int32_t v = (int32_t)blink(P97_BlinkA);
-  if (Q005FEA0C != 0) P97_Fn418E70(30.0f, 420.0f, (uint32_t)Q005FEA0C, v, v, v, 0, 3);
-  if (Q005FEA10 != 0) P97_Fn418E70(580.0f, 420.0f, (uint32_t)Q005FEA10, v, v, v, 0, 3);
+  if (Q005FEA0C != 0) P115_IconAt(30.0f, 420.0f, (uint32_t)Q005FEA0C, v, v, v, 0, 3);
+  if (Q005FEA10 != 0) P115_IconAt(580.0f, 420.0f, (uint32_t)Q005FEA10, v, v, v, 0, 3);
 }
 void P97_BlinkBStep(void) {
   int32_t v = (int32_t)blink(P97_BlinkB);
   if (P97_IconL != 0) {
-    P97_Fn418E70(32.0f, 422.0f, (uint32_t)P97_IconL, v, v, v, 0, 2);
-    P97_Fn418E70(30.0f, 420.0f, (uint32_t)P97_IconL, v, v, v, 0, 3);
+    P115_IconAt(32.0f, 422.0f, (uint32_t)P97_IconL, v, v, v, 0, 2);
+    P115_IconAt(30.0f, 420.0f, (uint32_t)P97_IconL, v, v, v, 0, 3);
   }
   if (P97_IconR != 0) {
-    P97_Fn418E70(582.0f, 422.0f, (uint32_t)P97_IconR, v, v, v, 0, 2);
-    P97_Fn418E70(580.0f, 420.0f, (uint32_t)P97_IconR, v, v, v, 0, 3);
+    P115_IconAt(582.0f, 422.0f, (uint32_t)P97_IconR, v, v, v, 0, 2);
+    P115_IconAt(580.0f, 420.0f, (uint32_t)P97_IconR, v, v, v, 0, 3);
   }
 }
 

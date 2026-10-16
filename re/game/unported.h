@@ -11,7 +11,6 @@
     V(P98_Fn4BA81F, 0x004ba81f, (uint8_t *rec), (rec)) \
     V(P98_Fn4C582F, 0x004c582f, (void *cam), (cam)) \
     V(P97_Fn52498E, 0x0052498e, (int32_t voice, int32_t sample, float a, float b, float c), (voice, sample, a, b, c)) \
-    V(P97_Fn418E70, 0x00418e70, (float x, float y, uint32_t icon, int32_t r, int32_t g, int32_t b, int32_t a, int32_t mode), (x, y, icon, r, g, b, a, mode)) \
     V(P97_Fn4262CE, 0x004262ce, (float x0, float y0, float x1, float y1, int32_t c), (x0, y0, x1, y1, c)) \
     V(P96_Fn4D7F91, 0x004d7f91, (float x, float y, float w, float h, int32_t c0, int32_t c1, int32_t c2, int32_t c3, int32_t c4, int32_t c5, int32_t c6, int32_t c7, int32_t c8, int32_t c9, int32_t c10, int32_t c11), (x, y, w, h, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11)) \
     V(P96_Fn40B6FD, 0x0040b6fd, (float x, float y, float w, float h, float u0, float v0, float u1, float v1, int32_t page, const uint8_t *rgb), (x, y, w, h, u0, v0, u1, v1, page, rgb)) \
@@ -121,7 +120,6 @@
     V(P53_Fn4146FB, 0x004146fb, (int32_t a0), (a0)) \
     V(P52_Fn4E6310, 0x004e6310, (void), ()) \
     V(P52_Fn4E5A1A, 0x004e5a1a, (void), ()) \
-    V(P52_Fn4E5B78, 0x004e5b78, (void), ()) \
     V(P52_Fn4ABD69, 0x004abd69, (void), ()) \
     V(P52_Fn4AB127, 0x004ab127, (void), ()) \
     V(P52_Fn4AB500, 0x004ab500, (void), ()) \

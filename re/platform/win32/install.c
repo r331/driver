@@ -103,6 +103,7 @@
 #include "../../game/ported112.h"
 #include "../../game/ported113.h"
 #include "../../game/ported114.h"
+#include "../../game/ported115.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2124,6 +2125,18 @@ void re_install_all(void) {
     re_hook(0x0049f474, (void*)P114_CamFadeFrame, "P114_CamFadeFrame");
     re_hook(0x005073f1, (void*)P114_RadarMarks, "P114_RadarMarks");
     re_hook(0x0040c8f1, (void*)P114_MenuStep, "P114_MenuStep");
+    re_hook(0x00418e70, (void*)P115_IconAt, "P115_IconAt");
+    re_hook(0x00510e1d, (void*)P115_IconScaled, "P115_IconScaled");
+    re_hook(0x0051084d, (void*)P115_IconFlip, "P115_IconFlip");
+    re_hook(0x0048d4e0, (void*)P115_RoadArrow, "P115_RoadArrow");
+    re_hook(0x00452327, (void*)P115_FlatTriC, "P115_FlatTriC");
+    re_hook(0x00452d3e, (void*)P115_GouraudTriC, "P115_GouraudTriC");
+    re_hook(0x004527ac, (void*)P115_FlatQuadC, "P115_FlatQuadC");
+    re_hook(0x004531c5, (void*)P115_GouraudQuadC, "P115_GouraudQuadC");
+    re_hook(0x0040b286, (void*)P115_IconDraw, "P115_IconDraw");
+    re_hook(0x00523829, (void*)P115_SndUpdate, "P115_SndUpdate");
+    re_hook(0x004a3808, (void*)P115_TargetTick, "P115_TargetTick");
+    re_hook(0x004e5b78, (void*)P115_PaperHud, "P115_PaperHud");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");
