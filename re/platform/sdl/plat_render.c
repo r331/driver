@@ -235,7 +235,8 @@ void plat_clear_depth(void *viewport, int x, int y, int w, int h, float z) {
     glDepthMask(1); glClearDepth((double)z); glClear(GL_DEPTH_BUFFER_BIT);
     glClearDepth(1.0);
 }
-void plat_flip(void) { if (!g_ok) return; glFinish(); if (g_swap) { plat_frame_tick("flip"); g_swap(); } }
+void plat_snd_pump(void);
+void plat_flip(void) { plat_snd_pump(); if (!g_ok) return; glFinish(); if (g_swap) { plat_frame_tick("flip"); g_swap(); } }
 void plat_blit2d(int tex, int sx, int sy, int sw, int sh, int dx, int dy) {
     if (!g_ok || tex <= 0 || tex >= MAX_TEX || !g_tex[tex].id) return;
     float tw = (float)g_tex[tex].w, th = (float)g_tex[tex].h;

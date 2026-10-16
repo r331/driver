@@ -15,6 +15,7 @@ typedef p148_drv_t p148_drvtab_t[8];
 extern p148_drvtab_t P148_Drv; extern int32_t P148_EaxOn;
 #pragma pop_macro("P148_EaxOn") /*gvi*/
 #endif
+void    P148_ListenerParams(float dist_factor);                          /* 0048beee (LAB у Ghidra): DistanceFactor(f), DopplerFactor(1.0), RolloffFactor(0x3995cbec) */
 void    P148_SndEnum(void);                                              /* 0048ba20: DirectSoundEnumerate(0048cdab) */
 int32_t P148_EnumCb(const void *guid, const char *desc, const char *module, void *ctx);   /* 0048cdab: в оригинале stdcall */
 int32_t P148_SndOpen(int32_t drv, int32_t mode, int32_t hwnd);           /* 0048ba31: 1 — успех */

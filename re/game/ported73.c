@@ -1,4 +1,6 @@
 #include "ported73.h"
+#include "ported43.h"   /* v2.09: P43_FreeCnt/P43_FreeList/A_00C56780 — объекты образа данных (пешеходы) */
+#include "ported7.h"
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD /* gvar-img */

@@ -64,6 +64,16 @@ int32_t P148_EnumCb(const void *guid, const char *desc, const char *module, void
   return 1;
 }
 
+/* ---- 0048beee: метка у Ghidra (вне functions.csv), адрес в таблице драйвера 00bdcb1c; вызывается из 005233be с 0.15f ----
+   слушатель 00b1f428: SetDistanceFactor(f, 0) (vtable +0x2c), SetDopplerFactor(1.0f, 0) (+0x30), SetRolloffFactor(0x3995cbec ≈ 2.857e-4, 0) (+0x3c) */
+void P148_ListenerParams(float f) {
+  if (P49_Listener == NULL) return;
+  union { uint32_t u; float f; } r = { 0x3995cbecu };
+  plat_ds_listener_set_factor(P49_Listener, 0, f);
+  plat_ds_listener_set_factor(P49_Listener, 1, 1.0f);
+  plat_ds_listener_set_factor(P49_Listener, 2, r.f);
+}
+
 /* ---- 0048ba20 ---- */
 void P148_SndEnum(void) { plat_ds_enumerate(P148_EnumCb, NULL); }
 

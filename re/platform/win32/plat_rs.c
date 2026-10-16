@@ -245,6 +245,7 @@ int32_t plat_ds_listener_set_position(void *l, float x, float y, float z) { retu
 int32_t plat_ds_listener_set_orientation(void *l, const float *s) {
     return ((dd_f8)VT(l, 0x34))(l, fbits(s[0]), fbits(s[1]), fbits(s[2]), fbits(s[3]), fbits(s[4]), fbits(s[5]), (void *)1); }
 int32_t plat_ds_listener_set_velocity(void *l, float x, float y, float z) { return ((dd_f4)VT(l, 0x40))(l, fbits(x), fbits(y), fbits(z), (void *)1); }
+int32_t plat_ds_listener_set_factor(void *l, int w, float v) { static const int k[3] = { 0x2c, 0x30, 0x3c }; if (w < 0 || w > 2) return -1; return ((dd_f2)VT(l, k[w]))(l, fbits(v), 0); }
 int32_t plat_ds_listener_commit(void *l) { return ((dd_f0)VT(l, 0x44))(l); }
 int32_t plat_ds_buf_play(void *b, uint32_t fl) { return ((dd_f3)VT(b, 0x30))(b, 0, 0, (void *)(uintptr_t)fl); }
 int32_t plat_ds_buf_set_volume(void *b, int32_t v) { return ((dd_f1)VT(b, 0x3c))(b, (void *)(uintptr_t)v); }

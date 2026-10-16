@@ -132,3 +132,10 @@ uint8_t *P68_SpawnCar(uint8_t *rec, uint32_t owner);            /* 004a67b0: с�
 #define P68_B87E54 (*(int32_t *)re_gvar(0x00b87e54u, sizeof(int32_t), (void *)&P68_B87E54))
 #endif
 /* gvar-img v2.03 end */
+/* v2.09: записи сэмплов 00bdc880 в игре — тоже в образе данных: байты +6/+7 записи — это P48_Samples 00bdc886 (флаги /LOOP /2D,
+   приоритет), который генератор уже поместил в образ; при native-объекте P68_Samps флаги не доходили до P109_SndPlay (все звуки
+   без цикла, 3D всегда). Не в блоке генератора — P68_SampArr не в его списке проверенных структур. */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P68_Samps
+#define P68_Samps (*(P68_SampArr *)re_gvar(0x00bdc880u, sizeof(P68_SampArr), (void *)&P68_Samps))
+#endif

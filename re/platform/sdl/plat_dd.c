@@ -17,6 +17,16 @@ static int trace_dd(void) { if (g_trace_dd < 0) { const char *e = getenv("RE_TRA
 static uint32_t g_desc[31]; static int g_desc_n; static void *g_tex; static int g_tex_stage, g_pal_entries, g_pal_changed;
 static int g_live; static uint32_t g_coop_flags;
 static int32_t g_fill[4]; static uint32_t g_fill_px; static int g_fill_n;
+/* v2.09: DirectSound в игре — plat_dsmix.c */
+int dsm_is(const void *o); int32_t dsm_create_buffer(uint32_t fl, uint32_t bytes, const void *wfx, void **out);
+int32_t dsm_duplicate(void *src, void **out); void *dsm_qi(void *o); void dsm_release(void *o);
+int32_t dsm_lock(void *o, uint32_t bytes, void **p1, uint32_t *n1, void **p2, uint32_t *n2);
+int32_t dsm_play(void *o, uint32_t fl); int32_t dsm_stop(void *o); int32_t dsm_set_position(void *o, uint32_t pos);
+int32_t dsm_set_volume(void *o, int32_t v); int32_t dsm_set_frequency(void *o, uint32_t hz); int32_t dsm_get_status(void *o, uint32_t *st);
+int32_t dsm_3d_mode(void *o, uint32_t m); int32_t dsm_3d_pos(void *o, float x, float y, float z);
+void dsm_listener_pos(float x, float y, float z); void dsm_listener_orient(const float *s); void dsm_listener_factors(int which, float v);
+#define DSG(o) (g_game_present && dsm_is(o))
+void plat_snd_open_game(void);
 static void *mk(uint32_t tag) { dd_obj *o = (dd_obj *)calloc(1, sizeof *o); if (o) { o->tag = tag; g_live++; } return o; }
 
 /* ===== v2.01: поверхности DirectDraw в памяти (только игра, g_game_present; тесты — прежние учётные заглушки) =====
@@ -120,6 +130,7 @@ void *plat_dd_get_attached(void *s, uint32_t caps) {
     return o; }
 void plat_dd_release(void *v) {
     if (!v) return;
+    if (dsm_is(v)) { dsm_release(v); return; }
     dd_obj *o = (dd_obj *)v;
     if (o->px) { re_ptr_unregister(o->px); free(o->px); }
     if (o->gltex) plat_tex_free(o->gltex);
@@ -227,28 +238,33 @@ int plat_dd_stub_surface_stats(int *lk, int *ul, int *fl, uint32_t *ff, int *bl,
 static int g_ds3_op; static float g_ds3_v[6]; static uint32_t g_ds3_u;
 static int32_t ds3_rec(void *o, int op, float a, float b, float c, uint32_t u) {
     if (!o) return -1; g_ds3_op = op; g_ds3_v[0] = a; g_ds3_v[1] = b; g_ds3_v[2] = c; g_ds3_u = u; return 0; }
-int32_t plat_ds_listener_set_position(void *l, float x, float y, float z) { return ds3_rec(l, 1, x, y, z, 0); }
+int32_t plat_ds_listener_set_position(void *l, float x, float y, float z) { if (DSG(l)) dsm_listener_pos(x, y, z); return ds3_rec(l, 1, x, y, z, 0); }
 int32_t plat_ds_listener_set_orientation(void *l, const float *s) {
+    if (DSG(l)) dsm_listener_orient(s);
     int32_t r = ds3_rec(l, 2, 0, 0, 0, 0); if (r == 0) memcpy(g_ds3_v, s, sizeof g_ds3_v); return r; }
 int32_t plat_ds_listener_set_velocity(void *l, float x, float y, float z) { return ds3_rec(l, 3, x, y, z, 0); }
+int32_t plat_ds_listener_set_factor(void *l, int w, float v) { if (DSG(l)) dsm_listener_factors(w, v); return ds3_rec(l, 16 + w, v, 0, 0, 0); }
 int32_t plat_ds_listener_commit(void *l) { return ds3_rec(l, 4, 0, 0, 0, 0); }
-int32_t plat_ds_buf_play(void *b, uint32_t fl) { return ds3_rec(b, 5, 0, 0, 0, fl); }
-int32_t plat_ds_buf_set_volume(void *b, int32_t v) { return ds3_rec(b, 6, 0, 0, 0, (uint32_t)v); }
-int32_t plat_ds_buf_set_frequency(void *b, uint32_t hz) { return ds3_rec(b, 7, 0, 0, 0, hz); }
-int32_t plat_ds_buf_get_status(void *b, uint32_t *st) { int32_t r = ds3_rec(b, 8, 0, 0, 0, 0); if (r == 0 && st) *st = 0x1; return r; }
-int32_t plat_ds3d_set_mode(void *b, uint32_t m) { return ds3_rec(b, 9, 0, 0, 0, m); }
-int32_t plat_ds3d_set_position(void *b, float x, float y, float z) { return ds3_rec(b, 10, x, y, z, 0); }
+int32_t plat_ds_buf_play(void *b, uint32_t fl) { if (DSG(b)) dsm_play(b, fl); return ds3_rec(b, 5, 0, 0, 0, fl); }
+int32_t plat_ds_buf_set_volume(void *b, int32_t v) { if (DSG(b)) dsm_set_volume(b, v); return ds3_rec(b, 6, 0, 0, 0, (uint32_t)v); }
+int32_t plat_ds_buf_set_frequency(void *b, uint32_t hz) { if (DSG(b)) dsm_set_frequency(b, hz); return ds3_rec(b, 7, 0, 0, 0, hz); }
+int32_t plat_ds_buf_get_status(void *b, uint32_t *st) { if (DSG(b)) return dsm_get_status(b, st); int32_t r = ds3_rec(b, 8, 0, 0, 0, 0); if (r == 0 && st) *st = 0x1; return r; }
+int32_t plat_ds3d_set_mode(void *b, uint32_t m) { if (DSG(b)) dsm_3d_mode(b, m); return ds3_rec(b, 9, 0, 0, 0, m); }
+int32_t plat_ds3d_set_position(void *b, float x, float y, float z) { if (DSG(b)) dsm_3d_pos(b, x, y, z); return ds3_rec(b, 10, x, y, z, 0); }
 int32_t plat_ds3d_set_velocity(void *b, float x, float y, float z) { return ds3_rec(b, 11, x, y, z, 0); }
 int plat_ds3d_stub_last(int *op, float *v6, uint32_t *u) { *op = g_ds3_op; memcpy(v6, g_ds3_v, sizeof g_ds3_v); *u = g_ds3_u; return 1; }
 static uint32_t g_dsx_fail, g_dsx_support = 3, g_dsx_pid, g_dsx_plen, g_dsx_pd0; static uint8_t g_dsx_pg[16]; static int g_dsx_pn;
-int32_t plat_ds_buf_stop(void *b) { return ds3_rec(b, 12, 0, 0, 0, 0); }
-int32_t plat_ds_buf_set_position(void *b, uint32_t pos) { return ds3_rec(b, 13, 0, 0, 0, pos); }
+int32_t plat_ds_buf_stop(void *b) { if (DSG(b)) dsm_stop(b); return ds3_rec(b, 12, 0, 0, 0, 0); }
+int32_t plat_ds_buf_set_position(void *b, uint32_t pos) { if (DSG(b)) dsm_set_position(b, pos); return ds3_rec(b, 13, 0, 0, 0, pos); }
 int32_t plat_ds3d_set_velocity_ex(void *b, float x, float y, float z, uint32_t ap) { return ds3_rec(b, 14, x, y, z, ap); }
 int32_t plat_ds_create_buffer(void *ds, uint32_t fl, uint32_t bytes, const void *wfx, void **out) {
+    if (g_game_present && ds && !(g_dsx_fail & 1)) return dsm_create_buffer(fl, bytes, wfx, out);
     (void)wfx; if (!ds || (g_dsx_fail & 1)) { *out = NULL; return -1; }
     *out = plat_dd_create(NULL); g_ds3_op = 15; g_ds3_u = fl; g_ds3_v[0] = (float)bytes; return 0; }
 int32_t plat_com_query_interface(void *obj, const void *iid, void **out) {
     if (!obj || (g_dsx_fail & 2)) { *out = NULL; return -1; }
+    static const uint8_t iid_ks[16] = { 0x30,0xac,0xef,0x31,0x5c,0x51,0xd0,0x11,0xa9,0xaa,0x00,0xaa,0x00,0x61,0xbe,0x93 };
+    if (DSG(obj) && !(iid && memcmp(iid, iid_ks, 16) == 0)) { *out = dsm_qi(obj); return *out ? 0 : -1; }
     static const uint8_t iid_tex2[16] = { 0x02,0x15,0x28,0x93,0xf8,0x8c,0xd0,0x11,0x89,0xab,0x00,0xa0,0xc9,0x05,0x41,0x29 };
     if (g_game_present && iid && ((dd_obj *)obj)->tag == 1 && memcmp(iid, iid_tex2, 16) == 0) {   /* v2.01: текстура ↔ поверхность */
         dd_obj *t = (dd_obj *)mk(6); if (t) t->surf = (dd_obj *)obj; *out = t; return t ? 0 : -1; }
@@ -256,7 +272,7 @@ int32_t plat_com_query_interface(void *obj, const void *iid, void **out) {
 int32_t plat_ds_prop_set(void *ps, const void *g, uint32_t id, const void *d, uint32_t len) {
     if (!ps) return -1; memcpy(g_dsx_pg, g, 16); g_dsx_pid = id; g_dsx_plen = len; g_dsx_pd0 = 0; memcpy(&g_dsx_pd0, d, len < 4 ? len : 4); g_dsx_pn++; return 0; }
 int32_t plat_ds_prop_support(void *ps, const void *g, uint32_t id, uint32_t *sup) {
-    (void)g; (void)id; if (!ps || (g_dsx_fail & 4)) return -1; *sup = g_dsx_support; return 0; }
+    (void)g; (void)id; if (!ps || (g_dsx_fail & 4)) return -1; *sup = g_game_present ? 0 : g_dsx_support; return 0; }   /* v2.09: в игре EAX нет */
 /* --- v1.93: DirectSound — создание/перечисление/дубликат/Lock (заглушки для тестов; память Lock — буфер 64 КБ) --- */
 static int g_dsd_n = 1; static uint8_t g_dsd_g[8][16]; static const char *g_dsd_name[8] = { "Primary Sound Driver" }; static int g_dsd_null[8] = { 1 };
 static uint32_t g_dsd_caps, g_dsd_fail, g_dsd_split; static int g_dsd_cr, g_dsd_coop, g_dsd_dup, g_dsd_lk, g_dsd_ul, g_dsd_rs;
@@ -271,14 +287,18 @@ int32_t plat_ds_enumerate(plat_ds_enum_cb cb, void *ctx) {
     for (int i = 0; i < g_dsd_n; i++) if (cb(g_dsd_null[i] ? NULL : g_dsd_g[i], g_dsd_name[i], "", ctx) == 0) break;
     return 0; }
 int32_t plat_ds_create(const void *g, void **out) {
-    (void)g; g_dsd_cr++; if (g_dsd_fail & 1) { *out = NULL; return -1; } *out = plat_dd_create(NULL); return *out ? 0 : -1; }
+    (void)g; g_dsd_cr++; if (g_dsd_fail & 1) { *out = NULL; return -1; } *out = plat_dd_create(NULL);
+    if (g_game_present && *out) plat_snd_open_game();   /* v2.09: устройство SDL_audio или запись RE_WAV_OUT */
+    return *out ? 0 : -1; }
 int32_t plat_ds_set_coop(void *ds, void *hwnd, uint32_t lv) { (void)hwnd; if (!ds || (g_dsd_fail & 4)) return -1; g_dsd_coop = (int)lv; return 0; }
 int32_t plat_ds_get_caps_flags(void *ds, uint32_t *f) { if (!ds || (g_dsd_fail & 2)) return -1; *f = g_dsd_caps; return 0; }
 int32_t plat_ds_duplicate(void *ds, void *src, void **out) {
     g_dsd_dup++; if (!ds || !src || (g_dsd_fail & 8)) { *out = NULL; return -1; }
+    if (DSG(src)) return dsm_duplicate(src, out);
     if (g_dsd_fail & 0x40) { g_dsd_fail &= ~0x40u; *out = NULL; return (int32_t)0x88780096u; }
     *out = plat_dd_create(NULL); return 0; }
 int32_t plat_ds_buf_lock(void *b, uint32_t bytes, void **p1, uint32_t *n1, void **p2, uint32_t *n2) {
+    if (DSG(b)) { g_dsd_lk++; return dsm_lock(b, bytes, p1, n1, p2, n2); }
     if (!b || (g_dsd_fail & 0x10) || bytes > sizeof g_dsd_mem) return -1; g_dsd_lk++;
     uint32_t s = g_dsd_split && g_dsd_split < bytes ? g_dsd_split : bytes;
     *p1 = g_dsd_mem; *n1 = s; *p2 = s < bytes ? g_dsd_mem + s : NULL; *n2 = bytes - s; return 0; }

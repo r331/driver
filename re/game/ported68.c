@@ -12,7 +12,10 @@
 #ifndef RE_HOOK_BUILD
 #pragma push_macro("P68_CamF") /*gvi*/
 #undef P68_CamF /*gvi*/
+#pragma push_macro("P68_Samps")
+#undef P68_Samps
 P68_RepArr P68_Rep_; P68_SampArr P68_Samps; P68_FLoad P68_DrvLoad; P68_Cam4 P68_CamF;
+#pragma pop_macro("P68_Samps")
 #pragma pop_macro("P68_CamF") /*gvi*/
 #pragma push_macro("P68_CamI0") /*gvi*/
 #undef P68_CamI0 /*gvi*/

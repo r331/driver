@@ -175,7 +175,7 @@ static const re_fnent_t k_fns[] = {
   { 0x00404f70u, (re_fn_t)P12_Fn00404F70 },        { 0x00404faeu, (re_fn_t)P12_Fn00404FAE },
   { 0x00404ffeu, (re_fn_t)MenuCallAction40CD17 },
   { 0x0048bcc0u, (re_fn_t)P50_SoundShutdown }, { 0x0048bd3bu, (re_fn_t)NoopFn0048bd3b },
-  { 0x0048bd40u, (re_fn_t)P49_Commit },        { 0x0048bd65u, (re_fn_t)P26_WaveSetVolume },
+  { 0x0048beeeu, (re_fn_t)P148_ListenerParams }, { 0x0048bd40u, (re_fn_t)P49_Commit },        { 0x0048bd65u, (re_fn_t)P26_WaveSetVolume },
   { 0x0048bf52u, (re_fn_t)P106_EaxPreset },
   { 0x0048bdccu, (re_fn_t)P38_SetPrimaryFormat }, { 0x0048be68u, (re_fn_t)P38_SetSpeakerConfig },
   { 0x0048c520u, (re_fn_t)P50_ReleaseVoice },  { 0x0048c74bu, (re_fn_t)P49_ListenerPos },

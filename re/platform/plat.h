@@ -201,6 +201,7 @@ int32_t plat_ds_set_speaker_config(void *ds, uint32_t cfg);               /* IDi
 int32_t plat_ds_listener_set_position(void *l, float x, float y, float z);       /* SetPosition(x,y,z,DS3D_IMMEDIATE=1) */
 int32_t plat_ds_listener_set_orientation(void *l, const float *six);             /* SetOrientation(front xyz, top xyz, 1) */
 int32_t plat_ds_listener_set_velocity(void *l, float x, float y, float z);       /* SetVelocity(x,y,z,1) */
+int32_t plat_ds_listener_set_factor(void *l, int which, float v);              /* v2.09: SetDistanceFactor (0) / SetDopplerFactor (1) / SetRolloffFactor (2), DS3D_IMMEDIATE=0 */
 int32_t plat_ds_listener_commit(void *l);                                        /* CommitDeferredSettings */
 int32_t plat_ds_buf_play(void *b, uint32_t flags);                               /* Play(0,0,flags) */
 int32_t plat_ds_buf_set_volume(void *b, int32_t vol);                            /* SetVolume (сотые дБ) */

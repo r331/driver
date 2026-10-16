@@ -1,4 +1,6 @@
 #include "ported56.h"
+#include "ported43.h"   /* v2.09: P43_FreeCnt/P43_FreeList/A_00C56780 — объекты образа данных (пешеходы) */
+#include "ported7.h"
 #include "ported125.h"
 #include "ported147.h"
 #include "ported71.h"

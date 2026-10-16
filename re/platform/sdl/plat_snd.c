@@ -27,6 +27,8 @@ void plat_snd_set(int h,int v,int p,int n){snd_t*s=S(h); if(s){LOCK(); s->vol=v;
 void plat_snd_pos3d(int h,float x,float y,float z){snd_t*s=S(h); if(s){s->x=x;s->y=y;s->z=z;}}
 
 #define SND_OUT_RATE 44100
+void dsm_mix(int16_t *out, int frames); int dsm_active(void);
+void plat_snd_lockdev(int on){ if(on) LOCK(); else UNLOCK(); }
 static float smp(const snd_t*s,int64_t fr,int c){ /* выборка кадра fr, канал c → -1..1 */
   int ch=s->ch>1?2:1; int i=(int)(fr*ch+(c<ch?c:0));
   if(s->bits==8) return (((const uint8_t*)s->pcm)[i]-128)/128.0f;
@@ -45,7 +47,8 @@ void plat_snd_mix(int16_t *out,int frames){
       int a=out[2*f]+(int)(l*gl*32767.0f), b=out[2*f+1]+(int)(r*gr*32767.0f);
       out[2*f]=(int16_t)(a>32767?32767:a<-32768?-32768:a); out[2*f+1]=(int16_t)(b>32767?32767:b<-32768?-32768:b);
       s->pos+=step;
-      if(s->pos>=(double)total){ if(s->loop) s->pos-=(double)total; else { s->playing=0; break; } } } } }
+      if(s->pos>=(double)total){ if(s->loop) s->pos-=(double)total; else { s->playing=0; break; } } } }
+  dsm_mix(out,frames); }
 static void SDLCALL audio_cb(void*u,Uint8*st,int len){ (void)u; plat_snd_mix((int16_t*)st,len/4); }
 int plat_snd_open(void){
   if(g_dev) return 1;
@@ -53,6 +56,32 @@ int plat_snd_open(void){
   SDL_AudioSpec want; SDL_zero(want); want.freq=SND_OUT_RATE; want.format=AUDIO_S16SYS; want.channels=2; want.samples=1024; want.callback=audio_cb;
   g_dev=SDL_OpenAudioDevice(NULL,0,&want,NULL,0); if(!g_dev) return 0;
   SDL_PauseAudioDevice(g_dev,0); return 1; }
+/* v2.09: игра — RE_WAV_OUT=файл.wav: микс пишется в WAV по виртуальным/реальным часам plat_time_ms (на каждом plat_flip),
+   устройство SDL_audio не открывается; иначе — SDL_audio (если устройства нет — звук молча выключен). */
+#include <stdio.h>
+uint32_t plat_time_ms(void);
+static FILE *g_wav; static uint64_t g_wav_frames, g_wav_ms0; static int g_wav_on, g_snd_game, g_pump_n;
+static void wav_hdr(void){ if(!g_wav) return; uint32_t data=(uint32_t)(g_wav_frames*4); uint8_t h[44]; memcpy(h,"RIFF",4);
+  uint32_t v=36+data; memcpy(h+4,&v,4); memcpy(h+8,"WAVEfmt ",8); v=16; memcpy(h+16,&v,4); uint16_t t=1; memcpy(h+20,&t,2); t=2; memcpy(h+22,&t,2);
+  v=SND_OUT_RATE; memcpy(h+24,&v,4); v=SND_OUT_RATE*4; memcpy(h+28,&v,4); t=4; memcpy(h+32,&t,2); t=16; memcpy(h+34,&t,2); memcpy(h+36,"data",4); memcpy(h+40,&data,4);
+  long cur=ftell(g_wav); fseek(g_wav,0,SEEK_SET); fwrite(h,1,44,g_wav); fseek(g_wav,cur,SEEK_SET); fflush(g_wav); }
+static void wav_close(void){ if(g_wav){ wav_hdr(); fclose(g_wav); g_wav=NULL; } }
+void plat_snd_open_game(void){
+  if(g_snd_game) return; g_snd_game=1;
+  const char *w=getenv("RE_WAV_OUT");
+  if(w&&*w){ g_wav=fopen(w,"wb"); if(g_wav){ uint8_t z[44]={0}; fwrite(z,1,44,g_wav); g_wav_on=1; g_wav_ms0=plat_time_ms(); atexit(wav_close);
+      fprintf(stderr,"[snd] RE_WAV_OUT %s\n",w); } return; }
+  if(!plat_snd_open()) fprintf(stderr,"[snd] SDL_audio: нет устройства (%s) — без звука\n",SDL_GetError());
+}
+/* на каждом показанном кадре: дописать в WAV столько кадров, сколько прошло по plat_time_ms */
+void plat_snd_pump(void){
+  if(!g_wav_on||!g_wav) return;
+  uint64_t ms=(uint64_t)plat_time_ms()-g_wav_ms0, want=ms*SND_OUT_RATE/1000;
+  static int16_t buf[4096*2];
+  while(g_wav_frames<want){ int n=(int)(want-g_wav_frames); if(n>4096) n=4096; plat_snd_mix(buf,n); fwrite(buf,4,(size_t)n,g_wav); g_wav_frames+=(uint64_t)n; }
+  if(getenv("RE_SND_LOG")&&(++g_pump_n%50)==0) fprintf(stderr,"[snd] flip %d ms %llu frames %llu active %d\n",g_pump_n,(unsigned long long)ms,(unsigned long long)g_wav_frames,dsm_active());
+  if((g_pump_n%200)==0) wav_hdr();
+}
 void plat_snd_close(void){ if(g_dev){ SDL_CloseAudioDevice(g_dev); g_dev=0; } }
 static int g_cd_track=0;
 int plat_cd_play(int t){ if(t<1||t>99) return 0; g_cd_track=t; return 1;}
