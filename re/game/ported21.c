@@ -11,7 +11,7 @@ GAME_VAR_DEF(int32_t, P21_GridStride, 0x00d00258)
 GAME_VAR_DEF(int32_t, P21_AxisValue, 0x00b31e20)
 GAME_VAR_DEF(int32_t, P21_EntryCount, 0x00575ee4)
 #ifndef RE_HOOK_BUILD
-uint8_t P21_AxisOut[256], P21_AxisSrc[256], P21_Entries[0x54 * 64];
+uint8_t P21_AxisOut[256], P21_AxisSrc[256];
 #endif
 
 int32_t P21_GridCellSet(int32_t idx, const uint8_t* map, int32_t cx, int32_t cy) {

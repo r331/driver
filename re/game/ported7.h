@@ -30,9 +30,11 @@ extern g8_bytes_t A_012083C0;
 #ifndef RE_HOOK_BUILD
 extern g8_bytes_t A_01146F20;
 #endif
+#ifdef RE_HOOK_BUILD
 #define A_011443E0 GAME_VAR(g8_bytes_t, A_011443E0, 0x011443e0)
-#ifndef RE_HOOK_BUILD
-extern g8_bytes_t A_011443E0;
+#else
+extern uint8_t TrafficRecs[0x40 * 0x54];   /* v1.47: одна таблица трафика (director.h) */
+#define A_011443E0 TrafficRecs
 #endif
 #define G8_00575EE4 GAME_VAR(int32_t, G8_00575EE4, 0x00575ee4)
 #ifndef RE_HOOK_BUILD

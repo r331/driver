@@ -90,6 +90,7 @@
 #include "../../game/ported99.h"
 #include "../../game/ported100.h"
 #include "../../game/ported101.h"
+#include "../../game/ported102.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -164,6 +165,7 @@ void P52_Fn4E5A1A (void) { P97_FadeIconDraw(); }
 void P52_Fn4AB500 (void) { P100_DebrisInit(); }
 void P52_Fn4AB808 (void) { P95_PoolIconInit(); }
 void P52_Fn4AB95C (void) { P94_IconQuad(); }
+void P52_Fn4ABA7C (void) { P102_SixInit(); }
 void P52_Fn5173D7 (float a0, float a1, int32_t a2, int32_t a3, int32_t a4) { P73_Text(a0, a1, a2, a3, a4); }
 int32_t P52_Fn405F6F (int32_t a0, void *a1) { return (int32_t)P64_ReplayStart(a0, a1); }
 void P48_Fn516DA0 (void) { P58_LangStrings(); }
@@ -178,6 +180,7 @@ void N14_Fn4FBA23 (const uint8_t* a0) { P96_ClockText(a0); }
 void N14_Fn4D6C5A (void) { P75_BgSound(); }
 void N14_Fn4D6DAC (void) { P75_CarSound(); }
 void N14_Fn4D6EF2 (void) { P95_AmbientTick(); }
+void N14_Fn5259C8 (int32_t a0) { P102_CopTalk(a0); }
 void N14_Fn4D2ADE (int32_t a0) { AddClamp4095_004D2ADE(a0); }
 void N14_Fn4A7EE9 (int32_t a0) { SetVarD1193C(a0); }
 void N14_Fn48A627 (void) { P12_Fn0048A627(); }
@@ -340,4 +343,5 @@ void P46_Fn51BE3C (void) { P58_BuildBlockIndex(); }
 void P58_Fn4185D2 (uint32_t tbl, int32_t a1, uint32_t tbl2) { P97_MenuCall2(tbl, a1, tbl2); }
 void P58_Fn416605 (void) { P100_ReplayMenuInit(); }
 void P58_Fn51763A (const char *a0, int32_t a1) { P98_LoadLang(a0, a1); }
+void P58_Fn406875 (void *a0) { P102_ConfigSnap(a0); }
 void P58_Fn413E37 (void) { P100_PadMenuInit(); }

@@ -103,9 +103,12 @@ extern p12_01144340_t P12_01144340;
 #endif
 typedef uint8_t p12_011443e0_t[0x40*0x54];
 #define g_011443e0 P12_011443e0
+/* v1.47: таблица трафика 011443e0 — в native одна TrafficRecs (director.h); P12_011443e0, A_011443E0, P21_Entries — её имена */
+#ifdef RE_HOOK_BUILD
 #define P12_011443e0 GAME_VAR(p12_011443e0_t,P12_011443e0,0x011443e0)
-#ifndef RE_HOOK_BUILD
-extern p12_011443e0_t P12_011443e0;
+#else
+extern uint8_t TrafficRecs[0x40 * 0x54];
+#define P12_011443e0 TrafficRecs
 #endif
 typedef uint32_t p12_0112da00_t[8*0x336];
 #define g_0112da00 P12_0112da00
@@ -358,9 +361,12 @@ typedef int32_t p12_00576688_t[0x40*3];
 extern p12_00576688_t P12_00576688;
 #endif
 #define g_00c808d0 P12_00c808d0
+/* v1.47: 00c808d0 = P101_Hud[4] (значение полосы HUD, float) — в native макрос над P101_Hud */
+#ifdef RE_HOOK_BUILD
 #define P12_00c808d0 GAME_VAR(float,P12_00c808d0,0x00c808d0)
-#ifndef RE_HOOK_BUILD
-extern float P12_00c808d0;
+#else
+extern uint32_t P101_Hud[12];
+#define P12_00c808d0 (*(float *)(void *)((uint8_t *)P101_Hud + 0x10))
 #endif
 #define M12(a,b) Call0040CCB4(a,b)
 int32_t P12_Wrap004046C8(void);

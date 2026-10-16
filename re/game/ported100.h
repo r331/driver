@@ -75,7 +75,13 @@ typedef uint32_t p100_pal_t[256];
 #define P100_RadarIcon GAME_VAR(uint8_t *, P100_RadarIcon, 0x00c8088c)
 /* дорога, машины */
 #define P100_Rect      GAME_VAR(p100_i4_t, P100_Rect, 0x00c1cd00)
-#define P100_CarDim    GAME_VAR(p100_dim_t, P100_CarDim, 0x00d0cdc4)       /* записи моделей машин 0x16c (+4 — ширина) */
+/* v1.47: записи моделей машин 0x16c (+4 — ширина), 00d0cdc4 = S_00D0CC60 + 0x164 — в native макрос над S_00D0CC60, без отдельной переменной */
+#ifdef RE_HOOK_BUILD
+#  define P100_CarDim  GAME_VAR(p100_dim_t, P100_CarDim, 0x00d0cdc4)
+#else
+extern uint8_t S_00D0CC60[];
+#  define P100_CarDim  (*(p100_dim_t *)(S_00D0CC60 + 0x164))
+#endif
 /* LFB */
 #define P100_PixFn     GAME_VAR(uint32_t, P100_PixFn, 0x0057b73c)          /* адрес функции пикселя (0040232e — 16 бит, иначе 00402306) */
 #define P100_LfbFmt    GAME_VAR(p100_i7_t, P100_LfbFmt, 0x005c6744)        /* байты формата +0x14..+0x1a ответа LfbLock; [0] — бит на пиксель */
@@ -95,7 +101,7 @@ extern uint8_t *P100_RecBuf; extern int32_t P100_RecKeys; extern p100_u5_t P100_
 extern p100_i5_t P100_RecTot, P100_RecOff, P100_RecVal, P100_RecCnt; extern int32_t P100_RecEnd, P100_B87E24, P100_1426FC, P100_143720;
 extern uint8_t P100_RecStop;
 extern int32_t P100_RadarX, P100_RadarZ, P100_Radar16; extern uint8_t *P100_RadarIcon;
-extern p100_i4_t P100_Rect; extern p100_dim_t P100_CarDim;
+extern p100_i4_t P100_Rect;
 extern uint32_t P100_PixFn; extern p100_i7_t P100_LfbFmt; extern int32_t P100_LfbPitch; extern p100_pal_t P100_Pal32;
 extern int32_t P100_ClipN; extern float *P100_ClipOut; extern uint8_t *P100_Mirror;
 #endif

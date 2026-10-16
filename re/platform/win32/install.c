@@ -90,6 +90,7 @@
 #include "../../game/ported99.h"
 #include "../../game/ported100.h"
 #include "../../game/ported101.h"
+#include "../../game/ported102.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -1985,4 +1986,34 @@ void re_install_all(void) {
     re_hook(0x0042e3c7, (void*)P101_ClipNearRGB, "P101_ClipNearRGB");
     re_hook(0x0042e007, (void*)P101_ClipNear5A, "P101_ClipNear5A");
     re_hook(0x0042e6e6, (void*)P101_ClipNear5B, "P101_ClipNear5B");
+    re_hook(0x004aef57, (void*)P102_CarLights, "P102_CarLights");
+    re_hook(0x00496372, (void*)P102_TrafficRoom, "P102_TrafficRoom");
+    re_hook(0x00499bb2, (void*)P102_CarsHit, "P102_CarsHit");
+    re_hook(0x00492b98, (void*)P102_TrafficAdd, "P102_TrafficAdd");
+    re_hook(0x00501c63, (void*)P102_HudInit, "P102_HudInit");
+    re_hook(0x004a6403, (void*)P102_CopsTick, "P102_CopsTick");
+    re_hook(0x004c2d73, (void*)P102_DirFreeCam, "P102_DirFreeCam");
+    re_hook(0x004a7aa7, (void*)P102_CopPathPoint, "P102_CopPathPoint");
+    re_hook(0x00406875, (void*)P102_ConfigSnap, "P102_ConfigSnap");
+    re_hook(0x004dd7ec, (void*)P102_ResetCars, "P102_ResetCars");
+    re_hook(0x004902a8, (void*)P102_ScanCells, "P102_ScanCells");
+    re_hook(0x00493b51, (void*)P102_TrafficAlign, "P102_TrafficAlign");
+    re_hook(0x004aba7c, (void*)P102_SixInit, "P102_SixInit");
+    re_hook(0x005259c8, (void*)P102_CopTalk, "P102_CopTalk");
+    re_hook(0x004fe869, (void*)P102_LampColor, "P102_LampColor");
+    re_hook(0x0051329b, (void*)P102_SpawnDust, "P102_SpawnDust");
+    re_hook(0x0051d51c, (void*)P102_PlayerCorners, "P102_PlayerCorners");
+    re_hook(0x00509e64, (void*)P102_RadarClear, "P102_RadarClear");
+    re_hook(0x004d0439, (void*)P102_BoxAnyCar, "P102_BoxAnyCar");
+    re_hook(0x004e6c92, (void*)P102_GhostTrail, "P102_GhostTrail");
+    re_hook(0x0049a21d, (void*)P102_BoxContact, "P102_BoxContact");
+    re_hook(0x0042eaa6, (void*)P102_ClipNear7, "P102_ClipNear7");
+    re_hook(0x0042f3f7, (void*)P102_ClipFar5, "P102_ClipFar5");
+    re_hook(0x0051a750, (void*)P102_RoadSide, "P102_RoadSide");
+    re_hook(0x0048f899, (void*)P102_CarsCollide, "P102_CarsCollide");
+    re_hook(0x005158cf, (void*)P102_CarPlanes, "P102_CarPlanes");
+    re_hook(0x0049521e, (void*)P102_TrafficAhead, "P102_TrafficAhead");
+    re_hook(0x004c4ef9, (void*)P102_DirMenuNodes, "P102_DirMenuNodes");
+    re_hook(0x004af2fd, (void*)P102_ObjMark, "P102_ObjMark");
+    re_hook(0x004af619, (void*)P102_CarTracks, "P102_CarTracks");
 }

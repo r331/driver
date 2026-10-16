@@ -13,7 +13,9 @@
 #define P21_Entries   ((uint8_t*)0x011443e0)
 #else
 extern int32_t P21_GridDiv, P21_GridRadius, P21_GridStride, P21_AxisValue, P21_EntryCount;
-extern uint8_t P21_AxisOut[256], P21_AxisSrc[256], P21_Entries[0x54 * 64];
+extern uint8_t P21_AxisOut[256], P21_AxisSrc[256];
+extern uint8_t TrafficRecs[0x40 * 0x54];   /* v1.47: P21_Entries — таблица трафика TrafficRecs */
+#define P21_Entries TrafficRecs
 #endif
 #define P21_ENTRY_SIZE 0x54
 int32_t  P21_GridCellSet(int32_t idx, const uint8_t* map, int32_t cx, int32_t cy); /* 004ecfbd */
