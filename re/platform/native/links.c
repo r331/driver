@@ -110,6 +110,7 @@
 #include "../../game/ported119.h"
 #include "../../game/ported120.h"
 #include "../../game/ported121.h"
+#include "../../game/ported122.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -132,6 +133,7 @@
 #include "../../game/ported8.h"
 #include "../../game/ported9.h"
 #include "../../game/ported10.h"
+void P98_Fn4ACCF0 (uint32_t rec, int32_t a) { P122_SpotShadow(rec, a); }
 void P97_Fn52498E (int32_t voice, int32_t sample, float a, float b, float c) { P109_SndPlay(voice, sample, a, b, c); }
 void P97_Fn4262CE (float x0, float y0, float x1, float y1, int32_t c) { P107_Line(x0, y0, x1, y1, c); }
 void P96_Fn4D7F91 (float x, float y, float w, float h, int32_t c0, int32_t c1, int32_t c2, int32_t c3, int32_t c4, int32_t c5, int32_t c6, int32_t c7, int32_t c8, int32_t c9, int32_t c10, int32_t c11) { P109_GradRect(x, y, w, h, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11); }
@@ -190,6 +192,7 @@ void P55_Fn5248CD (void) { P25_CDResume(); }
 void P55_Fn424530 (int32_t a0, int32_t a1, int32_t a2) { P74_DevSelect(a0, a1, a2); }
 int32_t P55_Fn4245E2 (void) { return (int32_t)GetVarB1C0D8(); }
 void P55_Fn4264A7 (void) { Ui004264A7(); }
+void P55_Fn4E7450 (int32_t a0, const char *a1) { P122_IconCopy(a0, a1); }
 void N54_Fn4913CC (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4) { P75_TrafficPos(a0, a1, a2, a3, a4); }
 int32_t P53_Fn40EFD5 (void) { return (int32_t)P74_KeyScan(); }
 int32_t P53_Fn4045E0 (void) { return (int32_t)P57_Menu4045E0(); }
@@ -254,10 +257,12 @@ void Call00424921 (int32_t a0, int32_t a1, uint32_t a2, int32_t a3) { P47_TexTab
 void Call0048A525 (int32_t a0) { P76_MarkSlots(a0); }
 void Call0048A68E (int32_t a0) { Dispatch0048A68E(a0); }
 void Call004C0C6F (int32_t a0) { P119_Hubcap(a0); }
+void Call004BA31B (void) { P122_ObjATick(); }
 void Call004B9AEC (void) { P101_DebrisFly(); }
 void Call004B9D79 (void) { P16_StepParticles(); }
 void Call004911D9 (void) { P98_TrafficSpin(); }
 void Call0050F289 (void) { P55_StopAudio(); }
+int32_t R12_40A8B0 (uint32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4) { return (int32_t)P122_FontIcons(a0, a1, a2, a3, a4); }
 void Call004D6190 (int32_t a0) { SetFirstFree_004D6190(a0); }
 void Call00493ECE (int32_t a0) { P74_FreeTraffic(a0); }
 void Call005186CE (void) { P74_ResetHud(); }
@@ -355,6 +360,7 @@ void G6Call004D614A (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { P46_SetBo
 void G6Call00426580 (int32_t a0) { P12_Fn00426580(a0); }
 void G6Call00516EB4 (int32_t a0, int32_t a1, int32_t a2) { SetRGB00516EB4(a0, a1, a2); }
 void G6Call00491360 (void) { P12_Fn00491360(); }
+void G6Call004A05FA (void) { P122_ObjNames(); }
 void Call0042486B (int32_t a0, uint32_t a1, int32_t a2, uint32_t a3, int32_t a4) { P52_TexDownloadMipMap(a0, a1, a2, a3, a4); }
 int32_t G6Call0041D63B (int32_t a0, int32_t a1, int32_t a2, int32_t a3) { return (int32_t)P53_TexLookup(a0, a1, a2, a3); }
 int32_t G6Call00523CDA (int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4) { return (int32_t)P97_SndStart(a0, a1, a2, a3, a4); }

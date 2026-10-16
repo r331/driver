@@ -397,6 +397,8 @@
     R(int32_t, P121_Fn5233BE, 0x005233be, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(P121_Fn4A706A, 0x004a706a, (uint32_t *rec, int32_t *a, int32_t *b, int32_t c), (rec, a, b, c)) \
     R(int32_t, P121_Fn4CD3FB, 0x004cd3fb, (float x, float y, float z, uint32_t w), (x, y, z, w)) \
+    V(P122_Fn4B9E9F, 0x004b9e9f, (uint8_t *obj), (obj)) \
+    R(uint32_t, P122_Fn4A45EB, 0x004a45eb, (uint32_t text, uint32_t ev), (text, ev)) \
 
 #ifdef RE_HOOK_BUILD
 #  define UNPORTED_V(name, addr, params, args) \

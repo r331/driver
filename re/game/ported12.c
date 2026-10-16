@@ -1,3 +1,4 @@
+#include "reptr.h"
 #include "ported12.h"
 #include "ported98.h"
 #include "ported118.h"
@@ -303,8 +304,8 @@ void P12_Fn0050C010(void) {
   g_00c7d84c = 0; g_00c595a0 = 0;
 }
 void P12_Fn00516E76(void) {
-  g_00c55034 = R12_40A8B0(0x00575a28, 0, -1, 5, 0x18);
-  R12_40A8B0(0x00575a30, 1, -1, 5, 0x18);
+  g_00c55034 = R12_40A8B0(re_addr("FONT"), 0, -1, 5, 0x18)   /* .data 00575a28 "FONT" */;
+  R12_40A8B0(re_addr("BIG"), 1, -1, 5, 0x18)      /* .data 00575a30 "BIG" */;
   CopySlots_0040AA82(1);
 }
 void P12_Fn004DC8EA(void) {

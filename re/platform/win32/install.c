@@ -110,6 +110,7 @@
 #include "../../game/ported119.h"
 #include "../../game/ported120.h"
 #include "../../game/ported121.h"
+#include "../../game/ported122.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2190,6 +2191,16 @@ void re_install_all(void) {
     re_hook(0x00415014, (void*)P121_SndNextDev, "P121_SndNextDev");
     re_hook(0x004a7d80, (void*)P121_CopSync, "P121_CopSync");
     re_hook(0x004d602e, (void*)P121_CamSounds, "P121_CamSounds");
+    re_hook(0x004accf0, (void*)P122_SpotShadow, "P122_SpotShadow");
+    re_hook(0x004ac779, (void*)P122_CarGlow, "P122_CarGlow");
+    re_hook(0x004ba31b, (void*)P122_ObjATick, "P122_ObjATick");
+    re_hook(0x0040d56c, (void*)P122_MapNames, "P122_MapNames");
+    re_hook(0x004a44d4, (void*)P122_EventsParse, "P122_EventsParse");
+    re_hook(0x0040a8b0, (void*)P122_FontIcons, "P122_FontIcons");
+    re_hook(0x004e7450, (void*)P122_IconCopy, "P122_IconCopy");
+    re_hook(0x004f8485, (void*)P122_SetVar, "P122_SetVar");
+    re_hook(0x004a05fa, (void*)P122_ObjNames, "P122_ObjNames");
+    re_hook(0x0041ab60, (void*)P122_NameMenu, "P122_NameMenu");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");
