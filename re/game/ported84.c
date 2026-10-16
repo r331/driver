@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "ported84.h"
 #include "ported8.h"
 #include "ported11.h"
@@ -8,6 +9,8 @@
 #include "ported98.h"
 #include "ported102.h"
 #include "reptr.h"
+#include "ported85.h"
+#include "redbg.h"
 #include "cartab.h"
 #include <math.h>
 #include <string.h>
@@ -131,8 +134,42 @@ void P84_InitConsts(void) {
   memcpy(P84_Arg, P84_ArgInit, 56);
   memcpy(P84_Lit, P84_LitInit, 56);
 }
+#include "p84_handlers.h"
+/* v2.05: в игре P84_Handlers заполняются по таблицам .data Game.exe (0055082c.. — программный набор, 00550cfc.. — аппаратный):
+   адрес → перенос (re_fn); неперенесённый обработчик — P85_SkipRecord (запись пропускается, как было бы без рисования).
+   До v2.05 в native-игре таблицы были нулевыми — P84 не рисовал ни одной записи (чёрный кадр уровня). */
+int P84_HandMissing, P84_HandSubst, P84_HandNoClip;
+static void init_game_handlers(void) {
+  static int done;
+  if (done || !re_ptr_has_image()) return;
+  done = 1; P84_HandMissing = 0;
+  for (int t = 0; t < 6; t++)
+    for (int k = 0; k < 56; k++) {
+      uint32_t a = P84_HandAddr[t][k];
+      if (a == 0) { P84_Handlers[t][k] = 0; continue; }
+      re_fn_t f = re_fn(a);
+      /* D3D-набор (0055082c.., b1c0d8 = 1) перенесён лишь частично (P115_*C — типы 0..3; остальные обработчики 00453759..004737c4
+         не опознаны Ghidra как функции): вместо неперенесённого — обработчик того же типа из Glide-набора (00550cfc..), он рисует
+         через ячейки таблицы Glide (01270e08 grDrawTriangle …), которые P151_InstallD3D направляет в D3D-эмуляцию. */
+      if (f == NULL && t < 3 && P84_HandAddr[t + 3][k] != 0) { f = re_fn(P84_HandAddr[t + 3][k]); if (f) P84_HandSubst++; }
+      /* Отступление native: наборы с отсечением (режим 1 — ближняя плоскость, «другой» — дальняя) почти целиком не перенесены
+         (0x436ab0.., 0x446e8a.. — тоже не опознаны Ghidra); вместо них — обработчик режима 0 того же типа без отсечения
+         (как P85_RegisterNative в тестах города). Полигоны, пересекающие ближнюю плоскость, рисуются без отсечения. */
+      if (f == NULL && (t % 3) != 0) {
+        int b = t - (t % 3);
+        if (P84_HandAddr[b][k] != 0) f = re_fn(P84_HandAddr[b][k]);
+        if (f == NULL && b == 0 && P84_HandAddr[3][k] != 0) f = re_fn(P84_HandAddr[3][k]);
+        if (f) P84_HandNoClip++;
+      }
+      if (f == NULL) { f = (re_fn_t)P85_SkipRecord; P84_HandMissing++; }
+      P84_Handlers[t][k] = (uintptr_t)f;
+    }
+  fprintf(stderr, "[p84] обработчики записей из .data Game.exe: из Glide-набора %d, без отсечения %d, неперенесённых %d (P85_SkipRecord)\n", P84_HandSubst, P84_HandNoClip, P84_HandMissing);
+}
 /* 011effe0/01209660/011f4060 ← таблицы набора (режимы 0, 1, другой) */
 void P84_SelectTables(int32_t alt) {
+  init_game_handlers();
+  if (re_ptr_has_image()) fprintf(stderr, "[p84] набор таблиц %s\n", alt ? "аппаратный 00550cfc" : "программный 0055082c");
   P84_Tab0 = P84_Handlers[alt ? 3 : 0];
   P84_Tab1 = P84_Handlers[alt ? 4 : 1];
   P84_Tab2 = P84_Handlers[alt ? 5 : 2];
@@ -160,6 +197,10 @@ static float shade(float d) {
 }
 static void call_h(const uintptr_t *tab, uint32_t type) {
   uintptr_t f = tab ? tab[type] : 0;
+  RE_DBG(9);
+#ifndef RE_HOOK_BUILD
+  if (f == (uintptr_t)P85_SkipRecord) RE_DBG(5);
+#endif
   if (f) ((p84_handler_t)f)((uint32_t)P84_Arg[type]);
 }
 
@@ -176,6 +217,7 @@ static void draw_core(uint8_t *mdl, const float *modmat, const float *viewm, con
   float p3[3] = { pos[0], pos[1], pos[2] };
   float nx, ny, nz;
   int lit = flags & 1;
+  RE_DBG(8);
   if (lit) {
     float lv[4] = { P19_OutA, P19_OutB, P19_OutC, 0 };   /* 4-е слово (005507dc) Xform не читает */
     P44_MatPtr = (float *)modmat;

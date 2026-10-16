@@ -1,4 +1,5 @@
 /* Маска видимости клеток и главный обход клеток карты — восстановлено из Game.exe (004ef997, 004ef793, 004ee8f4). */
+#include "redbg.h"
 #include "ported89.h"
 #include "ported13.h"
 #include <string.h>
@@ -99,6 +100,7 @@ static int16_t rd16s(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; 
 /* разложить объекты клетки с головой списка node по классам (общая часть обоих ветвей 004ee8f4) */
 static void walk_cell(int32_t node, int guarded) {
   int guard = 0;
+  RE_DBG(7);
   while (node != -1) {
     if (node < 0 || node >= 4 * 0x5000 || ++guard > 0x5000) return;              /* охранные проверки — в оригинале их нет */
     const int32_t *nd = (const int32_t *)((const uint8_t *)G6_00CE0F20 + (size_t)node * 8);
@@ -134,6 +136,7 @@ void P89_DrawMap(int32_t mode) {
   }
   P88_CellUpdate(mode);
   int32_t N = P54_GridN;
+  RE_DBG(6);
   if (N <= 0 || !G6_00CE0F20 || !G6_00D01268 || !G6_00D00208) return;           /* охранная проверка — оригинал упал бы на делении */
   P89_VisMask(P88_CellA.cell, (P88_CellA.y % N) * N + P88_CellA.x % N, (uint8_t *)P82_LightGrid);
   if (mode == 0) return;

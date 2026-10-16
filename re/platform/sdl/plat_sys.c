@@ -242,8 +242,15 @@ static void frame_shot(void) {
     if (plat_render_readback(px) == 0 && png_write_rgba(png, px, w, h) == 0) { fprintf(stderr, "[frame] снимок %s (%dx%d), кадр %d\n", png, w, h, g_frames); g_shot_done = 1; }
     free(px);
 }
+int g_re_dbg[16];   /* v2.05: счётчики RE_GSTAT=N: 0 GameFrame, 1 GameDraw, 2 GlideSwap, 3 draw_prim, 4 вершин, 5 записей P85_SkipRecord, 6 DrawMap, 7 клеток, 8 моделей (draw_core), 9 обработчиков записей, 10 CarsStep, 11 P100_RecKeys, 12 P36_PadMode, 13 KeyCfg[6,4,5], 14 условие демо-клавиш */
 void plat_frame_tick(const char *where) {
-    static int maxf = -2, maxp = -2;
+    static int maxf = -2, maxp = -2, gst = -2;
+    if (gst == -2) { const char *e = getenv("RE_GSTAT"); gst = e ? atoi(e) : 0; }
+    if (gst > 0 && where && !strcmp(where, "flip") && (g_frames + 1) % gst == 0) {
+        fprintf(stderr, "[gstat] кадр %d: GameFrame %d GameDraw %d Swap %d prim %d верш %d skip %d | map %d cell %d core %d h %d | cars %d keys %x padmode %d cfg %06x cond %d\n", g_frames + 1,
+                g_re_dbg[0], g_re_dbg[1], g_re_dbg[2], g_re_dbg[3], g_re_dbg[4], g_re_dbg[5], g_re_dbg[6], g_re_dbg[7], g_re_dbg[8], g_re_dbg[9], g_re_dbg[10], g_re_dbg[11], g_re_dbg[12], g_re_dbg[13], g_re_dbg[14]);
+        memset(g_re_dbg, 0, sizeof g_re_dbg);
+    }
     if (maxf == -2) { const char *e = getenv("RE_MAX_FRAMES"); maxf = e ? atoi(e) : -1; e = getenv("RE_MAX_PUMPS"); maxp = e ? atoi(e) : -1; }
     if (where && !strcmp(where, "flip")) {
         g_frames++;

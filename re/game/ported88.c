@@ -2,8 +2,24 @@
 #include "ported88.h"
 #include <string.h>
 
-GAME_VAR_DEF(p88_cell_t, P88_CellA, 0x00c97a00)
-GAME_VAR_DEF(p88_cell_t, P88_CellB, 0x00cff9a0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P88_CellA")
+#undef P88_CellA
+#pragma push_macro("P88_CellA") /*gvi*/
+#undef P88_CellA /*gvi*/
+p88_cell_t P88_CellA;
+#pragma pop_macro("P88_CellA") /*gvi*/
+#pragma pop_macro("P88_CellA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P88_CellB")
+#undef P88_CellB
+#pragma push_macro("P88_CellB") /*gvi*/
+#undef P88_CellB /*gvi*/
+p88_cell_t P88_CellB;
+#pragma pop_macro("P88_CellB") /*gvi*/
+#pragma pop_macro("P88_CellB")
+#endif
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P88_Mode575")
 #undef P88_Mode575

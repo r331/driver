@@ -1,3 +1,4 @@
+#include "reptr.h"
 #include "ported85.h"
 #include "ported86.h"
 #include "../platform/plat.h"
@@ -118,6 +119,11 @@ void P85_Project(p85_vtx *v) {
   v->stamp = P44_XformTag;
   {
     int32_t zi = P85_ZI;
+#ifndef RE_HOOK_BUILD
+    /* v2.05, отступление native: z вне таблицы 1/z (за камерой или ≥ 0xdbba) — в оригинале такие вершины уходят в набор с
+       отсечением (не перенесён); только в игре (вне игры — прежнее поведение тестов города): oow = 0 — P85_CallRaster такой треугольник не рисует (вместо чтения за границей таблицы). */
+    if ((zi < 1 || zi >= (int32_t)(sizeof(p12_00ba53a0_t) / sizeof(float))) && re_ptr_has_image()) { v->oow = 0.0f; v->x = 0; v->y = 0; return; }
+#endif
     v->oow = ((const float *)&P12_00ba53a0[0])[zi];
   }
   {
@@ -161,6 +167,9 @@ void P85_SetBlend(uint8_t m) {
   P85_BlendCur = m;
 }
 void P85_CallRaster(void) {
+#ifndef RE_HOOK_BUILD
+  if (re_ptr_has_image() && (!(P85_RV[0].oow > 0.0f) || !(P85_RV[1].oow > 0.0f) || !(P85_RV[2].oow > 0.0f))) return;   /* v2.05: только игра, см. P85_Project */
+#endif
   if ((uint8_t)P82_Edge == 0) P85_RasterA(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
   else P85_RasterB(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
 }

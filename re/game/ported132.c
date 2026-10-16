@@ -21,6 +21,14 @@
 #include "ported133.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include "ported88.h"
+#include "ported87.h"
+#include "ported80.h"
+#include "ported21.h"
+#include "ported54.h"
+#include "ported59.h"
+#include "ported44.h"
 #include <math.h>
 #include "crt.h"
 #include "reptr.h"
@@ -103,6 +111,7 @@
 #include "uihandlers3.h"
 #include "uihandlers4.h"
 #include "ported143.h"
+#include "redbg.h"
 
 static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 static float rdf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
@@ -122,6 +131,7 @@ int32_t P132_B87EC8;
 #pragma pop_macro("P132_B87EC8")
 #endif
 #endif
+
 
 /* ---- 00417b80 ---- */
 int32_t P132_MenuLoop(uint32_t tab) {
@@ -181,6 +191,7 @@ void P132_GameLogic(void) {
     return;
   }
   int32_t hud1 = G6_00B87EA0 | P62_HudOff1;
+
   if ((P14_00d118a8 | G2_00D118A8) == 0 && (hud1 != 0 || P36_PadMode != 2)) {
     uint32_t k = (uint32_t)P100_RecKeys; P36_GetPadButtons(&k); P100_RecKeys = (int32_t)k;
   }
@@ -231,7 +242,8 @@ void P132_GameLogic(void) {
   }
   P127_PlayerSkid(0);
   if ((G6_00B87EAC | G8_00B87EAC) != 0 || (P58_SB87EB0 | G6_00B87EB0 | G8_00B87EB0) != 0) P119_CarSkids(0x41);
-  if (live) P142_CarsStep(); else P35_PadX = 0;
+  RE_DBG_SET(11, P100_RecKeys); RE_DBG_SET(12, P36_PadMode); RE_DBG_SET(13, P36_KeyCfg[6] | P36_KeyCfg[4] << 8 | P36_KeyCfg[5] << 16); RE_DBG_SET(14, (P14_00d118a8 | G2_00D118A8) * 1000 + hud1 * 10 + (P100_143720 != 0) + (P100_1426FC != 0) * 2 + (P75_E4 != 0) * 4);
+  if (live) { RE_DBG(10); P142_CarsStep(); } else P35_PadX = 0;
   P14_Fn004E12E4();
   DrainStackC200F();
   CopyBDF984();
@@ -259,6 +271,16 @@ static void grd40(int32_t v) { if (P98_GrD40) P98_GrD40(v); }
 
 void P132_GameDraw(void) {
   char buf[256];
+  RE_DBG(1);
+#ifndef RE_HOOK_BUILD
+  { static int k; if (getenv("RE_GSTAT") && (k++ % 100) == 0) fprintf(stderr, "[gdraw] cam %.0f %.0f %.0f angB %d mode %d car0 %d %d %d cell %d,%d N %d grid %dx%d vm %.2f %.2f %.2f far %.0f\n",
+      P44_CamX, P44_CamY, P44_CamZ, (int)(int16_t)P59_AngB, (int)P59_Mode1137324, (int)P99_Cars[0].pos[0], (int)P99_Cars[0].pos[1], (int)P99_Cars[0].pos[2],
+      (int)P88_CellA.x, (int)P88_CellA.y, (int)P54_GridN, (int)P21_GridDiv, (int)P80_GridH, P44_ViewMat[0], P44_ViewMat[4], P44_ViewMat[8], P11_01270c24);
+    if (getenv("RE_GSTAT") && (k % 100) == 1 && G6_00D01268) { int N = P54_GridN, ne[4] = {0,0,0,0};
+      for (int sl = 0; sl < 4; sl++) for (int i = 0; i < N * N; i++) ne[sl] += ((int32_t *)G6_00D01268)[sl * N * N + i] != -1;
+      fprintf(stderr, "[gdraw] lumps %d %d %d %d cellA %d pc %d heads %d %d %d %d\n", (int)P87_SlotLumpA[0], (int)P87_SlotLumpA[1], (int)P87_SlotLumpA[2], (int)P87_SlotLumpA[3],
+        (int)P88_CellA.cell, (int)P88_CellA.pc, ne[0], ne[1], ne[2], ne[3]); } }
+#endif
   uint8_t fxd = P26_FxD;
   if ((MenuVar575F3C | P13_00575f3c | G00575F3C) == 0) P26_FxD = 0;
   P66_Scene = 0x00cb8f20u;

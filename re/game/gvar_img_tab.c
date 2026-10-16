@@ -1825,6 +1825,7 @@ const re_gvar_range_t re_gvar_ranges[] = {
   { 0x00c8252cu, (uint32_t)sizeof(int32_t) },   /* P126_SpawnT */
   { 0x00c82530u, (uint32_t)sizeof(int32_t) },   /* P41_Flag */
   { 0x00c97a00u, (uint32_t)sizeof(int32_t) },   /* P82_CellCX */
+  { 0x00c97a00u, (uint32_t)sizeof(p88_cell_t) },   /* P88_CellA */
   { 0x00c97a04u, (uint32_t)sizeof(int32_t) },   /* P82_CellCY */
   { 0x00c97a20u, (uint32_t)sizeof(int32_t) },   /* P55_Var20 */
   { 0x00c97a28u, (uint32_t)sizeof(int32_t) },   /* P80_Hdr6 */
@@ -1858,6 +1859,7 @@ const re_gvar_range_t re_gvar_ranges[] = {
   { 0x00cfe6e4u, (uint32_t)sizeof(int32_t) },   /* P89_CntShadow */
   { 0x00cfe760u, (uint32_t)sizeof(p104_buf760_t) },   /* P104_Buf760 */
   { 0x00cfe7a0u, (uint32_t)sizeof(p79_tab_t) },   /* P79_ModelTab */
+  { 0x00cff9a0u, (uint32_t)sizeof(p88_cell_t) },   /* P88_CellB */
   { 0x00cff9acu, (uint32_t)sizeof(int32_t) },   /* P12_00cff9ac */
   { 0x00cff9c0u, (uint32_t)sizeof(int32_t) },   /* P55_VarC0 */
   { 0x00cff9c6u, (uint32_t)sizeof(uint8_t) },   /* P55_VarC6 */

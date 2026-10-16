@@ -123,7 +123,7 @@ int plat_key_dik(const char *name) {   /* имя или номер → DIK; -1 �
     return -1;
 }
 #define MAX_SCRIPT 256
-static struct { int frame; uint8_t dik; uint8_t logged; } g_scr[MAX_SCRIPT];
+static struct { int frame, hold; uint8_t dik; uint8_t logged; } g_scr[MAX_SCRIPT];   /* v2.05: hold — «кадр:клавиша:кадров» */
 static int g_nscr = -1, g_hold = 2;
 static void script_load(void) {
     g_nscr = 0;
@@ -132,9 +132,10 @@ static void script_load(void) {
     char buf[4096]; snprintf(buf, sizeof buf, "%s", s);
     for (char *tk = strtok(buf, ", "); tk && g_nscr < MAX_SCRIPT; tk = strtok(NULL, ", ")) {
         char *c = strchr(tk, ':'); if (!c) { fprintf(stderr, "[keys] RE_KEYS: пропуск «%s» (нужно кадр:клавиша)\n", tk); continue; }
-        *c = 0; int d = plat_key_dik(c + 1);
+        *c = 0; char *c2 = strchr(c + 1, ':'); int hold = 0; if (c2) { *c2 = 0; hold = atoi(c2 + 1); }
+        int d = plat_key_dik(c + 1);
         if (d < 0) { fprintf(stderr, "[keys] RE_KEYS: неизвестная клавиша «%s»\n", c + 1); continue; }
-        g_scr[g_nscr].frame = atoi(tk); g_scr[g_nscr].dik = (uint8_t)d; g_scr[g_nscr].logged = 0; g_nscr++;
+        g_scr[g_nscr].frame = atoi(tk); g_scr[g_nscr].hold = hold; g_scr[g_nscr].dik = (uint8_t)d; g_scr[g_nscr].logged = 0; g_nscr++;
     }
     fprintf(stderr, "[keys] сценарий RE_KEYS: %d нажатий, удержание %d кадр.\n", g_nscr, g_hold);
 }
@@ -144,7 +145,7 @@ void plat_input_fill_keys(uint8_t *k) {
     if (g_nscr < 0) script_load();
     int fr = plat_frame_no();
     for (int i = 0; i < g_nscr; i++)
-        if (fr >= g_scr[i].frame && fr < g_scr[i].frame + g_hold) {
+        if (fr >= g_scr[i].frame && fr < g_scr[i].frame + (g_scr[i].hold > 0 ? g_scr[i].hold : g_hold)) {
             k[g_scr[i].dik] = 0x80;
             if (!g_scr[i].logged) { g_scr[i].logged = 1; fprintf(stderr, "[keys] кадр %d: DIK 0x%02x нажата\n", fr, g_scr[i].dik); }
         }

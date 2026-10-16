@@ -212,6 +212,7 @@ static uint32_t g_nfns;
 
 /* v2.02: запасная область — образ .rdata+.data Game.exe (game/data_image.c), только в режиме игры */
 static uint8_t *g_img; static uint32_t g_img_base, g_img_size;
+int re_ptr_has_image(void) { return g_img != NULL; }   /* v2.05: 1 — режим игры (образ .data подключён) */
 uint8_t *re_gvar_img; uint32_t re_gvar_img_size;   /* v2.03: gvar.h */
 void re_ptr_set_image(uint32_t base, void *p, uint32_t size) {
   g_img = (uint8_t *)p; g_img_base = base; g_img_size = size;

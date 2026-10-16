@@ -25,7 +25,13 @@ _Static_assert(sizeof(p88_cell_t) == 0x28, "p88_cell_t");
 #define P88_ObjZ    CARTAB_VAR(int32_t, P88_ObjZ, 0x00d0cbd8)
 #define P88_Mode575 GAME_VAR(int32_t, P88_Mode575, 0x00575efc)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P88_CellA") /*gvi*/
+#undef P88_CellA /*gvi*/
+#pragma push_macro("P88_CellB") /*gvi*/
+#undef P88_CellB /*gvi*/
 extern p88_cell_t P88_CellA, P88_CellB;
+#pragma pop_macro("P88_CellB") /*gvi*/
+#pragma pop_macro("P88_CellA") /*gvi*/
 #pragma push_macro("P88_Mode575") /*gvi*/
 #undef P88_Mode575 /*gvi*/
 extern int32_t P88_Mode575;
@@ -37,6 +43,10 @@ void P88_StreamTiles(void);          /* 004edaa2 */
 int32_t P88_PickTiles(const p88_cell_t *b, int32_t *lump, int32_t *slot);
 /* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
 #if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P88_CellA
+#define P88_CellA (*(p88_cell_t *)re_gvar(0x00c97a00u, sizeof(p88_cell_t), (void *)&P88_CellA))
+#undef P88_CellB
+#define P88_CellB (*(p88_cell_t *)re_gvar(0x00cff9a0u, sizeof(p88_cell_t), (void *)&P88_CellB))
 #undef P88_Mode575
 #define P88_Mode575 (*(int32_t *)re_gvar(0x00575efcu, sizeof(int32_t), (void *)&P88_Mode575))
 #endif

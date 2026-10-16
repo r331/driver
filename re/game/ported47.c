@@ -6,6 +6,7 @@
 #include "crt.h"
 #include <stdio.h>
 #include <string.h>
+#include "redbg.h"
 #ifdef RE_HOOK_BUILD
 #  define P47_STD __attribute__((stdcall))
 #else
@@ -150,6 +151,7 @@ int32_t P47_GlideWinOpen(int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t
   return f != NULL ? f(a1, a2, a3, a4, a5, a6, a7) : 0;
 }
 void P47_GlideSwap(void) {
+  RE_DBG(2);
   void (P47_STD *f)(int32_t) = (void (P47_STD *)(int32_t))glide_proc("_grBufferSwap@4");
   if (f != NULL) f(0);
   if (P11_01270c38 != 0) {
@@ -167,3 +169,4 @@ void P47_TexTable(int32_t a, int32_t b, int32_t c, int32_t d) {
     Dispatch0041D50E(a, b, c, d);
   }
 }
+

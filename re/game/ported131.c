@@ -75,6 +75,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include "redbg.h"
 
 #ifndef RE_HOOK_BUILD
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -124,6 +125,7 @@ static void vset(p85_rv *v, float x, float y, float c, float oow, float s, float
   memset(v, 0, sizeof *v);
   v->x = x; v->y = y; v->r = c; v->g = c; v->b = c; v->oow = oow; v->tmu[0] = s; v->tmu[1] = t;
 }
+
 
 /* ---- 0041b7d1 ---- */
 uint32_t P131_MenuPick(uint32_t tab) {
@@ -199,6 +201,7 @@ void P131_FlybyStart(void) {
 
 /* ---- 004d4a63 ---- */
 void P131_GameFrame(void) {
+  RE_DBG(0);
   P12_Fn0050E963();
   int32_t keep = G6_00B5A778;
   if (P62_Frame == 0) {
