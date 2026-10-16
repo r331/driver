@@ -82,6 +82,7 @@
 #include "ported125.h"
 #include "ported131.h"
 #include "ported133.h"
+#include "ported145.h"
 
 GAME_VAR_DEF(p136_rot_t, P136_WheelRot, 0x00b1fce0)
 GAME_VAR_DEF(p136_rot_t, P136_WheelRotB, 0x00b1fde8)
@@ -244,7 +245,7 @@ void P136_GameLoop(int32_t replay) {
     set_e54(1);
     G6_00B87E20 = 1;
     set_a778(0);
-    P136_Fn4D38B7();
+    P145_LevelLoad();
     if (GameMode == 4 || GameMode == 5) P100_RecStop = 1;
     while (G6_00B87E20 != 0) {
       if (UiVar01251A70 != 0) P131_GameFrame();

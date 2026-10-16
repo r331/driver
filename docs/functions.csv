@@ -753,7 +753,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004022c5,thunk_FUN_004a519a,,,,,,5,ported
 004022ca,thunk_FUN_004ec58a,,,,,,5,ported
 004022cf,thunk_FUN_0052369b,,,,,,5,ported
-004022d4,thunk_FUN_004d38b7,,,,,,5,todo
+004022d4,thunk_FUN_004d38b7,,,,,,5,ported
 004022d9,thunk_FUN_004d8511,,,,,,5,ported
 004022de,thunk_FUN_004c1b46,Thunk_004C1B46,manual,Thunks,,,5,ported
 004022e8,thunk_FUN_00502787,,,,,,5,ported
@@ -2570,7 +2570,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d3426,FUN_004d3426,InitMapState4D3426,manual,Menu,,,30,ported
 004d3444,FUN_004d3444,P99_MapFree,manual,,,,366,ported
 004d35b2,FUN_004d35b2,P125_LevelLoad,port,,,,773,ported
-004d38b7,FUN_004d38b7,,,,,,3064,todo
+004d38b7,FUN_004d38b7,,,,,,3064,ported
 004d4663,FUN_004d4663,P137_LevelEnd,port,ported137,port,,1024,ported
 004d4a63,FUN_004d4a63,P131_GameFrame,port,ported131,port,,408,ported
 004d4bfb,FUN_004d4bfb,P132_GameLogic,port,ported132,port,,970,ported
