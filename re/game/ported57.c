@@ -1,3 +1,4 @@
+#include "ported141.h"
 #include "ported113.h"
 #include "ported57.h"
 #include "crt.h"
@@ -86,7 +87,7 @@ int32_t P57_Menu40A540(void) {
   return menu_end(r);
 }
 int32_t P57_Menu40F2D0(void) {
-  Call0040F3DE(); P57_S5FE6B8 = 0;
+  P141_HsSetup(); P57_S5FE6B8 = 0;
   return menu_end(menu_run(0x0054bee8, &P57_S5FE6B8, 0x0054bcf0, 0x0054bd08));
 }
 int32_t P57_Menu413610(void) {

@@ -1331,7 +1331,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040f395,FUN_0040f395,MenuSet54BE7CTo3,manual,MenuState,,,12,ported
 0040f3a1,FUN_0040f3a1,MenuSet54BE7CTo2,manual,MenuState,,,12,ported
 0040f3ad,FUN_0040f3ad,CycleInc0040F3AD,manual,ui/widgets,,,49,ported
-0040f3de,FUN_0040f3de,,,,,,595,todo
+0040f3de,FUN_0040f3de,,,,,,595,ported
 0040fa60,FUN_0040fa60,,,,,,570,ported
 0040fc9a,FUN_0040fc9a,P97_KeyMenuAInit,manual,,,,399,ported
 0040fe29,FUN_0040fe29,MenuSelect0040FE29,manual,MenuState,,,70,ported
@@ -1734,7 +1734,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041b790,FUN_0041b790,FlagSet0127104C,manual,UIMisc,,,29,ported
 0041b7ad,FUN_0041b7ad,TestBit0041B7AD,manual,SmallFuncs,,,36,ported
 0041b7d1,FUN_0041b7d1,P131_MenuPick,port,ported131,port,,219,ported
-0041b8ac,FUN_0041b8ac,,,,,,3841,todo
+0041b8ac,FUN_0041b8ac,,,,,,3841,ported
 0041c7ad,FUN_0041c7ad,P47_ReadLine,manual,ported47,,,45,ported
 0041c7da,FUN_0041c7da,TakeToken,manual,,,,237,ported
 0041ce90,FUN_0041ce90,,,,,,78,todo

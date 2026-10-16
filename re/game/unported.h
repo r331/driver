@@ -12,7 +12,6 @@
     R(int32_t, P140_Fn48BA31, 0x0048ba31, (int32_t drv, int32_t arg, int32_t wnd), (drv, arg, wnd)) /* выбор/запуск звукового драйвера (из 005233be); 0 — ошибка; не перенесена (v1.85) */ \
     V(P139_Fn4B588E, 0x004b588e, (const uint8_t *a0), (a0)) /* эффект флага 0x20000 из 004aaf3a; не перенесена (v1.84) */ \
     V(P139_Fn4B73F3, 0x004b73f3, (const uint8_t *a0), (a0)) /* эффект флага 0x20 из 004aaf3a; не перенесена (v1.84) */ \
-    R(int32_t, P139_Fn41B8AC, 0x0041b8ac, (char *a0), (a0)) /* строка MLADDER из 0041b1c0; 0 — ошибка; не перенесена (v1.84) */ \
     V(Call0048A940, 0x0048a940, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(P136_Fn4D38B7, 0x004d38b7, (void), ()) \
     V(P133_Fn4A7FEC, 0x004a7fec, (uint8_t *rec), (rec)) \
@@ -290,7 +289,6 @@
     R(int, IsKeyDown, 0x004e383a, (int sc), (sc)) \
     R(int, GetGroundHeight, 0x004dd039, (int *pos), (pos)) \
     V(Call00411A9D, 0x00411a9d, (void), ()) \
-    V(Call0040F3DE, 0x0040f3de, (void), ()) \
     V(Call0041AFCA, 0x0041afca, (void), ()) \
     V(Call0050F7B2, 0x0050f7b2, (void), ()) \
     V(Call0050FBF4, 0x0050fbf4, (void), ()) \

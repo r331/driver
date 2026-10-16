@@ -129,6 +129,7 @@
 #include "../../game/ported138.h"
 #include "../../game/ported139.h"
 #include "../../game/ported140.h"
+#include "../../game/ported141.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2345,6 +2346,8 @@ void re_install_all(void) {
     re_hook(0x005233be, (void*)P140_SndInit, "P140_SndInit");
     re_hook(0x00524bd8, (void*)P140_BankLine, "P140_BankLine");
     re_hook(0x004e9bbf, (void*)P140_MrkFly, "P140_MrkFly");
+    re_hook(0x0041b8ac, (void*)P141_LadderLine, "P141_LadderLine");
+    re_hook(0x0040f3de, (void*)P141_HsSetup, "P141_HsSetup");
     re_hook(0x004b9287, (void*)P132_Smoke, "P132_Smoke");
     re_hook(0x004ca135, (void*)P132_Lights, "P132_Lights");
     re_hook(0x0049f20a, (void*)P132_LoadFlyby, "P132_LoadFlyby");

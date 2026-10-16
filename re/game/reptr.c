@@ -42,6 +42,7 @@ void     re_fn_register(uint32_t addr, re_fn_t fn) { (void)addr; (void)fn; }
 #include "uihandlers4.h"
 #include "menustate.h"
 #include "ported12.h"
+#include "ported141.h"
 #include <string.h>
 
 typedef struct { uint32_t addr; uint8_t *p; uint32_t size; } re_region_t;
@@ -95,6 +96,8 @@ static const re_region_t k_regions[] = {
   { P104_MENUGFX_ADDR0, P104_MenuGfx.b, P104_MENUGFX_SIZE0 },     /* v1.49: .data экрана графики 0054a170..0054a6f8 (game/menugfx.h) */
   { 0x00cfe760u, (uint8_t *)P104_Buf760, sizeof P104_Buf760 },  /* v1.49: буфер 00562d7c */
   { P57_MENU_ADDR, P57_MenuTab.b, P57_MENU_SIZE },              /* v1.58: .data меню опций 0057b578..0057b658 (game/menu57.h) */
+  { 0x0054bd10u, P141_HsMenu, sizeof P141_HsMenu },             /* v1.86: .data экрана рекордов 0054bd10..0054bee0 (game/p141_data.h) */
+  { 0x0054bf1cu, P141_HsStr, sizeof P141_HsStr },               /* v1.86: строки 0054bf1c..0054bf90 (адреса в P141_HsMenu) */
 };
 /* таблица функций: адрес Game.exe → перенесённая native-функция */
 static const re_fnent_t k_fns[] = {

@@ -1,5 +1,6 @@
 /* MenuState — мелкие переключатели состояния меню. */
 #pragma once
+#include "ported141.h"
 #include "gvar.h"
 #define MenuFlag5F7E4C GAME_VAR(int32_t, MenuFlag5F7E4C, 0x005f7e4c)
 #define MenuState575EF0 GAME_VAR(int32_t, MenuState575EF0, 0x00575ef0)
@@ -148,8 +149,8 @@ void MenuLeaveMode6(int32_t v); /* 0040a72b */
 #define MenuVal5D77C8 GAME_VAR(int32_t, MenuVal5D77C8, 0x005d77c8)
 #define MenuByte5D77C1 GAME_VAR(uint8_t, MenuByte5D77C1, 0x005d77c1)
 #define MenuByte5D77C0 GAME_VAR(uint8_t, MenuByte5D77C0, 0x005d77c0)
-#define MenuByte54BE5C GAME_VAR(uint8_t, MenuByte54BE5C, 0x0054be5c)
-#define MenuByte54BE7C GAME_VAR(uint8_t, MenuByte54BE7C, 0x0054be7c)
+#define MenuByte54BE5C P141_HSM8(0x0054be5cu)   /* v1.86: байт таблицы P141_HsMenu */
+#define MenuByte54BE7C P141_HSM8(0x0054be7cu)
 typedef uint32_t MenuTable256_t[256];
 #define MenuTable54B010 GAME_VAR(MenuTable256_t, MenuTable54B010, 0x0054b010)
 #define MenuByte54ACD4 GAME_VAR(uint8_t, MenuByte54ACD4, 0x0054acd4)
@@ -161,7 +162,6 @@ typedef uint32_t MenuTable256_t[256];
 #define MenuByte54AD34 GAME_VAR(uint8_t, MenuByte54AD34, 0x0054ad34)
 #define MenuByte54AD44 GAME_VAR(uint8_t, MenuByte54AD44, 0x0054ad44)
 #ifndef RE_HOOK_BUILD
-extern uint8_t MenuByte54BE5C, MenuByte54BE7C;
 extern MenuTable256_t MenuTable54B010;
 extern uint8_t MenuByte54ACD4, MenuByte54ACE4, MenuByte54ACF4, MenuByte54AD04, MenuByte54AD14, MenuByte54AD24, MenuByte54AD34, MenuByte54AD44;
 extern uint8_t MenuColorR54AA2C, MenuColorG54AA2D, MenuColorB54AA2E, MenuByte5D77C1, MenuByte5D77C0;

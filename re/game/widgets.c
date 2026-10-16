@@ -1,3 +1,4 @@
+#include "ported141.h"
 #include "widgets.h"
 GAME_VAR_DEF(int32_t, WI00575EE4, 0x00575ee4)
 GAME_VAR_DEF(int32_t, WI00B87E2C, 0x00b87e2c)
@@ -47,8 +48,8 @@ int32_t SelectRow004119F3(void) {return SelectRow(0x0054b7d1, 0x16);}
 void VolumeUp00409BC9(void) {WI00575EE4 += 0x10; if (WI00575EE4 > 0x40) WI00575EE4 = 0x40; G00575EF8 = 4; MenuRedraw();}
 void VolumeDown00409BFD(void) {WI00575EE4 -= 0x10; if (WI00575EE4 < 0x10) WI00575EE4 = 0x10; G00575EF8 = 4; MenuRedraw();}
 int32_t CycleInc0040E918(void) {WI00B87E2C++; if (WI00B87E2C == 3) WI00B87E2C = 0; Call0040EA70(); return 0;}
-int32_t CycleDec0040F364(void) {UiVar005FE6BC--; if (UiVar005FE6BC < 0) UiVar005FE6BC = WI005FE694 - 1; Call0040F3DE(); return 0;}
-int32_t CycleInc0040F3AD(void) {UiVar005FE6BC++; if (WI005FE694 <= UiVar005FE6BC) UiVar005FE6BC = 0; Call0040F3DE(); return 0;}
+int32_t CycleDec0040F364(void) {UiVar005FE6BC--; if (UiVar005FE6BC < 0) UiVar005FE6BC = WI005FE694 - 1; P141_HsSetup(); return 0;}
+int32_t CycleInc0040F3AD(void) {UiVar005FE6BC++; if (WI005FE694 <= UiVar005FE6BC) UiVar005FE6BC = 0; P141_HsSetup(); return 0;}
 void MenuRowsTo2_00412254(void) {WB0054C6D4[(UiVar005FE84C * 2 + 3) * 0x10] = 2; WB0054C6D4[(UiVar005FE84C * 2 + 4) * 0x10] = 2;}
 void MenuAllRowsTo2_00412280(void) {for (int i = 0; i < 8; i++) { WB0054C6D4[(i * 2 + 3) * 0x10] = 2; WB0054C6D4[(i * 2 + 4) * 0x10] = 2; }}
 void MenuRowsTo3_00412643(void) {WB0054C944[(UiVar005FE928 * 2 + 3) * 0x10] = 3; WB0054C944[(UiVar005FE928 * 2 + 4) * 0x10] = 3;}

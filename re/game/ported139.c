@@ -24,6 +24,7 @@
      0054c1e0/0054c530 и пункты 0054c030/0054c350 читаются через re_ptr/re_fn (нет области — обработчик/мигание пропускаются);
      00519408 — буферы 00c4d720 — uint32-адреса (re_ptr + re_ptr_unregister). */
 #include "ported139.h"
+#include "ported141.h"
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -434,7 +435,7 @@ int32_t P139_LadderLoad(void) {
       S_0127104C = 0; G0127104C = 0; P68_IntroA = 0;
       return 1;
     }
-    if (P139_Fn41B8AC(line) == 0) break;
+    if (P141_LadderLine(line) == 0) break;
   }
   g_fclose(f);
   P124_DebugLog("MLADDER: Compilation failed\n");

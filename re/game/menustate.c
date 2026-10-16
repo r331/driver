@@ -109,8 +109,6 @@ void MenuSetColor(uint8_t r, uint8_t g, uint8_t b) { MenuColorR54AA2C = r; MenuC
 void MenuSetPos(int32_t x, int32_t y) { MenuPosX54AA24 = x; MenuPosY54AA28 = y; }
 void MenuSetVals5D77C0(int32_t a, int32_t b, uint8_t c, uint8_t d) { MenuVal5D77CC = a; MenuVal5D77C4 = a; MenuVal5D77C8 = b; MenuByte5D77C1 = c; MenuByte5D77C0 = d; }
 void MenuSetByte5D77C1(uint8_t v) { MenuByte5D77C1 = v; }
-GAME_VAR_DEF(uint8_t, MenuByte54BE5C, 0x0054be5c)
-GAME_VAR_DEF(uint8_t, MenuByte54BE7C, 0x0054be7c)
 void MenuSet54BE5CTo3(void) { MenuByte54BE5C = 3; }
 void MenuSet54BE5CTo2(void) { MenuByte54BE5C = 2; }
 void MenuSet54BE7CTo3(void) { MenuByte54BE7C = 3; }
