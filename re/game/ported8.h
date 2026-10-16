@@ -298,7 +298,7 @@ extern float P8_00546884;
 #undef P19_OutA /*gvi*/
 extern float P19_OutA;
 #pragma pop_macro("P19_OutA") /*gvi*/
-#define P8_005507d0 P19_OutA   /* v1.48: дубль сведён (направление света) */
+#define P8_005507d0 (*(float *)re_gvar(0x005507d0u, sizeof(float), (void *)&P19_OutA))   /* v1.48: дубль сведён (направление света) */
 #endif
 #ifdef RE_HOOK_BUILD
 #define P8_005507d4 GAME_VAR(float, P8_005507d4, 0x005507d4)
@@ -307,7 +307,7 @@ extern float P19_OutA;
 #undef P19_OutB /*gvi*/
 extern float P19_OutB;
 #pragma pop_macro("P19_OutB") /*gvi*/
-#define P8_005507d4 P19_OutB   /* v1.48: дубль сведён (направление света) */
+#define P8_005507d4 (*(float *)re_gvar(0x005507d4u, sizeof(float), (void *)&P19_OutB))   /* v1.48: дубль сведён (направление света) */
 #endif
 #ifdef RE_HOOK_BUILD
 #define P8_005507d8 GAME_VAR(float, P8_005507d8, 0x005507d8)
@@ -316,7 +316,7 @@ extern float P19_OutB;
 #undef P19_OutC /*gvi*/
 extern float P19_OutC;
 #pragma pop_macro("P19_OutC") /*gvi*/
-#define P8_005507d8 P19_OutC   /* v1.48: дубль сведён (направление света) */
+#define P8_005507d8 (*(float *)re_gvar(0x005507d8u, sizeof(float), (void *)&P19_OutC))   /* v1.48: дубль сведён (направление света) */
 #endif
 #ifdef RE_HOOK_BUILD
 #define P8_01251a68 GAME_VAR(float, P8_01251a68, 0x01251a68)
@@ -325,7 +325,7 @@ extern float P19_OutC;
 #undef P19_Out68 /*gvi*/
 extern float P19_Out68;
 #pragma pop_macro("P19_Out68") /*gvi*/
-#define P8_01251a68 P19_Out68   /* v1.48: дубль сведён (направление света) */
+#define P8_01251a68 (*(float *)re_gvar(0x01251a68u, sizeof(float), (void *)&P19_Out68))   /* v1.48: дубль сведён (направление света) */
 #endif
 #define P8_00d164e4 GAME_VAR(float, P8_00d164e4, 0x00d164e4)
 #ifndef RE_HOOK_BUILD

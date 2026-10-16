@@ -24,6 +24,7 @@
      область в re_ptr регистрируется один раз; 00524bd8 — имя ограничено 0xff, драйвер 00bdcb24 в native — прямой вызов 0048bf9a
      (P140_SndLoadWav, указатель на стек не переживает int32); 0041b3ab — запись по нулевому/незарегистрированному адресу — выход;
      004e9bbf — 01137380 ← 00b1c268..6f по uint16 (P59_AngA/B/C, четвёртое слово — без native-имени, сохраняется). */
+#include <stdlib.h>
 #include "ported150.h"
 #include "ported140.h"
 #include "ported148.h"
@@ -374,6 +375,10 @@ void P140_LadderRun(void) {
       P68_IntroCur = rd32(rec + 8);
       break;
     case 0xb:
+#ifndef RE_HOOK_BUILD
+      /* v2.11: RE_SKIP_INTERVIEW=1 — отладка: как чит 00b87e9c (пункт 5 меню Cheats, при 00bdf9fc ≠ 0) — интервью пропускается */
+      if (getenv("RE_SKIP_INTERVIEW") != NULL) MenuOptB87E9C = 1;
+#endif
       if (MenuOptB87E9C == 0) {
         D_00b87e30 = 4; set_e38(0); set_ea0(0); P62_HudOff2 = 1; set_1dc(1); P14_00b87e84 = 1;
         P136_GameLoop(0);

@@ -577,7 +577,11 @@ void P62_SpawnTrafficCar(int32_t n) {
       rec[0xd] = 0x19;
       wr16(rec, 0x16, 0);
       uint8_t *slot = (uint8_t *)P12_0112da00 + (uint32_t)r * 0xcd8;
+#ifdef RE_HOOK_BUILD
       P51_InitCarSlot((uint32_t)(uintptr_t)(P59_CarsTab + (uint32_t)n * 0x148), slot, (uint32_t)r);
+#else
+      P51_InitCarSlot(re_addr(P59_CarsTab + (uint32_t)n * 0x148), slot, (uint32_t)r);   /* v2.11: re_addr — было усечение указателя, re_ptr(+0xcd0) = NULL → копы не видели игрока */
+#endif
       G0112B284 += 1;
       wr32(slot, 0xcbc, 0);
       wr32(slot, 0x5c, 1);

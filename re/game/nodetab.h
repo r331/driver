@@ -15,6 +15,6 @@
 extern uint8_t P11_00bf1c40[0x40000], P11_00c1ed80[0x40000];
 #pragma pop_macro("P11_00c1ed80") /*gvi*/
 #pragma pop_macro("P11_00bf1c40") /*gvi*/
-#  define NODETAB_VAR(type, name, addr) (*(type *)(P11_00bf1c40 + ((uint32_t)(addr) - 0x00bf1c40u)))
-#  define SLOTTAB_VAR(type, name, addr) (*(type *)(P11_00c1ed80 + ((uint32_t)(addr) - 0x00c1ed80u)))
+#  define NODETAB_VAR(type, name, addr) (*(type *)((uint8_t *)re_gvar(0x00bf1c40u, 0x40000u, (void *)P11_00bf1c40) + ((uint32_t)(addr) - 0x00bf1c40u)))   /* v2.11: через образ данных (re_gvar), иначе — отдельный native-объект */
+#  define SLOTTAB_VAR(type, name, addr) (*(type *)((uint8_t *)re_gvar(0x00c1ed80u, 0x40000u, (void *)P11_00c1ed80) + ((uint32_t)(addr) - 0x00c1ed80u)))   /* v2.11: через образ данных (re_gvar), иначе — отдельный native-объект */
 #endif

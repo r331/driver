@@ -350,8 +350,8 @@ void P132_GameDraw(void) {
 #ifndef RE_HOOK_BUILD
   /* v2.10: RE_COPDBG=N — рейтинг Felony / активные копы / последнее нарушение раз в N кадров (те же переменные, что строка отладки) */
   { static int k; const char *e = getenv("RE_COPDBG"); if (e && (k++ % (atoi(e) > 0 ? atoi(e) : 50)) == 0)
-      fprintf(stderr, "[cop] кадр %d felony %d cops %d sugg %d max %d last %d spd %d\n", (int)P62_Frame, (int)G2_00D11A5C,
-              (int)G0112B284, (int)P97_D9E0, (int)P62_Max, (int)P95_ChanLast, (int)P62_Spd);
+      fprintf(stderr, "[cop] кадр %d felony %d cops %d sugg %d max %d last %d spd %d игрок %d %d\n", (int)P62_Frame, (int)G2_00D11A5C,
+              (int)G0112B284, (int)P97_D9E0, (int)P62_Max, (int)P95_ChanLast, (int)P62_Spd, (int)P99_Cars[0].pos[0], (int)P99_Cars[0].pos[2]);
       if (e && (k % (atoi(e) > 0 ? atoi(e) : 50)) == 1) for (int32_t q = 0; q < 8; q++) {   /* копы 0112da00: +0x32d — занят */
         const uint32_t *c = &P12_0112da00[q * 0x336]; if (c[0x32d] == 0) continue;
         int32_t dx = (int32_t)c[0x319] - P99_Cars[0].pos[0], dz = (int32_t)c[0x31b] - P99_Cars[0].pos[2];

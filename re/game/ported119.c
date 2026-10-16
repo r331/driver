@@ -283,7 +283,11 @@ static void cop_slot(int32_t i, uint8_t *r, uint8_t *c, int32_t k) {
 #ifndef RE_HOOK_BUILD
   if (k < 1 || k > 8) { G0112B284 = G0112B284 + 1; return; }
 #endif
+#ifdef RE_HOOK_BUILD
   P51_InitCarSlot((uint32_t)(uintptr_t)c, (uint8_t *)&P12_0112da00[(k - 1) * 0x336], (uint32_t)(k - 1));
+#else
+  P51_InitCarSlot(re_addr(c), (uint8_t *)&P12_0112da00[(k - 1) * 0x336], (uint32_t)(k - 1));
+#endif
   (void)i;
   G0112B284 = G0112B284 + 1;
 }

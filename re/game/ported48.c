@@ -1,4 +1,6 @@
 /* Звуковые слоты, завершение подсистем, операции скрипта — восстановлено из Game.exe (cdecl). */
+#include <stdlib.h>
+#include <stdio.h>
 #include "ported48.h"
 #include "../platform/plat.h"
 #include <string.h>
@@ -62,6 +64,12 @@ void P48_FreeVoice(int32_t slot) {
   P48_Snd[slot].id = 0xffff;
 }
 void P48_SetVoiceVolume(int32_t slot, int32_t vol) {
+#ifndef RE_HOOK_BUILD
+  /* v2.11: RE_HORNDBG=N — раз в N вызовов для голоса 2 (гудок): громкость, флаги слота, id */
+  if (slot == 2) { static int k; const char *e = getenv("RE_HORNDBG"); if (e && (k++ % (atoi(e) > 0 ? atoi(e) : 50)) == 0)
+      fprintf(stderr, "[horn] vol %d flags %x id %x snd %d en %d\n", (int)vol, (unsigned)P48_Snd[2].flags, (unsigned)P48_Snd[2].id,
+              (int)G6_00B91CF4, (int)G8_00575F40); }
+#endif
   if (G6_00B91CF4 == 0 || G8_00575F40 == 0) return;
   P48_Slot *s = &P48_Snd[slot];
   if ((s->flags & 0x11) == 0) return;

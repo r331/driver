@@ -38,7 +38,7 @@ extern uint8_t A_00D04B00[];
 #undef TrafficRecs /*gvi*/
 extern uint8_t TrafficRecs[0x40 * 0x54];   /* v1.47: P21_Entries — таблица трафика TrafficRecs */
 #pragma pop_macro("TrafficRecs") /*gvi*/
-#define P21_Entries TrafficRecs
+#define P21_Entries ((uint8_t *)re_gvar(0x011443e0u, 0x40 * 0x54, (void *)TrafficRecs))   /* v2.11: через образ данных (re_gvar), иначе — отдельный native-объект */
 #endif
 #define P21_ENTRY_SIZE 0x54
 int32_t  P21_GridCellSet(int32_t idx, const uint8_t* map, int32_t cx, int32_t cy); /* 004ecfbd */

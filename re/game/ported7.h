@@ -58,7 +58,7 @@ extern g8_bytes_t A_01146F20;
 #undef TrafficRecs /*gvi*/
 extern uint8_t TrafficRecs[0x40 * 0x54];   /* v1.47: одна таблица трафика (director.h) */
 #pragma pop_macro("TrafficRecs") /*gvi*/
-#define A_011443E0 TrafficRecs
+#define A_011443E0 ((uint8_t *)re_gvar(0x011443e0u, 0x40 * 0x54, (void *)TrafficRecs))   /* v2.11: через образ данных (re_gvar), иначе — отдельный native-объект */
 #endif
 #define G8_00575EE4 GAME_VAR(int32_t, G8_00575EE4, 0x00575ee4)
 #ifndef RE_HOOK_BUILD

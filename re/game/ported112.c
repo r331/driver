@@ -1,4 +1,6 @@
 /* v1.57 (см. ported112.h). */
+#include <stdlib.h>
+#include <stdio.h>
 #include "ported112.h"
 #include "reptr.h"
 #include "cartab.h"
@@ -227,6 +229,11 @@ static void set_wanted(int32_t v) { G2_00D11A5C = v; P14_00d11a5c = (uint32_t)v;
 void P112_ChaseTick(void) {
   if (P62_BusyB != 0) set_wanted(0);
   if (P62_BusyE != 0) { set_wanted(0xfff); P104_12B26C = 300; P105_MusLimit = 0; }
+#ifndef RE_HOOK_BUILD
+  { static int k; const char *e = getenv("RE_COPDBG"); if (e && (k++ % (atoi(e) > 0 ? atoi(e) : 50)) == 0)
+      fprintf(stderr, "[chase] flag %d eb4 %d eac %d eb0 %d hudoff %d\n", (int)P47_Flag, (int)P95_B87EB4, (int)G6_00B87EAC,
+              (int)P58_SB87EB0, (int)P62_HudOff1); }
+#endif
   if (P47_Flag == 0 || P95_B87EB4 != 0 || G6_00B87EAC != 0 || P58_SB87EB0 != 0 || P62_HudOff1 != 0) {
     P95_AmbN = 0; P95_SndReady = 0; P62_I14428C = 0;
     return;

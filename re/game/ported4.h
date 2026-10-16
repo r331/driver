@@ -555,14 +555,22 @@ extern void* D_005fed98;
 extern int32_t D_005feda0;
 #pragma pop_macro("D_005feda0") /*gvi*/
 #endif
+#ifdef RE_HOOK_BUILD
 #define D_00b1c0d4 GAME_VAR(int32_t, G00B1C0D4, 0x00b1c0d4)   /* v2.00: один native-объект с G00B1C0D4 (uihandlers3) */
+#else
+#define D_00b1c0d4 (*(int32_t *)re_gvar(0x00b1c0d4u, sizeof(int32_t), (void *)&G00B1C0D4))   /* v2.11: через образ данных */
+#endif
 #ifndef RE_HOOK_BUILD
 #pragma push_macro("G00B1C0D4") /*gvi*/
 #undef G00B1C0D4 /*gvi*/
 extern int32_t G00B1C0D4;   /* v2.03: объявление объекта псевдонима D_00b1c0d4 */
 #pragma pop_macro("G00B1C0D4") /*gvi*/
 #endif
+#ifdef RE_HOOK_BUILD
 #define D_00b1c0d8 GAME_VAR(int32_t, G00B1C0D8, 0x00b1c0d8)   /* v2.00: один native-объект с G00B1C0D8 */
+#else
+#define D_00b1c0d8 (*(int32_t *)re_gvar(0x00b1c0d8u, sizeof(int32_t), (void *)&G00B1C0D8))   /* v2.11: через образ данных */
+#endif
 #ifndef RE_HOOK_BUILD
 #pragma push_macro("G00B1C0D8") /*gvi*/
 #undef G00B1C0D8 /*gvi*/

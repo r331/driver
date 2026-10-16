@@ -60,6 +60,8 @@
 #include "dirnodes.h"
 #include <math.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P102_HudDmg")
@@ -616,7 +618,34 @@ static void cop_view_fill(int16_t *v) {
 #endif
 }
 /* ---- 004a6403: копы видят игрока? уровень погони P95_AmbN (2 — видят, 1 — первый кадр, 0/-1 — потеряли) ---- */
+#ifndef RE_HOOK_BUILD
+/* v2.11: RE_COPNEAR=K[:кадр] — отладка погони: один раз (по умолчанию на кадре 1000) первая патрульная машина ставится
+   перед машиной игрока (машина + K/1000 · (машина − камера) по XZ, как RE_PEDNEAR) — дальше её ведёт обычный ИИ копов. */
+static void cop_near_dbg(void) {
+  static int on = -1, done = 0, at = 1000; static float kk;
+  if (on < 0) { const char *e = getenv("RE_COPNEAR"); on = e != NULL;
+    if (on) { kk = (float)atof(e) / 1000.0f; const char *p = strchr(e, ':'); if (p) at = atoi(p + 1); } }
+  if (!on || done || (int32_t)P62_Frame < at) return;
+  for (int32_t k = 0; k < 8; k++) {
+    uint32_t *c = &P12_0112da00[k * 0x336];
+    if (c[0x32d] == 0) continue;
+    uint8_t *car = (uint8_t *)re_ptr(c[0x334]);
+    if (car == NULL) { fprintf(stderr, "[cop] RE_COPNEAR: коп %d — re_ptr(%08x) = NULL\n", (int)k, (unsigned)c[0x334]); continue; }
+    float cx = (float)P99_Cars[0].pos[0], cz = (float)P99_Cars[0].pos[2];
+    int32_t x = (int32_t)(cx + kk * (cx - P44_CamX)), z = (int32_t)(cz + kk * (cz - P44_CamZ));
+    wr32(car + 0xc8, x); wr32(car + 0xd0, z);
+    P101_CarGround((p99_car_t *)car, trec(car[0] - 1));
+    P59_ObjDir(car, 1);
+    c[0x319] = (uint32_t)x; c[0x31b] = (uint32_t)z;
+    fprintf(stderr, "[cop] RE_COPNEAR: коп %d → %d %d (кадр %d)\n", (int)k, (int)x, (int)z, (int)P62_Frame);
+    done = 1; break;
+  }
+}
+#endif
 void P102_CopsTick(void) {
+#ifndef RE_HOOK_BUILD
+  cop_near_dbg();
+#endif
   if (MenuOptBDFA58 != 0) { P95_AmbN = 2; P95_SndReady = 1; return; }
   int32_t seen = 0, cx = 0, cy = 0;
   float pos[3] = { (float)P99_Cars[0].pos[0], 0.0f, (float)P99_Cars[0].pos[2] };
