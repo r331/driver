@@ -113,6 +113,7 @@
 #include "../../game/ported122.h"
 #include "../../game/ported123.h"
 #include "../../game/ported124.h"
+#include "../../game/ported125.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -154,6 +155,7 @@ void P60_CamPrepare (void *cam) { P61_CamPrepare(cam); }
 void P60_Fn4CA802 (void *o) { P105_SpinModel(o); }
 void P60_Fn514261 (void *p) { P61_SpawnPart(p); }
 int32_t P59_Fn4A6A57 (const void *a, const void *b, const void *c) { return (int32_t)P103_CopMeet((uint8_t *)(uintptr_t)a, (const uint8_t *)b); }
+void P59_Fn4A5634 (const char *a, int32_t i) { P125_ModelName(a, i); }
 int32_t P59_Fn417970 (void) { return (int32_t)P67_Menu417970(); }
 void P57_MenuInit (uint32_t tbl, int32_t n) { P97_MenuCall0(tbl, n); }
 void P57_Setup40A41C (void) { Copy54A838(); }
@@ -329,6 +331,7 @@ int GetGroundHeight (int *pos) { return (int)P100_RoadHeight(pos); }
 void Call00411A9D (void) { MenuHiliteWhite00411A9D(); }
 void Call0041AFCA (void) { P55_NamesC(); }
 void Call0050F7B2 (void) { P97_SndMenuInit(); }
+void Call0050FBF4 (void) { P125_CtrlMenuValues(); }
 void P4Call004A3354 (void) { P58_FreeGrid(); }
 void P4Call0041A8CD (void) { P12_Fn0041A8CD(); }
 void P4Call0051AA5B (void) { P54_AllocRoadbits(); }
@@ -399,3 +402,4 @@ void P58_Fn416605 (void) { P100_ReplayMenuInit(); }
 void P58_Fn51763A (const char *a0, int32_t a1) { P98_LoadLang(a0, a1); }
 void P58_Fn406875 (void *a0) { P102_ConfigSnap(a0); }
 void P58_Fn413E37 (void) { P100_PadMenuInit(); }
+void P121_Fn4B955C (int32_t *a, int32_t *b, int32_t n, int32_t kind) { P125_ObjABurst(a, b, n, kind); }

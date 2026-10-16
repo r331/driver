@@ -3,6 +3,7 @@
 #include "ported116.h"
 #include "ported112.h"
 #include "reptr.h"
+#include "ported125.h"
 #ifdef RE_HOOK_BUILD
 void    *re_ptr(uint32_t addr) { return (void *)(uintptr_t)addr; }
 uint32_t re_addr(const void *p) { return (uint32_t)(uintptr_t)p; }
@@ -50,6 +51,7 @@ static const re_region_t k_regions[] = {
   { 0x00574f08u, P117_MenuA, sizeof P117_MenuA },               /* v1.62: .data меню паузы (game/p117_data.h) */
   { 0x00575088u, P117_MenuB, sizeof P117_MenuB },
   { 0x00575370u, P117_MenuC, sizeof P117_MenuC },
+  { 0x00b5a48cu, P125_FpsStr, sizeof P125_FpsStr },             /* v1.70: строка fps/языка меню управления (адрес в P117_MenuB) */
   { 0x00b5c950u, P116_SkidRecA, sizeof P116_SkidRecA },         /* v1.62: таблицы следов шин (адреса записей в P117_SkidLastA/B) */
   { 0x00b6e950u, P116_SkidRecB, sizeof P116_SkidRecB },
   { 0x010f5160u, P95_ObjA, sizeof P95_ObjA },

@@ -1140,7 +1140,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040766d,FUN_0040766d,MenuRed0040766D,manual,Ported6,,,117,ported
 004076e2,FUN_004076e2,MenuWhite004076E2,manual,Ported6,,,108,ported
 004078d0,FUN_004078d0,P100_LfbFormat,manual,Ported100,,,218,ported
-004079aa,FUN_004079aa,,,,,,637,todo
+004079aa,FUN_004079aa,P125_BlendTable,port,,,,637,ported
 00407c27,FUN_00407c27,Copy400_00407C27,manual,Menu,,,27,ported
 00407c42,FUN_00407c42,MenuReturnOne,manual,MenuState,,,10,ported
 00407c4c,FUN_00407c4c,P105_LfbToMenu,manual,,,,108,ported
@@ -1989,7 +1989,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0042d2b0,FUN_0042d2b0,Reset0042D2B0,manual,UIMisc,,,25,ported
 0042d2c9,FUN_0042d2c9,QueueTri,manual,,,,187,ported
 0042d384,FUN_0042d384,,,,,,464,todo
-0042d554,FUN_0042d554,,,,,,579,todo
+0042d554,FUN_0042d554,P125_ClipNearXY,port,,,,579,ported
 0042d797,FUN_0042d797,P100_ClipNear,manual,Ported100,,,639,ported
 0042da16,FUN_0042da16,,,,,,722,ported
 0042dce8,FUN_0042dce8,,,,,,799,ported
@@ -2235,7 +2235,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004a522a,FUN_004a522a,P94_ReadIdent,manual,compiler,range,,270,ported
 004a5338,FUN_004a5338,P99_CmdAppend,manual,,assert,,461,ported
 004a5505,FUN_004a5505,P68_ReadCamArgs,manual,misc,range,,166,ported
-004a5634,FUN_004a5634,,,compiler,assert,,633,todo
+004a5634,FUN_004a5634,P125_ModelName,port,compiler,assert,,633,ported
 004a58ad,FUN_004a58ad,ModelLookup,manual,,,,190,ported
 004a596b,FUN_004a596b,SkipToIdentStart_004A596B,manual,Misc,,,91,ported
 004a59c6,FUN_004a59c6,SkipLine004A59C6,manual,SmallFuncs,,,44,ported
@@ -2315,7 +2315,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004af2fd,FUN_004af2fd,,,,,,796,ported
 004af619,FUN_004af619,,,,,,803,ported
 004af93c,FUN_004af93c,,,,,,272,ported
-004afa4c,FUN_004afa4c,,,,,,683,todo
+004afa4c,FUN_004afa4c,P125_DebrisBurst,port,,,,683,ported
 004afcf7,FUN_004afcf7,P97_SpawnSmoke,manual,,,,325,ported
 004afe3c,FUN_004afe3c,,,,,,342,ported
 004aff92,FUN_004aff92,,,,,,283,ported
@@ -2342,11 +2342,11 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004b73f3,FUN_004b73f3,,,,,,3775,todo
 004b82b2,FUN_004b82b2,P110_GlowC,,ported110,,,1471,ported
 004b8871,FUN_004b8871,P110_GlowB,,ported110,,,1240,ported
-004b8d49,FUN_004b8d49,,,,,,517,todo
+004b8d49,FUN_004b8d49,P125_SmokePuffs,port,,,,517,ported
 004b8f4e,FUN_004b8f4e,,,,,,825,ported
 004b9287,FUN_004b9287,,,,,,477,todo
 004b9464,FUN_004b9464,P96_SpawnSpark,manual,Ported96,,,248,ported
-004b955c,FUN_004b955c,,,,,,729,todo
+004b955c,FUN_004b955c,P125_ObjABurst,port,,,,729,ported
 004b9835,FUN_004b9835,P94_Wobble,manual,,,,254,ported
 004b9933,FUN_004b9933,P12_Fn004B9933,manual,Misc12,,,88,ported
 004b998b,FUN_004b998b,,,,,,353,ported
@@ -2418,6 +2418,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c41ec,FUN_004c41ec,GetNodeParent,manual,DirNodes.c,,,58,ported
 004c4226,FUN_004c4226,FindNodeAtPixel,manual,DirNodes.c,,,131,ported
 004c42a9,FUN_004c42a9,DrawCornerIndicator,manual,DirNodes,,,62,ported
+004c43b6,FUN_004c43b6,P125_ReplayNodeAction,port,director,thunk,,422,ported
 004c459f,FUN_004c459f,AddCamera,manual,Director,,,118,ported
 004c483e,FUN_004c483e,ChangeCamera,manual,Director,,,118,ported
 004c4b3a,,AddTripodCamera,manual,Director,,,,ported
@@ -2567,7 +2568,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d3402,FUN_004d3402,P48_ShutdownSystems,manual,winmain,manual,,36,ported
 004d3426,FUN_004d3426,InitMapState4D3426,manual,Menu,,,30,ported
 004d3444,FUN_004d3444,P99_MapFree,manual,,,,366,ported
-004d35b2,FUN_004d35b2,,,,,,773,todo
+004d35b2,FUN_004d35b2,P125_LevelLoad,port,,,,773,ported
 004d38b7,FUN_004d38b7,,,,,,3064,todo
 004d4663,FUN_004d4663,,,,,,1024,todo
 004d4a63,FUN_004d4a63,,,,,,408,todo
@@ -2826,7 +2827,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004f5d67,FUN_004f5d67,TickTimer4F5D67,manual,MScript,range,,49,ported
 004f5d98,FUN_004f5d98,DrawBanner_004F5D98,manual,MScript,range,,53,ported
 004f5dcd,FUN_004f5dcd,P58_FreeLists,manual,MScript,range,,136,ported
-004f5e55,FUN_004f5e55,AddDashMessage,debug_string,MScript,assert,,444,named
+004f5e55,FUN_004f5e55,AddDashMessage,debug_string,MScript,assert,,444,ported
 004f6011,FUN_004f6011,P58_FindChunk,manual,MScript,range,,166,ported
 004f60b7,FUN_004f60b7,,,MScript,range,,358,ported
 004f621d,FUN_004f621d,,,MScript,range,,278,todo
@@ -2858,7 +2859,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004fbeb2,FUN_004fbeb2,,,,,,251,ported
 004fbfad,FUN_004fbfad,,,,,,282,todo
 004fc0c7,FUN_004fc0c7,Fwd004FC0C7,manual,Menu,,,18,ported
-004fc0d9,FUN_004fc0d9,,,,,,795,todo
+004fc0d9,FUN_004fc0d9,P125_PickupTick,port,,,,795,ported
 004fc3f4,FUN_004fc3f4,P98_DrawScriptModels,manual,,,,391,ported
 004fc57b,FUN_004fc57b,FreeBuf004FC57B,manual,Ported6,,,48,ported
 004fc5ab,FUN_004fc5ab,FindScriptCommandById,manual,mscript,,,54,ported
@@ -2956,7 +2957,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0050fa41,FUN_0050fa41,StepDown0050FA41,manual,ui/widgets,,,47,ported
 0050fa70,FUN_0050fa70,MenuQuality0050FA70,manual,Ported6,,,64,ported
 0050fab0,FUN_0050fab0,P96_ClampOptions,manual,Ported96,,,324,ported
-0050fbf4,FUN_0050fbf4,,,,,,562,todo
+0050fbf4,FUN_0050fbf4,P125_CtrlMenuValues,port,,,,562,ported
 0050fe26,FUN_0050fe26,MenuToggle0050FE26,manual,Ported6,,,92,ported
 0050fe82,FUN_0050fe82,Toggle0050FE82,manual,ui/widgets,,,33,ported
 0050fea3,FUN_0050fea3,Toggle0050FEA3,manual,ui/widgets,,,33,ported
@@ -3158,7 +3159,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00522d02,FUN_00522d02,,,,,,354,ported
 00522e64,FUN_00522e64,P68_RepeatCheck,manual,misc,,,198,ported
 00522f2a,FUN_00522f2a,ExchangeTable00522F2A,manual,SmallFuncs,,,37,ported
-00522f4f,FUN_00522f4f,,,,,,603,todo
+00522f4f,FUN_00522f4f,P125_DropHit,port,,,,603,ported
 005233a0,FUN_005233a0,StartAudio005233A0,manual,Ported6,,,30,ported
 005233be,FUN_005233be,,,,,,471,todo
 00523595,FUN_00523595,P48_SndShutdown,manual,sound,manual,,62,ported

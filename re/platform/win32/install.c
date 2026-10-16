@@ -113,6 +113,7 @@
 #include "../../game/ported122.h"
 #include "../../game/ported123.h"
 #include "../../game/ported124.h"
+#include "../../game/ported125.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2220,6 +2221,18 @@ void re_install_all(void) {
     re_hook(0x004bf4a1, (void*)P124_WatchShow, "P124_WatchShow");
     re_hook(0x004c38e2, (void*)P124_ReplayMenu, "P124_ReplayMenu");
     re_hook(0x004c813d, (void*)P124_HandleDirector, "P124_HandleDirector");
+    re_hook(0x004d35b2, (void*)P125_LevelLoad, "P125_LevelLoad");
+    re_hook(0x004c43b6, (void*)P125_ReplayNodeAction, "P125_ReplayNodeAction");
+    re_hook(0x004f5e55, (void*)P125_AddDashMessage, "P125_AddDashMessage");
+    re_hook(0x004b8d49, (void*)P125_SmokePuffs, "P125_SmokePuffs");
+    re_hook(0x0050fbf4, (void*)P125_CtrlMenuValues, "P125_CtrlMenuValues");
+    re_hook(0x0042d554, (void*)P125_ClipNearXY, "P125_ClipNearXY");
+    re_hook(0x00522f4f, (void*)P125_DropHit, "P125_DropHit");
+    re_hook(0x004a5634, (void*)P125_ModelName, "P125_ModelName");
+    re_hook(0x004079aa, (void*)P125_BlendTable, "P125_BlendTable");
+    re_hook(0x004afa4c, (void*)P125_DebrisBurst, "P125_DebrisBurst");
+    re_hook(0x004b955c, (void*)P125_ObjABurst, "P125_ObjABurst");
+    re_hook(0x004fc0d9, (void*)P125_PickupTick, "P125_PickupTick");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");

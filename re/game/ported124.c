@@ -12,6 +12,7 @@
      0040209f→004c419e FindNodeByLink, 00402955→004c4151 FindNodeById, 00401e8d→004c43b6 — действие узла меню повтора,
      нет в Ghidra-списке, вызывается через unported.h P124_Fn4C43B6). */
 #include "ported124.h"
+#include "ported125.h"
 #include "unported.h"
 #include "engine.h"
 #include "crt.h"
@@ -194,7 +195,7 @@ void P124_MotelInit(void) {
   P110_IconKY = (float)P19_ScrH / P19_DivH;
   P47_LoadFlyby(D_00b87e30);
   Ui0041A192();
-  P124_Fn4D35B2();
+  P125_LevelLoad();
   P48_ResetAll();
   P77_LoadBank("MOTEL.DSS", 0);
   SoundSetVolB0052360D(5);
@@ -370,7 +371,7 @@ void P124_ReplayMenu(int32_t dir) {
     }
     DirectorUnk7C = n->id;
     break;
-  case 0x10: P124_Fn4C43B6(DirectorUnk7C); break;
+  case 0x10: P125_ReplayNodeAction(DirectorUnk7C); break;
   default: DebugLog("ReplayMenuHandler: Error! - Unknown movement/selection."); break;
   }
   if (DirectorUnk7C == 9 && P124_ReplayPrev == 6) BackupCameraState();

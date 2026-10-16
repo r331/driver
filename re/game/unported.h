@@ -7,9 +7,9 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
-    V(P124_Fn4D35B2, 0x004d35b2, (void), ()) \
+    V(P125_Fn4EFAFD, 0x004efafd, (const char *name), (name))   /* загрузка LEVELS\\FLAT.D3D (map) */ \
+    V(P125_Fn4906F9, 0x004906f9, (void), ()) \
     R(int32_t, P58_Fn416794, 0x00416794, (void), ())   /* шпион теста; перенесено как P124_MotelKeys (--skip) */ \
-    V(P124_Fn4C43B6, 0x004c43b6, (int32_t node), (node))   /* действие узла меню повтора (нет в Ghidra-списке) */ \
     V(P98_Fn4ACCF0, 0x004accf0, (uint32_t rec, int32_t a), (rec, a)) \
     V(P98_Fn4BA81F, 0x004ba81f, (uint8_t *rec), (rec)) \
     V(P98_Fn4C582F, 0x004c582f, (void *cam), (cam)) \
