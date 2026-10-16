@@ -95,6 +95,7 @@
 #include "ported128.h"
 #include "ported131.h"
 #include "ported132.h"
+#include "ported134.h"
 
 #ifndef RE_HOOK_BUILD
 GAME_VAR_DEF(int32_t, P133_1137320, 0x01137320)
@@ -211,10 +212,10 @@ void P133_CamUpdate(int32_t lock) {
     if (P36_Pad1 != 0) { cam_y(P44_CamY + P43_FadeDiv); P61_OffY = P61_OffY + P43_FadeDiv; }
   }
   if ((G6_00B87EA0 | P62_HudOff1) != 0 && P88_Mode575 == 0) {
-    P60_Var1373C0 = 0; P43_ScaleA = 384.0f; P133_Fn49D84A(); return;
+    P60_Var1373C0 = 0; P43_ScaleA = 384.0f; P134_CamChase(0x41); return;
   }
   switch (P59_Mode1137324) {
-  case 0: P60_Var1373C0 = 0; P43_ScaleA = 384.0f; P133_Fn49D84A(); break;
+  case 0: P60_Var1373C0 = 0; P43_ScaleA = 384.0f; P134_CamChase(P61_V10); break;
   case 1: {
     P60_Var1373C0 = 0; P43_ScaleA = 384.0f;
     P128_FreeCam(P61_V10);
@@ -224,10 +225,11 @@ void P133_CamUpdate(int32_t lock) {
     break; }
   case 2: P60_Var1373C0 = 0; P43_ScaleA = 384.0f; P61_SetupCamN(P61_V10b); break;
   case 6: P99_FreeCamMove(); break;
-  case 7: P133_Fn4F0F90(); break;
+  case 7: P134_CamCine(); break;
   case 8: P99_CamBehind(); break;
   case 9: P131_CamShake(); break;
-  case 0x10: case 0x11: P133_Fn49E16C(); break;
+  case 0x10: P134_CamTarget(-1); break;
+  case 0x11: P134_CamTarget(P61_V10); break;
   default: break;
   }
   float dx = fabsf((float)P99_Cars[0].pos[0] - P44_CamX), dz = fabsf((float)P99_Cars[0].pos[2] - P44_CamZ);
@@ -392,7 +394,7 @@ static void traffic_fn(uint8_t *r) {
   case 2: P103_TrafficTick(r); break;
   case 3: P119_TrafficStep(r); break;
   case 4: P133_Fn4A7FEC(r); break;
-  case 5: P133_Fn494620(r); break;
+  case 5: P134_TrafficHold(r); break;
   case 6: ActorStep00494678(r); break;
   case 7: NoopFn004946d0(); break;
   default: break;

@@ -68,6 +68,7 @@
 #include "ported76.h"
 #include "ported121.h"
 #include "ported122.h"
+#include "ported134.h"
 #include "smallfuncs2.h"
 #include "unported.h"
 #include <math.h>
@@ -513,7 +514,7 @@ void P131_CamShake(void) {
     float k = (3000.0f - d) / (20.0f * d);
     P44_CamX = fx * k + P44_CamX; P59_VX = P44_CamX;
     P44_CamZ = fz * k + P44_CamZ; P59_VZ = P44_CamZ;
-    P131_Fn49CAD4();
+    P134_CamCollide(1);
   }
   if (P76_Angle < 0x30) {
     uint32_t r = N14_Rand();

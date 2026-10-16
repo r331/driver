@@ -122,6 +122,7 @@
 #include "../../game/ported131.h"
 #include "../../game/ported132.h"
 #include "../../game/ported133.h"
+#include "../../game/ported134.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2291,6 +2292,11 @@ void re_install_all(void) {
     re_hook(0x004cf84c, (void*)P133_EventModels, "P133_EventModels");
     re_hook(0x004f2360, (void*)P133_MirrorDraw, "P133_MirrorDraw");
     re_hook(0x004967d2, (void*)P133_TrafficTick, "P133_TrafficTick");
+    re_hook(0x0049cad4, (void*)P134_CamCollide, "P134_CamCollide");
+    re_hook(0x0049d84a, (void*)P134_CamChase, "P134_CamChase");
+    re_hook(0x0049e16c, (void*)P134_CamTarget, "P134_CamTarget");
+    re_hook(0x004f0f90, (void*)P134_CamCine, "P134_CamCine");
+    re_hook(0x00494620, (void*)P134_TrafficHold, "P134_TrafficHold");
     re_hook(0x004b9287, (void*)P132_Smoke, "P132_Smoke");
     re_hook(0x004ca135, (void*)P132_Lights, "P132_Lights");
     re_hook(0x0049f20a, (void*)P132_LoadFlyby, "P132_LoadFlyby");

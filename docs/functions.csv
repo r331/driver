@@ -2139,6 +2139,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00493ff7,FUN_00493ff7,,,,,,806,ported
 0049431d,FUN_0049431d,HeadingDelta,manual,,,,191,ported
 004943dc,FUN_004943dc,,,,,,452,ported
+00494620,FUN_00494620,P134_TrafficHold,port,ported134,data,,88,ported
 00494678,FUN_00494678,ActorStep00494678,manual,Ported6,,,88,ported
 004946d0,FUN_004946d0,NoopFn004946d0,manual,Noop,,,5,ported
 004946d5,FUN_004946d5,NoopFn004946d5,manual,Noop,,,5,ported
@@ -2172,11 +2173,11 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0049c850,FUN_0049c850,InitCamDefaults,manual,,,,192,ported
 0049c910,FUN_0049c910,P59_SetupCamera,manual,,,,140,ported
 0049c99c,FUN_0049c99c,P99_FreeCamMove,manual,,,,312,ported
-0049cad4,FUN_0049cad4,,,,,,2910,todo
-0049d84a,FUN_0049d84a,,,,,,1065,todo
+0049cad4,FUN_0049cad4,P134_CamCollide,port,ported134,port,,2910,ported
+0049d84a,FUN_0049d84a,P134_CamChase,port,ported134,port,,1065,ported
 0049dc73,FUN_0049dc73,P128_FreeCam,port,Ported128,,,798,ported
 0049df91,FUN_0049df91,,,,,,475,ported
-0049e16c,FUN_0049e16c,,,,,,783,todo
+0049e16c,FUN_0049e16c,P134_CamTarget,port,ported134,port,,783,ported
 0049e47b,FUN_0049e47b,P99_CamBehind,manual,,,,364,ported
 0049e5e7,FUN_0049e5e7,P61_SetupCamN,manual,camera,manual,,449,ported
 0049e7a8,FUN_0049e7a8,P131_CamShake,port,ported131,port,,361,ported
@@ -2789,7 +2790,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004efafd,FUN_004efafd,P126_ReadMapPals,port,map,assert,,262,ported
 004efc03,FUN_004efc03,P58_FreeRecs,manual,,,,121,ported
 004efc7c,FUN_004efc7c,DownloadSlotPalette,manual,GlideTexMem,manual,,182,ported
-004f0f90,FUN_004f0f90,,,,,,917,todo
+004f0f90,FUN_004f0f90,P134_CamCine,port,ported134,port,,917,ported
 004f1325,FUN_004f1325,P100_DrawPartsB,manual,Ported100,,,553,ported
 004f154e,FUN_004f154e,,,,,,503,ported
 004f1745,FUN_004f1745,P126_SpawnInit,port,,,,724,ported
