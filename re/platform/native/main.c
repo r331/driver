@@ -25,6 +25,7 @@ static void watchdog(int sig) { (void)sig; fprintf(stderr, "[watchdog] стоп 
     fflush(NULL); _Exit(3); }
 int32_t P151_WinMain(int32_t hinst, int32_t prev, int32_t cmd, int32_t show);
 int  re_selftest(void);
+int  re_input_test(void);   /* v2.14: tests/input_test.c */
 void re_init_consts(void);
 int  re_init_data_game(void);   /* v2.01: game/data_init.c (tools/gen_data_init.py) */
 extern const uint32_t re_data_image_base, re_data_image_size; extern uint8_t re_data_image[];   /* v2.02: game/data_image.c */
@@ -37,6 +38,7 @@ int main(int argc, char **argv) {
     const char *data = "Data_Files"; int selftest = 0, frames = -1, idle = 0;
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "--selftest")) selftest = 1;
+        else if (!strcmp(argv[i], "--inputtest")) return re_input_test();
         else if (!strcmp(argv[i], "--data") && i + 1 < argc) data = argv[++i];
         else if (!strcmp(argv[i], "--idle")) idle = 1;
         else if (!strcmp(argv[i], "--frames") && i + 1 < argc) frames = atoi(argv[++i]);

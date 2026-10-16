@@ -79,6 +79,44 @@ static unsigned g_prog, g_vao, g_vbo, g_white;
 static int g_uAlphaTest, g_at = 1, g_uView, g_uTex, g_zt = 1, g_zw = 1, g_blend, g_bs = 5, g_bd = 6;
 static int g_zf = 4, g_vp[4], g_vpset, g_rs[64], g_tss[8][32], g_uCOp, g_uAOp, g_uAFunc, g_uARef, g_af, g_aref;
 static void (*g_swap)(void);
+/* v2.14: нативное разрешение. g_w×g_h — логический кадр игры (640×480: в нём игра даёт x,y вершин, прямоугольники 2D и
+   viewport); g_dw×g_dh — реальный буфер окна (SDL_GL_GetDrawableSize, на Retina — в пикселях). Кадр игры вписывается
+   в буфер с сохранением пропорций (4:3, полосы по бокам — pillarbox, сверху/снизу — letterbox); 3D растеризуется
+   в разрешении буфера (вершины — float), 2D/HUD масштабируются линейно тем же коэффициентом. */
+static int g_dw, g_dh, g_cx, g_cy, g_cw, g_ch; static double g_sc = 1.0;
+static void content_rect(void) {
+    if (g_dw <= 0 || g_dh <= 0) { g_dw = g_w; g_dh = g_h; }
+    double sx = (double)g_dw / g_w, sy = (double)g_dh / g_h; g_sc = sx < sy ? sx : sy;
+    g_cw = (int)(g_w * g_sc + 0.5); g_ch = (int)(g_h * g_sc + 0.5);
+    if (g_cw > g_dw) g_cw = g_dw;
+    if (g_ch > g_dh) g_ch = g_dh;
+    g_cx = (g_dw - g_cw) / 2; g_cy = (g_dh - g_ch) / 2;
+}
+/* логический прямоугольник (верх-лево, y вниз) → прямоугольник GL в буфере (низ-лево) */
+static void map_rect(int x, int y, int w, int h, int *o) {
+    double x0 = g_cx + x * g_sc, x1 = g_cx + (x + w) * g_sc, y0 = g_cy + (g_h - y - h) * g_sc, y1 = g_cy + (g_h - y) * g_sc;
+    o[0] = (int)(x0 + 0.5); o[1] = (int)(y0 + 0.5); o[2] = (int)(x1 + 0.5) - o[0]; o[3] = (int)(y1 + 0.5) - o[1];
+}
+static void scissor_logical(int x, int y, int w, int h) { int r[4]; map_rect(x, y, w, h, r); glScissor(r[0], r[1], r[2], r[3]); }
+void plat_render_set_drawable(int dw, int dh) {
+    if (dw <= 0 || dh <= 0) return;
+    g_dw = dw; g_dh = dh; content_rect();
+    if (g_ok) glViewport(g_cx, g_cy, g_cw, g_ch);
+}
+void plat_render_set_logical(int w, int h) { if (w > 0 && h > 0) { g_w = w; g_h = h; content_rect(); if (g_ok) glViewport(g_cx, g_cy, g_cw, g_ch); } }
+void plat_render_size(int *dw, int *dh, int *lw, int *lh) { if (dw) *dw = g_dw; if (dh) *dh = g_dh; if (lw) *lw = g_w; if (lh) *lh = g_h; }
+/* окно → логические координаты кадра (мышь); 0 — точка в полосе */
+int plat_render_to_logical(double px, double py, int *lx, int *ly) {
+    double x = (px - g_cx) / g_sc, y = (py - (g_dh - g_cy - g_ch)) / g_sc;
+    if (lx) *lx = (int)x;
+    if (ly) *ly = (int)y;
+    return x >= 0 && y >= 0 && x < g_w && y < g_h;
+}
+/* после показа кадра: весь буфер (и полосы) — чёрный; содержимое заднего буфера после swap в GL не определено */
+static void clear_bars(void) {
+    if (!g_ok || (g_cw == g_dw && g_ch == g_dh)) return;
+    glDisable(GL_SCISSOR_TEST); glClearColor(0, 0, 0, 1); glClear(GL_COLOR_BUFFER_BIT);
+}
 
 static unsigned blendf(int d3d) {
     static const unsigned m[11] = { GL_ONE, GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
@@ -94,7 +132,9 @@ static unsigned compile(unsigned type, const char *src) {
 static void apply_state(void) {
     static const unsigned zf[9] = { GL_LEQUAL, GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS };
     if (g_zt) { glEnable(GL_DEPTH_TEST); glDepthFunc(zf[g_zf >= 1 && g_zf <= 8 ? g_zf : 4]); } else glDisable(GL_DEPTH_TEST);
-    if (g_vpset) { glEnable(GL_SCISSOR_TEST); glScissor(g_vp[0], g_h - g_vp[1] - g_vp[3], g_vp[2], g_vp[3]); } else glDisable(GL_SCISSOR_TEST);
+    if (g_vpset) { glEnable(GL_SCISSOR_TEST); scissor_logical(g_vp[0], g_vp[1], g_vp[2], g_vp[3]); }
+    else if (g_cw != g_dw || g_ch != g_dh) { glEnable(GL_SCISSOR_TEST); glScissor(g_cx, g_cy, g_cw, g_ch); }   /* v2.14: не рисовать в полосы */
+    else glDisable(GL_SCISSOR_TEST);
     glDepthMask(g_zw ? 1 : 0);
     if (g_blend) { glEnable(GL_BLEND); glBlendFunc(blendf(g_bs), blendf(g_bd)); } else glDisable(GL_BLEND);
 }
@@ -122,10 +162,10 @@ int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &one);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glDisable(GL_CULL_FACE);
-    g_w = w; g_h = h; g_swap = swap; g_ok = 1; g_cur = 0;
+    g_w = w; g_h = h; g_dw = w; g_dh = h; content_rect(); g_swap = swap; g_ok = 1; g_cur = 0;
     memset(g_tss, 0, sizeof g_tss); g_af = 0; g_aref = 0;   /* v2.01: новый контекст — состояние стадий с нуля (op 0 — прежнее поведение) */
     g_tss[0][2] = 2; g_tss[0][3] = 1; g_tss[0][5] = 2; g_tss[0][6] = 1;   /* v2.01: умолчания D3D: ARG1 = TEXTURE, ARG2 = CURRENT */
-    glViewport(0, 0, w, h);
+    glViewport(g_cx, g_cy, g_cw, g_ch);
     plat_log("GL %s\n", (const char *)glGetString(GL_VERSION));
     return 0;
 }
@@ -155,7 +195,7 @@ void plat_tex_update(int tex, int w, int h, const uint32_t *rgba) {   /* v2.01: 
 }
 void plat_clear_rect(uint32_t c, int x, int y, int w, int h) {   /* v2.01: Blt COLORFILL задней поверхности */
     if (!g_ok || w <= 0 || h <= 0) return;
-    glEnable(GL_SCISSOR_TEST); glScissor(x, g_h - y - h, w, h);
+    glEnable(GL_SCISSOR_TEST); scissor_logical(x, y, w, h);
     glClearColor(((c >> 16) & 255) / 255.f, ((c >> 8) & 255) / 255.f, (c & 255) / 255.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT); glDisable(GL_SCISSOR_TEST);
 }
@@ -224,19 +264,21 @@ void plat_draw_lines(const plat_vertex *v, int count) { if (g_ok && v && count >
 void plat_clear(uint32_t c, int clear_z) {
     if (!g_ok) return;
     glDepthMask(1); glClearColor(((c >> 16) & 255) / 255.f, ((c >> 8) & 255) / 255.f, (c & 255) / 255.f, (c >> 24) / 255.f);
+    if (g_cw != g_dw || g_ch != g_dh) { glEnable(GL_SCISSOR_TEST); glScissor(g_cx, g_cy, g_cw, g_ch); }   /* v2.14: только кадр игры */
     glClear(GL_COLOR_BUFFER_BIT | (clear_z ? GL_DEPTH_BUFFER_BIT : 0));
+    if (g_cw != g_dw || g_ch != g_dh) glDisable(GL_SCISSOR_TEST);
 }
 void plat_set_current_viewport(void) {}
 int plat_get_render_state(int state) { return (state >= 0 && state < 64) ? g_rs[state] : 0; }
 void plat_clear_depth(void *viewport, int x, int y, int w, int h, float z) {
     (void)viewport;
     if (!g_ok) return;
-    glEnable(GL_SCISSOR_TEST); glScissor(x, g_h - y - h, w, h);
+    glEnable(GL_SCISSOR_TEST); scissor_logical(x, y, w, h);
     glDepthMask(1); glClearDepth((double)z); glClear(GL_DEPTH_BUFFER_BIT);
     glClearDepth(1.0);
 }
 void plat_snd_pump(void);
-void plat_flip(void) { plat_snd_pump(); if (!g_ok) return; glFinish(); if (g_swap) { plat_frame_tick("flip"); g_swap(); } }
+void plat_flip(void) { plat_snd_pump(); if (!g_ok) return; glFinish(); if (g_swap) { plat_frame_tick("flip"); g_swap(); clear_bars(); } }
 void plat_blit2d(int tex, int sx, int sy, int sw, int sh, int dx, int dy) {
     if (!g_ok || tex <= 0 || tex >= MAX_TEX || !g_tex[tex].id) return;
     float tw = (float)g_tex[tex].w, th = (float)g_tex[tex].h;
@@ -254,9 +296,10 @@ void plat_blit2d(int tex, int sx, int sy, int sw, int sh, int dx, int dy) {
 int plat_render_readback(uint32_t *out) {
     if (!g_ok || !out) return -1;
     glFinish(); glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    uint32_t *tmp = malloc((size_t)g_w * g_h * 4); if (!tmp) return -1;
-    glReadPixels(0, 0, g_w, g_h, GL_RGBA, GL_UNSIGNED_BYTE, tmp);
-    for (int y = 0; y < g_h; y++) memcpy(out + (size_t)y * g_w, tmp + (size_t)(g_h - 1 - y) * g_w, (size_t)g_w * 4);
-    for (size_t i = 0; i < (size_t)g_w * g_h; i++) out[i] |= 0xFF000000u;   /* у экрана (Glide/DirectDraw) нет альфы: пиксель кадра всегда непрозрачен */
+    int W = g_dw, H = g_dh;   /* v2.14: весь буфер окна (с полосами), plat_render_size */
+    uint32_t *tmp = malloc((size_t)W * H * 4); if (!tmp) return -1;
+    glReadPixels(0, 0, W, H, GL_RGBA, GL_UNSIGNED_BYTE, tmp);
+    for (int y = 0; y < H; y++) memcpy(out + (size_t)y * W, tmp + (size_t)(H - 1 - y) * W, (size_t)W * 4);
+    for (size_t i = 0; i < (size_t)W * H; i++) out[i] |= 0xFF000000u;   /* у экрана (Glide/DirectDraw) нет альфы: пиксель кадра всегда непрозрачен */
     free(tmp); return 0;
 }

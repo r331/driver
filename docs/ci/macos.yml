@@ -1,4 +1,5 @@
 # v2.13: проверка нативной сборки на Apple Silicon (macos-14 = arm64 M1).
+# v2.14: + inputtest (ввод: события в главном потоке, SDL_PushEvent → DIK), проверка Info.plist Driver.app.
 # Файлов игры в CI нет: ctest запускает только selftest (метка nodata) — он сам создаёт нужные файлы.
 name: macos
 on:
@@ -22,7 +23,7 @@ jobs:
         run: cmake --build re/build-native -j3
       - name: Бинарник
         run: file re/build-native/driver; otool -L re/build-native/driver
-      - name: ctest (selftest без данных игры)
+      - name: ctest (selftest и inputtest без данных игры)
         run: cd re/build-native && ctest --output-on-failure -L nodata
       - name: Диагностика selftest (lldb, только при падении)
         if: failure()
@@ -50,6 +51,9 @@ jobs:
           fi
           chmod u+w $APP/Contents/Frameworks/*.dylib
           ls -la $APP/Contents/Frameworks
+          plutil -p $APP/Contents/Info.plist
+          plutil -extract NSPrincipalClass raw $APP/Contents/Info.plist | grep -qx NSApplication
+          plutil -extract NSHighResolutionCapable raw $APP/Contents/Info.plist | grep -qx true
           codesign --force --deep -s - $APP
           otool -L $APP/Contents/MacOS/Driver
           cp re/README_macOS.txt re/build-app/ 2>/dev/null || true
@@ -63,6 +67,7 @@ jobs:
           cd re/build-app && mkdir -p t && cd t
           set +e; DYLD_PRINT_LIBRARIES=1 to 30 ../Driver.app/Contents/MacOS/Driver 2>&1 | grep -i "sdl\|Не найдены"; echo "rc(без данных)=${PIPESTATUS[0]}"
           SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy to 90 ../Driver.app/Contents/MacOS/Driver --selftest > st.log 2>&1; rc=$?; tail -3 st.log; echo "rc(selftest)=$rc"; test $rc -eq 0
+          SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy to 30 ../Driver.app/Contents/MacOS/Driver --inputtest; rc=$?; echo "rc(inputtest)=$rc"; test $rc -eq 0
       - uses: actions/upload-artifact@v4
         with:
           name: driver-macos-arm64

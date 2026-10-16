@@ -71,7 +71,13 @@ int  plat_draw_prim_last(int *ptype, int *count);               /* SDL (тест
 /* Подключение GL-контекста (SDL-окно или OSMesa); swap может быть NULL (offscreen). */
 int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int w, int h);
 int plat_render_offscreen(int w, int h);                 /* OSMesa; <0 если нет в сборке */
-int plat_render_readback(uint32_t *rgba_topdown);        /* w*h пикселей 0xAABBGGRR (байты R,G,B,A) */
+int plat_render_readback(uint32_t *rgba_topdown);        /* dw*dh пикселей буфера окна (plat_render_size), 0xAABBGGRR (байты R,G,B,A) */
+/* v2.14: нативное разрешение — логический кадр игры вписывается в буфер окна с сохранением пропорций */
+void plat_render_set_drawable(int dw, int dh);           /* размер буфера окна в пикселях (SDL_GL_GetDrawableSize) */
+void plat_render_set_logical(int w, int h);              /* логический размер кадра игры (640×480) */
+void plat_render_size(int *dw, int *dh, int *lw, int *lh);
+int  plat_render_to_logical(double px, double py, int *lx, int *ly);   /* пиксель буфера → логические координаты; 0 — в полосе */
+int  plat_is_main_thread(void);                          /* v2.14: 1 — главный поток процесса (macOS: pthread_main_np) */
 void plat_render_shutdown(void);
 /* Звук и CD-аудио */
 int  plat_snd_create(const void *pcm, int bytes, int rate, int channels, int bits);

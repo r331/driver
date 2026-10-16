@@ -1,4 +1,5 @@
 /* DirectInput: джойстик и геймпад — восстановлено из Game.exe (Input.c). */
+#include <stdlib.h>
 #include "ported36.h"
 #include <string.h>
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -206,6 +207,23 @@ void P36_GetPadButtons(uint32_t *out) {
   static const uint32_t bit[9] = { 8, 4, 2, 1, 0x10, 0x20, 0x40, 0x80, 0x100 };
   for (int i = 0; i < 9; i++)
     if (P34_Keys[P36_KeyCfg[cfg[i]]] != 0) *out |= bit[i];
+#ifndef RE_HOOK_BUILD
+  /* v2.14 (только native, не в Game.exe): удобные клавиши езды в дополнение к настроенным — ↑ газ (бит 2, KeyCfg[6]),
+     ↓ тормоз/назад (1, [7]), ← руль влево (8, [4]), → вправо (4, [5]), пробел — ручник (0x20, [9]).
+     Меню не затронуты: P36_GetPadButtons зовётся только из такта езды (P132, 004d4bfb), меню читают стрелки P34_Keys
+     напрямую (P107_MenuNav, P110, P114). RE_ARROWKEYS=0 — отключить. */
+  {
+    static int on = -1;
+    if (on < 0) { const char *e = getenv("RE_ARROWKEYS"); on = !(e && *e == '0'); }
+    if (on) {
+      if (P34_Keys[0xc8] != 0) *out |= 2;
+      if (P34_Keys[0xd0] != 0) *out |= 1;
+      if (P34_Keys[0xcb] != 0) *out |= 8;
+      if (P34_Keys[0xcd] != 0) *out |= 4;
+      if (P34_Keys[0x39] != 0) *out |= 0x20;
+    }
+  }
+#endif
 }
 
 int32_t P36_PollInput(void) {

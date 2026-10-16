@@ -12,7 +12,8 @@
 #include <sys/stat.h>
 #include <limits.h>
 static SDL_Window *g_win; static SDL_GLContext g_gl;
-static void swap_win(void){ SDL_GL_SwapWindow(g_win); }
+static void update_drawable(void);
+static void swap_win(void){ SDL_GL_SwapWindow(g_win); update_drawable(); }   /* v2.14: размер буфера мог измениться (окно, полный экран, Retina) */
 /* v2.08: RE_FIXED_DT=1 — виртуальное время для воспроизводимых прогонов: каждый вызов plat_time_ms +1 мс, каждый показанный
    кадр (plat_flip) — не меньше кадр·20 мс (такт логики P21_FrameTicks = 20 мс → один такт на кадр), plat_sleep_ms только
    сдвигает часы; таймеры (plat_timer_start) срабатывают в основном потоке по виртуальным часам (plat_vt_timers, plat_snd.c). */
@@ -35,17 +36,61 @@ void *plat_file_open(const char *path, const char *mode){
         snprintf(full, sizeof full, "%s/%s", dir, e->d_name); closedir(d); return fopen(full, mode); }
     closedir(d); return NULL;
 }
+/* v2.14: окно в нативном разрешении. Логический кадр игры w×h (640×480) вписывается в буфер окна (plat_render_set_drawable).
+   macOS — по умолчанию полный экран рабочего стола (SDL_WINDOW_FULLSCREEN_DESKTOP), другие системы — окно.
+   RE_WINDOWED=1 — окно; RE_FULLSCREEN=1 — полный экран; RE_RES=WxH — размер окна (точки; подразумевает окно, если нет RE_FULLSCREEN).
+   Окно без RE_RES — наибольшее целое кратное w×h, умещающееся в 85% рабочей области дисплея. Cmd+Enter / Alt+Enter — переключение. */
+static int g_fs_on;
+static int env_on(const char *n) { const char *e = getenv(n); return e && *e && *e != '0'; }
+static void update_drawable(void) { int dw = 0, dh = 0; if (!g_win) return; SDL_GL_GetDrawableSize(g_win, &dw, &dh); plat_render_set_drawable(dw, dh); }
+void plat_input_dbg(const char *fmt, ...);   /* plat_di.c */
+void plat_toggle_fullscreen(void) {
+    if (!g_win) return;
+    g_fs_on = !g_fs_on;
+    SDL_SetWindowFullscreen(g_win, g_fs_on ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+    update_drawable();
+    plat_input_dbg("полный экран %d", g_fs_on);
+}
 int plat_window_open(const char *t,int w,int h,int fs){
+#ifdef SDL_HINT_MAC_BACKGROUND_APP
+    SDL_SetHint(SDL_HINT_MAC_BACKGROUND_APP, "0");     /* v2.14: обычное приложение с окном/Dock — получает клавиатуру */
+#endif
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER)) return -1;
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG); /* macOS требует */
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    g_win = SDL_CreateWindow(t, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, SDL_WINDOW_OPENGL|(fs?SDL_WINDOW_FULLSCREEN_DESKTOP:0));
+#if defined(__APPLE__)
+    int full = 1;
+#else
+    int full = fs;
+#endif
+    int ww = w, wh = h; const char *res = getenv("RE_RES");
+    if (res && sscanf(res, "%dx%d", &ww, &wh) == 2 && ww > 0 && wh > 0) full = 0;
+    else {
+        ww = w; wh = h; SDL_Rect ub;
+        if (SDL_GetDisplayUsableBounds(0, &ub) == 0 && ub.w > 0 && ub.h > 0) {
+            int k = 1; while (w * (k + 1) <= ub.w * 85 / 100 && h * (k + 1) <= ub.h * 85 / 100) k++;
+            ww = w * k; wh = h * k;
+        }
+    }
+    if (env_on("RE_WINDOWED")) full = 0;
+    if (env_on("RE_FULLSCREEN")) full = 1;
+    g_fs_on = full;
+    g_win = SDL_CreateWindow(t, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww, wh,
+                             SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE | (full ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
     if (!g_win) return -1;
+    SDL_SetWindowMinimumSize(g_win, w / 2, h / 2);
     g_gl = SDL_GL_CreateContext(g_win); if (!g_gl) return -2;
     SDL_GL_SetSwapInterval(1);
-    return plat_render_attach((void *(*)(const char *))SDL_GL_GetProcAddress, swap_win, w, h);
+    SDL_RaiseWindow(g_win);   /* v2.14: окно — ключевое (фокус клавиатуры) сразу после запуска */
+    int r = plat_render_attach((void *(*)(const char *))SDL_GL_GetProcAddress, swap_win, w, h);
+    if (r == 0) update_drawable();
+    { int dw = 0, dh = 0; SDL_GL_GetDrawableSize(g_win, &dw, &dh);
+      fprintf(stderr, "[window] кадр игры %dx%d, окно %dx%d, буфер %dx%d, %s, главный поток %d\n", w, h, ww, wh, dw, dh,
+              full ? "полный экран" : "окно", plat_is_main_thread());
+      plat_input_dbg("окно: кадр %dx%d, окно %dx%d, буфер %dx%d, полный экран %d, главный поток %d", w, h, ww, wh, dw, dh, full, plat_is_main_thread()); }
+    return r;
 }
 int plat_poll_events(void){ SDL_Event e; while (SDL_PollEvent(&e)) if (e.type==SDL_QUIT) return 0; return 1; }
 int plat_key_down(int sc){ const Uint8 *k = SDL_GetKeyboardState(NULL); return k ? k[sc] : 0; }
@@ -145,19 +190,53 @@ void *plat_game_window_create(void *hinst,int32_t show,const char *title,int w,i
     if(g_wtrap) return (void *)(intptr_t)1;
     return plat_window_open(title,w,h,0)==0 ? (void *)(intptr_t)1 : NULL;
 }
+void plat_input_dbg_event(const void *ev);   /* v2.14: plat_di.c, RE_INPUTDBG=1 */
+void plat_input_key_event(int scancode, int down, int repeat);   /* v2.14: plat_di.c — защёлка коротких нажатий */
+/* v2.14: разбор очереди событий SDL — только из главного потока (на macOS события Cocoa приходят только туда).
+   Зовётся из цикла сообщений игры (plat_pump_messages) и из plat_flip, если с прошлого кадра цикла сообщений не было
+   (заставки/FMV/загрузка: игра не качает сообщения по 15+ с — на macOS окно «не отвечает» и не получает фокус). */
+static int g_active_sent = -1, g_pumped;
+static void send_activate(int on) {
+    if (g_wtrap || !g_wproc || g_active_sent == on) return;
+    g_active_sent = on; plat_input_dbg("WM_ACTIVATEAPP %d", on);
+    g_wproc((void *)(intptr_t)1, 0x1c, (uint32_t)on, 0);
+}
+static void drain_events(void) {
+    static int warned;
+    if (!warned && plat_is_main_thread() == 0) { warned = 1; fprintf(stderr, "[input] ВНИМАНИЕ: события SDL разбираются не в главном потоке\n"); plat_input_dbg("ВНИМАНИЕ: цикл событий не в главном потоке"); }
+    SDL_Event e;
+    while (SDL_PollEvent(&e)) {
+        plat_input_dbg_event(&e);
+        if (e.type == SDL_QUIT) {
+            g_wquit = 1;
+            if (!g_wtrap) { fprintf(stderr, "[window] закрытие окна — выход\n"); fflush(NULL); exit(0); }   /* v2.14: Cmd+Q / закрытие окна */
+        } else if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP) {
+            int sc = e.key.keysym.scancode, mod = e.key.keysym.mod;
+            if (e.type == SDL_KEYDOWN && !e.key.repeat && (sc == SDL_SCANCODE_RETURN || sc == SDL_SCANCODE_KP_ENTER) && (mod & (KMOD_GUI | KMOD_ALT))) {
+                plat_toggle_fullscreen(); continue;   /* Cmd+Enter / Alt+Enter — игре не передаётся */
+            }
+            plat_input_key_event(sc, e.type == SDL_KEYDOWN, e.key.repeat);
+        } else if (e.type == SDL_WINDOWEVENT) {
+            if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED || e.window.event == SDL_WINDOWEVENT_RESIZED) update_drawable();
+            else if (e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED || e.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+                send_activate(e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED);
+        }
+    }
+    /* v2.14: окно с фокусом клавиатуры, а игра считает себя неактивной (пропущено FOCUS_GAINED, порядок событий при запуске
+       или переходе в полноэкранное пространство macOS) — сообщить активацию; иначе P36_PollInput не читает клавиатуру */
+    if (g_win && g_active_sent == 0 && (SDL_GetWindowFlags(g_win) & SDL_WINDOW_INPUT_FOCUS)) send_activate(1);
+}
 void plat_pump_messages(void){
     if(!SDL_WasInit(SDL_INIT_VIDEO)) return;
     /* v2.01: оконная процедура игры получает WM_ACTIVATEAPP (0x1c): 1 при первом цикле сообщений (окно SDL создаётся активным;
        под Xvfb фокус-событий нет) и при SDL_WINDOWEVENT_FOCUS_GAINED/LOST — иначе фронтенд ждёт P31_Active вечно */
-    static int activated;
-    if(!g_wtrap && g_wproc && !activated){ activated=1; g_wproc((void *)(intptr_t)1,0x1c,1,0); }
-    SDL_Event e; while(SDL_PollEvent(&e)) {
-        if(e.type==SDL_QUIT) g_wquit=1;
-        else if(e.type==SDL_WINDOWEVENT && g_wproc && !g_wtrap &&
-                (e.window.event==SDL_WINDOWEVENT_FOCUS_GAINED || e.window.event==SDL_WINDOWEVENT_FOCUS_LOST))
-            g_wproc((void *)(intptr_t)1,0x1c,e.window.event==SDL_WINDOWEVENT_FOCUS_GAINED,0);
-    }
+    if (g_active_sent < 0) send_activate(1);
+    drain_events(); g_pumped = 1;
     if(!g_wtrap) plat_frame_tick("pump");
+}
+static void flip_events(void) {   /* из plat_frame_tick("flip") */
+    if (!g_pumped && g_win && !g_wtrap && SDL_WasInit(SDL_INIT_VIDEO)) drain_events();
+    g_pumped = 0;
 }
 void plat_set_priority(int level){
     g_wprio=level;
@@ -193,7 +272,8 @@ int32_t plat_wm_create_hinst(int32_t lparam){ return lparam; }
 static int g_moves; static int32_t g_move[5];
 void plat_window_move(void *h, int x, int y, int w, int hh, int rep) {
     (void)h; g_moves++; g_move[0] = x; g_move[1] = y; g_move[2] = w; g_move[3] = hh; g_move[4] = rep;
-    if (g_win && !g_wtrap && w > 0 && hh > 0) SDL_SetWindowSize(g_win, w, hh); }
+    /* v2.14: размер окна задаёт платформа (нативное разрешение); MoveWindow игры меняет только логический кадр */
+    if (g_win && !g_wtrap && w > 0 && hh > 0) { plat_render_set_logical(w, hh); update_drawable(); } }
 int plat_win_moves(int32_t *l) { if (l) memcpy(l, g_move, sizeof g_move); return g_moves; }
 void *plat_window_active(void) { return (g_win || g_wtrap) ? (void *)(intptr_t)1 : NULL; }
 void *plat_cursor_set(void *c) { void *old = (void *)(intptr_t)g_wcur; plat_set_cursor(c != NULL); return old; }
@@ -289,6 +369,7 @@ void plat_frame_tick(const char *where) {
     if (maxf == -2) { const char *e = getenv("RE_MAX_FRAMES"); maxf = e ? atoi(e) : -1; e = getenv("RE_MAX_PUMPS"); maxp = e ? atoi(e) : -1; }
     if (where && !strcmp(where, "flip")) {
         g_frames++;
+        flip_events();
         if (plat_fixed_dt()) vt_advance((uint32_t)g_frames * 20u);   /* v2.08: RE_FIXED_DT */
         if (g_frames == 1) fprintf(stderr, "[frame] первый кадр (plat_flip)\n");
         const char *sf = getenv("RE_SHOT_FIRST");

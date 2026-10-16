@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+static void dbg_keys(const uint8_t *k);   /* v2.14: RE_INPUTDBG */
 static int32_t g_jx, g_jy, g_poll;
 static int g_rel, g_unacq, g_evt, g_kind = -1, g_fail;
 void plat_di_release(void *o) { if (o) g_rel++; }
@@ -20,7 +22,7 @@ int32_t plat_di_get_state(void *d, uint32_t size, void *buf) {
       if (tr && n < 400 && (n++ % 40) == 0) fprintf(stderr, "[keys] get_state dev=%p size=0x%x кадр %d\n", d, size, plat_frame_no()); }
     if (!d || g_fail) return -1;
     memset(buf, 0, size);                /* «ничего не нажато»; v2.03: в игре — клавиатура SDL/геймпад/сценарий RE_KEYS */
-    if (size == 0x100) plat_input_fill_keys((uint8_t *)buf);
+    if (size == 0x100) { plat_input_fill_keys((uint8_t *)buf); dbg_keys((const uint8_t *)buf); }
     if (size == 0x50) { memcpy(buf, &g_jx, 4); memcpy((char *)buf + 4, &g_jy, 4); }   /* DIJOYSTATE: lX, lY */
     return 0;
 }
@@ -142,6 +144,12 @@ static void script_load(void) {
     fprintf(stderr, "[keys] сценарий RE_KEYS: %d нажатий, удержание %d кадр.\n", g_nscr, g_hold);
 }
 static SDL_GameController *g_pad;
+static uint8_t g_latch[256];
+void plat_input_key_event(int scancode, int down, int repeat) {
+    if (!g_in_on || !down || repeat) return;
+    uint8_t d = sc_to_dik((SDL_Scancode)scancode);
+    if (d) g_latch[d] = 1;
+}
 void plat_input_fill_keys(uint8_t *k) {
     if (!g_in_on) return;
     if (g_nscr < 0) script_load();
@@ -152,8 +160,13 @@ void plat_input_fill_keys(uint8_t *k) {
             if (!g_scr[i].logged) { g_scr[i].logged = 1; fprintf(stderr, "[keys] кадр %d: DIK 0x%02x нажата\n", fr, g_scr[i].dik); }
         }
     if (!SDL_WasInit(SDL_INIT_VIDEO)) return;
+    /* v2.14: короткое нажатие (KEYDOWN и KEYUP между двумя опросами игры) — защёлка держит клавишу до первого чтения */
+    for (int i = 0; i < 256; i++) if (g_latch[i]) { k[i] = 0x80; g_latch[i] = 0; }
+    /* состояние клавиатуры — по scancode (физическое положение клавиши, не зависит от раскладки); обновляется разбором
+       событий в главном потоке (plat_pump_messages / plat_flip) */
     int n = 0; const Uint8 *st = SDL_GetKeyboardState(&n);
     for (int sc = 0; st && sc < n; sc++) if (st[sc]) { uint8_t d = sc_to_dik((SDL_Scancode)sc); if (d) k[d] = 0x80; }
+    if (SDL_GetModState() & (KMOD_GUI | KMOD_ALT)) { k[0x1c] = 0; k[0x9c] = 0; }   /* Cmd/Alt+Enter — полный экран, не игре */
     if (!SDL_WasInit(SDL_INIT_GAMECONTROLLER)) return;
     if (g_pad && !SDL_GameControllerGetAttached(g_pad)) { SDL_GameControllerClose(g_pad); g_pad = NULL; }
     if (!g_pad) for (int j = 0; j < SDL_NumJoysticks(); j++) if (SDL_IsGameController(j) && (g_pad = SDL_GameControllerOpen(j))) break;
@@ -167,4 +180,93 @@ void plat_input_fill_keys(uint8_t *k) {
     if (SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_A) || SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_START)) k[0x1c] = 0x80;
     if (SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_B) || SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_BACK)) k[0x01] = 0x80;
     if (SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_X)) k[0x39] = 0x80;
+}
+
+/* ===== v2.14: RE_INPUTDBG=1 — журнал ввода driver_input.log (macOS: ~/Library/Logs/driver_input.log, иначе рядом с бинарником,
+   если каталог не пишется — текущий каталог). Пишутся: версии SDL (заголовки/библиотека), видеодрайвер, главный ли поток,
+   события SDL (клавиши: scancode, keycode, mod, repeat; окно: фокус/показ/размер; геймпад; мышь — только кнопки), активация
+   окна игры (WM_ACTIVATEAPP), раз в кадр-смену — набор нажатых DIK, который получает игра. ===== */
+#if defined(__APPLE__)
+#include <pthread.h>
+#elif defined(__linux__)
+#include <unistd.h>
+#include <sys/syscall.h>
+#endif
+static FILE *g_idbg; static int g_idbg_on = -1;
+int plat_is_main_thread(void) {   /* 1 — главный поток процесса, 0 — нет, -1 — неизвестно */
+#if defined(__APPLE__)
+    return pthread_main_np() ? 1 : 0;
+#elif defined(__linux__)
+    return (long)syscall(SYS_gettid) == (long)getpid() ? 1 : 0;
+#else
+    return -1;
+#endif
+}
+static FILE *idbg(void) {
+    if (g_idbg_on < 0) {
+        const char *e = getenv("RE_INPUTDBG"); g_idbg_on = e && *e && *e != '0';
+        if (g_idbg_on) {
+            char path[1024] = "";
+#if defined(__APPLE__)
+            const char *home = getenv("HOME");
+            if (home) { snprintf(path, sizeof path, "%s/Library/Logs/driver_input.log", home); g_idbg = fopen(path, "w"); }
+#endif
+            if (!g_idbg) { char *b = SDL_GetBasePath(); if (b) { snprintf(path, sizeof path, "%sdriver_input.log", b); SDL_free(b); g_idbg = fopen(path, "w"); } }
+            if (!g_idbg) { snprintf(path, sizeof path, "driver_input.log"); g_idbg = fopen(path, "w"); }
+            if (g_idbg) {
+                SDL_version c, l; SDL_VERSION(&c); SDL_GetVersion(&l);
+                fprintf(stderr, "[input] RE_INPUTDBG: журнал %s\n", path);
+                fprintf(g_idbg, "Driver input log. SDL headers %d.%d.%d, library %d.%d.%d (%s), video %s, platform %s, main thread %d\n",
+                        c.major, c.minor, c.patch, l.major, l.minor, l.patch, SDL_GetRevision(), SDL_GetCurrentVideoDriver() ? SDL_GetCurrentVideoDriver() : "-",
+                        SDL_GetPlatform(), plat_is_main_thread());
+                fflush(g_idbg);
+            } else g_idbg_on = 0;
+        }
+    }
+    return g_idbg_on ? g_idbg : NULL;
+}
+void plat_input_dbg(const char *fmt, ...) {
+    FILE *f = idbg(); if (!f) return;
+    va_list a; va_start(a, fmt);
+    fprintf(f, "[%6u ms, кадр %d] ", SDL_GetTicks(), plat_frame_no()); vfprintf(f, fmt, a); fputc('\n', f); fflush(f);
+    va_end(a);
+}
+void plat_input_dbg_event(const void *ev) {
+    const SDL_Event *e = (const SDL_Event *)ev;
+    if (!idbg()) return;
+    static int checked;
+    if (!checked) { checked = 1; plat_input_dbg("цикл событий: главный поток %d", plat_is_main_thread()); }
+    switch (e->type) {
+    case SDL_KEYDOWN: case SDL_KEYUP:
+        plat_input_dbg("%s scancode %d (%s) keycode 0x%x (%s) mod 0x%x repeat %d окно %u → DIK 0x%02x",
+            e->type == SDL_KEYDOWN ? "KEYDOWN" : "KEYUP  ", e->key.keysym.scancode, SDL_GetScancodeName(e->key.keysym.scancode),
+            (unsigned)e->key.keysym.sym, SDL_GetKeyName(e->key.keysym.sym), e->key.keysym.mod, e->key.repeat, e->key.windowID,
+            sc_to_dik(e->key.keysym.scancode));
+        break;
+    case SDL_WINDOWEVENT: {
+        static const char *const n[] = { "NONE","SHOWN","HIDDEN","EXPOSED","MOVED","RESIZED","SIZE_CHANGED","MINIMIZED","MAXIMIZED",
+                                         "RESTORED","ENTER","LEAVE","FOCUS_GAINED","FOCUS_LOST","CLOSE","TAKE_FOCUS","HIT_TEST" };
+        if (e->window.event == SDL_WINDOWEVENT_MOVED || e->window.event == SDL_WINDOWEVENT_EXPOSED) break;
+        SDL_Window *w = SDL_GetWindowFromID(e->window.windowID);
+        plat_input_dbg("WINDOW %s %d %d, флаги окна 0x%x (фокус клавиатуры %d)", e->window.event < 17 ? n[e->window.event] : "?",
+            e->window.data1, e->window.data2, w ? SDL_GetWindowFlags(w) : 0, w ? !!(SDL_GetWindowFlags(w) & SDL_WINDOW_INPUT_FOCUS) : -1);
+        break; }
+    case SDL_CONTROLLERDEVICEADDED: case SDL_CONTROLLERDEVICEREMOVED: case SDL_JOYDEVICEADDED: case SDL_JOYDEVICEREMOVED:
+        plat_input_dbg("устройство 0x%x индекс %d", e->type, e->cdevice.which); break;
+    case SDL_CONTROLLERBUTTONDOWN: case SDL_CONTROLLERBUTTONUP:
+        plat_input_dbg("геймпад кнопка %d %s", e->cbutton.button, e->type == SDL_CONTROLLERBUTTONDOWN ? "down" : "up"); break;
+    case SDL_MOUSEBUTTONDOWN: plat_input_dbg("мышь кнопка %d в %d,%d", e->button.button, e->button.x, e->button.y); break;
+    case SDL_QUIT: plat_input_dbg("QUIT"); break;
+    case SDL_TEXTINPUT: case SDL_MOUSEMOTION: case SDL_CONTROLLERAXISMOTION: case SDL_JOYAXISMOTION: break;
+    default: break;
+    }
+}
+static void dbg_keys(const uint8_t *k) {   /* набор DIK, видимый игре, — при каждом изменении */
+    if (!idbg()) return;
+    static uint8_t prev[256];
+    if (!memcmp(prev, k, 256)) return;
+    memcpy(prev, k, 256);
+    char b[512]; int n = 0; b[0] = 0;
+    for (int i = 0; i < 256 && n < (int)sizeof b - 8; i++) if (k[i]) n += snprintf(b + n, sizeof b - n, " %02x", i);
+    plat_input_dbg("игра видит DIK:%s", n ? b : " (ничего)");
 }
