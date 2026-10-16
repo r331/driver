@@ -1,5 +1,6 @@
 /* v1.43: 30 функций — восстановлено из Game.exe по стандарту указателей v1.42 (см. ported98.h). */
 #include "ported98.h"
+#include "ported135.h"
 #include "reptr.h"
 #include "crt.h"
 #include "engine.h"
@@ -297,7 +298,7 @@ void P98_DrawSix(void) {
   }
   if (P85_BlendCur != 4) { if (P85_BlendFn) P85_BlendFn(4, 6, 4, 0); P85_BlendCur = 4; }
   int32_t mode = Call0042655A(0);
-  for (int32_t i = 0; i < 6; i++) P98_Fn4BA81F(P98_Six + i * 0x30);
+  for (int32_t i = 0; i < 6; i++) P135_SixBeam((const uint32_t *)(P98_Six + i * 0x30));
   Call0042655A(mode);
 }
 

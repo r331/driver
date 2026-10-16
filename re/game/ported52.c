@@ -1,5 +1,6 @@
 #include "ported115.h"
 #include "ported52.h"
+#include "ported135.h"
 #include "ported33.h"
 #include <string.h>
 #ifdef RE_HOOK_BUILD
@@ -82,11 +83,11 @@ void P52_MenuStepToggle(void) {
 
 void P52_HudDispatch(void) {
   if (D_00b87e30 == 4) {
-    if (P11_00b87e38 == 0xc9) P52_Fn4E6310();
+    if (P11_00b87e38 == 0xc9) P135_GhostTrail();
     if (D_00b87e30 == 4) { P52_Fn4E5A1A(); P115_PaperHud(); }
     if (P12_00d044d0 != 0) DrawTextLine004FBBC5(0x00d04680);
   } else if (D_00b87e30 == 5 && G6_00B87EA0 != 0) {
-    P52_Fn4E6310();
+    P135_GhostTrail();
   }
 }
 

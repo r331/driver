@@ -2324,12 +2324,12 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004b0256,FUN_004b0256,,,,,,618,ported
 004b04c0,FUN_004b04c0,P96_SpawnDust,manual,Ported96,,,298,ported
 004b05ea,FUN_004b05ea,P111_DebrisIcon,,ported111,,,2788,ported
-004b10ce,FUN_004b10ce,,,,,,2245,todo
+004b10ce,FUN_004b10ce,P135_SmokeObj,port,ported135,port,,2245,ported
 004b1993,FUN_004b1993,P108_SmokeA,,ported108,,,1293,ported
 004b1ea0,FUN_004b1ea0,P108_SmokeB,,ported108,,,1368,ported
-004b23f8,FUN_004b23f8,,,,,,2131,todo
+004b23f8,FUN_004b23f8,P135_SparkQuad,port,ported135,port,,2131,ported
 004b2c4b,FUN_004b2c4b,,,,,,1933,ported
-004b33d8,FUN_004b33d8,,,,,,2563,todo
+004b33d8,FUN_004b33d8,P135_DebrisTri,port,ported135,port,,2563,ported
 004b3ddb,FUN_004b3ddb,ReleaseOverlays,manual,render,,,122,ported
 004b3e55,FUN_004b3e55,P114_DebrisAll,manual,Ported114,,,348,ported
 004b3fb1,FUN_004b3fb1,,,,,,228,ported
@@ -2363,7 +2363,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004ba57a,FUN_004ba57a,P95_SortObjC,manual,,,,211,ported
 004ba64d,FUN_004ba64d,P95_SortObjB,manual,,,,211,ported
 004ba720,FUN_004ba720,P98_DrawSix,manual,,,,255,ported
-004ba81f,FUN_004ba81f,,,,,,2113,todo
+004ba81f,FUN_004ba81f,P135_SixBeam,port,ported135,port,,2113,ported
 004bb060,FUN_004bb060,P67_CompactPool,manual,game,,,191,ported
 004bb11f,FUN_004bb11f,FindOrAdd_004BB11F,manual,Misc,,,112,ported
 004bf2a0,FUN_004bf2a0,DebugLog,manual,ported124.c,,,189,ported
@@ -2713,7 +2713,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004e6166,FUN_004e6166,Set0D044C8,manual,UIMisc,,,15,ported
 004e6175,FUN_004e6175,P55_LoadPaper,manual,,,,133,ported
 004e625e,FUN_004e625e,GhostInit,manual,replays,,,178,ported
-004e6310,FUN_004e6310,,,,,,2434,todo
+004e6310,FUN_004e6310,P135_GhostTrail,port,ported135,port,,2434,ported
 004e6c92,FUN_004e6c92,,,,,,766,ported
 004e6f90,FUN_004e6f90,P100_GhostNear,manual,Ported100,,,588,ported
 004e71dc,FUN_004e71dc,P96_IconAt,manual,Ported96,,,284,ported
@@ -2907,7 +2907,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00505e2b,FUN_00505e2b,P108_RadarCar,,ported108,,,926,ported
 005061c9,FUN_005061c9,P94_RadarXY,manual,,,,259,ported
 005062cc,FUN_005062cc,P70_RadarNearest,manual,hud,,,216,ported
-005063a4,FUN_005063a4,,,,,,1635,todo
+005063a4,FUN_005063a4,P135_RadarLine,port,ported135,port,,1635,ported
 00506a07,FUN_00506a07,P99_RadarXform,manual,,,,324,ported
 00506b4b,FUN_00506b4b,DrawSprite,manual,hud,,,180,ported
 00506bff,FUN_00506bff,P58_DrawObjs,manual,,,,151,ported
