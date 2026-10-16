@@ -24,7 +24,7 @@
 python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv')) if x['module']!='CRT']; print(sum(x['status']=='ported' for x in r), 'из', len(r))"
 ```
 
-**Native как игра — v2.12** (проверено сценариями `RE_KEYS` под Xvfb, Linux arm64):
+**Native как игра — v2.13** (проверено сценариями `RE_KEYS` под Xvfb, Linux arm64; v2.13 — сборка и selftest на macOS arm64 в CI):
 - работает: заставки и главное меню, режим **Take A Ride** в Майами — езда по городу (стриминг блоков карты), трафик, столкновения, HUD (Damage/Felony, радар, спидометр);
 - управление машиной: газ, тормоз/задний ход, ручник, резкий руль, смена камеры (вид с капота), пауза по Esc с меню (Continue / Restart / Sound Setup / Gfx Details / Film Director / Quick Replay / Show Map / Exit) — см. «Управление»;
 - звук: DirectSound эмулируется собственным микшером (SDL_audio или запись в WAV), двигатель и шумы слышны, мягкий ограничитель — без клиппинга; музыки нет (в оригинале — CD-audio);
@@ -73,18 +73,29 @@ cmake --build build-native -j
 Результат — `build-native/driver`. `libosmesa6-dev` нужен только для offscreen-теста рендера в selftest: если OSMesa не найден,
 CMake подключает `plat_render_nogl.c` и тест рендера пропускается. С libGL программа не линкуется — GL-функции берутся через `SDL_GL_GetProcAddress`.
 
-### macOS (Apple Silicon) — не проверялось на реальном Mac
+### macOS (Apple Silicon)
+
+Проверено в CI GitHub Actions: раннер `macos-14` (arm64, Apple clang 15) — сборка Release, `ctest` (selftest),
+запуск без данных, сборка `Driver.app` с вложенным SDL ([.github/workflows/macos.yml](.github/workflows/macos.yml)).
+**Не проверено:** запуск игры с окном (OpenGL 3.3 core, звук, ввод) на реальном Mac — в CI нет данных игры и экрана.
 
 ```sh
-brew install cmake sdl2
-cmake -S re -B build-native -DCMAKE_BUILD_TYPE=Release
-cmake --build build-native -j
-(cd build-native && ctest --output-on-failure)
+brew install cmake sdl2          # Homebrew ставит sdl2-compat (API SDL2 поверх SDL3)
+cd re && ./build.sh native       # -> re/build-native/driver, затем ctest
+./build-native/driver --data /путь/к/запуску   # см. «Запуск»
+# приложение: Driver.app (SDL2 из Homebrew; для переноса на другой Mac — см. артефакт CI, где SDL вложен)
+cmake -S . -B build-app -DCMAKE_BUILD_TYPE=Release -DRE_MACOS_BUNDLE=ON && cmake --build build-app -j
 ```
 
-Отдельной ветки `APPLE` в `re/CMakeLists.txt` нет, и она по замыслу не нужна: OpenGL framework не линкуется (GL — через SDL),
-контекст запрашивается как 3.3 core forward-compatible (то, что требует macOS). Что может понадобиться, если сборка не пойдёт:
-`-DCMAKE_PREFIX_PATH="$(brew --prefix)"`, если CMake не находит SDL2; предупреждения об устаревании OpenGL на macOS ожидаемы.
+Ветка `APPLE` в `re/CMakeLists.txt`: SDL2 ищется в Homebrew (`/opt/homebrew`, `/usr/local`), OpenGL framework не линкуется
+(GL-функции — через `SDL_GL_GetProcAddress`), контекст 3.3 core forward-compatible, offscreen-тест рендера (OSMesa) — только Linux.
+Данные игры (`Data_Files` с `FSIN.DAT`) ищутся: `--data <путь>`, `./Data_Files`, рядом с бинарником, в `Driver.app/Contents/Resources/Data_Files`
+или рядом с `Driver.app` — подробно в [re/README_macOS.txt](re/README_macOS.txt). Готовый `Driver.app` из CI (артефакт `driver-macos-arm64`)
+подписан только ad-hoc: первый запуск — правый клик → «Открыть» или `xattr -dr com.apple.quarantine Driver.app`.
+
+**Что запускается в CI** (файлов игры там нет): `ctest -L nodata` — `driver --selftest`, модульные проверки перенесённых функций
+на синтетических данных (тест настоящего уровня `RE_REAL_LEVEL` и рендер-снимок OSMesa на macOS пропускаются); Linux x86_64 —
+то же плюс hook-сборка `DINPUT.dll` ([.github/workflows/linux.yml](.github/workflows/linux.yml)).
 
 ## Запуск
 
@@ -213,7 +224,8 @@ A decompilation and C port of **Driver** (PC, 1999, Reflections / GT Interactive
   is raised (verified with a debug placement); FMV is skipped; Undercover reaches the motel and the first Miami mission. See `docs/NATIVE_GAPS.md`.
 - **Build (Linux, verified on arm64):** `apt-get install build-essential cmake libsdl2-dev libgl-dev libegl-dev libosmesa6-dev`, then
   `cmake -S re -B build-native -DCMAKE_BUILD_TYPE=Release && cmake --build build-native -j && (cd build-native && ctest --output-on-failure)`.
-  macOS: `brew install cmake sdl2` and the same commands — not tested on a real Mac.
+  macOS (Apple Silicon): `brew install cmake sdl2`, same commands; build + selftest verified in GitHub Actions on `macos-14` (arm64),
+  `-DRE_MACOS_BUNDLE=ON` builds `Driver.app`. Running the game with a window on a real Mac is not tested yet.
 - **Run:** `./build-native/driver --data <run dir>`, where the run dir symlinks your `Data_Files` and holds copies of `Scripts` and `ReplayData`
   (the game writes there). Controls: arrows/Enter in menus, `'` throttle, `/` brake/reverse, `Z`/`X` steering, Enter handbrake, `1` camera, Esc pause, gamepad supported.
 - **Hook build:** `sh re/build.sh hook` (MinGW i686) produces a proxy `DINPUT.dll`; put it next to `Game.exe`, check `re_driver.log`.
