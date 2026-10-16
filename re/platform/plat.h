@@ -202,6 +202,20 @@ int32_t plat_ds_create_buffer(void *ds, uint32_t flags, uint32_t bytes, const vo
 int32_t plat_com_query_interface(void *obj, const void *iid16, void **out);      /* IUnknown::QueryInterface; 0 — успех */
 int32_t plat_ds_prop_set(void *ps, const void *guid16, uint32_t id, const void *data, uint32_t len);   /* IKsPropertySet::Set */
 int32_t plat_ds_prop_support(void *ps, const void *guid16, uint32_t id, uint32_t *support);            /* IKsPropertySet::QuerySupport */
+/* v1.93: DirectSound — создание, перечисление драйверов, кооперативный уровень, дубликат, Lock/Unlock/Restore (0048ba20..0048cdab); 0 — успех */
+typedef int32_t (*plat_ds_enum_cb)(const void *guid16, const char *desc, const char *module, void *ctx);   /* 1 — продолжить, 0 — стоп */
+int32_t plat_ds_enumerate(plat_ds_enum_cb cb, void *ctx);                        /* DirectSoundEnumerateA */
+int32_t plat_ds_create(const void *guid16, void **out);                          /* DirectSoundCreate(guid, &ds, NULL) */
+int32_t plat_ds_set_coop(void *ds, void *hwnd, uint32_t level);                  /* IDirectSound::SetCooperativeLevel */
+int32_t plat_ds_get_caps_flags(void *ds, uint32_t *flags);                       /* IDirectSound::GetCaps → DSCAPS.dwFlags (0x20 — эмуляция) */
+int32_t plat_ds_duplicate(void *ds, void *src, void **out);                      /* IDirectSound::DuplicateSoundBuffer */
+int32_t plat_ds_buf_lock(void *b, uint32_t bytes, void **p1, uint32_t *n1, void **p2, uint32_t *n2);   /* Lock(0, bytes, …, 0) */
+int32_t plat_ds_buf_unlock(void *b, void *p1, uint32_t n1, void *p2, uint32_t n2);                     /* Unlock */
+int32_t plat_ds_buf_restore(void *b);                                            /* Restore */
+/* тесты (SDL): драйверы для перечисления (guid NULL — основной), маска отказов (бит 0 Create, 1 GetCaps, 2 Coop, 3 Duplicate, 4 Lock, 5 Restore, 6 — Duplicate один раз даёт DSERR_BUFFERLOST), caps, разрез Lock */
+void    plat_ds_stub_drivers(int n, const uint8_t (*guids)[16], const char *const *names, uint32_t caps);
+void    plat_ds_stub_dsfail(uint32_t mask, uint32_t split);
+int     plat_ds_stub_dsstats(int *creates, int *coop_level, int *dups, int *locks, int *unlocks, int *restores, uint8_t *last_lock64);
 void    plat_ds_stub_ctl(uint32_t fail_mask, uint32_t support);                  /* тесты (SDL): bit0 — CreateBuffer падает, bit1 — QI падает, bit2 — QuerySupport падает */
 int     plat_ds_stub_prop(uint8_t *guid16, uint32_t *id, uint32_t *len, uint32_t *data0, int *count);   /* тесты (SDL): последний Set */
 void    plat_fmv_stub_fail(uint32_t mask);                                /* тесты (SDL): бит 0 SetState, 1 Update, 2 Blt — отказ */

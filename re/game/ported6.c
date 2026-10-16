@@ -1,5 +1,6 @@
 #include "ported129.h"
 #include "ported6.h"
+#include "ported148.h"
 #include "ported137.h"
 #include "ported40.h"
 #include "engine.h"
@@ -234,7 +235,7 @@ void SoundMenuSave0051080E(void) { G6_005755C8 = Call0042655A(0); FnPtr01270E80(
 int32_t DrvCall004246D1(int32_t a) { return G00B1C0D4 == 0 ? 1 : G6_01270D20(a); }
 int32_t DrvSetMode0042655A(int32_t a) { int32_t old = G6_00B1C224; G6_00B1C224 = a; G6_01270D28(a); return old; }
 void ClearHandles005223BE(void) { G6_00BDF9C0 = 0; G6_00BDF9C4 = 0; G6Call004A2B70(); }
-void StartAudio005233A0(void) { if (G6_00B91CF4 == 0 && G6_00B91D2C == 0) G6Call0048BA20(); }
+void StartAudio005233A0(void) { if (G6_00B91CF4 == 0 && G6_00B91D2C == 0) P148_SndEnum(); }
 void NoopFn00528455(void) { }
 void InitSubsys004BA443(void) { G6Call004BA457(); G6Call004BA57A(); G6Call004BA64D(); }
 void Fwd004D2D9F(int32_t a, int32_t b, int32_t c, int32_t d) { if (G00575F08 != 0) G6Call004D614A(a, b, c, d); }

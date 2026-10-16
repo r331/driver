@@ -113,6 +113,33 @@ int32_t plat_ds_prop_set(void *ps, const void *g, uint32_t id, const void *d, ui
     if (!ps) return -1; memcpy(g_dsx_pg, g, 16); g_dsx_pid = id; g_dsx_plen = len; g_dsx_pd0 = 0; memcpy(&g_dsx_pd0, d, len < 4 ? len : 4); g_dsx_pn++; return 0; }
 int32_t plat_ds_prop_support(void *ps, const void *g, uint32_t id, uint32_t *sup) {
     (void)g; (void)id; if (!ps || (g_dsx_fail & 4)) return -1; *sup = g_dsx_support; return 0; }
+/* --- v1.93: DirectSound — создание/перечисление/дубликат/Lock (заглушки для тестов; память Lock — буфер 64 КБ) --- */
+static int g_dsd_n = 1; static uint8_t g_dsd_g[8][16]; static const char *g_dsd_name[8] = { "Primary Sound Driver" }; static int g_dsd_null[8] = { 1 };
+static uint32_t g_dsd_caps, g_dsd_fail, g_dsd_split; static int g_dsd_cr, g_dsd_coop, g_dsd_dup, g_dsd_lk, g_dsd_ul, g_dsd_rs;
+static uint8_t g_dsd_mem[0x10000];
+void plat_ds_stub_drivers(int n, const uint8_t (*g)[16], const char *const *nm, uint32_t caps) {
+    if (n > 8) n = 8; g_dsd_n = n; g_dsd_caps = caps;
+    for (int i = 0; i < n; i++) { g_dsd_null[i] = g == NULL || i == 0; if (g) memcpy(g_dsd_g[i], g[i], 16); g_dsd_name[i] = nm[i]; } }
+void plat_ds_stub_dsfail(uint32_t m, uint32_t sp) { g_dsd_fail = m; g_dsd_split = sp; }
+int plat_ds_stub_dsstats(int *c, int *co, int *d, int *l, int *u, int *r, uint8_t *m64) {
+    *c = g_dsd_cr; *co = g_dsd_coop; *d = g_dsd_dup; *l = g_dsd_lk; *u = g_dsd_ul; *r = g_dsd_rs; memcpy(m64, g_dsd_mem, 64); return 1; }
+int32_t plat_ds_enumerate(plat_ds_enum_cb cb, void *ctx) {
+    for (int i = 0; i < g_dsd_n; i++) if (cb(g_dsd_null[i] ? NULL : g_dsd_g[i], g_dsd_name[i], "", ctx) == 0) break;
+    return 0; }
+int32_t plat_ds_create(const void *g, void **out) {
+    (void)g; g_dsd_cr++; if (g_dsd_fail & 1) { *out = NULL; return -1; } *out = plat_dd_create(NULL); return *out ? 0 : -1; }
+int32_t plat_ds_set_coop(void *ds, void *hwnd, uint32_t lv) { (void)hwnd; if (!ds || (g_dsd_fail & 4)) return -1; g_dsd_coop = (int)lv; return 0; }
+int32_t plat_ds_get_caps_flags(void *ds, uint32_t *f) { if (!ds || (g_dsd_fail & 2)) return -1; *f = g_dsd_caps; return 0; }
+int32_t plat_ds_duplicate(void *ds, void *src, void **out) {
+    g_dsd_dup++; if (!ds || !src || (g_dsd_fail & 8)) { *out = NULL; return -1; }
+    if (g_dsd_fail & 0x40) { g_dsd_fail &= ~0x40u; *out = NULL; return (int32_t)0x88780096u; }
+    *out = plat_dd_create(NULL); return 0; }
+int32_t plat_ds_buf_lock(void *b, uint32_t bytes, void **p1, uint32_t *n1, void **p2, uint32_t *n2) {
+    if (!b || (g_dsd_fail & 0x10) || bytes > sizeof g_dsd_mem) return -1; g_dsd_lk++;
+    uint32_t s = g_dsd_split && g_dsd_split < bytes ? g_dsd_split : bytes;
+    *p1 = g_dsd_mem; *n1 = s; *p2 = s < bytes ? g_dsd_mem + s : NULL; *n2 = bytes - s; return 0; }
+int32_t plat_ds_buf_unlock(void *b, void *p1, uint32_t n1, void *p2, uint32_t n2) { (void)p1; (void)n1; (void)p2; (void)n2; if (!b) return -1; g_dsd_ul++; return 0; }
+int32_t plat_ds_buf_restore(void *b) { if (!b || (g_dsd_fail & 0x20)) return -1; g_dsd_rs++; return 0; }
 void plat_ds_stub_ctl(uint32_t fm, uint32_t sup) { g_dsx_fail = fm; g_dsx_support = sup; }
 int plat_ds_stub_prop(uint8_t *g, uint32_t *id, uint32_t *len, uint32_t *d0, int *n) {
     memcpy(g, g_dsx_pg, 16); *id = g_dsx_pid; *len = g_dsx_plen; *d0 = g_dsx_pd0; *n = g_dsx_pn; return 1; }

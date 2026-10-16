@@ -25,6 +25,7 @@
      (P140_SndLoadWav, указатель на стек не переживает int32); 0041b3ab — запись по нулевому/незарегистрированному адресу — выход;
      004e9bbf — 01137380 ← 00b1c268..6f по uint16 (P59_AngA/B/C, четвёртое слово — без native-имени, сохраняется). */
 #include "ported140.h"
+#include "ported148.h"
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
@@ -352,13 +353,13 @@ int32_t P140_SndLoadWav(int32_t n, const char *path) {
   g_fread(buf, 1, (size_t)size, f);
   g_fclose(f);
   P50_Voice *v = &P50_Voices[n];
-  v->a = P140_Fn48C192(P38_Ds, buf, P140_B1F434);
+  v->a = P148_BufFromWav(P38_Ds, buf, P140_B1F434);
   P98_DebugFree(buf);
   if (v->a == NULL) return -1;
   if (strlen(path) < 0x80) strcpy((char *)v->rest, path);
   else v->rest[0] = 0;
   if (P48_B91D30 != 0) {
-    v->b = P140_Fn48CAD6(v->a);
+    v->b = P148_KsProps(v->a);
     if (v->b != NULL) P50_EaxSetDefault(v->b);
   }
   return (int32_t)rd32(hdr + 4);
@@ -387,7 +388,7 @@ int32_t P140_SndInit(int32_t drv, int32_t arg, int32_t eax) {
     P48_VolTab[i] = (uint32_t)v;
   }
   P140_B91BC0 = 0;
-  if (P140_Fn48BA31(drv, arg, G6_00BDF9C0) == 0) {
+  if (P148_SndOpen(drv, arg, G6_00BDF9C0) == 0) {
     G6_00B91CF4 = 0; G8_00B91CF4 = 0;
     P124_DebugLog("=> Error allocating sound hardware <=");
     return 0;

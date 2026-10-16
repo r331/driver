@@ -23,6 +23,7 @@ void     re_fn_register(uint32_t addr, re_fn_t fn) { (void)addr; (void)fn; }
 #include "ported95.h"
 #include "ported96.h"
 #include "ported97.h"
+#include "ported148.h"
 #include "ported98.h"
 #include "ported100.h"
 #include "p100_data.h"
@@ -51,6 +52,7 @@ typedef struct { uint32_t addr; re_fn_t fn; } re_fnent_t;
 
 /* статические области: GAME_VAR-массивы, на которые в таблицах игры лежат адреса */
 static const re_region_t k_regions[] = {
+  { 0x00bdcb60u, (uint8_t *)P148_Drv, sizeof(p148_drvtab_t) },   /* v1.93: драйверы DirectSound (имя +0x14 читает P103 через 0054dbd8) */
   { 0x0112da40u, (uint8_t *)P12_0112da00 + 0x40, 0xc74 },   /* v1.73: пути копов (+0x40..+0xcb4 записей 0112da00, до P74_Cars) */
   { 0x0112e718u, (uint8_t *)P12_0112da00 + 0xd18, 0xc74 },
   { 0x0112f3f0u, (uint8_t *)P12_0112da00 + 0x19f0, 0xc74 },
@@ -122,6 +124,7 @@ static const re_fnent_t k_fns[] = {
   { 0x0048c9b2u, (re_fn_t)P49_SetFreq },       { 0x0048c9e8u, (re_fn_t)P49_SetPos3D },
   { 0x0048ca28u, (re_fn_t)P49_SetVel3D },      { 0x0048ca68u, (re_fn_t)P49_SetMode3D },
   { 0x0048caa0u, (re_fn_t)P49_GetStatus },
+  { 0x0048c2a3u, (re_fn_t)P148_DupVoice },     /* v1.93: P97_DrvC */
   /* v1.56: опкоды скрипта .data 0055fcac (P111_ScriptTick 004cf2cf); все 33 перенесены с v1.57 */
   { 0x004d03fdu, (re_fn_t)ReturnZero004D03FD },    { 0x004d020bu, (re_fn_t)P48_OpSet3 },
   { 0x004d02c6u, (re_fn_t)ScriptReadShort3_004D02C6 }, { 0x004d033fu, (re_fn_t)ScriptReadVec3_004D033F },

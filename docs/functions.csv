@@ -51,7 +51,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401118,thunk_FUN_0051b974,,,,,,5,ported
 0040111d,thunk_FUN_004ac702,Thunk_004AC702,manual,Thunks,,,5,ported
 00401122,thunk_FUN_0042a5de,,,,,,5,ported
-00401127,thunk_FUN_0048c47e,,,,,,5,todo
+00401127,thunk_FUN_0048c47e,,,,,,5,ported
 0040112c,thunk_FUN_0051aacd,,,,,,5,ported
 00401131,thunk_FUN_004b9933,,,,,,5,ported
 00401136,thunk_FUN_004c5f69,,,,,,5,ported
@@ -384,7 +384,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401956,thunk_FUN_004d3000,,,,,,5,ported
 0040195b,thunk_FUN_004d0439,,,,,,5,ported
 00401960,thunk_FUN_004c6264,Thunk_004C6264,manual,Thunks,,,5,ported
-00401965,thunk_FUN_0048ba20,,,,,,5,todo
+00401965,thunk_FUN_0048ba20,,,,,,5,ported
 0040196a,thunk_FUN_004d9013,Thunk_004D9013,manual,Thunks,,,5,ported
 00401979,thunk_FUN_0042a423,,,,,,5,ported
 00401983,thunk_FUN_004b3ddb,,,,,,5,ported
@@ -675,7 +675,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004020cc,thunk_FUN_004c9ca0,Thunk_004C9CA0,manual,Thunks,,,5,ported
 004020d1,thunk_FUN_005032ce,,,,,,5,ported
 004020d6,thunk_FUN_004b05ea,,,,,,5,ported
-004020db,thunk_FUN_0048c192,,,,,,5,todo
+004020db,thunk_FUN_0048c192,,,,,,5,ported
 004020e5,thunk_FUN_00503c03,,,,,,5,ported
 004020ea,thunk_FUN_00491650,,,,,,5,ported
 004020ef,thunk_FUN_00416390,,,,,,5,ported
@@ -896,7 +896,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040263a,thunk_FUN_00405e79,,,,,,5,ported
 0040263f,thunk_FUN_004e59b9,,,,,,5,ported
 00402644,thunk_FUN_004f29f7,,,,,,5,ported
-00402653,thunk_FUN_0048ba31,,,,,,5,todo
+00402653,thunk_FUN_0048ba31,,,,,,5,ported
 00402662,thunk_FUN_004d2500,,,,,,5,ported
 00402667,thunk_FUN_0049509a,,,,,,5,ported
 0040266c,thunk_FUN_004ee8f4,,,,,,5,ported
@@ -2047,8 +2047,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0048b5e3,FUN_0048b5e3,P108_FmvStart,,ported108,,,122,ported
 0048b65d,FUN_0048b65d,FmvStop,manual,fmv,,,76,ported
 0048b6a9,FUN_0048b6a9,Set551134,manual,UIMisc,,,15,ported
-0048ba20,FUN_0048ba20,,,,,,17,todo
-0048ba31,FUN_0048ba31,,,,,,420,todo
+0048ba20,FUN_0048ba20,P148_SndEnum,port,sound,,,17,ported
+0048ba31,FUN_0048ba31,P148_SndOpen,port,sound,,,420,ported
 0048bbd5,FUN_0048bbd5,P97_SndDrvInit,manual,,,,235,ported
 0048bcc0,FUN_0048bcc0,SoundShutdown,manual,sound,,,123,ported
 0048bd3b,FUN_0048bd3b,NoopFn0048bd3b,manual,Noop,,,5,ported
@@ -2058,11 +2058,11 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0048be68,FUN_0048be68,SetSpeakerConfig,manual,sound,,,84,ported
 0048bf52,FUN_0048bf52,P106_EaxPreset,,ported106,,,72,ported
 0048bf9a,FUN_0048bf9a,,,eax/directsound,assert,,504,ported
-0048c192,FUN_0048c192,,,,,,273,todo
-0048c2a3,FUN_0048c2a3,,,,,,324,todo
-0048c3e7,FUN_0048c3e7,,,,,,85,todo
+0048c192,FUN_0048c192,P148_BufFromWav,port,sound,,,273,ported
+0048c2a3,FUN_0048c2a3,P148_DupVoice,port,sound,,,324,ported
+0048c3e7,FUN_0048c3e7,P148_Refill,port,sound,,,85,ported
 0048c43c,FUN_0048c43c,P100_RiffFromRes,manual,Ported100,,,66,ported
-0048c47e,FUN_0048c47e,,,,,,162,todo
+0048c47e,FUN_0048c47e,P148_Fill,port,sound,,,162,ported
 0048c520,FUN_0048c520,ReleaseVoice,manual,sound,,,151,ported
 0048c5b7,FUN_0048c5b7,P98_RiffFind,manual,,,,404,ported
 0048c74b,FUN_0048c74b,DsListenerPos,manual,sound,,,51,ported
@@ -2077,7 +2077,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0048ca28,FUN_0048ca28,DsSetVel3D,manual,sound,,,64,ported
 0048ca68,FUN_0048ca68,DsSetMode3D,manual,sound,,,56,ported
 0048caa0,FUN_0048caa0,DsGetStatus,manual,sound,,,54,ported
-0048cad6,FUN_0048cad6,,,,,,206,todo
+0048cad6,FUN_0048cad6,P148_KsProps,port,sound,,,206,ported
 0048cba4,FUN_0048cba4,EaxSetDefault,manual,sound,,,47,ported
 0048cbd3,FUN_0048cbd3,EaxEnable,manual,sound,,,140,ported
 0048cc5f,FUN_0048cc5f,Nop,manual,sound,,,5,ported
@@ -2085,7 +2085,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0048ccaf,FUN_0048ccaf,DsReleaseProps,manual,sound,,,46,ported
 0048ccdd,FUN_0048ccdd,CreateDummyBuf,manual,sound,,,165,ported
 0048cd82,FUN_0048cd82,DsReleaseProp2C,manual,sound,,,41,ported
-0048cdab,FUN_0048cdab,,,,,,471,todo
+0048cdab,FUN_0048cdab,P148_EnumCb,port,sound,,,471,ported
 0048d4e0,FUN_0048d4e0,P115_RoadArrow,manual,Ported115,,,1513,ported
 0048db65,FUN_0048db65,P14_Fn0048DB65,manual,misc,,,41,ported
 0048db8e,FUN_0048db8e,P96_InitRotTab,manual,Ported96,,,589,ported

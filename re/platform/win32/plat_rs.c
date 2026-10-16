@@ -263,5 +263,25 @@ int32_t plat_com_query_interface(void *obj, const void *iid, void **out) { retur
 int32_t plat_ds_prop_set(void *ps, const void *g, uint32_t id, const void *d, uint32_t len) {
     return ((dd_f7)VT(ps, 0x10))(ps, (void *)g, (void *)(uintptr_t)id, 0, 0, (void *)d, (void *)(uintptr_t)len); }
 int32_t plat_ds_prop_support(void *ps, const void *g, uint32_t id, uint32_t *sup) { return ((dd_f3)VT(ps, 0x14))(ps, (void *)g, (void *)(uintptr_t)id, sup); }
+/* --- v1.93: DirectSound через импорты Game.exe (DirectSoundCreate 0052956e, DirectSoundEnumerateA 00529568);
+   IDirectSound: GetCaps 0x10, DuplicateSoundBuffer 0x14, SetCooperativeLevel 0x18; IDirectSoundBuffer: Lock 0x2c, Unlock 0x4c, Restore 0x50 --- */
+typedef long (__attribute__((stdcall)) *ds_create_f)(const void *, void **, void *);
+typedef long (__attribute__((stdcall)) *ds_enum_f)(void *, void *);
+static plat_ds_enum_cb g_dse_cb;
+static int __attribute__((stdcall)) dse_thunk(const void *g, const char *d, const char *m, void *ctx) { return g_dse_cb ? g_dse_cb(g, d, m, ctx) : 0; }
+int32_t plat_ds_enumerate(plat_ds_enum_cb cb, void *ctx) { g_dse_cb = cb; return ((ds_enum_f)0x00529568u)((void *)dse_thunk, ctx); }
+int32_t plat_ds_create(const void *g, void **out) { return ((ds_create_f)0x0052956eu)(g, out, 0); }
+int32_t plat_ds_set_coop(void *ds, void *hwnd, uint32_t lv) { return ((dd_f2)VT(ds, 0x18))(ds, hwnd, (void *)(uintptr_t)lv); }
+int32_t plat_ds_get_caps_flags(void *ds, uint32_t *f) {
+    uint32_t c[24]; for (int i = 0; i < 24; i++) c[i] = 0; c[0] = 0x60; long hr = ((dd_f1)VT(ds, 0x10))(ds, c); *f = c[1]; return hr; }
+int32_t plat_ds_duplicate(void *ds, void *src, void **out) { return ((dd_f2)VT(ds, 0x14))(ds, src, out); }
+int32_t plat_ds_buf_lock(void *b, uint32_t bytes, void **p1, uint32_t *n1, void **p2, uint32_t *n2) {
+    return ((dd_f8)VT(b, 0x2c))(b, 0, (void *)(uintptr_t)bytes, p1, n1, p2, n2, 0); }
+int32_t plat_ds_buf_unlock(void *b, void *p1, uint32_t n1, void *p2, uint32_t n2) {
+    return ((dd_f4)VT(b, 0x4c))(b, p1, (void *)(uintptr_t)n1, p2, (void *)(uintptr_t)n2); }
+int32_t plat_ds_buf_restore(void *b) { return ((dd_f0)VT(b, 0x50))(b); }
+void plat_ds_stub_drivers(int n, const uint8_t (*g)[16], const char *const *nm, uint32_t caps) { (void)n; (void)g; (void)nm; (void)caps; }
+void plat_ds_stub_dsfail(uint32_t m, uint32_t sp) { (void)m; (void)sp; }
+int plat_ds_stub_dsstats(int *c, int *co, int *d, int *l, int *u, int *r, uint8_t *m64) { (void)c; (void)co; (void)d; (void)l; (void)u; (void)r; (void)m64; return 0; }
 void plat_ds_stub_ctl(uint32_t fm, uint32_t sup) { (void)fm; (void)sup; }
 int plat_ds_stub_prop(uint8_t *g, uint32_t *id, uint32_t *len, uint32_t *d0, int *n) { (void)g; (void)id; (void)len; (void)d0; (void)n; return 0; }

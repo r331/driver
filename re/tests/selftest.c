@@ -154,6 +154,7 @@
 #include "../game/ported145.h"
 #include "../game/ported146.h"
 #include "../game/ported147.h"
+#include "../game/ported148.h"
 #include "../game/menustate.h"
 #include "../game/globalsets.h"
 #include "../game/smallfuncs.h"
@@ -5302,7 +5303,9 @@ static int test_p140(void) {
   { int32_t d2c = G6_00B91D2C, cf4 = G6_00B91CF4, b30 = P48_B91D30;
     G6_00B91CF4 = 0; G6_00B91D2C = 2;
     CK(P140_SndInit(5, 0, 0) == 0);
+    plat_ds_stub_dsfail(1, 0);   /* v1.93: 0048ba31 перенесена — DirectSoundCreate-заглушка отказывает */
     CK(P140_SndInit(1, 0, 7) == 0 && P48_B91D30 == 7 && G6_00B91CF4 == 0 && P43_FadeLen == 1.0f);
+    plat_ds_stub_dsfail(0, 0);
     CK((int32_t)P48_VolTab[0] == -10000 && (int32_t)P48_VolTab[1] == -8000 && (int32_t)P48_VolTab[5000] == -602 && (int32_t)P48_VolTab[9999] == 0);
     G6_00B91D2C = d2c; G6_00B91CF4 = cf4; P48_B91D30 = b30; }
   /* 00524bd8: без DirectSound сэмпл не загружается — флаг 4, счётчик +1, строка в верхнем регистре */
@@ -6122,6 +6125,76 @@ static int test_p146(void) {
   return f;
 }
 
+static int test_p148(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p148 fail line %d\n",__LINE__); } } while (0)
+  int32_t d2c = G6_00B91D2C, f434 = P140_B1F434, eax = P148_EaxOn;
+  void *ds0 = P38_Ds, *pr0 = P38_DsPrimary, *l0 = P49_Listener, *p2c = P49_Prop2C, *p30 = P49_Prop30;
+  p148_drvtab_t drv0; memcpy(drv0, P148_Drv, sizeof drv0);
+  int c0, co, dp, lk, ul, rs; uint8_t m64[64];
+  /* 0048ba20/0048cdab: основной (guid NULL), длинное имя → 0x1c + "...", короткое; эмуляция (0x20) с guid — пропуск */
+  { static const uint8_t g[3][16] = { {0}, {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16}, {0xaa,0xbb} };
+    static const char *const nm[3] = { "Primary Sound Driver", "Sound Blaster Live! EAX 5.1 Digital Audio", "AC97" };
+    G6_00B91D2C = 0; plat_ds_stub_drivers(3, g, nm, 0); P148_SndEnum();
+    CK(G6_00B91D2C == 3 && P148_Drv[0].guid_ptr == 0 && strcmp(P148_Drv[0].name, "Primary Sound Driver") == 0);
+    CK(re_ptr(P148_Drv[1].guid_ptr) == P148_Drv[1].guid && P148_Drv[1].guid[15] == 16 && strlen(P148_Drv[1].name) == 0x1f);
+    CK(memcmp(P148_Drv[1].name, "Sound Blaster Live! EAX 5.1 ...", 0x20) == 0 && strcmp(P148_Drv[2].name, "AC97") == 0);
+    CK(re_ptr(0x00bdcb74u + 2 * 0x34) == P148_Drv[2].name);
+    G6_00B91D2C = 0; plat_ds_stub_drivers(3, g, nm, 0x20); P148_SndEnum(); CK(G6_00B91D2C == 1);
+    G6_00B91D2C = 8; CK(P148_EnumCb(NULL, "x", "", NULL) == 0 && G6_00B91D2C == 8);
+    G6_00B91D2C = 1; plat_ds_stub_dsfail(2, 0); CK(P148_EnumCb(NULL, "x", "", NULL) == 1 && G6_00B91D2C == 1);
+    plat_ds_stub_dsfail(0, 0); plat_ds_stub_drivers(1, NULL, nm, 0); G6_00B91D2C = 0; P148_SndEnum(); CK(G6_00B91D2C == 1); }
+  /* 0048ba31: вне диапазона — 0; режим 2 → 00b1f434 = 1, EAX 0; успех — DirectSound, уровень 3, первичный буфер, слушатель */
+  { P38_Ds = NULL; P38_DsPrimary = NULL; P49_Listener = NULL; P49_Prop2C = NULL; P49_Prop30 = NULL;
+    CK(P148_SndOpen(1, 0, 0) == 0 && P148_SndOpen(-1, 0, 0) == 0);
+    CK(P148_SndOpen(0, 2, 0x1234) == 1 && P140_B1F434 == 1 && P148_EaxOn == 0 && P38_Ds != NULL && P38_DsPrimary != NULL && P49_Listener != NULL);
+    plat_ds_stub_dsstats(&c0, &co, &dp, &lk, &ul, &rs, m64); CK(co == 3);
+    P50_SoundShutdown();
+    plat_ds_stub_dsfail(4, 0);
+    CK(P148_SndOpen(0, 0, 0) == 0 && P140_B1F434 == 0 && P148_EaxOn == 1 && P38_Ds == NULL && P38_DsPrimary == NULL);
+    plat_ds_stub_dsfail(0, 0); }
+  /* 0048c192/0048c47e/0048c3e7: WAV-образ; заливка в две части (разрез 4); отказ Lock — NULL; Restore */
+  { uint8_t wav[12 + 8 + 16 + 8 + 10]; uint32_t w;
+    memcpy(wav, "RIFF", 4); w = sizeof wav - 8; memcpy(wav + 4, &w, 4); memcpy(wav + 8, "WAVEfmt ", 8); w = 16; memcpy(wav + 16, &w, 4);
+    memset(wav + 20, 0x11, 16); memcpy(wav + 36, "data", 4); w = 10; memcpy(wav + 40, &w, 4);
+    for (int i = 0; i < 10; i++) wav[44 + i] = (uint8_t)(0x40 + i);
+    void *ds = plat_dd_create(NULL); int op; float v6[6]; uint32_t u;
+    plat_ds_stub_dsfail(0, 4);
+    void *b = P148_BufFromWav(ds, wav, 0);
+    plat_ds3d_stub_last(&op, v6, &u); plat_ds_stub_dsstats(&c0, &co, &dp, &lk, &ul, &rs, m64);
+    CK(b != NULL && op == 15 && u == 0xb2 && v6[0] == 10.0f && memcmp(m64, wav + 44, 10) == 0);
+    void *b2 = P148_BufFromWav(ds, wav, 1); plat_ds3d_stub_last(&op, v6, &u); CK(b2 != NULL && u == 0xba);
+    plat_ds_stub_dsstats(&c0, &co, &dp, &lk, &ul, &rs, m64); int lk0 = lk; plat_ds_stub_dsfail(0x10, 0); CK(P148_BufFromWav(ds, wav, 0) == NULL);
+    plat_ds_stub_dsstats(&c0, &co, &dp, &lk, &ul, &rs, m64); CK(lk == lk0);
+    int rs0 = rs; plat_ds_stub_dsfail(0x20, 0); CK(P148_Refill(b, wav) == 0);
+    plat_ds_stub_dsfail(0, 0); memset(wav + 44, 0x77, 10); CK(P148_Refill(b, wav) == 1);
+    plat_ds_stub_dsstats(&c0, &co, &dp, &lk, &ul, &rs, m64); CK(rs == rs0 + 1 && m64[0] == 0x77 && m64[9] == 0x77);
+    CK(P148_Fill(NULL, wav, 4) == 0 && P148_Fill(b, wav, 0) == 0 && P148_BufFromWav(ds, (const uint8_t[16]){0}, 0) == NULL);
+  /* 0048cad6: QuerySupport обоих EAX-наборов = 3 — IKsPropertySet, иначе NULL */
+    plat_ds_stub_ctl(0, 3); void *ps = P148_KsProps(b); CK(ps != NULL); plat_dd_release(ps);
+    plat_ds_stub_ctl(0, 1); CK(P148_KsProps(b) == NULL);
+    plat_ds_stub_ctl(2, 3); CK(P148_KsProps(b) == NULL);
+    plat_ds_stub_ctl(0, 3);
+  /* 0048c2a3: дубликат голоса 60 в буфер 61, позиция 0, 3D-буфер; BUFFERLOST — сэмпл не перезагружен → 0, буфер освобождён */
+    P50_Voice v60 = P50_Voices[60]; P49_Pair p61 = P49_Bufs[61];
+    P38_Ds = ds; memset(&P50_Voices[60], 0, sizeof(P50_Voice)); memset(&P49_Bufs[61], 0, sizeof(P49_Pair));
+    CK(P148_DupVoice(60, 61) == 0);
+    P50_Voices[60].a = b2;
+    CK(P148_DupVoice(60, 61) == 1 && P49_Bufs[61].buf != NULL && P49_Bufs[61].buf3d != NULL);
+    plat_ds3d_stub_last(&op, v6, &u); CK(op == 13 && u == 0);
+    P50_ReleaseBuf(61);
+    strcpy((char *)P50_Voices[60].rest, "no_such_p148.wav");
+    plat_ds_stub_dsstats(&c0, &co, &dp, &lk, &ul, &rs, m64); int dp0 = dp;
+    plat_ds_stub_dsfail(0x40, 0);
+    CK(P148_DupVoice(60, 61) == 0 && P50_Voices[60].a == NULL && P49_Bufs[61].buf == NULL);   /* SndLoadWav = −1 ≠ 0 → повтор с a = NULL — отказ */
+    plat_ds_stub_dsstats(&c0, &co, &dp, &lk, &ul, &rs, m64); CK(dp == dp0 + 2);
+    plat_ds_stub_dsfail(0, 0);
+    P50_Voices[60] = v60; P49_Bufs[61] = p61; plat_dd_release(b); plat_dd_release(ds); }
+  G6_00B91D2C = d2c; P140_B1F434 = f434; P148_EaxOn = eax; memcpy(P148_Drv, drv0, sizeof drv0);
+  P38_Ds = ds0; P38_DsPrimary = pr0; P49_Listener = l0; P49_Prop2C = p2c; P49_Prop30 = p30;
+#undef CK
+  return f;
+}
 static int test_p147(void) {
   int f = 0;
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p147 fail line %d\n",__LINE__); } } while (0)
@@ -6742,7 +6815,7 @@ static int test_p86(void) {
 
 int re_selftest(void) {
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_p110) | RUN_T(test_p111) | RUN_T(test_p112) | RUN_T(test_p113) | RUN_T(test_p114) | RUN_T(test_p115) | RUN_T(test_p116) | RUN_T(test_p117) | RUN_T(test_p118) | RUN_T(test_p119) | RUN_T(test_p120) | RUN_T(test_p121) | RUN_T(test_p122) | RUN_T(test_p123) | RUN_T(test_p124) | RUN_T(test_p125) | RUN_T(test_p126) | RUN_T(test_p127) | RUN_T(test_p128) | RUN_T(test_p129) | RUN_T(test_p130) | RUN_T(test_p131) | RUN_T(test_p132) | RUN_T(test_p133) | RUN_T(test_p134) | RUN_T(test_p135) | RUN_T(test_p136) | RUN_T(test_p137) | RUN_T(test_p138) | RUN_T(test_p139) | RUN_T(test_p140) | RUN_T(test_p141) | RUN_T(test_p142) | RUN_T(test_p143) | RUN_T(test_p144) | RUN_T(test_p145) | RUN_T(test_p146) | RUN_T(test_p147) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_p110) | RUN_T(test_p111) | RUN_T(test_p112) | RUN_T(test_p113) | RUN_T(test_p114) | RUN_T(test_p115) | RUN_T(test_p116) | RUN_T(test_p117) | RUN_T(test_p118) | RUN_T(test_p119) | RUN_T(test_p120) | RUN_T(test_p121) | RUN_T(test_p122) | RUN_T(test_p123) | RUN_T(test_p124) | RUN_T(test_p125) | RUN_T(test_p126) | RUN_T(test_p127) | RUN_T(test_p128) | RUN_T(test_p129) | RUN_T(test_p130) | RUN_T(test_p131) | RUN_T(test_p132) | RUN_T(test_p133) | RUN_T(test_p134) | RUN_T(test_p135) | RUN_T(test_p136) | RUN_T(test_p137) | RUN_T(test_p138) | RUN_T(test_p139) | RUN_T(test_p140) | RUN_T(test_p141) | RUN_T(test_p142) | RUN_T(test_p143) | RUN_T(test_p144) | RUN_T(test_p145) | RUN_T(test_p146) | RUN_T(test_p147) | RUN_T(test_p148) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

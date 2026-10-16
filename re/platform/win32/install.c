@@ -136,6 +136,7 @@
 #include "../../game/ported145.h"
 #include "../../game/ported146.h"
 #include "../../game/ported147.h"
+#include "../../game/ported148.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2351,6 +2352,15 @@ void re_install_all(void) {
     re_hook(0x0048bf9a, (void*)P140_SndLoadWav, "P140_SndLoadWav");
     re_hook(0x005233be, (void*)P140_SndInit, "P140_SndInit");
     re_hook(0x00524bd8, (void*)P140_BankLine, "P140_BankLine");
+    /* v1.93: блок DirectSound (ported148); 0048cdab — stdcall-колбэк (ret 0x10, stdcall_tbl.h) */
+    re_hook(0x0048ba20, (void*)P148_SndEnum, "P148_SndEnum");
+    re_hook(0x0048cdab, (void*)P148_EnumCb, "P148_EnumCb");
+    re_hook(0x0048ba31, (void*)P148_SndOpen, "P148_SndOpen");
+    re_hook(0x0048c192, (void*)P148_BufFromWav, "P148_BufFromWav");
+    re_hook(0x0048c2a3, (void*)P148_DupVoice, "P148_DupVoice");
+    re_hook(0x0048c3e7, (void*)P148_Refill, "P148_Refill");
+    re_hook(0x0048c47e, (void*)P148_Fill, "P148_Fill");
+    re_hook(0x0048cad6, (void*)P148_KsProps, "P148_KsProps");
     re_hook(0x004e9bbf, (void*)P140_MrkFly, "P140_MrkFly");
     re_hook(0x0041b8ac, (void*)P141_LadderLine, "P141_LadderLine");
     re_hook(0x0040f3de, (void*)P141_HsSetup, "P141_HsSetup");
