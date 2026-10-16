@@ -81,7 +81,10 @@ static void crash_sig(int sig){ signal(sig,SIG_DFL); if(g_crash) g_crash(); _Exi
 void plat_set_crash_handler(void (*fn)(void)){
     g_crash=fn;
     void (*h)(int)= fn?crash_sig:SIG_DFL;
-    signal(SIGSEGV,h); signal(SIGFPE,h); signal(SIGILL,h);
+    if (getenv("RE_NO_CRASH")) return;   /* v2.01: отладка — сигналы видит ASan/gdb */
+    /* v2.01: SIGILL не перехватывается — Mesa (llvmpipe, arm64) пробует инструкции CPU через SIGILL при первой загрузке
+       текстуры; обработчик игры превращал это в «Application Error» */
+    signal(SIGSEGV,h); signal(SIGFPE,h);
 #ifdef SIGBUS
     signal(SIGBUS,h);
 #endif
@@ -98,7 +101,16 @@ void *plat_game_window_create(void *hinst,int32_t show,const char *title,int w,i
 }
 void plat_pump_messages(void){
     if(!SDL_WasInit(SDL_INIT_VIDEO)) return;
-    SDL_Event e; while(SDL_PollEvent(&e)) if(e.type==SDL_QUIT) g_wquit=1;
+    /* v2.01: оконная процедура игры получает WM_ACTIVATEAPP (0x1c): 1 при первом цикле сообщений (окно SDL создаётся активным;
+       под Xvfb фокус-событий нет) и при SDL_WINDOWEVENT_FOCUS_GAINED/LOST — иначе фронтенд ждёт P31_Active вечно */
+    static int activated;
+    if(!g_wtrap && g_wproc && !activated){ activated=1; g_wproc((void *)(intptr_t)1,0x1c,1,0); }
+    SDL_Event e; while(SDL_PollEvent(&e)) {
+        if(e.type==SDL_QUIT) g_wquit=1;
+        else if(e.type==SDL_WINDOWEVENT && g_wproc && !g_wtrap &&
+                (e.window.event==SDL_WINDOWEVENT_FOCUS_GAINED || e.window.event==SDL_WINDOWEVENT_FOCUS_LOST))
+            g_wproc((void *)(intptr_t)1,0x1c,e.window.event==SDL_WINDOWEVENT_FOCUS_GAINED,0);
+    }
     if(!g_wtrap) plat_frame_tick("pump");
 }
 void plat_set_priority(int level){

@@ -16,6 +16,7 @@ static void watchdog(int sig) { (void)sig; fprintf(stderr, "[watchdog] стоп 
 int32_t P151_WinMain(int32_t hinst, int32_t prev, int32_t cmd, int32_t show);
 int  re_selftest(void);
 void re_init_consts(void);
+int  re_init_data_game(void);   /* v2.01: game/data_init.c (tools/gen_data_init.py) */
 static int file_exists(const char *dir, const char *name) {
     char p[1024]; snprintf(p, sizeof p, "%s/%s", dir, name);
     FILE *f = fopen(p, "rb"); if (f) fclose(f); return f != NULL;
@@ -38,6 +39,7 @@ int main(int argc, char **argv) {
         if (chdir(data) != 0) { fprintf(stderr, "Не удалось перейти в %s\n", data); return 1; }
         if (frames > 0) { char b[16]; snprintf(b, sizeof b, "%d", frames); setenv("RE_MAX_FRAMES", b, 0); }
         if (getenv("RE_WATCHDOG")) { signal(SIGALRM, watchdog); alarm((unsigned)atoi(getenv("RE_WATCHDOG"))); }
+        { int n = re_init_data_game(); if (getenv("RE_TRACE")) printf("[init] .data Game.exe: %d значений\n", n); }   /* v2.01: блокер 4 */
         plat_dd_stub_enum(1, 1, 0x100);   /* v2.00: один драйвер DirectDraw и одно устройство D3D (GL) */
         printf("Driver native: данные %s, запуск WinMain 00521f10\n", data); fflush(stdout);
         int rc = P151_WinMain(1, 0, 0, 1);

@@ -30,4 +30,4 @@ void P22_SetCull(int32_t mode);            /* 0041e215 */
 void P22_SetAlphaTest(int32_t a, int32_t b, int32_t mode, int32_t flag); /* 0041dd37 */
 void P22_SetTexFilter(int32_t a, int32_t min_linear, int32_t mag_linear); /* 0041f6a9 */
 void P22_SetViewport(int32_t x0, int32_t y0, int32_t x1, int32_t y1);    /* 0041e08a */
-void P22_SetTexOp(int32_t a, int32_t b, int32_t c, int32_t d, int32_t mode); /* 0041e14f */
+void P22_SetTexOp(int32_t a, int32_t b, int32_t c, int32_t mode, int32_t e); /* 0041e14f: grColorCombine, режим — other (4-й) */

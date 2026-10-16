@@ -1,4 +1,4 @@
-# Native-сборка как игра: разрывы (v2.00, 2026-10-16)
+# Native-сборка как игра: разрывы (v2.00–v2.01, 2026-10-16)
 
 Сборка `re/build-native/driver` (SDL2 + OpenGL 3.3, Linux arm64, Mesa 25 под Xvfb).
 Запуск игры: `work/run_game.sh [кадров] [png]` — каталог `work/run_game` (симлинки на все файлы
@@ -13,6 +13,8 @@
 - `RE_WATCHDOG=N` — через N с печать стека (в ASan-сборке) и выход 3: где стоит игра.
 - `RE_TRACE=1` — трассировка P55_GlideInit и всех `return 0` в P151_WinOpen/P151_Reopen.
 - `--idle` — прежний режим main (пустое окно).
+- v2.01: `RE_TRACE_DD=1` — журнал поверхностей DirectDraw (create/lock/upload/set_texture) и первых вызовов GL (draw_prim,
+  render state); `RE_NO_CRASH=1` — обработчик аварий игры не ставится (сигналы видит ASan/gdb; ASan-сборка — /tmp/asan).
 
 ## Путь от main до игрового цикла
 
@@ -25,8 +27,8 @@
 | 5 | `P48_GlideCheck` (grSstQueryHardware) | проходит (после правки указателя) |
 | 6 | `P151_Reopen` → `P47_GlideWinOpen` → `P151_WinOpen` 0041ed98 (режим 7, 640×480, Flip) | проходит, `00b87e20 = 1` |
 | 7 | `P48_StartupSystems` (DirectInput, DirectSound, CD) | проходит; «InitCDAudio: Open CD device failed» |
-| 8 | `P140_Frontend`: `P140_KeysLoad`, `P126_ShowBmpFade` COPYRIGHT.BMP, GT.BMP (по 5 с по таймеру) | проходит, кадры показываются (Flip → plat_flip), **картинка чёрная** |
-| 9 | дальше в P140_Frontend (REFLECT, главное меню 0054cc90) | через 40 с стоит в ожидании (стек в vdso — функция не установлена; см. блокер 1/4) |
+| 8 | `P140_Frontend`: `P140_KeysLoad`, `P126_ShowBmpFade` COPYRIGHT.BMP, GT.BMP, REFLECT.BMP | **v2.01: картинка есть** (плитки 256×256 через D3D-эмуляцию → GL, с затемнением) — out/native_v2.01.png (кадр 30, COPYRIGHT), out/native_v2.01_gt.png (кадр 70, GT); REFLECT — кадр 120 |
+| 9 | `P150_PlayFmv` (пропуск), `P136_FrontInit`, главное меню 0054cc90 — цикл `for(;;)` в P140_Frontend | **v2.01: цикл меню идёт** (300 кадров, выход 0), но **экран меню чёрный**; ~140 раз «InitCDAudio» за 300 кадров (вероятно, P12_Fn004129DF(-1) по счётчику > 0x2c — демо/заставка по таймеру; не проверено) |
 | 10 | `P132_MenuLoop` / `P136_GameLoop` → `P145_LevelLoad` → `P131_GameFrame` | не достигнуто |
 
 Проверено: 60 кадров, выход 0 (release, `work/run_game.sh 60`), md5 FRUSTRUM.DAT до/после
@@ -48,13 +50,55 @@
 12. Заглушки unported.h при готовом переносе: `R12_40DAE1` → `P75_BmpToPage`, `Call00528221` → `P25_TimerStart` (колбэк по re_fn; 00408710 — счётчик 005d577c во все три native-объекта).
 13. Кадры не показывались: SDL `plat_dd_flip` в игре зовёт `plat_flip` (glFinish + SwapWindow).
 
+## Исправлено в v2.01 (по порядку, в каком мешало)
+
+1. **DirectDraw-поверхности SDL с памятью** (platform/sdl/plat_dd.c, только игра — `plat_dd_stub_enum(…, 0x100)`; тесты — прежние учётные заглушки):
+   w×h×bpp по DDSURFACEDESC2 (формат +0x48 при DDSD_PIXELFORMAT, иначе экран RGB565; цветовой ключ CKSRCBLT); первичная — размер режима
+   (SetDisplayMode, по умолчанию 640×480), задняя (GetAttachedSurface) — как первичная. Lock: lpSurface (desc[9]) — синтетический
+   32-битный адрес `re_ptr_register_dyn` (игра читает его `re_ptr(d[9])`), pitch, размеры, формат; Unlock помечает изменение.
+   GetPixelFormat — формат поверхности. Blt COLORFILL: текстура — заливка памяти, задняя/первичная — `plat_clear_rect` (GL scissor).
+   Палитры: CreatePalette/SetEntries хранят 256 PALETTEENTRY, SetPalette привязывает к поверхности (PAL8).
+2. **Текстура ↔ поверхность**: QueryInterface(IID_IDirect3DTexture2) поверхности → объект-текстура со ссылкой на неё;
+   `plat_set_texture` → при изменении памяти перевод в RGBA (маски формата, альфа по маске, PAL8 через палитру, ключ → альфа 0)
+   и `plat_tex_update`/`plat_tex_create`, затем `plat_tex_bind`; NULL — без текстуры. Flip/Blt front←back: LFB-запись в заднюю
+   (Lock) накладывается на GL-кадр (пиксель 0 прозрачный), память задней затем обнуляется; затем plat_flip.
+3. **Mesa/llvmpipe и SIGILL**: обработчик аварий игры (plat_set_crash_handler) перехватывал SIGILL, которым Mesa на arm64 пробует
+   инструкции CPU при первой загрузке текстуры → «Application Error». SIGILL больше не перехватывается.
+4. **Шпионы selftest в игре** (блокер 5, частично): 13 шпионов tests/selftest.c вне selftest зовут перенос — P76_Fn40DCE0 → P109_TileDraw
+   (плитка заставки; это и была причина пустого кадра), P68_Fn41B1C0 → P139_LadderLoad, P68_Fn41B3AB → P140_LadderRun,
+   Call005233BE → P140_SndInit, P77_Fn524BD8 → P140_BankLine, P69_Fn4AAF3A → P139_Effects, P58_Fn416794 → P124_MotelKeys(0),
+   P69_Fn4B33D8 → P135_DebrisTri, P70_Fn5063A4 → P135_RadarLine, P70_Fn507925 → P131_RadarArrow, P69_Fn4B2C4B → P121_DustDraw,
+   P75_Fn491A56 → P119_TrafficSpawn, P77_Fn501770 → P136_OverlayMap. Слабые заглушки — platform/native/game_fwd.c:
+   Call0040BF50 → P136_FrontInit, Call0040C20B → P136_GameLoop, P58_Fn40CFDF → P67_DrawIcon (0040cfdf, фон меню BKGRND*).
+5. **64 бит, GrTexInfo** (блокер 2, частично): `P40_UploadSlot*` писали адрес `&P40_Blocks[b].info` как `(uint32_t)(uintptr_t)` →
+   теперь `re_addr`; `P53_SetTexSource` (0041f76f, ячейка grTexSource) принимает `uint32_t info` и переводит `re_ptr` (был `const uint8_t *`
+   при 32-битном аргументе ячейки — SEGV).
+6. **Начальные значения .data** (блокер 4, скаляры): tools/gen_data_init.py → game/data_init.c — 347 скалярных GAME_VAR_DEF
+   (int8..int32, uint8..uint32, float, double) с ненулевым значением в инициализированной части .data/.rdata Game.exe;
+   `re_init_data_game()` (platform/native/main.c, только игра) пишет значение, если native-переменная после re_init_consts нулевая.
+   Здесь мешали P23_ScaleUV_A/B (0054ef60/6c = 1/256) и P23_ZScale_A/B (64.0): без них u = v = 0 и z = 1.
+7. **grColorCombine** `P22_SetTexOp` 0041e14f: режим — 4-й аргумент (other, `[ebp+0x14]`; 1 = текстура), прежний перенос брал 5-й
+   (invert) → COLOROP = DISABLE, текстура не участвовала. **Ошибка была и в hook.**
+8. **Рендер GL**: стадия 0 D3D в шейдере — COLOROP/ALPHAOP (DISABLE/SELECTARG1/2/MODULATE×1/2/4), ARG1/ARG2 (diffuse/texture),
+   умолчания D3D (ARG1 = TEXTURE, ARG2 = CURRENT); альфа-тест по ALPHAFUNC (D3DCMP) и ALPHAREF; в игре ALPHATESTENABLE по умолчанию 0
+   (как в D3D; тест рендера — прежнее «a < 0.5»). Новые plat_tex_update, plat_clear_rect.
+9. **WM_ACTIVATEAPP**: SDL-цикл сообщений шлёт оконной процедуре 0x1c(1) при первом проходе и при FOCUS_GAINED/LOST — иначе
+   P140_Frontend крутился в `if (P31_Active == 0) continue` без кадров.
+
 ## Блокеры в порядке, в каком они мешают запуску
 
-1. **Текстуры/2D через DirectDraw-эмуляцию — чёрный экран.** Цепочка заставки: `P12_Fn0040DA56` → `P75_BmpToPage` (страница 005d7e40) → `P40_UploadSlot` → `Call0042486B` (grTexDownloadMipMap эмуляции) → эмулируемые текстуры `P149_EmulNew`/`P105_EmulSurface` → `plat_dd_create_surface`/`plat_dd_lock`. В SDL поверхности — учётные заглушки без памяти пикселей, Lock не даёт буфер, загрузки в GL (`plat_tex_create`) нет. Нужно: поверхность SDL с реальной памятью (w×h×bpp), Lock/Unlock → `plat_tex_create`/обновление GL-текстуры, `plat_set_texture` → `plat_tex_bind`; палитры (`plat_dd_create_palette`/`plat_tex_palette_changed`) для 8-бит.
+0. **v2.01: экран главного меню чёрный.** Цикл меню P140_Frontend идёт (P114_MenuStep/P119_MenuFrame), фон рисуется P67_DrawIcon
+   (BKGRND1A..), но на снимке кадра 300 — чёрный экран. Не выяснено: рисует ли P67_DrawIcon в программный буфер (P65_Screen) с
+   выводом через LFB-Lock задней поверхности (P105, наложение при Flip) или через Glide-значки; плюс «not ported: Call005291ED»
+   (005291ed, 102 байта — вызывается из ported11 с адресом 0057b740 + y·0x280 + x: копия/заливка строки буфера, не перенесена).
+   Следующий шаг: RE_TRACE_DD на кадрах меню (lock задней, draw_prim), перенос 005291ed.
+1. ~~Текстуры/2D через DirectDraw-эмуляцию — чёрный экран~~ — **исправлено в v2.01** (см. выше). Осталось: Blt/BltFast между
+   поверхностями в памяти (`plat_dd_blt_from`/`plat_dd_blt_rect` для не-экранных поверхностей — только учёт), мип-уровни, 3D-рендер
+   поверх LFB в одном кадре — наложение упрощённое (пиксель 0 прозрачный).
 2. **64-битные указатели через int32.** 35 мест `(int32_t|uint32_t)(uintptr_t)&…` в re/game (напр. `P40_UploadSlot`: `info = (uint32_t)(uintptr_t)&P40_Blocks[b].info[0]`, аргумент `Call0042486B`), плюс таблица Glide с типами `FnIntI` для аргументов-указателей. Нужно: аудит ячеек Glide с аргументом-указателем (grTexDownloadMipMap, grTexSource, grDrawPolygonVertexList, grLfbLock, grSstQueryHardware …) → `intptr_t`/re_addr+re_ptr; поля структур — re_addr.
 3. **Несколько native-объектов на один адрес Game.exe.** 310 адресов с более чем одним `GAME_VAR_DEF` (D_/G/P…): запись в один псевдоним не видна читателю другого (так ломались 00b1c0d4 и 005d577c). Нужно: сводить в один объект (макрос-псевдоним), начиная с путей загрузки/меню; инструмент поиска — work/own191.py.
-4. **Начальные значения .data.** `GAME_VAR_DEF` в native без инициализатора: 371 скалярный объект (из 2567) с ненулевым значением в .data Game.exe — кандидаты (часть уже ставит re_init_consts/P56_InitConsts). Нужно: генератор инициализаторов из Game.exe .data (как tools/gen_*_data.py) с проверкой против re_init_consts.
-5. **Шпионы selftest в игровом бинарнике.** tests/selftest.c линкуется в driver; 41 имя из `--skip` (work/skip_v196.txt) в игре — шпионы, а не перенос (исправлено 2: P74_Fn41CE90, P74_Fn424B70). Нужно: каждый шпион вне selftest передаёт вызов настоящей функции (по образцу v2.00) либо вынести тесты из игрового бинарника.
+4. **Начальные значения .data.** v2.01: скаляры — game/data_init.c (347, только игра). Осталось: массивы/структуры (g8_bytes_t, p99_rgb_t …) и поля-адреса (int32-адреса .data копируются как есть — `re_ptr` их находит только в зарегистрированных областях).
+5. **Шпионы selftest в игровом бинарнике.** tests/selftest.c линкуется в driver; 41 имя из `--skip` (work/skip_v196.txt) в игре — шпионы, а не перенос (исправлено 2 в v2.00, ещё 16 в v2.01 — список выше; остальные ~23 — P67_*, P66_*, P56_FindIcon, P57_MenuStep, P58_Fn418675 …). Нужно: каждый шпион вне selftest передаёт вызов настоящей функции (по образцу v2.00) либо вынести тесты из игрового бинарника.
 6. **Заглушки unported.h, у которых есть перенос.** 365 строк V/R; часть не связана в links.c (две найдены запуском). Нужно: по журналу «not ported» при каждом новом шаге запуска связывать с перенесёнными функциями (адреса → re_ptr/re_fn).
 7. **Колбэки по адресу Game.exe.** `re_fn` знает только функции из k_fns (game/reptr.c); таймер 00408710 там не было (обойдено в links.c). Нужно: зарегистрировать все адреса, передаваемые в TimerStart/таблицы меню/обработчики.
 8. **DirectInput → клавиатура SDL.** `plat_di_get_state` в SDL возвращает «ничего не нажато» (platform/sdl/plat_di.c); `P48_AnyKey`/меню не получают клавиш. Нужно: буфер 256 DIK из `SDL_GetKeyboardState` (таблица SDL_Scancode → DIK), события SDL в `plat_pump_messages`, мышь/джойстик — потом.

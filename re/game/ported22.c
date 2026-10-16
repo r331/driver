@@ -74,8 +74,10 @@ void P22_SetViewport(int32_t x0, int32_t y0, int32_t x1, int32_t y1) {
   plat_set_viewport(P22_VpX, P22_VpY, P22_VpW, P22_VpH);
 }
 
-void P22_SetTexOp(int32_t a, int32_t b, int32_t c, int32_t d, int32_t mode) {
-  (void)a; (void)b; (void)c; (void)d;
+void P22_SetTexOp(int32_t a, int32_t b, int32_t c, int32_t mode, int32_t e) {
+  /* v2.01: режим — 4-й аргумент grColorCombine (other, [ebp+0x14] в 0041e17b: 1 = GR_COMBINE_OTHER_TEXTURE), не 5-й (invert);
+     прежний перенос брал 5-й — заставки рисовались без текстуры (и в hook) */
+  (void)a; (void)b; (void)c; (void)e;
   if (P22_DevReady == 0 || mode == P22_TexOpCur) return;
   P22_TexOpCur = mode;
   G6Call00422AE7();

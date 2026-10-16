@@ -4,28 +4,142 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-typedef struct { uint32_t tag; int32_t lost; int32_t attached; int32_t clipper; int32_t w, h; } dd_obj;
+typedef struct dd_obj { uint32_t tag; int32_t lost; int32_t attached; int32_t clipper; int32_t w, h;
+    /* v2.01: игра (g_game_present) — поверхность с памятью пикселей */
+    uint8_t *px; int32_t pitch, bpp; uint32_t pf[8]; uint32_t addr; int gltex, dirty, role; uint32_t caps;
+    struct dd_obj *surf; struct dd_obj *pal; uint8_t pal_rgba[256 * 4]; uint32_t ck_lo, ck_hi; int has_ck; } dd_obj;
+static int g_game_present;   /* v2.00: 1 — игра (plat_dd_stub_enum с 0x100): Flip показывает кадр GL; v2.01: поверхности с памятью */
+/* v2.01: адрес памяти поверхности для 32-битного поля lpSurface (game/reptr.c — синтетический адрес 0x80000000+) */
+uint32_t re_ptr_register_dyn(void *native, uint32_t size);
+void     re_ptr_unregister(const void *native);
+static int g_trace_dd = -1;
+static int trace_dd(void) { if (g_trace_dd < 0) { const char *e = getenv("RE_TRACE_DD"); g_trace_dd = e && *e && *e != '0'; } return g_trace_dd; }
 static uint32_t g_desc[31]; static int g_desc_n; static void *g_tex; static int g_tex_stage, g_pal_entries, g_pal_changed;
 static int g_live; static uint32_t g_coop_flags;
 static int32_t g_fill[4]; static uint32_t g_fill_px; static int g_fill_n;
 static void *mk(uint32_t tag) { dd_obj *o = (dd_obj *)calloc(1, sizeof *o); if (o) { o->tag = tag; g_live++; } return o; }
+
+/* ===== v2.01: поверхности DirectDraw в памяти (только игра, g_game_present; тесты — прежние учётные заглушки) =====
+   Поверхность: w×h, pitch = w·bpp/8 (выровнено на 4), формат пикселей — из DDSURFACEDESC2 (+0x48, флаг DDSD_PIXELFORMAT 0x1000),
+   иначе формат экрана (16 бит RGB565). Lock отдаёт lpSurface (desc[9]) — синтетический 32-битный адрес (re_ptr_register_dyn),
+   pitch (desc[4]), размеры и формат. Текстура Direct3D (QueryInterface IID_IDirect3DTexture2) — объект tag 6 со ссылкой на
+   поверхность; plat_set_texture → при изменённой памяти перевод в RGBA (маски формата, PAL8 — палитра поверхности,
+   цветовой ключ — альфа 0) и загрузка в GL (plat_tex_update), затем plat_tex_bind. Первичная/задняя поверхность: 3D рисуется
+   прямо в GL-кадр; запись в заднюю через Lock (LFB) накладывается на кадр при Flip (пиксель 0 — прозрачный), память затем
+   обнуляется; Blt COLORFILL задней — очистка прямоугольника GL. */
+enum { ROLE_TEX = 0, ROLE_PRIMARY = 1, ROLE_BACK = 2, ROLE_Z = 3 };
+static int g_scr_w = 640, g_scr_h = 480;
+static const uint32_t k_pf565[8] = { 0x20, 0x40, 0, 16, 0xf800, 0x7e0, 0x1f, 0 };
+static int g_tr_n;
+#define TR(...) do { if (trace_dd() && g_tr_n < 400) { g_tr_n++; fprintf(stderr, "[dd] " __VA_ARGS__); } } while (0)
+static int gs_alloc(dd_obj *o) {
+    if (o->w <= 0 || o->h <= 0 || o->w > 4096 || o->h > 4096) return 0;
+    o->bpp = (int32_t)o->pf[3]; if (o->bpp != 8 && o->bpp != 16 && o->bpp != 24 && o->bpp != 32) o->bpp = 16;
+    o->pitch = ((o->w * o->bpp / 8) + 3) & ~3;
+    o->px = (uint8_t *)calloc((size_t)o->pitch * (size_t)o->h, 1); if (!o->px) return 0;
+    o->addr = re_ptr_register_dyn(o->px, (uint32_t)(o->pitch * o->h));
+    o->dirty = 1; return 1;
+}
+static uint8_t mask8(uint32_t v, uint32_t m) {
+    if (!m) return 0; int sh = 0; while (!((m >> sh) & 1)) sh++; uint32_t mm = m >> sh, x = (v & m) >> sh;
+    return (uint8_t)(mm ? (x * 255u + mm / 2) / mm : 0);
+}
+static uint32_t gs_raw(const dd_obj *o, const uint8_t *p) {
+    switch (o->bpp) { case 8: return p[0]; case 16: return (uint32_t)p[0] | (uint32_t)p[1] << 8;
+    case 24: return (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16;
+    default: return (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24; }
+}
+/* RGBA (байты r,g,b,a в памяти), overlay: пиксель 0 — альфа 0 */
+static uint32_t *gs_to_rgba(const dd_obj *o, int overlay) {
+    uint32_t *out = (uint32_t *)malloc((size_t)o->w * (size_t)o->h * 4); if (!out) return NULL;
+    int alpha = (o->pf[1] & 1) && o->pf[7];
+    const uint8_t *pal = o->pal ? o->pal->pal_rgba : NULL;
+    for (int y = 0; y < o->h; y++) {
+        const uint8_t *row = o->px + (size_t)y * o->pitch;
+        for (int x = 0; x < o->w; x++) {
+            uint32_t v = gs_raw(o, row + x * (o->bpp / 8)); uint8_t r, g, b, a;
+            if (o->bpp == 8) { if (pal) { r = pal[v * 4]; g = pal[v * 4 + 1]; b = pal[v * 4 + 2]; } else r = g = b = (uint8_t)v; a = 255; }
+            else { r = mask8(v, o->pf[4]); g = mask8(v, o->pf[5]); b = mask8(v, o->pf[6]); a = alpha ? mask8(v, o->pf[7]) : 255; }
+            if (o->has_ck && v >= o->ck_lo && v <= o->ck_hi) a = 0;
+            if (overlay) a = v ? 255 : 0;
+            out[(size_t)y * o->w + x] = (uint32_t)r | (uint32_t)g << 8 | (uint32_t)b << 16 | (uint32_t)a << 24;
+        }
+    }
+    return out;
+}
+static void gs_upload(dd_obj *o, int overlay) {
+    if (!o->px || !o->dirty) return;
+    uint32_t *rgba = gs_to_rgba(o, overlay); if (!rgba) return;
+    if (trace_dd()) { int nz = 0, pz = 0; for (int i = 0; i < o->pitch * o->h; i++) nz += o->px[i] != 0;
+        if (o->pal) for (int i = 0; i < 1024; i++) pz += o->pal->pal_rgba[i] != 0;
+        TR("upload %p %dx%d bpp %d nz %d pal %p palnz %d rgba0 %08x mid %08x\n", (void *)o, o->w, o->h, o->bpp, nz, (void *)o->pal, pz, rgba[0], rgba[o->w * o->h / 2 + o->w / 2]); }
+    if (o->gltex) plat_tex_update(o->gltex, o->w, o->h, rgba); else o->gltex = plat_tex_create(o->w, o->h, rgba);
+    free(rgba); o->dirty = 0;
+}
+static dd_obj *g_gs_back, *g_gs_primary;
+static void gs_present(void) {
+    dd_obj *b = g_gs_back;
+    if (b && b->px && b->dirty) {   /* LFB-запись в заднюю поверхность — поверх кадра */
+        gs_upload(b, 1);
+        if (b->gltex) plat_blit2d(b->gltex, 0, 0, b->w, b->h, 0, 0);
+        memset(b->px, 0, (size_t)b->pitch * b->h); b->dirty = 0;
+    }
+    plat_flip();
+}
 void *plat_dd_create_surface(void *dd, const void *desc) {
     if (!dd || !desc) return NULL;
     dd_obj *o = (dd_obj *)mk(1); if (!o) return NULL;
     memcpy(g_desc, desc, sizeof g_desc); g_desc_n++;
     if (g_desc[1] & 6) { o->h = (int32_t)g_desc[2]; o->w = (int32_t)g_desc[3]; }
+    if (g_game_present) {
+        o->caps = g_desc[26];
+        memcpy(o->pf, (g_desc[1] & 0x1000) ? &g_desc[18] : k_pf565, 32);
+        if (g_desc[1] & 0x10000) { o->has_ck = 1; o->ck_lo = g_desc[16]; o->ck_hi = g_desc[17]; }
+        if (o->caps & 0x200) { o->role = ROLE_PRIMARY; o->w = g_scr_w; o->h = g_scr_h; g_gs_primary = o; }
+        else if (o->caps & 0x20000) o->role = ROLE_Z;
+        if (o->role != ROLE_Z) gs_alloc(o);
+        TR("create %p %dx%d bpp %d flags %x caps %x pf %x/%x masks %x %x %x %x role %d addr %08x\n", (void *)o, o->w, o->h, o->bpp,
+           g_desc[1], o->caps, o->pf[1], o->pf[3], o->pf[4], o->pf[5], o->pf[6], o->pf[7], o->role, o->addr);
+    }
     return o;
 }
-int32_t plat_dd_set_display_mode(void *dd, int w, int h, int bpp) { (void)w; (void)h; (void)bpp; return dd ? 0 : -1; }
+int32_t plat_dd_set_display_mode(void *dd, int w, int h, int bpp) { (void)bpp; if (dd && w > 0 && h > 0) { g_scr_w = w; g_scr_h = h; } return dd ? 0 : -1; }
 void *plat_dd_create_clipper(void *dd) { return dd ? mk(2) : NULL; }
 int32_t plat_dd_set_clipper(void *s, void *c) { if (!s || !c) return -1; ((dd_obj *)s)->clipper = 1; return 0; }
 int32_t plat_dd_attach_surface(void *s, void *a) { if (!s || !a) return -1; ((dd_obj *)s)->attached++; return 0; }
-void *plat_dd_get_attached(void *s, uint32_t caps) { (void)caps; return s ? mk(1) : NULL; }
-void plat_dd_release(void *o) { if (o) { free(o); g_live--; } }
+void *plat_dd_get_attached(void *s, uint32_t caps) {
+    (void)caps; if (!s) return NULL;
+    dd_obj *o = (dd_obj *)mk(1);
+    if (o && g_game_present) {   /* v2.01: задняя поверхность — размер и формат первичной */
+        dd_obj *p = (dd_obj *)s; o->w = p->w; o->h = p->h; memcpy(o->pf, p->pf, 32); o->role = ROLE_BACK; o->caps = 4;
+        gs_alloc(o); g_gs_back = o; TR("back %p %dx%d addr %08x\n", (void *)o, o->w, o->h, o->addr);
+    }
+    return o; }
+void plat_dd_release(void *v) {
+    if (!v) return;
+    dd_obj *o = (dd_obj *)v;
+    if (o->px) { re_ptr_unregister(o->px); free(o->px); }
+    if (o->gltex) plat_tex_free(o->gltex);
+    if (o == g_gs_back) g_gs_back = NULL;
+    if (o == g_gs_primary) g_gs_primary = NULL;
+    free(o); g_live--; }
 int32_t plat_dd_is_lost(void *s) { return s ? ((dd_obj *)s)->lost : 0; }
 int32_t plat_dd_restore(void *s) { if (s) ((dd_obj *)s)->lost = 0; return 0; }
 int32_t plat_dd_fill_rect(void *s, int x0, int y0, int x1, int y1, uint32_t px) {
-    (void)s; g_fill[0] = x0; g_fill[1] = y0; g_fill[2] = x1; g_fill[3] = y1; g_fill_px = px; g_fill_n++; return 0;
+    g_fill[0] = x0; g_fill[1] = y0; g_fill[2] = x1; g_fill[3] = y1; g_fill_px = px; g_fill_n++;
+    dd_obj *o = (dd_obj *)s;
+    if (g_game_present && o) {   /* v2.01: Blt COLORFILL */
+        if (o->role == ROLE_PRIMARY || o->role == ROLE_BACK) {
+            uint32_t c = (uint32_t)mask8(px, o->pf[4]) << 16 | (uint32_t)mask8(px, o->pf[5]) << 8 | mask8(px, o->pf[6]);
+            plat_clear_rect(c, x0, y0, x1 - x0, y1 - y0);
+        } else if (o->px) {
+            if (x0 < 0) x0 = 0; if (y0 < 0) y0 = 0; if (x1 > o->w) x1 = o->w; if (y1 > o->h) y1 = o->h;
+            int bp = o->bpp / 8;
+            for (int y = y0; y < y1; y++) for (int x = x0; x < x1; x++) memcpy(o->px + (size_t)y * o->pitch + x * bp, &px, (size_t)bp);
+            o->dirty = 1;
+        }
+    }
+    return 0;
 }
 void *plat_d3d_create_device(void *d3d, const void *iid, void *surf) { (void)iid; return (d3d && surf) ? mk(3) : NULL; }
 void *plat_d3d_create_viewport(void *d3d) { return d3d ? mk(4) : NULL; }
@@ -37,11 +151,24 @@ int plat_dd_stub_last_fill(int32_t *r, uint32_t *px) { if (!g_fill_n) return 0; 
 int32_t plat_dd_set_cooperative(void *dd, void *hwnd, uint32_t flags) { (void)hwnd; g_coop_flags = flags; return dd ? 0 : -1; }
 int plat_dd_last_coop(void) { return (int)g_coop_flags; }
 int32_t plat_dd_get_surface_size(void *s, int32_t *w, int32_t *h) { if (!s) return -1; *w = ((dd_obj *)s)->w; *h = ((dd_obj *)s)->h; return 0; }
-void *plat_dd_create_palette(void *dd, uint32_t flags, const void *e) { (void)flags; return (dd && e) ? mk(5) : NULL; }
-int32_t plat_dd_surface_set_palette(void *s, void *p) { return (s && p) ? 0 : -1; }
-int32_t plat_dd_palette_set_entries(void *p, uint32_t f, uint32_t first, uint32_t n, const void *e) { (void)f; (void)first; (void)n; (void)e; if (!p) return -1; g_pal_entries++; return 0; }
-void plat_tex_palette_changed(void *t, uint32_t first, uint32_t n) { (void)t; (void)first; (void)n; g_pal_changed++; }
-void plat_set_texture(int stage, void *tex) { g_tex_stage = stage; g_tex = tex; }
+void *plat_dd_create_palette(void *dd, uint32_t flags, const void *e) {
+    (void)flags; if (!dd || !e) return NULL;
+    dd_obj *o = (dd_obj *)mk(5); if (o) memcpy(o->pal_rgba, e, sizeof o->pal_rgba); return o; }
+int32_t plat_dd_surface_set_palette(void *s, void *p) {
+    if (!s || !p) return -1; if (g_game_present) { ((dd_obj *)s)->pal = (dd_obj *)p; ((dd_obj *)s)->dirty = 1; } return 0; }
+int32_t plat_dd_palette_set_entries(void *p, uint32_t f, uint32_t first, uint32_t n, const void *e) {
+    (void)f; if (!p) return -1; g_pal_entries++;
+    if (e && first < 256) { if (n > 256 - first) n = 256 - first; memcpy(((dd_obj *)p)->pal_rgba + first * 4, e, (size_t)n * 4); }
+    return 0; }
+void plat_tex_palette_changed(void *t, uint32_t first, uint32_t n) {
+    (void)first; (void)n; g_pal_changed++;
+    if (g_game_present && t && ((dd_obj *)t)->tag == 6 && ((dd_obj *)t)->surf) ((dd_obj *)t)->surf->dirty = 1; }
+void plat_set_texture(int stage, void *tex) {
+    g_tex_stage = stage; g_tex = tex;
+    if (!g_game_present || stage != 0) return;
+    dd_obj *t = (dd_obj *)tex, *s = (t && t->tag == 6) ? t->surf : (t && t->tag == 1 ? t : NULL);
+    TR("set_texture %p surf %p\n", tex, (void *)s);
+    if (s && s->px) { gs_upload(s, 0); plat_tex_bind(s->gltex); } else plat_tex_bind(0); }
 void *plat_stub_last_texture(int *stage) { if (stage) *stage = g_tex_stage; return g_tex; }
 int plat_stub_pal_stats(int *a, int *b) { *a = g_pal_entries; *b = g_pal_changed; return 1; }
 int plat_dd_stub_last_desc(uint32_t *d) { if (!g_desc_n) return 0; memcpy(d, g_desc, sizeof g_desc); return g_desc_n; }
@@ -66,9 +193,17 @@ static int g_lk_fail, g_pf_fail, g_locks, g_unlocks, g_flips, g_blts_rc, g_clip_
 static uint8_t g_lock_mem[64];
 int32_t plat_dd_lock(void *s, void *d) {
     if (!s || !d || g_lk_fail) return -1;
-    uint32_t *u = (uint32_t *)d; u[4] = 640; u[9] = (uint32_t)(uintptr_t)g_lock_mem; g_locks++; return 0; }
-int32_t plat_dd_unlock(void *s) { if (!s) return -1; g_unlocks++; return 0; }
+    uint32_t *u = (uint32_t *)d;
+    dd_obj *o = (dd_obj *)s;
+    if (g_game_present && o->tag == 1 && o->px) {   /* v2.01: настоящая память поверхности */
+        u[1] = 0x100f | 8; u[2] = (uint32_t)o->h; u[3] = (uint32_t)o->w; u[4] = (uint32_t)o->pitch; u[9] = o->addr;
+        memcpy(&u[18], o->pf, 32); u[26] = o->caps; g_locks++;
+        TR("lock %p role %d addr %08x pitch %d\n", (void *)o, o->role, o->addr, o->pitch);
+        return 0; }
+    u[4] = 640; u[9] = (uint32_t)(uintptr_t)g_lock_mem; g_locks++; return 0; }
+int32_t plat_dd_unlock(void *s) { if (!s) return -1; g_unlocks++; if (g_game_present && ((dd_obj *)s)->px) ((dd_obj *)s)->dirty = 1; return 0; }
 int32_t plat_dd_get_pixel_format(void *s, uint32_t *pf) {
+    if (g_game_present && s && ((dd_obj *)s)->tag == 1) { memcpy(pf, ((dd_obj *)s)->pf, 32); pf[0] = 0x20; return 0; }
     if (!s || g_pf_fail) return -1;
     memset(pf, 0, 32); pf[0] = 0x20; pf[3] = g_pf_bits; pf[4] = g_pf_m[0]; pf[5] = g_pf_m[1]; pf[6] = g_pf_m[2]; return 0; }
 void *plat_dd_query_dd4(void *dd) { return dd ? mk(0) : NULL; }
@@ -77,9 +212,10 @@ void plat_window_client_rect(void *h, int32_t *rc) { (void)h; rc[0] = 0; rc[1] =
 void plat_client_to_screen(void *h, int32_t *pt) { (void)h; pt[0] += 100; pt[1] += 50; }
 int32_t plat_dd_clipper_set_hwnd(void *c, void *h) { (void)h; if (!c) return -1; g_clip_sets++; return 0; }
 int32_t plat_dd_blt_rect(void *d, const int32_t *dr, void *s, const int32_t *sr) {
-    if (!d || !s) return -1; memcpy(g_drc, dr, sizeof g_drc); memcpy(g_src_rc, sr, sizeof g_src_rc); g_blts_rc++; return 0; }
-static int g_game_present;   /* v2.00: 1 — игра (plat_dd_stub_enum с 0x100): Flip показывает кадр GL */
-int32_t plat_dd_flip(void *s, uint32_t fl) { if (!s) return -1; g_flips++; g_flip_flags = fl; if (g_game_present) plat_flip(); return g_flip_hr; }
+    if (!d || !s) return -1; memcpy(g_drc, dr, sizeof g_drc); memcpy(g_src_rc, sr, sizeof g_src_rc); g_blts_rc++;
+    if (g_game_present && d == (void *)g_gs_primary && s == (void *)g_gs_back) gs_present();   /* v2.01: оконный режим — Blt front←back */
+    return 0; }
+int32_t plat_dd_flip(void *s, uint32_t fl) { if (!s) return -1; g_flips++; g_flip_flags = fl; if (g_game_present) { gs_present(); return 0; } return g_flip_hr; }
 void plat_dd_stub_surface(int lf, int pff, uint32_t bits, uint32_t r, uint32_t g, uint32_t b, int32_t fhr) {
     g_lk_fail = lf; g_pf_fail = pff; g_pf_bits = bits; g_pf_m[0] = r; g_pf_m[1] = g; g_pf_m[2] = b; g_flip_hr = fhr; (void)g_rects_n; }
 int plat_dd_stub_surface_stats(int *lk, int *ul, int *fl, uint32_t *ff, int *bl, int32_t *dr, int32_t *sr, int *cs) {
@@ -109,7 +245,10 @@ int32_t plat_ds_create_buffer(void *ds, uint32_t fl, uint32_t bytes, const void 
     (void)wfx; if (!ds || (g_dsx_fail & 1)) { *out = NULL; return -1; }
     *out = plat_dd_create(NULL); g_ds3_op = 15; g_ds3_u = fl; g_ds3_v[0] = (float)bytes; return 0; }
 int32_t plat_com_query_interface(void *obj, const void *iid, void **out) {
-    (void)iid; if (!obj || (g_dsx_fail & 2)) { *out = NULL; return -1; }
+    if (!obj || (g_dsx_fail & 2)) { *out = NULL; return -1; }
+    static const uint8_t iid_tex2[16] = { 0x02,0x15,0x28,0x93,0xf8,0x8c,0xd0,0x11,0x89,0xab,0x00,0xa0,0xc9,0x05,0x41,0x29 };
+    if (g_game_present && iid && ((dd_obj *)obj)->tag == 1 && memcmp(iid, iid_tex2, 16) == 0) {   /* v2.01: текстура ↔ поверхность */
+        dd_obj *t = (dd_obj *)mk(6); if (t) t->surf = (dd_obj *)obj; *out = t; return t ? 0 : -1; }
     *out = plat_dd_create(NULL); return 0; }
 int32_t plat_ds_prop_set(void *ps, const void *g, uint32_t id, const void *d, uint32_t len) {
     if (!ps) return -1; memcpy(g_dsx_pg, g, 16); g_dsx_pid = id; g_dsx_plen = len; g_dsx_pd0 = 0; memcpy(&g_dsx_pd0, d, len < 4 ? len : 4); g_dsx_pn++; return 0; }
@@ -149,7 +288,8 @@ int plat_ds_stub_prop(uint8_t *g, uint32_t *id, uint32_t *len, uint32_t *d0, int
    драйвер 0 — основной (guid NULL) «Primary Display Driver», остальные с guid {i}; устройства — «SDL HAL i»
    (D3DDEVICEDESC: dwSize 0xfc, dwFlags 0, dcmColorModel = 2 у HAL, 0 у последнего при n_dev > 1) --- */
 static int g_dde_n = 1, g_d3de_n = 1; static uint32_t g_dde_fail;
-void plat_dd_stub_enum(int n_dd, int n_dev, uint32_t fm) { g_dde_n = n_dd; g_d3de_n = n_dev; g_dde_fail = fm; g_game_present = (fm & 0x100) != 0; }
+void plat_dd_stub_enum(int n_dd, int n_dev, uint32_t fm) { g_dde_n = n_dd; g_d3de_n = n_dev; g_dde_fail = fm; g_game_present = (fm & 0x100) != 0;
+    if (g_game_present) plat_set_render_state(15, 0); }   /* v2.01: игра — умолчание D3D ALPHATESTENABLE = FALSE (тесты рендера — прежнее 1) */
 int32_t plat_dd_enumerate(plat_dd_enum_cb cb, void *ctx) {
     if (g_dde_fail & 1) return -1;
     for (int i = 0; i < g_dde_n; i++) {

@@ -50,7 +50,7 @@ extern p53_modetab_t P53_ModeTab; extern p53_textab_t P53_TexTab;
 void    P53_StepBounds(void);                              /* 004d6354: слот 0xf свободен → следующая запись границ или сброс */
 void    P53_NameEntryKey(int32_t key);                     /* 005101f0 (после 0040efd5): ввод символа имени (-3 отмена, -2 принять, -1 стереть) */
 void    P53_NameEntry(void);                               /* 005101f0 */
-void    P53_SetTexSource(int32_t a, uint32_t addr, int32_t c, const uint8_t *d); /* 0041f76f (stdcall ret 0x10) */
+void    P53_SetTexSource(int32_t a, uint32_t addr, int32_t c, uint32_t info);  /* v2.01: info — адрес GrTexInfo (re_addr) */ /* 0041f76f (stdcall ret 0x10) */
 int32_t P53_TexLookup(int32_t handle, int32_t b, int32_t c, int32_t d);          /* 0041d63b */
 void    P53_CallWithStateP(const float *pos, uint8_t *car, int32_t c);              /* v1.74 */
 void    P53_CallWithState(int32_t a, int32_t b, int32_t c);                      /* 00500154 */

@@ -43,9 +43,13 @@ void P53_NameEntryKey(int32_t key) {
 }
 void P53_NameEntry(void) { P53_NameEntryKey(P53_Fn40EFD5()); }
 
-void P53_SetTexSource(int32_t a, uint32_t addr, int32_t c, const uint8_t *d) {
+void P53_SetTexSource(int32_t a, uint32_t addr, int32_t c, uint32_t info) {
   (void)a; (void)c;
   if (P22_DevReady == 0) return;
+  const uint8_t *d = (const uint8_t *)re_ptr(info);   /* v2.01: GrTexInfo — 32-битный адрес (re_addr), как в ячейке Glide */
+#ifndef RE_HOOK_BUILD
+  if (d == NULL) return;
+#endif
   int32_t kind; memcpy(&kind, d + 0xc, 4);
   uint32_t idx = (kind == 5) ? (addr >> 0x10) : ((addr >> 0x11) << 1);
   if (idx < 0x20) {

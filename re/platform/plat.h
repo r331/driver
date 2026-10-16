@@ -38,6 +38,8 @@ void plat_window_close(void);
 typedef struct { float x, y, z, rhw; uint32_t color, specular; float u, v; } plat_vertex;
 int plat_tex_create(int w, int h, const uint32_t *rgba);
 void plat_tex_bind(int tex);
+void plat_tex_update(int tex, int w, int h, const uint32_t *rgba);   /* v2.01: перезагрузка картинки текстуры (SDL) */
+void plat_clear_rect(uint32_t rgb, int x, int y, int w, int h);       /* v2.01: заливка прямоугольника кадра (SDL) */
 void plat_tex_free(int tex);
 void plat_set_blend(int enable, int src, int dst);
 void plat_set_zbuffer(int test, int write);

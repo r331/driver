@@ -162,6 +162,12 @@
 #include "../game/uihandlers2.h"
 #include "../game/menu57.h"
 #include "../game/ported150.h"
+/* v2.01: шпионы selftest вне selftest передают вызов настоящей функции (как v2.00) */
+extern int re_selftest_on;
+void P109_TileDraw(int32_t x, int32_t y, int32_t w, int32_t h, int32_t idx, void *color);
+int32_t P139_LadderLoad(void); void P140_LadderRun(void); int32_t P140_SndInit(int32_t, int32_t, int32_t); void P140_BankLine(char *);
+void P139_Effects(void); int32_t P124_MotelKeys(int32_t); void P135_DebrisTri(int32_t *); void P135_RadarLine(int32_t);
+void P131_RadarArrow(int32_t); void P136_OverlayMap(void); void P121_DustDraw(void); int32_t P119_TrafficSpawn(int32_t, int32_t, int32_t, int32_t, int32_t);
 #include "../game/ported151.h"
 #include <stdio.h>
 #include <string.h>
@@ -581,8 +587,8 @@ static int test_p22(void) {
   P22_DevReady = 1; P22_SetViewport(10, 20, 110, 80);
   if (P22_VpX != 10 || P22_VpY != 20 || P22_VpW != 100 || P22_VpH != 60) f++;
   P22_TexOpCur = 0; P22_TexVarA = 5; P22_TexVarB = 9;
-  P22_SetTexOp(0, 0, 0, 0, 2); if (P22_TexVarA != 0x20 || P22_TexVarB != 5) f++;
-  P22_SetTexOp(0, 0, 0, 0, 1); if (P22_TexVarA != 5) f++;
+  P22_SetTexOp(0, 0, 0, 2, 0); if (P22_TexVarA != 0x20 || P22_TexVarB != 5) f++;
+  P22_SetTexOp(0, 0, 0, 1, 0); if (P22_TexVarA != 5) f++;
   P22_SetViewport(0, 0, 0, 0); P22_DevReady = 0;
   P22_SetZFunc(3);  /* вернуть LEQUAL: состояние plat_* глобальное, дальше идёт render_test */
   P22_SetZWrite(1);
@@ -1697,13 +1703,13 @@ static int test_p53(void) {
   { uint8_t d[0x14]; memset(d, 0, sizeof d); int32_t k = 5; memcpy(d + 0xc, &k, 4);
     P22_DevReady = 1; P22_TexVarA = 0; P32_CurSlot = 0;
     uint32_t h = 0x1234; memcpy(&P53_TexTab[3 * 0x20], &h, 4);
-    P53_SetTexSource(0, 3u << 16, 0, d);
+    P53_SetTexSource(0, 3u << 16, 0, re_addr(d));
     CK(P22_TexVarA == 3 && P22_TexVarB == 3 && (uintptr_t)P32_CurHandle == 0x1234 && P32_CurSlot == -1);
-    k = 0; memcpy(d + 0xc, &k, 4); P53_SetTexSource(0, 5u << 17, 0, d);
+    k = 0; memcpy(d + 0xc, &k, 4); P53_SetTexSource(0, 5u << 17, 0, re_addr(d));
     CK(P22_TexVarA == 10);
-    P53_SetTexSource(0, 0x40u << 16, 0, d);   /* вне диапазона: без изменений */
+    P53_SetTexSource(0, 0x40u << 16, 0, re_addr(d));   /* вне диапазона: без изменений */
     CK(P22_TexVarA == 10);
-    P22_DevReady = 0; P53_SetTexSource(0, 1u << 16, 0, d); CK(P22_TexVarA == 10); }
+    P22_DevReady = 0; P53_SetTexSource(0, 1u << 16, 0, re_addr(d)); CK(P22_TexVarA == 10); }
   /* поиск узла */
   G6_00A421F0 = 0; CK(P53_TexLookup(1, 2, 3, 4) == 1);
   G6_00A421F0 = 1; P46_TexHead = NULL; P53_TexLookup(1, 2, 3, 4);
@@ -1997,7 +2003,7 @@ static int test_p57(void) {
 
 /* ported58: опрос меню/цикл экранов переопределены, иначе циклы не выходят */
 int32_t P58_Fn418675(uint32_t tbl, int32_t cur) { (void)tbl; (void)cur; return -1; }
-int32_t P58_Fn416794(void) { return 7; }
+int32_t P58_Fn416794(void) { if (!re_selftest_on) return P124_MotelKeys(0); return 7; }
 static int test_p58(void) {
   int f = 0;
   if (!P56_EulerTab) P56_AllocEulerTab(1);   /* кадр меню рисует мир: P83_LightMatrices читает таблицу поворотов */
@@ -2650,7 +2656,7 @@ void P67_Stream(const char *name, int32_t a) { (void)a; strncpy(t67_name, name, 
 uint8_t *P56_FindIcon(const char *n) { t67_findname = n; return t67_icon; }
 void P58_Fn4AA4EA(int32_t a0, int32_t a1, int32_t a2, int32_t a3, void *a4, int32_t a5) {
   t67_logo[0] = a0; t67_logo[1] = a1; t67_logo[2] = a2; t67_logo[3] = a3; t67_logo[4] = a4 == (void *)t67_icon; t67_logo[5] = a5; t67_logoN++; }
-void Call005233BE(int32_t a0, int32_t a1, int32_t a2) { (void)a0; (void)a1; (void)a2; }
+void Call005233BE(int32_t a0, int32_t a1, int32_t a2) { if (!re_selftest_on) { P140_SndInit(a0, a1, a2); return; } (void)a0; (void)a1; (void)a2; }
 void Call00414D1F(void) { t67_calls += 100; }
 static float t67_f(int32_t v) { float f; memcpy(&f, &v, 4); return f; }
 static int test_p67(void) {
@@ -2707,8 +2713,8 @@ static int test_p67(void) {
 /* ported68 */
 static int t68_cmds[8], t68_ret41b1c0, t68_loadN; static int32_t t68_freed;
 void P68_Fn514A47(void *p) { (void)p; t68_cmds[0]++; }
-int32_t P68_Fn41B1C0(void) { return t68_ret41b1c0; }
-void P68_Fn41B3AB(void) { t68_cmds[1]++; }
+int32_t P68_Fn41B1C0(void) { if (!re_selftest_on) return P139_LadderLoad(); return t68_ret41b1c0; }
+void P68_Fn41B3AB(void) { if (!re_selftest_on) { P140_LadderRun(); return; } t68_cmds[1]++; }
 static int32_t t68_load(int32_t n, int32_t a) { t68_loadN++; return a == 99 ? -1 : n * 100 + a; }
 static void t68_free(int32_t id) { t68_freed = id; }
 static float rd_f32(const uint8_t *p, uint32_t o) { float v; memcpy(&v, p + o, 4); return v; }
@@ -2794,10 +2800,10 @@ static int test_p68(void) {
 
 /* ported69 */
 static int t69_ovl, t69_calls[4], t69_freed;
-void P69_Fn4B33D8(void *p) { (void)p; t69_ovl++; }
+void P69_Fn4B33D8(void *p) { if (!re_selftest_on) { P135_DebrisTri((int32_t *)p); return; } (void)p; t69_ovl++; }
 void P69_Fn4B3E55(void) { t69_calls[0]++; }
-void P69_Fn4B2C4B(void) { t69_calls[1]++; }
-void P69_Fn4AAF3A(void) { t69_calls[2]++; }
+void P69_Fn4B2C4B(void) { if (!re_selftest_on) { P121_DustDraw(); return; } t69_calls[1]++; }
+void P69_Fn4AAF3A(void) { if (!re_selftest_on) { P139_Effects(); return; } t69_calls[2]++; }
 void P69_Fn4BA720(void) { t69_calls[3]++; }
 void CrtFree_0052CB70(uint32_t a) { t69_freed += (int)a; }
 static int test_p69(void) {
@@ -2842,8 +2848,8 @@ static int test_p69(void) {
 /* ported70 */
 static int t70_ret, t70_rad[2], t70_rgb[8], t70_txt;
 int32_t P61_Fn5139D7(int32_t a, int32_t b, int32_t c, void *d) { (void)a; (void)b; (void)c; (void)d; return t70_ret; }
-void P70_Fn5063A4(int32_t i) { t70_rad[0] = i + 1; }
-void P70_Fn507925(int32_t i) { t70_rad[1] = i + 1; }
+void P70_Fn5063A4(int32_t i) { if (!re_selftest_on) { P135_RadarLine(i); return; } t70_rad[0] = i + 1; }
+void P70_Fn507925(int32_t i) { if (!re_selftest_on) { P131_RadarArrow(i); return; } t70_rad[1] = i + 1; }
 static int test_p70(void) {
   int f = 0;
 #undef CK
@@ -3176,7 +3182,7 @@ static int test_p74(void) {
 /* ported75: подмена неперенесённых вызовов */
 static int t75_calls[4]; static int32_t t75_arg[5];
 void P75_Fn4958B7(void) { t75_calls[0]++; }
-int32_t P75_Fn491A56(int32_t car, int32_t node, int32_t a, int32_t b, int32_t c) { t75_calls[1]++; t75_arg[0] = car; t75_arg[1] = node; t75_arg[2] = a; t75_arg[3] = b; t75_arg[4] = c; return 1; }
+int32_t P75_Fn491A56(int32_t car, int32_t node, int32_t a, int32_t b, int32_t c) { if (!re_selftest_on) return P119_TrafficSpawn(car, node, a, b, c); t75_calls[1]++; t75_arg[0] = car; t75_arg[1] = node; t75_arg[2] = a; t75_arg[3] = b; t75_arg[4] = c; return 1; }
 void P75_Fn4EDD08(int32_t a0) { t75_calls[2] += 1 + a0 * 10; }
 static int test_p75(void) {
   int f = 0;
@@ -3264,7 +3270,7 @@ static int test_p75(void) {
 
 /* ported76: подмена неперенесённых вызовов */
 static int t76_calls[4]; static int32_t t76_arg[8]; static uint8_t t76_col;
-void P76_Fn40DCE0(int32_t x, int32_t y, int32_t w, int32_t h, int32_t idx, void *color) { t76_calls[0]++; t76_arg[0] = x; t76_arg[1] = y; t76_arg[2] = w; t76_arg[3] = h; t76_arg[4] = idx; t76_col = ((uint8_t *)color)[2]; }
+void P76_Fn40DCE0(int32_t x, int32_t y, int32_t w, int32_t h, int32_t idx, void *color) { if (!re_selftest_on) { P109_TileDraw(x, y, w, h, idx, color); return; } t76_calls[0]++; t76_arg[0] = x; t76_arg[1] = y; t76_arg[2] = w; t76_arg[3] = h; t76_arg[4] = idx; t76_col = ((uint8_t *)color)[2]; }
 void P76_Fn4268EF(void *p, int32_t a, int32_t b, int32_t c, int32_t d) { (void)p; t76_calls[2]++; t76_arg[0] = a; t76_arg[1] = b; t76_arg[2] = c; t76_arg[3] = d; }
 static int test_p76(void) {
   int f = 0;
@@ -3344,8 +3350,8 @@ static int test_p76(void) {
 /* ported77: подмена неперенесённых вызовов */
 static int t77_calls[8];
 void P77_Fn501C63(void) { t77_calls[5]++; }
-void P77_Fn501770(void) { t77_calls[6]++; }
-void P77_Fn524BD8(void *p) { (void)p; t77_calls[7]++; G6_00B91D34 = G6_00B91D34 + 1; }
+void P77_Fn501770(void) { if (!re_selftest_on) { P136_OverlayMap(); return; } t77_calls[6]++; }
+void P77_Fn524BD8(void *p) { if (!re_selftest_on) { P140_BankLine((char *)p); return; } (void)p; t77_calls[7]++; G6_00B91D34 = G6_00B91D34 + 1; }
 static int test_p77(void) {
   int f = 0;
 #undef CK

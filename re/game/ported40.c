@@ -1,4 +1,5 @@
 /* Память текстур Glide: сброс, загрузка слотов, палитры — восстановлено из Game.exe. */
+#include "reptr.h"
 #include "ported40.h"
 #include "ported6.h"
 #include "ported7.h"
@@ -39,7 +40,7 @@ void P40_ResetTexMem(void) {
     P40_Slots[i].block = 0xff;
     P40_Slots[i].data = 0;
     P40_Slots[i].texaddr = 0;
-    P40_Slots[i].info = (uint32_t)(uintptr_t)&P40_Blocks[0].info[0];
+    P40_Slots[i].info = re_addr(&P40_Blocks[0].info[0]);
   }
   uint32_t a = glide_addr("_grTexMinAddress@4");
   uint32_t max = glide_addr("_grTexMaxAddress@4");
@@ -80,10 +81,10 @@ void P40_UploadSlot(int32_t slot, int32_t data) {
   if ((P40_Slots[slot].flags & 2) != 0) extra = 4;
   if (data == 0) data = (int32_t)P40_Slots[slot].data;
   fill_block(b, slot, data, 0xb, extra);
-  Call0042486B(0, P40_Blocks[b].addr, 3, (uint32_t)(uintptr_t)&P40_Blocks[b].info[0], slot);
+  Call0042486B(0, P40_Blocks[b].addr, 3, re_addr(&P40_Blocks[b].info[0]), slot);
   P40_Slots[slot].block = (uint8_t)b;
   P40_Slots[slot].texaddr = P40_Blocks[b].addr;
-  P40_Slots[slot].info = (uint32_t)(uintptr_t)&P40_Blocks[b].info[0];
+  P40_Slots[slot].info = re_addr(&P40_Blocks[b].info[0]);
   b++;
   /* вторая половина пары: данные — исходные данные слота, загрузки в Glide нет */
   fill_block(b, slot, (int32_t)P40_Slots[slot].data, 0xb, extra);
@@ -103,10 +104,10 @@ void P40_UploadSlotPair(int32_t slot, int32_t data0, int32_t data1) {
     int32_t data = half == 0 ? data0 : data1;
     if (data == 0) data = (int32_t)P40_Slots[slot].data;
     fill_block(b, slot, data, 5, extra);
-    Call0042486B(0, P40_Blocks[b].addr, 3, (uint32_t)(uintptr_t)&P40_Blocks[b].info[0], slot);
+    Call0042486B(0, P40_Blocks[b].addr, 3, re_addr(&P40_Blocks[b].info[0]), slot);
     P40_Slots[slot].block = (uint8_t)b;
     P40_Slots[slot].texaddr = P40_Blocks[b].addr;
-    P40_Slots[slot].info = (uint32_t)(uintptr_t)&P40_Blocks[b].info[0];
+    P40_Slots[slot].info = re_addr(&P40_Blocks[b].info[0]);
     b++;
     slot++;
   }
