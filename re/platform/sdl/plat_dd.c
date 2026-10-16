@@ -1,6 +1,7 @@
 /* SDL-вариант объектов DirectDraw/Direct3D: учётные записи без устройства.
    Игровой код (game/ported24.c) работает с дескрипторами; реальное окно/буфер даёт plat_render.c. */
 #include "../plat.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 typedef struct { uint32_t tag; int32_t lost; int32_t attached; int32_t clipper; int32_t w, h; } dd_obj;
@@ -143,3 +144,25 @@ int32_t plat_ds_buf_restore(void *b) { if (!b || (g_dsd_fail & 0x20)) return -1;
 void plat_ds_stub_ctl(uint32_t fm, uint32_t sup) { g_dsx_fail = fm; g_dsx_support = sup; }
 int plat_ds_stub_prop(uint8_t *g, uint32_t *id, uint32_t *len, uint32_t *d0, int *n) {
     memcpy(g, g_dsx_pg, 16); *id = g_dsx_pid; *len = g_dsx_plen; *d0 = g_dsx_pd0; *n = g_dsx_pn; return 1; }
+/* --- v1.94: перечисление DirectDraw/Direct3D — тестовые заглушки (SDL не перечисляет адаптеры DirectDraw):
+   драйвер 0 — основной (guid NULL) «Primary Display Driver», остальные с guid {i}; устройства — «SDL HAL i»
+   (D3DDEVICEDESC: dwSize 0xfc, dwFlags 0, dcmColorModel = 2 у HAL, 0 у последнего при n_dev > 1) --- */
+static int g_dde_n = 1, g_d3de_n = 1; static uint32_t g_dde_fail;
+void plat_dd_stub_enum(int n_dd, int n_dev, uint32_t fm) { g_dde_n = n_dd; g_d3de_n = n_dev; g_dde_fail = fm; }
+int32_t plat_dd_enumerate(plat_dd_enum_cb cb, void *ctx) {
+    if (g_dde_fail & 1) return -1;
+    for (int i = 0; i < g_dde_n; i++) {
+        uint8_t g[16] = { (uint8_t)i, 0xdd };
+        char nm[32]; snprintf(nm, sizeof nm, i == 0 ? "Primary Display Driver" : "Display %d", i);
+        if (cb(i == 0 ? NULL : g, nm, i == 0 ? "display" : "dd", ctx) == 0) break;
+    }
+    return 0; }
+int32_t plat_d3d_enum_devices(void *d3d, plat_d3d_dev_cb cb, void *ctx) {
+    if (!d3d || (g_dde_fail & 2)) return -1;
+    for (int i = 0; i < g_d3de_n; i++) {
+        uint32_t hw[63] = { 0xfc, 0, (g_d3de_n > 1 && i == g_d3de_n - 1) ? 0u : 2u }, hel[63] = { 0xfc, 0, 1 };
+        hw[3] = 0x1000u + (uint32_t)i; uint8_t g[16] = { 0x3d, (uint8_t)i };
+        char nm[32]; snprintf(nm, sizeof nm, "SDL HAL %d", i);
+        if (cb(g, "SDL Direct3D stub", nm, hw, hel, ctx) == 0) break;
+    }
+    return 0; }

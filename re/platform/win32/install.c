@@ -137,6 +137,7 @@
 #include "../../game/ported146.h"
 #include "../../game/ported147.h"
 #include "../../game/ported148.h"
+#include "../../game/ported149.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2361,6 +2362,14 @@ void re_install_all(void) {
     re_hook(0x0048c3e7, (void*)P148_Refill, "P148_Refill");
     re_hook(0x0048c47e, (void*)P148_Fill, "P148_Fill");
     re_hook(0x0048cad6, (void*)P148_KsProps, "P148_KsProps");
+    /* v1.94: блок D3D/DirectDraw (ported149); 0041fac0/0041fcc7 — stdcall-колбэки (ret 0x10/0x18, stdcall_tbl.h) */
+    re_hook(0x0041ce90, (void*)P149_DDEnumAll, "P149_DDEnumAll");
+    re_hook(0x0041fac0, (void*)P149_DDEnumCb, "P149_DDEnumCb");
+    re_hook(0x0041fcc7, (void*)P149_D3DDevCb, "P149_D3DDevCb");
+    re_hook(0x0041fe07, (void*)P149_BuildDevs, "P149_BuildDevs");
+    re_hook(0x0041d6aa, (void*)P149_EmulFreeAll, "P149_EmulFreeAll");
+    re_hook(0x0042248b, (void*)P149_EmulAddSub, "P149_EmulAddSub");
+    re_hook(0x004225eb, (void*)P149_EmulNew, "P149_EmulNew");
     re_hook(0x004e9bbf, (void*)P140_MrkFly, "P140_MrkFly");
     re_hook(0x0041b8ac, (void*)P141_LadderLine, "P141_LadderLine");
     re_hook(0x0040f3de, (void*)P141_HsSetup, "P141_HsSetup");

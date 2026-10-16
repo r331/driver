@@ -1,4 +1,5 @@
 #include "ported141.h"
+#include "ported149.h"
 #include "ported113.h"
 #include "ported57.h"
 #include "crt.h"
@@ -229,7 +230,7 @@ void P57_SkipBlock(void *file, int32_t size) {
 }
 /* 00421a39: сброс 32 слотов текстур. */
 void P57_ResetTexNodes(void) {
-  Call0041D6AA();
+  P149_EmulFreeAll();
   for (int32_t i = 0; i < 0x20; i++) P57_Fn4221BF(i);
   P32_CurHandle = 0;
   P31_DDVal5 = 0;

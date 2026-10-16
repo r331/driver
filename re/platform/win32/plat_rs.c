@@ -285,3 +285,13 @@ void plat_ds_stub_dsfail(uint32_t m, uint32_t sp) { (void)m; (void)sp; }
 int plat_ds_stub_dsstats(int *c, int *co, int *d, int *l, int *u, int *r, uint8_t *m64) { (void)c; (void)co; (void)d; (void)l; (void)u; (void)r; (void)m64; return 0; }
 void plat_ds_stub_ctl(uint32_t fm, uint32_t sup) { (void)fm; (void)sup; }
 int plat_ds_stub_prop(uint8_t *g, uint32_t *id, uint32_t *len, uint32_t *d0, int *n) { (void)g; (void)id; (void)len; (void)d0; (void)n; return 0; }
+/* --- v1.94: DirectDrawEnumerateA через заглушку Game.exe 0052955c, IDirect3D3::EnumDevices (vtable 0xc);
+   колбэки игры — cdecl, ОС получает stdcall-переходники --- */
+typedef long (__attribute__((stdcall)) *dd_enum_f)(void *, void *);
+static plat_dd_enum_cb g_dde_cb; static plat_d3d_dev_cb g_d3de_cb;
+static int __attribute__((stdcall)) dde_thunk(const void *g, const char *d, const char *n, void *ctx) { return g_dde_cb ? g_dde_cb(g, d, n, ctx) : 0; }
+static long __attribute__((stdcall)) d3de_thunk(const void *g, const char *d, const char *n, const void *hw, const void *hel, void *ctx) {
+    return g_d3de_cb ? g_d3de_cb(g, d, n, hw, hel, ctx) : 0; }
+int32_t plat_dd_enumerate(plat_dd_enum_cb cb, void *ctx) { g_dde_cb = cb; return ((dd_enum_f)0x0052955cu)((void *)dde_thunk, ctx); }
+int32_t plat_d3d_enum_devices(void *d3d, plat_d3d_dev_cb cb, void *ctx) { g_d3de_cb = cb; return ((dd_f2)VT(d3d, 0xc))(d3d, (void *)d3de_thunk, ctx); }
+void plat_dd_stub_enum(int n_dd, int n_dev, uint32_t fm) { (void)n_dd; (void)n_dev; (void)fm; }

@@ -9,6 +9,7 @@
 #define UNPORTED_LIST(V, R) \
     V(Call0048A940, 0x0048a940, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(P132_Fn42D384, 0x0042d384, (void), ()) /* D3D — не трогать */ \
+    R(int32_t, P149_Fn420038, 0x00420038, (void *a0), (a0))   /* v1.94: создание/проверка устройства D3D по строке 01270ec0 */ \
     R(int32_t, P58_Fn416794, 0x00416794, (void), ())   /* шпион теста; перенесено как P124_MotelKeys (--skip) */ \
     V(P98_Fn4ACCF0, 0x004accf0, (uint32_t rec, int32_t a), (rec, a)) \
     V(P97_Fn52498E, 0x0052498e, (int32_t voice, int32_t sample, float a, float b, float c), (voice, sample, a, b, c)) \
@@ -111,8 +112,6 @@
     V(P55_Fn4E7450, 0x004e7450, (int32_t a0, const char *a1), (a0, a1)) \
     V(N54_Fn4913CC, 0x004913cc, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4), (a0, a1, a2, a3, a4)) \
     R(int32_t, P53_Fn40EFD5, 0x0040efd5, (void), ()) \
-    R(int32_t, P53_Fn42248B, 0x0042248b, (void *a0, int32_t a1, int32_t a2, int32_t a3), (a0, a1, a2, a3)) \
-    R(int32_t, P53_Fn4225EB, 0x004225eb, (int32_t a0, int32_t a1, int32_t a2, int32_t a3), (a0, a1, a2, a3)) \
     R(int32_t, P53_Fn4045E0, 0x004045e0, (void), ()) \
     V(P53_Fn4146FB, 0x004146fb, (int32_t a0), (a0)) \
     V(P52_Fn4E5A1A, 0x004e5a1a, (void), ()) \
@@ -227,7 +226,6 @@
     V(Call00419B35, 0x00419b35, (void), ()) \
     V(Call00414D1F, 0x00414d1f, (void), ()) \
     R(int32_t, Call0042655A, 0x0042655a, (int32_t a0), (a0)) \
-    V(Call0041D6AA, 0x0041d6aa, (void), ()) \
     V(Call004D90F4, 0x004d90f4, (int32_t a0), (a0)) \
     V(Call004D611B, 0x004d611b, (int32_t a0), (a0)) \
     V(Call004A2C98, 0x004a2c98, (void), ()) \

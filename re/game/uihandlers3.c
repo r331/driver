@@ -1,4 +1,5 @@
 #include "uihandlers3.h"
+#include "ported149.h"
 #include "ported118.h"
 #ifndef RE_HOOK_BUILD
 #include "ported92.h"
@@ -155,7 +156,7 @@ int32_t Dev0042480D(int32_t a0) {
     return G00B1C0D4 == 0 ? 0 : FnPtr01270EAC(1, a0);
 }
 void Dev00424858(void) {
-    if (GetVarB1C0D8() == 1) Call0041D6AA();
+    if (GetVarB1C0D8() == 1) P149_EmulFreeAll();
 }
 void Ui00426CAF(void) {
 #ifdef RE_HOOK_BUILD

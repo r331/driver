@@ -168,6 +168,9 @@ int32_t P105_EmulSurface(uint8_t *o) {
   memset(d, 0, sizeof d);
   d[0] = 0x7c; d[1] = 0x1007;
   d[2] = 0x100; d[3] = 0x100;
+#ifndef RE_HOOK_BUILD
+  if (P32_DevInfo == NULL) { NoopFn0042243f(); return 0; }   /* v1.94: native — устройство не выбрано */
+#endif
   memcpy(&d[26], P32_DevInfo + 0x520, 8);    /* ddsCaps */
   memcpy(&d[18], P32_DevInfo + 0x528, 32);   /* DDPIXELFORMAT */
   void *s = P24_CreateSurface(P24_DD, d);

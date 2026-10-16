@@ -234,4 +234,10 @@ int32_t plat_dd_flip(void *surf, uint32_t flags);                         /* Fli
 /* тесты (SDL): lock_fail — отказ Lock; pf: bitcount, маски R,G,B для GetPixelFormat (pf_fail — отказ) */
 void    plat_dd_stub_surface(int lock_fail, int pf_fail, uint32_t bits, uint32_t rmask, uint32_t gmask, uint32_t bmask, int32_t flip_hr);
 int     plat_dd_stub_surface_stats(int *locks, int *unlocks, int *flips, uint32_t *flip_flags, int *blts, int32_t *drc4, int32_t *src_rc4, int *clip_sets);
+/* v1.94: перечисление DirectDraw/Direct3D (блок 0041ce90..0042d384) */
+typedef int32_t (*plat_dd_enum_cb)(const void *guid16, const char *desc, const char *name, void *ctx);   /* 1 — продолжить, 0 — стоп */
+int32_t plat_dd_enumerate(plat_dd_enum_cb cb, void *ctx);                 /* DirectDrawEnumerateA; HRESULT */
+typedef int32_t (*plat_d3d_dev_cb)(const void *guid16, const char *desc, const char *name, const void *hw_desc, const void *hel_desc, void *ctx);
+int32_t plat_d3d_enum_devices(void *d3d, plat_d3d_dev_cb cb, void *ctx);  /* IDirect3D3::EnumDevices (D3DDEVICEDESC 0xfc байт); HRESULT */
+void    plat_dd_stub_enum(int n_dd, int n_dev, uint32_t fail_mask);       /* тесты (SDL): bit0 — отказ DirectDrawEnumerate, bit1 — отказ EnumDevices */
 #endif

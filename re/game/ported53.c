@@ -1,4 +1,5 @@
 #include "ported129.h"
+#include "ported149.h"
 #include "reptr.h"
 #include "ported53.h"
 #include <string.h>
@@ -61,8 +62,8 @@ void P53_SetTexSource(int32_t a, uint32_t addr, int32_t c, const uint8_t *d) {
 int32_t P53_TexLookup(int32_t handle, int32_t b, int32_t c, int32_t d) {
   if (G6_00A421F0 == 0) return 1;
   for (P46_TexNode *n = P46_TexHead; n != NULL; n = n->next)
-    if (n->handle == handle) return P53_Fn42248B(n, b, c, d);
-  return P53_Fn4225EB(handle, b, c, d);
+    if (n->handle == handle) return P149_EmulAddSub(n, b, c, d);
+  return P149_EmulNew(handle, b, c, d);
 }
 
 void P53_CallWithState(int32_t a, int32_t b, int32_t c) {
