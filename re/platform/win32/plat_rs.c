@@ -295,3 +295,19 @@ static long __attribute__((stdcall)) d3de_thunk(const void *g, const char *d, co
 int32_t plat_dd_enumerate(plat_dd_enum_cb cb, void *ctx) { g_dde_cb = cb; return ((dd_enum_f)0x0052955cu)((void *)dde_thunk, ctx); }
 int32_t plat_d3d_enum_devices(void *d3d, plat_d3d_dev_cb cb, void *ctx) { g_d3de_cb = cb; return ((dd_f2)VT(d3d, 0xc))(d3d, (void *)d3de_thunk, ctx); }
 void plat_dd_stub_enum(int n_dd, int n_dev, uint32_t fm) { (void)n_dd; (void)n_dev; (void)fm; }
+/* --- v1.95: FMV через DirectShow. CoCreateInstance и MultiByteToWideChar — через таблицу импорта Game.exe
+   (01287 72c / 012874f4, как в 0048af23/0048b3e8); остальное — vtable объектов --- */
+typedef long (__attribute__((stdcall)) *co_create_f)(const void *, void *, uint32_t, const void *, void **);
+typedef int (__attribute__((stdcall)) *mb2wc_f)(uint32_t, uint32_t, const char *, int, uint16_t *, int);
+int32_t plat_com_create(const void *c, const void *i, void **out) { return (int32_t)(*(co_create_f *)0x0128772cu)(c, 0, 1, i, out); }
+int32_t plat_mms_initialize(void *m, uint32_t t, uint32_t f, void *g) { return ((dd_f3)VT(m, 0x30))(m, (void *)(uintptr_t)t, (void *)(uintptr_t)f, g); }
+int32_t plat_mms_add_stream(void *m, void *src, const void *pur, uint32_t f) { return ((dd_f4)VT(m, 0x3c))(m, src, (void *)pur, (void *)(uintptr_t)f, 0); }
+int32_t plat_mms_open_file(void *m, const char *p, uint32_t f) {
+    uint16_t w[0x104]; (*(mb2wc_f *)0x012874f4u)(0, 0, p, -1, w, 0x104); return ((dd_f2)VT(m, 0x40))(m, w, (void *)(uintptr_t)f); }
+int32_t plat_mms_get_stream(void *m, const void *pur, void **out) { return ((dd_f2)VT(m, 0x10))(m, (void *)pur, out); }
+int32_t plat_ddms_get_format(void *s, void *d) { return ((dd_f4)VT(s, 0x24))(s, d, 0, 0, 0); }
+int32_t plat_ddms_create_sample(void *s, void *surf, const int32_t *rc, uint32_t f, void **out) { return ((dd_f4)VT(s, 0x34))(s, surf, (void *)rc, (void *)(uintptr_t)f, out); }
+int32_t plat_dd_get_surface_desc(void *s, void *d) { return ((dd_f1)VT(s, 0x58))(s, d); }
+int32_t plat_media_get_duration(void *p, double *sec) { return ((dd_f1)VT(p, 0x1c))(p, sec); }
+void plat_fmv_stub_open(int ok, uint32_t m, int32_t w, int32_t h, double d) { (void)ok; (void)m; (void)w; (void)h; (void)d; }
+int plat_fmv_stub_open_stats(int *cr, int *op, char *p64, int *smp, int32_t *rc, int *fg, int *upd) { (void)cr; (void)op; (void)p64; (void)smp; (void)rc; (void)fg; (void)upd; return 0; }

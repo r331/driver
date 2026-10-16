@@ -35,7 +35,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004010be,thunk_FUN_00523c56,Thunk_00523C56,manual,Thunks,,,5,ported
 004010c3,thunk_FUN_00502e76,,,,,,5,ported
 004010c8,thunk_FUN_004b8f4e,,,,,,5,ported
-004010cd,thunk_FUN_0048a940,,,,,,5,todo
+004010cd,thunk_FUN_0048a940,,,,,,5,ported
 004010d2,thunk_FUN_00417b80,,,,,,5,ported
 004010d7,thunk_FUN_00496505,,,,,,5,ported
 004010e1,thunk_FUN_00496eb4,,,,,,5,ported
@@ -292,7 +292,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401703,thunk_FUN_00413df3,Thunk_00413DF3,manual,Thunks,,,5,ported
 00401708,thunk_FUN_00524873,,,,,,5,ported
 00401712,thunk_FUN_004ef309,,,,,,5,ported
-0040171c,thunk_FUN_0042d384,,,,,,5,todo
+0040171c,thunk_FUN_0042d384,,,,,,5,ported
 00401721,thunk_FUN_0051329b,,,,,,5,ported
 00401726,thunk_FUN_0040ab9f,Thunk_0040AB9F,manual,Thunks,,,5,ported
 0040172b,thunk_FUN_004f8d6d,,,,,,5,ported
@@ -1988,7 +1988,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0042b7cb,FUN_0042b7cb,P84_DrawModelC,port,ported84,port,,1468,ported
 0042d2b0,FUN_0042d2b0,Reset0042D2B0,manual,UIMisc,,,25,ported
 0042d2c9,FUN_0042d2c9,QueueTri,manual,,,,187,ported
-0042d384,FUN_0042d384,,,,,,464,todo
+0042d384,FUN_0042d384,P150_FlushTris,port,render,,,464,ported
 0042d554,FUN_0042d554,P125_ClipNearXY,port,,,,579,ported
 0042d797,FUN_0042d797,P100_ClipNear,manual,Ported100,,,639,ported
 0042da16,FUN_0042da16,,,,,,722,ported
@@ -2032,17 +2032,17 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0048a525,FUN_0048a525,P76_MarkSlots,manual,ported76,,,258,ported
 0048a627,FUN_0048a627,P12_Fn0048A627,manual,Misc12,,,103,ported
 0048a68e,FUN_0048a68e,Dispatch0048A68E,manual,Ported6,,,58,ported
-0048a940,FUN_0048a940,,,,,,668,todo
+0048a940,FUN_0048a940,P150_PlayFmv,port,fmv,,,668,ported
 0048abdc,FUN_0048abdc,P52_FmvStart,manual,,,,49,ported
 0048ac0d,FUN_0048ac0d,FmvStopRelease,manual,sound,,,15,ported
-0048ac1c,FUN_0048ac1c,,,,,,502,todo
+0048ac1c,FUN_0048ac1c,P150_FmvDDInit,port,fmv,,,502,ported
 0048ae12,FUN_0048ae12,FmvRelease,manual,fmv,,,273,ported
-0048af23,FUN_0048af23,OpenVideo,debug_string,,,,799,named
+0048af23,FUN_0048af23,P150_OpenVideo,port,fmv,,,799,ported
 0048b242,FUN_0048b242,FmvReleaseAll,manual,sound,,,187,ported
 0048b2fd,FUN_0048b2fd,MmsRun,manual,fmv,,,46,ported
 0048b32b,FUN_0048b32b,MmsStop,manual,fmv,,,33,ported
 0048b34c,FUN_0048b34c,FmvUpdateFrame,manual,fmv,,,156,ported
-0048b3e8,FUN_0048b3e8,,,,,,384,todo
+0048b3e8,FUN_0048b3e8,P150_OpenAudio,port,fmv,,,384,ported
 0048b568,FUN_0048b568,FmvReleaseObjs,manual,sound,,,123,ported
 0048b5e3,FUN_0048b5e3,P108_FmvStart,,ported108,,,122,ported
 0048b65d,FUN_0048b65d,FmvStop,manual,fmv,,,76,ported
@@ -3152,7 +3152,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00522369,FUN_00522369,FatalError,manual,WinMain,,,85,ported
 005223be,FUN_005223be,InitWindowGlobals,manual,WinMain,,,30,ported
 005223dc,FUN_005223dc,InitWindow,manual,WinMain,,,204,ported
-005224a8,FUN_005224a8,,,,,,351,todo
+005224a8,FUN_005224a8,P31_WndProc,port,WinMain,,,351,ported
 005226b5,FUN_005226b5,P55_GlideInit,manual,,,,135,ported
 0052273c,FUN_0052273c,CrashHandlerInstall,manual,WinMain,,,16,ported
 0052274c,FUN_0052274c,CrashHandlerRemove,manual,WinMain,,,13,ported

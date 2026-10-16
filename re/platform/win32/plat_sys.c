@@ -41,7 +41,7 @@ void (*plat_crash_handler(void))(void){ return g_crash; }
 /* --- окно игры, цикл сообщений --- */
 static plat_wndproc g_wp;
 static LRESULT CALLBACK wnd_tramp(HWND h, UINT m, WPARAM w, LPARAM l){
-    if(m==WM_CREATE) l=(LPARAM)((CREATESTRUCTA*)l)->hInstance;   /* игра берёт hInstance из lparam */
+    /* v1.95: lparam WM_CREATE передаётся как есть (CREATESTRUCTA*), hInstance берёт игра через plat_wm_create_hinst */
     return (LRESULT)g_wp((void*)h,m,(uint32_t)w,(int32_t)l);
 }
 void *plat_game_window_create(void *hinst,int32_t show,const char *title,int w,int h,plat_wndproc proc){
@@ -71,3 +71,7 @@ void plat_event_close(void *h){ CloseHandle((HANDLE)h); }
 int plat_com_init(void){ return (int)CoInitialize(NULL); }
 void plat_com_uninit(void){ CoUninitialize(); }
 int plat_com_count(void){ return 0; }
+/* v1.95: окно — UpdateWindow/SetForegroundWindow (0048a940), WM_CREATE (005224a8) */
+void plat_window_update(void *h){ UpdateWindow((HWND)h); }
+void plat_window_foreground(void *h){ SetForegroundWindow((HWND)h); }
+int32_t plat_wm_create_hinst(int32_t lp){ return lp ? (int32_t)(intptr_t)((CREATESTRUCTA*)(intptr_t)lp)->hInstance : 0; }

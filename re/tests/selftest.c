@@ -161,6 +161,7 @@
 #include "../game/smallfuncs.h"
 #include "../game/uihandlers2.h"
 #include "../game/menu57.h"
+#include "../game/ported150.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -6295,6 +6296,89 @@ static int test_p147(void) {
   return f;
 }
 
+/* v1.95: ported150 — FMV (0048ac1c/0048af23/0048b3e8/0048a940), очередь треугольников 0042d384, WM_CREATE 005224a8 */
+static int g150_rast[4], g150_state, g150_blend, g150_tex; static const p85_rv *g150_a;
+static void P85_STD r150_c(const p85_rv *a, const p85_rv *b, const p85_rv *c) { (void)b; (void)c; g150_rast[0]++; g150_a = a; }
+static void P85_STD r150_d(const p85_rv *a, const p85_rv *b, const p85_rv *c) { (void)a; (void)b; (void)c; g150_rast[1]++; }
+static void P85_STD r150_a(const p85_rv *a, const p85_rv *b, const p85_rv *c) { (void)a; (void)b; (void)c; g150_rast[2]++; }
+static void P85_STD r150_b(const p85_rv *a, const p85_rv *b, const p85_rv *c) { (void)a; (void)b; (void)c; g150_rast[3]++; }
+static void P85_STD s150(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e) { g150_state = a * 10000 + b * 1000 + c * 100 + d * 10 + e; }
+static void P85_STD b150(int32_t a, int32_t b, int32_t c, int32_t d) { g150_blend = a * 1000 + b * 100 + c * 10 + d; }
+static void t150(int32_t tmu, uint32_t addr, int32_t mask, uint32_t info) { (void)tmu; (void)info; g150_tex = (int)addr + mask; }
+static int test_p150(void) {
+  int f = 0;
+#define CK150(c) do { if (!(c)) { f++; fprintf(stderr,"p150 fail line %d\n",__LINE__); } } while (0)
+  /* 0042d384 */
+  int32_t n0 = G01159D74; uint8_t *q0 = G0115A13C; int32_t sd = P85_StateDirty, ct = P86_CurTex, bd = P55_BDFA18, cs = P28_CarShine;
+  uint8_t bc = P85_BlendCur; p85_state_fn sf = P85_StateFn; p85_blend_fn bf = P85_BlendFn; p86_texsrc_fn tf = P86_TexSrc;
+  p85_raster_fn rc0 = P115_RasterC, rd0 = P115_RasterD, ra0 = P85_RasterA, rb0 = P85_RasterB;
+  static uint8_t shine[16]; shine[8] = 5; uint8_t slot[16]; memcpy(slot, &g_01145a60[5 * 0x10], 16);
+  uint32_t v8 = 0x100, vc = 7; memcpy(&g_01145a60[5 * 0x10 + 8], &v8, 4); memcpy(&g_01145a60[5 * 0x10 + 0xc], &vc, 4);
+  P28_CarShine = (int32_t)re_addr(shine);
+  P115_RasterC = r150_c; P115_RasterD = r150_d; P85_RasterA = r150_a; P85_RasterB = r150_b;
+  P85_StateFn = s150; P85_BlendFn = b150; P86_TexSrc = t150;
+  P85_StateDirty = 0; P86_CurTex = -1; P85_BlendCur = 0; P55_BDFA18 = 0;
+  G01159D74 = 0; P150_FlushTris(); CK150(g150_state == 0 && g150_rast[0] == 0);
+  Reset0042D2B0();
+  uint32_t va[15] = {0}, tag1 = 1; va[0] = 0x3f800000u;
+  P62_QueueTri(va, va, va, 0); P62_QueueTri(va, va, va, tag1); P62_QueueTri(va, va, va, 0);
+  CK150(G01159D74 == 3);
+  P150_FlushTris();
+  CK150(g150_state == 31010 && P85_StateDirty == 4 && g150_blend == 4400 && P85_BlendCur == 3);
+  CK150(P86_CurTex == 5 && g150_tex == 0x103);
+  CK150(g150_rast[0] == 2 && g150_rast[1] == 1 && g150_rast[2] == 0 && g150_a == (const p85_rv *)(const void *)(G0115A140 + 0xb8 * 2 + 4));
+  CK150(G0115A13C == G0115A140 + 0xb8 * 3);
+  P55_BDFA18 = 1; g150_state = 0; g150_tex = 0; P150_FlushTris();
+  CK150(g150_state == 0 && g150_tex == 0 && g150_rast[2] == 2 && g150_rast[3] == 1);
+  memcpy(&g_01145a60[5 * 0x10], slot, 16);
+  G01159D74 = n0; G0115A13C = q0; P85_StateDirty = sd; G6_01270C34 = sd; P86_CurTex = ct; P55_BDFA18 = bd; P28_CarShine = cs; P85_BlendCur = bc; P69_BlendOn = bc;
+  P85_StateFn = sf; P85_BlendFn = bf; P86_TexSrc = tf; P115_RasterC = rc0; P115_RasterD = rd0; P85_RasterA = ra0; P85_RasterB = rb0;
+  /* 005224a8: WM_CREATE — hInstance через plat_wm_create_hinst (SDL: lparam как есть) */
+  int32_t hi0 = G6_00BDF9C4; P31_WndProc(0, 1, 0, 0x4321); CK150(G6_00BDF9C4 == 0x4321); G6_00BDF9C4 = hi0;
+  /* 0048ac1c */
+  int32_t wm = P31_WindowMode; int live0 = plat_dd_stub_count();
+  P31_WindowMode = 1; CK150(P150_FmvDDInit((void *)(intptr_t)5) == 1);
+  CK150(P38_Obj814 && P38_DD && P38_Dest && P38_Obj824 && plat_dd_last_coop() == 0x11);
+  { uint32_t d31[31]; plat_dd_stub_last_desc(d31); CK150(d31[0] == 0x6c && d31[1] == 1 && d31[0x68 / 4] == 0x200); }
+  P38_FmvRelease();
+  plat_dd_release(P38_DD); P38_DD = NULL; plat_dd_release(P38_Obj814); P38_Obj814 = NULL;
+  P31_WindowMode = 0; CK150(P150_FmvDDInit(0) == 1 && plat_dd_last_coop() == 8);
+  /* 0048b3e8 / 0048af23: SDL по умолчанию — CoCreateInstance отказывает (ролики пропускаются) */
+  plat_fmv_stub_open(0, 0, 0, 0, 0);
+  CK150(P150_OpenAudio("A.WAV") == 0 && P50_FmvB == NULL);
+  CK150(P150_OpenVideo("V.MPG") == 0 && P50_Fmv82C == NULL);
+  double len0 = P108_FmvLen;
+  plat_fmv_stub_open(1, 0, 320, 160, 2.5);
+  CK150(P150_OpenAudio("AUDIO\\X.WAV") == 1 && P38_Mms2 == P50_FmvA && P50_FmvFlag == P50_FmvA && P108_FmvLen == 2.5);
+  int cr, op, smp, fg, upd; char p64[64]; int32_t rc4[4];
+  plat_fmv_stub_open_stats(&cr, &op, p64, &smp, rc4, &fg, &upd);
+  CK150(cr == 2 && op == 1 && strcmp(p64, "AUDIO\\X.WAV") == 0);
+  P50_FmvReleaseObjs();
+  CK150(P150_OpenVideo("FMVDATA\\RENDER01.MPG") == 1);
+  CK150(P38_Mms == P50_Fmv82C && P50_Fmv830 && P50_Fmv834 && P38_Src && P38_Sample && P38_Letter == 160);
+  { uint32_t d31[31]; plat_dd_stub_last_desc(d31); CK150(d31[1] == 0x1007 && d31[2] == 160 && d31[3] == 320 && d31[0x48 / 4] == 0x20 && d31[0x48 / 4 + 3] == 16 && d31[0x68 / 4] == 0x40); }
+  plat_fmv_stub_open_stats(&cr, &op, p64, &smp, rc4, &fg, &upd);
+  CK150(smp == 1 && rc4[0] == 0 && rc4[1] == 0 && rc4[2] == 320 && rc4[3] == 160);
+  P50_FmvReleaseAll(); P38_FmvRelease();
+  plat_fmv_stub_open(1, 1u << 4, 320, 160, 2.5);                 /* звук ролика не добавился — только запись в лог */
+  CK150(P150_FmvDDInit(0) == 1 && P150_OpenVideo("B.MPG") == 1); P50_FmvReleaseAll(); P38_FmvRelease();
+  plat_fmv_stub_open(1, 1u << 7, 320, 160, 2.5); CK150(P150_FmvDDInit(0) == 1 && P150_OpenVideo("B.MPG") == 0); P50_FmvReleaseAll(); P38_FmvRelease();
+  plat_fmv_stub_open(1, 1u << 10, 320, 160, 2.5); CK150(P150_OpenAudio("B.WAV") == 0); P50_FmvReleaseObjs();
+  plat_dd_release(P38_DD); P38_DD = NULL; plat_dd_release(P38_Obj814); P38_Obj814 = NULL;
+  CK150(plat_dd_stub_count() == live0);
+  /* 0048a940: ранние выходы (n = −1, ролики выключены, файла нет нигде) — без DirectDraw */
+  int32_t fo = P150_FmvOff, g48 = G00575F48;
+  G00575F48 = 1; P150_FmvOff = 0;
+  P150_PlayFmv(1, -1, -1); P150_FmvOff = 1; P150_PlayFmv(1, 3, -1); P150_FmvOff = 0;
+  P150_PlayFmv(1, 97, -1);                                          /* FMVDATA\RENDER97.MPG нет ни рядом, ни на CD */
+  CK150(strcmp(P150_FmvPath, "FMVDATA\\RENDER97.MPG") == 0 && P38_Obj814 == NULL);
+  plat_fmv_stub_open_stats(&cr, &op, p64, &smp, rc4, &fg, &upd); CK150(fg == 0 && upd == 0);
+  G00575F48 = g48; P150_FmvOff = fo; P31_WindowMode = wm; P108_FmvLen = len0;
+  plat_fmv_stub_open(0, 0, 320, 200, 1.0);
+#undef CK150
+  return f;
+}
+
 static int test_real_level(void) {
   const char *nm = getenv("RE_REAL_LEVEL");
   if (!nm) return 0;
@@ -6885,7 +6969,7 @@ static int test_p86(void) {
 
 int re_selftest(void) {
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_p110) | RUN_T(test_p111) | RUN_T(test_p112) | RUN_T(test_p113) | RUN_T(test_p114) | RUN_T(test_p115) | RUN_T(test_p116) | RUN_T(test_p117) | RUN_T(test_p118) | RUN_T(test_p119) | RUN_T(test_p120) | RUN_T(test_p121) | RUN_T(test_p122) | RUN_T(test_p123) | RUN_T(test_p124) | RUN_T(test_p125) | RUN_T(test_p126) | RUN_T(test_p127) | RUN_T(test_p128) | RUN_T(test_p129) | RUN_T(test_p130) | RUN_T(test_p131) | RUN_T(test_p132) | RUN_T(test_p133) | RUN_T(test_p134) | RUN_T(test_p135) | RUN_T(test_p136) | RUN_T(test_p137) | RUN_T(test_p138) | RUN_T(test_p139) | RUN_T(test_p140) | RUN_T(test_p141) | RUN_T(test_p142) | RUN_T(test_p143) | RUN_T(test_p144) | RUN_T(test_p145) | RUN_T(test_p146) | RUN_T(test_p147) | RUN_T(test_p148) | RUN_T(test_p149) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_p110) | RUN_T(test_p111) | RUN_T(test_p112) | RUN_T(test_p113) | RUN_T(test_p114) | RUN_T(test_p115) | RUN_T(test_p116) | RUN_T(test_p117) | RUN_T(test_p118) | RUN_T(test_p119) | RUN_T(test_p120) | RUN_T(test_p121) | RUN_T(test_p122) | RUN_T(test_p123) | RUN_T(test_p124) | RUN_T(test_p125) | RUN_T(test_p126) | RUN_T(test_p127) | RUN_T(test_p128) | RUN_T(test_p129) | RUN_T(test_p130) | RUN_T(test_p131) | RUN_T(test_p132) | RUN_T(test_p133) | RUN_T(test_p134) | RUN_T(test_p135) | RUN_T(test_p136) | RUN_T(test_p137) | RUN_T(test_p138) | RUN_T(test_p139) | RUN_T(test_p140) | RUN_T(test_p141) | RUN_T(test_p142) | RUN_T(test_p143) | RUN_T(test_p144) | RUN_T(test_p145) | RUN_T(test_p146) | RUN_T(test_p147) | RUN_T(test_p148) | RUN_T(test_p149) | RUN_T(test_p150) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

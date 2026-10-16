@@ -14,6 +14,7 @@
      флаг +0x28 |= 1, последний ключ дублируется, P99_CamLast = последний + 1.
    Отступления native: строки читаются в локальный буфер (оригинал пишет в буфер имени), '\r' срезается, файл
    закрывается и при ошибке, индекс ключа 0..0x3e; деление на 0 в 004b9287 — 1; NULL-указатели функций пропускаются. */
+#include "ported150.h"
 #include "ported140.h"
 #include "ported142.h"
 #include "ported132.h"
@@ -275,7 +276,7 @@ void P132_GameDraw(void) {
     if ((G6_00B87EAC | G8_00B87EAC) != 0 || (P58_SB87EB0 | G6_00B87EB0 | G8_00B87EB0) != 0) P116_SkidsB();
     if (P26_FxD != 0) grd40(2);
     P128_TrafficDraw();
-    P132_Fn42D384();
+    P150_FlushTris();
     P127_SpawnTick(1);
     P133_EventModels();
     if (P98_MrkOff == 0) { P114_PartModels(); P98_IconFlush(); }

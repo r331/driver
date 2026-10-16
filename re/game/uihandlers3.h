@@ -120,9 +120,12 @@ extern int32_t G01159D74;
 #ifndef RE_HOOK_BUILD
 extern uint8_t * G0115A13C;
 #endif
-#define G0115A140 GAME_VAR(uint8_t, G0115A140, 0x0115a140)
+/* v1.95: очередь отложенных треугольников Glide 0115a140..011b6140 (записи 0xb8: тег + 3 вершины по 0x3c; 0042d2c9/0042d384);
+   раньше в native был 1 байт — запись очереди выходила за переменную */
+typedef uint8_t g0115a140_t[0x5c000];
+#define G0115A140 GAME_VAR(g0115a140_t, G0115A140, 0x0115a140)
 #ifndef RE_HOOK_BUILD
-extern uint8_t G0115A140;
+extern g0115a140_t G0115A140;
 #endif
 #define G00551134 GAME_VAR(int32_t, G00551134, 0x00551134)
 #ifndef RE_HOOK_BUILD

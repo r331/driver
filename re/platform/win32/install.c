@@ -138,6 +138,7 @@
 #include "../../game/ported147.h"
 #include "../../game/ported148.h"
 #include "../../game/ported149.h"
+#include "../../game/ported150.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2370,6 +2371,13 @@ void re_install_all(void) {
     re_hook(0x0041d6aa, (void*)P149_EmulFreeAll, "P149_EmulFreeAll");
     re_hook(0x0042248b, (void*)P149_EmulAddSub, "P149_EmulAddSub");
     re_hook(0x004225eb, (void*)P149_EmulNew, "P149_EmulNew");
+    /* v1.95: FMV (ported150), очередь треугольников Glide; 005224a8 — оконная процедура P31_WndProc (stdcall ret 0x10, stdcall_tbl.h) */
+    re_hook(0x0048ac1c, (void*)P150_FmvDDInit, "P150_FmvDDInit");
+    re_hook(0x0048af23, (void*)P150_OpenVideo, "P150_OpenVideo");
+    re_hook(0x0048b3e8, (void*)P150_OpenAudio, "P150_OpenAudio");
+    re_hook(0x0048a940, (void*)P150_PlayFmv, "P150_PlayFmv");
+    re_hook(0x0042d384, (void*)P150_FlushTris, "P150_FlushTris");
+    re_hook(0x005224a8, (void*)P31_WndProc, "P31_WndProc");
     re_hook(0x004e9bbf, (void*)P140_MrkFly, "P140_MrkFly");
     re_hook(0x0041b8ac, (void*)P141_LadderLine, "P141_LadderLine");
     re_hook(0x0040f3de, (void*)P141_HsSetup, "P141_HsSetup");

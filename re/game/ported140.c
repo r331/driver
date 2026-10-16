@@ -24,6 +24,7 @@
      область в re_ptr регистрируется один раз; 00524bd8 — имя ограничено 0xff, драйвер 00bdcb24 в native — прямой вызов 0048bf9a
      (P140_SndLoadWav, указатель на стек не переживает int32); 0041b3ab — запись по нулевому/незарегистрированному адресу — выход;
      004e9bbf — 01137380 ← 00b1c268..6f по uint16 (P59_AngA/B/C, четвёртое слово — без native-имени, сохраняется). */
+#include "ported150.h"
 #include "ported140.h"
 #include "ported148.h"
 #include <string.h>
@@ -213,7 +214,7 @@ void P140_Frontend(int32_t unused) {
   P126_ShowBmpFade("DATA\\GT.BMP", 5);
   P54_ClearSwap(4);
   P126_ShowBmpFade("DATA\\REFLECT.BMP", 5);
-  Call0048A940(G6_00BDF9C0, 0, -1);
+  P150_PlayFmv(G6_00BDF9C0, 0, -1);
   if (P136_FrontInit() == 0) { P56_ResetFrontend(); return; }
   set_menu_mode(0);
   P140_FrSelA = 0;
@@ -284,7 +285,7 @@ void P140_LadderRun(void) {
       P68_IntroCur = rd32(rec + 8);
       break;
     case 3:
-      Call0048A940(G6_00BDF9C0, (int32_t)a, -1);
+      P150_PlayFmv(G6_00BDF9C0, (int32_t)a, -1);
       P68_IntroCur = rd32(rec + 8);
       break;
     case 4:

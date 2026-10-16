@@ -17,6 +17,7 @@
    Отступления native: файл config.dat читается через g_fread с проверкой длины; NULL-указатели (P59_CarsTab, модель, стек
      скрипта, P98_GrD40) пропускаются; тип записи трафика > 7 — без обработчика; число записей ≤ 0x40; в native зеркало
      возвращает прежние P66_Scene/G2_ScriptStack (оригинал пишет 00b31f00 и 00d14f00). */
+#include "ported150.h"
 #include "ported133.h"
 #include "ported142.h"
 #include <string.h>
@@ -347,7 +348,7 @@ void P133_MirrorDraw(void) {
     if (P26_FxD != 0) grd40(2);
     Reset0042D2B0();
     P128_TrafficDraw();
-    P132_Fn42D384();
+    P150_FlushTris();
     P133_EventModels();
     P114_PartModels();
     P98_IconFlush();

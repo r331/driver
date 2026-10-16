@@ -28,7 +28,8 @@ extern int32_t P31_Active, P31_WindowMode, P31_PriorityHigh, P31_GlideModule;
 #endif
 void Call00522323(void);                      /* 00522323: прокачать все ожидающие сообщения окна */
 int32_t P31_InitWindow(void *hinst, int32_t show); /* 005223dc: класс «Driver», окно 640x480 «Driver V6.3w», ShowWindow; 1 — удалось */
-/* 005224a8: оконная процедура. Сообщения Windows (WM_*) как в оригинале; для WM_CREATE lparam = hInstance. */
+/* 005224a8: оконная процедура (в оригинале stdcall, ret 0x10; с v1.95 хук). Сообщения WM_* как в оригинале;
+   для WM_CREATE lparam — CREATESTRUCTA* (hInstance — plat_wm_create_hinst; в SDL lparam = hInstance). */
 int32_t P31_WndProc(void *hwnd, uint32_t msg, uint32_t wparam, int32_t lparam);
 int32_t P31_LoadGlide(void);                  /* 00425730: LoadLibrary("glide2x.dll"); 1 — загрузилась */
 void P31_ReleaseDirectDraw(void);         /* 0041f2a0: освободить все COM-объекты DirectDraw/Direct3D, вернуть кооперативный режим, обнулить состояние */

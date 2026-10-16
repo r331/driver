@@ -46,6 +46,6 @@ void    P52_TexDownloadMipMap(int32_t a, int32_t b, int32_t c, int32_t d, int32_
 void    P52_MenuStepToggle(void);                 /* 00510084: цикл флагов кадра (575f34/38/eec), затем 0050fbf4 */
 void    P52_HudDispatch(void);                    /* 004e59b9: по режиму 4/5 вызвать отрисовку HUD */
 void    P52_ResetSlots(void);                     /* 004aad65: сброс таблиц слотов, четыре флага = 1 */
-int32_t P52_FmvStart(int32_t a);                  /* 0048abdc: остановить, открыть, запустить; 1 — успех */
+int32_t P52_FmvStart(const char *a);                  /* 0048abdc: остановить, открыть, запустить; 1 — успех */
 void    P52_DrawLabel(int32_t a, int32_t b, int32_t c); /* 004a9e0a: цвет из таблицы 00552e0c, текст по высоте */
 void    P52_MenuReload(void);                     /* 00510728: сброс счётчиков, перечитать запись меню, 00510784 */

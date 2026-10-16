@@ -128,3 +128,5 @@ static int g_com;
 int plat_com_init(void){ g_com++; return 0; }
 void plat_com_uninit(void){ if(g_com>0) g_com--; }
 int plat_com_count(void){ return g_com; }
+/* v1.95: WM_CREATE — в SDL оконная процедура получает hInstance прямо в lparam (как и раньше) */
+int32_t plat_wm_create_hinst(int32_t lparam){ return lparam; }

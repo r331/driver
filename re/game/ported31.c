@@ -37,7 +37,7 @@ int32_t P31_WndProc(void *hwnd, uint32_t msg, uint32_t wp, int32_t lp) {
       if (wp == 0) { DrvCall004246D1(2); plat_set_priority(0); }
       else { DrvCall004246D1(1); set_game_priority(); }
     } else switch (msg) {
-      case 1: G6_00BDF9C4 = lp; break;         /* WM_CREATE: hInstance */
+      case 1: G6_00BDF9C4 = plat_wm_create_hinst(lp); break;   /* WM_CREATE: CREATESTRUCT.hInstance (+4) */
       case 2: plat_post_quit(0); break;        /* WM_DESTROY */
       case 3: if (DrvCall004246D1(4) == 0) plat_post_close(hwnd); break; /* WM_MOVE */
       case 6:                                  /* WM_ACTIVATE */

@@ -7,8 +7,7 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
-    V(Call0048A940, 0x0048a940, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
-    V(P132_Fn42D384, 0x0042d384, (void), ()) /* D3D — не трогать */ \
+    R(int32_t, P150_Fn425F7B, 0x00425f7b, (int32_t hwnd, int32_t mode, int32_t keep), (hwnd, mode, keep))   /* v1.95: переоткрытие Glide после ролика (grSstWinOpen, таблицы, туман) */ \
     R(int32_t, P149_Fn420038, 0x00420038, (void *a0), (a0))   /* v1.94: создание/проверка устройства D3D по строке 01270ec0 */ \
     R(int32_t, P58_Fn416794, 0x00416794, (void), ())   /* шпион теста; перенесено как P124_MotelKeys (--skip) */ \
     V(P98_Fn4ACCF0, 0x004accf0, (uint32_t rec, int32_t a), (rec, a)) \
@@ -121,7 +120,6 @@
     V(P52_Fn4AB808, 0x004ab808, (void), ()) \
     V(P52_Fn4AB95C, 0x004ab95c, (void), ()) \
     V(P52_Fn4ABA7C, 0x004aba7c, (void), ()) \
-    R(int32_t, P52_Fn48B3E8, 0x0048b3e8, (int32_t a0), (a0)) \
     R(int32_t, P52_Fn48B5E3, 0x0048b5e3, (void), ()) \
     V(P52_Fn5173D7, 0x005173d7, (float a0, float a1, int32_t a2, int32_t a3, int32_t a4), (a0, a1, a2, a3, a4)) \
     R(int32_t, P52_Fn405F6F, 0x00405f6f, (int32_t a0, void *a1), (a0, a1)) \

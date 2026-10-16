@@ -1,3 +1,4 @@
+#include "ported150.h"
 #include "ported139.h"
 #include "ported115.h"
 #include "ported52.h"
@@ -107,9 +108,9 @@ void P52_ResetSlots(void) {
   P52_Ones0 = 1; P52_Ones1 = 1; P52_Ones2 = 1; P52_Ones3 = 1;
 }
 
-int32_t P52_FmvStart(int32_t a) {
+int32_t P52_FmvStart(const char *a) {
   Chain0048AC0D();
-  if (P52_Fn48B3E8(a) != 0 && P52_Fn48B5E3() != 0) return 1;
+  if (P150_OpenAudio(a) != 0 && P52_Fn48B5E3() != 0) return 1;
   Chain0048AC0D();
   return 0;
 }

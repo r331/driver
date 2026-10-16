@@ -240,4 +240,21 @@ int32_t plat_dd_enumerate(plat_dd_enum_cb cb, void *ctx);                 /* Dir
 typedef int32_t (*plat_d3d_dev_cb)(const void *guid16, const char *desc, const char *name, const void *hw_desc, const void *hel_desc, void *ctx);
 int32_t plat_d3d_enum_devices(void *d3d, plat_d3d_dev_cb cb, void *ctx);  /* IDirect3D3::EnumDevices (D3DDEVICEDESC 0xfc байт); HRESULT */
 void    plat_dd_stub_enum(int n_dd, int n_dev, uint32_t fail_mask);       /* тесты (SDL): bit0 — отказ DirectDrawEnumerate, bit1 — отказ EnumDevices */
+/* v1.95: FMV через DirectShow (0048a940, 0048ac1c, 0048af23, 0048b3e8), окно (005224a8); HRESULT, 0 — успех */
+int32_t plat_com_create(const void *clsid16, const void *iid16, void **out);   /* CoCreateInstance(clsid, NULL, CLSCTX_INPROC_SERVER, iid, out) */
+int32_t plat_mms_initialize(void *amms, uint32_t type, uint32_t flags, void *graph);   /* IAMMultiMediaStream::Initialize (vtable 0x30) */
+int32_t plat_mms_add_stream(void *amms, void *src, const void *purpose16, uint32_t flags);   /* AddMediaStream(src, purpose, flags, NULL) (0x3c) */
+int32_t plat_mms_open_file(void *amms, const char *path, uint32_t flags);     /* MultiByteToWideChar(CP_ACP, 0x104) + OpenFile (0x40) */
+int32_t plat_mms_get_stream(void *mms, const void *purpose16, void **out);     /* IMultiMediaStream::GetMediaStream (0x10) */
+int32_t plat_ddms_get_format(void *ddms, void *desc108);                       /* IDirectDrawMediaStream::GetFormat(desc, NULL, NULL, NULL) (0x24) */
+int32_t plat_ddms_create_sample(void *ddms, void *surf, const int32_t *rect4, uint32_t flags, void **out);   /* CreateSample (0x34) */
+int32_t plat_dd_get_surface_desc(void *surf, void *desc108);                   /* IDirectDrawSurface::GetSurfaceDesc (0x58), desc[0] = размер */
+int32_t plat_media_get_duration(void *mpos, double *sec);                      /* IMediaPosition::get_Duration (0x1c) */
+void    plat_window_update(void *hwnd);                                        /* UpdateWindow */
+void    plat_window_foreground(void *hwnd);                                    /* SetForegroundWindow */
+int32_t plat_wm_create_hinst(int32_t lparam);                                  /* WM_CREATE: CREATESTRUCTA.hInstance (+4); SDL — lparam как есть */
+/* тесты (SDL): FMV — mask отказов (бит 0 CoCreate, 1 QI, 2 Initialize, 3 AddStream видео, 4 AddStream звук, 5 OpenFile,
+   6 GetMediaStream, 7 GetFormat, 8 GetSurfaceDesc, 9 CreateSample, 10 get_Duration), w×h формата, длительность; ok — 0 = все отказы */
+void    plat_fmv_stub_open(int ok, uint32_t fail_mask, int32_t w, int32_t h, double dur);
+int     plat_fmv_stub_open_stats(int *creates, int *opens, char *last_path64, int *samples, int32_t *rect4, int *fg, int *upd);
 #endif

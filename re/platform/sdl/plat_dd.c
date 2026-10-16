@@ -166,3 +166,32 @@ int32_t plat_d3d_enum_devices(void *d3d, plat_d3d_dev_cb cb, void *ctx) {
         if (cb(g, "SDL Direct3D stub", nm, hw, hel, ctx) == 0) break;
     }
     return 0; }
+/* --- v1.95: FMV через DirectShow — в SDL MPEG-ролики не декодируются: по умолчанию CoCreateInstance отказывает
+   (E_NOTIMPL), и игра пропускает ролик, как при отсутствии DirectShow. Тестовый режим (plat_fmv_stub_open(1, …)) —
+   учётные объекты с форматом w×h и длительностью. Окно: UpdateWindow/SetForegroundWindow — счётчики (+ SDL_RaiseWindow
+   в plat_sys.c не нужен: окно SDL одно и всегда сверху у игры). --- */
+static int g_fo_ok, g_fo_cr, g_fo_open, g_fo_smp, g_fo_fg, g_fo_upd; static uint32_t g_fo_fail; static int32_t g_fo_w = 320, g_fo_h = 200, g_fo_rc[4];
+static double g_fo_dur = 1.0; static char g_fo_path[64];
+#define FO_FAIL(b) (!g_fo_ok || (g_fo_fail & (1u << (b))))
+void plat_fmv_stub_open(int ok, uint32_t m, int32_t w, int32_t h, double d) {
+    g_fo_ok = ok; g_fo_fail = m; g_fo_w = w; g_fo_h = h; g_fo_dur = d; g_fo_cr = g_fo_open = g_fo_smp = g_fo_fg = g_fo_upd = 0; g_fo_path[0] = 0; }
+int plat_fmv_stub_open_stats(int *cr, int *op, char *p64, int *smp, int32_t *rc, int *fg, int *upd) {
+    *cr = g_fo_cr; *op = g_fo_open; memcpy(p64, g_fo_path, 64); *smp = g_fo_smp; memcpy(rc, g_fo_rc, sizeof g_fo_rc); *fg = g_fo_fg; *upd = g_fo_upd; return 1; }
+int32_t plat_com_create(const void *c, const void *i, void **out) {
+    (void)c; (void)i; *out = NULL; if (FO_FAIL(0)) return (int32_t)0x80004001u; *out = mk(20); g_fo_cr++; return 0; }
+int32_t plat_mms_initialize(void *m, uint32_t t, uint32_t f, void *g) { (void)t; (void)f; (void)g; return (!m || FO_FAIL(2)) ? -1 : 0; }
+int32_t plat_mms_add_stream(void *m, void *src, const void *pur, uint32_t f) {
+    (void)pur; (void)f; if (!m) return -1; return FO_FAIL(src ? 3 : 4) ? -1 : 0; }
+int32_t plat_mms_open_file(void *m, const char *p, uint32_t f) {
+    (void)f; if (!m || FO_FAIL(5)) return -1; snprintf(g_fo_path, sizeof g_fo_path, "%s", p ? p : ""); g_fo_open++; return 0; }
+int32_t plat_mms_get_stream(void *m, const void *pur, void **out) { (void)pur; *out = NULL; if (!m || FO_FAIL(6)) return -1; *out = mk(21); return 0; }
+int32_t plat_ddms_get_format(void *s, void *d) {
+    if (!s || FO_FAIL(7)) return -1; uint32_t *u = (uint32_t *)d; u[1] = 0x1006; u[2] = (uint32_t)g_fo_h; u[3] = (uint32_t)g_fo_w; return 0; }
+int32_t plat_ddms_create_sample(void *s, void *surf, const int32_t *rc, uint32_t f, void **out) {
+    (void)f; *out = NULL; if (!s || !surf || FO_FAIL(9)) return -1; if (rc) memcpy(g_fo_rc, rc, sizeof g_fo_rc); *out = mk(22); g_fo_smp++; return 0; }
+int32_t plat_dd_get_surface_desc(void *s, void *d) {
+    if (!s || FO_FAIL(8)) return -1; uint32_t *u = (uint32_t *)d; u[1] = 0x1007; u[2] = 480; u[3] = 640;
+    u[0x48 / 4] = 0x20; u[0x48 / 4 + 1] = 0x40; u[0x48 / 4 + 3] = 16; u[0x48 / 4 + 4] = 0xf800; u[0x48 / 4 + 5] = 0x7e0; u[0x48 / 4 + 6] = 0x1f; return 0; }
+int32_t plat_media_get_duration(void *p, double *sec) { if (!p || FO_FAIL(10)) return -1; *sec = g_fo_dur; return 0; }
+void plat_window_update(void *h) { (void)h; g_fo_upd++; }
+void plat_window_foreground(void *h) { (void)h; g_fo_fg++; }

@@ -19,6 +19,7 @@
      машина вне 0..65 — выход; 005181da/0051879f/00518bbc/00517d58 — отсутствующий файл не читается, число PINGS ≤ 0x800, буферы — адреса
      re_ptr_register_dyn в P100_RecPtr; 004fbfad — файл 00c812f0 в native не открыт (как P120), прочитанный TRAIL.DAT хранится в модуле;
      004f4180 — P77_LevelName — родной указатель на P138_LevBuf, обнуление 00c810c0..00c812d0 обновляет и native-псевдонимы внутри. */
+#include "ported150.h"
 #include "ported139.h"
 #include "ported138.h"
 #include <string.h>
@@ -318,7 +319,7 @@ int32_t P138_LoadMission(int32_t n) {
   snprintf(P65_Tok, sizeof(p65_tok_t), "Scripts\\Missions\\Mission%d.dms", n);
   int32_t r = P139_CompileScript(P65_Tok);
   if (r == 0 || r == 10 || r == 4) {
-    Call0048A940(G6_00BDF9C0, P125_C814E0, P125_C814E4);
+    P150_PlayFmv(G6_00BDF9C0, P125_C814E0, P125_C814E4);
     P97_ScrObjOn = 1;
     P124_DebugLog(">> LoadMission Complete - Routine Terminated <<");
     return 1;

@@ -23,6 +23,7 @@
      очередь пятен фар не длиннее 65; 0040d07b — не больше 64 палитр/16 страниц P65_Texs, сбой 0040d4b3 — выход 0 (файл уже закрыт),
      указатель арены — re_addr; 004f3490 — смещений узлов не больше 32; 004d4663 — арена страниц освобождается, только если её выделил
      P137_LoadTsd. */
+#include "ported150.h"
 #include "ported139.h"
 #include "ported138.h"
 #include "ported137.h"
@@ -154,7 +155,7 @@ void P137_LevelEnd(void) {
   FreeDirectorData();
   Reset004D600B();
   FreeBuffer_004F30E6();
-  if (P14_00c810c4 == 0x8000) Call0048A940(G6_00BDF9C0, P125_C81690, P125_C81694);
+  if (P14_00c810c4 == 0x8000) P150_PlayFmv(G6_00BDF9C0, P125_C81690, P125_C81694);
   P125_C81690 = -1;
   P125_C81694 = -1;
   P99_ScriptFree();

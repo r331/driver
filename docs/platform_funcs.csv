@@ -60,13 +60,13 @@ address,name,layer,imports,callers,status
 00422309,FUN_00422309,render,COM_vtable,,ported
 00422ae7,FUN_00422ae7,render,COM_vtable,,ported
 00422c55,FUN_00422c55,render,COM_vtable,,ported
-0048ac1c,FUN_0048ac1c,render,DirectDrawCreate,,todo
+0048ac1c,FUN_0048ac1c,render,DirectDrawCreate,,ported
 0048ae12,FUN_0048ae12,render,COM_vtable,,ported
-0048af23,OpenVideo,render,CoCreateInstance,,named
+0048af23,OpenVideo,render,CoCreateInstance,,ported
 0048b2fd,FUN_0048b2fd,render,COM_vtable,,ported
 0048b32b,FUN_0048b32b,render,COM_vtable,,ported
 0048b34c,FUN_0048b34c,render,COM_vtable,,ported
-0048b3e8,FUN_0048b3e8,render,CoCreateInstance,,todo
+0048b3e8,FUN_0048b3e8,render,CoCreateInstance,,ported
 0048b5e3,FUN_0048b5e3,render,COM_vtable,,todo
 0048b65d,FUN_0048b65d,render,COM_vtable,,ported
 0048ba31,FUN_0048ba31,render,COM_vtable,,ported
@@ -97,7 +97,7 @@ address,name,layer,imports,callers,status
 0052955c,DirectDrawEnumerateA,render,DirectDrawEnumerateA,,named
 00529562,DirectDrawCreate,render,DirectDrawCreate,,named
 004010a0,thunk_FUN_004d53e8,system,timeGetTime,,ported
-004010cd,thunk_FUN_0048a940,system,Sleep;SetForegroundWindow;ShowWindow;UpdateWindow,,todo
+004010cd,thunk_FUN_0048a940,system,Sleep;SetForegroundWindow;ShowWindow;UpdateWindow,,ported
 00401226,thunk_FUN_004d78f3,system,timeGetTime,,ported
 00401375,thunk_FUN_004c17ae,system,MessageBoxA,,ported
 0040155f,thunk_FUN_004d986e,system,GetLocalTime,,ported
@@ -123,7 +123,7 @@ address,name,layer,imports,callers,status
 00420b19,FUN_00420b19,system,MessageBoxA;DirectDrawCreate,,ported
 00424c40,FUN_00424c40,system,GetProcAddress,,ported
 00425730,FUN_00425730,system,LoadLibraryA,,ported
-0048a940,FUN_0048a940,system,Sleep;SetForegroundWindow;ShowWindow;UpdateWindow,,todo
+0048a940,FUN_0048a940,system,Sleep;SetForegroundWindow;ShowWindow;UpdateWindow,,ported
 004a5ac3,FUN_004a5ac3,system,MessageBoxA,,ported
 004bf35d,FUN_004bf35d,system,GetSystemTime,,ported
 004bf910,FUN_004bf910,system,timeGetTime,,ported
@@ -186,6 +186,6 @@ address,name,layer,imports,callers,status
 004213a4,FUN_004213a4,window_input,ShowWindow,,ported
 00522323,FUN_00522323,window_input,DispatchMessageA;GetMessageA;PeekMessageA;TranslateMessage,,ported
 005223dc,FUN_005223dc,window_input,CreateWindowExA;LoadCursorA;LoadIconA;RegisterClassA;ShowWindow,,ported
-005224a8,FUN_005224a8,window_input,DefWindowProcA;LoadCursorA;PostMessageA;PostQuitMessage;SetCursor,,todo
+005224a8,FUN_005224a8,window_input,DefWindowProcA;LoadCursorA;PostMessageA;PostQuitMessage;SetCursor,,ported
 0052a628,DirectInputCreateA,window_input,DirectInputCreateA,,named
 0048ba20,FUN_0048ba20,sound,DirectSoundEnumerateA,,ported
