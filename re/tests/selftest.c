@@ -1225,7 +1225,7 @@ static int test_p39(void) {
   *(int32_t *)(P32_DevInfo + 0x518) = 1; CK(P39_CreateFrontBack(320, 240) == 1);
   CK(plat_dd_stub_last_desc(ld) > 0 && ld[2] == 240 && ld[3] == 320 && ld[26] == 0x6040);
   free(P32_DevInfo); P32_DevInfo = NULL;
-  plat_dd_release(dd);
+  plat_dd_release(dd); if (P24_DD == dd) P24_DD = NULL;   /* v2.13: висячий P24_DD → double free в test_p151 (macOS malloc: abort) */
 #undef CK
   return f;
 }
@@ -3638,6 +3638,7 @@ static int test_p80(void) {
       CK(rd_u32(l, 0) == 2 && rd_u32(l, 4) == 10 && rd_u32(l, 8) == 11 && rd_u32(l, 12) == 3 && memcmp(l + 16, "abc", 3) == 0 && rd_u32(l, 19) == 1 && l[23] == 9);
       CK(P80_LumpTab[1] == (const void *)(l + 23 + 0x14)); }
     free(D_00d00230); DebugFree(G6_00D00208); DebugFree(G6_00D01268); DebugFree(G6_00CE0F20);
+    G6_00D01268 = NULL; G6_00CE0F20 = NULL;   /* v2.13: висячие указатели (ASan: use-after-free в P134_CamCollide) */
     D_00d00230 = sv0; G6_00D00208 = sv1; D_00c98ed0 = sv2; }
 #undef CK
   return f;

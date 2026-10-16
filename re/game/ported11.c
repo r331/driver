@@ -3,6 +3,11 @@
 #include "ported27.h"
 #include "globalsets.h"
 #include "ported29.h"
+#ifndef RE_HOOK_BUILD
+#include "ported43.h"
+#include "ported44.h"
+#include "ported59.h"
+#endif
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P11_00b87e7c")
 #undef P11_00b87e7c
@@ -548,8 +553,17 @@ void LoadFsin_00525E50(void) {
 }
 
 void InitXform_005263FE(void) {
+#ifdef RE_HOOK_BUILD
   Call005261AD(ADDR(P11_011f4080), ADDR(P11_00b1c268));
   Call00528461(ADDR(P11_011f4080), ADDR(P11_011effa0));
+#else
+  /* v2.13: однобайтовые псевдонимы P11_* вне образа (selftest) — отдельные объекты по 1 байту, а матрица 3x3/три угла
+     писались за их границы (ASan: global-buffer-overflow; на macOS — порча соседних глобалов, free(0x27) в P31_ReleaseDirectDraw).
+     Те же адреса 011f4080/00b1c268/011effa0 — настоящие объекты P44_ViewMat / P59_AngA..C / P44_ViewMatT (в игре — образ). */
+  int16_t ang[3] = { (int16_t)P59_AngA, (int16_t)P59_AngB, (int16_t)P59_AngC };
+  P43_EulerMatrix((float *)&P44_ViewMat, ang);
+  P44_Transpose((const float *)&P44_ViewMat, (float *)&P44_ViewMatT);
+#endif
 }
 
 void InitVec_00526582(void) {

@@ -327,7 +327,12 @@ void P135_SixBeam(const uint32_t *rec) {
 static float g_mirror_mat[16];
 #define GREC(i) (P56_GhostBuf + (i) * 0x48)
 int32_t P135_GhostTrail(void) {
+#ifdef RE_HOOK_BUILD
   CopyVec3_0052797A((uint32_t *)&P98_M4640);
+#else
+  { uint32_t v3[3]; memcpy(&v3[0], &P98_M4640, 4); memcpy(&v3[1], &P98_M4644, 4); memcpy(&v3[2], &P98_M4648, 4);   /* v2.13: 3 отдельных native-объекта вне образа */
+    CopyVec3_0052797A(v3); }
+#endif
   if (P85_StateDirty != 4) { if (P85_StateFn) P85_StateFn(3, 1, 0, 1, 0); P85_StateDirty = 4; }
   const uint8_t *ic = P56_GhostPtr;
   if (ic == NULL) {
