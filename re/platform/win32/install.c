@@ -100,6 +100,7 @@
 #include "../../game/ported109.h"
 #include "../../game/ported110.h"
 #include "../../game/ported111.h"
+#include "../../game/ported112.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2103,6 +2104,17 @@ void re_install_all(void) {
     re_hook(0x00504866, (void*)P109_RadarArrows, "P109_RadarArrows");
     re_hook(0x005191c5, (void*)P109_InputTick, "P109_InputTick");
     re_hook(0x00505b54, (void*)P109_RadarTraffic, "P109_RadarTraffic");
+    re_hook(0x004d09fd, (void*)P112_OpMoveTo, "P112_OpMoveTo");
+    re_hook(0x004d1765, (void*)P112_OpMoveCur, "P112_OpMoveCur");
+    re_hook(0x004d0734, (void*)P112_OpMoveCurve, "P112_OpMoveCurve");
+    re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
+    re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
+    re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");
+    re_hook(0x004cfe69, (void*)P112_ScriptRunId, "P112_ScriptRunId");
+    re_hook(0x004cf123, (void*)P112_ScriptTriggers, "P112_ScriptTriggers");
+    re_hook(0x004e7755, (void*)P112_IconScaled, "P112_IconScaled");
+    re_hook(0x004e7613, (void*)P112_IconBar, "P112_IconBar");
+    re_hook(0x004c68a7, (void*)P112_DirTimeline, "P112_DirTimeline");
     re_hook(0x004abd69, (void*)P111_IconsInit, "P111_IconsInit");
     re_hook(0x004b05ea, (void*)P111_DebrisIcon, "P111_DebrisIcon");
     re_hook(0x004b6deb, (void*)P111_Flare, "P111_Flare");

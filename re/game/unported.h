@@ -419,11 +419,6 @@ static void (__stdcall * const G6Call0041F57D)(int32_t, int32_t, int32_t) __attr
 void G6Call0041F57D(int32_t a0, int32_t a1, int32_t a2);
 #endif
 
-/* 0041f4a1: stdcall, 4 аргумента (ret 0x10). */
-#ifdef RE_HOOK_BUILD
-static void (__stdcall * const P46Call0041F4A1)(int32_t, int32_t, int32_t, void *) __attribute__((unused)) = (void (__stdcall *)(int32_t, int32_t, int32_t, void *))(uintptr_t)0x0041f4a1;
-#else
-void P46Call0041F4A1(int32_t a0, int32_t a1, int32_t a2, void *a3);
-#endif
+/* 0041f4a1 перенесена в v1.57 — P112_TexDownload (ported112.h). */
 
 #include "ported31.h"

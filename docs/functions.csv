@@ -1829,7 +1829,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041f48c,FUN_0041f48c,NoopFn0041f48c,manual,Noop,,,7,ported
 0041f493,FUN_0041f493,NoopFn0041f493,manual,Noop,,,7,ported
 0041f49a,FUN_0041f49a,NoopFn0041f49a,manual,Noop,,,7,ported
-0041f4a1,FUN_0041f4a1,,,,,,206,todo
+0041f4a1,FUN_0041f4a1,P112_TexDownload,,ported112,,,206,ported
 0041f56f,FUN_0041f56f,NoopFn0041f56f,manual,Noop,,,7,ported
 0041f576,FUN_0041f576,NoopFn0041f576,manual,Noop,,,7,ported
 0041f57d,FUN_0041f57d,SetPalette,manual,Render,,,293,ported
@@ -2256,7 +2256,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004a6e84,FUN_004a6e84,P99_CopTarget,manual,,,,486,ported
 004a706a,FUN_004a706a,,,,,,960,todo
 004a742a,FUN_004a742a,,,,,,902,todo
-004a77b0,FUN_004a77b0,,,,,,368,todo
+004a77b0,FUN_004a77b0,P112_ChaseTick,,ported112,,,368,ported
 004a7920,FUN_004a7920,P99_PathAhead,manual,,,,391,ported
 004a7aa7,FUN_004a7aa7,,,,,,729,ported
 004a7d80,FUN_004a7d80,,,,,,238,todo
@@ -2268,7 +2268,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004a994a,FUN_004a994a,Inc0B1FFBC,manual,UIMisc,,,18,ported
 004a995c,FUN_004a995c,,,,,,287,todo
 004a9b1a,FUN_004a9b1a,P58_DrawLogo,manual,,,,150,ported
-004a9bb0,FUN_004a9bb0,,,,,,288,todo
+004a9bb0,FUN_004a9bb0,P112_FaceIcon,,ported112,,,288,ported
 004a9cd0,FUN_004a9cd0,P98_CreditsFace,manual,,,,268,ported
 004a9ddc,FUN_004a9ddc,DrawFrame_004A9DDC,manual,Misc,,,46,ported
 004a9e0a,FUN_004a9e0a,P52_DrawLabel,manual,,,,126,ported
@@ -2449,7 +2449,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c6691,FUN_004c6691,FindNearestCamera,manual,Director,,,132,ported
 004c6715,FUN_004c6715,CameraFrameDistance,manual,Director,,,43,ported
 004c6740,FUN_004c6740,P98_DirCamNext,manual,,,,359,ported
-004c68a7,FUN_004c68a7,,,,,,1053,todo
+004c68a7,FUN_004c68a7,P112_DirTimeline,,ported112,,,1053,ported
 004c6d62,FUN_004c6d62,P61_CamPrepare,manual,director,manual,,487,ported
 004c8070,FUN_004c8070,ResetDirectorState,manual,Director,,,159,ported
 004c810f,FUN_004c810f,ClearDirectorTables,manual,Director.c,,,31,ported
@@ -2503,12 +2503,12 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004cdb25,FUN_004cdb25,,,,,,641,todo
 004cdda6,FUN_004cdda6,P110_ScriptSprites,,ported110,,,842,ported
 004cf100,FUN_004cf100,GlobalSet004CF100,manual,GlobalSets,,,35,ported
-004cf123,FUN_004cf123,,,,,,428,todo
+004cf123,FUN_004cf123,P112_ScriptTriggers,,ported112,,,428,ported
 004cf2cf,FUN_004cf2cf,P111_ScriptTick,,ported111,,,995,ported
 004cf6b2,FUN_004cf6b2,P97_ScriptSave,manual,,,,192,ported
 004cf772,FUN_004cf772,P97_ScriptLoad,manual,,,,218,ported
 004cf84c,FUN_004cf84c,,,,,,1565,todo
-004cfe69,FUN_004cfe69,,,,,,183,todo
+004cfe69,FUN_004cfe69,P112_ScriptRunId,,ported112,,,183,ported
 004cff20,FUN_004cff20,ListClearActiveByTag,manual,ui,,,94,ported
 004cff7e,FUN_004cff7e,P97_ScriptResetCur,manual,,,,163,ported
 004d0021,FUN_004d0021,ListClearAllActive,manual,ui,,,80,ported
@@ -2521,8 +2521,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d03fd,FUN_004d03fd,ReturnZero004D03FD,manual,SmallFuncs,,,7,ported
 004d0404,FUN_004d0404,ScriptOpSetBit2_004D0404,manual,SmallFuncs,,,53,ported
 004d0439,FUN_004d0439,,,,,,763,ported
-004d0734,FUN_004d0734,,,,,,713,todo
-004d09fd,FUN_004d09fd,,,,,,895,todo
+004d0734,FUN_004d0734,P112_OpMoveCurve,,ported112,,,713,ported
+004d09fd,FUN_004d09fd,P112_OpMoveTo,,ported112,,,895,ported
 004d0d7c,FUN_004d0d7c,P48_OpTurn,manual,MScript,manual,,428,ported
 004d0f28,FUN_004d0f28,P95_ScriptTurn,manual,,,,342,ported
 004d107e,FUN_004d107e,P48_OpSet4,manual,MScript,manual,,147,ported
@@ -2542,7 +2542,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004d1635,FUN_004d1635,ScriptSkipBack_004D1635,manual,Script,,,61,ported
 004d1672,FUN_004d1672,P48_OpRepeat,manual,MScript,manual,,197,ported
 004d1737,FUN_004d1737,ScriptOpToggle10_004D1737,manual,SmallFuncs,,,46,ported
-004d1765,FUN_004d1765,,,,,,799,todo
+004d1765,FUN_004d1765,P112_OpMoveCur,,ported112,,,799,ported
 004d1a84,FUN_004d1a84,NoopFn004d1a84,manual,Noop,,,5,ported
 004d1a89,FUN_004d1a89,NoopFn004d1a89,manual,Noop,,,5,ported
 004d2500,FUN_004d2500,P95_SndInit,manual,,,,300,ported
@@ -2717,8 +2717,8 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004e71dc,FUN_004e71dc,P96_IconAt,manual,Ported96,,,284,ported
 004e72f8,FUN_004e72f8,P96_IconRect,manual,Ported96,,,344,ported
 004e7450,FUN_004e7450,,,,,,451,todo
-004e7613,FUN_004e7613,,,,,,322,todo
-004e7755,FUN_004e7755,,,,,,304,todo
+004e7613,FUN_004e7613,P112_IconBar,,ported112,,,322,ported
+004e7755,FUN_004e7755,P112_IconScaled,,ported112,,,304,ported
 004e8440,FUN_004e8440,P96_InitSphere,manual,Ported96,,,341,ported
 004e8595,FUN_004e8595,P110_SmokeRing,,ported110,,,1595,ported
 004e8bd0,FUN_004e8bd0,,,,,,846,todo

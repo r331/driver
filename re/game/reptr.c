@@ -1,4 +1,5 @@
 /* Реестр «адрес Game.exe ↔ native-объект» (v1.42). См. reptr.h. */
+#include "ported112.h"
 #include "reptr.h"
 #ifdef RE_HOOK_BUILD
 void    *re_ptr(uint32_t addr) { return (void *)(uintptr_t)addr; }
@@ -82,7 +83,7 @@ static const re_fnent_t k_fns[] = {
   { 0x0048c9b2u, (re_fn_t)P49_SetFreq },       { 0x0048c9e8u, (re_fn_t)P49_SetPos3D },
   { 0x0048ca28u, (re_fn_t)P49_SetVel3D },      { 0x0048ca68u, (re_fn_t)P49_SetMode3D },
   { 0x0048caa0u, (re_fn_t)P49_GetStatus },
-  /* v1.56: опкоды скрипта .data 0055fcac (P111_ScriptTick 004cf2cf); 004d09fd/004d1765/004d0734 ещё не перенесены */
+  /* v1.56: опкоды скрипта .data 0055fcac (P111_ScriptTick 004cf2cf); все 33 перенесены с v1.57 */
   { 0x004d03fdu, (re_fn_t)ReturnZero004D03FD },    { 0x004d020bu, (re_fn_t)P48_OpSet3 },
   { 0x004d02c6u, (re_fn_t)ScriptReadShort3_004D02C6 }, { 0x004d033fu, (re_fn_t)ScriptReadVec3_004D033F },
   { 0x004d0404u, (re_fn_t)ScriptOpSetBit2_004D0404 }, { 0x004d107eu, (re_fn_t)P48_OpSet4 },
@@ -96,6 +97,8 @@ static const re_fnent_t k_fns[] = {
   { 0x004d1737u, (re_fn_t)ScriptOpToggle10_004D1737 }, { 0x004d156au, (re_fn_t)P97_ScriptOpNext },
   { 0x004d0d7cu, (re_fn_t)P48_OpTurn },            { 0x004d0f28u, (re_fn_t)P95_ScriptTurn },
   { 0x004d03d0u, (re_fn_t)ScriptOpSetBit200_004D03D0 },
+  /* v1.57: оставшиеся опкоды 0055fcac */
+  { 0x004d09fdu, (re_fn_t)P112_OpMoveTo }, { 0x004d1765u, (re_fn_t)P112_OpMoveCur }, { 0x004d0734u, (re_fn_t)P112_OpMoveCurve },
 };
 #define RE_DYN_MAX 4096
 #define RE_FN_MAX 512

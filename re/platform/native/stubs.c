@@ -9,4 +9,3 @@ static void not_ported(const char *name, unsigned addr) {
 #define STUB_R(ret, name, addr, params, args) __attribute__((weak)) ret name params { not_ported(#name, addr); return (ret)0; }
 UNPORTED_LIST(STUB_V, STUB_R)
 void G6Call0041F57D(int32_t a0, int32_t a1, int32_t a2) { (void)a0; (void)a1; (void)a2; not_ported("G6Call0041F57D", 0x0041f57d); }
-void P46Call0041F4A1(int32_t a0, int32_t a1, int32_t a2, void *a3) { (void)a0; (void)a1; (void)a2; (void)a3; not_ported("P46Call0041F4A1", 0x0041f4a1); }

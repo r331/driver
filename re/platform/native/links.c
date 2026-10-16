@@ -100,6 +100,7 @@
 #include "../../game/ported109.h"
 #include "../../game/ported110.h"
 #include "../../game/ported111.h"
+#include "../../game/ported112.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -128,6 +129,7 @@ void P96_Fn4D7F91 (float x, float y, float w, float h, int32_t c0, int32_t c1, i
 void P96_Fn40B6FD (float x, float y, float w, float h, float u0, float v0, float u1, float v1, int32_t page, const uint8_t *rgb) { P109_IconDraw(x, y, w, h, u0, v0, u1, v1, page, rgb); }
 int32_t P96_Fn50F304 (uint32_t script, int32_t pos) { return (int32_t)P107_MenuNav(script, pos); }
 void P66_DrawText (int32_t x, int32_t y, uint32_t txt, int32_t a, int32_t b, int32_t r, int32_t g, int32_t bl) { P70_ShadowText(x, y, txt, a, b, r, g, bl); }
+void P65_Fn4CFE69 (uint32_t a0) { P112_ScriptRunId(a0); }
 int32_t P62_Fn51CC55 (void *a, int32_t t, int32_t i) { return (int32_t)P64_RankPlace(a, t, i); }
 uint32_t P62_Fn515CCA (void *p, void *car) { return (uint32_t)P71_FaceCar(p, car); }
 void P61_Fn5144D4 (void *p, void *q) { P71_EdgeA(p, q); }

@@ -1,4 +1,5 @@
 /* Диспетчеры текстур, границы, загрузка блоков карты — восстановлено из Game.exe (cdecl). */
+#include "ported112.h"
 #include "ported46.h"
 #include "ported41.h"
 #include "ported58.h"
@@ -31,7 +32,7 @@ void P46_TexCall2(int32_t a, int32_t b, int32_t c, const uint8_t *d, int32_t han
     P46_Fn42282F(n, arg);
     return;
   }
-  P46Call0041F4A1(a, b, c, (void *)d);
+  P112_TexDownload(a, (uint32_t)b, c, d);   /* 0041f4a1 */
 }
 void P46_SetBounds(int32_t a, int32_t b, int32_t c, int32_t d) {
   if (IsSlotActive00524473(0xf) == 0) {
