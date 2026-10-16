@@ -109,6 +109,7 @@
 #include "../../game/ported118.h"
 #include "../../game/ported119.h"
 #include "../../game/ported120.h"
+#include "../../game/ported121.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2179,6 +2180,16 @@ void re_install_all(void) {
     re_hook(0x004a4d84, (void*)P120_ParseCamInt, "P120_ParseCamInt");
     re_hook(0x004fbeb2, (void*)P120_ConeRec, "P120_ConeRec");
     re_hook(0x005032ce, (void*)P120_HudTimes, "P120_HudTimes");
+    re_hook(0x004f4a33, (void*)P121_ScriptHud, "P121_ScriptHud");
+    re_hook(0x004a4a5f, (void*)P121_ParseCamLine, "P121_ParseCamLine");
+    re_hook(0x00431016, (void*)P121_TexQuadFlat, "P121_TexQuadFlat");
+    re_hook(0x004b2c4b, (void*)P121_DustDraw, "P121_DustDraw");
+    re_hook(0x00447753, (void*)P121_ClipQuad, "P121_ClipQuad");
+    re_hook(0x0043a5be, (void*)P121_ClipTexQuad, "P121_ClipTexQuad");
+    re_hook(0x0051dc18, (void*)P121_WheelDust, "P121_WheelDust");
+    re_hook(0x00415014, (void*)P121_SndNextDev, "P121_SndNextDev");
+    re_hook(0x004a7d80, (void*)P121_CopSync, "P121_CopSync");
+    re_hook(0x004d602e, (void*)P121_CamSounds, "P121_CamSounds");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");
