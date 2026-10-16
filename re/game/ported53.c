@@ -1,3 +1,5 @@
+#include "ported129.h"
+#include "reptr.h"
 #include "ported53.h"
 #include <string.h>
 GAME_VAR_DEF(int32_t, P53_MenuSel, 0x01271064)
@@ -64,11 +66,15 @@ int32_t P53_TexLookup(int32_t handle, int32_t b, int32_t c, int32_t d) {
 }
 
 void P53_CallWithState(int32_t a, int32_t b, int32_t c) {
+  P53_CallWithStateP((const float *)re_ptr((uint32_t)a), (uint8_t *)re_ptr((uint32_t)b), c);
+}
+/* v1.74: вариант с родными указателями (позиция, машина) — вызов из P129_CarObjects */
+void P53_CallWithStateP(const float *pos, uint8_t *car, int32_t c) {
   uint32_t st[8];
   memset(st, 0, sizeof st);
   st[1] = P53_Var2640; memcpy(&st[2], &P53_Mrk[0], 16);   /* 00d026a0..ac — биты float */
   st[6] = (uint32_t)(-(int32_t)P53_Ang2702) & 0xfffu;
-  P53_Fn500937(st, a, b, c, P53_Var2634, 0);
+  P129_ObjBoxes((uint8_t *)st, pos, car, c, (uint32_t)P53_Var2634, 0);
 }
 
 int32_t P53_ReadWholeFile(const char *name, void *buf) {

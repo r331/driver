@@ -126,6 +126,7 @@ void    P97_ScriptResetCur(void);                                               
 int32_t P97_ScriptSave(uint8_t *out);                                             /* 004cf6b2: байт записано */
 void    P97_ScriptLoad(const uint8_t *in);                                        /* 004cf772 */
 int32_t P97_ScriptOpNext(void);                                                   /* 004d156a */
+void    P97_ScriptEachP(const float *a, uint8_t *b, int32_t c);                    /* v1.74 */
 void    P97_ScriptEach(int32_t a, int32_t b, int32_t c);                          /* 00500090 */
 void    P97_SndMenuInit(void);                                                    /* 0050f7b2 */
 void    P97_KeyMenuAInit(void);                                                   /* 0040fc9a */

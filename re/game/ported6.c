@@ -1,3 +1,4 @@
+#include "ported129.h"
 #include "ported6.h"
 #include "ported40.h"
 #include "engine.h"
@@ -303,8 +304,8 @@ void FreeBufs00516E2E(void) {
     if (G6_00B5A83C != 0) { DebugFree(G6_00B5A83C); G6_00B5A83C = 0; }
 }
 void Update005012A3(void) {
-    G6Call00500E1D(0);
-    if (G6_00B87EAC != 0 || G6_00B87EB0 != 0) G6Call00500E1D(0x41);
+    P129_CarObjects(0);
+    if (G6_00B87EAC != 0 || G6_00B87EB0 != 0) P129_CarObjects(0x41);
     if (G6_00B87EA0 == 0) G6Call00491360();
 }
 void ActorStep00494678(uint8_t *p) {

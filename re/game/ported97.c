@@ -2,6 +2,7 @@
    (0051c900, 00523cda, 004a681a, 005074e5, 0048bbd5, 004d9ad4, 0050bc2b, 004f4f10, 004cff7e, 004cf6b2, 004cf772, 004d156a,
    00500090, 0050f7b2, 0040fc9a, 00410e89, 0040ea70, 00419b35, 0040c8a0, 004185d2, 004f58c6, 004f57d7, 004f5c89, 004d2c95,
    004c2ab0, 00417479, 00417fff, 004afcf7, 004ad128, 004e5a1a). */
+#include "ported129.h"
 #include "ported115.h"
 #include "ported97.h"
 #include "reptr.h"
@@ -348,6 +349,10 @@ int32_t P97_ScriptOpNext(void) {
 }
 /* 00500090: обход активных объектов скрипта → 00500937 (модель события из P28_EventModels как адрес) */
 void P97_ScriptEach(int32_t a, int32_t b, int32_t c) {
+  P97_ScriptEachP((const float *)re_ptr((uint32_t)a), (uint8_t *)re_ptr((uint32_t)b), c);
+}
+/* v1.74: вариант с родными указателями — вызов из P129_CarObjects */
+void P97_ScriptEachP(const float *a, uint8_t *b, int32_t c) {
   for (uint8_t *n = P15_ListHead; n != NULL; n = link(n + 0x20)) {
     if ((rd16(n) & 2) == 0) continue;
     for (uint8_t *o = link(n + 0x1c); o != NULL; o = link(o + 0x58)) {
@@ -357,7 +362,7 @@ void P97_ScriptEach(int32_t a, int32_t b, int32_t c) {
       wr32(tmp + 4, m);
       memcpy(tmp + 8, o, 16);
       wr32(tmp + 0x18, (int16_t)rd16(o + 0x12));
-      P53_Fn500937(tmp, a, b, c, (int32_t)P28_EventModels[m], 0);
+      P129_ObjBoxes(tmp, a, b, c, (uint32_t)P28_EventModels[m], 0);
     }
   }
 }

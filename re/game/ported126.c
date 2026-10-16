@@ -105,7 +105,7 @@ void P126_ReadMapPals(const char *name) {
   g_fread(&n, 1, 4, f);
   if (n < 0) n = 0;                                       /* защита: в оригинале нет */
   P58_Cnt4EFC03 = n;
-  p58_rec_t *t = (p58_rec_t *)P98_DebugMalloc(n * 0xc, "D:\\Driver\\Game\\map.c", 0xd88);
+  p58_rec_t *t = (p58_rec_t *)P98_DebugMalloc(n * (int32_t)sizeof(p58_rec_t), "D:\\Driver\\Game\\map.c", 0xd88);
   P58_Tab4EFC03 = t;
   if (t == NULL) { P58_Cnt4EFC03 = 0; g_fclose(f); return; }   /* защита */
   for (int32_t i = 0; i < n; i++) {

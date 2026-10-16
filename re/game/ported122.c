@@ -236,8 +236,9 @@ int32_t P122_SetVar(p42_cmd_t *cmd, p42_var_t *var) {
   int32_t idx = 0;
   if (var == NULL) {
     var = &P42_Vars[0];
-    while (var->type != 0x7f && strcmp(P65_Tok, var->name) != 0) { idx++; var++; }
-    if (strlen(var->name) == 0) return 9;
+    const int32_t nvars = (int32_t)(sizeof P42_Vars / sizeof P42_Vars[0]);   /* native: таблица без 0x7f — не выходить за её конец */
+    while (idx < nvars && var->type != 0x7f && strcmp(P65_Tok, var->name) != 0) { idx++; var++; }
+    if (idx >= nvars || strlen(var->name) == 0) return 9;
     cmd = &P42_Cmds[2];
   }
   if (cmd->id != 2) return 9;

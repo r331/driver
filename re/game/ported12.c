@@ -1,3 +1,4 @@
+#include "ported129.h"
 #include "ported124.h"
 #include "reptr.h"
 #include "ported12.h"
@@ -150,7 +151,7 @@ void P12_Fn00496505(void) {
 void P12_Fn00491360(void) {
   for (int32_t i = 0; i < 0x40; i++) {
     const uint8_t *p = &g_011443e0[i * 0x54];
-    if (p[1] != 0 && (p[2] == 1 || p[5] != 0)) G6Call00500E1D(p[0] + 1);
+    if (p[1] != 0 && (p[2] == 1 || p[5] != 0)) P129_CarObjects(p[0] + 1);
   }
 }
 void P12_Fn0048EBC8(void) {

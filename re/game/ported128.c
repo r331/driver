@@ -784,12 +784,7 @@ static int32_t clip_pass(const p128_pt_t *in, int32_t n, p128_pt_t *out, int32_t
   }
   return m;
 }
-int32_t P128_ClipArea(const int32_t *poly, const int32_t *rect) {
-  p128_pt_t a[48], b[48];
-  int32_t n = 0;
-  for (const int32_t *p = poly; p != NULL && n < 48; p = (const int32_t *)re_rd_ptr(p + 2)) {
-    a[n].v[0] = p[0]; a[n].v[1] = p[1]; n++;
-  }
+static int32_t clip_area(p128_pt_t *a, p128_pt_t *b, int32_t n, const int32_t *rect) {
   if (n == 0) return 0;
   if ((n = clip_pass(a, n, b, 0, rect[0], 0)) == 0) return 0;
   if ((n = clip_pass(b, n, a, 0, rect[2], 1)) == 0) return 0;
@@ -799,4 +794,19 @@ int32_t P128_ClipArea(const int32_t *poly, const int32_t *rect) {
   for (int32_t k = 0; k < n - 1; k++) s += a[k].v[0] * a[k + 1].v[1] - a[k + 1].v[0] * a[k].v[1];
   s = (s + (a[n - 1].v[0] * a[0].v[1] - a[0].v[0] * a[n - 1].v[1])) / 2;
   return s < 0 ? -s : s;
+}
+int32_t P128_ClipArea(const int32_t *poly, const int32_t *rect) {
+  p128_pt_t a[48], b[48];
+  int32_t n = 0;
+  for (const int32_t *p = poly; p != NULL && n < 48; p = (const int32_t *)re_rd_ptr(p + 2)) {
+    a[n].v[0] = p[0]; a[n].v[1] = p[1]; n++;
+  }
+  return clip_area(a, b, n, rect);
+}
+/* v1.74: вариант с родным массивом точек {x, y} × n (вызов из P129_MapCars вместо списка 00c7d820) */
+int32_t P128_ClipAreaN(const int32_t *xy, int32_t n, const int32_t *rect) {
+  p128_pt_t a[48], b[48];
+  if (n > 48) n = 48;
+  for (int32_t k = 0; k < n; k++) { a[k].v[0] = xy[k * 2]; a[k].v[1] = xy[k * 2 + 1]; }
+  return clip_area(a, b, n, rect);
 }

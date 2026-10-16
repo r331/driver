@@ -16,6 +16,7 @@
    004f472b — такт скрипта миссии; 004f8e0c (команда скрипта) не перенесена — R-строка P127_Fn4F8E0C.
    004131a0 — ввод имени (.data 0054cf80 — P127_NameMenu в k_regions, курсор 005fe97c — P127_Cursor);
      __ftol — (int32_t)(ширина / 2.0) + 0x141; возвращаемое значение — мусор eax 004133b4 (void). */
+#include "ported129.h"
 #include "ported127.h"
 #include "p127_data.h"
 #include "unported.h"
@@ -271,7 +272,7 @@ void P127_MapWindow(int32_t x, int32_t y, uint32_t arg) {
       if (i + rz == N - 1) { row = 0; sel ^= 2; } else row += N;
     }
   }
-  P127_Fn50B088(arg);
+  P129_MapCars((int32_t *)re_ptr(arg));
   for (int32_t i = 0; i < 0x2f4 * 4; i++) {
     uint32_t v = (uint32_t)rd32(P77_C5FE00 + i * 4);
     wr32(P77_C7D8C0 + i * 4, (int32_t)(v & 0x1e));

@@ -52,6 +52,7 @@ void    P53_NameEntryKey(int32_t key);                     /* 005101f0 (посл
 void    P53_NameEntry(void);                               /* 005101f0 */
 void    P53_SetTexSource(int32_t a, uint32_t addr, int32_t c, const uint8_t *d); /* 0041f76f (stdcall ret 0x10) */
 int32_t P53_TexLookup(int32_t handle, int32_t b, int32_t c, int32_t d);          /* 0041d63b */
+void    P53_CallWithStateP(const float *pos, uint8_t *car, int32_t c);              /* v1.74 */
 void    P53_CallWithState(int32_t a, int32_t b, int32_t c);                      /* 00500154 */
 int32_t P53_ReadWholeFile(const char *name, void *buf);                          /* 004d303a: размер или 0 */
 int32_t P53_MenuA(void);                                   /* 004161b3 */

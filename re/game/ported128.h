@@ -18,4 +18,5 @@ int32_t P128_CopPath(uint8_t *rec);                                             
 int32_t P128_CopRoute(int32_t *rec, int32_t dx, int32_t dz, int32_t start);       /* 0050d4a2 */
 void    P128_CopReplan(uint8_t *rec);                                             /* 004a742a */
 void    P128_TrafficDraw(void);                                                   /* 00490bcb */
+int32_t P128_ClipAreaN(const int32_t *xy, int32_t n, const int32_t *rect);           /* v1.74: родные точки */
 int32_t P128_ClipArea(const int32_t *poly, const int32_t *rect);                  /* 0050a15b */
