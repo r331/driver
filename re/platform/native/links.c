@@ -473,3 +473,7 @@ void Call00528461(uint32_t a0, uint32_t a1) {   /* 00528461 Transpose3(исто�
   const float *s = (const float *)re_ptr(a0); float *d = (float *)re_ptr(a1);
   if (s && d) P44_Transpose(s, d); else link_miss("Call00528461", a0, a1); }
 void Call004B998B(uint32_t a0) { int32_t *p = (int32_t *)re_ptr(a0); if (p) P101_DebrisBounce(p); else link_miss("Call004B998B", a0, 0); }   /* 004b998b */
+/* v2.08: 0051755e (текст с тенью: скорость P62_SpeedText, отладка копов ported56) — перенос P70_ShadowText; строка — адрес re_addr */
+void P56_DrawText (int32_t a0, int32_t a1, const char *a2, int32_t a3, int32_t a4, int32_t a5, int32_t a6, int32_t a7) {
+  P70_ShadowText(a0, a1, re_addr(a2), a3, (uint32_t)a4, (uint8_t)a5, (uint8_t)a6, (uint8_t)a7);
+}

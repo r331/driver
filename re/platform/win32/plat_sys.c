@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdarg.h>
 uint32_t plat_time_ms(void){ return GetTickCount(); }
+void plat_vt_poll(void){}   /* v2.08: RE_FIXED_DT только в native */
 void plat_sleep_ms(uint32_t ms){ Sleep(ms); }
 void plat_log(const char *f, ...){ char b[512]; va_list a; va_start(a,f); vsnprintf(b,sizeof b,f,a); va_end(a); OutputDebugStringA(b); }
 void *plat_file_open(const char *p, const char *m){ return fopen(p,m); }

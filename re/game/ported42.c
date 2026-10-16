@@ -3,7 +3,15 @@
 #include "engine.h"
 #include "../platform/plat.h"
 #include <string.h>
-GAME_VAR_DEF(p42_cmdtab_t, P42_Cmds, 0x00000000)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P42_Cmds")
+#undef P42_Cmds
+#pragma push_macro("P42_Cmds") /*gvi*/
+#undef P42_Cmds /*gvi*/
+p42_cmdtab_t P42_Cmds;
+#pragma pop_macro("P42_Cmds") /*gvi*/
+#pragma pop_macro("P42_Cmds")
+#endif
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P42_Vars")
 #undef P42_Vars

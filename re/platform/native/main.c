@@ -1,3 +1,4 @@
+#include <execinfo.h>
 /* Нативная точка входа (macOS arm64 / Linux / Windows x64): SDL2 + OpenGL.
    v2.00: без --selftest запускается игра — WinMain 00521f10 (P151_WinMain) с рабочим каталогом Data_Files.
    --idle — прежний режим (пустое окно, --frames N). Кадры/снимок: RE_MAX_FRAMES, RE_SHOT_PNG (platform/sdl/plat_sys.c). */
@@ -14,7 +15,9 @@ void plat_fs_mkdirs(int on);      /* v2.04: platform/sdl/plat_sys.c */
 /* v2.00: RE_WATCHDOG=N — через N с стек (в ASan-сборке) и выход 3: где игра стоит */
 void __sanitizer_print_stack_trace(void) __attribute__((weak));
 static void watchdog(int sig) { (void)sig; fprintf(stderr, "[watchdog] стоп по таймеру\n");
-    if (__sanitizer_print_stack_trace) __sanitizer_print_stack_trace(); fflush(NULL); _Exit(3); }
+    if (__sanitizer_print_stack_trace) __sanitizer_print_stack_trace();
+    else { void *bt[48]; int n = backtrace(bt, 48); backtrace_symbols_fd(bt, n, 2); }   /* v2.08: стек и без ASan */
+    fflush(NULL); _Exit(3); }
 int32_t P151_WinMain(int32_t hinst, int32_t prev, int32_t cmd, int32_t show);
 int  re_selftest(void);
 void re_init_consts(void);

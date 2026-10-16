@@ -13,7 +13,9 @@ static uint32_t g_fmask, g_caps; static int g_njoy, g_ndev, g_ncoop, g_nprop, g_
 static char g_tok[64];
 #define FAIL(b) (g_fmask & (1u << (b)))
 int32_t plat_di_acquire(void *d) { return (d && !FAIL(8)) ? 0 : -1; }
+void plat_vt_poll(void);   /* v2.08: plat_sys.c — RE_FIXED_DT: опрос ввода двигает виртуальные часы (ожидание клавиши/таймера) */
 int32_t plat_di_get_state(void *d, uint32_t size, void *buf) {
+  plat_vt_poll();
     { static int tr = -1, n = 0; if (tr < 0) tr = getenv("RE_TRACE_KEYS") != NULL;
       if (tr && n < 400 && (n++ % 40) == 0) fprintf(stderr, "[keys] get_state dev=%p size=0x%x кадр %d\n", d, size, plat_frame_no()); }
     if (!d || g_fail) return -1;

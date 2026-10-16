@@ -22,7 +22,7 @@ SCAL = {'int8_t','uint8_t','int16_t','uint16_t','int32_t','uint32_t','float','do
         'unsigned short','int','unsigned','unsigned int'}
 safe = set(SCAL)
 # структуры, проверенные вручную: одинаковая раскладка в 32-битной Game.exe и в native (только 32-битные поля, _Static_assert размера)
-safe |= {'p42_var_t', 'p42_vartab_t', 'p88_cell_t'}   # v2.05: p88_cell_t — 9 × int32 + 4 байта
+safe |= {'p42_var_t', 'p42_vartab_t', 'p88_cell_t', 'p42_cmd_t', 'p42_cmdtab_t'}   # v2.05: p88_cell_t — 9 × int32 + 4 байта; v2.08: p42_cmd_t — char[0x100] + 4 × int32 (таблица команд MScript 00563980)
 alltxt = ''.join(open(h).read() for h in hdrs)
 for _ in range(3):
     for m in re.finditer(r'typedef\s+([\w ]+?)\s+(\w+)\s*((?:\[[^\]]+\])+)\s*;', alltxt):

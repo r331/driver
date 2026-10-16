@@ -88,11 +88,38 @@ static Uint32 tmr_cb(Uint32 interval, void *p) {
   return c->flags & 1 ? interval : 0;
 }
 static TmrCtx g_tc[64]; static int g_tcn;
+/* v2.08: RE_FIXED_DT — таймеры по виртуальным часам plat_time_ms, вызов в основном потоке (id = 0x10000 + слот) */
+int plat_fixed_dt(void); uint32_t plat_time_ms(void);
+typedef struct { void (*cb)(unsigned); unsigned flags, delay, on; uint32_t due; } VtTmr;
+static VtTmr g_vtt[64]; static int g_vt_in;
+void plat_vt_timers(uint32_t now) {
+  if (g_vt_in) return;
+  g_vt_in = 1;
+  for (int i = 0; i < 64; i++) {
+    VtTmr *t = &g_vtt[i]; int guard = 0;
+    while (t->on && (int32_t)(now - t->due) >= 0 && guard++ < 100) {
+      if (t->flags & 1) t->due += t->delay ? t->delay : 1; else t->on = 0;
+      t->cb(0x10000u + (unsigned)i);
+    }
+  }
+  g_vt_in = 0;
+}
 unsigned plat_timer_start(unsigned delay, unsigned flags, void (*cb)(unsigned)) {
+  if (plat_fixed_dt()) {
+    for (int i = 0; i < 64; i++) if (!g_vtt[i].on) {
+      uint32_t now = plat_time_ms();
+      g_vtt[i].cb = cb; g_vtt[i].flags = flags; g_vtt[i].delay = delay; g_vtt[i].due = now + delay; g_vtt[i].on = 1;
+      return 0x10000u + (unsigned)i;
+    }
+    return 0;
+  }
   TmrCtx *c = &g_tc[g_tcn++ & 63];
   c->cb = cb; c->flags = flags; c->id = 0;
   SDL_TimerID id = SDL_AddTimer(delay, tmr_cb, c);
   c->id = (unsigned)id;
   return (unsigned)id;
 }
-void plat_timer_kill(unsigned id) { SDL_RemoveTimer((SDL_TimerID)id); }
+void plat_timer_kill(unsigned id) {
+  if (id >= 0x10000u && id < 0x10040u) { g_vtt[id - 0x10000u].on = 0; return; }
+  SDL_RemoveTimer((SDL_TimerID)id);
+}

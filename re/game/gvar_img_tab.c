@@ -647,6 +647,7 @@ const re_gvar_range_t re_gvar_ranges[] = {
   { 0x00562d40u, (uint32_t)sizeof(int32_t) },   /* P80_Cell */
   { 0x00562d7cu, (uint32_t)sizeof(uint32_t) },   /* P75_Ptr562D7C */
   { 0x00562d80u, (uint32_t)sizeof(p41_texsel_t) },   /* P41_TexSel */
+  { 0x00563980u, (uint32_t)sizeof(p42_cmdtab_t) },   /* P42_Cmds */
   { 0x0056dc10u, (uint32_t)sizeof(p42_vartab_t) },   /* P42_Vars */
   { 0x00572a80u, (uint32_t)sizeof(p74_rowtab_t) },   /* P74_RowTab */
   { 0x00572b40u, (uint32_t)sizeof(p11_u32arr) },   /* P11_00572b40 */

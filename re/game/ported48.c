@@ -131,6 +131,7 @@ uint16_t P48_GetVoiceVolume(int32_t slot) {
   return (P48_Snd[slot].flags & 1) != 0 ? (uint16_t)P48_Snd[slot].vol : 0;
 }
 int32_t P48_AnyKey(void) {
+  plat_vt_poll();   /* v2.08: native RE_FIXED_DT — ожидание заставки (004d…/ported126) идёт по виртуальным часам; иначе ничего */
   P36_PollInput();
   for (int32_t i = 0xfe; i >= 0; i--)
     if (P34_Keys[i] != 0) return 1;

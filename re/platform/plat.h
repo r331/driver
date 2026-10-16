@@ -4,6 +4,7 @@
 /* Platform interface: game code in game/ calls only this. */
 /* --- system --- */
 uint32_t plat_time_ms(void);
+void     plat_vt_poll(void);   /* v2.08: RE_FIXED_DT — шаг виртуальных часов в циклах ожидания (native; win32 — пусто) */
 void plat_sleep_ms(uint32_t ms);
 void plat_local_hms(int *h, int *m, int *s); /* GetLocalTime */
 void plat_utc_hms(int *h, int *m, int *s);   /* GetSystemTime (UTC) */

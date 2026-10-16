@@ -1,6 +1,7 @@
 #include "../plat.h"
 #include <SDL.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <strings.h>
@@ -9,8 +10,16 @@
 #include <limits.h>
 static SDL_Window *g_win; static SDL_GLContext g_gl;
 static void swap_win(void){ SDL_GL_SwapWindow(g_win); }
-uint32_t plat_time_ms(void){ return SDL_GetTicks(); }
-void plat_sleep_ms(uint32_t ms){ SDL_Delay(ms); }
+/* v2.08: RE_FIXED_DT=1 — виртуальное время для воспроизводимых прогонов: каждый вызов plat_time_ms +1 мс, каждый показанный
+   кадр (plat_flip) — не меньше кадр·20 мс (такт логики P21_FrameTicks = 20 мс → один такт на кадр), plat_sleep_ms только
+   сдвигает часы; таймеры (plat_timer_start) срабатывают в основном потоке по виртуальным часам (plat_vt_timers, plat_snd.c). */
+static int g_fixed_dt = -1; static uint32_t g_vt;
+void plat_vt_timers(uint32_t now);
+int plat_fixed_dt(void){ if (g_fixed_dt < 0) { const char *e = getenv("RE_FIXED_DT"); g_fixed_dt = e && *e && *e != '0'; } return g_fixed_dt; }
+static void vt_advance(uint32_t t){ if (t > g_vt) g_vt = t; plat_vt_timers(g_vt); }
+uint32_t plat_time_ms(void){ if (!plat_fixed_dt()) return SDL_GetTicks(); vt_advance(g_vt + 1); return g_vt; }
+void plat_vt_poll(void){ if (plat_fixed_dt()) vt_advance(g_vt + 1); }
+void plat_sleep_ms(uint32_t ms){ if (!plat_fixed_dt()) { SDL_Delay(ms); return; } vt_advance(g_vt + ms); }
 void plat_log(const char *f, ...){ va_list a; va_start(a,f); vfprintf(stderr,f,a); va_end(a); }
 void *plat_file_open(const char *path, const char *mode){
     FILE *f = fopen(path, mode); if (f) return f;
@@ -254,6 +263,7 @@ void plat_frame_tick(const char *where) {
     if (maxf == -2) { const char *e = getenv("RE_MAX_FRAMES"); maxf = e ? atoi(e) : -1; e = getenv("RE_MAX_PUMPS"); maxp = e ? atoi(e) : -1; }
     if (where && !strcmp(where, "flip")) {
         g_frames++;
+        if (plat_fixed_dt()) vt_advance((uint32_t)g_frames * 20u);   /* v2.08: RE_FIXED_DT */
         if (g_frames == 1) fprintf(stderr, "[frame] первый кадр (plat_flip)\n");
         const char *sf = getenv("RE_SHOT_FIRST");
         if (!g_shot_done && sf && *sf == '1') frame_shot();
@@ -263,6 +273,7 @@ void plat_frame_tick(const char *where) {
         }
     } else {
         g_pumps++;
+        if (plat_fixed_dt()) vt_advance(g_vt + 1);   /* v2.08: цикл сообщений без кадров тоже двигает часы/таймеры */
         if (maxp > 0 && g_pumps >= maxp) { fprintf(stderr, "[frame] RE_MAX_PUMPS=%d (кадров %d) — выход\n", maxp, g_frames); fflush(NULL); _Exit(0); }
     }
 }

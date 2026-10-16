@@ -28,6 +28,8 @@ typedef uint8_t p42_names_t[16][0x4c];
 #define P42_CellY     GAME_VAR(int32_t, P42_CellY, 0x00ce0f30)
 #define P42_CellScale GAME_VAR(float, P42_CellScale, 0x0125f3e8)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P42_Cmds") /*gvi*/
+#undef P42_Cmds /*gvi*/
 #pragma push_macro("P42_Vars") /*gvi*/
 #undef P42_Vars /*gvi*/
 #pragma push_macro("P42_HighScores") /*gvi*/
@@ -35,6 +37,7 @@ typedef uint8_t p42_names_t[16][0x4c];
 extern p42_cmdtab_t P42_Cmds; extern p42_vartab_t P42_Vars; extern p42_hs_t P42_HighScores;
 #pragma pop_macro("P42_HighScores") /*gvi*/
 #pragma pop_macro("P42_Vars") /*gvi*/
+#pragma pop_macro("P42_Cmds") /*gvi*/
 #pragma push_macro("P42_DevCount") /*gvi*/
 #undef P42_DevCount /*gvi*/
 #pragma push_macro("P42_DevNames") /*gvi*/
@@ -77,6 +80,8 @@ void    P42_SetViewAngles(int32_t a, int32_t b, int32_t unused, float scale); /*
 int32_t P42_CellIndex(const float *p);                   /* 004ece84: индекс клетки из координат x/z */
 /* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
 #if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P42_Cmds
+#define P42_Cmds (*(p42_cmdtab_t *)re_gvar(0x00563980u, sizeof(p42_cmdtab_t), (void *)&P42_Cmds))
 #undef P42_Vars
 #define P42_Vars (*(p42_vartab_t *)re_gvar(0x0056dc10u, sizeof(p42_vartab_t), (void *)&P42_Vars))
 #undef P42_HighScores
