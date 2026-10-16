@@ -13,7 +13,12 @@ void plat_input_enable(int on);   /* v2.03: platform/sdl/plat_di.c */
 void plat_fs_mkdirs(int on);      /* v2.04: platform/sdl/plat_sys.c */
 #include <signal.h>
 /* v2.00: RE_WATCHDOG=N — через N с стек (в ASan-сборке) и выход 3: где игра стоит */
+#if defined(__APPLE__)
+/* v2.13: ld64 не допускает неразрешённый weak-символ без ASan — стек только через backtrace */
+#define __sanitizer_print_stack_trace ((void (*)(void))0)
+#else
 void __sanitizer_print_stack_trace(void) __attribute__((weak));
+#endif
 static void watchdog(int sig) { (void)sig; fprintf(stderr, "[watchdog] стоп по таймеру\n");
     if (__sanitizer_print_stack_trace) __sanitizer_print_stack_trace();
     else { void *bt[48]; int n = backtrace(bt, 48); backtrace_symbols_fd(bt, n, 2); }   /* v2.08: стек и без ASan */
@@ -38,6 +43,20 @@ int main(int argc, char **argv) {
     }
     re_init_consts();
     if (selftest) return re_selftest();
+    static char found[1024];
+    if (!file_exists(data, "FSIN.DAT") && !strcmp(data, "Data_Files")) {
+        /* v2.13: Data_Files рядом с бинарником; в Driver.app — Contents/Resources/Data_Files или рядом с Driver.app
+           (из Finder рабочий каталог — «/») */
+        char *base = SDL_GetBasePath();
+        if (base) {
+            static const char *const cand[] = { "Data_Files", "../../../Data_Files" };
+            for (unsigned i = 0; i < sizeof cand / sizeof cand[0]; i++) {
+                snprintf(found, sizeof found, "%s%s", base, cand[i]);
+                if (file_exists(found, "FSIN.DAT")) { data = found; break; }
+            }
+            SDL_free(base);
+        }
+    }
     if (!file_exists(data, "FSIN.DAT")) {
         fprintf(stderr, "Не найдены данные игры: укажите папку Data_Files с вашего диска: --data <путь>\n");
         return 1;

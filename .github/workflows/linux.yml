@@ -1,0 +1,32 @@
+# v2.13: нативная сборка Linux x86_64 (arm64-раннеры GitHub только для публичных репозиториев; arm64 проверяется локально) + DINPUT.dll (mingw i686). Файлов игры в CI нет: ctest -L nodata.
+name: linux
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Зависимости
+        run: sudo apt-get update && sudo apt-get install -y cmake libsdl2-dev libosmesa6-dev
+      - name: Configure/Build
+        run: cmake -S re -B re/build-native -DCMAKE_BUILD_TYPE=Release && cmake --build re/build-native -j3
+      - name: ctest (selftest без данных игры)
+        run: cd re/build-native && ctest --output-on-failure -L nodata
+      - uses: actions/upload-artifact@v4
+        with:
+          name: driver-linux-x86_64
+          path: re/build-native/driver
+  hook:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y gcc-mingw-w64-i686
+      - run: cd re && ./build.sh hook
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DINPUT-dll
+          path: re/build/DINPUT.dll

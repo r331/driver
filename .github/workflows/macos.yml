@@ -1,0 +1,49 @@
+# v2.13: проверка нативной сборки на Apple Silicon (macos-14 = arm64 M1).
+# Файлов игры в CI нет: ctest запускает только selftest (метка nodata) — он сам создаёт нужные файлы.
+name: macos
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Зависимости (Homebrew)
+        run: brew install cmake sdl2 || brew upgrade cmake sdl2 || true
+      - name: Сведения
+        run: uname -m; sw_vers; clang --version; cmake --version; brew --prefix sdl2
+      - name: Configure
+        run: cmake -S re -B re/build-native -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build re/build-native -j3
+      - name: Бинарник
+        run: file re/build-native/driver; otool -L re/build-native/driver
+      - name: ctest (selftest без данных игры)
+        run: cd re/build-native && ctest --output-on-failure -L nodata
+      - name: Запуск без данных (ожидается сообщение и код 1)
+        run: |
+          set +e; re/build-native/driver; rc=$?; echo "rc=$rc"; test $rc -eq 1
+      - name: Driver.app (MACOSX_BUNDLE) + SDL2 внутрь
+        run: |
+          cmake -S re -B re/build-app -DCMAKE_BUILD_TYPE=Release -DRE_MACOS_BUNDLE=ON
+          cmake --build re/build-app -j3
+          APP=re/build-app/Driver.app
+          mkdir -p $APP/Contents/Frameworks $APP/Contents/Resources
+          SDL=$(otool -L $APP/Contents/MacOS/Driver | awk '/libSDL2/{print $1}')
+          cp "$(brew --prefix sdl2)/lib/$(basename $SDL)" $APP/Contents/Frameworks/
+          install_name_tool -change "$SDL" "@executable_path/../Frameworks/$(basename $SDL)" $APP/Contents/MacOS/Driver
+          codesign --force --deep -s - $APP
+          otool -L $APP/Contents/MacOS/Driver
+          cp re/README_macOS.txt re/build-app/ 2>/dev/null || true
+          (cd re/build-app && ditto -c -k --keepParent Driver.app Driver-macos-arm64.zip)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: driver-macos-arm64
+          path: |
+            re/build-native/driver
+            re/build-app/Driver-macos-arm64.zip
+            re/build-app/README_macOS.txt
+            re/build-native/Testing/Temporary/LastTest.log
