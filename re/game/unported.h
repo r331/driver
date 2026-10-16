@@ -32,6 +32,7 @@
     R(int32_t, P68_Fn41B1C0, 0x0041b1c0, (void), ()) \
     V(P68_Fn41B3AB, 0x0041b3ab, (void), ()) \
     V(P67_Fn40ABAC, 0x0040abac, (uint32_t a), (a)) \
+    V(P116_FullMap, 0x00502fe2, (void), ()) \
     R(int32_t, P67_Fn514C9F, 0x00514c9f, (void *p, int32_t a, int32_t b), (p, a, b)) \
     V(P67_Fn51500C, 0x0051500c, (void *p), (p)) \
     V(P67_Fn514165, 0x00514165, (void *p), (p)) \
@@ -108,7 +109,6 @@
     R(int32_t, P55_Fn4245E2, 0x004245e2, (void), ()) \
     R(int32_t, P55_Fn425F7B, 0x00425f7b, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(P55_Fn4264A7, 0x004264a7, (void), ()) \
-    V(P55_Fn417651, 0x00417651, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5), (a0, a1, a2, a3, a4, a5)) \
     V(P55_Fn4E7450, 0x004e7450, (int32_t a0, const char *a1), (a0, a1)) \
     V(N54_Fn4949F0, 0x004949f0, (void *a0), (a0)) \
     V(N54_Fn4913CC, 0x004913cc, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4), (a0, a1, a2, a3, a4)) \
@@ -389,7 +389,6 @@
     R(int32_t, P58_Fn416794, 0x00416794, (void), ()) \
     V(P58_Fn51763A, 0x0051763a, (const char *a0, int32_t a1), (a0, a1)) \
     V(P58_Fn4AA4EA, 0x004aa4ea, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, void *a4, int32_t a5), (a0, a1, a2, a3, a4, a5)) \
-    V(P58_Fn506C96, 0x00506c96, (void *a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5), (a0, a1, a2, a3, a4, a5)) \
     V(P58_Fn40CFDF, 0x0040cfdf, (int32_t x, int32_t y, uint32_t tbl, const char *name, int32_t a4), (x, y, tbl, name, a4)) \
     V(P58_Fn406875, 0x00406875, (void *a0), (a0)) \
     V(P58_Fn413E37, 0x00413e37, (void), ()) \

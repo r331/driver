@@ -1,4 +1,5 @@
 #include "ported55.h"
+#include "ported116.h"
 #include "ported87.h"
 #include "ported27.h"
 #include "ported30.h"
@@ -229,7 +230,7 @@ void P55_MenuLangCall(void) {
   if (MenuI005D578C == 0x1e) lang = 2;
   if (MenuI005D578C == 0x1f) lang = 3;
   if (MenuI005D578C == 0x20) lang = 4;
-  P55_Fn417651(P55_A680, P55_A688, P55_A68C, P55_A684, P55_A690, lang);
+  P116_Sliders5(p116_f(P55_A680), p116_f(P55_A688), p116_f(P55_A68C), p116_f(P55_A684), p116_f(P55_A690), lang);
 }
 
 void P55_LoadPaper(void) {

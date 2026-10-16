@@ -104,6 +104,7 @@
 #include "../../game/ported113.h"
 #include "../../game/ported114.h"
 #include "../../game/ported115.h"
+#include "../../game/ported116.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2137,6 +2138,15 @@ void re_install_all(void) {
     re_hook(0x00523829, (void*)P115_SndUpdate, "P115_SndUpdate");
     re_hook(0x004a3808, (void*)P115_TargetTick, "P115_TargetTick");
     re_hook(0x004e5b78, (void*)P115_PaperHud, "P115_PaperHud");
+    re_hook(0x004159e5, (void*)P116_Sliders2, "P116_Sliders2");
+    re_hook(0x00417651, (void*)P116_Sliders5, "P116_Sliders5");
+    re_hook(0x0050eaaa, (void*)P116_PauseMenu, "P116_PauseMenu");
+    re_hook(0x00506c96, (void*)P116_RadarIcon, "P116_RadarIcon");
+    re_hook(0x004d5ce0, (void*)P116_SndLevelStart, "P116_SndLevelStart");
+    re_hook(0x0040abac, (void*)P116_Text, "P116_Text");
+    re_hook(0x0051e65e, (void*)P116_SkidsA, "P116_SkidsA");
+    re_hook(0x0051f376, (void*)P116_SkidsB, "P116_SkidsB");
+    re_hook(0x004cc801, (void*)P116_Reflections, "P116_Reflections");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");

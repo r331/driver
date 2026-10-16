@@ -1,4 +1,5 @@
 #include "ported58.h"
+#include "ported116.h"
 #include "crt.h"
 #include <string.h>
 #include <stdio.h>
@@ -275,10 +276,10 @@ void P58_DrawObjs(void) {
   if (P58_SB87EB0 == 0) {
     for (int i = 0; i < 10; i++) {
       uint32_t fl; memcpy(&fl, &P58_Objs[i][0x10], 4);
-      if ((fl & 1) != 0 && (fl & 0x10) == 0) P58_Fn506C96(&P58_Objs[i][0x14], 0, 0xff, 0, 0, P58_S32980);
+      if ((fl & 1) != 0 && (fl & 0x10) == 0) P116_RadarIcon((const int32_t *)&P58_Objs[i][0x14], 0, 0xff, 0, 0, p116_f(P58_S32980));
     }
   } else {
-    P58_Fn506C96(&P58_ObjSpare, 0, 0xff, 0, 0, P58_S32980);
+    P116_RadarIcon((const int32_t *)&P58_ObjSpare, 0, 0xff, 0, 0, p116_f(P58_S32980));
   }
 }
 

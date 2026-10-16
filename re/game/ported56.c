@@ -1,4 +1,5 @@
 #include "ported56.h"
+#include "ported116.h"
 #include "ported14.h"
 #include "ported27.h"
 #include "ported51.h"
@@ -53,6 +54,7 @@ static void w32(void *p, uint32_t v) { memcpy(p, &v, 4); }
 void P56_InitConsts(void) {
 #ifndef RE_HOOK_BUILD
   P19_DivC = 2.0f; P56_C546120 = 1.5f; P56_C54611C = 2.5f; P56_C546A38 = 0.0007812500116415322f; P56_F573FA0 = 540.0f; P56_F573FA4 = 380.0f;
+  P116_K546A3C = 0.0015625000232830644f; P116_BlinkT = 10;
 #endif
 }
 

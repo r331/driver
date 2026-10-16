@@ -104,6 +104,7 @@
 #include "../../game/ported113.h"
 #include "../../game/ported114.h"
 #include "../../game/ported115.h"
+#include "../../game/ported116.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -331,6 +332,7 @@ void G6Call004064B4 (int32_t a0, int32_t a1) { P13_Fn004064B4(a0, a1); }
 void G6Call004094E3 (void) { P94_ClampView(); }
 void G6Call0050FAB0 (void) { P96_ClampOptions(); }
 void G6Call004D5FFC (void) { Chain004D5FFC(); }
+void G6Call004D5CE0 (void) { P116_SndLevelStart(); }
 void G6Call00524398 (void) { P43_CdFadeInit(); }
 void G6Call00523628 (void) { P48_ResetAll(); }
 void G6Call0041A16C (void) { FreeBuffer5FED98(); }
