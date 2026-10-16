@@ -118,6 +118,7 @@
 #include "../../game/ported127.h"
 #include "../../game/ported128.h"
 #include "../../game/ported129.h"
+#include "../../game/ported130.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2264,6 +2265,11 @@ void re_install_all(void) {
     re_hook(0x00500937, (void*)P129_ObjBoxes, "P129_ObjBoxes");
     re_hook(0x00500e1d, (void*)P129_CarObjects, "P129_CarObjects");
     re_hook(0x0050b088, (void*)P129_MapCars, "P129_MapCars");
+    re_hook(0x004cd994, (void*)P130_SnowSpawn, "P130_SnowSpawn");
+    re_hook(0x004cc008, (void*)P130_RainSpawn, "P130_RainSpawn");
+    re_hook(0x004cadb5, (void*)P130_Lightning, "P130_Lightning");
+    re_hook(0x004cba1d, (void*)P130_RainStep, "P130_RainStep");
+    re_hook(0x004cdb25, (void*)P130_SnowStep, "P130_SnowStep");
     re_hook(0x004cd3fb, (void*)P128_ModelHit, "P128_ModelHit");
     re_hook(0x004c032a, (void*)P128_CarDeform, "P128_CarDeform");
     re_hook(0x004949f0, (void*)P128_TrafficNode, "P128_TrafficNode");
