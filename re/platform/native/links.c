@@ -107,6 +107,7 @@
 #include "../../game/ported116.h"
 #include "../../game/ported117.h"
 #include "../../game/ported118.h"
+#include "../../game/ported119.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -250,6 +251,7 @@ int32_t R12_4D97E9 (void) { return (int32_t)P48_AnyKey(); }
 void Call00424921 (int32_t a0, int32_t a1, uint32_t a2, int32_t a3) { P47_TexTable(a0, a1, a2, a3); }
 void Call0048A525 (int32_t a0) { P76_MarkSlots(a0); }
 void Call0048A68E (int32_t a0) { Dispatch0048A68E(a0); }
+void Call004C0C6F (int32_t a0) { P119_Hubcap(a0); }
 void Call004B9AEC (void) { P101_DebrisFly(); }
 void Call004B9D79 (void) { P16_StepParticles(); }
 void Call004911D9 (void) { P98_TrafficSpin(); }
@@ -305,6 +307,7 @@ void UiCall0040C480 (int32_t a0) { P68_ScreenReset(a0); }
 void UiCall00408600 (int32_t a0) { P58_PlayDemo(a0); }
 void UiCall00417AA2 (void) { SetColorWhite00417AA2(); }
 void MenuAction40CD17 (void) { P57_MenuDone(); }
+void Call0040CB9F (void) { P119_MenuFrame(); }
 void MenuRedraw (void) { P104_GfxMenuInit(); }
 void MenuRefresh (void) { P54_MenuTexSel(); }
 void Call004076E2 (void) { MenuWhite004076E2(); }

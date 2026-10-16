@@ -107,6 +107,7 @@
 #include "../../game/ported116.h"
 #include "../../game/ported117.h"
 #include "../../game/ported118.h"
+#include "../../game/ported119.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2158,6 +2159,16 @@ void re_install_all(void) {
     re_hook(0x004932d5, (void*)P118_TrafficTurn, "P118_TrafficTurn");
     re_hook(0x0048dddb, (void*)P118_TrafficBlocked, "P118_TrafficBlocked");
     re_hook(0x004b8f4e, (void*)P118_SkidFx, "P118_SkidFx");
+    re_hook(0x004c0c6f, (void*)P119_Hubcap, "P119_Hubcap");
+    re_hook(0x00491a56, (void*)P119_TrafficSpawn, "P119_TrafficSpawn");
+    re_hook(0x00417386, (void*)P119_CarSelKey, "P119_CarSelKey");
+    re_hook(0x0040cb9f, (void*)P119_MenuFrame, "P119_MenuFrame");
+    re_hook(0x004aff92, (void*)P119_CarDust, "P119_CarDust");
+    re_hook(0x004943dc, (void*)P119_TrafficStep, "P119_TrafficStep");
+    re_hook(0x004de86c, (void*)P119_CarSkids, "P119_CarSkids");
+    re_hook(0x0048fbcf, (void*)P119_TrafficSpeed, "P119_TrafficSpeed");
+    re_hook(0x004928c9, (void*)P119_TrafficParked, "P119_TrafficParked");
+    re_hook(0x0050230a, (void*)P119_Hud, "P119_Hud");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");
