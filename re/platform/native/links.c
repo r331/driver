@@ -126,6 +126,7 @@
 #include "../../game/ported135.h"
 #include "../../game/ported136.h"
 #include "../../game/ported137.h"
+#include "../../game/ported138.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"

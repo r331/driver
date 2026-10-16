@@ -1,4 +1,5 @@
 /* Мелкие функции игры — восстановлено из Game.exe (cdecl). */
+#include "ported138.h"
 #include "ported132.h"
 #include "ported47.h"
 #include "ported33.h"
@@ -90,7 +91,7 @@ void P47_DirText(int32_t a) {
 int32_t P47_PrepareTemp(int32_t a) {
   if (P47_Fn405FDB(a, 0) == 0) return 0;
   if (P47_Fn406199(a) == 0) return 0;
-  P47_Fn517D58("$TEMP$");
+  P138_ReplayCfg("$TEMP$");
   return 1;
 }
 int32_t P47_GlideWinOpen(int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5, int32_t a6, int32_t a7) {

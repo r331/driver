@@ -1,3 +1,4 @@
+#include "ported138.h"
 #include "ported58.h"
 #include "ported116.h"
 #include "crt.h"
@@ -244,7 +245,7 @@ void P58_BuildBlockIndex(void) {
 /* 00408600: демо-ролик n (или следующий по кругу при -1). */
 void P58_PlayDemo(int32_t n) {
   P58_DemoFlag = 1; P58_S5F7E5C = 1;
-  P47_Fn517D58(n == -1 ? P58_Demos[P58_DemoNo] : P58_Demos[n]);
+  P138_ReplayCfg(n == -1 ? P58_Demos[P58_DemoNo] : P58_Demos[n]);
   Call3_0040C455(1, 1);
   P58_S5F7E5C = 0; P58_DemoFlag = 0;
   if (n == -1) {

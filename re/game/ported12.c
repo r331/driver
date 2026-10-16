@@ -1,3 +1,4 @@
+#include "ported138.h"
 #include "ported129.h"
 #include "ported124.h"
 #include "reptr.h"
@@ -79,7 +80,7 @@ uint32_t P12_Fn00404F70(void) {
 }
 uint32_t P12_Fn00404FAE(void) {
   MenuAction40CD17(); g_00b87ef8 = 1; g_005f7e5c = 1;
-  Call00517D58(0x549c68); UiCall0040C455(1, 1);
+  P138_ReplayCfg("CREDITS"); UiCall0040C455(1, 1);
   g_005f7e5c = 0; g_00b87ef8 = 0; return 1;
 }
 uint32_t P12_Fn004152A7(void) {

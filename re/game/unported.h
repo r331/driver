@@ -7,9 +7,8 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
-    V(P137_Fn520278, 0x00520278, (int32_t car), (car)) /* тень машины; не перенесена (v1.82) */ \
+    R(int32_t, P138_Fn4F4596, 0x004f4596, (const char *a0), (a0)) /* CompileMissionScript; не перенесена (v1.83) */ \
     V(Call0048A940, 0x0048a940, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
-    V(Call004FBFAD, 0x004fbfad, (void), ()) \
     V(P136_Fn4D38B7, 0x004d38b7, (void), ()) \
     V(P133_Fn4A7FEC, 0x004a7fec, (uint8_t *rec), (rec)) \
     V(P132_Fn4DACEE, 0x004dacee, (void), ()) \
@@ -145,7 +144,6 @@
     V(P47_Fn405BFA, 0x00405bfa, (void), ()) \
     R(int32_t, P47_Fn405FDB, 0x00405fdb, (int32_t a0, int32_t a1), (a0, a1)) \
     R(int32_t, P47_Fn406199, 0x00406199, (int32_t a0), (a0)) \
-    V(P47_Fn517D58, 0x00517d58, (const char *a0), (a0)) \
     R(uint32_t, N14_Rand, 0x0052e190, (void), ()) \
     V(Fn00416040, 0x00416040, (int32_t a0), (a0)) \
     V(N14_Fn4CB4FF, 0x004cb4ff, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
@@ -179,7 +177,6 @@
     R(int32_t, R12_408770, 0x00408770, (void), ()) \
     R(int32_t, R12_414C30, 0x00414c30, (void), ()) \
     R(int32_t, R12_407160, 0x00407160, (void), ()) \
-    V(Call00517D58, 0x00517d58, (uint32_t a0), (a0)) \
     R(int32_t, R12_405CB4, 0x00405cb4, (int32_t a0), (a0)) \
     R(int32_t, R12_405F2E, 0x00405f2e, (int32_t a0), (a0)) \
     V(Call004122C4, 0x004122c4, (void), ()) \

@@ -23,6 +23,7 @@
      очередь пятен фар не длиннее 65; 0040d07b — не больше 64 палитр/16 страниц P65_Texs, сбой 0040d4b3 — выход 0 (файл уже закрыт),
      указатель арены — re_addr; 004f3490 — смещений узлов не больше 32; 004d4663 — арена страниц освобождается, только если её выделил
      P137_LoadTsd. */
+#include "ported138.h"
 #include "ported137.h"
 #include <string.h>
 #include <math.h>
@@ -156,7 +157,7 @@ void P137_LevelEnd(void) {
   P125_C81690 = -1;
   P125_C81694 = -1;
   P99_ScriptFree();
-  if (P95_B87EE0 != 0) Call004FBFAD();
+  if (P95_B87EE0 != 0) P138_TrailEnd();
   if (P95_B87EDC != 0) FreeBuf004FC57B();
   P35_PadX = 0;
   P35_UpdateForce();
@@ -385,7 +386,7 @@ void P137_DrawCar(int32_t car, int32_t rec) {
     return;
   }
   if (P95_D11920 == 0 || rec != -1) {
-    P137_Fn520278(car);
+    P138_CarShadow(car);
     P82_Edge = edge;
     P106_CarHeadSpots(car);
   }

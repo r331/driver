@@ -126,6 +126,7 @@
 #include "../../game/ported135.h"
 #include "../../game/ported136.h"
 #include "../../game/ported137.h"
+#include "../../game/ported138.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2318,6 +2319,13 @@ void re_install_all(void) {
     re_hook(0x004f388e, (void*)P137_MotionInit, "P137_MotionInit");
     re_hook(0x0040d07b, (void*)P137_LoadTsd, "P137_LoadTsd");
     re_hook(0x004a1037, (void*)P137_DrawCar, "P137_DrawCar");
+    re_hook(0x00520278, (void*)P138_CarShadow, "P138_CarShadow");
+    re_hook(0x004f4180, (void*)P138_LoadMission, "P138_LoadMission");
+    re_hook(0x00517d58, (void*)P138_ReplayCfg, "P138_ReplayCfg");
+    re_hook(0x005181da, (void*)P138_ReplayLoad, "P138_ReplayLoad");
+    re_hook(0x0051879f, (void*)P138_ReplayInit, "P138_ReplayInit");
+    re_hook(0x00518bbc, (void*)P138_LoadPads, "P138_LoadPads");
+    re_hook(0x004fbfad, (void*)P138_TrailEnd, "P138_TrailEnd");
     re_hook(0x004b9287, (void*)P132_Smoke, "P132_Smoke");
     re_hook(0x004ca135, (void*)P132_Lights, "P132_Lights");
     re_hook(0x0049f20a, (void*)P132_LoadFlyby, "P132_LoadFlyby");
