@@ -1,3 +1,4 @@
+#include "ported151.h"
 #include "ported55.h"
 #include "ported116.h"
 #include "ported87.h"
@@ -207,7 +208,7 @@ void P55_GlideInit(int32_t a, int32_t b, int32_t mode) {
   if (P48_GlideCheck() == 0) return;
   P55_BDFA18 = P55_Fn4245E2() == 0;
   P31_WindowMode = mode != 1;
-  if (P55_Fn425F7B(G6_00BDF9C0, P31_WindowMode, 0) != 0) G6_00B87E20 = 1;
+  if (P151_Reopen(G6_00BDF9C0, P31_WindowMode, 0) != 0) G6_00B87E20 = 1;
   P55_GlideDevInfo(P55_GlideInfo);
 }
 
@@ -215,9 +216,9 @@ int32_t P55_SetScreen(int32_t w, int32_t h) {
   int32_t oldW = P19_ScrW, oldH = P19_ScrH;
   P55_Fn4264A7();
   P19_ScrW = w; P19_ScrH = h;
-  if (P55_Fn425F7B(G6_00BDF9C0, P31_WindowMode, 0) == 0) {
+  if (P151_Reopen(G6_00BDF9C0, P31_WindowMode, 0) == 0) {
     P19_ScrH = oldH; P19_ScrW = oldW;
-    if (P55_Fn425F7B(G6_00BDF9C0, P31_WindowMode, 0) == 0)
+    if (P151_Reopen(G6_00BDF9C0, P31_WindowMode, 0) == 0)
       P30_FatalError("FATAL: Can't allocate 3D hardware");
   }
   return 1;

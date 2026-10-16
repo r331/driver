@@ -75,3 +75,10 @@ int plat_com_count(void){ return 0; }
 void plat_window_update(void *h){ UpdateWindow((HWND)h); }
 void plat_window_foreground(void *h){ SetForegroundWindow((HWND)h); }
 int32_t plat_wm_create_hinst(int32_t lp){ return lp ? (int32_t)(intptr_t)((CREATESTRUCTA*)(intptr_t)lp)->hInstance : 0; }
+/* v1.96: MoveWindow (00425f7b), GetActiveWindow (0041ed98), SetCursor/GetCurrentProcess/LoadAcceleratorsA (00521f10) */
+void plat_window_move(void *h, int x, int y, int w, int hh, int rep){ MoveWindow((HWND)h, x, y, w, hh, rep); }
+int plat_win_moves(int32_t *l){ (void)l; return 0; }
+void *plat_window_active(void){ return (void*)GetActiveWindow(); }
+void *plat_cursor_set(void *c){ return (void*)SetCursor((HCURSOR)c); }
+void *plat_current_process(void){ return (void*)GetCurrentProcess(); }
+void *plat_load_accelerators(void *hinst, const char *name){ return (void*)LoadAcceleratorsA((HINSTANCE)hinst, name); }

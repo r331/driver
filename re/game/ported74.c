@@ -1,3 +1,4 @@
+#include "ported151.h"
 #include "ported74.h"
 #include <string.h>
 
@@ -110,7 +111,7 @@ void P74_DevSelect(int32_t idx, int32_t a, int32_t b) {
     G00B1C0D4 = P33_LoadGlideProcs();
     G00B1C0D8 = 0;
   } else if (kind == 1) {
-    G00B1C0D4 = P74_Fn41CEDE(idx, a, b);
+    G00B1C0D4 = P151_InstallD3D(idx, a, b);
     G00B1C0D8 = 1;
   } else {
     G00B1C0D4 = 0;

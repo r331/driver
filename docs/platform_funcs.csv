@@ -42,7 +42,7 @@ address,name,layer,imports,callers,status
 0041f57d,FUN_0041f57d,render,COM_vtable,,ported
 0041f6a9,FUN_0041f6a9,render,COM_vtable,,ported
 0041fac0,FUN_0041fac0,render,DirectDrawCreate,,ported
-00420038,FUN_00420038,render,DirectDrawCreate,,todo
+00420038,FUN_00420038,render,DirectDrawCreate,,ported
 00420c10,FUN_00420c10,render,COM_vtable,,ported
 00420cfe,FUN_00420cfe,render,COM_vtable,,ported
 00420d5d,FUN_00420d5d,render,COM_vtable,,ported
@@ -67,13 +67,13 @@ address,name,layer,imports,callers,status
 0048b32b,FUN_0048b32b,render,COM_vtable,,ported
 0048b34c,FUN_0048b34c,render,COM_vtable,,ported
 0048b3e8,FUN_0048b3e8,render,CoCreateInstance,,ported
-0048b5e3,FUN_0048b5e3,render,COM_vtable,,todo
+0048b5e3,FUN_0048b5e3,render,COM_vtable,,ported
 0048b65d,FUN_0048b65d,render,COM_vtable,,ported
 0048ba31,FUN_0048ba31,render,COM_vtable,,ported
 0048bd40,FUN_0048bd40,render,COM_vtable,,ported
 0048bdcc,FUN_0048bdcc,render,COM_vtable,,ported
 0048be68,FUN_0048be68,render,COM_vtable,,ported
-0048bf52,FUN_0048bf52,render,COM_vtable,,todo
+0048bf52,FUN_0048bf52,render,COM_vtable,,ported
 0048c192,FUN_0048c192,render,COM_vtable,,ported
 0048c2a3,FUN_0048c2a3,render,COM_vtable,,ported
 0048c3e7,FUN_0048c3e7,render,COM_vtable,,ported
@@ -94,8 +94,8 @@ address,name,layer,imports,callers,status
 004e417f,FUN_004e417f,render,COM_vtable,,ported
 004e41d5,FUN_004e41d5,render,COM_vtable,,ported
 004e429b,FUN_004e429b,render,COM_vtable,,ported
-0052955c,DirectDrawEnumerateA,render,DirectDrawEnumerateA,,named
-00529562,DirectDrawCreate,render,DirectDrawCreate,,named
+0052955c,DirectDrawEnumerateA,render,DirectDrawEnumerateA (импорт; замена — plat_dd_enumerate),,ported
+00529562,DirectDrawCreate,render,DirectDrawCreate (импорт; замена — plat_dd_create),,ported
 004010a0,thunk_FUN_004d53e8,system,timeGetTime,,ported
 004010cd,thunk_FUN_0048a940,system,Sleep;SetForegroundWindow;ShowWindow;UpdateWindow,,ported
 00401226,thunk_FUN_004d78f3,system,timeGetTime,,ported
@@ -109,7 +109,7 @@ address,name,layer,imports,callers,status
 00401e9c,thunk_FUN_00522369,system,MessageBoxA,,ported
 00401fb9,thunk_FUN_004c875d,system,timeGetTime,,ported
 004022a7,thunk_FUN_00528221,system,timeSetEvent,,ported
-004022bb,thunk_FUN_00521f10,system,MessageBoxA;SetCursor,,todo
+004022bb,thunk_FUN_00521f10,system,MessageBoxA;SetCursor,,ported
 004022ca,thunk_FUN_004ec58a,system,MessageBoxA,,ported
 00402379,thunk_FUN_004bf910,system,timeGetTime,,ported
 004023b0,thunk_FUN_004d322c,system,GetDriveTypeA,,ported
@@ -129,7 +129,7 @@ address,name,layer,imports,callers,status
 004bf910,FUN_004bf910,system,timeGetTime,,ported
 004bfc30,FUN_004bfc30,system,MessageBoxA,,ported
 004c17ae,FUN_004c17ae,system,MessageBoxA,,ported
-004c875d,SetDirectorMode,system,timeGetTime,,named
+004c875d,SetDirectorMode,system,timeGetTime,,ported
 004d322c,FUN_004d322c,system,GetDriveTypeA,,ported
 004d53e8,FUN_004d53e8,system,timeGetTime,,ported
 004d78f3,FUN_004d78f3,system,timeGetTime,,ported
@@ -142,7 +142,7 @@ address,name,layer,imports,callers,status
 004ec154,FUN_004ec154,system,MessageBoxA,,ported
 004ec58a,FUN_004ec58a,system,MessageBoxA,,ported
 004fc5e1,FUN_004fc5e1,system,timeGetTime,,ported
-00521f10,FUN_00521f10,system,MessageBoxA;SetCursor,,todo
+00521f10,FUN_00521f10,system,MessageBoxA;SetCursor,,ported
 00522369,FUN_00522369,system,MessageBoxA,,ported
 00522759,FUN_00522759,system,MessageBoxA,,ported
 005281b0,FUN_005281b0,system,timeBeginPeriod,,ported
@@ -182,10 +182,12 @@ address,name,layer,imports,callers,status
 0053fa70,FUN_0053fa70,system,CreateDirectoryA;GetLastError,,todo
 0040104b,thunk_FUN_00522323,window_input,DispatchMessageA;GetMessageA;PeekMessageA;TranslateMessage,,ported
 0041dec8,FUN_0041dec8,window_input,GetClientRect,,ported
-0041ed98,FUN_0041ed98,window_input,GetActiveWindow;GetClientRect;ShowWindow,,todo
+0041ed98,FUN_0041ed98,window_input,GetActiveWindow;GetClientRect;ShowWindow,,ported
 004213a4,FUN_004213a4,window_input,ShowWindow,,ported
 00522323,FUN_00522323,window_input,DispatchMessageA;GetMessageA;PeekMessageA;TranslateMessage,,ported
 005223dc,FUN_005223dc,window_input,CreateWindowExA;LoadCursorA;LoadIconA;RegisterClassA;ShowWindow,,ported
 005224a8,FUN_005224a8,window_input,DefWindowProcA;LoadCursorA;PostMessageA;PostQuitMessage;SetCursor,,ported
-0052a628,DirectInputCreateA,window_input,DirectInputCreateA,,named
+0052a628,DirectInputCreateA,window_input,DirectInputCreateA (импорт; замена — plat_di_create),,ported
 0048ba20,FUN_0048ba20,sound,DirectSoundEnumerateA,,ported
+00529568,Ordinal_2,sound,DirectSoundEnumerateA (импорт dsound #2; замена — plat_ds_enumerate),,ported
+0052956e,Ordinal_1,sound,DirectSoundCreate (импорт dsound #1; замена — plat_ds_create),,ported

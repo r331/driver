@@ -46,6 +46,20 @@ void     re_fn_register(uint32_t addr, re_fn_t fn) { (void)addr; (void)fn; }
 #include "ported141.h"
 #include "ported143.h"
 #include <string.h>
+#include "ported151.h"
+#include "ported22.h"
+#include "ported23.h"
+#include "ported31.h"
+#include "ported32.h"
+#include "ported39.h"
+#include "ported42.h"
+#include "ported53.h"
+#include "ported54.h"
+#include "ported76.h"
+#include "ported8.h"
+#include "uihandlers2.h"
+#include "uihandlers3.h"
+#include "widgets.h"
 
 typedef struct { uint32_t addr; uint8_t *p; uint32_t size; } re_region_t;
 typedef struct { uint32_t addr; re_fn_t fn; } re_fnent_t;
@@ -105,6 +119,49 @@ static const re_region_t k_regions[] = {
 };
 /* таблица функций: адрес Game.exe → перенесённая native-функция */
 static const re_fnent_t k_fns[] = {
+  /* v1.96: функции D3D-эмуляции Glide (таблица 0041cede); сигнатуры совпадают с прототипами Glide по ABI */
+  { 0x0041d8e9u, (re_fn_t)InitIdentityPalette_0041D8E9 }, { 0x0041d94au, (re_fn_t)Ui0041D94A }, { 0x0041d954u, (re_fn_t)FillTable8_0041D954 },
+  { 0x0041d9afu, (re_fn_t)NoopFn0041d9af }, { 0x0041d9b6u, (re_fn_t)NoopFn0041d9b6 }, { 0x0041d9bdu, (re_fn_t)NoopFn0041d9bd },
+  { 0x0041d9c4u, (re_fn_t)NoopFn0041d9c4 }, { 0x0041d9cbu, (re_fn_t)NoopFn0041d9cb }, { 0x0041d9d2u, (re_fn_t)P23_SetBlendMode },
+  { 0x0041dd37u, (re_fn_t)P22_SetAlphaTest }, { 0x0041ddbeu, (re_fn_t)NoopFn0041ddbe }, { 0x0041ddc5u, (re_fn_t)P22_SetAlphaFunc },
+  { 0x0041de1du, (re_fn_t)P22_SetAlphaRef }, { 0x0041de46u, (re_fn_t)P54_ClearBuffers }, { 0x0041dec1u, (re_fn_t)Ui0041DEC1 },
+  { 0x0041dec8u, (re_fn_t)P39_Present }, { 0x0041e075u, (re_fn_t)NoopFn0041e075 }, { 0x0041e07cu, (re_fn_t)NoopFn0041e07c },
+  { 0x0041e083u, (re_fn_t)NoopFn0041e083 }, { 0x0041e08au, (re_fn_t)P22_SetViewport }, { 0x0041e14fu, (re_fn_t)P22_SetTexOp },
+  { 0x0041e1e4u, (re_fn_t)SetFlagFromArg0041E1E4 }, { 0x0041e207u, (re_fn_t)NoopFn0041e207 }, { 0x0041e20eu, (re_fn_t)NoopFn0041e20e },
+  { 0x0041e215u, (re_fn_t)P22_SetCull }, { 0x0041e28au, (re_fn_t)P22_SetZFunc }, { 0x0041e404u, (re_fn_t)P22_SetZWrite },
+  { 0x0041e456u, (re_fn_t)NoopFn0041e456 }, { 0x0041e45bu, (re_fn_t)NoopFn0041e45b }, { 0x0041e462u, (re_fn_t)P23_DrawLineA },
+  { 0x0041e4b9u, (re_fn_t)P23_DrawLineB }, { 0x0041e510u, (re_fn_t)NoopFn0041e510 }, { 0x0041e517u, (re_fn_t)NoopFn0041e517 },
+  { 0x0041e51eu, (re_fn_t)NoopFn0041e51e }, { 0x0041e525u, (re_fn_t)NoopFn0041e525 }, { 0x0041e52cu, (re_fn_t)P98_QuadA },
+  { 0x0041e729u, (re_fn_t)P98_QuadB }, { 0x0041e926u, (re_fn_t)P76_TriA1 }, { 0x0041ea2au, (re_fn_t)P76_TriB1 },
+  { 0x0041eb2eu, (re_fn_t)NoopFn0041eb2e }, { 0x0041eb35u, (re_fn_t)NoopFn0041eb35 }, { 0x0041eb3cu, (re_fn_t)NoopFn0041eb3c },
+  { 0x0041eb43u, (re_fn_t)NoopFn0041eb43 }, { 0x0041eb4au, (re_fn_t)NoopFn0041eb4a }, { 0x0041eb51u, (re_fn_t)P42_VersionString },
+  { 0x0041eb69u, (re_fn_t)NoopFn0041eb69 }, { 0x0041eb70u, (re_fn_t)NoopFn0041eb70 }, { 0x0041eb77u, (re_fn_t)NoopFn0041eb77 },
+  { 0x0041eb7eu, (re_fn_t)NoopFn0041eb7e }, { 0x0041eb85u, (re_fn_t)NoopFn0041eb85 }, { 0x0041eb8cu, (re_fn_t)P39_LockSurface },
+  { 0x0041ec79u, (re_fn_t)Ui0041EC79 }, { 0x0041ec82u, (re_fn_t)P39_UnlockSurface }, { 0x0041ed00u, (re_fn_t)NoopFn0041ed00 },
+  { 0x0041ed07u, (re_fn_t)NoopFn0041ed07 }, { 0x0041ed0eu, (re_fn_t)Ui0041ED0E }, { 0x0041ed1au, (re_fn_t)NoopFn0041ed1a },
+  { 0x0041ed21u, (re_fn_t)NoopFn0041ed21 }, { 0x0041ed26u, (re_fn_t)NoopFn0041ed26 }, { 0x0041ed2du, (re_fn_t)Ui0041ED2D },
+  { 0x0041ed39u, (re_fn_t)NoopFn0041ed39 }, { 0x0041ed3eu, (re_fn_t)Ui0041ED3E }, { 0x0041ed45u, (re_fn_t)NoopFn0041ed45 },
+  { 0x0041ed4cu, (re_fn_t)NoopFn0041ed4c }, { 0x0041ed53u, (re_fn_t)Ui0041ED53 }, { 0x0041ed63u, (re_fn_t)NoopFn0041ed63 },
+  { 0x0041ed68u, (re_fn_t)GetVarA421A8 }, { 0x0041ed72u, (re_fn_t)GetVarA421A4 }, { 0x0041ed7cu, (re_fn_t)NoopFn0041ed7c },
+  { 0x0041ed83u, (re_fn_t)Ui0041ED83 }, { 0x0041ed8au, (re_fn_t)Ui0041ED8A }, { 0x0041ed91u, (re_fn_t)Ui0041ED91 },
+  { 0x0041f2a0u, (re_fn_t)P31_ReleaseDirectDraw }, { 0x0041f47cu, (re_fn_t)Ui0041F47C }, { 0x0041f485u, (re_fn_t)NoopFn0041f485 },
+  { 0x0041f48cu, (re_fn_t)NoopFn0041f48c }, { 0x0041f493u, (re_fn_t)NoopFn0041f493 }, { 0x0041f49au, (re_fn_t)NoopFn0041f49a },
+  { 0x0041f4a1u, (re_fn_t)P112_TexDownload }, { 0x0041f56fu, (re_fn_t)NoopFn0041f56f }, { 0x0041f576u, (re_fn_t)NoopFn0041f576 },
+  { 0x0041f57du, (re_fn_t)P32_SetPalette }, { 0x0041f6a2u, (re_fn_t)NoopFn0041f6a2 }, { 0x0041f6a9u, (re_fn_t)P22_SetTexFilter },
+  { 0x0041f72du, (re_fn_t)NoopFn0041f72d }, { 0x0041f734u, (re_fn_t)Ret1FFFF8IfZero }, { 0x0041f74au, (re_fn_t)Ui0041F74A },
+  { 0x0041f753u, (re_fn_t)NoopFn0041f753 }, { 0x0041f75au, (re_fn_t)NoopFn0041f75a }, { 0x0041f761u, (re_fn_t)NoopFn0041f761 },
+  { 0x0041f768u, (re_fn_t)NoopFn0041f768 }, { 0x0041f76fu, (re_fn_t)P53_SetTexSource }, { 0x0041f7e7u, (re_fn_t)Ui0041F7E7 },
+  { 0x0041f7f0u, (re_fn_t)NoopFn0041f7f0 }, { 0x0041f7f7u, (re_fn_t)Ui0041F7F7 }, { 0x0041f800u, (re_fn_t)Ui0041F800 },
+  { 0x0041f809u, (re_fn_t)NoopFn0041f809 }, { 0x0041f810u, (re_fn_t)NoopFn0041f810 }, { 0x0041f817u, (re_fn_t)NoopFn0041f817 },
+  { 0x0041f81eu, (re_fn_t)NoopFn0041F81E }, { 0x0041f825u, (re_fn_t)P76_TriA2 }, { 0x0041f929u, (re_fn_t)P76_TriB2 },
+  { 0x0041fa2du, (re_fn_t)Ui0041FA2D }, { 0x0041fa36u, (re_fn_t)RetZero0041FA36 }, { 0x0041fa40u, (re_fn_t)Ui0041FA40 },
+  { 0x0041fa49u, (re_fn_t)NoopFn0041FA49 }, { 0x0041fa50u, (re_fn_t)NoopFn0041FA50 }, { 0x0041fa57u, (re_fn_t)NoopFn0041FA57 },
+  { 0x0041fa5eu, (re_fn_t)GetConst0041FA5E }, { 0x0041fa6bu, (re_fn_t)Ui0041FA6B }, { 0x0041fa74u, (re_fn_t)Ui0041FA74 },
+  { 0x0041fa7du, (re_fn_t)NoopFn0041FA7D }, { 0x0041fa84u, (re_fn_t)Ui0041FA84 }, { 0x0041fa8bu, (re_fn_t)NoopFn0041FA8B },
+  { 0x0041fa92u, (re_fn_t)NoopFn0041FA92 }, { 0x0041fa99u, (re_fn_t)Ui0041FA99 }, { 0x0041faa2u, (re_fn_t)Ui0041FAA2 },
+  { 0x0041faabu, (re_fn_t)Ui0041FAAB }, { 0x0041fab4u, (re_fn_t)NoopFn0041fab4 }, { 0x0041fab9u, (re_fn_t)NoopFn0041FAB9 },
+  { 0x00421cabu, (re_fn_t)SetZoom_00421CAB },
+  { 0x0041ed98u, (re_fn_t)P151_WinOpen },
   /* v1.58: обработчики таблицы меню опций 0057b5a8 (004048dd) */
   { 0x00404e52u, (re_fn_t)MenuRowsTo3_00404E52 },  { 0x00404e7eu, (re_fn_t)MenuRowsIf0To2_00404E7E },
   { 0x00404eb0u, (re_fn_t)ToggleBDFA44_Call40500D }, { 0x00404ec9u, (re_fn_t)ToggleBDFA48_Call40500D },

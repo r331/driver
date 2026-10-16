@@ -20,4 +20,5 @@ int     P33_GlideCount(void);     /* 119 */
 const char *P33_GlideName(int index);
 #ifndef RE_HOOK_BUILD
 int     P33_SetNativeProc(const char *name, void *proc); /* native: подставить родную реализацию функции Glide по имени; 0 — имени нет в таблице */
+int     P33_SetNativeProcAt(uint32_t addr, void *proc);   /* v1.96: то же по адресу ячейки Game.exe */
 #endif

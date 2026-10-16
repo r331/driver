@@ -311,3 +311,11 @@ int32_t plat_dd_get_surface_desc(void *s, void *d) { return ((dd_f1)VT(s, 0x58))
 int32_t plat_media_get_duration(void *p, double *sec) { return ((dd_f1)VT(p, 0x1c))(p, sec); }
 void plat_fmv_stub_open(int ok, uint32_t m, int32_t w, int32_t h, double d) { (void)ok; (void)m; (void)w; (void)h; (void)d; }
 int plat_fmv_stub_open_stats(int *cr, int *op, char *p64, int *smp, int32_t *rc, int *fg, int *upd) { (void)cr; (void)op; (void)p64; (void)smp; (void)rc; (void)fg; (void)upd; return 0; }
+/* --- v1.96: IDirectDraw4::GetCaps (0x2c), IDirect3DDevice3::EnumTextureFormats (0x20), IDirect3D3::EnumZBufferFormats (0x28);
+   колбэк игры — cdecl, ОС получает stdcall-переходник --- */
+static plat_pf_enum_cb g_pfe_cb;
+static long __attribute__((stdcall)) pfe_thunk(void *pf, void *ctx) { return g_pfe_cb ? g_pfe_cb((const uint32_t *)pf, (uint8_t *)ctx) : 0; }
+int32_t plat_dd_get_caps(void *dd, void *hal, void *hel) { return ((dd_f2)VT(dd, 0x2c))(dd, hal, hel); }
+int32_t plat_d3d_enum_tex_formats(void *dev, plat_pf_enum_cb cb, void *ctx) { g_pfe_cb = cb; return ((dd_f2)VT(dev, 0x20))(dev, (void *)pfe_thunk, ctx); }
+int32_t plat_d3d_enum_zbuffer(void *d3d, const void *g, plat_pf_enum_cb cb, void *ctx) { g_pfe_cb = cb; return ((dd_f3)VT(d3d, 0x28))(d3d, (void *)g, (void *)pfe_thunk, ctx); }
+void plat_dd_stub_caps(uint32_t m, uint32_t c2) { (void)m; (void)c2; }

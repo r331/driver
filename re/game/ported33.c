@@ -179,6 +179,12 @@ int P33_SetNativeProc(const char *name, void *proc) {
     if (strcmp(P33_GlideTab[i].name, name) == 0) { g_glide_native[i] = proc; return 1; }
   return 0;
 }
+/* v1.96: то же по адресу ячейки Game.exe (0041cede пишет таблицу по адресам); 0 — ячейки нет в таблице имён */
+int P33_SetNativeProcAt(uint32_t addr, void *proc) {
+  for (int i = 0; i < P33_GlideCount(); i++)
+    if (P33_GlideTab[i].addr == addr) { g_glide_native[i] = proc; return 1; }
+  return 0;
+}
 #endif
 
 int32_t P33_LoadGlideProcs(void) {

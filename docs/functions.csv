@@ -126,7 +126,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0040131b,thunk_FUN_0051990a,,,,,,5,ported
 00401320,thunk_FUN_004913cc,,,,,,5,ported
 00401325,thunk_FUN_00518953,,,,,,5,ported
-0040132a,thunk_FUN_0041cede,,,,,,5,todo
+0040132a,thunk_FUN_0041cede,,,,,,5,ported
 0040132f,thunk_FUN_004906f9,,,,,,5,ported
 00401334,thunk_FUN_004d1a84,Thunk_004D1A84,manual,Thunks,,,5,ported
 00401339,thunk_FUN_004d81da,,,,,,5,ported
@@ -553,7 +553,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00401dc5,thunk_FUN_00417970,,,,,,5,ported
 00401dca,thunk_FUN_004fbe96,Thunk_004FBE96,manual,Thunks,,,5,ported
 00401dcf,thunk_FUN_004afa4c,,,,,,5,ported
-00401dd9,thunk_FUN_00425f7b,,,,,,5,todo
+00401dd9,thunk_FUN_00425f7b,,,,,,5,ported
 00401de3,thunk_FUN_00404850,,,,,,5,ported
 00401ded,thunk_FUN_00519ddb,Thunk_00519DDB,manual,Thunks,,,5,ported
 00401df7,thunk_FUN_004daac7,,,,,,5,ported
@@ -748,7 +748,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004022ac,thunk_FUN_00522a50,,,,,,5,ported
 004022b1,thunk_FUN_004a3808,,,,,,5,ported
 004022b6,thunk_FUN_004a3aa7,,,,,,5,ported
-004022bb,thunk_FUN_00521f10,,,,,,5,todo
+004022bb,thunk_FUN_00521f10,,,,,,5,ported
 004022c0,thunk_FUN_004e5938,Thunk_004E5938,manual,Thunks,,,5,ported
 004022c5,thunk_FUN_004a519a,,,,,,5,ported
 004022ca,thunk_FUN_004ec58a,,,,,,5,ported
@@ -1738,7 +1738,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041c7ad,FUN_0041c7ad,P47_ReadLine,manual,ported47,,,45,ported
 0041c7da,FUN_0041c7da,TakeToken,manual,,,,237,ported
 0041ce90,FUN_0041ce90,P149_DDEnumAll,port,render,,,78,ported
-0041cede,FUN_0041cede,,,,,,1295,todo
+0041cede,FUN_0041cede,P151_InstallD3D,manual,render,,,1295,ported
 0041d3ed,FUN_0041d3ed,P39_GetSurfaceFormat,manual,render,,,289,ported
 0041d50e,FUN_0041d50e,Dispatch0041D50E,manual,Ported6,,,46,ported
 0041d53c,FUN_0041d53c,P114_TexDownloadMip,manual,Ported114,,,171,ported
@@ -1822,7 +1822,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041ed83,FUN_0041ed83,Ui0041ED83,manual,MenuUI,,,7,ported
 0041ed8a,FUN_0041ed8a,Ui0041ED8A,manual,MenuUI,,,7,ported
 0041ed91,FUN_0041ed91,Ui0041ED91,manual,MenuUI,,,7,ported
-0041ed98,FUN_0041ed98,,,,,,1057,todo
+0041ed98,FUN_0041ed98,P151_WinOpen,manual,render,,,1057,ported
 0041f2a0,FUN_0041f2a0,ReleaseDirectDraw,manual,render,,,476,ported
 0041f47c,FUN_0041f47c,Ui0041F47C,manual,MenuUI,,,9,ported
 0041f485,FUN_0041f485,NoopFn0041f485,manual,Noop,,,7,ported
@@ -1874,7 +1874,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0041fac0,FUN_0041fac0,P149_DDEnumCb,port,render,,,519,ported
 0041fcc7,FUN_0041fcc7,P149_D3DDevCb,port,render,,,320,ported
 0041fe07,FUN_0041fe07,P149_BuildDevs,port,render,,,561,ported
-00420038,FUN_00420038,,,,,,2076,todo
+00420038,FUN_00420038,P151_CheckDev,manual,render,,,2076,ported
 00420854,FUN_00420854,P99_DDEnumFmt,manual,,,,461,ported
 00420a21,FUN_00420a21,P106_CanDevTex,,ported106,,,248,ported
 00420b19,FUN_00420b19,P35_GetDirectDrawInterface,manual,Render,,,247,ported
@@ -1950,7 +1950,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00425e9e,FUN_00425e9e,Zoom_00425E9E,manual,Misc,,,66,ported
 00425ee0,FUN_00425ee0,P12_Fn00425EE0,manual,Misc12,,,114,ported
 00425f52,FUN_00425f52,P48_GlideCheck,manual,render,manual,,41,ported
-00425f7b,FUN_00425f7b,,,,,,755,todo
+00425f7b,FUN_00425f7b,P151_Reopen,manual,render,,,755,ported
 0042626e,FUN_0042626e,P52_GlideFogSetup,manual,,,,96,ported
 004262ce,FUN_004262ce,P107_Line,,ported107,,,473,ported
 004264a7,FUN_004264a7,Ui004264A7,manual,MenuUI,,,22,ported
@@ -3145,7 +3145,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0051f376,FUN_0051f376,,,,,,3352,ported
 0052008e,FUN_0052008e,P96_ShadowInit,manual,Ported96,,,490,ported
 00520278,FUN_00520278,P138_CarShadow,port,ported138,,,3487,ported
-00521f10,FUN_00521f10,,,,,,959,todo
+00521f10,FUN_00521f10,P151_WinMain,manual,system,,,959,ported
 005222cf,FUN_005222cf,P96_ResetDirector,manual,Ported96,,,55,ported
 00522306,FUN_00522306,ResetDirector_00522306,manual,Misc,,,29,ported
 00522323,FUN_00522323,PumpMessages,manual,WinMain,,,70,ported
@@ -3285,11 +3285,11 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 005291ed,FUN_005291ed,,,,,,102,ported
 00529253,FUN_00529253,,,,,,126,ported
 005292d1,FUN_005292d1,,,,,,195,ported
-0052955c,DirectDrawEnumerateA,DirectDrawEnumerateA,ghidra,,,,6,named
-00529562,DirectDrawCreate,DirectDrawCreate,ghidra,,,,6,named
-00529568,Ordinal_2,Ordinal_2,ghidra,,,,6,named
-0052956e,Ordinal_1,Ordinal_1,ghidra,,,,6,named
-0052a628,DirectInputCreateA,DirectInputCreateA,ghidra,,,,6,named
+0052955c,DirectDrawEnumerateA,DirectDrawEnumerateA,ghidra,,,,6,ported
+00529562,DirectDrawCreate,DirectDrawCreate,ghidra,,,,6,ported
+00529568,Ordinal_2,Ordinal_2,ghidra,,,,6,ported
+0052956e,Ordinal_1,Ordinal_1,ghidra,,,,6,ported
+0052a628,DirectInputCreateA,DirectInputCreateA,ghidra,,,,6,ported
 0052a910,FUN_0052a910,,,CRT,crt,,250,todo
 0052aa10,FUN_0052aa10,,,CRT,crt,,221,todo
 0052aaf0,FUN_0052aaf0,,,CRT,range,,463,todo

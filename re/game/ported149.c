@@ -14,6 +14,7 @@
      (IDirect3DTexture2; если это текущая 00a42178 — сброс) и +0x10, free; голова 0, 0054ef2c = 0054ef30 = −1.
    004225eb — узел 0x20 (memset первых 4 байт), 00422736; +0 номер, +4 вид, +0xc палитра, +0x18 = 0, в голову 00a42180;
      Lock(+0x10) → 004229fa(src, палитра, lpSurface, pitch), Unlock; 1. 0042248b — то же, но к концу подсписка узла. */
+#include "ported151.h"
 #include "ported149.h"
 #include "ported6.h"
 #include "ported32.h"
@@ -154,7 +155,7 @@ void P149_BuildDevs(void) {
         memcpy(r + 0x18, dv + 0x20, 16);
         re_wr_ptr(r + 0x14, r + 0x18);
         dev_mirror(n);
-        if (P149_Fn420038(e) == 0) {
+        if (P151_CheckDev(e) == 0) {
           rec_free(r);
         } else {
           wr32(e + 0x44, rd32(r + 0x588) == 0 ? 1u : 0u);

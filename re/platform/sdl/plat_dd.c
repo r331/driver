@@ -195,3 +195,24 @@ int32_t plat_dd_get_surface_desc(void *s, void *d) {
 int32_t plat_media_get_duration(void *p, double *sec) { if (!p || FO_FAIL(10)) return -1; *sec = g_fo_dur; return 0; }
 void plat_window_update(void *h) { (void)h; g_fo_upd++; }
 void plat_window_foreground(void *h) { (void)h; g_fo_fg++; }
+/* --- v1.96: GetCaps, EnumTextureFormats / EnumZBufferFormats — учётные: форматы, которые реально умеет plat_render
+   (ARGB1555, RGB565, PAL8 через палитру в шейдере; Z 16 бит) --- */
+static uint32_t g_caps_fail, g_caps2;
+void plat_dd_stub_caps(uint32_t m, uint32_t c2) { g_caps_fail = m; g_caps2 = c2; }
+int32_t plat_dd_get_caps(void *dd, void *hal, void *hel) {
+    if (!dd || (g_caps_fail & 1)) return -1;
+    uint32_t *a = (uint32_t *)hal, *b = (uint32_t *)hel;
+    if (a) { uint32_t n = a[0]; memset(a, 0, 0x17c); a[0] = n; a[2] = g_caps2; }
+    if (b) { uint32_t n = b[0]; memset(b, 0, 0x17c); b[0] = n; }
+    return 0; }
+int32_t plat_d3d_enum_tex_formats(void *dev, plat_pf_enum_cb cb, void *ctx) {
+    if (!dev || (g_caps_fail & 2)) return -1;
+    static const uint32_t f[3][8] = { { 0x20, 0x41, 0, 16, 0x7c00, 0x3e0, 0x1f, 0x8000 },
+                                      { 0x20, 0x40, 0, 16, 0xf800, 0x7e0, 0x1f, 0 },
+                                      { 0x20, 0x60, 0, 8, 0, 0, 0, 0 } };
+    for (int i = 0; i < 3; i++) if (cb(f[i], (uint8_t *)ctx) == 0) break;
+    return 0; }
+int32_t plat_d3d_enum_zbuffer(void *d3d, const void *g, plat_pf_enum_cb cb, void *ctx) {
+    (void)g; if (!d3d || (g_caps_fail & 4)) return -1;
+    static const uint32_t z[8] = { 0x20, 0x400, 0, 16, 0, 0xffff, 0, 0 };
+    cb(z, (uint8_t *)ctx); return 0; }

@@ -257,4 +257,16 @@ int32_t plat_wm_create_hinst(int32_t lparam);                                  /
    6 GetMediaStream, 7 GetFormat, 8 GetSurfaceDesc, 9 CreateSample, 10 get_Duration), w×h формата, длительность; ok — 0 = все отказы */
 void    plat_fmv_stub_open(int ok, uint32_t fail_mask, int32_t w, int32_t h, double dur);
 int     plat_fmv_stub_open_stats(int *creates, int *opens, char *last_path64, int *samples, int32_t *rect4, int *fg, int *upd);
+/* --- v1.96: окно/DirectDraw (0041ed98, 00420038, 00425f7b) и WinMain (00521f10) --- */
+void    plat_window_move(void *hwnd, int x, int y, int w, int h, int repaint);  /* MoveWindow */
+void   *plat_window_active(void);                                             /* GetActiveWindow; SDL — окно игры или NULL */
+int32_t plat_dd_get_caps(void *dd, void *hal380, void *hel380);              /* IDirectDraw4::GetCaps (0x2c), DDCAPS 0x17c (dwSize заполнен); HRESULT */
+typedef int32_t (*plat_pf_enum_cb)(const uint32_t *pixfmt8, uint8_t *ctx);    /* DDPIXELFORMAT 32 байта; 1 — продолжить */
+int32_t plat_d3d_enum_tex_formats(void *dev, plat_pf_enum_cb cb, void *ctx); /* IDirect3DDevice3::EnumTextureFormats (0x20); HRESULT */
+int32_t plat_d3d_enum_zbuffer(void *d3d, const void *dev_guid, plat_pf_enum_cb cb, void *ctx); /* IDirect3D3::EnumZBufferFormats (0x28); HRESULT */
+void   *plat_cursor_set(void *cursor);                                        /* SetCursor: возвращает прежний; SDL — NULL прячет, иное показывает */
+void   *plat_current_process(void);                                           /* GetCurrentProcess (псевдо-дескриптор −1) */
+void   *plat_load_accelerators(void *hinst, const char *name);                /* LoadAcceleratorsA; SDL — NULL (таблиц ускорителей нет) */
+void    plat_dd_stub_caps(uint32_t fail_mask, uint32_t caps2);                /* тесты (SDL): bit0 GetCaps, bit1 EnumTextureFormats, bit2 EnumZBuffer; dwCaps2 HAL */
+int     plat_win_moves(int32_t *last5);                                       /* тесты (SDL): число MoveWindow и последний x,y,w,h,repaint; hook — 0 */
 #endif

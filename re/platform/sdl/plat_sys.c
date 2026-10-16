@@ -130,3 +130,13 @@ void plat_com_uninit(void){ if(g_com>0) g_com--; }
 int plat_com_count(void){ return g_com; }
 /* v1.95: WM_CREATE — в SDL оконная процедура получает hInstance прямо в lparam (как и раньше) */
 int32_t plat_wm_create_hinst(int32_t lparam){ return lparam; }
+/* --- v1.96: MoveWindow (размер окна SDL), активное окно, курсор, процесс, ускорители --- */
+static int g_moves; static int32_t g_move[5];
+void plat_window_move(void *h, int x, int y, int w, int hh, int rep) {
+    (void)h; g_moves++; g_move[0] = x; g_move[1] = y; g_move[2] = w; g_move[3] = hh; g_move[4] = rep;
+    if (g_win && !g_wtrap && w > 0 && hh > 0) SDL_SetWindowSize(g_win, w, hh); }
+int plat_win_moves(int32_t *l) { if (l) memcpy(l, g_move, sizeof g_move); return g_moves; }
+void *plat_window_active(void) { return (g_win || g_wtrap) ? (void *)(intptr_t)1 : NULL; }
+void *plat_cursor_set(void *c) { void *old = (void *)(intptr_t)g_wcur; plat_set_cursor(c != NULL); return old; }
+void *plat_current_process(void) { return (void *)(intptr_t)-1; }
+void *plat_load_accelerators(void *hinst, const char *name) { (void)hinst; (void)name; return NULL; }

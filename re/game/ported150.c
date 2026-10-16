@@ -19,6 +19,7 @@
    0042d384 — при непустой очереди: состояние 3,1,0,1,0 (01270c34 = 4), текстура блеска машины (байт +8 записи
      011b6140) в TMU 0, смешивание 4,4,0,0 (0125f3e4 = 3); записи 0xb8 с 0115a140: тег 0 — 01270e30/01270e08,
      иначе 01270d9c/01270dfc (по 00bdfa18), вершины +4/+0x40/+0x7c. */
+#include "ported151.h"
 #include "ported150.h"
 #include "ported6.h"
 #include "ported12.h"
@@ -181,7 +182,7 @@ void P150_PlayFmv(int32_t hwnd_i, int32_t n, int32_t ans) {
   plat_window_foreground(hwnd);
   Call00522323();
   int32_t tries = 10;
-  while (tries > 0 && P150_Fn425F7B(G6_00BDF9C0, P31_WindowMode, 0) == 0) {
+  while (tries > 0 && P151_Reopen(G6_00BDF9C0, P31_WindowMode, 0) == 0) {
     plat_sleep_ms(500);
     Call00522323();
     tries--;

@@ -139,6 +139,7 @@
 #include "../../game/ported148.h"
 #include "../../game/ported149.h"
 #include "../../game/ported150.h"
+#include "../../game/ported151.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2377,6 +2378,12 @@ void re_install_all(void) {
     re_hook(0x0048b3e8, (void*)P150_OpenAudio, "P150_OpenAudio");
     re_hook(0x0048a940, (void*)P150_PlayFmv, "P150_PlayFmv");
     re_hook(0x0042d384, (void*)P150_FlushTris, "P150_FlushTris");
+    /* v1.96: ported151 — таблица D3D-эмуляции, grSstWinOpen эмуляции (stdcall ret 0x1c), проверка устройства, переоткрытие Glide, WinMain (stdcall ret 0x10) */
+    re_hook(0x0041cede, (void*)P151_InstallD3D, "P151_InstallD3D");
+    re_hook(0x0041ed98, (void*)P151_WinOpen, "P151_WinOpen");
+    re_hook(0x00420038, (void*)P151_CheckDev, "P151_CheckDev");
+    re_hook(0x00425f7b, (void*)P151_Reopen, "P151_Reopen");
+    re_hook(0x00521f10, (void*)P151_WinMain, "P151_WinMain");
     re_hook(0x005224a8, (void*)P31_WndProc, "P31_WndProc");
     re_hook(0x004e9bbf, (void*)P140_MrkFly, "P140_MrkFly");
     re_hook(0x0041b8ac, (void*)P141_LadderLine, "P141_LadderLine");
