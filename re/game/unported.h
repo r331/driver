@@ -10,7 +10,6 @@
     R(void *, P140_Fn48C192, 0x0048c192, (void *ds, void *wav, int32_t a2), (ds, wav, a2)) /* DirectSound: буфер из образа WAV (из 0048bf9a); COM — не переносится (v1.85) */ \
     R(void *, P140_Fn48CAD6, 0x0048cad6, (void *buf), (buf)) /* DirectSound: IKsPropertySet буфера (из 0048bf9a); COM (v1.85) */ \
     R(int32_t, P140_Fn48BA31, 0x0048ba31, (int32_t drv, int32_t arg, int32_t wnd), (drv, arg, wnd)) /* выбор/запуск звукового драйвера (из 005233be); 0 — ошибка; не перенесена (v1.85) */ \
-    V(P139_Fn4B588E, 0x004b588e, (const uint8_t *a0), (a0)) /* эффект флага 0x20000 из 004aaf3a; не перенесена (v1.84) */ \
     V(Call0048A940, 0x0048a940, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(P136_Fn4D38B7, 0x004d38b7, (void), ()) \
     V(P132_Fn42D384, 0x0042d384, (void), ()) /* D3D — не трогать */ \
