@@ -564,7 +564,15 @@ int32_t P128_CopPath(uint8_t *rec) {
   for (p = base; p != NULL; ) {
     uint8_t *nx = nxp(p);
     if (nx == NULL) wr16(p + 0x1c, -1);
-    else wr16(p + 0x1c, (int16_t)((uint16_t)P44_Atan2(rd32(nx + 8) - rd32(p + 8), rd32(nx + 0xc) - rd32(p + 0xc)) & 0xfff));
+    else {
+#ifndef RE_HOOK_BUILD
+      { int32_t dx = (int32_t)(rd32(nx + 8) - rd32(p + 8)), dz = (int32_t)(rd32(nx + 0xc) - rd32(p + 0xc));
+        if (getenv("RE_COPDBG") && (dx > 0x1fffff || dx < -0x1fffff || dz > 0x1fffff || dz < -0x1fffff))
+          fprintf(stderr, "[copath] большой шаг: p %d %d → nx %d %d (узлы %p %p)\n", (int)rd32(p + 8), (int)rd32(p + 0xc),
+                  (int)rd32(nx + 8), (int)rd32(nx + 0xc), (void *)p, (void *)nx); }
+#endif
+      wr16(p + 0x1c, (int16_t)((uint16_t)P44_Atan2(rd32(nx + 8) - rd32(p + 8), rd32(nx + 0xc) - rd32(p + 0xc)) & 0xfff));
+    }
     p = nx;
   }
   p = base;

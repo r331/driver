@@ -1,5 +1,6 @@
 /* v1.60 (см. ported115.h). */
 #include "ported115.h"
+#include "cartab.h"
 #include "reptr.h"
 #include "ported5.h"
 #include "ported6.h"
@@ -347,6 +348,10 @@ void P115_SndUpdate(void) {
 #endif
       { wrf(s + 4, (float)src[0]); wrf(s + 8, (float)-src[1]); wrf(s + 0xc, (float)src[2]); }
       s[0] |= 2;
+#ifndef RE_HOOK_BUILD
+      if (i == 2) { static int k; const char *e = getenv("RE_HORNDBG"); if (e && (k++ % (atoi(e) > 0 ? atoi(e) : 50)) == 0)
+        fprintf(stderr, "[horn] 3D ptr %08x → %p pos %.0f %.0f %.0f; P99_Cars[0].pos %p = %d %d\n", (unsigned)rd32(s + 0x1c), (const void *)src, rdf(s + 4), rdf(s + 8), rdf(s + 0xc), (void *)&P99_Cars[0].pos[0], (int)P99_Cars[0].pos[0], (int)P99_Cars[0].pos[2]); }
+#endif
     }
     if ((s[0] & 4) != 0) {
       if (P97_DrvI) ((p115_fii)P97_DrvI)(i, rd32(s + 0x28));

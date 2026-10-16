@@ -59,6 +59,7 @@
 #include "ported121.h"
 #include "ported123.h"
 #include "ported124.h"
+#include "ported34.h"
 #include "ported125.h"
 #include "ported126.h"
 #include "ported127.h"
@@ -157,6 +158,12 @@ int32_t P132_MenuLoop(uint32_t tab) {
     Call00522323();
     P36_PollInput();
     if (P59_MenuKeys() == -1) break;
+#ifndef RE_HOOK_BUILD
+    { static int k; const char *e = getenv("RE_MOTELDBG");   /* v2.12: отладка меню мотеля */
+      if (e && ((k++ % (atoi(e) > 0 ? atoi(e) : 50)) == 0 || P34_Keys[0x1c] || P34_Keys[0xcd]))
+        fprintf(stderr, "[motel] keys 1c=%02x/%02x sel %d fn %08x idx %d feda0 %d/%d nokey %d lock %d\n", P34_Keys[0x1c], P34_KeysPrev[0x1c], (int)P58_MenuSel, (unsigned)P58_MenuFn,
+                (int)P58_MenuIdx, (int)D_005feda0, (int)UiVar005FEDA0, (int)P59_NoKeyFlag, (int)P59_MenuLock); }
+#endif
     if (P58_MenuFn != 0 && (D_005feda0 | P59_NoKeyFlag | UiVar005FEDA0) == 0) {
       re_fn_t fn = re_fn((uint32_t)P58_MenuFn);
       int32_t r = fn ? ((int32_t (*)(void))fn)() : 0;

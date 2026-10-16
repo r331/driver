@@ -24,14 +24,15 @@
 python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv')) if x['module']!='CRT']; print(sum(x['status']=='ported' for x in r), 'из', len(r))"
 ```
 
-**Native как игра — v2.11** (проверено сценариями `RE_KEYS` под Xvfb, Linux arm64):
+**Native как игра — v2.12** (проверено сценариями `RE_KEYS` под Xvfb, Linux arm64):
 - работает: заставки и главное меню, режим **Take A Ride** в Майами — езда по городу (стриминг блоков карты), трафик, столкновения, HUD (Damage/Felony, радар, спидометр);
 - управление машиной: газ, тормоз/задний ход, ручник, резкий руль, смена камеры (вид с капота), пауза по Esc с меню (Continue / Restart / Sound Setup / Gfx Details / Film Director / Quick Replay / Show Map / Exit) — см. «Управление»;
 - звук: DirectSound эмулируется собственным микшером (SDL_audio или запись в WAV), двигатель и шумы слышны, мягкий ограничитель — без клиппинга; музыки нет (в оригинале — CD-audio);
 - пешеходы: 12–16 активны, модель рисуется (проверено, когда пешеход стоит перед машиной); на обычном прогоне они появляются в ~34 500 единиц от игрока, а рисуются ближе 15 000 — чтобы увидеть, надо подъехать;
-- копы: одна патрульная машина (предел 4); v2.11 — исправлено «коп не видит»: когда коп рядом (проверено отладочной перестановкой), Felony растёт за превышение скорости; погоня ещё не начинается, без отладки патруль к игроку не подходит;
-- Undercover: интервью в гараже запускается; с пропуском интервью (RE_SKIP_INTERVIEW=1, как чит) — мотель с автоответчиком, выбор миссии пока не работает;
-- не проверены/не работают: гудок (голос запускается, но почти не слышен), ночь и другие города (SF, LA, NY); FMV-ролики пропускаются.
+- копы: патрульная машина (предел 4); v2.12 — погоня работает: когда коп рядом (проверено отладочной перестановкой RE_COPNEAR), Felony растёт до предела, подключаются до 4 копов, преследуют и таранят; без отладки патруль к игроку пока не подходит;
+- Undercover: интервью в гараже запускается; с пропуском интервью (RE_SKIP_INTERVIEW=1, как чит) — мотель, автоответчик (←/→ — кнопка, Enter — действие, «принять» — миссия) и **первая миссия Майами** «Get to the bank.» (прохождение не проверено);
+- гудок H слышен (v2.12: 3D-источник у машины);
+- не проверены/не работают: ночь и другие города (SF, LA, NY); FMV-ролики пропускаются.
 
 Подробно: [docs/NATIVE_GAPS.md](docs/NATIVE_GAPS.md) (разрывы native, переключатели отладки), [docs/PLATFORM_PLAN.md](docs/PLATFORM_PLAN.md) (журнал переноса по шагам),
 [re/README.md](re/README.md) (правила переноса и история версий).
@@ -206,10 +207,10 @@ Driver — собственность её правообладателей (Ref
 A decompilation and C port of **Driver** (PC, 1999, Reflections / GT Interactive), based on `Game.exe` built 1999-09-10
 (MD5 `8e19d76a4bd5f3838a5c5cbf1cc5cfb5`). **No game files are included** — you need your own copy of the game (CD).
 
-- **Status:** 3292 of 3292 non-CRT functions are marked `ported` in `docs/functions.csv`. The native build (v2.11) runs the menus and
+- **Status:** 3292 of 3292 non-CRT functions are marked `ported` in `docs/functions.csv`. The native build (v2.12) runs the menus and
   *Take A Ride* in Miami (driving, traffic, HUD, brake/reverse, handbrake, bonnet camera, Esc pause menu) with sound (own DirectSound
-  mixer, soft limiter; no CD music). Pedestrians are rendered but appear far from the player; one patrol cop spawns, felony/pursuit not
-  verified; FMV is skipped, Undercover partially working. See `docs/NATIVE_GAPS.md`.
+  mixer, soft limiter; no CD music). Pedestrians are rendered but appear far from the player; cops pursue and ram the player once felony
+  is raised (verified with a debug placement); FMV is skipped; Undercover reaches the motel and the first Miami mission. See `docs/NATIVE_GAPS.md`.
 - **Build (Linux, verified on arm64):** `apt-get install build-essential cmake libsdl2-dev libgl-dev libegl-dev libosmesa6-dev`, then
   `cmake -S re -B build-native -DCMAKE_BUILD_TYPE=Release && cmake --build build-native -j && (cd build-native && ctest --output-on-failure)`.
   macOS: `brew install cmake sdl2` and the same commands — not tested on a real Mac.

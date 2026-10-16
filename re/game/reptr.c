@@ -236,6 +236,11 @@ static int in_gvar_range(uint32_t a) {
 }
 void *re_ptr(uint32_t addr) {
   if (addr == 0) return NULL;
+  /* v2.12: таблица машин 00d077c0 живёт только в native-массиве P99_Cars (cartab.h, CARTAB_VAR), в образе её нет; но
+     «байтовая» заглушка образа A_00D04B00 (g8_bytes_t, 0x40000 от 00d04b00 — блок клавиш) накрывает её адреса, и re_ptr
+     отдавал нулевой образ: позиция игрока 00d07888 для 3D-гудка (SoundLoop_0052422D → источник в 0,0,0, ослабление ×0,008),
+     машина копа из слота +0xcd0 (P102_CopsTick/ИИ читали пустую запись). Поэтому эта область — до проверки образа. */
+  if (addr >= P99_CARS_ADDR && addr - P99_CARS_ADDR < (uint32_t)sizeof P99_Cars) return (uint8_t *)P99_Cars + (addr - P99_CARS_ADDR);
   if (re_gvar_img != NULL && addr >= g_img_base && addr - g_img_base < g_img_size && in_gvar_range(addr)) return g_img + (addr - g_img_base);   /* v2.03 */
   for (uint32_t i = 0; i < g_ndyn; i++)
     if (addr >= g_dyn[i].addr && addr - g_dyn[i].addr < g_dyn[i].size) return g_dyn[i].p + (addr - g_dyn[i].addr);
@@ -285,11 +290,23 @@ static uint32_t fn_table_addr(re_fn_t fn) {
   for (size_t i = 0; i < re_fn_table_n; i++) if (re_fn_table[i].fn == fn) return re_fn_table[i].addr;
   return 0;
 }
+/* v2.12: thunk-и инкрементальной компоновки (00401005..00402aea, jmp rel32) — platform/native/thunk_table.c (tools/gen_thunk_table.py).
+   Обработчики меню мотеля в 005fea44 — адреса thunk-ов (004013c5 → 00416540 и т. п.), без этого re_fn давал NULL. */
+extern const uint32_t re_thunk_table[][2] __attribute__((weak));
+extern const size_t re_thunk_table_n __attribute__((weak));
+static uint32_t thunk_target(uint32_t addr) {
+  if (&re_thunk_table_n == NULL || re_thunk_table == NULL) return 0;
+  size_t lo = 0, hi = re_thunk_table_n;
+  while (lo < hi) { size_t m = (lo + hi) / 2; if (re_thunk_table[m][0] < addr) lo = m + 1; else hi = m; }
+  return (lo < re_thunk_table_n && re_thunk_table[lo][0] == addr) ? re_thunk_table[lo][1] : 0;
+}
 re_fn_t re_fn(uint32_t addr) {
   if (addr == 0) return NULL;
   for (uint32_t i = 0; i < g_nfns; i++) if (g_fns[i].addr == addr) return g_fns[i].fn;
   for (size_t i = 0; i < sizeof k_fns / sizeof k_fns[0]; i++) if (k_fns[i].addr == addr) return k_fns[i].fn;
-  return fn_table_find(addr);
+  re_fn_t f = fn_table_find(addr);
+  if (f == NULL) { uint32_t t = thunk_target(addr); if (t != 0 && t != addr) f = re_fn(t); }
+  return f;
 }
 uint32_t re_fn_addr(re_fn_t fn) {
   if (fn == NULL) return 0;

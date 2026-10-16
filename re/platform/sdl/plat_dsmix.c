@@ -93,7 +93,15 @@ int32_t dsm_set_position(void *o, uint32_t pos) {
   dsm_buf *b = sec(o); if (!b) return 0;
   int fb = b->ch * (b->bits / 8); plat_snd_lockdev(1); b->pos = (double)(pos / (uint32_t)fb); plat_snd_lockdev(0); return 0;
 }
-int32_t dsm_set_volume(void *o, int32_t v) { dsm_buf *b = sec(o); if (b) b->vol = v; return 0; }
+int32_t dsm_set_volume(void *o, int32_t v) {
+  dsm_buf *b = sec(o);
+  if (b && b->vol != v && getenv("RE_SND_LOG")) {
+    int mn = 255, mx = 0; if (b->pcm && b->bits == 8) for (uint32_t i = 0; i < b->pcm->bytes; i++) { int c = b->pcm->data[i]; if (c < mn) mn = c; if (c > mx) mx = c; }
+    fprintf(stderr, "[ds] vol %p %d → %d pcm %u B 8бит min %d max %d freq %u playing %d\n", (void *)b, b->vol, v, b->pcm ? b->pcm->bytes : 0, mn, mx, b->freq, b->playing);
+  }
+  if (b) b->vol = v;
+  return 0;
+}
 int32_t dsm_set_frequency(void *o, uint32_t hz) { dsm_buf *b = sec(o); if (b) b->freq = hz; return 0; }
 int32_t dsm_get_status(void *o, uint32_t *st) {
   dsm_buf *b = sec(o); if (st) *st = (b && b->playing) ? (1u | (b->loop ? 4u : 0u)) : 0u; return 0;
@@ -127,6 +135,9 @@ static void gains3d(const dsm_buf *b, float *gl, float *gr) {
     if (rl > 1e-6f) p = (v[0] * r[0] + v[1] * r[1] + v[2] * r[2]) / (rl * dist);
   }
   if (d->mode3d == 1 && dist <= 1e-3f) p = 0.0f;
+  { static int dbg = -1, n; if (dbg < 0) dbg = getenv("RE_3DDBG") ? atoi(getenv("RE_3DDBG")) : 0;   /* v2.12: отладка 3D-ослабления */
+    if (dbg > 0 && b->vol > -10000 && (n++ % dbg) == 0) fprintf(stderr, "[3d] buf %p pcm %u mode %d src %.0f %.0f %.0f lis %.0f %.0f %.0f dist %.1f roll %.2f distf %.3f g %.4f vol %d\n",
+      (const void *)b, b->pcm ? b->pcm->bytes : 0, d->mode3d, d->x, d->y, d->z, g_lp[0], g_lp[1], g_lp[2], dist, g_roll, g_distf, g, b->vol); }
   *gl = g * (p > 0 ? 1.0f - 0.7f * p : 1.0f);
   *gr = g * (p < 0 ? 1.0f + 0.7f * p : 1.0f);
 }

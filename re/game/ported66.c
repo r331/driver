@@ -1,4 +1,5 @@
 #include "ported66.h"
+#include "reptr.h"
 #include "ported89.h"
 #include <string.h>
 
@@ -93,7 +94,8 @@ static const void *Resolve(uint32_t a) {
 #ifdef RE_HOOK_BUILD
   return (const void *)(uintptr_t)a;
 #else
-  return (a >= 0x00400000u && a < 0x01400000u) ? NULL : (const void *)(uintptr_t)a;
+  /* v2.12: таблица в .data Game.exe — из образа данных (re_ptr), иначе (не в образе) не разыменовываем */
+  return (a >= 0x00400000u && a < 0x01400000u) ? re_ptr(a) : (const void *)(uintptr_t)a;
 #endif
 }
 

@@ -136,6 +136,13 @@ int32_t P124_MotelKeys(int32_t junk) {
   }
   if (!IsKeyDown(0x1c)) return 0;
   Ui00418886();
+#ifndef RE_HOOK_BUILD
+  if (getenv("RE_MOTELDBG")) {               /* v2.12: отладка автоответчика */
+    uint8_t *it = motel_item();
+    fprintf(stderr, "[motel] Enter: кнопка %d пункт %d/%d флаги %04x номер %d (таблица %08x)\n", (int)P9_005fe9f0, (int)P100_ItemSel,
+            (int)P100_ItemN, it ? rd16(it) : 0xffff, it ? rd16(it + 2) : -1, (unsigned)P100_ItemTab);
+  }
+#endif
   switch (P9_005fe9f0) {
   case 0: if (--P100_ItemSel < 0) P100_ItemSel = P100_ItemN - 1; P124_MotelSample(); break;
   case 1: P124_MotelSample(); break;

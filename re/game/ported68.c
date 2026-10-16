@@ -1,4 +1,6 @@
 #include "ported68.h"
+#include "ported140.h"
+#include "reptr.h"
 #include "crt.h"
 #include <math.h>
 #include <string.h>
@@ -171,7 +173,17 @@ int32_t P68_ChangeSample(int32_t arg, int32_t n) {
     return 0;
   }
   P48_FreeSample((uint32_t)n);
+#ifdef RE_HOOK_BUILD
   int32_t h = P68_DrvLoad ? P68_DrvLoad(n, arg) : -1;
+#else
+  /* v2.12: arg — 32-битный адрес имени (re_addr); драйвер 0048bf9a = P140_SndLoadWav(n, const char *) — native-указатель через re_ptr
+     (было: усечённое число как указатель → SIGSEGV в snprintf при «Play» на автоответчике мотеля) */
+  int32_t h;
+  if (P68_DrvLoad != NULL && (re_fn_t)P68_DrvLoad == (re_fn_t)P140_SndLoadWav) {
+    const char *nm = (const char *)re_ptr((uint32_t)arg);
+    h = nm ? P140_SndLoadWav(n, nm) : -1;
+  } else h = P68_DrvLoad ? P68_DrvLoad(n, arg) : -1;   /* иной драйвер (шпион selftest) — как в оригинале */
+#endif
   P68_Samps[n].handle = h;
   if (h == -1) {
     DebugLog("ChangeSample: Error loading sample");
