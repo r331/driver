@@ -29,8 +29,59 @@ typedef int32_t p43_freelist_t[512];
 typedef int32_t p43_anim_t[16];
 #define P43_AnimTab   GAME_VAR(p43_anim_t, P43_AnimTab, 0x00c8198c)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P43_Sin") /*gvi*/
+#undef P43_Sin /*gvi*/
+#pragma push_macro("P43_Eps") /*gvi*/
+#undef P43_Eps /*gvi*/
+#pragma push_macro("P43_Four") /*gvi*/
+#undef P43_Four /*gvi*/
+#pragma push_macro("P43_FadeLen") /*gvi*/
+#undef P43_FadeLen /*gvi*/
+#pragma push_macro("P43_FadeDiv") /*gvi*/
+#undef P43_FadeDiv /*gvi*/
+#pragma push_macro("P43_FadeA") /*gvi*/
+#undef P43_FadeA /*gvi*/
+#pragma push_macro("P43_FadeStep") /*gvi*/
+#undef P43_FadeStep /*gvi*/
+#pragma push_macro("P43_ScaleA") /*gvi*/
+#undef P43_ScaleA /*gvi*/
+#pragma push_macro("P43_OffX") /*gvi*/
+#undef P43_OffX /*gvi*/
+#pragma push_macro("P43_OffY") /*gvi*/
+#undef P43_OffY /*gvi*/
+#pragma push_macro("P43_Half") /*gvi*/
+#undef P43_Half /*gvi*/
 extern p43_sintab_t P43_Sin; extern float P43_Eps, P43_Four, P43_FadeLen, P43_FadeDiv, P43_FadeA, P43_FadeStep, P43_ScaleA, P43_OffX, P43_OffY, P43_Half;
+#pragma pop_macro("P43_Half") /*gvi*/
+#pragma pop_macro("P43_OffY") /*gvi*/
+#pragma pop_macro("P43_OffX") /*gvi*/
+#pragma pop_macro("P43_ScaleA") /*gvi*/
+#pragma pop_macro("P43_FadeStep") /*gvi*/
+#pragma pop_macro("P43_FadeA") /*gvi*/
+#pragma pop_macro("P43_FadeDiv") /*gvi*/
+#pragma pop_macro("P43_FadeLen") /*gvi*/
+#pragma pop_macro("P43_Four") /*gvi*/
+#pragma pop_macro("P43_Eps") /*gvi*/
+#pragma pop_macro("P43_Sin") /*gvi*/
+#pragma push_macro("P43_FadeOn") /*gvi*/
+#undef P43_FadeOn /*gvi*/
+#pragma push_macro("P43_FadeSteps") /*gvi*/
+#undef P43_FadeSteps /*gvi*/
+#pragma push_macro("P43_FadeB") /*gvi*/
+#undef P43_FadeB /*gvi*/
+#pragma push_macro("P43_FreeCnt") /*gvi*/
+#undef P43_FreeCnt /*gvi*/
+#pragma push_macro("P43_FreeList") /*gvi*/
+#undef P43_FreeList /*gvi*/
+#pragma push_macro("P43_AnimTab") /*gvi*/
+#undef P43_AnimTab /*gvi*/
 extern int32_t P43_FadeOn, P43_FadeSteps, P43_FadeB, P43_FreeCnt; extern p43_freelist_t P43_FreeList; extern p43_anim_t P43_AnimTab;
+#pragma pop_macro("P43_AnimTab") /*gvi*/
+#pragma pop_macro("P43_FreeList") /*gvi*/
+#pragma pop_macro("P43_FreeCnt") /*gvi*/
+#pragma pop_macro("P43_FadeB") /*gvi*/
+#pragma pop_macro("P43_FadeSteps") /*gvi*/
+#pragma pop_macro("P43_FadeOn") /*gvi*/
 #endif
 void   P43_CdFadeInit(void);                              /* 00524398: старт фейда CD, если CD включён и фейд ещё не идёт */
 void   P43_NormalizeToOut(float x, float y, float z);     /* 00526521: нормализованный вектор -> глобал 005507d0.. */
@@ -49,3 +100,41 @@ void   P43_ProjectGrid(uint8_t *p);                       /* 0052647d: прое�
 void   P43_FreeSlot(uint8_t *p);                          /* 0051200f: освободить слот (бит 0x10) в список свободных */
 void   P43_AnimNext(uint8_t *p);                          /* 00514073 */
 void re_init_consts(void); /* ported43.c: .data-константы для native */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P43_Sin
+#define P43_Sin (*(p43_sintab_t *)re_gvar(0x00b94280u, sizeof(p43_sintab_t), (void *)&P43_Sin))
+#undef P43_Eps
+#define P43_Eps (*(float *)re_gvar(0x00546aa4u, sizeof(float), (void *)&P43_Eps))
+#undef P43_Four
+#define P43_Four (*(float *)re_gvar(0x005461acu, sizeof(float), (void *)&P43_Four))
+#undef P43_FadeLen
+#define P43_FadeLen (*(float *)re_gvar(0x00576480u, sizeof(float), (void *)&P43_FadeLen))
+#undef P43_FadeDiv
+#define P43_FadeDiv (*(float *)re_gvar(0x0054612cu, sizeof(float), (void *)&P43_FadeDiv))
+#undef P43_FadeOn
+#define P43_FadeOn (*(int32_t *)re_gvar(0x00b91cf8u, sizeof(int32_t), (void *)&P43_FadeOn))
+#undef P43_FadeSteps
+#define P43_FadeSteps (*(int32_t *)re_gvar(0x00b91d1cu, sizeof(int32_t), (void *)&P43_FadeSteps))
+#undef P43_FadeA
+#define P43_FadeA (*(float *)re_gvar(0x00b91d20u, sizeof(float), (void *)&P43_FadeA))
+#undef P43_FadeB
+#define P43_FadeB (*(int32_t *)re_gvar(0x00b91d24u, sizeof(int32_t), (void *)&P43_FadeB))
+#undef P43_FadeStep
+#define P43_FadeStep (*(float *)re_gvar(0x00b91d28u, sizeof(float), (void *)&P43_FadeStep))
+#undef P43_ScaleA
+#define P43_ScaleA (*(float *)re_gvar(0x01251a64u, sizeof(float), (void *)&P43_ScaleA))
+#undef P43_OffX
+#define P43_OffX (*(float *)re_gvar(0x01252b7cu, sizeof(float), (void *)&P43_OffX))
+#undef P43_OffY
+#define P43_OffY (*(float *)re_gvar(0x01252b6cu, sizeof(float), (void *)&P43_OffY))
+#undef P43_Half
+#define P43_Half (*(float *)re_gvar(0x0054607cu, sizeof(float), (void *)&P43_Half))
+#undef P43_FreeCnt
+#define P43_FreeCnt (*(int32_t *)re_gvar(0x00c56764u, sizeof(int32_t), (void *)&P43_FreeCnt))
+#undef P43_FreeList
+#define P43_FreeList (*(p43_freelist_t *)re_gvar(0x00c594a0u, sizeof(p43_freelist_t), (void *)&P43_FreeList))
+#undef P43_AnimTab
+#define P43_AnimTab (*(p43_anim_t *)re_gvar(0x00c8198cu, sizeof(p43_anim_t), (void *)&P43_AnimTab))
+#endif
+/* gvar-img v2.03 end */

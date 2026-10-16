@@ -49,40 +49,299 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P101_FxCol") /*gvi*/
+#undef P101_FxCol /*gvi*/
 p101_b16_t P101_FxCol = { 0x00, 0x3f, 0x7f, 0xbf, 0xff, 0xbf, 0x7f, 0x3f, 0x00, 0x3f, 0x7f, 0xbf, 0xff, 0xbf, 0x7f, 0x3f };  /* .data 005537c8 */
+#pragma pop_macro("P101_FxCol") /*gvi*/
 #endif
-GAME_VAR_DEF(p101_hud_t, P101_Hud, 0x00c808c0)
-GAME_VAR_DEF(int32_t, P101_HudVal, 0x00c810a0)
-GAME_VAR_DEF(p101_f3_t, P101_GoalPos, 0x00c80f50)
-GAME_VAR_DEF(p101_b148_t, P101_SaveCar, 0x00c54b60)
-GAME_VAR_DEF(p101_b148_t, P101_SaveCar2, 0x00c54d20)
-GAME_VAR_DEF(p101_b34_t, P101_SaveA, 0x00c4d8a0)
-GAME_VAR_DEF(p101_b34_t, P101_SaveA2, 0x00c4da60)
-GAME_VAR_DEF(p101_b34_t, P101_SaveB, 0x00c4d800)
-GAME_VAR_DEF(p101_b34_t, P101_SaveB2, 0x00c4da00)
-GAME_VAR_DEF(p101_b34_t, P101_SaveC, 0x00c4d840)
-GAME_VAR_DEF(p101_b34_t, P101_SaveC2, 0x00c4d9c0)
-GAME_VAR_DEF(p101_b34_t, P101_LiveA, 0x00d07754)
-GAME_VAR_DEF(p101_b34_t, P101_LiveB, 0x00d0eb34)
-GAME_VAR_DEF(p101_b34_t, P101_LiveC, 0x00d0f8b4)
-GAME_VAR_DEF(int32_t, P101_RecState, 0x00c4d700)
-GAME_VAR_DEF(int32_t, P101_RecFrame, 0x00c4d704)
-GAME_VAR_DEF(int32_t, P101_RecFrame2, 0x00c4d708)
-GAME_VAR_DEF(int32_t, P101_RecSaved, 0x00c4da94)
-GAME_VAR_DEF(p101_drops_t, P101_Drops, 0x00bde680)
-GAME_VAR_DEF(p101_nbr_t, P101_Nbr, 0x00c55da2)
-GAME_VAR_DEF(uint16_t, P101_RdNode, 0x00c1cca0)
-GAME_VAR_DEF(uint16_t, P101_RdCell, 0x00c1cca2)
-GAME_VAR_DEF(int16_t, P101_RdLane, 0x00c1cca4)
-GAME_VAR_DEF(uint8_t, P101_RdB2, 0x00c1ccb2)
-GAME_VAR_DEF(int32_t, P101_RdDist, 0x00c1ccb4)
-GAME_VAR_DEF(int32_t, P101_RdLeft, 0x00c1ccb8)
-GAME_VAR_DEF(int32_t, P101_ObjBOn2, 0x0111a3e0)
-GAME_VAR_DEF(p101_b66_t, P101_CarFx, 0x010fb1c0)
-GAME_VAR_DEF(float, P101_ScrX0, 0x0124b6d0)
-GAME_VAR_DEF(float, P101_ScrY0, 0x01252b70)
-GAME_VAR_DEF(float, P101_TmpY, 0x0057a112)
-GAME_VAR_DEF(p101_pal_t, P101_PalLfb, 0x01271a80)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_Hud")
+#undef P101_Hud
+#pragma push_macro("P101_Hud") /*gvi*/
+#undef P101_Hud /*gvi*/
+p101_hud_t P101_Hud;
+#pragma pop_macro("P101_Hud") /*gvi*/
+#pragma pop_macro("P101_Hud")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_HudVal")
+#undef P101_HudVal
+#pragma push_macro("P101_HudVal") /*gvi*/
+#undef P101_HudVal /*gvi*/
+int32_t P101_HudVal;
+#pragma pop_macro("P101_HudVal") /*gvi*/
+#pragma pop_macro("P101_HudVal")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_GoalPos")
+#undef P101_GoalPos
+#pragma push_macro("P101_GoalPos") /*gvi*/
+#undef P101_GoalPos /*gvi*/
+p101_f3_t P101_GoalPos;
+#pragma pop_macro("P101_GoalPos") /*gvi*/
+#pragma pop_macro("P101_GoalPos")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_SaveCar")
+#undef P101_SaveCar
+#pragma push_macro("P101_SaveCar") /*gvi*/
+#undef P101_SaveCar /*gvi*/
+p101_b148_t P101_SaveCar;
+#pragma pop_macro("P101_SaveCar") /*gvi*/
+#pragma pop_macro("P101_SaveCar")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_SaveCar2")
+#undef P101_SaveCar2
+#pragma push_macro("P101_SaveCar2") /*gvi*/
+#undef P101_SaveCar2 /*gvi*/
+p101_b148_t P101_SaveCar2;
+#pragma pop_macro("P101_SaveCar2") /*gvi*/
+#pragma pop_macro("P101_SaveCar2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_SaveA")
+#undef P101_SaveA
+#pragma push_macro("P101_SaveA") /*gvi*/
+#undef P101_SaveA /*gvi*/
+p101_b34_t P101_SaveA;
+#pragma pop_macro("P101_SaveA") /*gvi*/
+#pragma pop_macro("P101_SaveA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_SaveA2")
+#undef P101_SaveA2
+#pragma push_macro("P101_SaveA2") /*gvi*/
+#undef P101_SaveA2 /*gvi*/
+p101_b34_t P101_SaveA2;
+#pragma pop_macro("P101_SaveA2") /*gvi*/
+#pragma pop_macro("P101_SaveA2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_SaveB")
+#undef P101_SaveB
+#pragma push_macro("P101_SaveB") /*gvi*/
+#undef P101_SaveB /*gvi*/
+p101_b34_t P101_SaveB;
+#pragma pop_macro("P101_SaveB") /*gvi*/
+#pragma pop_macro("P101_SaveB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_SaveB2")
+#undef P101_SaveB2
+#pragma push_macro("P101_SaveB2") /*gvi*/
+#undef P101_SaveB2 /*gvi*/
+p101_b34_t P101_SaveB2;
+#pragma pop_macro("P101_SaveB2") /*gvi*/
+#pragma pop_macro("P101_SaveB2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_SaveC")
+#undef P101_SaveC
+#pragma push_macro("P101_SaveC") /*gvi*/
+#undef P101_SaveC /*gvi*/
+p101_b34_t P101_SaveC;
+#pragma pop_macro("P101_SaveC") /*gvi*/
+#pragma pop_macro("P101_SaveC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_SaveC2")
+#undef P101_SaveC2
+#pragma push_macro("P101_SaveC2") /*gvi*/
+#undef P101_SaveC2 /*gvi*/
+p101_b34_t P101_SaveC2;
+#pragma pop_macro("P101_SaveC2") /*gvi*/
+#pragma pop_macro("P101_SaveC2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_LiveA")
+#undef P101_LiveA
+#pragma push_macro("P101_LiveA") /*gvi*/
+#undef P101_LiveA /*gvi*/
+p101_b34_t P101_LiveA;
+#pragma pop_macro("P101_LiveA") /*gvi*/
+#pragma pop_macro("P101_LiveA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_LiveB")
+#undef P101_LiveB
+#pragma push_macro("P101_LiveB") /*gvi*/
+#undef P101_LiveB /*gvi*/
+p101_b34_t P101_LiveB;
+#pragma pop_macro("P101_LiveB") /*gvi*/
+#pragma pop_macro("P101_LiveB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_LiveC")
+#undef P101_LiveC
+#pragma push_macro("P101_LiveC") /*gvi*/
+#undef P101_LiveC /*gvi*/
+p101_b34_t P101_LiveC;
+#pragma pop_macro("P101_LiveC") /*gvi*/
+#pragma pop_macro("P101_LiveC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_RecState")
+#undef P101_RecState
+#pragma push_macro("P101_RecState") /*gvi*/
+#undef P101_RecState /*gvi*/
+int32_t P101_RecState;
+#pragma pop_macro("P101_RecState") /*gvi*/
+#pragma pop_macro("P101_RecState")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_RecFrame")
+#undef P101_RecFrame
+#pragma push_macro("P101_RecFrame") /*gvi*/
+#undef P101_RecFrame /*gvi*/
+int32_t P101_RecFrame;
+#pragma pop_macro("P101_RecFrame") /*gvi*/
+#pragma pop_macro("P101_RecFrame")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_RecFrame2")
+#undef P101_RecFrame2
+#pragma push_macro("P101_RecFrame2") /*gvi*/
+#undef P101_RecFrame2 /*gvi*/
+int32_t P101_RecFrame2;
+#pragma pop_macro("P101_RecFrame2") /*gvi*/
+#pragma pop_macro("P101_RecFrame2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_RecSaved")
+#undef P101_RecSaved
+#pragma push_macro("P101_RecSaved") /*gvi*/
+#undef P101_RecSaved /*gvi*/
+int32_t P101_RecSaved;
+#pragma pop_macro("P101_RecSaved") /*gvi*/
+#pragma pop_macro("P101_RecSaved")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_Drops")
+#undef P101_Drops
+#pragma push_macro("P101_Drops") /*gvi*/
+#undef P101_Drops /*gvi*/
+p101_drops_t P101_Drops;
+#pragma pop_macro("P101_Drops") /*gvi*/
+#pragma pop_macro("P101_Drops")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_Nbr")
+#undef P101_Nbr
+#pragma push_macro("P101_Nbr") /*gvi*/
+#undef P101_Nbr /*gvi*/
+p101_nbr_t P101_Nbr;
+#pragma pop_macro("P101_Nbr") /*gvi*/
+#pragma pop_macro("P101_Nbr")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_RdNode")
+#undef P101_RdNode
+#pragma push_macro("P101_RdNode") /*gvi*/
+#undef P101_RdNode /*gvi*/
+uint16_t P101_RdNode;
+#pragma pop_macro("P101_RdNode") /*gvi*/
+#pragma pop_macro("P101_RdNode")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_RdCell")
+#undef P101_RdCell
+#pragma push_macro("P101_RdCell") /*gvi*/
+#undef P101_RdCell /*gvi*/
+uint16_t P101_RdCell;
+#pragma pop_macro("P101_RdCell") /*gvi*/
+#pragma pop_macro("P101_RdCell")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_RdLane")
+#undef P101_RdLane
+#pragma push_macro("P101_RdLane") /*gvi*/
+#undef P101_RdLane /*gvi*/
+int16_t P101_RdLane;
+#pragma pop_macro("P101_RdLane") /*gvi*/
+#pragma pop_macro("P101_RdLane")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_RdB2")
+#undef P101_RdB2
+#pragma push_macro("P101_RdB2") /*gvi*/
+#undef P101_RdB2 /*gvi*/
+uint8_t P101_RdB2;
+#pragma pop_macro("P101_RdB2") /*gvi*/
+#pragma pop_macro("P101_RdB2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_RdDist")
+#undef P101_RdDist
+#pragma push_macro("P101_RdDist") /*gvi*/
+#undef P101_RdDist /*gvi*/
+int32_t P101_RdDist;
+#pragma pop_macro("P101_RdDist") /*gvi*/
+#pragma pop_macro("P101_RdDist")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_RdLeft")
+#undef P101_RdLeft
+#pragma push_macro("P101_RdLeft") /*gvi*/
+#undef P101_RdLeft /*gvi*/
+int32_t P101_RdLeft;
+#pragma pop_macro("P101_RdLeft") /*gvi*/
+#pragma pop_macro("P101_RdLeft")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_ObjBOn2")
+#undef P101_ObjBOn2
+#pragma push_macro("P101_ObjBOn2") /*gvi*/
+#undef P101_ObjBOn2 /*gvi*/
+int32_t P101_ObjBOn2;
+#pragma pop_macro("P101_ObjBOn2") /*gvi*/
+#pragma pop_macro("P101_ObjBOn2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_CarFx")
+#undef P101_CarFx
+#pragma push_macro("P101_CarFx") /*gvi*/
+#undef P101_CarFx /*gvi*/
+p101_b66_t P101_CarFx;
+#pragma pop_macro("P101_CarFx") /*gvi*/
+#pragma pop_macro("P101_CarFx")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_ScrX0")
+#undef P101_ScrX0
+#pragma push_macro("P101_ScrX0") /*gvi*/
+#undef P101_ScrX0 /*gvi*/
+float P101_ScrX0;
+#pragma pop_macro("P101_ScrX0") /*gvi*/
+#pragma pop_macro("P101_ScrX0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_ScrY0")
+#undef P101_ScrY0
+#pragma push_macro("P101_ScrY0") /*gvi*/
+#undef P101_ScrY0 /*gvi*/
+float P101_ScrY0;
+#pragma pop_macro("P101_ScrY0") /*gvi*/
+#pragma pop_macro("P101_ScrY0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_TmpY")
+#undef P101_TmpY
+#pragma push_macro("P101_TmpY") /*gvi*/
+#undef P101_TmpY /*gvi*/
+float P101_TmpY;
+#pragma pop_macro("P101_TmpY") /*gvi*/
+#pragma pop_macro("P101_TmpY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P101_PalLfb")
+#undef P101_PalLfb
+#pragma push_macro("P101_PalLfb") /*gvi*/
+#undef P101_PalLfb /*gvi*/
+p101_pal_t P101_PalLfb;
+#pragma pop_macro("P101_PalLfb") /*gvi*/
+#pragma pop_macro("P101_PalLfb")
+#endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }

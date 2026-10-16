@@ -80,20 +80,132 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
-GAME_VAR_DEF(int32_t, P125_C814E0, 0x00c814e0)
-GAME_VAR_DEF(int32_t, P125_C814E4, 0x00c814e4)
-GAME_VAR_DEF(int32_t, P125_C81690, 0x00c81690)
-GAME_VAR_DEF(int32_t, P125_C81694, 0x00c81694)
-GAME_VAR_DEF(int32_t, P125_D118E4, 0x00d118e4)
-GAME_VAR_DEF(int32_t, P125_D11680, 0x00d11680)
-GAME_VAR_DEF(int32_t, P125_CF56C0, 0x00cf56c0)
-GAME_VAR_DEF(int32_t, P125_DirD17C0C, 0x00d17c0c)
-GAME_VAR_DEF(p125_pick_t, P125_Pick, 0x00c81500)
-GAME_VAR_DEF(int32_t, P125_PickIdx, 0x00c80bec)
-GAME_VAR_DEF(p125_droptime_t, P125_DropTime, 0x00bde780)
-GAME_VAR_DEF(p125_fps_t, P125_FpsStr, 0x00b5a48c)
-GAME_VAR_DEF(p125_mrk_t, P125_MrkSave, 0x01271070)
-GAME_VAR_DEF(int32_t, P125_ModelNamesSize, 0x00b1ff64)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_C814E0")
+#undef P125_C814E0
+#pragma push_macro("P125_C814E0") /*gvi*/
+#undef P125_C814E0 /*gvi*/
+int32_t P125_C814E0;
+#pragma pop_macro("P125_C814E0") /*gvi*/
+#pragma pop_macro("P125_C814E0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_C814E4")
+#undef P125_C814E4
+#pragma push_macro("P125_C814E4") /*gvi*/
+#undef P125_C814E4 /*gvi*/
+int32_t P125_C814E4;
+#pragma pop_macro("P125_C814E4") /*gvi*/
+#pragma pop_macro("P125_C814E4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_C81690")
+#undef P125_C81690
+#pragma push_macro("P125_C81690") /*gvi*/
+#undef P125_C81690 /*gvi*/
+int32_t P125_C81690;
+#pragma pop_macro("P125_C81690") /*gvi*/
+#pragma pop_macro("P125_C81690")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_C81694")
+#undef P125_C81694
+#pragma push_macro("P125_C81694") /*gvi*/
+#undef P125_C81694 /*gvi*/
+int32_t P125_C81694;
+#pragma pop_macro("P125_C81694") /*gvi*/
+#pragma pop_macro("P125_C81694")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_D118E4")
+#undef P125_D118E4
+#pragma push_macro("P125_D118E4") /*gvi*/
+#undef P125_D118E4 /*gvi*/
+int32_t P125_D118E4;
+#pragma pop_macro("P125_D118E4") /*gvi*/
+#pragma pop_macro("P125_D118E4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_D11680")
+#undef P125_D11680
+#pragma push_macro("P125_D11680") /*gvi*/
+#undef P125_D11680 /*gvi*/
+int32_t P125_D11680;
+#pragma pop_macro("P125_D11680") /*gvi*/
+#pragma pop_macro("P125_D11680")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_CF56C0")
+#undef P125_CF56C0
+#pragma push_macro("P125_CF56C0") /*gvi*/
+#undef P125_CF56C0 /*gvi*/
+int32_t P125_CF56C0;
+#pragma pop_macro("P125_CF56C0") /*gvi*/
+#pragma pop_macro("P125_CF56C0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_DirD17C0C")
+#undef P125_DirD17C0C
+#pragma push_macro("P125_DirD17C0C") /*gvi*/
+#undef P125_DirD17C0C /*gvi*/
+int32_t P125_DirD17C0C;
+#pragma pop_macro("P125_DirD17C0C") /*gvi*/
+#pragma pop_macro("P125_DirD17C0C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_Pick")
+#undef P125_Pick
+#pragma push_macro("P125_Pick") /*gvi*/
+#undef P125_Pick /*gvi*/
+p125_pick_t P125_Pick;
+#pragma pop_macro("P125_Pick") /*gvi*/
+#pragma pop_macro("P125_Pick")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_PickIdx")
+#undef P125_PickIdx
+#pragma push_macro("P125_PickIdx") /*gvi*/
+#undef P125_PickIdx /*gvi*/
+int32_t P125_PickIdx;
+#pragma pop_macro("P125_PickIdx") /*gvi*/
+#pragma pop_macro("P125_PickIdx")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_DropTime")
+#undef P125_DropTime
+#pragma push_macro("P125_DropTime") /*gvi*/
+#undef P125_DropTime /*gvi*/
+p125_droptime_t P125_DropTime;
+#pragma pop_macro("P125_DropTime") /*gvi*/
+#pragma pop_macro("P125_DropTime")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_FpsStr")
+#undef P125_FpsStr
+#pragma push_macro("P125_FpsStr") /*gvi*/
+#undef P125_FpsStr /*gvi*/
+p125_fps_t P125_FpsStr;
+#pragma pop_macro("P125_FpsStr") /*gvi*/
+#pragma pop_macro("P125_FpsStr")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_MrkSave")
+#undef P125_MrkSave
+#pragma push_macro("P125_MrkSave") /*gvi*/
+#undef P125_MrkSave /*gvi*/
+p125_mrk_t P125_MrkSave;
+#pragma pop_macro("P125_MrkSave") /*gvi*/
+#pragma pop_macro("P125_MrkSave")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P125_ModelNamesSize")
+#undef P125_ModelNamesSize
+#pragma push_macro("P125_ModelNamesSize") /*gvi*/
+#undef P125_ModelNamesSize /*gvi*/
+int32_t P125_ModelNamesSize;
+#pragma pop_macro("P125_ModelNamesSize") /*gvi*/
+#pragma pop_macro("P125_ModelNamesSize")
+#endif
 #endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }

@@ -1,4 +1,7 @@
 /* Реестр «адрес Game.exe ↔ native-объект» (v1.42). См. reptr.h. */
+#define RE_GVAR_PLAIN   /* v2.03: k_regions — константные адреса native-объектов */
+#include <stdlib.h>
+#include <string.h>
 #include "ported117.h"
 #include "ported116.h"
 #include "ported112.h"
@@ -209,9 +212,30 @@ static uint32_t g_nfns;
 
 /* v2.02: запасная область — образ .rdata+.data Game.exe (game/data_image.c), только в режиме игры */
 static uint8_t *g_img; static uint32_t g_img_base, g_img_size;
-void re_ptr_set_image(uint32_t base, void *p, uint32_t size) { g_img = (uint8_t *)p; g_img_base = base; g_img_size = size; }
+uint8_t *re_gvar_img; uint32_t re_gvar_img_size;   /* v2.03: gvar.h */
+void re_ptr_set_image(uint32_t base, void *p, uint32_t size) {
+  g_img = (uint8_t *)p; g_img_base = base; g_img_size = size;
+  /* v2.03: переменные GAME_VAR этого диапазона (скалярные типы) в образе (RE_NO_GVAR_IMG=1 — выкл.) */
+  /* v2.03: память данных Game.exe целиком — .rdata+.data с .bss, 00546000..01287000 (13 МБ): образ + нули */
+  if (base == 0x00546000u && size <= 0x00d41000u) {
+    uint8_t *img = (uint8_t *)calloc(1, 0x00d41000u);
+    if (img != NULL) { memcpy(img, p, size); g_img = img; g_img_size = 0x00d41000u;
+      if (getenv("RE_NO_GVAR_IMG") == NULL) { re_gvar_img = img; re_gvar_img_size = 0x00d41000u; } }
+  }
+}
+/* v2.03: game/gvar_img_tab.c — переменные GAME_VAR, которые в игре живут в образе (их native-объекты не используются):
+   адрес внутри такой переменной — в образ раньше реестра g_dyn/k_regions; прочие адреса — как прежде, образ последним */
+typedef struct { uint32_t addr, size; } re_gvar_range_t;
+extern const re_gvar_range_t re_gvar_ranges[] __attribute__((weak));
+extern const uint32_t re_gvar_ranges_n __attribute__((weak));
+static int in_gvar_range(uint32_t a) {
+  if (&re_gvar_ranges_n == NULL) return 0;
+  for (uint32_t i = 0; i < re_gvar_ranges_n; i++) if (a >= re_gvar_ranges[i].addr && a - re_gvar_ranges[i].addr < re_gvar_ranges[i].size) return 1;
+  return 0;
+}
 void *re_ptr(uint32_t addr) {
   if (addr == 0) return NULL;
+  if (re_gvar_img != NULL && addr >= g_img_base && addr - g_img_base < g_img_size && in_gvar_range(addr)) return g_img + (addr - g_img_base);   /* v2.03 */
   for (uint32_t i = 0; i < g_ndyn; i++)
     if (addr >= g_dyn[i].addr && addr - g_dyn[i].addr < g_dyn[i].size) return g_dyn[i].p + (addr - g_dyn[i].addr);
   for (size_t i = 0; i < sizeof k_regions / sizeof k_regions[0]; i++)
@@ -246,17 +270,31 @@ void re_ptr_unregister(const void *native) {
   for (uint32_t i = 0; i < g_ndyn; i++)
     if (g_dyn[i].p == native) { g_dyn[i] = g_dyn[--g_ndyn]; return; }
 }
+/* v2.03: platform/native/fn_table.c (tools/gen_fn_table.py, из re_hook install.c) — только в игре (образ .data задан) */
+extern const re_fnent_t re_fn_table[] __attribute__((weak));
+extern const size_t re_fn_table_n __attribute__((weak));
+static re_fn_t fn_table_find(uint32_t addr) {
+  if (g_img == NULL || &re_fn_table_n == NULL || re_fn_table == NULL) return NULL;
+  size_t lo = 0, hi = re_fn_table_n;
+  while (lo < hi) { size_t m = (lo + hi) / 2; if (re_fn_table[m].addr < addr) lo = m + 1; else hi = m; }
+  return (lo < re_fn_table_n && re_fn_table[lo].addr == addr) ? re_fn_table[lo].fn : NULL;
+}
+static uint32_t fn_table_addr(re_fn_t fn) {
+  if (g_img == NULL || &re_fn_table_n == NULL || re_fn_table == NULL) return 0;
+  for (size_t i = 0; i < re_fn_table_n; i++) if (re_fn_table[i].fn == fn) return re_fn_table[i].addr;
+  return 0;
+}
 re_fn_t re_fn(uint32_t addr) {
   if (addr == 0) return NULL;
   for (uint32_t i = 0; i < g_nfns; i++) if (g_fns[i].addr == addr) return g_fns[i].fn;
   for (size_t i = 0; i < sizeof k_fns / sizeof k_fns[0]; i++) if (k_fns[i].addr == addr) return k_fns[i].fn;
-  return NULL;
+  return fn_table_find(addr);
 }
 uint32_t re_fn_addr(re_fn_t fn) {
   if (fn == NULL) return 0;
   for (uint32_t i = 0; i < g_nfns; i++) if (g_fns[i].fn == fn) return g_fns[i].addr;
   for (size_t i = 0; i < sizeof k_fns / sizeof k_fns[0]; i++) if (k_fns[i].fn == fn) return k_fns[i].addr;
-  return 0;
+  return fn_table_addr(fn);
 }
 void re_fn_register(uint32_t addr, re_fn_t fn) {
   for (uint32_t i = 0; i < g_nfns; i++) if (g_fns[i].addr == addr) { g_fns[i].fn = fn; return; }

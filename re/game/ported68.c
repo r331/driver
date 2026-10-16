@@ -10,9 +10,48 @@
 #endif
 
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P68_CamF") /*gvi*/
+#undef P68_CamF /*gvi*/
 P68_RepArr P68_Rep_; P68_SampArr P68_Samps; P68_FLoad P68_DrvLoad; P68_Cam4 P68_CamF;
+#pragma pop_macro("P68_CamF") /*gvi*/
+#pragma push_macro("P68_CamI0") /*gvi*/
+#undef P68_CamI0 /*gvi*/
+#pragma push_macro("P68_CamI1") /*gvi*/
+#undef P68_CamI1 /*gvi*/
+#pragma push_macro("P68_CamI2") /*gvi*/
+#undef P68_CamI2 /*gvi*/
+#pragma push_macro("P68_CamI3") /*gvi*/
+#undef P68_CamI3 /*gvi*/
+#pragma push_macro("P68_ModeW") /*gvi*/
+#undef P68_ModeW /*gvi*/
+#pragma push_macro("P68_ModeH") /*gvi*/
+#undef P68_ModeH /*gvi*/
+#pragma push_macro("P68_B87E54") /*gvi*/
+#undef P68_B87E54 /*gvi*/
+#pragma push_macro("P68_D11A48") /*gvi*/
+#undef P68_D11A48 /*gvi*/
 uint16_t P68_CamI0, P68_CamI1, P68_CamI2, P68_CamI3; int32_t P68_ModeW, P68_ModeH, P68_B87E54, P68_D11A48;
+#pragma pop_macro("P68_D11A48") /*gvi*/
+#pragma pop_macro("P68_B87E54") /*gvi*/
+#pragma pop_macro("P68_ModeH") /*gvi*/
+#pragma pop_macro("P68_ModeW") /*gvi*/
+#pragma pop_macro("P68_CamI3") /*gvi*/
+#pragma pop_macro("P68_CamI2") /*gvi*/
+#pragma pop_macro("P68_CamI1") /*gvi*/
+#pragma pop_macro("P68_CamI0") /*gvi*/
+#pragma push_macro("P68_Saved") /*gvi*/
+#undef P68_Saved /*gvi*/
+#pragma push_macro("P68_IntroBase") /*gvi*/
+#undef P68_IntroBase /*gvi*/
+#pragma push_macro("P68_IntroCur") /*gvi*/
+#undef P68_IntroCur /*gvi*/
+#pragma push_macro("P68_IntroA") /*gvi*/
+#undef P68_IntroA /*gvi*/
 P68_SaveArr P68_Saved; uint32_t P68_IntroBase, P68_IntroCur; int32_t P68_IntroA;
+#pragma pop_macro("P68_IntroA") /*gvi*/
+#pragma pop_macro("P68_IntroCur") /*gvi*/
+#pragma pop_macro("P68_IntroBase") /*gvi*/
+#pragma pop_macro("P68_Saved") /*gvi*/
 #endif
 
 static int32_t rd_i32(const uint8_t *p, uint32_t o) { int32_t v; memcpy(&v, p + o, 4); return v; }

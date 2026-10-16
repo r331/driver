@@ -53,15 +53,66 @@
 #include <stdio.h>
 #include <string.h>
 
-GAME_VAR_DEF(p122_rec44_t, P122_SpotRec, 0x010fc9a0)
-GAME_VAR_DEF(p122_rec44_t, P122_GlowRec, 0x01123280)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P122_SpotRec")
+#undef P122_SpotRec
+#pragma push_macro("P122_SpotRec") /*gvi*/
+#undef P122_SpotRec /*gvi*/
+p122_rec44_t P122_SpotRec;
+#pragma pop_macro("P122_SpotRec") /*gvi*/
+#pragma pop_macro("P122_SpotRec")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P122_GlowRec")
+#undef P122_GlowRec
+#pragma push_macro("P122_GlowRec") /*gvi*/
+#undef P122_GlowRec /*gvi*/
+p122_rec44_t P122_GlowRec;
+#pragma pop_macro("P122_GlowRec") /*gvi*/
+#pragma pop_macro("P122_GlowRec")
+#endif
 GAME_VAR_DEF(uint8_t *, P122_EvCur, 0x00b1ff5c)
-GAME_VAR_DEF(int32_t, P122_Ev118, 0x01134118)
-GAME_VAR_DEF(int32_t, P122_Ev240, 0x01134240)
-GAME_VAR_DEF(int32_t, P122_Ev24C, 0x0113424c)
-GAME_VAR_DEF(int32_t, P122_BlinkOn, 0x005feefc)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P122_Ev118")
+#undef P122_Ev118
+#pragma push_macro("P122_Ev118") /*gvi*/
+#undef P122_Ev118 /*gvi*/
+int32_t P122_Ev118;
+#pragma pop_macro("P122_Ev118") /*gvi*/
+#pragma pop_macro("P122_Ev118")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P122_Ev240")
+#undef P122_Ev240
+#pragma push_macro("P122_Ev240") /*gvi*/
+#undef P122_Ev240 /*gvi*/
+int32_t P122_Ev240;
+#pragma pop_macro("P122_Ev240") /*gvi*/
+#pragma pop_macro("P122_Ev240")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P122_Ev24C")
+#undef P122_Ev24C
+#pragma push_macro("P122_Ev24C") /*gvi*/
+#undef P122_Ev24C /*gvi*/
+int32_t P122_Ev24C;
+#pragma pop_macro("P122_Ev24C") /*gvi*/
+#pragma pop_macro("P122_Ev24C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P122_BlinkOn")
+#undef P122_BlinkOn
+#pragma push_macro("P122_BlinkOn") /*gvi*/
+#undef P122_BlinkOn /*gvi*/
+int32_t P122_BlinkOn;
+#pragma pop_macro("P122_BlinkOn") /*gvi*/
+#pragma pop_macro("P122_BlinkOn")
+#endif
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P122_Blink") /*gvi*/
+#undef P122_Blink /*gvi*/
 int32_t P122_Blink = 10;                     /* .data 0054e9d8 */
+#pragma pop_macro("P122_Blink") /*gvi*/
 #endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }

@@ -9,12 +9,22 @@ GAME_VAR_DEF(void *, P34_Joy, 0x00b31de4)
 GAME_VAR_DEF(void *, P34_FfA, 0x00b31de8)
 GAME_VAR_DEF(void *, P34_FfB, 0x00b31dec)
 GAME_VAR_DEF(void *, P34_Event, 0x00b31df0)
-GAME_VAR_DEF(int32_t, P34_Reg24, 0x00b31e24)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P34_Reg24")
+#undef P34_Reg24
+#pragma push_macro("P34_Reg24") /*gvi*/
+#undef P34_Reg24 /*gvi*/
+int32_t P34_Reg24;
+#pragma pop_macro("P34_Reg24") /*gvi*/
+#pragma pop_macro("P34_Reg24")
+#endif
 GAME_VAR_DEF(P34_DevArr, P34_EffA, 0x00b31cc0)
 GAME_VAR_DEF(P34_DevArr, P34_EffB, 0x00b31c80)
 GAME_VAR_DEF(P34_DevArr, P34_EffC, 0x00b31ce0)
+#ifdef RE_HOOK_BUILD   /* v2.03: в native — псевдонимы над A_00D04B00 (ported34.h) */
 GAME_VAR_DEF(P34_KeyArr, P34_Keys, 0x00d04b00)
 GAME_VAR_DEF(P34_KeyArr, P34_KeysPrev, 0x00d04c00)
+#endif
 
 void P34_ReleaseInput(void) {
   if (P34_Event) { plat_event_close(P34_Event); P34_Event = NULL; }

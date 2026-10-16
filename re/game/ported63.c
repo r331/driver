@@ -2,18 +2,114 @@
 #include <math.h>
 #include <string.h>
 
-GAME_VAR_DEF(float, P63_Scale, 0x00c1cc74)
-GAME_VAR_DEF(int32_t, P63_Near, 0x011443c8)
-GAME_VAR_DEF(p63_i32x64_t, P63_Dist, 0x0113a5c0)
-GAME_VAR_DEF(p63_i32x64_t, P63_Ids, 0x01143620)
-GAME_VAR_DEF(int32_t, P63_Cnt0, 0x01139a40)
-GAME_VAR_DEF(int32_t, P63_Cnt1, 0x01139a44)
-GAME_VAR_DEF(int32_t, P63_Cnt2, 0x01139a48)
-GAME_VAR_DEF(int32_t, P63_Cnt3, 0x01139a4c)
-GAME_VAR_DEF(p63_i32x4_t, P63_LimA, 0x005512c0)
-GAME_VAR_DEF(p63_i32x4_t, P63_LimB, 0x005512d0)
-GAME_VAR_DEF(int32_t, P63_SphN, 0x01209618)
-GAME_VAR_DEF(p63_hits_t, P63_Hits, 0x011f0000)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P63_Scale")
+#undef P63_Scale
+#pragma push_macro("P63_Scale") /*gvi*/
+#undef P63_Scale /*gvi*/
+float P63_Scale;
+#pragma pop_macro("P63_Scale") /*gvi*/
+#pragma pop_macro("P63_Scale")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P63_Near")
+#undef P63_Near
+#pragma push_macro("P63_Near") /*gvi*/
+#undef P63_Near /*gvi*/
+int32_t P63_Near;
+#pragma pop_macro("P63_Near") /*gvi*/
+#pragma pop_macro("P63_Near")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P63_Dist")
+#undef P63_Dist
+#pragma push_macro("P63_Dist") /*gvi*/
+#undef P63_Dist /*gvi*/
+p63_i32x64_t P63_Dist;
+#pragma pop_macro("P63_Dist") /*gvi*/
+#pragma pop_macro("P63_Dist")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P63_Ids")
+#undef P63_Ids
+#pragma push_macro("P63_Ids") /*gvi*/
+#undef P63_Ids /*gvi*/
+p63_i32x64_t P63_Ids;
+#pragma pop_macro("P63_Ids") /*gvi*/
+#pragma pop_macro("P63_Ids")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P63_Cnt0")
+#undef P63_Cnt0
+#pragma push_macro("P63_Cnt0") /*gvi*/
+#undef P63_Cnt0 /*gvi*/
+int32_t P63_Cnt0;
+#pragma pop_macro("P63_Cnt0") /*gvi*/
+#pragma pop_macro("P63_Cnt0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P63_Cnt1")
+#undef P63_Cnt1
+#pragma push_macro("P63_Cnt1") /*gvi*/
+#undef P63_Cnt1 /*gvi*/
+int32_t P63_Cnt1;
+#pragma pop_macro("P63_Cnt1") /*gvi*/
+#pragma pop_macro("P63_Cnt1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P63_Cnt2")
+#undef P63_Cnt2
+#pragma push_macro("P63_Cnt2") /*gvi*/
+#undef P63_Cnt2 /*gvi*/
+int32_t P63_Cnt2;
+#pragma pop_macro("P63_Cnt2") /*gvi*/
+#pragma pop_macro("P63_Cnt2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P63_Cnt3")
+#undef P63_Cnt3
+#pragma push_macro("P63_Cnt3") /*gvi*/
+#undef P63_Cnt3 /*gvi*/
+int32_t P63_Cnt3;
+#pragma pop_macro("P63_Cnt3") /*gvi*/
+#pragma pop_macro("P63_Cnt3")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P63_LimA")
+#undef P63_LimA
+#pragma push_macro("P63_LimA") /*gvi*/
+#undef P63_LimA /*gvi*/
+p63_i32x4_t P63_LimA;
+#pragma pop_macro("P63_LimA") /*gvi*/
+#pragma pop_macro("P63_LimA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P63_LimB")
+#undef P63_LimB
+#pragma push_macro("P63_LimB") /*gvi*/
+#undef P63_LimB /*gvi*/
+p63_i32x4_t P63_LimB;
+#pragma pop_macro("P63_LimB") /*gvi*/
+#pragma pop_macro("P63_LimB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P63_SphN")
+#undef P63_SphN
+#pragma push_macro("P63_SphN") /*gvi*/
+#undef P63_SphN /*gvi*/
+int32_t P63_SphN;
+#pragma pop_macro("P63_SphN") /*gvi*/
+#pragma pop_macro("P63_SphN")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P63_Hits")
+#undef P63_Hits
+#pragma push_macro("P63_Hits") /*gvi*/
+#undef P63_Hits /*gvi*/
+p63_hits_t P63_Hits;
+#pragma pop_macro("P63_Hits") /*gvi*/
+#pragma pop_macro("P63_Hits")
+#endif
 
 static int32_t rd32(const uint8_t *p, uint32_t o) { int32_t v; memcpy(&v, p + o, 4); return v; }
 static void    wr32(uint8_t *p, uint32_t o, int32_t v) { memcpy(p + o, &v, 4); }

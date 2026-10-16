@@ -88,11 +88,51 @@
 #include "ported133.h"
 #include "ported136.h"
 
-GAME_VAR_DEF(p137_i5_t, P137_McdSkipA, 0x00b31f10)
-GAME_VAR_DEF(p137_i5_t, P137_McdSkipB, 0x00b31f24)
-GAME_VAR_DEF(p137_f4_t, P137_PathDist, 0x00c823c0)
-GAME_VAR_DEF(int32_t, P137_PedHeadA, 0x00cf56b4)
-GAME_VAR_DEF(int32_t, P137_PedHeadB, 0x00d00210)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P137_McdSkipA")
+#undef P137_McdSkipA
+#pragma push_macro("P137_McdSkipA") /*gvi*/
+#undef P137_McdSkipA /*gvi*/
+p137_i5_t P137_McdSkipA;
+#pragma pop_macro("P137_McdSkipA") /*gvi*/
+#pragma pop_macro("P137_McdSkipA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P137_McdSkipB")
+#undef P137_McdSkipB
+#pragma push_macro("P137_McdSkipB") /*gvi*/
+#undef P137_McdSkipB /*gvi*/
+p137_i5_t P137_McdSkipB;
+#pragma pop_macro("P137_McdSkipB") /*gvi*/
+#pragma pop_macro("P137_McdSkipB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P137_PathDist")
+#undef P137_PathDist
+#pragma push_macro("P137_PathDist") /*gvi*/
+#undef P137_PathDist /*gvi*/
+p137_f4_t P137_PathDist;
+#pragma pop_macro("P137_PathDist") /*gvi*/
+#pragma pop_macro("P137_PathDist")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P137_PedHeadA")
+#undef P137_PedHeadA
+#pragma push_macro("P137_PedHeadA") /*gvi*/
+#undef P137_PedHeadA /*gvi*/
+int32_t P137_PedHeadA;
+#pragma pop_macro("P137_PedHeadA") /*gvi*/
+#pragma pop_macro("P137_PedHeadA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P137_PedHeadB")
+#undef P137_PedHeadB
+#pragma push_macro("P137_PedHeadB") /*gvi*/
+#undef P137_PedHeadB /*gvi*/
+int32_t P137_PedHeadB;
+#pragma pop_macro("P137_PedHeadB") /*gvi*/
+#pragma pop_macro("P137_PedHeadB")
+#endif
 
 #ifdef RE_HOOK_BUILD
 #  define P137_DUST_LIM (*(int32_t *)0x00575ee0)

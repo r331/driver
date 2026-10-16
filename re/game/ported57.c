@@ -5,21 +5,141 @@
 #include "crt.h"
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P57_S5D5794, 0x005d5794)
-GAME_VAR_DEF(int32_t, P57_S5D5774, 0x005d5774)
-GAME_VAR_DEF(int32_t, P57_S5FE4EC, 0x005fe4ec)
-GAME_VAR_DEF(int32_t, P57_S5FE990, 0x005fe990)
-GAME_VAR_DEF(int32_t, P57_S5FE9A0, 0x005fe9a0)
-GAME_VAR_DEF(int32_t, P57_S5D579C, 0x005d579c)
-GAME_VAR_DEF(int32_t, P57_S5FE6B8, 0x005fe6b8)
-GAME_VAR_DEF(int32_t, P57_S5FE998, 0x005fe998)
-GAME_VAR_DEF(int32_t, P57_S5FE9A8, 0x005fe9a8)
-GAME_VAR_DEF(int32_t, P57_S5FE9E8, 0x005fe9e8)
-GAME_VAR_DEF(int32_t, P57_S57B568, 0x0057b568)
-GAME_VAR_DEF(int32_t, P57_S5FE848, 0x005fe848)
-GAME_VAR_DEF(int32_t, P57_S5FE924, 0x005fe924)
-GAME_VAR_DEF(int32_t, P57_ScrW, 0x00c80890)
-GAME_VAR_DEF(float, P57_Div1500, 0x005469c4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_S5D5794")
+#undef P57_S5D5794
+#pragma push_macro("P57_S5D5794") /*gvi*/
+#undef P57_S5D5794 /*gvi*/
+int32_t P57_S5D5794;
+#pragma pop_macro("P57_S5D5794") /*gvi*/
+#pragma pop_macro("P57_S5D5794")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_S5D5774")
+#undef P57_S5D5774
+#pragma push_macro("P57_S5D5774") /*gvi*/
+#undef P57_S5D5774 /*gvi*/
+int32_t P57_S5D5774;
+#pragma pop_macro("P57_S5D5774") /*gvi*/
+#pragma pop_macro("P57_S5D5774")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_S5FE4EC")
+#undef P57_S5FE4EC
+#pragma push_macro("P57_S5FE4EC") /*gvi*/
+#undef P57_S5FE4EC /*gvi*/
+int32_t P57_S5FE4EC;
+#pragma pop_macro("P57_S5FE4EC") /*gvi*/
+#pragma pop_macro("P57_S5FE4EC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_S5FE990")
+#undef P57_S5FE990
+#pragma push_macro("P57_S5FE990") /*gvi*/
+#undef P57_S5FE990 /*gvi*/
+int32_t P57_S5FE990;
+#pragma pop_macro("P57_S5FE990") /*gvi*/
+#pragma pop_macro("P57_S5FE990")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_S5FE9A0")
+#undef P57_S5FE9A0
+#pragma push_macro("P57_S5FE9A0") /*gvi*/
+#undef P57_S5FE9A0 /*gvi*/
+int32_t P57_S5FE9A0;
+#pragma pop_macro("P57_S5FE9A0") /*gvi*/
+#pragma pop_macro("P57_S5FE9A0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_S5D579C")
+#undef P57_S5D579C
+#pragma push_macro("P57_S5D579C") /*gvi*/
+#undef P57_S5D579C /*gvi*/
+int32_t P57_S5D579C;
+#pragma pop_macro("P57_S5D579C") /*gvi*/
+#pragma pop_macro("P57_S5D579C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_S5FE6B8")
+#undef P57_S5FE6B8
+#pragma push_macro("P57_S5FE6B8") /*gvi*/
+#undef P57_S5FE6B8 /*gvi*/
+int32_t P57_S5FE6B8;
+#pragma pop_macro("P57_S5FE6B8") /*gvi*/
+#pragma pop_macro("P57_S5FE6B8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_S5FE998")
+#undef P57_S5FE998
+#pragma push_macro("P57_S5FE998") /*gvi*/
+#undef P57_S5FE998 /*gvi*/
+int32_t P57_S5FE998;
+#pragma pop_macro("P57_S5FE998") /*gvi*/
+#pragma pop_macro("P57_S5FE998")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_S5FE9A8")
+#undef P57_S5FE9A8
+#pragma push_macro("P57_S5FE9A8") /*gvi*/
+#undef P57_S5FE9A8 /*gvi*/
+int32_t P57_S5FE9A8;
+#pragma pop_macro("P57_S5FE9A8") /*gvi*/
+#pragma pop_macro("P57_S5FE9A8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_S5FE9E8")
+#undef P57_S5FE9E8
+#pragma push_macro("P57_S5FE9E8") /*gvi*/
+#undef P57_S5FE9E8 /*gvi*/
+int32_t P57_S5FE9E8;
+#pragma pop_macro("P57_S5FE9E8") /*gvi*/
+#pragma pop_macro("P57_S5FE9E8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_S57B568")
+#undef P57_S57B568
+#pragma push_macro("P57_S57B568") /*gvi*/
+#undef P57_S57B568 /*gvi*/
+int32_t P57_S57B568;
+#pragma pop_macro("P57_S57B568") /*gvi*/
+#pragma pop_macro("P57_S57B568")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_S5FE848")
+#undef P57_S5FE848
+#pragma push_macro("P57_S5FE848") /*gvi*/
+#undef P57_S5FE848 /*gvi*/
+int32_t P57_S5FE848;
+#pragma pop_macro("P57_S5FE848") /*gvi*/
+#pragma pop_macro("P57_S5FE848")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_S5FE924")
+#undef P57_S5FE924
+#pragma push_macro("P57_S5FE924") /*gvi*/
+#undef P57_S5FE924 /*gvi*/
+int32_t P57_S5FE924;
+#pragma pop_macro("P57_S5FE924") /*gvi*/
+#pragma pop_macro("P57_S5FE924")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_ScrW")
+#undef P57_ScrW
+#pragma push_macro("P57_ScrW") /*gvi*/
+#undef P57_ScrW /*gvi*/
+int32_t P57_ScrW;
+#pragma pop_macro("P57_ScrW") /*gvi*/
+#pragma pop_macro("P57_ScrW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P57_Div1500")
+#undef P57_Div1500
+#pragma push_macro("P57_Div1500") /*gvi*/
+#undef P57_Div1500 /*gvi*/
+float P57_Div1500;
+#pragma pop_macro("P57_Div1500") /*gvi*/
+#pragma pop_macro("P57_Div1500")
+#endif
 
 /* Начальные значения констант из .data Game.exe (нужны только native). */
 void P57_InitConsts(void) {

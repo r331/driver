@@ -1,10 +1,50 @@
 #include "ported72.h"
 
-GAME_VAR_DEF(int32_t, P72_Rows, 0x00cb8f04)
-GAME_VAR_DEF(uint16_t, P72_Id, 0x00c1cca6)
-GAME_VAR_DEF(int32_t, P72_Low, 0x00c1cca8)
-GAME_VAR_DEF(uint16_t, P72_Dir, 0x00c1ccb0)
-GAME_VAR_DEF(p72_dir_t, P72_DirTab, 0x00575e28)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P72_Rows")
+#undef P72_Rows
+#pragma push_macro("P72_Rows") /*gvi*/
+#undef P72_Rows /*gvi*/
+int32_t P72_Rows;
+#pragma pop_macro("P72_Rows") /*gvi*/
+#pragma pop_macro("P72_Rows")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P72_Id")
+#undef P72_Id
+#pragma push_macro("P72_Id") /*gvi*/
+#undef P72_Id /*gvi*/
+uint16_t P72_Id;
+#pragma pop_macro("P72_Id") /*gvi*/
+#pragma pop_macro("P72_Id")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P72_Low")
+#undef P72_Low
+#pragma push_macro("P72_Low") /*gvi*/
+#undef P72_Low /*gvi*/
+int32_t P72_Low;
+#pragma pop_macro("P72_Low") /*gvi*/
+#pragma pop_macro("P72_Low")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P72_Dir")
+#undef P72_Dir
+#pragma push_macro("P72_Dir") /*gvi*/
+#undef P72_Dir /*gvi*/
+uint16_t P72_Dir;
+#pragma pop_macro("P72_Dir") /*gvi*/
+#pragma pop_macro("P72_Dir")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P72_DirTab")
+#undef P72_DirTab
+#pragma push_macro("P72_DirTab") /*gvi*/
+#undef P72_DirTab /*gvi*/
+p72_dir_t P72_DirTab;
+#pragma pop_macro("P72_DirTab") /*gvi*/
+#pragma pop_macro("P72_DirTab")
+#endif
 
 #ifndef RE_HOOK_BUILD
 void P72_InitConsts(void) { P72_DirTab[0] = 0; P72_DirTab[1] = 0x400; P72_DirTab[2] = 0x800; P72_DirTab[3] = 0xc00; }

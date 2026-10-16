@@ -34,12 +34,72 @@ typedef int16_t p94_curveA_t[0x1004];
 typedef int16_t p94_curveB_t[0xa0];
 #ifndef RE_HOOK_BUILD
  extern float P94_RadarK;
+#pragma push_macro("P94_MapW") /*gvi*/
+#undef P94_MapW /*gvi*/
+#pragma push_macro("P94_MapH") /*gvi*/
+#undef P94_MapH /*gvi*/
+#pragma push_macro("P94_MapX0") /*gvi*/
+#undef P94_MapX0 /*gvi*/
+#pragma push_macro("P94_MapY0") /*gvi*/
+#undef P94_MapY0 /*gvi*/
 extern int32_t P94_MapW, P94_MapH, P94_MapX0, P94_MapY0;
+#pragma pop_macro("P94_MapY0") /*gvi*/
+#pragma pop_macro("P94_MapX0") /*gvi*/
+#pragma pop_macro("P94_MapH") /*gvi*/
+#pragma pop_macro("P94_MapW") /*gvi*/
+#pragma push_macro("P94_FadeDir") /*gvi*/
+#undef P94_FadeDir /*gvi*/
+#pragma push_macro("P94_FadeVal") /*gvi*/
+#undef P94_FadeVal /*gvi*/
+#pragma push_macro("P94_FadePos") /*gvi*/
+#undef P94_FadePos /*gvi*/
+#pragma push_macro("P94_FadeSpeed") /*gvi*/
+#undef P94_FadeSpeed /*gvi*/
 extern int32_t P94_FadeDir, P94_FadeVal; extern float P94_FadePos, P94_FadeSpeed;
+#pragma pop_macro("P94_FadeSpeed") /*gvi*/
+#pragma pop_macro("P94_FadePos") /*gvi*/
+#pragma pop_macro("P94_FadeVal") /*gvi*/
+#pragma pop_macro("P94_FadeDir") /*gvi*/
+#pragma push_macro("P94_IconRec") /*gvi*/
+#undef P94_IconRec /*gvi*/
+#pragma push_macro("P94_QuadPage") /*gvi*/
+#undef P94_QuadPage /*gvi*/
+#pragma push_macro("P94_Quad") /*gvi*/
+#undef P94_Quad /*gvi*/
 extern uint32_t P94_IconRec; extern uint8_t P94_QuadPage; extern p94_quad_t P94_Quad;
+#pragma pop_macro("P94_Quad") /*gvi*/
+#pragma pop_macro("P94_QuadPage") /*gvi*/
+#pragma pop_macro("P94_IconRec") /*gvi*/
+#pragma push_macro("P94_DirCnt") /*gvi*/
+#undef P94_DirCnt /*gvi*/
+#pragma push_macro("P94_DirTab") /*gvi*/
+#undef P94_DirTab /*gvi*/
 extern int32_t P94_DirCnt; extern p94_dirtab_t P94_DirTab;
+#pragma pop_macro("P94_DirTab") /*gvi*/
+#pragma pop_macro("P94_DirCnt") /*gvi*/
+#pragma push_macro("P94_CurveA") /*gvi*/
+#undef P94_CurveA /*gvi*/
+#pragma push_macro("P94_CurveB") /*gvi*/
+#undef P94_CurveB /*gvi*/
+#pragma push_macro("P94_CurveC") /*gvi*/
+#undef P94_CurveC /*gvi*/
 extern p94_curveA_t P94_CurveA; extern p94_curveB_t P94_CurveB, P94_CurveC;
+#pragma pop_macro("P94_CurveC") /*gvi*/
+#pragma pop_macro("P94_CurveB") /*gvi*/
+#pragma pop_macro("P94_CurveA") /*gvi*/
+#pragma push_macro("P94_WobA") /*gvi*/
+#undef P94_WobA /*gvi*/
+#pragma push_macro("P94_WobB") /*gvi*/
+#undef P94_WobB /*gvi*/
+#pragma push_macro("P94_WobC") /*gvi*/
+#undef P94_WobC /*gvi*/
+#pragma push_macro("P94_WobK") /*gvi*/
+#undef P94_WobK /*gvi*/
 extern int32_t P94_WobA, P94_WobB, P94_WobC; extern float P94_WobK;
+#pragma pop_macro("P94_WobK") /*gvi*/
+#pragma pop_macro("P94_WobC") /*gvi*/
+#pragma pop_macro("P94_WobB") /*gvi*/
+#pragma pop_macro("P94_WobA") /*gvi*/
 #endif
 
 uint8_t *P94_ReadIdent(uint8_t *src, uint8_t *dst);              /* 004a522a: имя [A-Z0-9_] (строчные → заглавные) в dst; возвращает конец */
@@ -57,3 +117,49 @@ void     P94_ClampView(void);                                    /* 004094e3 */
 void     P94_FadeStep(void);                                     /* 004e5284 */
 void     P94_IconQuad(void);                                     /* 004ab95c */
 void     P94_MapToScreen(float *x, float *y);                    /* 00507672 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P94_RadarK
+#define P94_RadarK (*(float *)re_gvar(0x00b32978u, sizeof(float), (void *)&P94_RadarK))
+#undef P94_MapW
+#define P94_MapW (*(int32_t *)re_gvar(0x00b32a30u, sizeof(int32_t), (void *)&P94_MapW))
+#undef P94_MapH
+#define P94_MapH (*(int32_t *)re_gvar(0x00b52a34u, sizeof(int32_t), (void *)&P94_MapH))
+#undef P94_MapX0
+#define P94_MapX0 (*(int32_t *)re_gvar(0x00b32a04u, sizeof(int32_t), (void *)&P94_MapX0))
+#undef P94_MapY0
+#define P94_MapY0 (*(int32_t *)re_gvar(0x00b32a0cu, sizeof(int32_t), (void *)&P94_MapY0))
+#undef P94_FadeDir
+#define P94_FadeDir (*(int32_t *)re_gvar(0x00d048f0u, sizeof(int32_t), (void *)&P94_FadeDir))
+#undef P94_FadeVal
+#define P94_FadeVal (*(int32_t *)re_gvar(0x00d044d4u, sizeof(int32_t), (void *)&P94_FadeVal))
+#undef P94_FadePos
+#define P94_FadePos (*(float *)re_gvar(0x00d04478u, sizeof(float), (void *)&P94_FadePos))
+#undef P94_FadeSpeed
+#define P94_FadeSpeed (*(float *)re_gvar(0x00d04784u, sizeof(float), (void *)&P94_FadeSpeed))
+#undef P94_IconRec
+#define P94_IconRec (*(uint32_t *)re_gvar(0x010faf20u, sizeof(uint32_t), (void *)&P94_IconRec))
+#undef P94_QuadPage
+#define P94_QuadPage (*(uint8_t *)re_gvar(0x010fc9a2u, sizeof(uint8_t), (void *)&P94_QuadPage))
+#undef P94_Quad
+#define P94_Quad (*(p94_quad_t *)re_gvar(0x010fc9a8u, sizeof(p94_quad_t), (void *)&P94_Quad))
+#undef P94_DirCnt
+#define P94_DirCnt (*(int32_t *)re_gvar(0x01145a48u, sizeof(int32_t), (void *)&P94_DirCnt))
+#undef P94_DirTab
+#define P94_DirTab (*(p94_dirtab_t *)re_gvar(0x01142700u, sizeof(p94_dirtab_t), (void *)&P94_DirTab))
+#undef P94_CurveA
+#define P94_CurveA (*(p94_curveA_t *)re_gvar(0x00b2f414u, sizeof(p94_curveA_t), (void *)&P94_CurveA))
+#undef P94_CurveB
+#define P94_CurveB (*(p94_curveB_t *)re_gvar(0x00b2eb8cu, sizeof(p94_curveB_t), (void *)&P94_CurveB))
+#undef P94_CurveC
+#define P94_CurveC (*(p94_curveB_t *)re_gvar(0x00b2ea4cu, sizeof(p94_curveB_t), (void *)&P94_CurveC))
+#undef P94_WobA
+#define P94_WobA (*(int32_t *)re_gvar(0x00553a18u, sizeof(int32_t), (void *)&P94_WobA))
+#undef P94_WobB
+#define P94_WobB (*(int32_t *)re_gvar(0x00b201e0u, sizeof(int32_t), (void *)&P94_WobB))
+#undef P94_WobC
+#define P94_WobC (*(int32_t *)re_gvar(0x00553a1cu, sizeof(int32_t), (void *)&P94_WobC))
+#undef P94_WobK
+#define P94_WobK (*(float *)re_gvar(0x00b201e4u, sizeof(float), (void *)&P94_WobK))
+#endif
+/* gvar-img v2.03 end */

@@ -8,7 +8,13 @@
 #  define NODETAB_VAR(type, name, addr) (*(type *)(uintptr_t)(addr))
 #  define SLOTTAB_VAR(type, name, addr) (*(type *)(uintptr_t)(addr))
 #else
+#pragma push_macro("P11_00bf1c40") /*gvi*/
+#undef P11_00bf1c40 /*gvi*/
+#pragma push_macro("P11_00c1ed80") /*gvi*/
+#undef P11_00c1ed80 /*gvi*/
 extern uint8_t P11_00bf1c40[0x40000], P11_00c1ed80[0x40000];
+#pragma pop_macro("P11_00c1ed80") /*gvi*/
+#pragma pop_macro("P11_00bf1c40") /*gvi*/
 #  define NODETAB_VAR(type, name, addr) (*(type *)(P11_00bf1c40 + ((uint32_t)(addr) - 0x00bf1c40u)))
 #  define SLOTTAB_VAR(type, name, addr) (*(type *)(P11_00c1ed80 + ((uint32_t)(addr) - 0x00c1ed80u)))
 #endif

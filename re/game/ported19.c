@@ -4,29 +4,213 @@
 #ifndef RE_HOOK_BUILD
 uint8_t P19_Keys1[16], P19_Keys2[16];
 #endif
-GAME_VAR_DEF(float, P19_Cur, 0x005fea58)
-GAME_VAR_DEF(float, P19_Target, 0x005fea5c)
-GAME_VAR_DEF(int32_t, P19_Active, 0x005fea60)
-GAME_VAR_DEF(float, P19_Out68, 0x01251a68)
-GAME_VAR_DEF(float, P19_OutA, 0x005507d0)
-GAME_VAR_DEF(float, P19_OutB, 0x005507d4)
-GAME_VAR_DEF(float, P19_OutC, 0x005507d8)
-GAME_VAR_DEF(float, P19_Step, 0x00546070)
-GAME_VAR_DEF(int32_t, P19_ScrW, 0x01270c28)
-GAME_VAR_DEF(int32_t, P19_ScrH, 0x0125f3f0)
-GAME_VAR_DEF(float, P19_Scale, 0x0125f3e0)
-GAME_VAR_DEF(float, P19_DivW, 0x00546060)
-GAME_VAR_DEF(float, P19_DivH, 0x0054605c)
-GAME_VAR_DEF(float, P19_DivC, 0x00546050)
-GAME_VAR_DEF(int32_t, P19_Level, 0x00575ef0)
-GAME_VAR_DEF(int32_t, P19_Sel, 0x005fe9e0)
-GAME_VAR_DEF(uint32_t, P19_PtrA, 0x0054df9c)
-GAME_VAR_DEF(uint16_t, P19_Wd, 0x0054df98)
-GAME_VAR_DEF(uint16_t, P19_Ht, 0x0054df9a)
-GAME_VAR_DEF(int32_t, P19_F1, 0x0054dfe4)
-GAME_VAR_DEF(int32_t, P19_F2, 0x0054dff4)
-GAME_VAR_DEF(int32_t, P19_F3, 0x0054e004)
-GAME_VAR_DEF(int32_t, P19_Cond, 0x00b87e38)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_Cur")
+#undef P19_Cur
+#pragma push_macro("P19_Cur") /*gvi*/
+#undef P19_Cur /*gvi*/
+float P19_Cur;
+#pragma pop_macro("P19_Cur") /*gvi*/
+#pragma pop_macro("P19_Cur")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_Target")
+#undef P19_Target
+#pragma push_macro("P19_Target") /*gvi*/
+#undef P19_Target /*gvi*/
+float P19_Target;
+#pragma pop_macro("P19_Target") /*gvi*/
+#pragma pop_macro("P19_Target")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_Active")
+#undef P19_Active
+#pragma push_macro("P19_Active") /*gvi*/
+#undef P19_Active /*gvi*/
+int32_t P19_Active;
+#pragma pop_macro("P19_Active") /*gvi*/
+#pragma pop_macro("P19_Active")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_Out68")
+#undef P19_Out68
+#pragma push_macro("P19_Out68") /*gvi*/
+#undef P19_Out68 /*gvi*/
+float P19_Out68;
+#pragma pop_macro("P19_Out68") /*gvi*/
+#pragma pop_macro("P19_Out68")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_OutA")
+#undef P19_OutA
+#pragma push_macro("P19_OutA") /*gvi*/
+#undef P19_OutA /*gvi*/
+float P19_OutA;
+#pragma pop_macro("P19_OutA") /*gvi*/
+#pragma pop_macro("P19_OutA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_OutB")
+#undef P19_OutB
+#pragma push_macro("P19_OutB") /*gvi*/
+#undef P19_OutB /*gvi*/
+float P19_OutB;
+#pragma pop_macro("P19_OutB") /*gvi*/
+#pragma pop_macro("P19_OutB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_OutC")
+#undef P19_OutC
+#pragma push_macro("P19_OutC") /*gvi*/
+#undef P19_OutC /*gvi*/
+float P19_OutC;
+#pragma pop_macro("P19_OutC") /*gvi*/
+#pragma pop_macro("P19_OutC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_Step")
+#undef P19_Step
+#pragma push_macro("P19_Step") /*gvi*/
+#undef P19_Step /*gvi*/
+float P19_Step;
+#pragma pop_macro("P19_Step") /*gvi*/
+#pragma pop_macro("P19_Step")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_ScrW")
+#undef P19_ScrW
+#pragma push_macro("P19_ScrW") /*gvi*/
+#undef P19_ScrW /*gvi*/
+int32_t P19_ScrW;
+#pragma pop_macro("P19_ScrW") /*gvi*/
+#pragma pop_macro("P19_ScrW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_ScrH")
+#undef P19_ScrH
+#pragma push_macro("P19_ScrH") /*gvi*/
+#undef P19_ScrH /*gvi*/
+int32_t P19_ScrH;
+#pragma pop_macro("P19_ScrH") /*gvi*/
+#pragma pop_macro("P19_ScrH")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_Scale")
+#undef P19_Scale
+#pragma push_macro("P19_Scale") /*gvi*/
+#undef P19_Scale /*gvi*/
+float P19_Scale;
+#pragma pop_macro("P19_Scale") /*gvi*/
+#pragma pop_macro("P19_Scale")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_DivW")
+#undef P19_DivW
+#pragma push_macro("P19_DivW") /*gvi*/
+#undef P19_DivW /*gvi*/
+float P19_DivW;
+#pragma pop_macro("P19_DivW") /*gvi*/
+#pragma pop_macro("P19_DivW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_DivH")
+#undef P19_DivH
+#pragma push_macro("P19_DivH") /*gvi*/
+#undef P19_DivH /*gvi*/
+float P19_DivH;
+#pragma pop_macro("P19_DivH") /*gvi*/
+#pragma pop_macro("P19_DivH")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_DivC")
+#undef P19_DivC
+#pragma push_macro("P19_DivC") /*gvi*/
+#undef P19_DivC /*gvi*/
+float P19_DivC;
+#pragma pop_macro("P19_DivC") /*gvi*/
+#pragma pop_macro("P19_DivC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_Level")
+#undef P19_Level
+#pragma push_macro("P19_Level") /*gvi*/
+#undef P19_Level /*gvi*/
+int32_t P19_Level;
+#pragma pop_macro("P19_Level") /*gvi*/
+#pragma pop_macro("P19_Level")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_Sel")
+#undef P19_Sel
+#pragma push_macro("P19_Sel") /*gvi*/
+#undef P19_Sel /*gvi*/
+int32_t P19_Sel;
+#pragma pop_macro("P19_Sel") /*gvi*/
+#pragma pop_macro("P19_Sel")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_PtrA")
+#undef P19_PtrA
+#pragma push_macro("P19_PtrA") /*gvi*/
+#undef P19_PtrA /*gvi*/
+uint32_t P19_PtrA;
+#pragma pop_macro("P19_PtrA") /*gvi*/
+#pragma pop_macro("P19_PtrA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_Wd")
+#undef P19_Wd
+#pragma push_macro("P19_Wd") /*gvi*/
+#undef P19_Wd /*gvi*/
+uint16_t P19_Wd;
+#pragma pop_macro("P19_Wd") /*gvi*/
+#pragma pop_macro("P19_Wd")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_Ht")
+#undef P19_Ht
+#pragma push_macro("P19_Ht") /*gvi*/
+#undef P19_Ht /*gvi*/
+uint16_t P19_Ht;
+#pragma pop_macro("P19_Ht") /*gvi*/
+#pragma pop_macro("P19_Ht")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_F1")
+#undef P19_F1
+#pragma push_macro("P19_F1") /*gvi*/
+#undef P19_F1 /*gvi*/
+int32_t P19_F1;
+#pragma pop_macro("P19_F1") /*gvi*/
+#pragma pop_macro("P19_F1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_F2")
+#undef P19_F2
+#pragma push_macro("P19_F2") /*gvi*/
+#undef P19_F2 /*gvi*/
+int32_t P19_F2;
+#pragma pop_macro("P19_F2") /*gvi*/
+#pragma pop_macro("P19_F2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_F3")
+#undef P19_F3
+#pragma push_macro("P19_F3") /*gvi*/
+#undef P19_F3 /*gvi*/
+int32_t P19_F3;
+#pragma pop_macro("P19_F3") /*gvi*/
+#pragma pop_macro("P19_F3")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P19_Cond")
+#undef P19_Cond
+#pragma push_macro("P19_Cond") /*gvi*/
+#undef P19_Cond /*gvi*/
+int32_t P19_Cond;
+#pragma pop_macro("P19_Cond") /*gvi*/
+#pragma pop_macro("P19_Cond")
+#endif
 
 int32_t P19_KeysUnique12(void) {
   static const int idx[12] = {0,1,2,3,4,6,7,5,8,9,10,11};

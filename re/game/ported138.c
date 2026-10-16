@@ -97,15 +97,87 @@
 #include "ported129.h"
 #include "ported136.h"
 
-GAME_VAR_DEF(int32_t, P138_B5A8CC, 0x00b5a8cc)
-GAME_VAR_DEF(int32_t, P138_C80954, 0x00c80954)
-GAME_VAR_DEF(int32_t, P138_C80F40, 0x00c80f40)
-GAME_VAR_DEF(int32_t, P138_C80F7C, 0x00c80f7c)
-GAME_VAR_DEF(int32_t, P138_C8168C, 0x00c8168c)
-GAME_VAR_DEF(p138_s100_t, P138_LevBuf, 0x00c81780)
-GAME_VAR_DEF(p138_s40_t, P138_PadsPath, 0x00c4d680)
-GAME_VAR_DEF(p138_s40_t, P138_CfgName, 0x00c4d6c0)
-GAME_VAR_DEF(p138_s40_t, P138_CamsPath, 0x00c4d7c0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P138_B5A8CC")
+#undef P138_B5A8CC
+#pragma push_macro("P138_B5A8CC") /*gvi*/
+#undef P138_B5A8CC /*gvi*/
+int32_t P138_B5A8CC;
+#pragma pop_macro("P138_B5A8CC") /*gvi*/
+#pragma pop_macro("P138_B5A8CC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P138_C80954")
+#undef P138_C80954
+#pragma push_macro("P138_C80954") /*gvi*/
+#undef P138_C80954 /*gvi*/
+int32_t P138_C80954;
+#pragma pop_macro("P138_C80954") /*gvi*/
+#pragma pop_macro("P138_C80954")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P138_C80F40")
+#undef P138_C80F40
+#pragma push_macro("P138_C80F40") /*gvi*/
+#undef P138_C80F40 /*gvi*/
+int32_t P138_C80F40;
+#pragma pop_macro("P138_C80F40") /*gvi*/
+#pragma pop_macro("P138_C80F40")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P138_C80F7C")
+#undef P138_C80F7C
+#pragma push_macro("P138_C80F7C") /*gvi*/
+#undef P138_C80F7C /*gvi*/
+int32_t P138_C80F7C;
+#pragma pop_macro("P138_C80F7C") /*gvi*/
+#pragma pop_macro("P138_C80F7C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P138_C8168C")
+#undef P138_C8168C
+#pragma push_macro("P138_C8168C") /*gvi*/
+#undef P138_C8168C /*gvi*/
+int32_t P138_C8168C;
+#pragma pop_macro("P138_C8168C") /*gvi*/
+#pragma pop_macro("P138_C8168C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P138_LevBuf")
+#undef P138_LevBuf
+#pragma push_macro("P138_LevBuf") /*gvi*/
+#undef P138_LevBuf /*gvi*/
+p138_s100_t P138_LevBuf;
+#pragma pop_macro("P138_LevBuf") /*gvi*/
+#pragma pop_macro("P138_LevBuf")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P138_PadsPath")
+#undef P138_PadsPath
+#pragma push_macro("P138_PadsPath") /*gvi*/
+#undef P138_PadsPath /*gvi*/
+p138_s40_t P138_PadsPath;
+#pragma pop_macro("P138_PadsPath") /*gvi*/
+#pragma pop_macro("P138_PadsPath")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P138_CfgName")
+#undef P138_CfgName
+#pragma push_macro("P138_CfgName") /*gvi*/
+#undef P138_CfgName /*gvi*/
+p138_s40_t P138_CfgName;
+#pragma pop_macro("P138_CfgName") /*gvi*/
+#pragma pop_macro("P138_CfgName")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P138_CamsPath")
+#undef P138_CamsPath
+#pragma push_macro("P138_CamsPath") /*gvi*/
+#undef P138_CamsPath /*gvi*/
+p138_s40_t P138_CamsPath;
+#pragma pop_macro("P138_CamsPath") /*gvi*/
+#pragma pop_macro("P138_CamsPath")
+#endif
 
 #if defined(_WIN32) && !defined(_WIN64)
 #  define P138_STD __attribute__((stdcall))

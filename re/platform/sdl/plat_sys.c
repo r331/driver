@@ -77,7 +77,17 @@ void plat_screensaver_set(int on){
     g_saver = on?1:0;
     if(SDL_WasInit(SDL_INIT_VIDEO)){ if(g_saver) SDL_EnableScreenSaver(); else SDL_DisableScreenSaver(); }
 }
-static void crash_sig(int sig){ signal(sig,SIG_DFL); if(g_crash) g_crash(); _Exit(1); }
+#if defined(__GLIBC__)
+#include <execinfo.h>
+#endif
+/* v2.03: RE_CRASH_BT=1 — стек в stderr перед обработчиком игры (glibc backtrace; адреса — addr2line -f -e driver) */
+static void crash_sig(int sig){
+    signal(sig,SIG_DFL);
+#if defined(__GLIBC__)
+    if (getenv("RE_CRASH_BT")) { void *bt[48]; int n = backtrace(bt, 48); fprintf(stderr, "[crash] сигнал %d, стек:\n", sig); backtrace_symbols_fd(bt, n, 2); }
+#endif
+    if(g_crash) g_crash(); _Exit(1);
+}
 void plat_set_crash_handler(void (*fn)(void)){
     g_crash=fn;
     void (*h)(int)= fn?crash_sig:SIG_DFL;
@@ -197,6 +207,7 @@ void *plat_fopen_game(const char *path, const char *mode) {
        (или первого, если RE_SHOT_FIRST=1); RE_MAX_PUMPS=N — выход после N циклов сообщений без кадров (защита) --- */
 int png_write_rgba(const char *path, const uint32_t *px, int w, int h);   /* tests/render_test.c */
 static int g_frames, g_pumps, g_shot_done;
+int plat_frame_no(void) { return g_frames; }
 static void frame_shot(void) {
     const char *png = getenv("RE_SHOT_PNG"); int w = 0, h = 0;
     if (!png || !*png || !g_win) return;

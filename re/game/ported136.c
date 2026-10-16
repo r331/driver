@@ -84,12 +84,60 @@
 #include "ported133.h"
 #include "ported145.h"
 
-GAME_VAR_DEF(p136_rot_t, P136_WheelRot, 0x00b1fce0)
-GAME_VAR_DEF(p136_rot_t, P136_WheelRotB, 0x00b1fde8)
-GAME_VAR_DEF(p136_path_t, P136_EvPath, 0x01134140)
-GAME_VAR_DEF(p136_pal16_t, P136_Pal16, 0x01271680)
-GAME_VAR_DEF(p136_path_t, P136_MapName, 0x00c80fa0)
-GAME_VAR_DEF(int32_t, P136_MapScroll, 0x00c80884)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P136_WheelRot")
+#undef P136_WheelRot
+#pragma push_macro("P136_WheelRot") /*gvi*/
+#undef P136_WheelRot /*gvi*/
+p136_rot_t P136_WheelRot;
+#pragma pop_macro("P136_WheelRot") /*gvi*/
+#pragma pop_macro("P136_WheelRot")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P136_WheelRotB")
+#undef P136_WheelRotB
+#pragma push_macro("P136_WheelRotB") /*gvi*/
+#undef P136_WheelRotB /*gvi*/
+p136_rot_t P136_WheelRotB;
+#pragma pop_macro("P136_WheelRotB") /*gvi*/
+#pragma pop_macro("P136_WheelRotB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P136_EvPath")
+#undef P136_EvPath
+#pragma push_macro("P136_EvPath") /*gvi*/
+#undef P136_EvPath /*gvi*/
+p136_path_t P136_EvPath;
+#pragma pop_macro("P136_EvPath") /*gvi*/
+#pragma pop_macro("P136_EvPath")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P136_Pal16")
+#undef P136_Pal16
+#pragma push_macro("P136_Pal16") /*gvi*/
+#undef P136_Pal16 /*gvi*/
+p136_pal16_t P136_Pal16;
+#pragma pop_macro("P136_Pal16") /*gvi*/
+#pragma pop_macro("P136_Pal16")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P136_MapName")
+#undef P136_MapName
+#pragma push_macro("P136_MapName") /*gvi*/
+#undef P136_MapName /*gvi*/
+p136_path_t P136_MapName;
+#pragma pop_macro("P136_MapName") /*gvi*/
+#pragma pop_macro("P136_MapName")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P136_MapScroll")
+#undef P136_MapScroll
+#pragma push_macro("P136_MapScroll") /*gvi*/
+#undef P136_MapScroll /*gvi*/
+int32_t P136_MapScroll;
+#pragma pop_macro("P136_MapScroll") /*gvi*/
+#pragma pop_macro("P136_MapScroll")
+#endif
 
 typedef long double ld;
 static void wf(uint8_t *v, uint32_t off, float f) { memcpy(v + off, &f, 4); }

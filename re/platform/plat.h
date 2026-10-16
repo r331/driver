@@ -152,6 +152,10 @@ void    plat_di_unacquire(void *dev);                  /* IDirectInputDevice::Un
 int32_t plat_di_set_format(void *dev, int kind);       /* SetDataFormat; 0 — успех */
 int32_t plat_di_acquire(void *dev);                    /* Acquire; 0 — успех */
 int32_t plat_di_get_state(void *dev, uint32_t size, void *buf); /* GetDeviceState; 0 — успех */
+void    plat_input_enable(int on);                 /* v2.03 (SDL): GetDeviceState клавиатуры — SDL/геймпад/RE_KEYS (только игра) */
+void    plat_input_fill_keys(uint8_t *keys256);    /* v2.03 (SDL): добавить нажатые клавиши (DIK, 0x80) */
+int     plat_key_dik(const char *name);            /* v2.03 (SDL): имя клавиши/номер → DIK, -1 — неизвестно */
+int     plat_frame_no(void);                       /* v2.03 (SDL): номер последнего показанного кадра (plat_flip) */
 int32_t plat_di_poll(void *dev);                       /* IDirectInputDevice2::Poll; 0 или 1 (DI_NOEFFECT) — успех */
 void    plat_di_stub_joy(int32_t x, int32_t y, int32_t poll_rc); /* тест (SDL): что вернёт джойстик (lX, lY) и Poll */
 void    plat_event_close(void *h);                     /* CloseHandle события */

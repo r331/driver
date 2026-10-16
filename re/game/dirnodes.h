@@ -34,7 +34,16 @@ void DrawCornerIndicator(void);                  /* 004c42a9 */
 #define DirIndicatorCnt GAME_VAR(int32_t,  DirIndicatorCnt, 0x00d17b80)
 #define IndicatorTex    GAME_VAR(uint32_t, IndicatorTex,    0x00c55c58)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("DirIndicatorOn") /*gvi*/
+#undef DirIndicatorOn /*gvi*/
+#pragma push_macro("DirIndicatorCnt") /*gvi*/
+#undef DirIndicatorCnt /*gvi*/
+#pragma push_macro("IndicatorTex") /*gvi*/
+#undef IndicatorTex /*gvi*/
 extern int32_t DirIndicatorOn, DirIndicatorCnt; extern uint32_t IndicatorTex;
+#pragma pop_macro("IndicatorTex") /*gvi*/
+#pragma pop_macro("DirIndicatorCnt") /*gvi*/
+#pragma pop_macro("DirIndicatorOn") /*gvi*/
 #endif
 void DrawNode(DIR_NODE *node);                    /* 004c3d5c */
 void DrawNodeMarker(DIR_NODE *node);              /* 004c3e6a */
@@ -45,14 +54,39 @@ void DrawNodeMarker(DIR_NODE *node);              /* 004c3e6a */
 #define NodeIconTex NodeIconTexArr
 #endif
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("DirSelectedColor") /*gvi*/
+#undef DirSelectedColor /*gvi*/
 extern uint32_t DirSelectedColor; extern uint32_t NodeIconTexArr[];
+#pragma pop_macro("DirSelectedColor") /*gvi*/
 #endif
 
 #define DirUseDI GAME_VAR(int32_t, DirUseDI, 0x00d17ba0)
 #define KeyArr(a) ((uint8_t*)(uintptr_t)(a))
 #define CamParamTbl CARTAB_VAR(int32_t, CamParamTbl, 0x00d0788c)
 #ifndef RE_HOOK_BUILD
-extern int32_t DirUseDI; extern uint8_t KeyState[0x200]; extern int32_t CamParamTblArr[0x52*4];
+#pragma push_macro("DirUseDI") /*gvi*/
+#undef DirUseDI /*gvi*/
+extern int32_t DirUseDI; extern int32_t CamParamTblArr[0x52*4];
+#pragma pop_macro("DirUseDI") /*gvi*/
+#pragma push_macro("A_00D04B00") /*gvi*/
+#undef A_00D04B00 /*gvi*/
+extern uint8_t A_00D04B00[];
+#pragma pop_macro("A_00D04B00") /*gvi*/
+#define KeyState ((uint8_t *)re_gvar(0x00d04b00u, 0x40000u, (void *)&A_00D04B00[0]))   /* v2.03: 00d04b00 (клавиши + предыдущие) — один блок с P34_Keys/IsFlagSetNotMasked_004E383A */
 #endif
 uint32_t ReadDirectorKeys(void);                  /* 004c3f8f */
 void ClampCameraHeight(int32_t *cam);             /* 004c356d */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef DirIndicatorOn
+#define DirIndicatorOn (*(int32_t *)re_gvar(0x00d17bacu, sizeof(int32_t), (void *)&DirIndicatorOn))
+#undef DirIndicatorCnt
+#define DirIndicatorCnt (*(int32_t *)re_gvar(0x00d17b80u, sizeof(int32_t), (void *)&DirIndicatorCnt))
+#undef IndicatorTex
+#define IndicatorTex (*(uint32_t *)re_gvar(0x00c55c58u, sizeof(uint32_t), (void *)&IndicatorTex))
+#undef DirSelectedColor
+#define DirSelectedColor (*(uint32_t *)re_gvar(0x00d17b8cu, sizeof(uint32_t), (void *)&DirSelectedColor))
+#undef DirUseDI
+#define DirUseDI (*(int32_t *)re_gvar(0x00d17ba0u, sizeof(int32_t), (void *)&DirUseDI))
+#endif
+/* gvar-img v2.03 end */

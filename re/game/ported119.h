@@ -20,7 +20,19 @@ typedef float p119_wheels_t[16];
 #define P119_SelPtr   GAME_VAR(uint32_t, P119_SelPtr, 0x005fea14)       /* адрес таблицы выбора машины (.data 0054e320/28/30), по 4 байта: камера, скорость, влево, вправо */
 #define P119_SelIdx   GAME_VAR(int32_t, P119_SelIdx, 0x005fea18)        /* текущая запись */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P119_GroundY") /*gvi*/
+#undef P119_GroundY /*gvi*/
+#pragma push_macro("P119_SelIdx") /*gvi*/
+#undef P119_SelIdx /*gvi*/
+#pragma push_macro("P119_Wheels") /*gvi*/
+#undef P119_Wheels /*gvi*/
+#pragma push_macro("P119_SelPtr") /*gvi*/
+#undef P119_SelPtr /*gvi*/
 extern int32_t P119_GroundY, P119_SelIdx; extern p119_wheels_t P119_Wheels; extern uint32_t P119_SelPtr;
+#pragma pop_macro("P119_SelPtr") /*gvi*/
+#pragma pop_macro("P119_Wheels") /*gvi*/
+#pragma pop_macro("P119_SelIdx") /*gvi*/
+#pragma pop_macro("P119_GroundY") /*gvi*/
 #endif
 void    P119_Hubcap(int32_t draw);                                                      /* 004c0c6f */
 int32_t P119_TrafficSpawn(int32_t i, int32_t node, int32_t lane, int32_t x, int32_t z);  /* 00491a56 */
@@ -33,3 +45,15 @@ void    P119_CarSkids(int32_t i);                                               
 void    P119_TrafficSpeed(uint8_t *rec, uint8_t *car);                                  /* 0048fbcf */
 void    P119_TrafficParked(int32_t heading, int32_t x, int32_t z);                      /* 004928c9 */
 void    P119_Hud(void);                                                                 /* 0050230a */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P119_GroundY
+#define P119_GroundY (*(int32_t *)re_gvar(0x00b202b8u, sizeof(int32_t), (void *)&P119_GroundY))
+#undef P119_Wheels
+#define P119_Wheels (*(p119_wheels_t *)re_gvar(0x00d069c0u, sizeof(p119_wheels_t), (void *)&P119_Wheels))
+#undef P119_SelPtr
+#define P119_SelPtr (*(uint32_t *)re_gvar(0x005fea14u, sizeof(uint32_t), (void *)&P119_SelPtr))
+#undef P119_SelIdx
+#define P119_SelIdx (*(int32_t *)re_gvar(0x005fea18u, sizeof(int32_t), (void *)&P119_SelIdx))
+#endif
+/* gvar-img v2.03 end */

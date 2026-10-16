@@ -8,7 +8,19 @@
 #define P124_LogOn      GAME_VAR(int32_t, P124_LogOn,      0x00553bbc)  /* .data, начальное 1: писать debug.log */
 #define P124_LogSize    GAME_VAR(int32_t, P124_LogSize,    0x00b20254)  /* ftell после последней записи debug.log */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P124_ReplayPrev") /*gvi*/
+#undef P124_ReplayPrev /*gvi*/
+#pragma push_macro("P124_DirBlink") /*gvi*/
+#undef P124_DirBlink /*gvi*/
+#pragma push_macro("P124_LogOn") /*gvi*/
+#undef P124_LogOn /*gvi*/
+#pragma push_macro("P124_LogSize") /*gvi*/
+#undef P124_LogSize /*gvi*/
 extern int32_t P124_ReplayPrev, P124_DirBlink, P124_LogOn, P124_LogSize;
+#pragma pop_macro("P124_LogSize") /*gvi*/
+#pragma pop_macro("P124_LogOn") /*gvi*/
+#pragma pop_macro("P124_DirBlink") /*gvi*/
+#pragma pop_macro("P124_ReplayPrev") /*gvi*/
 #endif
 int32_t P124_MotelKeys(int32_t junk);                      /* 00416794: в оригинале __fastcall-мусор в ECX (не используется) — передавать 0 */
 void    P124_MotelSample(void);                            /* 00416d6d: ANS/CAR/JOKE%03d.WAV выбранного пункта в сэмпл 7 */
@@ -20,3 +32,15 @@ void    P124_DebugLog(const char *msg);                    /* 004bf2a0: стро
 void    P124_WatchShow(void);                              /* 004bf4a1: 32 наблюдаемые переменные (010ea620, шаг 0xc) в журнал экрана */
 void    P124_ReplayMenu(int32_t dir);                      /* 004c38e2: ReplayMenuHandler — перемещение по узлам меню повтора */
 void    P124_HandleDirector(void);                         /* 004c813d: HandleDirector — такт режиссёра повтора */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P124_ReplayPrev
+#define P124_ReplayPrev (*(int32_t *)re_gvar(0x00d17c60u, sizeof(int32_t), (void *)&P124_ReplayPrev))
+#undef P124_DirBlink
+#define P124_DirBlink (*(int32_t *)re_gvar(0x00d17b78u, sizeof(int32_t), (void *)&P124_DirBlink))
+#undef P124_LogOn
+#define P124_LogOn (*(int32_t *)re_gvar(0x00553bbcu, sizeof(int32_t), (void *)&P124_LogOn))
+#undef P124_LogSize
+#define P124_LogSize (*(int32_t *)re_gvar(0x00b20254u, sizeof(int32_t), (void *)&P124_LogSize))
+#endif
+/* gvar-img v2.03 end */

@@ -127,52 +127,380 @@
 p103_menutab_t P103_MenuTab = { P100_DB58_INIT };
 uint8_t P103_MObj[P103_MOBJ_SIZE] = P103_MOBJ_INIT;
 #endif
-GAME_VAR_DEF(int32_t, P103_MObjN, 0x00c80948)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_MObjN")
+#undef P103_MObjN
+#pragma push_macro("P103_MObjN") /*gvi*/
+#undef P103_MObjN /*gvi*/
+int32_t P103_MObjN;
+#pragma pop_macro("P103_MObjN") /*gvi*/
+#pragma pop_macro("P103_MObjN")
+#endif
 GAME_VAR_DEF(uint8_t *, P103_Slider, 0x005fe9d8)
 GAME_VAR_DEF(uint8_t *, P103_SliderBar, 0x005fe9d4)
 
-GAME_VAR_DEF(int32_t, P103_1373D4, 0x011373d4)
-GAME_VAR_DEF(int32_t, P103_139A38, 0x01139a38)
-GAME_VAR_DEF(int32_t, P103_13A5A0, 0x0113a5a0)
-GAME_VAR_DEF(int32_t, P103_1426E0, 0x011426e0)
-GAME_VAR_DEF(int32_t, P103_1426EC, 0x011426ec)
-GAME_VAR_DEF(int32_t, P103_1426F0, 0x011426f0)
-GAME_VAR_DEF(int32_t, P103_1426F4, 0x011426f4)
-GAME_VAR_DEF(int32_t, P103_143724, 0x01143724)
-GAME_VAR_DEF(int32_t, P103_144320, 0x01144320)
-GAME_VAR_DEF(int32_t, P103_1443C0, 0x011443c0)
-GAME_VAR_DEF(int32_t, P103_145A44, 0x01145a44)
-GAME_VAR_DEF(int32_t, P103_DmgPct, 0x011373c8)
-GAME_VAR_DEF(p103_i4_t, P103_PathLen, 0x00c81990)
-GAME_VAR_DEF(float, P103_PathK, 0x00c56714)
-GAME_VAR_DEF(int32_t, P103_D118E0, 0x00d118e0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_1373D4")
+#undef P103_1373D4
+#pragma push_macro("P103_1373D4") /*gvi*/
+#undef P103_1373D4 /*gvi*/
+int32_t P103_1373D4;
+#pragma pop_macro("P103_1373D4") /*gvi*/
+#pragma pop_macro("P103_1373D4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_139A38")
+#undef P103_139A38
+#pragma push_macro("P103_139A38") /*gvi*/
+#undef P103_139A38 /*gvi*/
+int32_t P103_139A38;
+#pragma pop_macro("P103_139A38") /*gvi*/
+#pragma pop_macro("P103_139A38")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_13A5A0")
+#undef P103_13A5A0
+#pragma push_macro("P103_13A5A0") /*gvi*/
+#undef P103_13A5A0 /*gvi*/
+int32_t P103_13A5A0;
+#pragma pop_macro("P103_13A5A0") /*gvi*/
+#pragma pop_macro("P103_13A5A0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_1426E0")
+#undef P103_1426E0
+#pragma push_macro("P103_1426E0") /*gvi*/
+#undef P103_1426E0 /*gvi*/
+int32_t P103_1426E0;
+#pragma pop_macro("P103_1426E0") /*gvi*/
+#pragma pop_macro("P103_1426E0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_1426EC")
+#undef P103_1426EC
+#pragma push_macro("P103_1426EC") /*gvi*/
+#undef P103_1426EC /*gvi*/
+int32_t P103_1426EC;
+#pragma pop_macro("P103_1426EC") /*gvi*/
+#pragma pop_macro("P103_1426EC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_1426F0")
+#undef P103_1426F0
+#pragma push_macro("P103_1426F0") /*gvi*/
+#undef P103_1426F0 /*gvi*/
+int32_t P103_1426F0;
+#pragma pop_macro("P103_1426F0") /*gvi*/
+#pragma pop_macro("P103_1426F0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_1426F4")
+#undef P103_1426F4
+#pragma push_macro("P103_1426F4") /*gvi*/
+#undef P103_1426F4 /*gvi*/
+int32_t P103_1426F4;
+#pragma pop_macro("P103_1426F4") /*gvi*/
+#pragma pop_macro("P103_1426F4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_143724")
+#undef P103_143724
+#pragma push_macro("P103_143724") /*gvi*/
+#undef P103_143724 /*gvi*/
+int32_t P103_143724;
+#pragma pop_macro("P103_143724") /*gvi*/
+#pragma pop_macro("P103_143724")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_144320")
+#undef P103_144320
+#pragma push_macro("P103_144320") /*gvi*/
+#undef P103_144320 /*gvi*/
+int32_t P103_144320;
+#pragma pop_macro("P103_144320") /*gvi*/
+#pragma pop_macro("P103_144320")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_1443C0")
+#undef P103_1443C0
+#pragma push_macro("P103_1443C0") /*gvi*/
+#undef P103_1443C0 /*gvi*/
+int32_t P103_1443C0;
+#pragma pop_macro("P103_1443C0") /*gvi*/
+#pragma pop_macro("P103_1443C0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_145A44")
+#undef P103_145A44
+#pragma push_macro("P103_145A44") /*gvi*/
+#undef P103_145A44 /*gvi*/
+int32_t P103_145A44;
+#pragma pop_macro("P103_145A44") /*gvi*/
+#pragma pop_macro("P103_145A44")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_DmgPct")
+#undef P103_DmgPct
+#pragma push_macro("P103_DmgPct") /*gvi*/
+#undef P103_DmgPct /*gvi*/
+int32_t P103_DmgPct;
+#pragma pop_macro("P103_DmgPct") /*gvi*/
+#pragma pop_macro("P103_DmgPct")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_PathLen")
+#undef P103_PathLen
+#pragma push_macro("P103_PathLen") /*gvi*/
+#undef P103_PathLen /*gvi*/
+p103_i4_t P103_PathLen;
+#pragma pop_macro("P103_PathLen") /*gvi*/
+#pragma pop_macro("P103_PathLen")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_PathK")
+#undef P103_PathK
+#pragma push_macro("P103_PathK") /*gvi*/
+#undef P103_PathK /*gvi*/
+float P103_PathK;
+#pragma pop_macro("P103_PathK") /*gvi*/
+#pragma pop_macro("P103_PathK")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_D118E0")
+#undef P103_D118E0
+#pragma push_macro("P103_D118E0") /*gvi*/
+#undef P103_D118E0 /*gvi*/
+int32_t P103_D118E0;
+#pragma pop_macro("P103_D118E0") /*gvi*/
+#pragma pop_macro("P103_D118E0")
+#endif
 GAME_VAR_DEF(uint8_t *, P103_HQuad, 0x00b2f300)
 GAME_VAR_DEF(uint8_t *, P103_HBlk, 0x00b2f308)
-GAME_VAR_DEF(int32_t, P103_HCellZ, 0x00bdfaf0)
-GAME_VAR_DEF(int32_t, P103_HCellX, 0x00bdfaf4)
-GAME_VAR_DEF(p103_box_t, P103_CarBoxes, 0x00b2ecd0)
-GAME_VAR_DEF(int32_t, P103_B5A848, 0x00b5a848)
-GAME_VAR_DEF(int32_t, P103_B5A84C, 0x00b5a84c)
-GAME_VAR_DEF(uint8_t, P103_B5A895, 0x00b5a895)
-GAME_VAR_DEF(uint8_t, P103_B5A8A9, 0x00b5a8a9)
-GAME_VAR_DEF(uint8_t, P103_B5A8AA, 0x00b5a8aa)
-GAME_VAR_DEF(int32_t, P103_B5A8B4, 0x00b5a8b4)
-GAME_VAR_DEF(int32_t, P103_B5A8B8, 0x00b5a8b8)
-GAME_VAR_DEF(int32_t, P103_B5A8C4, 0x00b5a8c4)
-GAME_VAR_DEF(int32_t, P103_B5A8C8, 0x00b5a8c8)
-GAME_VAR_DEF(uint8_t, P103_C4D664, 0x00c4d664)
-GAME_VAR_DEF(int32_t, P103_C4D874, 0x00c4d874)
-GAME_VAR_DEF(int32_t, P103_C4D920, 0x00c4d920)
-GAME_VAR_DEF(int32_t, P103_C4D924, 0x00c4d924)
-GAME_VAR_DEF(int32_t, P103_C4D9A0, 0x00c4d9a0)
-GAME_VAR_DEF(uint8_t, P103_C4D9A4, 0x00c4d9a4)
-GAME_VAR_DEF(int32_t, P103_C54AA0, 0x00c54aa0)
-GAME_VAR_DEF(int32_t, P103_C54D00, 0x00c54d00)
-GAME_VAR_DEF(int32_t, P103_C54D04, 0x00c54d04)
-GAME_VAR_DEF(int32_t, P103_C54EC4, 0x00c54ec4)
-GAME_VAR_DEF(int32_t, P103_C54FC0, 0x00c54fc0)
-GAME_VAR_DEF(int32_t, P103_C54FC4, 0x00c54fc4)
-GAME_VAR_DEF(p103_b88_t, P103_C54EE0, 0x00c54ee0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_HCellZ")
+#undef P103_HCellZ
+#pragma push_macro("P103_HCellZ") /*gvi*/
+#undef P103_HCellZ /*gvi*/
+int32_t P103_HCellZ;
+#pragma pop_macro("P103_HCellZ") /*gvi*/
+#pragma pop_macro("P103_HCellZ")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_HCellX")
+#undef P103_HCellX
+#pragma push_macro("P103_HCellX") /*gvi*/
+#undef P103_HCellX /*gvi*/
+int32_t P103_HCellX;
+#pragma pop_macro("P103_HCellX") /*gvi*/
+#pragma pop_macro("P103_HCellX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_CarBoxes")
+#undef P103_CarBoxes
+#pragma push_macro("P103_CarBoxes") /*gvi*/
+#undef P103_CarBoxes /*gvi*/
+p103_box_t P103_CarBoxes;
+#pragma pop_macro("P103_CarBoxes") /*gvi*/
+#pragma pop_macro("P103_CarBoxes")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_B5A848")
+#undef P103_B5A848
+#pragma push_macro("P103_B5A848") /*gvi*/
+#undef P103_B5A848 /*gvi*/
+int32_t P103_B5A848;
+#pragma pop_macro("P103_B5A848") /*gvi*/
+#pragma pop_macro("P103_B5A848")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_B5A84C")
+#undef P103_B5A84C
+#pragma push_macro("P103_B5A84C") /*gvi*/
+#undef P103_B5A84C /*gvi*/
+int32_t P103_B5A84C;
+#pragma pop_macro("P103_B5A84C") /*gvi*/
+#pragma pop_macro("P103_B5A84C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_B5A895")
+#undef P103_B5A895
+#pragma push_macro("P103_B5A895") /*gvi*/
+#undef P103_B5A895 /*gvi*/
+uint8_t P103_B5A895;
+#pragma pop_macro("P103_B5A895") /*gvi*/
+#pragma pop_macro("P103_B5A895")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_B5A8A9")
+#undef P103_B5A8A9
+#pragma push_macro("P103_B5A8A9") /*gvi*/
+#undef P103_B5A8A9 /*gvi*/
+uint8_t P103_B5A8A9;
+#pragma pop_macro("P103_B5A8A9") /*gvi*/
+#pragma pop_macro("P103_B5A8A9")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_B5A8AA")
+#undef P103_B5A8AA
+#pragma push_macro("P103_B5A8AA") /*gvi*/
+#undef P103_B5A8AA /*gvi*/
+uint8_t P103_B5A8AA;
+#pragma pop_macro("P103_B5A8AA") /*gvi*/
+#pragma pop_macro("P103_B5A8AA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_B5A8B4")
+#undef P103_B5A8B4
+#pragma push_macro("P103_B5A8B4") /*gvi*/
+#undef P103_B5A8B4 /*gvi*/
+int32_t P103_B5A8B4;
+#pragma pop_macro("P103_B5A8B4") /*gvi*/
+#pragma pop_macro("P103_B5A8B4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_B5A8B8")
+#undef P103_B5A8B8
+#pragma push_macro("P103_B5A8B8") /*gvi*/
+#undef P103_B5A8B8 /*gvi*/
+int32_t P103_B5A8B8;
+#pragma pop_macro("P103_B5A8B8") /*gvi*/
+#pragma pop_macro("P103_B5A8B8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_B5A8C4")
+#undef P103_B5A8C4
+#pragma push_macro("P103_B5A8C4") /*gvi*/
+#undef P103_B5A8C4 /*gvi*/
+int32_t P103_B5A8C4;
+#pragma pop_macro("P103_B5A8C4") /*gvi*/
+#pragma pop_macro("P103_B5A8C4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_B5A8C8")
+#undef P103_B5A8C8
+#pragma push_macro("P103_B5A8C8") /*gvi*/
+#undef P103_B5A8C8 /*gvi*/
+int32_t P103_B5A8C8;
+#pragma pop_macro("P103_B5A8C8") /*gvi*/
+#pragma pop_macro("P103_B5A8C8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_C4D664")
+#undef P103_C4D664
+#pragma push_macro("P103_C4D664") /*gvi*/
+#undef P103_C4D664 /*gvi*/
+uint8_t P103_C4D664;
+#pragma pop_macro("P103_C4D664") /*gvi*/
+#pragma pop_macro("P103_C4D664")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_C4D874")
+#undef P103_C4D874
+#pragma push_macro("P103_C4D874") /*gvi*/
+#undef P103_C4D874 /*gvi*/
+int32_t P103_C4D874;
+#pragma pop_macro("P103_C4D874") /*gvi*/
+#pragma pop_macro("P103_C4D874")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_C4D920")
+#undef P103_C4D920
+#pragma push_macro("P103_C4D920") /*gvi*/
+#undef P103_C4D920 /*gvi*/
+int32_t P103_C4D920;
+#pragma pop_macro("P103_C4D920") /*gvi*/
+#pragma pop_macro("P103_C4D920")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_C4D924")
+#undef P103_C4D924
+#pragma push_macro("P103_C4D924") /*gvi*/
+#undef P103_C4D924 /*gvi*/
+int32_t P103_C4D924;
+#pragma pop_macro("P103_C4D924") /*gvi*/
+#pragma pop_macro("P103_C4D924")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_C4D9A0")
+#undef P103_C4D9A0
+#pragma push_macro("P103_C4D9A0") /*gvi*/
+#undef P103_C4D9A0 /*gvi*/
+int32_t P103_C4D9A0;
+#pragma pop_macro("P103_C4D9A0") /*gvi*/
+#pragma pop_macro("P103_C4D9A0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_C4D9A4")
+#undef P103_C4D9A4
+#pragma push_macro("P103_C4D9A4") /*gvi*/
+#undef P103_C4D9A4 /*gvi*/
+uint8_t P103_C4D9A4;
+#pragma pop_macro("P103_C4D9A4") /*gvi*/
+#pragma pop_macro("P103_C4D9A4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_C54AA0")
+#undef P103_C54AA0
+#pragma push_macro("P103_C54AA0") /*gvi*/
+#undef P103_C54AA0 /*gvi*/
+int32_t P103_C54AA0;
+#pragma pop_macro("P103_C54AA0") /*gvi*/
+#pragma pop_macro("P103_C54AA0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_C54D00")
+#undef P103_C54D00
+#pragma push_macro("P103_C54D00") /*gvi*/
+#undef P103_C54D00 /*gvi*/
+int32_t P103_C54D00;
+#pragma pop_macro("P103_C54D00") /*gvi*/
+#pragma pop_macro("P103_C54D00")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_C54D04")
+#undef P103_C54D04
+#pragma push_macro("P103_C54D04") /*gvi*/
+#undef P103_C54D04 /*gvi*/
+int32_t P103_C54D04;
+#pragma pop_macro("P103_C54D04") /*gvi*/
+#pragma pop_macro("P103_C54D04")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_C54EC4")
+#undef P103_C54EC4
+#pragma push_macro("P103_C54EC4") /*gvi*/
+#undef P103_C54EC4 /*gvi*/
+int32_t P103_C54EC4;
+#pragma pop_macro("P103_C54EC4") /*gvi*/
+#pragma pop_macro("P103_C54EC4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_C54FC0")
+#undef P103_C54FC0
+#pragma push_macro("P103_C54FC0") /*gvi*/
+#undef P103_C54FC0 /*gvi*/
+int32_t P103_C54FC0;
+#pragma pop_macro("P103_C54FC0") /*gvi*/
+#pragma pop_macro("P103_C54FC0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_C54FC4")
+#undef P103_C54FC4
+#pragma push_macro("P103_C54FC4") /*gvi*/
+#undef P103_C54FC4 /*gvi*/
+int32_t P103_C54FC4;
+#pragma pop_macro("P103_C54FC4") /*gvi*/
+#pragma pop_macro("P103_C54FC4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P103_C54EE0")
+#undef P103_C54EE0
+#pragma push_macro("P103_C54EE0") /*gvi*/
+#undef P103_C54EE0 /*gvi*/
+p103_b88_t P103_C54EE0;
+#pragma pop_macro("P103_C54EE0") /*gvi*/
+#pragma pop_macro("P103_C54EE0")
+#endif
 
 static int32_t mul(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b); }   /* imul с переполнением */
 static int32_t iabs(int32_t v) { return v < 0 ? -v : v; }

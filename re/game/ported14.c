@@ -2,38 +2,294 @@
 #include "ported12.h"
 #include "unported.h"
 #include <string.h>
-GAME_VAR_DEF(p14_00d14ee4_t,P14_00d14ee4,0x00d14ee4)
-GAME_VAR_DEF(p14_00d14ee0_t,P14_00d14ee0,0x00d14ee0)
-GAME_VAR_DEF(p14_00c810c4_t,P14_00c810c4,0x00c810c4)
-GAME_VAR_DEF(p14_00d0778c_t,P14_00d0778c,0x00d0778c)
-GAME_VAR_DEF(p14_00b87ee4_t,P14_00b87ee4,0x00b87ee4)
-GAME_VAR_DEF(p14_00bdfa58_t,P14_00bdfa58,0x00bdfa58)
-GAME_VAR_DEF(p14_00bdfa44_t,P14_00bdfa44,0x00bdfa44)
-GAME_VAR_DEF(p14_00c810e8_t,P14_00c810e8,0x00c810e8)
-GAME_VAR_DEF(p14_00c81100_t,P14_00c81100,0x00c81100)
-GAME_VAR_DEF(p14_00c4bdc4_t,P14_00c4bdc4,0x00c4bdc4)
-GAME_VAR_DEF(p14_00c29d80_t,P14_00c29d80,0x00c29d80)
-GAME_VAR_DEF(p14_00c29d81_t,P14_00c29d81,0x00c29d81)
-GAME_VAR_DEF(p14_00bf1c20_t,P14_00bf1c20,0x00bf1c20)
-GAME_VAR_DEF(p14_00b31e20_t,P14_00b31e20,0x00b31e20)
-GAME_VAR_DEF(p14_00b31dfc_t,P14_00b31dfc,0x00b31dfc)
-GAME_VAR_DEF(p14_00b31db8_t,P14_00b31db8,0x00b31db8)
-GAME_VAR_DEF(p14_00b31d30_t,P14_00b31d30,0x00b31d30)
-GAME_VAR_DEF(p14_00b202d8_t,P14_00b202d8,0x00b202d8)
-GAME_VAR_DEF(p14_00b202dc_t,P14_00b202dc,0x00b202dc)
-GAME_VAR_DEF(p14_00b87e84_t,P14_00b87e84,0x00b87e84)
-GAME_VAR_DEF(p14_00d17b28_t,P14_00d17b28,0x00d17b28)
-GAME_VAR_DEF(p14_00d17afc_t,P14_00d17afc,0x00d17afc)
-GAME_VAR_DEF(p14_00d17b18_t,P14_00d17b18,0x00d17b18)
-GAME_VAR_DEF(p14_005d592e_t,P14_005d592e,0x005d592e)
-GAME_VAR_DEF(p14_005d57ae_t,P14_005d57ae,0x005d57ae)
-GAME_VAR_DEF(p14_00c1ed80_t,P14_00c1ed80,0x00c1ed80)
-GAME_VAR_DEF(p14_00b5a8ec_t,P14_00b5a8ec,0x00b5a8ec)
-GAME_VAR_DEF(p14_01252be0_t,P14_01252be0,0x01252be0)
-GAME_VAR_DEF(p14_00d11a5c_t,P14_00d11a5c,0x00d11a5c)
-GAME_VAR_DEF(p14_00d118a8_t,P14_00d118a8,0x00d118a8)
-GAME_VAR_DEF(p14_00b87e48_t,P14_00b87e48,0x00b87e48)
-GAME_VAR_DEF(p14_00b20360_t,P14_00b20360,0x00b20360)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00d14ee4")
+#undef P14_00d14ee4
+#pragma push_macro("P14_00d14ee4") /*gvi*/
+#undef P14_00d14ee4 /*gvi*/
+p14_00d14ee4_t P14_00d14ee4;
+#pragma pop_macro("P14_00d14ee4") /*gvi*/
+#pragma pop_macro("P14_00d14ee4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00d14ee0")
+#undef P14_00d14ee0
+#pragma push_macro("P14_00d14ee0") /*gvi*/
+#undef P14_00d14ee0 /*gvi*/
+p14_00d14ee0_t P14_00d14ee0;
+#pragma pop_macro("P14_00d14ee0") /*gvi*/
+#pragma pop_macro("P14_00d14ee0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00c810c4")
+#undef P14_00c810c4
+#pragma push_macro("P14_00c810c4") /*gvi*/
+#undef P14_00c810c4 /*gvi*/
+p14_00c810c4_t P14_00c810c4;
+#pragma pop_macro("P14_00c810c4") /*gvi*/
+#pragma pop_macro("P14_00c810c4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00d0778c")
+#undef P14_00d0778c
+#pragma push_macro("P14_00d0778c") /*gvi*/
+#undef P14_00d0778c /*gvi*/
+p14_00d0778c_t P14_00d0778c;
+#pragma pop_macro("P14_00d0778c") /*gvi*/
+#pragma pop_macro("P14_00d0778c")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00b87ee4")
+#undef P14_00b87ee4
+#pragma push_macro("P14_00b87ee4") /*gvi*/
+#undef P14_00b87ee4 /*gvi*/
+p14_00b87ee4_t P14_00b87ee4;
+#pragma pop_macro("P14_00b87ee4") /*gvi*/
+#pragma pop_macro("P14_00b87ee4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00bdfa58")
+#undef P14_00bdfa58
+#pragma push_macro("P14_00bdfa58") /*gvi*/
+#undef P14_00bdfa58 /*gvi*/
+p14_00bdfa58_t P14_00bdfa58;
+#pragma pop_macro("P14_00bdfa58") /*gvi*/
+#pragma pop_macro("P14_00bdfa58")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00bdfa44")
+#undef P14_00bdfa44
+#pragma push_macro("P14_00bdfa44") /*gvi*/
+#undef P14_00bdfa44 /*gvi*/
+p14_00bdfa44_t P14_00bdfa44;
+#pragma pop_macro("P14_00bdfa44") /*gvi*/
+#pragma pop_macro("P14_00bdfa44")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00c810e8")
+#undef P14_00c810e8
+#pragma push_macro("P14_00c810e8") /*gvi*/
+#undef P14_00c810e8 /*gvi*/
+p14_00c810e8_t P14_00c810e8;
+#pragma pop_macro("P14_00c810e8") /*gvi*/
+#pragma pop_macro("P14_00c810e8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00c81100")
+#undef P14_00c81100
+#pragma push_macro("P14_00c81100") /*gvi*/
+#undef P14_00c81100 /*gvi*/
+p14_00c81100_t P14_00c81100;
+#pragma pop_macro("P14_00c81100") /*gvi*/
+#pragma pop_macro("P14_00c81100")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00c4bdc4")
+#undef P14_00c4bdc4
+#pragma push_macro("P14_00c4bdc4") /*gvi*/
+#undef P14_00c4bdc4 /*gvi*/
+p14_00c4bdc4_t P14_00c4bdc4;
+#pragma pop_macro("P14_00c4bdc4") /*gvi*/
+#pragma pop_macro("P14_00c4bdc4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00c29d80")
+#undef P14_00c29d80
+#pragma push_macro("P14_00c29d80") /*gvi*/
+#undef P14_00c29d80 /*gvi*/
+p14_00c29d80_t P14_00c29d80;
+#pragma pop_macro("P14_00c29d80") /*gvi*/
+#pragma pop_macro("P14_00c29d80")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00c29d81")
+#undef P14_00c29d81
+#pragma push_macro("P14_00c29d81") /*gvi*/
+#undef P14_00c29d81 /*gvi*/
+p14_00c29d81_t P14_00c29d81;
+#pragma pop_macro("P14_00c29d81") /*gvi*/
+#pragma pop_macro("P14_00c29d81")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00bf1c20")
+#undef P14_00bf1c20
+#pragma push_macro("P14_00bf1c20") /*gvi*/
+#undef P14_00bf1c20 /*gvi*/
+p14_00bf1c20_t P14_00bf1c20;
+#pragma pop_macro("P14_00bf1c20") /*gvi*/
+#pragma pop_macro("P14_00bf1c20")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00b31e20")
+#undef P14_00b31e20
+#pragma push_macro("P14_00b31e20") /*gvi*/
+#undef P14_00b31e20 /*gvi*/
+p14_00b31e20_t P14_00b31e20;
+#pragma pop_macro("P14_00b31e20") /*gvi*/
+#pragma pop_macro("P14_00b31e20")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00b31dfc")
+#undef P14_00b31dfc
+#pragma push_macro("P14_00b31dfc") /*gvi*/
+#undef P14_00b31dfc /*gvi*/
+p14_00b31dfc_t P14_00b31dfc;
+#pragma pop_macro("P14_00b31dfc") /*gvi*/
+#pragma pop_macro("P14_00b31dfc")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00b31db8")
+#undef P14_00b31db8
+#pragma push_macro("P14_00b31db8") /*gvi*/
+#undef P14_00b31db8 /*gvi*/
+p14_00b31db8_t P14_00b31db8;
+#pragma pop_macro("P14_00b31db8") /*gvi*/
+#pragma pop_macro("P14_00b31db8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00b31d30")
+#undef P14_00b31d30
+#pragma push_macro("P14_00b31d30") /*gvi*/
+#undef P14_00b31d30 /*gvi*/
+p14_00b31d30_t P14_00b31d30;
+#pragma pop_macro("P14_00b31d30") /*gvi*/
+#pragma pop_macro("P14_00b31d30")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00b202d8")
+#undef P14_00b202d8
+#pragma push_macro("P14_00b202d8") /*gvi*/
+#undef P14_00b202d8 /*gvi*/
+p14_00b202d8_t P14_00b202d8;
+#pragma pop_macro("P14_00b202d8") /*gvi*/
+#pragma pop_macro("P14_00b202d8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00b202dc")
+#undef P14_00b202dc
+#pragma push_macro("P14_00b202dc") /*gvi*/
+#undef P14_00b202dc /*gvi*/
+p14_00b202dc_t P14_00b202dc;
+#pragma pop_macro("P14_00b202dc") /*gvi*/
+#pragma pop_macro("P14_00b202dc")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00b87e84")
+#undef P14_00b87e84
+#pragma push_macro("P14_00b87e84") /*gvi*/
+#undef P14_00b87e84 /*gvi*/
+p14_00b87e84_t P14_00b87e84;
+#pragma pop_macro("P14_00b87e84") /*gvi*/
+#pragma pop_macro("P14_00b87e84")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00d17b28")
+#undef P14_00d17b28
+#pragma push_macro("P14_00d17b28") /*gvi*/
+#undef P14_00d17b28 /*gvi*/
+p14_00d17b28_t P14_00d17b28;
+#pragma pop_macro("P14_00d17b28") /*gvi*/
+#pragma pop_macro("P14_00d17b28")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00d17afc")
+#undef P14_00d17afc
+#pragma push_macro("P14_00d17afc") /*gvi*/
+#undef P14_00d17afc /*gvi*/
+p14_00d17afc_t P14_00d17afc;
+#pragma pop_macro("P14_00d17afc") /*gvi*/
+#pragma pop_macro("P14_00d17afc")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00d17b18")
+#undef P14_00d17b18
+#pragma push_macro("P14_00d17b18") /*gvi*/
+#undef P14_00d17b18 /*gvi*/
+p14_00d17b18_t P14_00d17b18;
+#pragma pop_macro("P14_00d17b18") /*gvi*/
+#pragma pop_macro("P14_00d17b18")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_005d592e")
+#undef P14_005d592e
+#pragma push_macro("P14_005d592e") /*gvi*/
+#undef P14_005d592e /*gvi*/
+p14_005d592e_t P14_005d592e;
+#pragma pop_macro("P14_005d592e") /*gvi*/
+#pragma pop_macro("P14_005d592e")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_005d57ae")
+#undef P14_005d57ae
+#pragma push_macro("P14_005d57ae") /*gvi*/
+#undef P14_005d57ae /*gvi*/
+p14_005d57ae_t P14_005d57ae;
+#pragma pop_macro("P14_005d57ae") /*gvi*/
+#pragma pop_macro("P14_005d57ae")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00c1ed80")
+#undef P14_00c1ed80
+#pragma push_macro("P14_00c1ed80") /*gvi*/
+#undef P14_00c1ed80 /*gvi*/
+p14_00c1ed80_t P14_00c1ed80;
+#pragma pop_macro("P14_00c1ed80") /*gvi*/
+#pragma pop_macro("P14_00c1ed80")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00b5a8ec")
+#undef P14_00b5a8ec
+#pragma push_macro("P14_00b5a8ec") /*gvi*/
+#undef P14_00b5a8ec /*gvi*/
+p14_00b5a8ec_t P14_00b5a8ec;
+#pragma pop_macro("P14_00b5a8ec") /*gvi*/
+#pragma pop_macro("P14_00b5a8ec")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_01252be0")
+#undef P14_01252be0
+#pragma push_macro("P14_01252be0") /*gvi*/
+#undef P14_01252be0 /*gvi*/
+p14_01252be0_t P14_01252be0;
+#pragma pop_macro("P14_01252be0") /*gvi*/
+#pragma pop_macro("P14_01252be0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00d11a5c")
+#undef P14_00d11a5c
+#pragma push_macro("P14_00d11a5c") /*gvi*/
+#undef P14_00d11a5c /*gvi*/
+p14_00d11a5c_t P14_00d11a5c;
+#pragma pop_macro("P14_00d11a5c") /*gvi*/
+#pragma pop_macro("P14_00d11a5c")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00d118a8")
+#undef P14_00d118a8
+#pragma push_macro("P14_00d118a8") /*gvi*/
+#undef P14_00d118a8 /*gvi*/
+p14_00d118a8_t P14_00d118a8;
+#pragma pop_macro("P14_00d118a8") /*gvi*/
+#pragma pop_macro("P14_00d118a8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00b87e48")
+#undef P14_00b87e48
+#pragma push_macro("P14_00b87e48") /*gvi*/
+#undef P14_00b87e48 /*gvi*/
+p14_00b87e48_t P14_00b87e48;
+#pragma pop_macro("P14_00b87e48") /*gvi*/
+#pragma pop_macro("P14_00b87e48")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P14_00b20360")
+#undef P14_00b20360
+#pragma push_macro("P14_00b20360") /*gvi*/
+#undef P14_00b20360 /*gvi*/
+p14_00b20360_t P14_00b20360;
+#pragma pop_macro("P14_00b20360") /*gvi*/
+#pragma pop_macro("P14_00b20360")
+#endif
 
 static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }

@@ -9,7 +9,22 @@ typedef uint8_t p114_rgb_t[4];
 #define P114_RepCnt   GAME_VAR(int32_t, P114_RepCnt, 0x005f7e70)    /* автоповтор джойстика */
 #define P114_RepDelay GAME_VAR(int32_t, P114_RepDelay, 0x0054aa48)  /* .data 10 */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P114_Black") /*gvi*/
+#undef P114_Black /*gvi*/
+#pragma push_macro("P114_BlinkCnt") /*gvi*/
+#undef P114_BlinkCnt /*gvi*/
+#pragma push_macro("P114_BlinkOn") /*gvi*/
+#undef P114_BlinkOn /*gvi*/
+#pragma push_macro("P114_RepCnt") /*gvi*/
+#undef P114_RepCnt /*gvi*/
+#pragma push_macro("P114_RepDelay") /*gvi*/
+#undef P114_RepDelay /*gvi*/
 extern p114_rgb_t P114_Black; extern int32_t P114_BlinkCnt, P114_BlinkOn, P114_RepCnt, P114_RepDelay;
+#pragma pop_macro("P114_RepDelay") /*gvi*/
+#pragma pop_macro("P114_RepCnt") /*gvi*/
+#pragma pop_macro("P114_BlinkOn") /*gvi*/
+#pragma pop_macro("P114_BlinkCnt") /*gvi*/
+#pragma pop_macro("P114_Black") /*gvi*/
 #endif
 void P114_TexDownloadMip(int32_t tmu, int32_t addr, int32_t evenOdd, int32_t info, int32_t handle); /* 0041d53c */
 void P114_PaperMark(int32_t idx);            /* 004e5fd7: отметка пункта «бумаги» (крест линиями или полоса LINE) */
@@ -23,3 +38,17 @@ void P114_DrawSpr(float x, float y, float sx, float sy, void *ic, int32_t r, int
 void P114_CamFadeFrame(void);                /* 0049f474: затемнение кадра камеры режиссёра (две полосы), смена кадра, окно 3D по высоте */
 void P114_RadarMarks(void);                  /* 005073f1: значки игрока и целей P58_Objs на карте */
 int32_t P114_MenuStep(uint32_t tbl, int32_t *cur);  /* 0040c8f1: шаг меню по таблице пунктов 0x10 (три обработчика + переходы), -1 — выход */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P114_Black
+#define P114_Black (*(p114_rgb_t *)re_gvar(0x00b1ffc0u, sizeof(p114_rgb_t), (void *)&P114_Black))
+#undef P114_BlinkCnt
+#define P114_BlinkCnt (*(int32_t *)re_gvar(0x005f7e68u, sizeof(int32_t), (void *)&P114_BlinkCnt))
+#undef P114_BlinkOn
+#define P114_BlinkOn (*(int32_t *)re_gvar(0x005f7e6cu, sizeof(int32_t), (void *)&P114_BlinkOn))
+#undef P114_RepCnt
+#define P114_RepCnt (*(int32_t *)re_gvar(0x005f7e70u, sizeof(int32_t), (void *)&P114_RepCnt))
+#undef P114_RepDelay
+#define P114_RepDelay (*(int32_t *)re_gvar(0x0054aa48u, sizeof(int32_t), (void *)&P114_RepDelay))
+#endif
+/* gvar-img v2.03 end */

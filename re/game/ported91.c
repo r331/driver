@@ -1,7 +1,15 @@
 /* Освобождение слота трафика — восстановлено из Game.exe (004a66ef). */
 #include "ported91.h"
 
-GAME_VAR_DEF(int32_t, G0112B280, 0x0112b280)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("G0112B280")
+#undef G0112B280
+#pragma push_macro("G0112B280") /*gvi*/
+#undef G0112B280 /*gvi*/
+int32_t G0112B280;
+#pragma pop_macro("G0112B280") /*gvi*/
+#pragma pop_macro("G0112B280")
+#endif
 
 /* 004a66ef */
 void P91_ReleaseTraffic(uint8_t *car) {

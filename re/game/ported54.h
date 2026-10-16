@@ -55,10 +55,52 @@ typedef void    *p54_p4_t[4];
 #define P54_G40      GAME_VAR(int32_t, P54_G40, 0x01139a30)
 #define P54_G44      GAME_VAR(int32_t, P54_G44, 0x01139a2c)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P54_IconIdx") /*gvi*/
+#undef P54_IconIdx /*gvi*/
+#pragma push_macro("P54_Out") /*gvi*/
+#undef P54_Out /*gvi*/
 extern p54_i32_t P54_IconIdx; extern p54_out_t P54_Out;
+#pragma pop_macro("P54_Out") /*gvi*/
+#pragma pop_macro("P54_IconIdx") /*gvi*/
+#pragma push_macro("P54_KeySrc") /*gvi*/
+#undef P54_KeySrc /*gvi*/
+#pragma push_macro("P54_Keys3") /*gvi*/
+#undef P54_Keys3 /*gvi*/
+#pragma push_macro("P54_Dst") /*gvi*/
+#undef P54_Dst /*gvi*/
+#pragma push_macro("P54_Src6") /*gvi*/
+#undef P54_Src6 /*gvi*/
 extern p54_keysrc_t P54_KeySrc; extern p54_keys3_t P54_Keys3; extern p54_dst_t P54_Dst; extern p54_src6_t P54_Src6;
+#pragma pop_macro("P54_Src6") /*gvi*/
+#pragma pop_macro("P54_Dst") /*gvi*/
+#pragma pop_macro("P54_Keys3") /*gvi*/
+#pragma pop_macro("P54_KeySrc") /*gvi*/
+#pragma push_macro("P54_RoadId") /*gvi*/
+#undef P54_RoadId /*gvi*/
 extern p54_i4_t P54_RoadId; extern p54_p4_t P54_RoadA, P54_RoadB, P54_Tab4;
+#pragma pop_macro("P54_RoadId") /*gvi*/
+#pragma push_macro("P54_MapA") /*gvi*/
+#undef P54_MapA /*gvi*/
+#pragma push_macro("P54_MapB1") /*gvi*/
+#undef P54_MapB1 /*gvi*/
+#pragma push_macro("P54_MapB2") /*gvi*/
+#undef P54_MapB2 /*gvi*/
+#pragma push_macro("P54_GridN") /*gvi*/
+#undef P54_GridN /*gvi*/
+#pragma push_macro("P54_Cnt1E0") /*gvi*/
+#undef P54_Cnt1E0 /*gvi*/
+#pragma push_macro("P54_G40") /*gvi*/
+#undef P54_G40 /*gvi*/
+#pragma push_macro("P54_G44") /*gvi*/
+#undef P54_G44 /*gvi*/
 extern int32_t P54_MapA, P54_MapB1, P54_MapB2, P54_GridN, P54_Cnt1E0, P54_G40, P54_G44;
+#pragma pop_macro("P54_G44") /*gvi*/
+#pragma pop_macro("P54_G40") /*gvi*/
+#pragma pop_macro("P54_Cnt1E0") /*gvi*/
+#pragma pop_macro("P54_GridN") /*gvi*/
+#pragma pop_macro("P54_MapB2") /*gvi*/
+#pragma pop_macro("P54_MapB1") /*gvi*/
+#pragma pop_macro("P54_MapA") /*gvi*/
 extern void *P54_MapAPtr, *P54_MapBPtr;
 #endif
 void    P54_MenuTexSel(void);                                  /* 0040500d: значки строк меню по P54_SelTab */
@@ -77,3 +119,35 @@ void   *P54_GetTexture2(void *tex);                            /* 0042200c: IDir
 void    P54_ReadNames(void *file, int32_t size);               /* 004ec7ac */
 void    P54_ReadMapA(void *file, int32_t size);                /* 004ec280 */
 void    P54_ReadMapB(void *file, int32_t size);                /* 004ec3fd */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P54_IconIdx
+#define P54_IconIdx (*(p54_i32_t *)re_gvar(0x00549c60u, sizeof(p54_i32_t), (void *)&P54_IconIdx))
+#undef P54_Out
+#define P54_Out (*(p54_out_t *)re_gvar(0x00549b08u, sizeof(p54_out_t), (void *)&P54_Out))
+#undef P54_KeySrc
+#define P54_KeySrc (*(p54_keysrc_t *)re_gvar(0x0054b7a8u, sizeof(p54_keysrc_t), (void *)&P54_KeySrc))
+#undef P54_Keys3
+#define P54_Keys3 (*(p54_keys3_t *)re_gvar(0x00d04a70u, sizeof(p54_keys3_t), (void *)&P54_Keys3))
+#undef P54_Dst
+#define P54_Dst (*(p54_dst_t *)re_gvar(0x00549f80u, sizeof(p54_dst_t), (void *)&P54_Dst))
+#undef P54_Src6
+#define P54_Src6 (*(p54_src6_t *)re_gvar(0x00c55908u, sizeof(p54_src6_t), (void *)&P54_Src6))
+#undef P54_RoadId
+#define P54_RoadId (*(p54_i4_t *)re_gvar(0x00c39da0u, sizeof(p54_i4_t), (void *)&P54_RoadId))
+#undef P54_MapA
+#define P54_MapA (*(int32_t *)re_gvar(0x00b31ed4u, sizeof(int32_t), (void *)&P54_MapA))
+#undef P54_MapB1
+#define P54_MapB1 (*(int32_t *)re_gvar(0x00c1ed60u, sizeof(int32_t), (void *)&P54_MapB1))
+#undef P54_MapB2
+#define P54_MapB2 (*(int32_t *)re_gvar(0x00c1cc68u, sizeof(int32_t), (void *)&P54_MapB2))
+#undef P54_GridN
+#define P54_GridN (*(int32_t *)re_gvar(0x00c98eccu, sizeof(int32_t), (void *)&P54_GridN))
+#undef P54_Cnt1E0
+#define P54_Cnt1E0 (*(int32_t *)re_gvar(0x00d001e0u, sizeof(int32_t), (void *)&P54_Cnt1E0))
+#undef P54_G40
+#define P54_G40 (*(int32_t *)re_gvar(0x01139a30u, sizeof(int32_t), (void *)&P54_G40))
+#undef P54_G44
+#define P54_G44 (*(int32_t *)re_gvar(0x01139a2cu, sizeof(int32_t), (void *)&P54_G44))
+#endif
+/* gvar-img v2.03 end */

@@ -7,17 +7,105 @@ GAME_VAR_DEF(void *, P24_Primary, 0x00a42168)
 GAME_VAR_DEF(void *, P24_Back, 0x00a4216c)
 GAME_VAR_DEF(void *, P24_ZSurf, 0x00a42170)
 GAME_VAR_DEF(void *, P24_Hwnd, 0x00a421bc)
-GAME_VAR_DEF(int32_t, P24_Fullscreen, 0x00a421f4)
-GAME_VAR_DEF(int32_t, P24_Bpp, 0x0054ef28)
-GAME_VAR_DEF(int32_t, P24_RShiftR, 0x00a42184)
-GAME_VAR_DEF(int32_t, P24_RShiftL, 0x00a42188)
-GAME_VAR_DEF(int32_t, P24_GShiftR, 0x00a4218c)
-GAME_VAR_DEF(int32_t, P24_GShiftL, 0x00a42190)
-GAME_VAR_DEF(int32_t, P24_BShiftR, 0x00a42194)
-GAME_VAR_DEF(int32_t, P24_BShiftL, 0x00a42198)
-GAME_VAR_DEF(int32_t, P24_RestoreMode, 0x00a421c4)
-GAME_VAR_DEF(int32_t, P24_ModeW, 0x00a421a4)
-GAME_VAR_DEF(int32_t, P24_ModeH, 0x00a421a8)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P24_Fullscreen")
+#undef P24_Fullscreen
+#pragma push_macro("P24_Fullscreen") /*gvi*/
+#undef P24_Fullscreen /*gvi*/
+int32_t P24_Fullscreen;
+#pragma pop_macro("P24_Fullscreen") /*gvi*/
+#pragma pop_macro("P24_Fullscreen")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P24_Bpp")
+#undef P24_Bpp
+#pragma push_macro("P24_Bpp") /*gvi*/
+#undef P24_Bpp /*gvi*/
+int32_t P24_Bpp;
+#pragma pop_macro("P24_Bpp") /*gvi*/
+#pragma pop_macro("P24_Bpp")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P24_RShiftR")
+#undef P24_RShiftR
+#pragma push_macro("P24_RShiftR") /*gvi*/
+#undef P24_RShiftR /*gvi*/
+int32_t P24_RShiftR;
+#pragma pop_macro("P24_RShiftR") /*gvi*/
+#pragma pop_macro("P24_RShiftR")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P24_RShiftL")
+#undef P24_RShiftL
+#pragma push_macro("P24_RShiftL") /*gvi*/
+#undef P24_RShiftL /*gvi*/
+int32_t P24_RShiftL;
+#pragma pop_macro("P24_RShiftL") /*gvi*/
+#pragma pop_macro("P24_RShiftL")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P24_GShiftR")
+#undef P24_GShiftR
+#pragma push_macro("P24_GShiftR") /*gvi*/
+#undef P24_GShiftR /*gvi*/
+int32_t P24_GShiftR;
+#pragma pop_macro("P24_GShiftR") /*gvi*/
+#pragma pop_macro("P24_GShiftR")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P24_GShiftL")
+#undef P24_GShiftL
+#pragma push_macro("P24_GShiftL") /*gvi*/
+#undef P24_GShiftL /*gvi*/
+int32_t P24_GShiftL;
+#pragma pop_macro("P24_GShiftL") /*gvi*/
+#pragma pop_macro("P24_GShiftL")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P24_BShiftR")
+#undef P24_BShiftR
+#pragma push_macro("P24_BShiftR") /*gvi*/
+#undef P24_BShiftR /*gvi*/
+int32_t P24_BShiftR;
+#pragma pop_macro("P24_BShiftR") /*gvi*/
+#pragma pop_macro("P24_BShiftR")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P24_BShiftL")
+#undef P24_BShiftL
+#pragma push_macro("P24_BShiftL") /*gvi*/
+#undef P24_BShiftL /*gvi*/
+int32_t P24_BShiftL;
+#pragma pop_macro("P24_BShiftL") /*gvi*/
+#pragma pop_macro("P24_BShiftL")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P24_RestoreMode")
+#undef P24_RestoreMode
+#pragma push_macro("P24_RestoreMode") /*gvi*/
+#undef P24_RestoreMode /*gvi*/
+int32_t P24_RestoreMode;
+#pragma pop_macro("P24_RestoreMode") /*gvi*/
+#pragma pop_macro("P24_RestoreMode")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P24_ModeW")
+#undef P24_ModeW
+#pragma push_macro("P24_ModeW") /*gvi*/
+#undef P24_ModeW /*gvi*/
+int32_t P24_ModeW;
+#pragma pop_macro("P24_ModeW") /*gvi*/
+#pragma pop_macro("P24_ModeW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P24_ModeH")
+#undef P24_ModeH
+#pragma push_macro("P24_ModeH") /*gvi*/
+#undef P24_ModeH /*gvi*/
+int32_t P24_ModeH;
+#pragma pop_macro("P24_ModeH") /*gvi*/
+#pragma pop_macro("P24_ModeH")
+#endif
 
 enum { DDERR_SURFACELOST = (int32_t)0x887601C2, DDERR_WRONGMODE_ = (int32_t)0x8876024B };   /* -0x7789fe3e, -0x7789fdb5 в оригинале */
 

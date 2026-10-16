@@ -53,10 +53,42 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
-GAME_VAR_DEF(p129_boxes_t, P129_Boxes, 0x00b31f50)
-GAME_VAR_DEF(int32_t, P129_BoxN, 0x00c80944)
-GAME_VAR_DEF(uint16_t, P129_HitModel, 0x00c80938)
-GAME_VAR_DEF(int32_t, P129_C81680, 0x00c81680)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P129_Boxes")
+#undef P129_Boxes
+#pragma push_macro("P129_Boxes") /*gvi*/
+#undef P129_Boxes /*gvi*/
+p129_boxes_t P129_Boxes;
+#pragma pop_macro("P129_Boxes") /*gvi*/
+#pragma pop_macro("P129_Boxes")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P129_BoxN")
+#undef P129_BoxN
+#pragma push_macro("P129_BoxN") /*gvi*/
+#undef P129_BoxN /*gvi*/
+int32_t P129_BoxN;
+#pragma pop_macro("P129_BoxN") /*gvi*/
+#pragma pop_macro("P129_BoxN")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P129_HitModel")
+#undef P129_HitModel
+#pragma push_macro("P129_HitModel") /*gvi*/
+#undef P129_HitModel /*gvi*/
+uint16_t P129_HitModel;
+#pragma pop_macro("P129_HitModel") /*gvi*/
+#pragma pop_macro("P129_HitModel")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P129_C81680")
+#undef P129_C81680
+#pragma push_macro("P129_C81680") /*gvi*/
+#undef P129_C81680 /*gvi*/
+int32_t P129_C81680;
+#pragma pop_macro("P129_C81680") /*gvi*/
+#pragma pop_macro("P129_C81680")
+#endif
 #endif
 /* 00b326d0: объект каждой отложенной коробки. Пишется и читается только внутри одного вызова 00500e1d (00500937 → цикл
    ударов), объекты — записи кучи G6_00D00208; в native — родные указатели (поле нигде больше не читается). */

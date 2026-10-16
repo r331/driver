@@ -11,7 +11,21 @@ _Static_assert(sizeof(p147_chase_t) == 0x40, "p147_chase_t");
 #define P147_Rec2A10   GAME_VAR(p147_rec6_t, P147_Rec2A10, 0x00b32a10)   /* P71_V2A14/1C/20/24 — псевдонимы слов 1/3/4/5 */
 #define P147_ChaseName GAME_VAR(p147_chase_t, P147_ChaseName, 0x00c80f00)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P147_Rec2A10") /*gvi*/
+#undef P147_Rec2A10 /*gvi*/
+#pragma push_macro("P147_ChaseName") /*gvi*/
+#undef P147_ChaseName /*gvi*/
 extern p147_rec6_t P147_Rec2A10; extern p147_chase_t P147_ChaseName;
+#pragma pop_macro("P147_ChaseName") /*gvi*/
+#pragma pop_macro("P147_Rec2A10") /*gvi*/
 #endif
 int32_t P147_ParseCmd(void *cmd);   /* 004f68a1: cmd — запись p42_cmd_t; 0xb — продолжить строку, 0 — строка закончена, иначе код ошибки (9/0xc/…) */
 int32_t P147_ScoreRec(void);        /* 00503ddf: 1 — запись *00b32a08 обновлена (P14_Fn00503E83 ≠ 0), иначе 0 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P147_Rec2A10
+#define P147_Rec2A10 (*(p147_rec6_t *)re_gvar(0x00b32a10u, sizeof(p147_rec6_t), (void *)&P147_Rec2A10))
+#undef P147_ChaseName
+#define P147_ChaseName (*(p147_chase_t *)re_gvar(0x00c80f00u, sizeof(p147_chase_t), (void *)&P147_ChaseName))
+#endif
+/* gvar-img v2.03 end */

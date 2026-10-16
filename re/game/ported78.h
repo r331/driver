@@ -18,10 +18,24 @@ typedef int32_t p78_hdr_t[5];
 #define P78_VertsB    GAME_VAR(void *, P78_VertsB, 0x00c97a2c)
 #define P78_LampHdr   GAME_VAR(p78_hdr_t, P78_LampHdr, 0x00d02300)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P78_VertCount") /*gvi*/
+#undef P78_VertCount /*gvi*/
+#pragma push_macro("P78_LampHdr") /*gvi*/
+#undef P78_LampHdr /*gvi*/
 extern int32_t P78_VertCount; extern void *P78_VertsA, *P78_VertsB; extern p78_hdr_t P78_LampHdr;
+#pragma pop_macro("P78_LampHdr") /*gvi*/
+#pragma pop_macro("P78_VertCount") /*gvi*/
 #endif
 void    P78_LoadVerts(void *f, int32_t size);       /* 004eb811 */
 int32_t P78_LoadLamps(void *f);                      /* 004eafe0 */
 void    P78_LoadLampsBlock(void *f);                 /* 004eafcf */
 int32_t P78_ChairAdd(const p58_cell_t *rec);         /* 004a31fc: rec = {индекс ячейки, число, буфер} */
 void    P78_LoadChairs(void *f, int32_t size);       /* 004a2f77 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P78_VertCount
+#define P78_VertCount (*(int32_t *)re_gvar(0x00d00200u, sizeof(int32_t), (void *)&P78_VertCount))
+#undef P78_LampHdr
+#define P78_LampHdr (*(p78_hdr_t *)re_gvar(0x00d02300u, sizeof(p78_hdr_t), (void *)&P78_LampHdr))
+#endif
+/* gvar-img v2.03 end */

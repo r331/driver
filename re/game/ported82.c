@@ -1,19 +1,123 @@
 #include "ported82.h"
 #include <string.h>
 
-GAME_VAR_DEF(float, P82_FovX, 0x00b959ec)
-GAME_VAR_DEF(float, P82_FovY, 0x00b949ec)
-GAME_VAR_DEF(float, P82_FovXc, 0x011f40c0)
-GAME_VAR_DEF(float, P82_FovYc, 0x01209644)
-GAME_VAR_DEF(p82_plane_t, P82_PlL, 0x01209670)
-GAME_VAR_DEF(p82_plane_t, P82_PlR, 0x01209600)
-GAME_VAR_DEF(p82_plane_t, P82_PlF, 0x01209630)
-GAME_VAR_DEF(p82_plane_t, P82_PlT, 0x01209650)
-GAME_VAR_DEF(p82_plane_t, P82_PlB, 0x0124b6c0)
-GAME_VAR_DEF(int32_t, P82_Edge, 0x01270c2c)
-GAME_VAR_DEF(p82_grid_t, P82_LightGrid, 0x00cf2fa0)
-GAME_VAR_DEF(int32_t, P82_CellCX, 0x00c97a00)
-GAME_VAR_DEF(int32_t, P82_CellCY, 0x00c97a04)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P82_FovX")
+#undef P82_FovX
+#pragma push_macro("P82_FovX") /*gvi*/
+#undef P82_FovX /*gvi*/
+float P82_FovX;
+#pragma pop_macro("P82_FovX") /*gvi*/
+#pragma pop_macro("P82_FovX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P82_FovY")
+#undef P82_FovY
+#pragma push_macro("P82_FovY") /*gvi*/
+#undef P82_FovY /*gvi*/
+float P82_FovY;
+#pragma pop_macro("P82_FovY") /*gvi*/
+#pragma pop_macro("P82_FovY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P82_FovXc")
+#undef P82_FovXc
+#pragma push_macro("P82_FovXc") /*gvi*/
+#undef P82_FovXc /*gvi*/
+float P82_FovXc;
+#pragma pop_macro("P82_FovXc") /*gvi*/
+#pragma pop_macro("P82_FovXc")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P82_FovYc")
+#undef P82_FovYc
+#pragma push_macro("P82_FovYc") /*gvi*/
+#undef P82_FovYc /*gvi*/
+float P82_FovYc;
+#pragma pop_macro("P82_FovYc") /*gvi*/
+#pragma pop_macro("P82_FovYc")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P82_PlL")
+#undef P82_PlL
+#pragma push_macro("P82_PlL") /*gvi*/
+#undef P82_PlL /*gvi*/
+p82_plane_t P82_PlL;
+#pragma pop_macro("P82_PlL") /*gvi*/
+#pragma pop_macro("P82_PlL")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P82_PlR")
+#undef P82_PlR
+#pragma push_macro("P82_PlR") /*gvi*/
+#undef P82_PlR /*gvi*/
+p82_plane_t P82_PlR;
+#pragma pop_macro("P82_PlR") /*gvi*/
+#pragma pop_macro("P82_PlR")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P82_PlF")
+#undef P82_PlF
+#pragma push_macro("P82_PlF") /*gvi*/
+#undef P82_PlF /*gvi*/
+p82_plane_t P82_PlF;
+#pragma pop_macro("P82_PlF") /*gvi*/
+#pragma pop_macro("P82_PlF")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P82_PlT")
+#undef P82_PlT
+#pragma push_macro("P82_PlT") /*gvi*/
+#undef P82_PlT /*gvi*/
+p82_plane_t P82_PlT;
+#pragma pop_macro("P82_PlT") /*gvi*/
+#pragma pop_macro("P82_PlT")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P82_PlB")
+#undef P82_PlB
+#pragma push_macro("P82_PlB") /*gvi*/
+#undef P82_PlB /*gvi*/
+p82_plane_t P82_PlB;
+#pragma pop_macro("P82_PlB") /*gvi*/
+#pragma pop_macro("P82_PlB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P82_Edge")
+#undef P82_Edge
+#pragma push_macro("P82_Edge") /*gvi*/
+#undef P82_Edge /*gvi*/
+int32_t P82_Edge;
+#pragma pop_macro("P82_Edge") /*gvi*/
+#pragma pop_macro("P82_Edge")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P82_LightGrid")
+#undef P82_LightGrid
+#pragma push_macro("P82_LightGrid") /*gvi*/
+#undef P82_LightGrid /*gvi*/
+p82_grid_t P82_LightGrid;
+#pragma pop_macro("P82_LightGrid") /*gvi*/
+#pragma pop_macro("P82_LightGrid")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P82_CellCX")
+#undef P82_CellCX
+#pragma push_macro("P82_CellCX") /*gvi*/
+#undef P82_CellCX /*gvi*/
+int32_t P82_CellCX;
+#pragma pop_macro("P82_CellCX") /*gvi*/
+#pragma pop_macro("P82_CellCX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P82_CellCY")
+#undef P82_CellCY
+#pragma push_macro("P82_CellCY") /*gvi*/
+#undef P82_CellCY /*gvi*/
+int32_t P82_CellCY;
+#pragma pop_macro("P82_CellCY") /*gvi*/
+#pragma pop_macro("P82_CellCY")
+#endif
 
 typedef long double ld;
 

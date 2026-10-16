@@ -8,44 +8,324 @@
 #include <string.h>
 #include <stdio.h>
 
-GAME_VAR_DEF(p56_blk84_t, P56_Blk84, 0x00c810c0)
-GAME_VAR_DEF(p56_blk84_t, P56_Save84, 0x00b5a498)
-GAME_VAR_DEF(p56_blk11_t, P56_Blk11, 0x01271060)
-GAME_VAR_DEF(p56_blk11_t, P56_Save11, 0x00b5a448)
-GAME_VAR_DEF(p56_blk10_t, P56_Blk16, 0x00b5c898)
-GAME_VAR_DEF(p56_snd4_t, P56_LoopTab, 0x00560378)
-GAME_VAR_DEF(int32_t, P56_Cur, 0x005603c8)
-GAME_VAR_DEF(int32_t, P56_B2EA48, 0x00b2ea48)
-GAME_VAR_DEF(int32_t, P56_B268, 0x0112b268)
-GAME_VAR_DEF(int32_t, P56_C81880, 0x00c81880)
-GAME_VAR_DEF(int32_t, P56_F7E58, 0x005f7e58)
-GAME_VAR_DEF(uint32_t, P56_AA30, 0x0054aa30)
-GAME_VAR_DEF(p56_ghost_t, P56_GhostBuf, 0x00d03920)
-GAME_VAR_DEF(int32_t, P56_G4538, 0x00d04538)
-GAME_VAR_DEF(int32_t, P56_G3908, 0x00d03908)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_Blk84")
+#undef P56_Blk84
+#pragma push_macro("P56_Blk84") /*gvi*/
+#undef P56_Blk84 /*gvi*/
+p56_blk84_t P56_Blk84;
+#pragma pop_macro("P56_Blk84") /*gvi*/
+#pragma pop_macro("P56_Blk84")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_Save84")
+#undef P56_Save84
+#pragma push_macro("P56_Save84") /*gvi*/
+#undef P56_Save84 /*gvi*/
+p56_blk84_t P56_Save84;
+#pragma pop_macro("P56_Save84") /*gvi*/
+#pragma pop_macro("P56_Save84")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_Blk11")
+#undef P56_Blk11
+#pragma push_macro("P56_Blk11") /*gvi*/
+#undef P56_Blk11 /*gvi*/
+p56_blk11_t P56_Blk11;
+#pragma pop_macro("P56_Blk11") /*gvi*/
+#pragma pop_macro("P56_Blk11")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_Save11")
+#undef P56_Save11
+#pragma push_macro("P56_Save11") /*gvi*/
+#undef P56_Save11 /*gvi*/
+p56_blk11_t P56_Save11;
+#pragma pop_macro("P56_Save11") /*gvi*/
+#pragma pop_macro("P56_Save11")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_Blk16")
+#undef P56_Blk16
+#pragma push_macro("P56_Blk16") /*gvi*/
+#undef P56_Blk16 /*gvi*/
+p56_blk10_t P56_Blk16;
+#pragma pop_macro("P56_Blk16") /*gvi*/
+#pragma pop_macro("P56_Blk16")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_LoopTab")
+#undef P56_LoopTab
+#pragma push_macro("P56_LoopTab") /*gvi*/
+#undef P56_LoopTab /*gvi*/
+p56_snd4_t P56_LoopTab;
+#pragma pop_macro("P56_LoopTab") /*gvi*/
+#pragma pop_macro("P56_LoopTab")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_Cur")
+#undef P56_Cur
+#pragma push_macro("P56_Cur") /*gvi*/
+#undef P56_Cur /*gvi*/
+int32_t P56_Cur;
+#pragma pop_macro("P56_Cur") /*gvi*/
+#pragma pop_macro("P56_Cur")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_B2EA48")
+#undef P56_B2EA48
+#pragma push_macro("P56_B2EA48") /*gvi*/
+#undef P56_B2EA48 /*gvi*/
+int32_t P56_B2EA48;
+#pragma pop_macro("P56_B2EA48") /*gvi*/
+#pragma pop_macro("P56_B2EA48")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_B268")
+#undef P56_B268
+#pragma push_macro("P56_B268") /*gvi*/
+#undef P56_B268 /*gvi*/
+int32_t P56_B268;
+#pragma pop_macro("P56_B268") /*gvi*/
+#pragma pop_macro("P56_B268")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_C81880")
+#undef P56_C81880
+#pragma push_macro("P56_C81880") /*gvi*/
+#undef P56_C81880 /*gvi*/
+int32_t P56_C81880;
+#pragma pop_macro("P56_C81880") /*gvi*/
+#pragma pop_macro("P56_C81880")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_F7E58")
+#undef P56_F7E58
+#pragma push_macro("P56_F7E58") /*gvi*/
+#undef P56_F7E58 /*gvi*/
+int32_t P56_F7E58;
+#pragma pop_macro("P56_F7E58") /*gvi*/
+#pragma pop_macro("P56_F7E58")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_AA30")
+#undef P56_AA30
+#pragma push_macro("P56_AA30") /*gvi*/
+#undef P56_AA30 /*gvi*/
+uint32_t P56_AA30;
+#pragma pop_macro("P56_AA30") /*gvi*/
+#pragma pop_macro("P56_AA30")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_GhostBuf")
+#undef P56_GhostBuf
+#pragma push_macro("P56_GhostBuf") /*gvi*/
+#undef P56_GhostBuf /*gvi*/
+p56_ghost_t P56_GhostBuf;
+#pragma pop_macro("P56_GhostBuf") /*gvi*/
+#pragma pop_macro("P56_GhostBuf")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_G4538")
+#undef P56_G4538
+#pragma push_macro("P56_G4538") /*gvi*/
+#undef P56_G4538 /*gvi*/
+int32_t P56_G4538;
+#pragma pop_macro("P56_G4538") /*gvi*/
+#pragma pop_macro("P56_G4538")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_G3908")
+#undef P56_G3908
+#pragma push_macro("P56_G3908") /*gvi*/
+#undef P56_G3908 /*gvi*/
+int32_t P56_G3908;
+#pragma pop_macro("P56_G3908") /*gvi*/
+#pragma pop_macro("P56_G3908")
+#endif
 GAME_VAR_DEF(uint8_t *, P56_GhostPtr, 0x00d04488)
-GAME_VAR_DEF(int32_t, P56_B87EA8, 0x00b87ea8)
-GAME_VAR_DEF(int32_t, P56_D4470, 0x00d04470)
-GAME_VAR_DEF(p56_page_t, P56_Page, 0x00b32a34)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_B87EA8")
+#undef P56_B87EA8
+#pragma push_macro("P56_B87EA8") /*gvi*/
+#undef P56_B87EA8 /*gvi*/
+int32_t P56_B87EA8;
+#pragma pop_macro("P56_B87EA8") /*gvi*/
+#pragma pop_macro("P56_B87EA8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_D4470")
+#undef P56_D4470
+#pragma push_macro("P56_D4470") /*gvi*/
+#undef P56_D4470 /*gvi*/
+int32_t P56_D4470;
+#pragma pop_macro("P56_D4470") /*gvi*/
+#pragma pop_macro("P56_D4470")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_Page")
+#undef P56_Page
+#pragma push_macro("P56_Page") /*gvi*/
+#undef P56_Page /*gvi*/
+p56_page_t P56_Page;
+#pragma pop_macro("P56_Page") /*gvi*/
+#pragma pop_macro("P56_Page")
+#endif
 GAME_VAR_DEF(uint8_t *, P56_EulerTab, 0x00b1c280)
-GAME_VAR_DEF(float, P56_C546120, 0x00546120)
-GAME_VAR_DEF(float, P56_C54611C, 0x0054611c)
-GAME_VAR_DEF(float, P56_C546A38, 0x00546a38)
-GAME_VAR_DEF(float, P56_F573FA0, 0x00573fa0)
-GAME_VAR_DEF(float, P56_F573FA4, 0x00573fa4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_C546120")
+#undef P56_C546120
+#pragma push_macro("P56_C546120") /*gvi*/
+#undef P56_C546120 /*gvi*/
+float P56_C546120;
+#pragma pop_macro("P56_C546120") /*gvi*/
+#pragma pop_macro("P56_C546120")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_C54611C")
+#undef P56_C54611C
+#pragma push_macro("P56_C54611C") /*gvi*/
+#undef P56_C54611C /*gvi*/
+float P56_C54611C;
+#pragma pop_macro("P56_C54611C") /*gvi*/
+#pragma pop_macro("P56_C54611C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_C546A38")
+#undef P56_C546A38
+#pragma push_macro("P56_C546A38") /*gvi*/
+#undef P56_C546A38 /*gvi*/
+float P56_C546A38;
+#pragma pop_macro("P56_C546A38") /*gvi*/
+#pragma pop_macro("P56_C546A38")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_F573FA0")
+#undef P56_F573FA0
+#pragma push_macro("P56_F573FA0") /*gvi*/
+#undef P56_F573FA0 /*gvi*/
+float P56_F573FA0;
+#pragma pop_macro("P56_F573FA0") /*gvi*/
+#pragma pop_macro("P56_F573FA0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_F573FA4")
+#undef P56_F573FA4
+#pragma push_macro("P56_F573FA4") /*gvi*/
+#undef P56_F573FA4 /*gvi*/
+float P56_F573FA4;
+#pragma pop_macro("P56_F573FA4") /*gvi*/
+#pragma pop_macro("P56_F573FA4")
+#endif
 GAME_VAR_DEF(uint8_t *, P56_Sprite, 0x00c80888)
-GAME_VAR_DEF(int32_t, P56_CopsA, 0x00d11a50)
-GAME_VAR_DEF(int32_t, P56_CopsB, 0x00d11a58)
-GAME_VAR_DEF(p56_s60_t, P56_PathLeader, 0x00c54fe0)
-GAME_VAR_DEF(p56_s100_t, P56_PathPlayer, 0x00c4d8e0)
-GAME_VAR_DEF(p56_s60_t, P56_PathPads, 0x00c54f80)
-GAME_VAR_DEF(p56_s120_t, P56_PathPings, 0x00c4d620)
-GAME_VAR_DEF(p56_s100_t, P56_PathCams, 0x00c54e80)
-GAME_VAR_DEF(p56_s1a0_t, P56_PathKey, 0x00c4d740)
-GAME_VAR_DEF(p56_s360_t, P56_PathStart, 0x00c54b20)
-GAME_VAR_DEF(p56_s100_t, P56_PathName, 0x00c54ac0)
-GAME_VAR_DEF(p56_hdr_t, P56_SaveHdr, 0x0057b6b0)
-GAME_VAR_DEF(p56_save_t, P56_SaveBuf, 0x012852a0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_CopsA")
+#undef P56_CopsA
+#pragma push_macro("P56_CopsA") /*gvi*/
+#undef P56_CopsA /*gvi*/
+int32_t P56_CopsA;
+#pragma pop_macro("P56_CopsA") /*gvi*/
+#pragma pop_macro("P56_CopsA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_CopsB")
+#undef P56_CopsB
+#pragma push_macro("P56_CopsB") /*gvi*/
+#undef P56_CopsB /*gvi*/
+int32_t P56_CopsB;
+#pragma pop_macro("P56_CopsB") /*gvi*/
+#pragma pop_macro("P56_CopsB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_PathLeader")
+#undef P56_PathLeader
+#pragma push_macro("P56_PathLeader") /*gvi*/
+#undef P56_PathLeader /*gvi*/
+p56_s60_t P56_PathLeader;
+#pragma pop_macro("P56_PathLeader") /*gvi*/
+#pragma pop_macro("P56_PathLeader")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_PathPlayer")
+#undef P56_PathPlayer
+#pragma push_macro("P56_PathPlayer") /*gvi*/
+#undef P56_PathPlayer /*gvi*/
+p56_s100_t P56_PathPlayer;
+#pragma pop_macro("P56_PathPlayer") /*gvi*/
+#pragma pop_macro("P56_PathPlayer")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_PathPads")
+#undef P56_PathPads
+#pragma push_macro("P56_PathPads") /*gvi*/
+#undef P56_PathPads /*gvi*/
+p56_s60_t P56_PathPads;
+#pragma pop_macro("P56_PathPads") /*gvi*/
+#pragma pop_macro("P56_PathPads")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_PathPings")
+#undef P56_PathPings
+#pragma push_macro("P56_PathPings") /*gvi*/
+#undef P56_PathPings /*gvi*/
+p56_s120_t P56_PathPings;
+#pragma pop_macro("P56_PathPings") /*gvi*/
+#pragma pop_macro("P56_PathPings")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_PathCams")
+#undef P56_PathCams
+#pragma push_macro("P56_PathCams") /*gvi*/
+#undef P56_PathCams /*gvi*/
+p56_s100_t P56_PathCams;
+#pragma pop_macro("P56_PathCams") /*gvi*/
+#pragma pop_macro("P56_PathCams")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_PathKey")
+#undef P56_PathKey
+#pragma push_macro("P56_PathKey") /*gvi*/
+#undef P56_PathKey /*gvi*/
+p56_s1a0_t P56_PathKey;
+#pragma pop_macro("P56_PathKey") /*gvi*/
+#pragma pop_macro("P56_PathKey")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_PathStart")
+#undef P56_PathStart
+#pragma push_macro("P56_PathStart") /*gvi*/
+#undef P56_PathStart /*gvi*/
+p56_s360_t P56_PathStart;
+#pragma pop_macro("P56_PathStart") /*gvi*/
+#pragma pop_macro("P56_PathStart")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_PathName")
+#undef P56_PathName
+#pragma push_macro("P56_PathName") /*gvi*/
+#undef P56_PathName /*gvi*/
+p56_s100_t P56_PathName;
+#pragma pop_macro("P56_PathName") /*gvi*/
+#pragma pop_macro("P56_PathName")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_SaveHdr")
+#undef P56_SaveHdr
+#pragma push_macro("P56_SaveHdr") /*gvi*/
+#undef P56_SaveHdr /*gvi*/
+p56_hdr_t P56_SaveHdr;
+#pragma pop_macro("P56_SaveHdr") /*gvi*/
+#pragma pop_macro("P56_SaveHdr")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P56_SaveBuf")
+#undef P56_SaveBuf
+#pragma push_macro("P56_SaveBuf") /*gvi*/
+#undef P56_SaveBuf /*gvi*/
+p56_save_t P56_SaveBuf;
+#pragma pop_macro("P56_SaveBuf") /*gvi*/
+#pragma pop_macro("P56_SaveBuf")
+#endif
 
 static uint32_t r32(const void *p) { uint32_t v; memcpy(&v, p, 4); return v; }
 static void w32(void *p, uint32_t v) { memcpy(p, &v, 4); }

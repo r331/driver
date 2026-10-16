@@ -54,8 +54,24 @@
 #include <math.h>
 #include <string.h>
 
-GAME_VAR_DEF(p121_clipbuf_t, P121_ClipBuf, 0x01159f80)
-GAME_VAR_DEF(uint32_t, P121_CamW, 0x00b1c27c)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P121_ClipBuf")
+#undef P121_ClipBuf
+#pragma push_macro("P121_ClipBuf") /*gvi*/
+#undef P121_ClipBuf /*gvi*/
+p121_clipbuf_t P121_ClipBuf;
+#pragma pop_macro("P121_ClipBuf") /*gvi*/
+#pragma pop_macro("P121_ClipBuf")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P121_CamW")
+#undef P121_CamW
+#pragma push_macro("P121_CamW") /*gvi*/
+#undef P121_CamW /*gvi*/
+uint32_t P121_CamW;
+#pragma pop_macro("P121_CamW") /*gvi*/
+#pragma pop_macro("P121_CamW")
+#endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }

@@ -155,17 +155,85 @@
 
 
 
-GAME_VAR_DEF(uint32_t, P110_GlowIcon, 0x01123208)
-GAME_VAR_DEF(int32_t, P110_SelCnt, 0x005fea68)
-GAME_VAR_DEF(float, P110_ClipX0, 0x01252a84)
-GAME_VAR_DEF(float, P110_ClipX1, 0x01252a88)
-GAME_VAR_DEF(float, P110_ClipY0, 0x01252a8c)
-GAME_VAR_DEF(float, P110_ClipY1, 0x01252a90)
-GAME_VAR_DEF(int32_t, P110_FullClip, 0x00bdfa10)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P110_GlowIcon")
+#undef P110_GlowIcon
+#pragma push_macro("P110_GlowIcon") /*gvi*/
+#undef P110_GlowIcon /*gvi*/
+uint32_t P110_GlowIcon;
+#pragma pop_macro("P110_GlowIcon") /*gvi*/
+#pragma pop_macro("P110_GlowIcon")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P110_SelCnt")
+#undef P110_SelCnt
+#pragma push_macro("P110_SelCnt") /*gvi*/
+#undef P110_SelCnt /*gvi*/
+int32_t P110_SelCnt;
+#pragma pop_macro("P110_SelCnt") /*gvi*/
+#pragma pop_macro("P110_SelCnt")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P110_ClipX0")
+#undef P110_ClipX0
+#pragma push_macro("P110_ClipX0") /*gvi*/
+#undef P110_ClipX0 /*gvi*/
+float P110_ClipX0;
+#pragma pop_macro("P110_ClipX0") /*gvi*/
+#pragma pop_macro("P110_ClipX0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P110_ClipX1")
+#undef P110_ClipX1
+#pragma push_macro("P110_ClipX1") /*gvi*/
+#undef P110_ClipX1 /*gvi*/
+float P110_ClipX1;
+#pragma pop_macro("P110_ClipX1") /*gvi*/
+#pragma pop_macro("P110_ClipX1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P110_ClipY0")
+#undef P110_ClipY0
+#pragma push_macro("P110_ClipY0") /*gvi*/
+#undef P110_ClipY0 /*gvi*/
+float P110_ClipY0;
+#pragma pop_macro("P110_ClipY0") /*gvi*/
+#pragma pop_macro("P110_ClipY0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P110_ClipY1")
+#undef P110_ClipY1
+#pragma push_macro("P110_ClipY1") /*gvi*/
+#undef P110_ClipY1 /*gvi*/
+float P110_ClipY1;
+#pragma pop_macro("P110_ClipY1") /*gvi*/
+#pragma pop_macro("P110_ClipY1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P110_FullClip")
+#undef P110_FullClip
+#pragma push_macro("P110_FullClip") /*gvi*/
+#undef P110_FullClip /*gvi*/
+int32_t P110_FullClip;
+#pragma pop_macro("P110_FullClip") /*gvi*/
+#pragma pop_macro("P110_FullClip")
+#endif
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P110_SelRep") /*gvi*/
+#undef P110_SelRep /*gvi*/
 int32_t P110_SelRep = 10;                         /* .data 0054e52c */
+#pragma pop_macro("P110_SelRep") /*gvi*/
+#pragma push_macro("P110_IconKX") /*gvi*/
+#undef P110_IconKX /*gvi*/
+#pragma push_macro("P110_IconKY") /*gvi*/
+#undef P110_IconKY /*gvi*/
 float P110_IconKX = 1.0f, P110_IconKY = 1.0f;     /* .data 0054e520 / 0054e524 */
+#pragma pop_macro("P110_IconKY") /*gvi*/
+#pragma pop_macro("P110_IconKX") /*gvi*/
+#pragma push_macro("P110_CellTab") /*gvi*/
+#undef P110_CellTab /*gvi*/
 p110_celltab_t P110_CellTab = P110_CELLTAB_INIT;  /* .data 00574574 (tools/gen_p110_data.py) */
+#pragma pop_macro("P110_CellTab") /*gvi*/
 #endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }

@@ -5,23 +5,159 @@
 #else
 #  define P69_STD
 #endif
-GAME_VAR_DEF(uint32_t, P69_Num3, 0x01134298)
-GAME_VAR_DEF(uint32_t, P69_Num2, 0x01134264)
-GAME_VAR_DEF(uint32_t, P69_Num1, 0x01134294)
-GAME_VAR_DEF(uint32_t, P69_Go, 0x0113429c)
-GAME_VAR_DEF(uint32_t, P69_Check, 0x0113428c)
-GAME_VAR_DEF(uint32_t, P69_Finish, 0x01134288)
-GAME_VAR_DEF(P69_Blk, P69_MsgBlk, 0x011342a0)
-GAME_VAR_DEF(int32_t, P69_MsgW, 0x011342d4)
-GAME_VAR_DEF(int32_t, P69_Score, 0x011368c4)
-GAME_VAR_DEF(int32_t, P69_Bonus, 0x01136ac8)
-GAME_VAR_DEF(int32_t, P69_ScoreCpy, 0x01271068)
-GAME_VAR_DEF(uint8_t, P69_BlendOn, 0x0125f3e4)
-GAME_VAR_DEF(int32_t, P69_OvlOn, 0x01123210)
-GAME_VAR_DEF(int32_t, P69_DevOn, 0x00b1c0d0)
-GAME_VAR_DEF(P69_ThrTab, P69_Thr, 0x01136940)
-GAME_VAR_DEF(P69_PtrTab, P69_Ptrs, 0x01136a80)
-GAME_VAR_DEF(P69_Pts, P69_PtsTab, 0x00551528)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_Num3")
+#undef P69_Num3
+#pragma push_macro("P69_Num3") /*gvi*/
+#undef P69_Num3 /*gvi*/
+uint32_t P69_Num3;
+#pragma pop_macro("P69_Num3") /*gvi*/
+#pragma pop_macro("P69_Num3")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_Num2")
+#undef P69_Num2
+#pragma push_macro("P69_Num2") /*gvi*/
+#undef P69_Num2 /*gvi*/
+uint32_t P69_Num2;
+#pragma pop_macro("P69_Num2") /*gvi*/
+#pragma pop_macro("P69_Num2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_Num1")
+#undef P69_Num1
+#pragma push_macro("P69_Num1") /*gvi*/
+#undef P69_Num1 /*gvi*/
+uint32_t P69_Num1;
+#pragma pop_macro("P69_Num1") /*gvi*/
+#pragma pop_macro("P69_Num1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_Go")
+#undef P69_Go
+#pragma push_macro("P69_Go") /*gvi*/
+#undef P69_Go /*gvi*/
+uint32_t P69_Go;
+#pragma pop_macro("P69_Go") /*gvi*/
+#pragma pop_macro("P69_Go")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_Check")
+#undef P69_Check
+#pragma push_macro("P69_Check") /*gvi*/
+#undef P69_Check /*gvi*/
+uint32_t P69_Check;
+#pragma pop_macro("P69_Check") /*gvi*/
+#pragma pop_macro("P69_Check")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_Finish")
+#undef P69_Finish
+#pragma push_macro("P69_Finish") /*gvi*/
+#undef P69_Finish /*gvi*/
+uint32_t P69_Finish;
+#pragma pop_macro("P69_Finish") /*gvi*/
+#pragma pop_macro("P69_Finish")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_MsgBlk")
+#undef P69_MsgBlk
+#pragma push_macro("P69_MsgBlk") /*gvi*/
+#undef P69_MsgBlk /*gvi*/
+P69_Blk P69_MsgBlk;
+#pragma pop_macro("P69_MsgBlk") /*gvi*/
+#pragma pop_macro("P69_MsgBlk")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_MsgW")
+#undef P69_MsgW
+#pragma push_macro("P69_MsgW") /*gvi*/
+#undef P69_MsgW /*gvi*/
+int32_t P69_MsgW;
+#pragma pop_macro("P69_MsgW") /*gvi*/
+#pragma pop_macro("P69_MsgW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_Score")
+#undef P69_Score
+#pragma push_macro("P69_Score") /*gvi*/
+#undef P69_Score /*gvi*/
+int32_t P69_Score;
+#pragma pop_macro("P69_Score") /*gvi*/
+#pragma pop_macro("P69_Score")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_Bonus")
+#undef P69_Bonus
+#pragma push_macro("P69_Bonus") /*gvi*/
+#undef P69_Bonus /*gvi*/
+int32_t P69_Bonus;
+#pragma pop_macro("P69_Bonus") /*gvi*/
+#pragma pop_macro("P69_Bonus")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_ScoreCpy")
+#undef P69_ScoreCpy
+#pragma push_macro("P69_ScoreCpy") /*gvi*/
+#undef P69_ScoreCpy /*gvi*/
+int32_t P69_ScoreCpy;
+#pragma pop_macro("P69_ScoreCpy") /*gvi*/
+#pragma pop_macro("P69_ScoreCpy")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_BlendOn")
+#undef P69_BlendOn
+#pragma push_macro("P69_BlendOn") /*gvi*/
+#undef P69_BlendOn /*gvi*/
+uint8_t P69_BlendOn;
+#pragma pop_macro("P69_BlendOn") /*gvi*/
+#pragma pop_macro("P69_BlendOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_OvlOn")
+#undef P69_OvlOn
+#pragma push_macro("P69_OvlOn") /*gvi*/
+#undef P69_OvlOn /*gvi*/
+int32_t P69_OvlOn;
+#pragma pop_macro("P69_OvlOn") /*gvi*/
+#pragma pop_macro("P69_OvlOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_DevOn")
+#undef P69_DevOn
+#pragma push_macro("P69_DevOn") /*gvi*/
+#undef P69_DevOn /*gvi*/
+int32_t P69_DevOn;
+#pragma pop_macro("P69_DevOn") /*gvi*/
+#pragma pop_macro("P69_DevOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_Thr")
+#undef P69_Thr
+#pragma push_macro("P69_Thr") /*gvi*/
+#undef P69_Thr /*gvi*/
+P69_ThrTab P69_Thr;
+#pragma pop_macro("P69_Thr") /*gvi*/
+#pragma pop_macro("P69_Thr")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_Ptrs")
+#undef P69_Ptrs
+#pragma push_macro("P69_Ptrs") /*gvi*/
+#undef P69_Ptrs /*gvi*/
+P69_PtrTab P69_Ptrs;
+#pragma pop_macro("P69_Ptrs") /*gvi*/
+#pragma pop_macro("P69_Ptrs")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P69_PtsTab")
+#undef P69_PtsTab
+#pragma push_macro("P69_PtsTab") /*gvi*/
+#undef P69_PtsTab /*gvi*/
+P69_Pts P69_PtsTab;
+#pragma pop_macro("P69_PtsTab") /*gvi*/
+#pragma pop_macro("P69_PtsTab")
+#endif
 
 static void *glide_proc(const char *name) {
   for (int i = 0; i < P33_GlideCount(); i++)

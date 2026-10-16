@@ -57,9 +57,28 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P143_Fx") /*gvi*/
+#undef P143_Fx /*gvi*/
 p143_fx_t P143_Fx = P143_FX_INIT;
-GAME_VAR_DEF(p143_hist_t, P143_LampHist, 0x01105da0)
-GAME_VAR_DEF(p143_perf_t, P143_Perf, 0x0111d420)
+#pragma pop_macro("P143_Fx") /*gvi*/
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P143_LampHist")
+#undef P143_LampHist
+#pragma push_macro("P143_LampHist") /*gvi*/
+#undef P143_LampHist /*gvi*/
+p143_hist_t P143_LampHist;
+#pragma pop_macro("P143_LampHist") /*gvi*/
+#pragma pop_macro("P143_LampHist")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P143_Perf")
+#undef P143_Perf
+#pragma push_macro("P143_Perf") /*gvi*/
+#undef P143_Perf /*gvi*/
+p143_perf_t P143_Perf;
+#pragma pop_macro("P143_Perf") /*gvi*/
+#pragma pop_macro("P143_Perf")
+#endif
 #endif
 
 #ifdef RE_HOOK_BUILD

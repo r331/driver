@@ -49,7 +49,15 @@
 #include <stdio.h>
 #include <string.h>
 
-GAME_VAR_DEF(p97_strtab_t, P97_StrAddr, 0x00c55820)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_StrAddr")
+#undef P97_StrAddr
+#pragma push_macro("P97_StrAddr") /*gvi*/
+#undef P97_StrAddr /*gvi*/
+p97_strtab_t P97_StrAddr;
+#pragma pop_macro("P97_StrAddr") /*gvi*/
+#pragma pop_macro("P97_StrAddr")
+#endif
 GAME_VAR_DEF(re_fn_t, P97_DrvA, 0x00bdcb10)
 GAME_VAR_DEF(re_fn_t, P97_DrvB, 0x00bdcb1c)
 GAME_VAR_DEF(re_fn_t, P97_DrvC, 0x00bdcb28)
@@ -65,57 +73,352 @@ GAME_VAR_DEF(re_fn_t, P97_DrvL, 0x00bdcb5c)
 GAME_VAR_DEF(p97_lfblock_fn, P97_LfbLock, 0x01270e60)
 GAME_VAR_DEF(p97_gr5_fn, P97_GrAlpha, 0x01270dcc)
 GAME_VAR_DEF(p97_gr1_fn, P97_GrDepth, 0x01270d68)
-GAME_VAR_DEF(int32_t, P97_ScrObjOn, 0x00c81270)
-GAME_VAR_DEF(p97_menuA_t, P97_KeyMenuA, 0x0054c030)
-GAME_VAR_DEF(p97_menuB_t, P97_KeyMenuB, 0x0054c350)
-GAME_VAR_DEF(p97_menuC_t, P97_OptMenuA, 0x0054acc0)
-GAME_VAR_DEF(p97_menuC_t, P97_OptMenuB, 0x0054e560)
-GAME_VAR_DEF(p97_txt32_t, P97_FpsTxtA, 0x005fe4e4)
-GAME_VAR_DEF(p97_txt32_t, P97_FpsTxtB, 0x005fea74)
-GAME_VAR_DEF(p97_txt64_t, P97_MsgBuf, 0x00c80c60)
-GAME_VAR_DEF(int32_t, P97_C810A8, 0x00c810a8)
-GAME_VAR_DEF(int32_t, P97_C81490, 0x00c81490)
-GAME_VAR_DEF(int32_t, P97_IconL, 0x005fea3c)
-GAME_VAR_DEF(int32_t, P97_IconR, 0x005fea40)
-GAME_VAR_DEF(p97_debris_t, P97_Debris, 0x010fb220)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_ScrObjOn")
+#undef P97_ScrObjOn
+#pragma push_macro("P97_ScrObjOn") /*gvi*/
+#undef P97_ScrObjOn /*gvi*/
+int32_t P97_ScrObjOn;
+#pragma pop_macro("P97_ScrObjOn") /*gvi*/
+#pragma pop_macro("P97_ScrObjOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_KeyMenuA")
+#undef P97_KeyMenuA
+#pragma push_macro("P97_KeyMenuA") /*gvi*/
+#undef P97_KeyMenuA /*gvi*/
+p97_menuA_t P97_KeyMenuA;
+#pragma pop_macro("P97_KeyMenuA") /*gvi*/
+#pragma pop_macro("P97_KeyMenuA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_KeyMenuB")
+#undef P97_KeyMenuB
+#pragma push_macro("P97_KeyMenuB") /*gvi*/
+#undef P97_KeyMenuB /*gvi*/
+p97_menuB_t P97_KeyMenuB;
+#pragma pop_macro("P97_KeyMenuB") /*gvi*/
+#pragma pop_macro("P97_KeyMenuB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_OptMenuA")
+#undef P97_OptMenuA
+#pragma push_macro("P97_OptMenuA") /*gvi*/
+#undef P97_OptMenuA /*gvi*/
+p97_menuC_t P97_OptMenuA;
+#pragma pop_macro("P97_OptMenuA") /*gvi*/
+#pragma pop_macro("P97_OptMenuA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_OptMenuB")
+#undef P97_OptMenuB
+#pragma push_macro("P97_OptMenuB") /*gvi*/
+#undef P97_OptMenuB /*gvi*/
+p97_menuC_t P97_OptMenuB;
+#pragma pop_macro("P97_OptMenuB") /*gvi*/
+#pragma pop_macro("P97_OptMenuB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_FpsTxtA")
+#undef P97_FpsTxtA
+#pragma push_macro("P97_FpsTxtA") /*gvi*/
+#undef P97_FpsTxtA /*gvi*/
+p97_txt32_t P97_FpsTxtA;
+#pragma pop_macro("P97_FpsTxtA") /*gvi*/
+#pragma pop_macro("P97_FpsTxtA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_FpsTxtB")
+#undef P97_FpsTxtB
+#pragma push_macro("P97_FpsTxtB") /*gvi*/
+#undef P97_FpsTxtB /*gvi*/
+p97_txt32_t P97_FpsTxtB;
+#pragma pop_macro("P97_FpsTxtB") /*gvi*/
+#pragma pop_macro("P97_FpsTxtB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_MsgBuf")
+#undef P97_MsgBuf
+#pragma push_macro("P97_MsgBuf") /*gvi*/
+#undef P97_MsgBuf /*gvi*/
+p97_txt64_t P97_MsgBuf;
+#pragma pop_macro("P97_MsgBuf") /*gvi*/
+#pragma pop_macro("P97_MsgBuf")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_C810A8")
+#undef P97_C810A8
+#pragma push_macro("P97_C810A8") /*gvi*/
+#undef P97_C810A8 /*gvi*/
+int32_t P97_C810A8;
+#pragma pop_macro("P97_C810A8") /*gvi*/
+#pragma pop_macro("P97_C810A8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_C81490")
+#undef P97_C81490
+#pragma push_macro("P97_C81490") /*gvi*/
+#undef P97_C81490 /*gvi*/
+int32_t P97_C81490;
+#pragma pop_macro("P97_C81490") /*gvi*/
+#pragma pop_macro("P97_C81490")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_IconL")
+#undef P97_IconL
+#pragma push_macro("P97_IconL") /*gvi*/
+#undef P97_IconL /*gvi*/
+int32_t P97_IconL;
+#pragma pop_macro("P97_IconL") /*gvi*/
+#pragma pop_macro("P97_IconL")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_IconR")
+#undef P97_IconR
+#pragma push_macro("P97_IconR") /*gvi*/
+#undef P97_IconR /*gvi*/
+int32_t P97_IconR;
+#pragma pop_macro("P97_IconR") /*gvi*/
+#pragma pop_macro("P97_IconR")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_Debris")
+#undef P97_Debris
+#pragma push_macro("P97_Debris") /*gvi*/
+#undef P97_Debris /*gvi*/
+p97_debris_t P97_Debris;
+#pragma pop_macro("P97_Debris") /*gvi*/
+#pragma pop_macro("P97_Debris")
+#endif
 GAME_VAR_DEF(uint8_t *, P97_FadeIcon, 0x00d04788)
-GAME_VAR_DEF(int32_t, P97_B2A8, 0x0112b2a8)
-GAME_VAR_DEF(int32_t, P97_B2A4, 0x0112b2a4)
-GAME_VAR_DEF(int32_t, P97_B2A0, 0x0112b2a0)
-GAME_VAR_DEF(int32_t, P97_129584, 0x01129584)
-GAME_VAR_DEF(int32_t, P97_B274, 0x0112b274)
-GAME_VAR_DEF(int32_t, P97_B2B0, 0x0112b2b0)
-GAME_VAR_DEF(int32_t, P97_D9DC, 0x0112d9dc)
-GAME_VAR_DEF(int32_t, P97_D9D8, 0x0112d9d8)
-GAME_VAR_DEF(int32_t, P97_B264, 0x0112b264)
-GAME_VAR_DEF(int32_t, P97_B260, 0x0112b260)
-GAME_VAR_DEF(int32_t, P97_B290, 0x0112b290)
-GAME_VAR_DEF(int32_t, P97_B214, 0x0112b214)
-GAME_VAR_DEF(int32_t, P97_D9E0, 0x0112d9e0)
-GAME_VAR_DEF(int32_t, P97_B28C, 0x0112b28c)
-GAME_VAR_DEF(int32_t, P97_B288, 0x0112b288)
-GAME_VAR_DEF(p97_b2c0_t, P97_B2C0, 0x0112b2c0)
-GAME_VAR_DEF(p97_b220_t, P97_B220, 0x0112b220)
-GAME_VAR_DEF(p97_d11980_t, P97_D11980, 0x00d11980)
-GAME_VAR_DEF(uint16_t, P97_D11A44, 0x00d11a44)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_B2A8")
+#undef P97_B2A8
+#pragma push_macro("P97_B2A8") /*gvi*/
+#undef P97_B2A8 /*gvi*/
+int32_t P97_B2A8;
+#pragma pop_macro("P97_B2A8") /*gvi*/
+#pragma pop_macro("P97_B2A8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_B2A4")
+#undef P97_B2A4
+#pragma push_macro("P97_B2A4") /*gvi*/
+#undef P97_B2A4 /*gvi*/
+int32_t P97_B2A4;
+#pragma pop_macro("P97_B2A4") /*gvi*/
+#pragma pop_macro("P97_B2A4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_B2A0")
+#undef P97_B2A0
+#pragma push_macro("P97_B2A0") /*gvi*/
+#undef P97_B2A0 /*gvi*/
+int32_t P97_B2A0;
+#pragma pop_macro("P97_B2A0") /*gvi*/
+#pragma pop_macro("P97_B2A0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_129584")
+#undef P97_129584
+#pragma push_macro("P97_129584") /*gvi*/
+#undef P97_129584 /*gvi*/
+int32_t P97_129584;
+#pragma pop_macro("P97_129584") /*gvi*/
+#pragma pop_macro("P97_129584")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_B274")
+#undef P97_B274
+#pragma push_macro("P97_B274") /*gvi*/
+#undef P97_B274 /*gvi*/
+int32_t P97_B274;
+#pragma pop_macro("P97_B274") /*gvi*/
+#pragma pop_macro("P97_B274")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_B2B0")
+#undef P97_B2B0
+#pragma push_macro("P97_B2B0") /*gvi*/
+#undef P97_B2B0 /*gvi*/
+int32_t P97_B2B0;
+#pragma pop_macro("P97_B2B0") /*gvi*/
+#pragma pop_macro("P97_B2B0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_D9DC")
+#undef P97_D9DC
+#pragma push_macro("P97_D9DC") /*gvi*/
+#undef P97_D9DC /*gvi*/
+int32_t P97_D9DC;
+#pragma pop_macro("P97_D9DC") /*gvi*/
+#pragma pop_macro("P97_D9DC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_D9D8")
+#undef P97_D9D8
+#pragma push_macro("P97_D9D8") /*gvi*/
+#undef P97_D9D8 /*gvi*/
+int32_t P97_D9D8;
+#pragma pop_macro("P97_D9D8") /*gvi*/
+#pragma pop_macro("P97_D9D8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_B264")
+#undef P97_B264
+#pragma push_macro("P97_B264") /*gvi*/
+#undef P97_B264 /*gvi*/
+int32_t P97_B264;
+#pragma pop_macro("P97_B264") /*gvi*/
+#pragma pop_macro("P97_B264")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_B260")
+#undef P97_B260
+#pragma push_macro("P97_B260") /*gvi*/
+#undef P97_B260 /*gvi*/
+int32_t P97_B260;
+#pragma pop_macro("P97_B260") /*gvi*/
+#pragma pop_macro("P97_B260")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_B290")
+#undef P97_B290
+#pragma push_macro("P97_B290") /*gvi*/
+#undef P97_B290 /*gvi*/
+int32_t P97_B290;
+#pragma pop_macro("P97_B290") /*gvi*/
+#pragma pop_macro("P97_B290")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_B214")
+#undef P97_B214
+#pragma push_macro("P97_B214") /*gvi*/
+#undef P97_B214 /*gvi*/
+int32_t P97_B214;
+#pragma pop_macro("P97_B214") /*gvi*/
+#pragma pop_macro("P97_B214")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_D9E0")
+#undef P97_D9E0
+#pragma push_macro("P97_D9E0") /*gvi*/
+#undef P97_D9E0 /*gvi*/
+int32_t P97_D9E0;
+#pragma pop_macro("P97_D9E0") /*gvi*/
+#pragma pop_macro("P97_D9E0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_B28C")
+#undef P97_B28C
+#pragma push_macro("P97_B28C") /*gvi*/
+#undef P97_B28C /*gvi*/
+int32_t P97_B28C;
+#pragma pop_macro("P97_B28C") /*gvi*/
+#pragma pop_macro("P97_B28C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_B288")
+#undef P97_B288
+#pragma push_macro("P97_B288") /*gvi*/
+#undef P97_B288 /*gvi*/
+int32_t P97_B288;
+#pragma pop_macro("P97_B288") /*gvi*/
+#pragma pop_macro("P97_B288")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_B2C0")
+#undef P97_B2C0
+#pragma push_macro("P97_B2C0") /*gvi*/
+#undef P97_B2C0 /*gvi*/
+p97_b2c0_t P97_B2C0;
+#pragma pop_macro("P97_B2C0") /*gvi*/
+#pragma pop_macro("P97_B2C0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_B220")
+#undef P97_B220
+#pragma push_macro("P97_B220") /*gvi*/
+#undef P97_B220 /*gvi*/
+p97_b220_t P97_B220;
+#pragma pop_macro("P97_B220") /*gvi*/
+#pragma pop_macro("P97_B220")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_D11980")
+#undef P97_D11980
+#pragma push_macro("P97_D11980") /*gvi*/
+#undef P97_D11980 /*gvi*/
+p97_d11980_t P97_D11980;
+#pragma pop_macro("P97_D11980") /*gvi*/
+#pragma pop_macro("P97_D11980")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P97_D11A44")
+#undef P97_D11A44
+#pragma push_macro("P97_D11A44") /*gvi*/
+#undef P97_D11A44 /*gvi*/
+uint16_t P97_D11A44;
+#pragma pop_macro("P97_D11A44") /*gvi*/
+#pragma pop_macro("P97_D11A44")
+#endif
 
 #ifndef RE_HOOK_BUILD
 /* .data Game.exe — в native начальные значения (прочитаны из Game.exe) */
+#pragma push_macro("P97_CellPat") /*gvi*/
+#undef P97_CellPat /*gvi*/
 p97_pat_t P97_CellPat = {                                                         /* 00574674: 8 типов по 3×3 */
+#pragma pop_macro("P97_CellPat") /*gvi*/
   0,0,0,0,0,0,1,1,1, 0,0,0,1,0,0,1,1,0, 1,0,0,1,0,0,1,0,0, 1,1,0,1,0,0,0,0,0,
   1,1,1,0,0,0,0,0,0, 0,1,1,0,0,1,0,0,0, 0,0,1,0,0,1,0,0,1, 0,0,0,0,0,1,0,1,1 };
+#pragma push_macro("P97_OnOff") /*gvi*/
+#undef P97_OnOff /*gvi*/
 p97_u4_t P97_OnOff = { 2, 1, 2, 6 };
+#pragma pop_macro("P97_OnOff") /*gvi*/
+#pragma push_macro("P97_BitsStr") /*gvi*/
+#undef P97_BitsStr /*gvi*/
 p97_u2_t P97_BitsStr = { 0x005755ecu, 0x005755f4u };
+#pragma pop_macro("P97_BitsStr") /*gvi*/
+#pragma push_macro("P97_RateStr") /*gvi*/
+#undef P97_RateStr /*gvi*/
 p97_u2_t P97_RateStr = { 0x005755fcu, 0x00575608u };
+#pragma pop_macro("P97_RateStr") /*gvi*/
+#pragma push_macro("P97_SpkStr") /*gvi*/
+#undef P97_SpkStr /*gvi*/
 p97_u4_t P97_SpkStr = { 0xec, 0xed, 0xee, 0xef };
+#pragma pop_macro("P97_SpkStr") /*gvi*/
+#pragma push_macro("P97_Str8bit") /*gvi*/
+#undef P97_Str8bit /*gvi*/
 p97_s8_t P97_Str8bit = "8bit";
+#pragma pop_macro("P97_Str8bit") /*gvi*/
+#pragma push_macro("P97_Str16bit") /*gvi*/
+#undef P97_Str16bit /*gvi*/
 p97_s8_t P97_Str16bit = "16bit";
+#pragma pop_macro("P97_Str16bit") /*gvi*/
+#pragma push_macro("P97_Str22k") /*gvi*/
+#undef P97_Str22k /*gvi*/
 p97_s12_t P97_Str22k = "22050KHz";
+#pragma pop_macro("P97_Str22k") /*gvi*/
+#pragma push_macro("P97_Str44k") /*gvi*/
+#undef P97_Str44k /*gvi*/
 p97_s12_t P97_Str44k = "44100KHz";
+#pragma pop_macro("P97_Str44k") /*gvi*/
+#pragma push_macro("P97_OptTabA") /*gvi*/
+#undef P97_OptTabA /*gvi*/
 p97_i6_t P97_OptTabA = { 2, 1, 9, 10, 11, 29477 };
+#pragma pop_macro("P97_OptTabA") /*gvi*/
+#pragma push_macro("P97_OptTabB") /*gvi*/
+#undef P97_OptTabB /*gvi*/
 p97_i6_t P97_OptTabB = { 2, 1, 9, 10, 11, -1 };
+#pragma pop_macro("P97_OptTabB") /*gvi*/
+#pragma push_macro("P97_BlinkA") /*gvi*/
+#undef P97_BlinkA /*gvi*/
 p97_i2_t P97_BlinkA = { 50, 20 };
+#pragma pop_macro("P97_BlinkA") /*gvi*/
+#pragma push_macro("P97_BlinkB") /*gvi*/
+#undef P97_BlinkB /*gvi*/
 p97_i2_t P97_BlinkB = { 50, 20 };
+#pragma pop_macro("P97_BlinkB") /*gvi*/
 #endif
 
 void P97_InitConsts(void) {

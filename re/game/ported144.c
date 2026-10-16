@@ -51,7 +51,15 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
-GAME_VAR_DEF(p144_rec28_t, P144_Hist0, 0x011232e0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P144_Hist0")
+#undef P144_Hist0
+#pragma push_macro("P144_Hist0") /*gvi*/
+#undef P144_Hist0 /*gvi*/
+p144_rec28_t P144_Hist0;
+#pragma pop_macro("P144_Hist0") /*gvi*/
+#pragma pop_macro("P144_Hist0")
+#endif
 #endif
 
 #ifdef RE_HOOK_BUILD

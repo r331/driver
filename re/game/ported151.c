@@ -91,15 +91,79 @@
 #include "../platform/plat.h"
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P151_DevIdx, 0x00a421cc)
-GAME_VAR_DEF(int32_t, P151_No8bit, 0x00a421ec)
-GAME_VAR_DEF(int32_t, P151_FsFlag, 0x00b87ed4)
-GAME_VAR_DEF(int32_t, P151_Bpp, 0x0125f3fc)
-GAME_VAR_DEF(p151_buf_t, P151_ErrBuf, 0x00b87d0c)
-GAME_VAR_DEF(int32_t, P151_Empty10, 0x00b87f10)
-GAME_VAR_DEF(int32_t, P151_Empty14, 0x00b87f14)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P151_DevIdx")
+#undef P151_DevIdx
+#pragma push_macro("P151_DevIdx") /*gvi*/
+#undef P151_DevIdx /*gvi*/
+int32_t P151_DevIdx;
+#pragma pop_macro("P151_DevIdx") /*gvi*/
+#pragma pop_macro("P151_DevIdx")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P151_No8bit")
+#undef P151_No8bit
+#pragma push_macro("P151_No8bit") /*gvi*/
+#undef P151_No8bit /*gvi*/
+int32_t P151_No8bit;
+#pragma pop_macro("P151_No8bit") /*gvi*/
+#pragma pop_macro("P151_No8bit")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P151_FsFlag")
+#undef P151_FsFlag
+#pragma push_macro("P151_FsFlag") /*gvi*/
+#undef P151_FsFlag /*gvi*/
+int32_t P151_FsFlag;
+#pragma pop_macro("P151_FsFlag") /*gvi*/
+#pragma pop_macro("P151_FsFlag")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P151_Bpp")
+#undef P151_Bpp
+#pragma push_macro("P151_Bpp") /*gvi*/
+#undef P151_Bpp /*gvi*/
+int32_t P151_Bpp;
+#pragma pop_macro("P151_Bpp") /*gvi*/
+#pragma pop_macro("P151_Bpp")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P151_ErrBuf")
+#undef P151_ErrBuf
+#pragma push_macro("P151_ErrBuf") /*gvi*/
+#undef P151_ErrBuf /*gvi*/
+p151_buf_t P151_ErrBuf;
+#pragma pop_macro("P151_ErrBuf") /*gvi*/
+#pragma pop_macro("P151_ErrBuf")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P151_Empty10")
+#undef P151_Empty10
+#pragma push_macro("P151_Empty10") /*gvi*/
+#undef P151_Empty10 /*gvi*/
+int32_t P151_Empty10;
+#pragma pop_macro("P151_Empty10") /*gvi*/
+#pragma pop_macro("P151_Empty10")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P151_Empty14")
+#undef P151_Empty14
+#pragma push_macro("P151_Empty14") /*gvi*/
+#undef P151_Empty14 /*gvi*/
+int32_t P151_Empty14;
+#pragma pop_macro("P151_Empty14") /*gvi*/
+#pragma pop_macro("P151_Empty14")
+#endif
 GAME_VAR_DEF(void *, P151_Proc, 0x00bdfa1c)
-GAME_VAR_DEF(int32_t, P151_PrioOn, 0x00575f2c)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P151_PrioOn")
+#undef P151_PrioOn
+#pragma push_macro("P151_PrioOn") /*gvi*/
+#undef P151_PrioOn /*gvi*/
+int32_t P151_PrioOn;
+#pragma pop_macro("P151_PrioOn") /*gvi*/
+#pragma pop_macro("P151_PrioOn")
+#endif
 
 #ifdef RE_HOOK_BUILD
 #  define P151_STD __attribute__((stdcall))

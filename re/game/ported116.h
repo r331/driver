@@ -27,8 +27,38 @@ typedef p85_rv p116_v4_t[4];
 #define P116_BlinkT   GAME_VAR(int32_t, P116_BlinkT, 0x005755c0)         /* .data 10 — счётчик мигания */
 #define P116_SndB2035C GAME_VAR(int32_t, P116_SndB2035C, 0x00b2035c)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P116_SkidRecA") /*gvi*/
+#undef P116_SkidRecA /*gvi*/
+#pragma push_macro("P116_SkidRecB") /*gvi*/
+#undef P116_SkidRecB /*gvi*/
+#pragma push_macro("P116_K546A3C") /*gvi*/
+#undef P116_K546A3C /*gvi*/
+#pragma push_macro("P116_MLevA") /*gvi*/
+#undef P116_MLevA /*gvi*/
+#pragma push_macro("P116_MLevB") /*gvi*/
+#undef P116_MLevB /*gvi*/
 extern p116_skid_t P116_SkidRecA, P116_SkidRecB; extern p116_v4_t P116_SkidV; extern float P116_K546A3C, P116_MLevA, P116_MLevB;
+#pragma pop_macro("P116_MLevB") /*gvi*/
+#pragma pop_macro("P116_MLevA") /*gvi*/
+#pragma pop_macro("P116_K546A3C") /*gvi*/
+#pragma pop_macro("P116_SkidRecB") /*gvi*/
+#pragma pop_macro("P116_SkidRecA") /*gvi*/
+#pragma push_macro("P116_MBar") /*gvi*/
+#undef P116_MBar /*gvi*/
+#pragma push_macro("P116_MSlider") /*gvi*/
+#undef P116_MSlider /*gvi*/
+#pragma push_macro("P116_Blink") /*gvi*/
+#undef P116_Blink /*gvi*/
+#pragma push_macro("P116_BlinkT") /*gvi*/
+#undef P116_BlinkT /*gvi*/
+#pragma push_macro("P116_SndB2035C") /*gvi*/
+#undef P116_SndB2035C /*gvi*/
 extern uint32_t P116_MBar, P116_MSlider; extern int32_t P116_Blink, P116_BlinkT, P116_SndB2035C;
+#pragma pop_macro("P116_SndB2035C") /*gvi*/
+#pragma pop_macro("P116_BlinkT") /*gvi*/
+#pragma pop_macro("P116_Blink") /*gvi*/
+#pragma pop_macro("P116_MSlider") /*gvi*/
+#pragma pop_macro("P116_MBar") /*gvi*/
 #endif
 static inline float p116_f(int32_t v) { float f; memcpy(&f, &v, 4); return f; }
 void P116_Sliders2(void);                                                  /* 004159e5 */
@@ -40,3 +70,27 @@ void P116_Text(uint32_t txt);                                              /* 00
 void P116_SkidsA(void);                                                    /* 0051e65e */
 void P116_SkidsB(void);                                                    /* 0051f376 */
 void P116_Reflections(void);                                               /* 004cc801 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P116_SkidRecA
+#define P116_SkidRecA (*(p116_skid_t *)re_gvar(0x00b5c950u, sizeof(p116_skid_t), (void *)&P116_SkidRecA))
+#undef P116_SkidRecB
+#define P116_SkidRecB (*(p116_skid_t *)re_gvar(0x00b6e950u, sizeof(p116_skid_t), (void *)&P116_SkidRecB))
+#undef P116_K546A3C
+#define P116_K546A3C (*(float *)re_gvar(0x00546a3cu, sizeof(float), (void *)&P116_K546A3C))
+#undef P116_MBar
+#define P116_MBar (*(uint32_t *)re_gvar(0x00b5a740u, sizeof(uint32_t), (void *)&P116_MBar))
+#undef P116_MSlider
+#define P116_MSlider (*(uint32_t *)re_gvar(0x00b5a744u, sizeof(uint32_t), (void *)&P116_MSlider))
+#undef P116_MLevB
+#define P116_MLevB (*(float *)re_gvar(0x00b5a748u, sizeof(float), (void *)&P116_MLevB))
+#undef P116_MLevA
+#define P116_MLevA (*(float *)re_gvar(0x00b5a74cu, sizeof(float), (void *)&P116_MLevA))
+#undef P116_Blink
+#define P116_Blink (*(int32_t *)re_gvar(0x00b5a760u, sizeof(int32_t), (void *)&P116_Blink))
+#undef P116_BlinkT
+#define P116_BlinkT (*(int32_t *)re_gvar(0x005755c0u, sizeof(int32_t), (void *)&P116_BlinkT))
+#undef P116_SndB2035C
+#define P116_SndB2035C (*(int32_t *)re_gvar(0x00b2035cu, sizeof(int32_t), (void *)&P116_SndB2035C))
+#endif
+/* gvar-img v2.03 end */

@@ -2,16 +2,67 @@
 #include "ported35.h"
 #include "noop.h"
 #include <math.h>
-GAME_VAR_DEF(int32_t, P35_PadX, 0x00d07790)
-GAME_VAR_DEF(int32_t, P35_FfX, 0x00b31e04)
-GAME_VAR_DEF(int32_t, P35_FfY, 0x00b31e08)
-GAME_VAR_DEF(int32_t, P35_FfPending, 0x00b31e10)
-#ifdef RE_HOOK_BUILD
-GAME_VAR_DEF(int32_t, P35_ReqBpp, 0x00549ccc)
-#else
-int32_t P35_ReqBpp = 0x10;   /* v2.00: начальное значение .data 00549ccc = 16 (в native GAME_VAR_DEF без инициализатора давал 0) */
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P35_PadX")
+#undef P35_PadX
+#pragma push_macro("P35_PadX") /*gvi*/
+#undef P35_PadX /*gvi*/
+int32_t P35_PadX;
+#pragma pop_macro("P35_PadX") /*gvi*/
+#pragma pop_macro("P35_PadX")
 #endif
-GAME_VAR_DEF(uint8_t, P35_InputMode, 0x00562a44)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P35_FfX")
+#undef P35_FfX
+#pragma push_macro("P35_FfX") /*gvi*/
+#undef P35_FfX /*gvi*/
+int32_t P35_FfX;
+#pragma pop_macro("P35_FfX") /*gvi*/
+#pragma pop_macro("P35_FfX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P35_FfY")
+#undef P35_FfY
+#pragma push_macro("P35_FfY") /*gvi*/
+#undef P35_FfY /*gvi*/
+int32_t P35_FfY;
+#pragma pop_macro("P35_FfY") /*gvi*/
+#pragma pop_macro("P35_FfY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P35_FfPending")
+#undef P35_FfPending
+#pragma push_macro("P35_FfPending") /*gvi*/
+#undef P35_FfPending /*gvi*/
+int32_t P35_FfPending;
+#pragma pop_macro("P35_FfPending") /*gvi*/
+#pragma pop_macro("P35_FfPending")
+#endif
+#ifdef RE_HOOK_BUILD
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P35_ReqBpp")
+#undef P35_ReqBpp
+#pragma push_macro("P35_ReqBpp") /*gvi*/
+#undef P35_ReqBpp /*gvi*/
+int32_t P35_ReqBpp;
+#pragma pop_macro("P35_ReqBpp") /*gvi*/
+#pragma pop_macro("P35_ReqBpp")
+#endif
+#else
+#pragma push_macro("P35_ReqBpp") /*gvi*/
+#undef P35_ReqBpp /*gvi*/
+int32_t P35_ReqBpp = 0x10;   /* v2.00: начальное значение .data 00549ccc = 16 (в native GAME_VAR_DEF без инициализатора давал 0) */
+#pragma pop_macro("P35_ReqBpp") /*gvi*/
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P35_InputMode")
+#undef P35_InputMode
+#pragma push_macro("P35_InputMode") /*gvi*/
+#undef P35_InputMode /*gvi*/
+uint8_t P35_InputMode;
+#pragma pop_macro("P35_InputMode") /*gvi*/
+#pragma pop_macro("P35_InputMode")
+#endif
 
 /* GUID_ConstantForce {13541C20-8E33-11D0-9AD0-00A0C9A06E35} — данные игры по 00546510 */
 static const uint8_t k_constant_force[16] = { 0x20,0x1c,0x54,0x13,0x33,0x8e,0xd0,0x11,0x9a,0xd0,0x00,0xa0,0xc9,0xa0,0x6e,0x35 };

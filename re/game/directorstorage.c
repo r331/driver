@@ -5,8 +5,24 @@
 #include <string.h>
 
 #define DS_FILE "D:\\Driver\\Game\\DirectorStorage.c"
-GAME_VAR_DEF(int32_t, WaypointDirty, 0x00d17b30)
-GAME_VAR_DEF(int32_t, WaypointCount, 0x00d17b40)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WaypointDirty")
+#undef WaypointDirty
+#pragma push_macro("WaypointDirty") /*gvi*/
+#undef WaypointDirty /*gvi*/
+int32_t WaypointDirty;
+#pragma pop_macro("WaypointDirty") /*gvi*/
+#pragma pop_macro("WaypointDirty")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WaypointCount")
+#undef WaypointCount
+#pragma push_macro("WaypointCount") /*gvi*/
+#undef WaypointCount /*gvi*/
+int32_t WaypointCount;
+#pragma pop_macro("WaypointCount") /*gvi*/
+#pragma pop_macro("WaypointCount")
+#endif
 
 /* после записи содержимого чанка в заголовок пишется реальный размер */
 static void finish_chunk(void *f, long start, CHUNK_HEADER *h) {

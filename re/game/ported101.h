@@ -63,13 +63,112 @@ typedef uint32_t p101_pal_t[256];
 /* палитра вывода LFB (16/32 бит на индекс) */
 #define P101_PalLfb    GAME_VAR(p101_pal_t, P101_PalLfb, 0x01271a80)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P101_Hud") /*gvi*/
+#undef P101_Hud /*gvi*/
+#pragma push_macro("P101_HudVal") /*gvi*/
+#undef P101_HudVal /*gvi*/
+#pragma push_macro("P101_GoalPos") /*gvi*/
+#undef P101_GoalPos /*gvi*/
 extern p101_hud_t P101_Hud; extern int32_t P101_HudVal; extern p101_f3_t P101_GoalPos;
+#pragma pop_macro("P101_GoalPos") /*gvi*/
+#pragma pop_macro("P101_HudVal") /*gvi*/
+#pragma pop_macro("P101_Hud") /*gvi*/
+#pragma push_macro("P101_SaveCar") /*gvi*/
+#undef P101_SaveCar /*gvi*/
+#pragma push_macro("P101_SaveCar2") /*gvi*/
+#undef P101_SaveCar2 /*gvi*/
+#pragma push_macro("P101_SaveA") /*gvi*/
+#undef P101_SaveA /*gvi*/
+#pragma push_macro("P101_SaveA2") /*gvi*/
+#undef P101_SaveA2 /*gvi*/
+#pragma push_macro("P101_SaveB") /*gvi*/
+#undef P101_SaveB /*gvi*/
+#pragma push_macro("P101_SaveB2") /*gvi*/
+#undef P101_SaveB2 /*gvi*/
+#pragma push_macro("P101_SaveC") /*gvi*/
+#undef P101_SaveC /*gvi*/
+#pragma push_macro("P101_SaveC2") /*gvi*/
+#undef P101_SaveC2 /*gvi*/
 extern p101_b148_t P101_SaveCar, P101_SaveCar2; extern p101_b34_t P101_SaveA, P101_SaveA2, P101_SaveB, P101_SaveB2, P101_SaveC, P101_SaveC2;
+#pragma pop_macro("P101_SaveC2") /*gvi*/
+#pragma pop_macro("P101_SaveC") /*gvi*/
+#pragma pop_macro("P101_SaveB2") /*gvi*/
+#pragma pop_macro("P101_SaveB") /*gvi*/
+#pragma pop_macro("P101_SaveA2") /*gvi*/
+#pragma pop_macro("P101_SaveA") /*gvi*/
+#pragma pop_macro("P101_SaveCar2") /*gvi*/
+#pragma pop_macro("P101_SaveCar") /*gvi*/
+#pragma push_macro("P101_LiveA") /*gvi*/
+#undef P101_LiveA /*gvi*/
+#pragma push_macro("P101_LiveB") /*gvi*/
+#undef P101_LiveB /*gvi*/
+#pragma push_macro("P101_LiveC") /*gvi*/
+#undef P101_LiveC /*gvi*/
+#pragma push_macro("P101_RecState") /*gvi*/
+#undef P101_RecState /*gvi*/
+#pragma push_macro("P101_RecFrame") /*gvi*/
+#undef P101_RecFrame /*gvi*/
+#pragma push_macro("P101_RecFrame2") /*gvi*/
+#undef P101_RecFrame2 /*gvi*/
+#pragma push_macro("P101_RecSaved") /*gvi*/
+#undef P101_RecSaved /*gvi*/
 extern p101_b34_t P101_LiveA, P101_LiveB, P101_LiveC; extern int32_t P101_RecState, P101_RecFrame, P101_RecFrame2, P101_RecSaved;
+#pragma pop_macro("P101_RecSaved") /*gvi*/
+#pragma pop_macro("P101_RecFrame2") /*gvi*/
+#pragma pop_macro("P101_RecFrame") /*gvi*/
+#pragma pop_macro("P101_RecState") /*gvi*/
+#pragma pop_macro("P101_LiveC") /*gvi*/
+#pragma pop_macro("P101_LiveB") /*gvi*/
+#pragma pop_macro("P101_LiveA") /*gvi*/
+#pragma push_macro("P101_Drops") /*gvi*/
+#undef P101_Drops /*gvi*/
+#pragma push_macro("P101_Nbr") /*gvi*/
+#undef P101_Nbr /*gvi*/
 extern p101_drops_t P101_Drops; extern p101_nbr_t P101_Nbr;
+#pragma pop_macro("P101_Nbr") /*gvi*/
+#pragma pop_macro("P101_Drops") /*gvi*/
+#pragma push_macro("P101_RdNode") /*gvi*/
+#undef P101_RdNode /*gvi*/
+#pragma push_macro("P101_RdCell") /*gvi*/
+#undef P101_RdCell /*gvi*/
+#pragma push_macro("P101_RdLane") /*gvi*/
+#undef P101_RdLane /*gvi*/
+#pragma push_macro("P101_RdB2") /*gvi*/
+#undef P101_RdB2 /*gvi*/
+#pragma push_macro("P101_RdDist") /*gvi*/
+#undef P101_RdDist /*gvi*/
+#pragma push_macro("P101_RdLeft") /*gvi*/
+#undef P101_RdLeft /*gvi*/
 extern uint16_t P101_RdNode, P101_RdCell; extern int16_t P101_RdLane; extern uint8_t P101_RdB2; extern int32_t P101_RdDist, P101_RdLeft;
+#pragma pop_macro("P101_RdLeft") /*gvi*/
+#pragma pop_macro("P101_RdDist") /*gvi*/
+#pragma pop_macro("P101_RdB2") /*gvi*/
+#pragma pop_macro("P101_RdLane") /*gvi*/
+#pragma pop_macro("P101_RdCell") /*gvi*/
+#pragma pop_macro("P101_RdNode") /*gvi*/
+#pragma push_macro("P101_ObjBOn2") /*gvi*/
+#undef P101_ObjBOn2 /*gvi*/
+#pragma push_macro("P101_CarFx") /*gvi*/
+#undef P101_CarFx /*gvi*/
+#pragma push_macro("P101_FxCol") /*gvi*/
+#undef P101_FxCol /*gvi*/
 extern int32_t P101_ObjBOn2; extern p101_b66_t P101_CarFx; extern p101_b16_t P101_FxCol;
+#pragma pop_macro("P101_FxCol") /*gvi*/
+#pragma pop_macro("P101_CarFx") /*gvi*/
+#pragma pop_macro("P101_ObjBOn2") /*gvi*/
+#pragma push_macro("P101_ScrX0") /*gvi*/
+#undef P101_ScrX0 /*gvi*/
+#pragma push_macro("P101_ScrY0") /*gvi*/
+#undef P101_ScrY0 /*gvi*/
+#pragma push_macro("P101_TmpY") /*gvi*/
+#undef P101_TmpY /*gvi*/
+#pragma push_macro("P101_PalLfb") /*gvi*/
+#undef P101_PalLfb /*gvi*/
 extern float P101_ScrX0, P101_ScrY0, P101_TmpY; extern p101_pal_t P101_PalLfb;
+#pragma pop_macro("P101_PalLfb") /*gvi*/
+#pragma pop_macro("P101_TmpY") /*gvi*/
+#pragma pop_macro("P101_ScrY0") /*gvi*/
+#pragma pop_macro("P101_ScrX0") /*gvi*/
 #endif
 
 void    P101_GoalTick(uint8_t *goal);                                         /* 004f51b4 */
@@ -105,3 +204,73 @@ void    P101_ClipNear5A(const uint8_t *a, const uint8_t *b, float ua0, float ua1
                         float ub0, float ub1, float ub2, float ub3, float ub4);   /* 0042e007 */
 void    P101_ClipNear5B(const uint8_t *a, const uint8_t *b, float ua0, float ua1, float ua2, float ua3, float ua4,
                         float ub0, float ub1, float ub2, float ub3, float ub4);   /* 0042e6e6 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P101_Hud
+#define P101_Hud (*(p101_hud_t *)re_gvar(0x00c808c0u, sizeof(p101_hud_t), (void *)&P101_Hud))
+#undef P101_HudVal
+#define P101_HudVal (*(int32_t *)re_gvar(0x00c810a0u, sizeof(int32_t), (void *)&P101_HudVal))
+#undef P101_GoalPos
+#define P101_GoalPos (*(p101_f3_t *)re_gvar(0x00c80f50u, sizeof(p101_f3_t), (void *)&P101_GoalPos))
+#undef P101_SaveCar
+#define P101_SaveCar (*(p101_b148_t *)re_gvar(0x00c54b60u, sizeof(p101_b148_t), (void *)&P101_SaveCar))
+#undef P101_SaveCar2
+#define P101_SaveCar2 (*(p101_b148_t *)re_gvar(0x00c54d20u, sizeof(p101_b148_t), (void *)&P101_SaveCar2))
+#undef P101_SaveA
+#define P101_SaveA (*(p101_b34_t *)re_gvar(0x00c4d8a0u, sizeof(p101_b34_t), (void *)&P101_SaveA))
+#undef P101_SaveA2
+#define P101_SaveA2 (*(p101_b34_t *)re_gvar(0x00c4da60u, sizeof(p101_b34_t), (void *)&P101_SaveA2))
+#undef P101_SaveB
+#define P101_SaveB (*(p101_b34_t *)re_gvar(0x00c4d800u, sizeof(p101_b34_t), (void *)&P101_SaveB))
+#undef P101_SaveB2
+#define P101_SaveB2 (*(p101_b34_t *)re_gvar(0x00c4da00u, sizeof(p101_b34_t), (void *)&P101_SaveB2))
+#undef P101_SaveC
+#define P101_SaveC (*(p101_b34_t *)re_gvar(0x00c4d840u, sizeof(p101_b34_t), (void *)&P101_SaveC))
+#undef P101_SaveC2
+#define P101_SaveC2 (*(p101_b34_t *)re_gvar(0x00c4d9c0u, sizeof(p101_b34_t), (void *)&P101_SaveC2))
+#undef P101_LiveA
+#define P101_LiveA (*(p101_b34_t *)re_gvar(0x00d07754u, sizeof(p101_b34_t), (void *)&P101_LiveA))
+#undef P101_LiveB
+#define P101_LiveB (*(p101_b34_t *)re_gvar(0x00d0eb34u, sizeof(p101_b34_t), (void *)&P101_LiveB))
+#undef P101_LiveC
+#define P101_LiveC (*(p101_b34_t *)re_gvar(0x00d0f8b4u, sizeof(p101_b34_t), (void *)&P101_LiveC))
+#undef P101_RecState
+#define P101_RecState (*(int32_t *)re_gvar(0x00c4d700u, sizeof(int32_t), (void *)&P101_RecState))
+#undef P101_RecFrame
+#define P101_RecFrame (*(int32_t *)re_gvar(0x00c4d704u, sizeof(int32_t), (void *)&P101_RecFrame))
+#undef P101_RecFrame2
+#define P101_RecFrame2 (*(int32_t *)re_gvar(0x00c4d708u, sizeof(int32_t), (void *)&P101_RecFrame2))
+#undef P101_RecSaved
+#define P101_RecSaved (*(int32_t *)re_gvar(0x00c4da94u, sizeof(int32_t), (void *)&P101_RecSaved))
+#undef P101_Drops
+#define P101_Drops (*(p101_drops_t *)re_gvar(0x00bde680u, sizeof(p101_drops_t), (void *)&P101_Drops))
+#undef P101_Nbr
+#define P101_Nbr (*(p101_nbr_t *)re_gvar(0x00c55da2u, sizeof(p101_nbr_t), (void *)&P101_Nbr))
+#undef P101_RdNode
+#define P101_RdNode (*(uint16_t *)re_gvar(0x00c1cca0u, sizeof(uint16_t), (void *)&P101_RdNode))
+#undef P101_RdCell
+#define P101_RdCell (*(uint16_t *)re_gvar(0x00c1cca2u, sizeof(uint16_t), (void *)&P101_RdCell))
+#undef P101_RdLane
+#define P101_RdLane (*(int16_t *)re_gvar(0x00c1cca4u, sizeof(int16_t), (void *)&P101_RdLane))
+#undef P101_RdB2
+#define P101_RdB2 (*(uint8_t *)re_gvar(0x00c1ccb2u, sizeof(uint8_t), (void *)&P101_RdB2))
+#undef P101_RdDist
+#define P101_RdDist (*(int32_t *)re_gvar(0x00c1ccb4u, sizeof(int32_t), (void *)&P101_RdDist))
+#undef P101_RdLeft
+#define P101_RdLeft (*(int32_t *)re_gvar(0x00c1ccb8u, sizeof(int32_t), (void *)&P101_RdLeft))
+#undef P101_ObjBOn2
+#define P101_ObjBOn2 (*(int32_t *)re_gvar(0x0111a3e0u, sizeof(int32_t), (void *)&P101_ObjBOn2))
+#undef P101_CarFx
+#define P101_CarFx (*(p101_b66_t *)re_gvar(0x010fb1c0u, sizeof(p101_b66_t), (void *)&P101_CarFx))
+#undef P101_FxCol
+#define P101_FxCol (*(p101_b16_t *)re_gvar(0x005537c8u, sizeof(p101_b16_t), (void *)&P101_FxCol))
+#undef P101_ScrX0
+#define P101_ScrX0 (*(float *)re_gvar(0x0124b6d0u, sizeof(float), (void *)&P101_ScrX0))
+#undef P101_ScrY0
+#define P101_ScrY0 (*(float *)re_gvar(0x01252b70u, sizeof(float), (void *)&P101_ScrY0))
+#undef P101_TmpY
+#define P101_TmpY (*(float *)re_gvar(0x0057a112u, sizeof(float), (void *)&P101_TmpY))
+#undef P101_PalLfb
+#define P101_PalLfb (*(p101_pal_t *)re_gvar(0x01271a80u, sizeof(p101_pal_t), (void *)&P101_PalLfb))
+#endif
+/* gvar-img v2.03 end */

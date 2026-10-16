@@ -59,11 +59,74 @@ typedef int32_t p74_rowtab_t[16 * 3];
 #define P74_Rows     GAME_VAR(p74_rows_t, P74_Rows, 0x012577e0)   /* массив значений; индексы строк берутся из таблицы */
 #define P74_RowTab   GAME_VAR(p74_rowtab_t, P74_RowTab, 0x00572a80) /* 16 записей по 12 байт: начало, конец, маска кадров */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P74_DistTab") /*gvi*/
+#undef P74_DistTab /*gvi*/
+#pragma push_macro("P74_KeyA") /*gvi*/
+#undef P74_KeyA /*gvi*/
+#pragma push_macro("P74_KeyB") /*gvi*/
+#undef P74_KeyB /*gvi*/
 extern p74_dist_t P74_DistTab; extern p74_keys_t P74_KeyA, P74_KeyB;
+#pragma pop_macro("P74_KeyB") /*gvi*/
+#pragma pop_macro("P74_KeyA") /*gvi*/
+#pragma pop_macro("P74_DistTab") /*gvi*/
+#pragma push_macro("P74_DevTab") /*gvi*/
+#undef P74_DevTab /*gvi*/
+#pragma push_macro("P74_Cars") /*gvi*/
+#undef P74_Cars /*gvi*/
+#pragma push_macro("P74_C4DA58") /*gvi*/
+#undef P74_C4DA58 /*gvi*/
+#pragma push_macro("P74_B5A89C") /*gvi*/
+#undef P74_B5A89C /*gvi*/
+#pragma push_macro("P74_C4D668") /*gvi*/
+#undef P74_C4D668 /*gvi*/
+#pragma push_macro("P74_C4BDE0") /*gvi*/
+#undef P74_C4BDE0 /*gvi*/
+#pragma push_macro("P74_C54D08") /*gvi*/
+#undef P74_C54D08 /*gvi*/
 extern p74_dev_t P74_DevTab; extern p74_cars_t P74_Cars; extern int32_t P74_C4DA58, P74_B5A89C, P74_C4D668, P74_C4BDE0, P74_C54D08;
+#pragma pop_macro("P74_C54D08") /*gvi*/
+#pragma pop_macro("P74_C4BDE0") /*gvi*/
+#pragma pop_macro("P74_C4D668") /*gvi*/
+#pragma pop_macro("P74_B5A89C") /*gvi*/
+#pragma pop_macro("P74_C4DA58") /*gvi*/
+#pragma pop_macro("P74_Cars") /*gvi*/
+#pragma pop_macro("P74_DevTab") /*gvi*/
+#pragma push_macro("P74_B5A858") /*gvi*/
+#undef P74_B5A858 /*gvi*/
+#pragma push_macro("P74_B5A86C") /*gvi*/
+#undef P74_B5A86C /*gvi*/
+#pragma push_macro("P74_B5A880") /*gvi*/
+#undef P74_B5A880 /*gvi*/
+#pragma push_macro("P74_C4D7A0") /*gvi*/
+#undef P74_C4D7A0 /*gvi*/
+#pragma push_macro("P74_B5A894") /*gvi*/
+#undef P74_B5A894 /*gvi*/
 extern p74_i5_t P74_B5A858, P74_B5A86C, P74_B5A880, P74_C4D7A0; extern uint8_t P74_B5A894;
+#pragma pop_macro("P74_B5A894") /*gvi*/
+#pragma pop_macro("P74_C4D7A0") /*gvi*/
+#pragma pop_macro("P74_B5A880") /*gvi*/
+#pragma pop_macro("P74_B5A86C") /*gvi*/
+#pragma pop_macro("P74_B5A858") /*gvi*/
+#pragma push_macro("P74_SkidA") /*gvi*/
+#undef P74_SkidA /*gvi*/
+#pragma push_macro("P74_SkidB") /*gvi*/
+#undef P74_SkidB /*gvi*/
+#pragma push_macro("P74_SkidC") /*gvi*/
+#undef P74_SkidC /*gvi*/
+#pragma push_macro("P74_SkidD") /*gvi*/
+#undef P74_SkidD /*gvi*/
 extern p74_i4_t P74_SkidA, P74_SkidB, P74_SkidC, P74_SkidD; extern uint8_t *P74_Skid;
+#pragma pop_macro("P74_SkidD") /*gvi*/
+#pragma pop_macro("P74_SkidC") /*gvi*/
+#pragma pop_macro("P74_SkidB") /*gvi*/
+#pragma pop_macro("P74_SkidA") /*gvi*/
+#pragma push_macro("P74_Rows") /*gvi*/
+#undef P74_Rows /*gvi*/
+#pragma push_macro("P74_RowTab") /*gvi*/
+#undef P74_RowTab /*gvi*/
 extern p74_rows_t P74_Rows; extern p74_rowtab_t P74_RowTab;
+#pragma pop_macro("P74_RowTab") /*gvi*/
+#pragma pop_macro("P74_Rows") /*gvi*/
 #endif
 void    P74_InitConsts(void);                                         /* native: таблицы из .data (p74_data.h) */
 void    P74_FreeTraffic(int32_t i);                                   /* 00493ece: освободить запись трафика i (0x54 байта) */
@@ -76,3 +139,49 @@ int32_t P74_ParseFloat(char *s, int32_t idx);                         /* 004a4f7
 char   *P74_ParseShorts(char *s, uint16_t *out, int32_t n);           /* 004a5afb: n коротких чисел через запятую; дальше — SkipLine004A59C6 (указатель после конца строки), NULL при ошибке */
 void    P74_SkidInit(void);                                           /* 0051d440: значок SKID и сброс таблиц */
 int32_t P74_KeyScan(void);                                            /* 0040efd5: клавиша по таблице раскладки (-3 Esc, -2 Enter, -1 Backspace) */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P74_DistTab
+#define P74_DistTab (*(p74_dist_t *)re_gvar(0x0055272cu, sizeof(p74_dist_t), (void *)&P74_DistTab))
+#undef P74_KeyA
+#define P74_KeyA (*(p74_keys_t *)re_gvar(0x0054ae10u, sizeof(p74_keys_t), (void *)&P74_KeyA))
+#undef P74_KeyB
+#define P74_KeyB (*(p74_keys_t *)re_gvar(0x0054af10u, sizeof(p74_keys_t), (void *)&P74_KeyB))
+#undef P74_DevTab
+#define P74_DevTab (*(p74_dev_t *)re_gvar(0x01270ec0u, sizeof(p74_dev_t), (void *)&P74_DevTab))
+#undef P74_Cars
+#define P74_Cars (*(p74_cars_t *)re_gvar(0x0112e6b4u, sizeof(p74_cars_t), (void *)&P74_Cars))
+#undef P74_C4DA58
+#define P74_C4DA58 (*(int32_t *)re_gvar(0x00c4da58u, sizeof(int32_t), (void *)&P74_C4DA58))
+#undef P74_B5A858
+#define P74_B5A858 (*(p74_i5_t *)re_gvar(0x00b5a858u, sizeof(p74_i5_t), (void *)&P74_B5A858))
+#undef P74_B5A86C
+#define P74_B5A86C (*(p74_i5_t *)re_gvar(0x00b5a86cu, sizeof(p74_i5_t), (void *)&P74_B5A86C))
+#undef P74_B5A880
+#define P74_B5A880 (*(p74_i5_t *)re_gvar(0x00b5a880u, sizeof(p74_i5_t), (void *)&P74_B5A880))
+#undef P74_C4D7A0
+#define P74_C4D7A0 (*(p74_i5_t *)re_gvar(0x00c4d7a0u, sizeof(p74_i5_t), (void *)&P74_C4D7A0))
+#undef P74_B5A89C
+#define P74_B5A89C (*(int32_t *)re_gvar(0x00b5a89cu, sizeof(int32_t), (void *)&P74_B5A89C))
+#undef P74_B5A894
+#define P74_B5A894 (*(uint8_t *)re_gvar(0x00b5a894u, sizeof(uint8_t), (void *)&P74_B5A894))
+#undef P74_C4D668
+#define P74_C4D668 (*(int32_t *)re_gvar(0x00c4d668u, sizeof(int32_t), (void *)&P74_C4D668))
+#undef P74_C4BDE0
+#define P74_C4BDE0 (*(int32_t *)re_gvar(0x00c4bde0u, sizeof(int32_t), (void *)&P74_C4BDE0))
+#undef P74_C54D08
+#define P74_C54D08 (*(int32_t *)re_gvar(0x00c54d08u, sizeof(int32_t), (void *)&P74_C54D08))
+#undef P74_SkidA
+#define P74_SkidA (*(p74_i4_t *)re_gvar(0x00bdfae0u, sizeof(p74_i4_t), (void *)&P74_SkidA))
+#undef P74_SkidB
+#define P74_SkidB (*(p74_i4_t *)re_gvar(0x00bdfb10u, sizeof(p74_i4_t), (void *)&P74_SkidB))
+#undef P74_SkidC
+#define P74_SkidC (*(p74_i4_t *)re_gvar(0x00bdfab0u, sizeof(p74_i4_t), (void *)&P74_SkidC))
+#undef P74_SkidD
+#define P74_SkidD (*(p74_i4_t *)re_gvar(0x00bdfb00u, sizeof(p74_i4_t), (void *)&P74_SkidD))
+#undef P74_Rows
+#define P74_Rows (*(p74_rows_t *)re_gvar(0x012577e0u, sizeof(p74_rows_t), (void *)&P74_Rows))
+#undef P74_RowTab
+#define P74_RowTab (*(p74_rowtab_t *)re_gvar(0x00572a80u, sizeof(p74_rowtab_t), (void *)&P74_RowTab))
+#endif
+/* gvar-img v2.03 end */

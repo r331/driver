@@ -4,11 +4,43 @@
 #include "ported131.h"
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P87_CntA, 0x00b31edc)
-GAME_VAR_DEF(int32_t, P87_CntB, 0x00d022e0)
-GAME_VAR_DEF(void **, P87_ListPtr, 0x00562d7c)
-GAME_VAR_DEF(p87_lumps_t, P87_SlotLump, 0x00c39da0)
-GAME_VAR_DEF(p87_lumps_t, P87_SlotLumpA, 0x00d00220)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P87_CntA")
+#undef P87_CntA
+#pragma push_macro("P87_CntA") /*gvi*/
+#undef P87_CntA /*gvi*/
+int32_t P87_CntA;
+#pragma pop_macro("P87_CntA") /*gvi*/
+#pragma pop_macro("P87_CntA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P87_CntB")
+#undef P87_CntB
+#pragma push_macro("P87_CntB") /*gvi*/
+#undef P87_CntB /*gvi*/
+int32_t P87_CntB;
+#pragma pop_macro("P87_CntB") /*gvi*/
+#pragma pop_macro("P87_CntB")
+#endif
+GAME_VAR_DEF(void **, P87_ListPtr, 0x00000000)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P87_SlotLump")
+#undef P87_SlotLump
+#pragma push_macro("P87_SlotLump") /*gvi*/
+#undef P87_SlotLump /*gvi*/
+p87_lumps_t P87_SlotLump;
+#pragma pop_macro("P87_SlotLump") /*gvi*/
+#pragma pop_macro("P87_SlotLump")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P87_SlotLumpA")
+#undef P87_SlotLumpA
+#pragma push_macro("P87_SlotLumpA") /*gvi*/
+#undef P87_SlotLumpA /*gvi*/
+p87_lumps_t P87_SlotLumpA;
+#pragma pop_macro("P87_SlotLumpA") /*gvi*/
+#pragma pop_macro("P87_SlotLumpA")
+#endif
 
 #ifdef RE_HOOK_BUILD
 #  define P87_LIST_END ((void **)0x00cfe7a0)

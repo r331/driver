@@ -7,9 +7,25 @@
 #include "../platform/plat.h"
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P86_CurTex, 0x0125f3ec)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P86_CurTex")
+#undef P86_CurTex
+#pragma push_macro("P86_CurTex") /*gvi*/
+#undef P86_CurTex /*gvi*/
+int32_t P86_CurTex;
+#pragma pop_macro("P86_CurTex") /*gvi*/
+#pragma pop_macro("P86_CurTex")
+#endif
 GAME_VAR_DEF(p86_texsrc_fn, P86_TexSrc, 0x01270d5c)
-GAME_VAR_DEF(uint8_t, P86_Detail, 0x00550828)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P86_Detail")
+#undef P86_Detail
+#pragma push_macro("P86_Detail") /*gvi*/
+#undef P86_Detail /*gvi*/
+uint8_t P86_Detail;
+#pragma pop_macro("P86_Detail") /*gvi*/
+#pragma pop_macro("P86_Detail")
+#endif
 
 typedef struct { int nv; int uv; int col; int size; int detail; } p86_fmt;
 static const p86_fmt F20 = { 3, 0x14, 0x2c, 0x38, 0 };

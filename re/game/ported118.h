@@ -17,9 +17,38 @@ typedef uint8_t p118_route_t[0x830];   /* 005feb90..005ff3c0: ключи мар�
 #define P118_RouteKey  GAME_VAR(int32_t, P118_RouteKey, 0x005feae4)          /* последний ключ при прямом переходе */
 #define P118_RouteMax  GAME_VAR(int32_t, P118_RouteMax, 0x005feae8)          /* число ключей кольца камер (0x19/10/0xf) */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P118_RouteTab") /*gvi*/
+#undef P118_RouteTab /*gvi*/
+#pragma push_macro("P118_Route") /*gvi*/
+#undef P118_Route /*gvi*/
+#pragma push_macro("P118_RouteTo") /*gvi*/
+#undef P118_RouteTo /*gvi*/
+#pragma push_macro("P118_RouteKey") /*gvi*/
+#undef P118_RouteKey /*gvi*/
+#pragma push_macro("P118_RouteMax") /*gvi*/
+#undef P118_RouteMax /*gvi*/
 extern p118_routetab_t P118_RouteTab; extern p118_route_t P118_Route; extern int32_t P118_RouteTo, P118_RouteKey, P118_RouteMax;
+#pragma pop_macro("P118_RouteMax") /*gvi*/
+#pragma pop_macro("P118_RouteKey") /*gvi*/
+#pragma pop_macro("P118_RouteTo") /*gvi*/
+#pragma pop_macro("P118_Route") /*gvi*/
+#pragma pop_macro("P118_RouteTab") /*gvi*/
 #endif
 void    P118_CamRoute(uint32_t cam);                                   /* 0041a1f9 */
 int32_t P118_TrafficTurn(uint8_t *rec);                                /* 004932d5 */
 int32_t P118_TrafficBlocked(uint8_t *rec);                             /* 0048dddb */
 void    P118_SkidFx(const float *pos, int32_t a, int32_t b, int32_t type, int32_t dist, const float *vel, int32_t spark); /* 004b8f4e */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P118_RouteTab
+#define P118_RouteTab (*(p118_routetab_t *)re_gvar(0x0054e774u, sizeof(p118_routetab_t), (void *)&P118_RouteTab))
+#undef P118_Route
+#define P118_Route (*(p118_route_t *)re_gvar(0x005feb90u, sizeof(p118_route_t), (void *)&P118_Route))
+#undef P118_RouteTo
+#define P118_RouteTo (*(int32_t *)re_gvar(0x005feae0u, sizeof(int32_t), (void *)&P118_RouteTo))
+#undef P118_RouteKey
+#define P118_RouteKey (*(int32_t *)re_gvar(0x005feae4u, sizeof(int32_t), (void *)&P118_RouteKey))
+#undef P118_RouteMax
+#define P118_RouteMax (*(int32_t *)re_gvar(0x005feae8u, sizeof(int32_t), (void *)&P118_RouteMax))
+#endif
+/* gvar-img v2.03 end */

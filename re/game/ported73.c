@@ -1,12 +1,60 @@
 #include "ported73.h"
 #include <string.h>
 
-GAME_VAR_DEF(p73_mask_t, P73_Mask, 0x00575e34)
-GAME_VAR_DEF(int32_t, P73_C566FC, 0x00c566fc)
-GAME_VAR_DEF(int32_t, P73_C5670C, 0x00c5670c)
-GAME_VAR_DEF(int32_t, P73_C56760, 0x00c56760)
-GAME_VAR_DEF(int32_t, P73_D00214, 0x00d00214)
-GAME_VAR_DEF(int32_t, P73_CF56BC, 0x00cf56bc)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P73_Mask")
+#undef P73_Mask
+#pragma push_macro("P73_Mask") /*gvi*/
+#undef P73_Mask /*gvi*/
+p73_mask_t P73_Mask;
+#pragma pop_macro("P73_Mask") /*gvi*/
+#pragma pop_macro("P73_Mask")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P73_C566FC")
+#undef P73_C566FC
+#pragma push_macro("P73_C566FC") /*gvi*/
+#undef P73_C566FC /*gvi*/
+int32_t P73_C566FC;
+#pragma pop_macro("P73_C566FC") /*gvi*/
+#pragma pop_macro("P73_C566FC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P73_C5670C")
+#undef P73_C5670C
+#pragma push_macro("P73_C5670C") /*gvi*/
+#undef P73_C5670C /*gvi*/
+int32_t P73_C5670C;
+#pragma pop_macro("P73_C5670C") /*gvi*/
+#pragma pop_macro("P73_C5670C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P73_C56760")
+#undef P73_C56760
+#pragma push_macro("P73_C56760") /*gvi*/
+#undef P73_C56760 /*gvi*/
+int32_t P73_C56760;
+#pragma pop_macro("P73_C56760") /*gvi*/
+#pragma pop_macro("P73_C56760")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P73_D00214")
+#undef P73_D00214
+#pragma push_macro("P73_D00214") /*gvi*/
+#undef P73_D00214 /*gvi*/
+int32_t P73_D00214;
+#pragma pop_macro("P73_D00214") /*gvi*/
+#pragma pop_macro("P73_D00214")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P73_CF56BC")
+#undef P73_CF56BC
+#pragma push_macro("P73_CF56BC") /*gvi*/
+#undef P73_CF56BC /*gvi*/
+int32_t P73_CF56BC;
+#pragma pop_macro("P73_CF56BC") /*gvi*/
+#pragma pop_macro("P73_CF56BC")
+#endif
 
 #ifndef RE_HOOK_BUILD
 void P73_InitConsts(void) {

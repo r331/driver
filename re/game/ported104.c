@@ -130,12 +130,60 @@
 #ifndef RE_HOOK_BUILD
 p104_menugfx_t P104_MenuGfx = { P104_MENUGFX_INIT };
 #endif
-GAME_VAR_DEF(p104_deb_t, P104_DebA, 0x01102d20)
-GAME_VAR_DEF(p104_deb_t, P104_DebB, 0x010ffd20)
-GAME_VAR_DEF(p104_deb_t, P104_DebC, 0x0111a400)
-GAME_VAR_DEF(p104_buf760_t, P104_Buf760, 0x00cfe760)
-GAME_VAR_DEF(int32_t, P104_12B26C, 0x0112b26c)
-GAME_VAR_DEF(int32_t, P104_139A28, 0x01139a28)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P104_DebA")
+#undef P104_DebA
+#pragma push_macro("P104_DebA") /*gvi*/
+#undef P104_DebA /*gvi*/
+p104_deb_t P104_DebA;
+#pragma pop_macro("P104_DebA") /*gvi*/
+#pragma pop_macro("P104_DebA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P104_DebB")
+#undef P104_DebB
+#pragma push_macro("P104_DebB") /*gvi*/
+#undef P104_DebB /*gvi*/
+p104_deb_t P104_DebB;
+#pragma pop_macro("P104_DebB") /*gvi*/
+#pragma pop_macro("P104_DebB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P104_DebC")
+#undef P104_DebC
+#pragma push_macro("P104_DebC") /*gvi*/
+#undef P104_DebC /*gvi*/
+p104_deb_t P104_DebC;
+#pragma pop_macro("P104_DebC") /*gvi*/
+#pragma pop_macro("P104_DebC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P104_Buf760")
+#undef P104_Buf760
+#pragma push_macro("P104_Buf760") /*gvi*/
+#undef P104_Buf760 /*gvi*/
+p104_buf760_t P104_Buf760;
+#pragma pop_macro("P104_Buf760") /*gvi*/
+#pragma pop_macro("P104_Buf760")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P104_12B26C")
+#undef P104_12B26C
+#pragma push_macro("P104_12B26C") /*gvi*/
+#undef P104_12B26C /*gvi*/
+int32_t P104_12B26C;
+#pragma pop_macro("P104_12B26C") /*gvi*/
+#pragma pop_macro("P104_12B26C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P104_139A28")
+#undef P104_139A28
+#pragma push_macro("P104_139A28") /*gvi*/
+#undef P104_139A28 /*gvi*/
+int32_t P104_139A28;
+#pragma pop_macro("P104_139A28") /*gvi*/
+#pragma pop_macro("P104_139A28")
+#endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }

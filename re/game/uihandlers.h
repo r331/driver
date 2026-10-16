@@ -18,19 +18,58 @@
 #define UiVar005FEA30 GAME_VAR(int32_t, UiVar005FEA30, 0x005fea30)
 #define UiVar0054E4B0 GAME_VAR(int32_t, UiVar0054E4B0, 0x0054e4b0)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("UiVar00B87E38") /*gvi*/
+#undef UiVar00B87E38 /*gvi*/
 extern int32_t UiVar00B87E38;
+#pragma pop_macro("UiVar00B87E38") /*gvi*/
+#pragma push_macro("UiVar005FE84C") /*gvi*/
+#undef UiVar005FE84C /*gvi*/
 extern int32_t UiVar005FE84C;
+#pragma pop_macro("UiVar005FE84C") /*gvi*/
+#pragma push_macro("UiVar005FE850") /*gvi*/
+#undef UiVar005FE850 /*gvi*/
 extern int32_t UiVar005FE850;
+#pragma pop_macro("UiVar005FE850") /*gvi*/
+#pragma push_macro("UiVar005FE928") /*gvi*/
+#undef UiVar005FE928 /*gvi*/
 extern int32_t UiVar005FE928;
+#pragma pop_macro("UiVar005FE928") /*gvi*/
+#pragma push_macro("UiVar005FE92C") /*gvi*/
+#undef UiVar005FE92C /*gvi*/
 extern int32_t UiVar005FE92C;
+#pragma pop_macro("UiVar005FE92C") /*gvi*/
+#pragma push_macro("UiVar0054CC64") /*gvi*/
+#undef UiVar0054CC64 /*gvi*/
 extern uint8_t UiVar0054CC64;
+#pragma pop_macro("UiVar0054CC64") /*gvi*/
+#pragma push_macro("UiVar0054CC74") /*gvi*/
+#undef UiVar0054CC74 /*gvi*/
 extern uint8_t UiVar0054CC74;
+#pragma pop_macro("UiVar0054CC74") /*gvi*/
+#pragma push_macro("UiVar0054D10C") /*gvi*/
+#undef UiVar0054D10C /*gvi*/
 extern uint8_t UiVar0054D10C;
+#pragma pop_macro("UiVar0054D10C") /*gvi*/
+#pragma push_macro("UiVar0054D11C") /*gvi*/
+#undef UiVar0054D11C /*gvi*/
 extern uint8_t UiVar0054D11C;
+#pragma pop_macro("UiVar0054D11C") /*gvi*/
+#pragma push_macro("UiVar0054BF18") /*gvi*/
+#undef UiVar0054BF18 /*gvi*/
 extern int32_t UiVar0054BF18;
+#pragma pop_macro("UiVar0054BF18") /*gvi*/
+#pragma push_macro("UiVar005FE6BC") /*gvi*/
+#undef UiVar005FE6BC /*gvi*/
 extern int32_t UiVar005FE6BC;
+#pragma pop_macro("UiVar005FE6BC") /*gvi*/
+#pragma push_macro("UiVar005FEA30") /*gvi*/
+#undef UiVar005FEA30 /*gvi*/
 extern int32_t UiVar005FEA30;
+#pragma pop_macro("UiVar005FEA30") /*gvi*/
+#pragma push_macro("UiVar0054E4B0") /*gvi*/
+#undef UiVar0054E4B0 /*gvi*/
 extern int32_t UiVar0054E4B0;
+#pragma pop_macro("UiVar0054E4B0") /*gvi*/
 #endif
 void Ui00408699(void); /* 00408699 */
 void Ui0040C867(void); /* 0040c867 */
@@ -92,3 +131,33 @@ void Ui00417A98(void); /* 00417a98 */
 int32_t Ui00417AD6(void); /* 00417ad6 */
 void Ui00417AEA(void); /* 00417aea */
 void Ui00417AF9(void); /* 00417af9 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef UiVar00B87E38
+#define UiVar00B87E38 (*(int32_t *)re_gvar(0x00b87e38u, sizeof(int32_t), (void *)&UiVar00B87E38))
+#undef UiVar005FE84C
+#define UiVar005FE84C (*(int32_t *)re_gvar(0x005fe84cu, sizeof(int32_t), (void *)&UiVar005FE84C))
+#undef UiVar005FE850
+#define UiVar005FE850 (*(int32_t *)re_gvar(0x005fe850u, sizeof(int32_t), (void *)&UiVar005FE850))
+#undef UiVar005FE928
+#define UiVar005FE928 (*(int32_t *)re_gvar(0x005fe928u, sizeof(int32_t), (void *)&UiVar005FE928))
+#undef UiVar005FE92C
+#define UiVar005FE92C (*(int32_t *)re_gvar(0x005fe92cu, sizeof(int32_t), (void *)&UiVar005FE92C))
+#undef UiVar0054CC64
+#define UiVar0054CC64 (*(uint8_t *)re_gvar(0x0054cc64u, sizeof(uint8_t), (void *)&UiVar0054CC64))
+#undef UiVar0054CC74
+#define UiVar0054CC74 (*(uint8_t *)re_gvar(0x0054cc74u, sizeof(uint8_t), (void *)&UiVar0054CC74))
+#undef UiVar0054D10C
+#define UiVar0054D10C (*(uint8_t *)re_gvar(0x0054d10cu, sizeof(uint8_t), (void *)&UiVar0054D10C))
+#undef UiVar0054D11C
+#define UiVar0054D11C (*(uint8_t *)re_gvar(0x0054d11cu, sizeof(uint8_t), (void *)&UiVar0054D11C))
+#undef UiVar0054BF18
+#define UiVar0054BF18 (*(int32_t *)re_gvar(0x0054bf18u, sizeof(int32_t), (void *)&UiVar0054BF18))
+#undef UiVar005FE6BC
+#define UiVar005FE6BC (*(int32_t *)re_gvar(0x005fe6bcu, sizeof(int32_t), (void *)&UiVar005FE6BC))
+#undef UiVar005FEA30
+#define UiVar005FEA30 (*(int32_t *)re_gvar(0x005fea30u, sizeof(int32_t), (void *)&UiVar005FEA30))
+#undef UiVar0054E4B0
+#define UiVar0054E4B0 (*(int32_t *)re_gvar(0x0054e4b0u, sizeof(int32_t), (void *)&UiVar0054E4B0))
+#endif
+/* gvar-img v2.03 end */

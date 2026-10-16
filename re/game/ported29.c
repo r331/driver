@@ -6,16 +6,96 @@
 #include "directorstorage.h"
 #include "engine.h"
 #include "unported.h"
-GAME_VAR_DEF(int32_t, P29_Mode, 0x00d17bbc)
-GAME_VAR_DEF(int32_t, P29_Param, 0x00d17bc0)
-GAME_VAR_DEF(int32_t, P29_Flag48, 0x00d17d48)
-GAME_VAR_DEF(int32_t, P29_FlagA4, 0x00d17ba4)
-GAME_VAR_DEF(int32_t, P29_Flag74, 0x00d17b74)
-GAME_VAR_DEF(int32_t, P29_Flag9C, 0x00d17b9c)
-GAME_VAR_DEF(int32_t, P29_FlagA8, 0x00d17ba8)
-GAME_VAR_DEF(int32_t, P29_FlagB0, 0x00d17bb0)
-GAME_VAR_DEF(int32_t, P29_Flag98, 0x00d17b98)
-GAME_VAR_DEF(int32_t, P29_Flag94, 0x00d17b94)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P29_Mode")
+#undef P29_Mode
+#pragma push_macro("P29_Mode") /*gvi*/
+#undef P29_Mode /*gvi*/
+int32_t P29_Mode;
+#pragma pop_macro("P29_Mode") /*gvi*/
+#pragma pop_macro("P29_Mode")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P29_Param")
+#undef P29_Param
+#pragma push_macro("P29_Param") /*gvi*/
+#undef P29_Param /*gvi*/
+int32_t P29_Param;
+#pragma pop_macro("P29_Param") /*gvi*/
+#pragma pop_macro("P29_Param")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P29_Flag48")
+#undef P29_Flag48
+#pragma push_macro("P29_Flag48") /*gvi*/
+#undef P29_Flag48 /*gvi*/
+int32_t P29_Flag48;
+#pragma pop_macro("P29_Flag48") /*gvi*/
+#pragma pop_macro("P29_Flag48")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P29_FlagA4")
+#undef P29_FlagA4
+#pragma push_macro("P29_FlagA4") /*gvi*/
+#undef P29_FlagA4 /*gvi*/
+int32_t P29_FlagA4;
+#pragma pop_macro("P29_FlagA4") /*gvi*/
+#pragma pop_macro("P29_FlagA4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P29_Flag74")
+#undef P29_Flag74
+#pragma push_macro("P29_Flag74") /*gvi*/
+#undef P29_Flag74 /*gvi*/
+int32_t P29_Flag74;
+#pragma pop_macro("P29_Flag74") /*gvi*/
+#pragma pop_macro("P29_Flag74")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P29_Flag9C")
+#undef P29_Flag9C
+#pragma push_macro("P29_Flag9C") /*gvi*/
+#undef P29_Flag9C /*gvi*/
+int32_t P29_Flag9C;
+#pragma pop_macro("P29_Flag9C") /*gvi*/
+#pragma pop_macro("P29_Flag9C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P29_FlagA8")
+#undef P29_FlagA8
+#pragma push_macro("P29_FlagA8") /*gvi*/
+#undef P29_FlagA8 /*gvi*/
+int32_t P29_FlagA8;
+#pragma pop_macro("P29_FlagA8") /*gvi*/
+#pragma pop_macro("P29_FlagA8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P29_FlagB0")
+#undef P29_FlagB0
+#pragma push_macro("P29_FlagB0") /*gvi*/
+#undef P29_FlagB0 /*gvi*/
+int32_t P29_FlagB0;
+#pragma pop_macro("P29_FlagB0") /*gvi*/
+#pragma pop_macro("P29_FlagB0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P29_Flag98")
+#undef P29_Flag98
+#pragma push_macro("P29_Flag98") /*gvi*/
+#undef P29_Flag98 /*gvi*/
+int32_t P29_Flag98;
+#pragma pop_macro("P29_Flag98") /*gvi*/
+#pragma pop_macro("P29_Flag98")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P29_Flag94")
+#undef P29_Flag94
+#pragma push_macro("P29_Flag94") /*gvi*/
+#undef P29_Flag94 /*gvi*/
+int32_t P29_Flag94;
+#pragma pop_macro("P29_Flag94") /*gvi*/
+#pragma pop_macro("P29_Flag94")
+#endif
 /* До конца повтора ещё есть кадры (индекс текущего < последний-1). */
 static int has_frames(void) { return DirectorUnk6C < DirectorLastFrame - 1; }
 int32_t SetDirectorMode(int32_t mode, int32_t sub, int32_t param) {

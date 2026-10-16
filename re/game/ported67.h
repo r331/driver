@@ -31,8 +31,26 @@ typedef uint32_t P67_ItemArr[30];
 #define P67_Res51C  GAME_VAR(int32_t, P67_Res51C, 0x0054e51c)
 #define P67_Tbl100  GAME_VAR(uint32_t, P67_Tbl100, 0x0054e100)   /* адрес таблицы пунктов (читается из .data игры) */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P67_Items") /*gvi*/
+#undef P67_Items /*gvi*/
 extern P67_EntArr P67_Ents; extern P67_ItemArr P67_Items;
+#pragma pop_macro("P67_Items") /*gvi*/
+#pragma push_macro("P67_ItemCnt") /*gvi*/
+#undef P67_ItemCnt /*gvi*/
+#pragma push_macro("P67_Cur") /*gvi*/
+#undef P67_Cur /*gvi*/
+#pragma push_macro("P67_Sel2C") /*gvi*/
+#undef P67_Sel2C /*gvi*/
+#pragma push_macro("P67_Res51C") /*gvi*/
+#undef P67_Res51C /*gvi*/
+#pragma push_macro("P67_Tbl100") /*gvi*/
+#undef P67_Tbl100 /*gvi*/
 extern int32_t P67_ItemCnt, P67_Cur, P67_Sel2C, P67_Res51C; extern uint32_t P67_Tbl100;
+#pragma pop_macro("P67_Tbl100") /*gvi*/
+#pragma pop_macro("P67_Res51C") /*gvi*/
+#pragma pop_macro("P67_Sel2C") /*gvi*/
+#pragma pop_macro("P67_Cur") /*gvi*/
+#pragma pop_macro("P67_ItemCnt") /*gvi*/
 #endif
 void    P67_CompactPool(void);                         /* 004bb060: свободные записи берут значения из пула, пул очищается */
 void    P67_CenterDraw(float x, float y, float z, uint32_t p4);  /* 00516fbe: позиция (масштабирование от центра экрана), цвет, значения, 0040abac */
@@ -42,3 +60,19 @@ void    P67_DrawIcon(int32_t x, int32_t y, int32_t unused, const char *name);  /
 int32_t P67_Menu415EC0(void);                          /* 00415ec0: экран с таблицей 0054e0b0/значение из 0054e100 */
 int32_t P67_Menu417970(void);                          /* 00417970: экран с таблицей 0054e480 */
 int32_t P67_Menu415188(void);                          /* 00415188: смена режима звука/музыки (0→1→2→0) */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P67_Items
+#define P67_Items (*(P67_ItemArr *)re_gvar(0x010ffb60u, sizeof(P67_ItemArr), (void *)&P67_Items))
+#undef P67_ItemCnt
+#define P67_ItemCnt (*(int32_t *)re_gvar(0x0110b024u, sizeof(int32_t), (void *)&P67_ItemCnt))
+#undef P67_Cur
+#define P67_Cur (*(int32_t *)re_gvar(0x00d11924u, sizeof(int32_t), (void *)&P67_Cur))
+#undef P67_Sel2C
+#define P67_Sel2C (*(int32_t *)re_gvar(0x005fea2cu, sizeof(int32_t), (void *)&P67_Sel2C))
+#undef P67_Res51C
+#define P67_Res51C (*(int32_t *)re_gvar(0x0054e51cu, sizeof(int32_t), (void *)&P67_Res51C))
+#undef P67_Tbl100
+#define P67_Tbl100 (*(uint32_t *)re_gvar(0x0054e100u, sizeof(uint32_t), (void *)&P67_Tbl100))
+#endif
+/* gvar-img v2.03 end */

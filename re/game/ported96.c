@@ -45,30 +45,214 @@
 #include <stdio.h>
 #include <string.h>
 
-GAME_VAR_DEF(p96_logbuf_t, P96_LogBuf, 0x00d0fe40)
-GAME_VAR_DEF(int32_t, P96_FpsShown, 0x00d0fe14)
-GAME_VAR_DEF(int32_t, P96_FpsFrames, 0x00d11684)
-GAME_VAR_DEF(int32_t, P96_FpsTicks, 0x00d11688)
-GAME_VAR_DEF(int32_t, P96_FpsTick0, 0x00d11810)
-GAME_VAR_DEF(int32_t, P96_FpsFrame0, 0x00d11814)
-GAME_VAR_DEF(int32_t, P96_RefreshHz, 0x00575f0c)
-GAME_VAR_DEF(p96_sphere_t, P96_Sphere, 0x00d02780)
-GAME_VAR_DEF(p96_rottab_t, P96_RotTab, 0x0113a6e0)
-GAME_VAR_DEF(int32_t, P96_SparkOn, 0x010faf24)
-GAME_VAR_DEF(int32_t, P96_DustOn, 0x0111d408)
-GAME_VAR_DEF(p96_dust_t, P96_Dust, 0x0110e160)
-GAME_VAR_DEF(int32_t, P96_DustN, 0x011171a0)
-GAME_VAR_DEF(int32_t, P96_ObjBOn, 0x010fb204)
-GAME_VAR_DEF(uint8_t, P96_ReplayB, 0x00b5a850)
-GAME_VAR_DEF(p96_tag_t, P96_RTag, 0x00575d84)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_LogBuf")
+#undef P96_LogBuf
+#pragma push_macro("P96_LogBuf") /*gvi*/
+#undef P96_LogBuf /*gvi*/
+p96_logbuf_t P96_LogBuf;
+#pragma pop_macro("P96_LogBuf") /*gvi*/
+#pragma pop_macro("P96_LogBuf")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_FpsShown")
+#undef P96_FpsShown
+#pragma push_macro("P96_FpsShown") /*gvi*/
+#undef P96_FpsShown /*gvi*/
+int32_t P96_FpsShown;
+#pragma pop_macro("P96_FpsShown") /*gvi*/
+#pragma pop_macro("P96_FpsShown")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_FpsFrames")
+#undef P96_FpsFrames
+#pragma push_macro("P96_FpsFrames") /*gvi*/
+#undef P96_FpsFrames /*gvi*/
+int32_t P96_FpsFrames;
+#pragma pop_macro("P96_FpsFrames") /*gvi*/
+#pragma pop_macro("P96_FpsFrames")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_FpsTicks")
+#undef P96_FpsTicks
+#pragma push_macro("P96_FpsTicks") /*gvi*/
+#undef P96_FpsTicks /*gvi*/
+int32_t P96_FpsTicks;
+#pragma pop_macro("P96_FpsTicks") /*gvi*/
+#pragma pop_macro("P96_FpsTicks")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_FpsTick0")
+#undef P96_FpsTick0
+#pragma push_macro("P96_FpsTick0") /*gvi*/
+#undef P96_FpsTick0 /*gvi*/
+int32_t P96_FpsTick0;
+#pragma pop_macro("P96_FpsTick0") /*gvi*/
+#pragma pop_macro("P96_FpsTick0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_FpsFrame0")
+#undef P96_FpsFrame0
+#pragma push_macro("P96_FpsFrame0") /*gvi*/
+#undef P96_FpsFrame0 /*gvi*/
+int32_t P96_FpsFrame0;
+#pragma pop_macro("P96_FpsFrame0") /*gvi*/
+#pragma pop_macro("P96_FpsFrame0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_RefreshHz")
+#undef P96_RefreshHz
+#pragma push_macro("P96_RefreshHz") /*gvi*/
+#undef P96_RefreshHz /*gvi*/
+int32_t P96_RefreshHz;
+#pragma pop_macro("P96_RefreshHz") /*gvi*/
+#pragma pop_macro("P96_RefreshHz")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_Sphere")
+#undef P96_Sphere
+#pragma push_macro("P96_Sphere") /*gvi*/
+#undef P96_Sphere /*gvi*/
+p96_sphere_t P96_Sphere;
+#pragma pop_macro("P96_Sphere") /*gvi*/
+#pragma pop_macro("P96_Sphere")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_RotTab")
+#undef P96_RotTab
+#pragma push_macro("P96_RotTab") /*gvi*/
+#undef P96_RotTab /*gvi*/
+p96_rottab_t P96_RotTab;
+#pragma pop_macro("P96_RotTab") /*gvi*/
+#pragma pop_macro("P96_RotTab")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_SparkOn")
+#undef P96_SparkOn
+#pragma push_macro("P96_SparkOn") /*gvi*/
+#undef P96_SparkOn /*gvi*/
+int32_t P96_SparkOn;
+#pragma pop_macro("P96_SparkOn") /*gvi*/
+#pragma pop_macro("P96_SparkOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_DustOn")
+#undef P96_DustOn
+#pragma push_macro("P96_DustOn") /*gvi*/
+#undef P96_DustOn /*gvi*/
+int32_t P96_DustOn;
+#pragma pop_macro("P96_DustOn") /*gvi*/
+#pragma pop_macro("P96_DustOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_Dust")
+#undef P96_Dust
+#pragma push_macro("P96_Dust") /*gvi*/
+#undef P96_Dust /*gvi*/
+p96_dust_t P96_Dust;
+#pragma pop_macro("P96_Dust") /*gvi*/
+#pragma pop_macro("P96_Dust")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_DustN")
+#undef P96_DustN
+#pragma push_macro("P96_DustN") /*gvi*/
+#undef P96_DustN /*gvi*/
+int32_t P96_DustN;
+#pragma pop_macro("P96_DustN") /*gvi*/
+#pragma pop_macro("P96_DustN")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_ObjBOn")
+#undef P96_ObjBOn
+#pragma push_macro("P96_ObjBOn") /*gvi*/
+#undef P96_ObjBOn /*gvi*/
+int32_t P96_ObjBOn;
+#pragma pop_macro("P96_ObjBOn") /*gvi*/
+#pragma pop_macro("P96_ObjBOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_ReplayB")
+#undef P96_ReplayB
+#pragma push_macro("P96_ReplayB") /*gvi*/
+#undef P96_ReplayB /*gvi*/
+uint8_t P96_ReplayB;
+#pragma pop_macro("P96_ReplayB") /*gvi*/
+#pragma pop_macro("P96_ReplayB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_RTag")
+#undef P96_RTag
+#pragma push_macro("P96_RTag") /*gvi*/
+#undef P96_RTag /*gvi*/
+p96_tag_t P96_RTag;
+#pragma pop_macro("P96_RTag") /*gvi*/
+#pragma pop_macro("P96_RTag")
+#endif
 GAME_VAR_DEF(uint8_t *, P96_ShadIcon, 0x00b5c8d8)
-GAME_VAR_DEF(uint8_t, P96_ShadPage, 0x00b5c7e2)
-GAME_VAR_DEF(p96_i4_t, P96_ShadIdx, 0x00b5c7e8)
-GAME_VAR_DEF(p96_f3_t, P96_ShadRGB, 0x00b5c818)
-GAME_VAR_DEF(p96_f12_t, P96_ShadUV, 0x00b5c8dc)
-GAME_VAR_DEF(float, P96_ShadH, 0x00b80950)
-GAME_VAR_DEF(float, P96_ShadW, 0x00b80954)
-GAME_VAR_DEF(p96_parttab_t, P96_PartTab, 0x005759c4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_ShadPage")
+#undef P96_ShadPage
+#pragma push_macro("P96_ShadPage") /*gvi*/
+#undef P96_ShadPage /*gvi*/
+uint8_t P96_ShadPage;
+#pragma pop_macro("P96_ShadPage") /*gvi*/
+#pragma pop_macro("P96_ShadPage")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_ShadIdx")
+#undef P96_ShadIdx
+#pragma push_macro("P96_ShadIdx") /*gvi*/
+#undef P96_ShadIdx /*gvi*/
+p96_i4_t P96_ShadIdx;
+#pragma pop_macro("P96_ShadIdx") /*gvi*/
+#pragma pop_macro("P96_ShadIdx")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_ShadRGB")
+#undef P96_ShadRGB
+#pragma push_macro("P96_ShadRGB") /*gvi*/
+#undef P96_ShadRGB /*gvi*/
+p96_f3_t P96_ShadRGB;
+#pragma pop_macro("P96_ShadRGB") /*gvi*/
+#pragma pop_macro("P96_ShadRGB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_ShadUV")
+#undef P96_ShadUV
+#pragma push_macro("P96_ShadUV") /*gvi*/
+#undef P96_ShadUV /*gvi*/
+p96_f12_t P96_ShadUV;
+#pragma pop_macro("P96_ShadUV") /*gvi*/
+#pragma pop_macro("P96_ShadUV")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_ShadH")
+#undef P96_ShadH
+#pragma push_macro("P96_ShadH") /*gvi*/
+#undef P96_ShadH /*gvi*/
+float P96_ShadH;
+#pragma pop_macro("P96_ShadH") /*gvi*/
+#pragma pop_macro("P96_ShadH")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_ShadW")
+#undef P96_ShadW
+#pragma push_macro("P96_ShadW") /*gvi*/
+#undef P96_ShadW /*gvi*/
+float P96_ShadW;
+#pragma pop_macro("P96_ShadW") /*gvi*/
+#pragma pop_macro("P96_ShadW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P96_PartTab")
+#undef P96_PartTab
+#pragma push_macro("P96_PartTab") /*gvi*/
+#undef P96_PartTab /*gvi*/
+p96_parttab_t P96_PartTab;
+#pragma pop_macro("P96_PartTab") /*gvi*/
+#pragma pop_macro("P96_PartTab")
+#endif
 
 #define LOG_BASE 0x00d0fe40u
 

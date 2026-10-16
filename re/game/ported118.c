@@ -30,12 +30,47 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P118_RouteTab") /*gvi*/
+#undef P118_RouteTab /*gvi*/
 p118_routetab_t P118_RouteTab = P118_ROUTE_INIT;
+#pragma pop_macro("P118_RouteTab") /*gvi*/
 #endif
-GAME_VAR_DEF(p118_route_t, P118_Route, 0x005feb90)
-GAME_VAR_DEF(int32_t, P118_RouteTo, 0x005feae0)
-GAME_VAR_DEF(int32_t, P118_RouteKey, 0x005feae4)
-GAME_VAR_DEF(int32_t, P118_RouteMax, 0x005feae8)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P118_Route")
+#undef P118_Route
+#pragma push_macro("P118_Route") /*gvi*/
+#undef P118_Route /*gvi*/
+p118_route_t P118_Route;
+#pragma pop_macro("P118_Route") /*gvi*/
+#pragma pop_macro("P118_Route")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P118_RouteTo")
+#undef P118_RouteTo
+#pragma push_macro("P118_RouteTo") /*gvi*/
+#undef P118_RouteTo /*gvi*/
+int32_t P118_RouteTo;
+#pragma pop_macro("P118_RouteTo") /*gvi*/
+#pragma pop_macro("P118_RouteTo")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P118_RouteKey")
+#undef P118_RouteKey
+#pragma push_macro("P118_RouteKey") /*gvi*/
+#undef P118_RouteKey /*gvi*/
+int32_t P118_RouteKey;
+#pragma pop_macro("P118_RouteKey") /*gvi*/
+#pragma pop_macro("P118_RouteKey")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P118_RouteMax")
+#undef P118_RouteMax
+#pragma push_macro("P118_RouteMax") /*gvi*/
+#undef P118_RouteMax /*gvi*/
+int32_t P118_RouteMax;
+#pragma pop_macro("P118_RouteMax") /*gvi*/
+#pragma pop_macro("P118_RouteMax")
+#endif
 
 static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }

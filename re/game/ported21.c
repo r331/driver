@@ -5,13 +5,53 @@
 #include "unported.h"
 #include "ported19.h"
 #include "uihandlers3.h"
-GAME_VAR_DEF(int32_t, P21_GridDiv, 0x00562d38)
-GAME_VAR_DEF(int32_t, P21_GridRadius, 0x00cf56b8)
-GAME_VAR_DEF(int32_t, P21_GridStride, 0x00d00258)
-GAME_VAR_DEF(int32_t, P21_AxisValue, 0x00b31e20)
-GAME_VAR_DEF(int32_t, P21_EntryCount, 0x00575ee4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P21_GridDiv")
+#undef P21_GridDiv
+#pragma push_macro("P21_GridDiv") /*gvi*/
+#undef P21_GridDiv /*gvi*/
+int32_t P21_GridDiv;
+#pragma pop_macro("P21_GridDiv") /*gvi*/
+#pragma pop_macro("P21_GridDiv")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P21_GridRadius")
+#undef P21_GridRadius
+#pragma push_macro("P21_GridRadius") /*gvi*/
+#undef P21_GridRadius /*gvi*/
+int32_t P21_GridRadius;
+#pragma pop_macro("P21_GridRadius") /*gvi*/
+#pragma pop_macro("P21_GridRadius")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P21_GridStride")
+#undef P21_GridStride
+#pragma push_macro("P21_GridStride") /*gvi*/
+#undef P21_GridStride /*gvi*/
+int32_t P21_GridStride;
+#pragma pop_macro("P21_GridStride") /*gvi*/
+#pragma pop_macro("P21_GridStride")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P21_AxisValue")
+#undef P21_AxisValue
+#pragma push_macro("P21_AxisValue") /*gvi*/
+#undef P21_AxisValue /*gvi*/
+int32_t P21_AxisValue;
+#pragma pop_macro("P21_AxisValue") /*gvi*/
+#pragma pop_macro("P21_AxisValue")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P21_EntryCount")
+#undef P21_EntryCount
+#pragma push_macro("P21_EntryCount") /*gvi*/
+#undef P21_EntryCount /*gvi*/
+int32_t P21_EntryCount;
+#pragma pop_macro("P21_EntryCount") /*gvi*/
+#pragma pop_macro("P21_EntryCount")
+#endif
 #ifndef RE_HOOK_BUILD
-uint8_t P21_AxisOut[256], P21_AxisSrc[256];
+uint8_t P21_AxisSrc[256];   /* v2.03: P21_AxisOut — A_00D04B00 (ported21.h) */
 #endif
 
 int32_t P21_GridCellSet(int32_t idx, const uint8_t* map, int32_t cx, int32_t cy) {
@@ -105,11 +145,51 @@ void P21_DrawFps(void) {
   Call004D90F4((int32_t)(intptr_t)buf);
 }
 
-GAME_VAR_DEF(int32_t, P21_FrameFlagA, 0x00575f38)
-GAME_VAR_DEF(int32_t, P21_FrameFlagB, 0x00575f34)
-GAME_VAR_DEF(int32_t, P21_FrameMin, 0x00575eec)
-GAME_VAR_DEF(uint32_t, P21_FrameBase, 0x00b2c3a0)
-GAME_VAR_DEF(int32_t, P21_FrameTotal, 0x00b87e78)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P21_FrameFlagA")
+#undef P21_FrameFlagA
+#pragma push_macro("P21_FrameFlagA") /*gvi*/
+#undef P21_FrameFlagA /*gvi*/
+int32_t P21_FrameFlagA;
+#pragma pop_macro("P21_FrameFlagA") /*gvi*/
+#pragma pop_macro("P21_FrameFlagA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P21_FrameFlagB")
+#undef P21_FrameFlagB
+#pragma push_macro("P21_FrameFlagB") /*gvi*/
+#undef P21_FrameFlagB /*gvi*/
+int32_t P21_FrameFlagB;
+#pragma pop_macro("P21_FrameFlagB") /*gvi*/
+#pragma pop_macro("P21_FrameFlagB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P21_FrameMin")
+#undef P21_FrameMin
+#pragma push_macro("P21_FrameMin") /*gvi*/
+#undef P21_FrameMin /*gvi*/
+int32_t P21_FrameMin;
+#pragma pop_macro("P21_FrameMin") /*gvi*/
+#pragma pop_macro("P21_FrameMin")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P21_FrameBase")
+#undef P21_FrameBase
+#pragma push_macro("P21_FrameBase") /*gvi*/
+#undef P21_FrameBase /*gvi*/
+uint32_t P21_FrameBase;
+#pragma pop_macro("P21_FrameBase") /*gvi*/
+#pragma pop_macro("P21_FrameBase")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P21_FrameTotal")
+#undef P21_FrameTotal
+#pragma push_macro("P21_FrameTotal") /*gvi*/
+#undef P21_FrameTotal /*gvi*/
+int32_t P21_FrameTotal;
+#pragma pop_macro("P21_FrameTotal") /*gvi*/
+#pragma pop_macro("P21_FrameTotal")
+#endif
 uint32_t P21_FrameTicks(void) {
   uint32_t n = 0, r;
   Call00522323();

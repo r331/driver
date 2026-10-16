@@ -1,4 +1,4 @@
-# Native-сборка как игра: разрывы (v2.00–v2.02, 2026-10-16)
+# Native-сборка как игра: разрывы (v2.00–v2.03, 2026-10-16)
 
 Сборка `re/build-native/driver` (SDL2 + OpenGL 3.3, Linux arm64, Mesa 25 под Xvfb).
 Запуск игры: `work/run_game.sh [кадров] [png]` — каталог `work/run_game` (симлинки на все файлы
@@ -13,6 +13,10 @@
 - `RE_WATCHDOG=N` — через N с печать стека (в ASan-сборке) и выход 3: где стоит игра.
 - `RE_TRACE=1` — трассировка P55_GlideInit и всех `return 0` в P151_WinOpen/P151_Reopen.
 - `--idle` — прежний режим main (пустое окно).
+- v2.03: `RE_KEYS="кадр:клавиша,…"` — сценарий нажатий (клавиша нажата с кадра N `RE_KEYS_HOLD` кадров, по умолчанию 2; имена UP DOWN
+  LEFT RIGHT RETURN ESC SPACE F1..F12 A..Z 0..9 … или номер DIK); `RE_TRACE_KEYS=1` — журнал GetDeviceState и шагов P114_MenuStep;
+  `RE_TRACE_TEXT=1` — список надписей P117_TextList; `RE_CRASH_BT=1` — стек (glibc backtrace) при аварии; `RE_NO_GVAR_IMG=1` — выключить
+  размещение переменных в образе данных (для сравнения).
 - v2.01: `RE_TRACE_DD=1` — журнал поверхностей DirectDraw (create/lock/upload/set_texture) и первых вызовов GL (draw_prim,
   render state); `RE_NO_CRASH=1` — обработчик аварий игры не ставится (сигналы видит ASan/gdb; ASan-сборка — /tmp/asan).
 
@@ -29,7 +33,10 @@
 | 7 | `P48_StartupSystems` (DirectInput, DirectSound, CD) | проходит; «InitCDAudio: Open CD device failed» |
 | 8 | `P140_Frontend`: `P140_KeysLoad`, `P126_ShowBmpFade` COPYRIGHT.BMP, GT.BMP, REFLECT.BMP | **v2.01: картинка есть** (плитки 256×256 через D3D-эмуляцию → GL, с затемнением) — out/native_v2.01.png (кадр 30, COPYRIGHT), out/native_v2.01_gt.png (кадр 70, GT); REFLECT — кадр 120 |
 | 9 | `P150_PlayFmv` (пропуск), `P136_FrontInit`, главное меню 0054cc90 — цикл `for(;;)` в P140_Frontend | **v2.02: главное меню видно** — фон BKGRND1A..F, логотип DRIVER, значки пунктов (машины, флаг, хлопушка, конусы, полицейский) — out/native_v2.02.png (кадр 300); подписи пунктов (шрифт P117_TextList/P116_Text) на снимке не видны — не проверено, рисуются ли |
-| 10 | `P132_MenuLoop` / `P136_GameLoop` → `P145_LevelLoad` → `P131_GameFrame` | не достигнуто |
+| 9a | v2.03: подписи пунктов (P117_TextList → P116_Text) | **видны** — out/native_v2.03.png (кадр 300, «Undercover») |
+| 9b | v2.03: ввод SDL → DirectInput, листание меню | **работает** — RE_KEYS="300:RIGHT": пункт 0 → 7, out/native_v2.03_keys.png («Car Chases», кадр 330); RE_KEYS="300:RETURN,400:RETURN,500:RETURN" — подменю Undercover (New Game / Load Saved Game), out/native_v2.03_sub.png (кадр 600) |
+| 10 | Undercover → New Game: Ui0041355B → P68_ScreenReset → P139_LadderLoad (MLADDER.DML) → P140_LadderRun → `P136_GameLoop` → `P145_LevelLoad` → P138_LoadMission → P77_LoadLevel | **v2.03: доходит до загрузки уровня**; «LoadMission», cosmetics/denting загружены; авария SIGSEGV в `P40_DownloadPalette` ← `P41_LoadTexPages` ← P77_LoadLevel (кадр ≈410, RE_KEYS="300:RETURN,400:RETURN"); в журнале «not ported: Call004D303A, Call005283B5» |
+| 11 | `P131_GameFrame` (заезд) | не достигнуто |
 
 Проверено: 60 кадров, выход 0 (release, `work/run_game.sh 60`), md5 FRUSTRUM.DAT до/после
 3c76cb744abe31d5478004ab33005585. Снимок кадра 22: `out/native_v2.00.png` — сплошной чёрный 640×480.
@@ -123,7 +130,39 @@ Glide-значки в меню не участвуют. Lock работал; п�
 Ветка `0x2c < 005d577c → 004129df(-1)` в P140_Frontend — отдельный путь (не проверено, что она делает в native). Можно гасить повтор в
 native (plat CD: «нет устройства» → не пытаться), но это отступление — не делалось.
 
+## Исправлено в v2.03 (по порядку, в каком мешало)
+
+1. **Ввод SDL → DirectInput** (platform/sdl/plat_di.c, только игра — `plat_input_enable(1)` в platform/native/main.c): GetDeviceState(0x100)
+   клавиатуры = SDL_GetKeyboardState через таблицу SDL_Scancode → DIK + первый SDL_GameController (крестовина/левый стик → стрелки,
+   A/Start → RETURN, B/Back → ESC, X → SPACE) + сценарий RE_KEYS. Буферизованный ввод (GetDeviceData) игре не нужен: перенос 004e417f
+   читает только GetDeviceState. Мышь, джойстик DIJOYSTATE (кроме lX/lY заглушки) — не сделаны.
+2. **00d04b00 — один блок клавиш.** P34_Keys/P34_KeysPrev (пишет 004e417f), A_00D04B00 (читает IsFlagSetNotMasked_004E383A — «нажата,
+   а в прошлом кадре нет», которым листает меню P114_MenuStep), KeyState (dirnodes/ported107/110) и P21_AxisOut были четырьмя разными
+   native-объектами: клавиши не доходили до меню. В native — макросы над одним блоком (ported34.h, dirnodes.h, ported21.h); hook не затронут.
+3. **Подписи пунктов: таблицы меню и переменные .data — один объект на адрес** (блокеры 3/4). Строки пунктов берутся из таблицы
+   0054cc50 (`P45_PtrA`): слово +8 — адрес строки, его пишут обработчики пунктов (SetIconIdx00412A0D: `Q0054CC58 = Q00C5585C`) из таблицы
+   языка 00c55820 (P98_LoadLang). В v2.02 у этих адресов было по два объекта (native-переменная и копия .data для re_ptr) — список надписей
+   был пуст. Теперь: game/gvar.h `re_gvar()` + tools/gen_gvar_img.py — в игре **2423 переменных GAME_VAR** со скалярными типами
+   (и массивами из них, плюс p42_var_t) с адресами 00546000..01287000 (.rdata+.data+.bss Game.exe, 13 МБ) живут в образе данных
+   (game/data_image.c + нули); их адреса re_ptr отдаёт в образ раньше реестра (game/gvar_img_tab.c — таблица диапазонов). Вне игры
+   (selftest/ctest) образа нет — прежние native-объекты. Генератор правит заголовки (блоки «gvar-img v2.03») и объявления
+   (`#pragma push_macro … /*gvi*/`); перезапуск — `python3 tools/gen_gvar_img.py`. Структуры с указателями/иной раскладкой в 64 битах
+   не переносятся (остаются native).
+4. **re_fn по всем перенесённым функциям**: platform/native/fn_table.c (tools/gen_fn_table.py из 2205 re_hook install.c) — колбэки таблиц
+   меню (обработчики пунктов 004129.. 00413…), таймеров и т. п. по адресу Game.exe; только в игре.
+5. **fgets текстового режима MSVC** (game/crt.h, native): «\r\n» → «\n». MLADDER.DML (CRLF) давал токен «[MIAMI]\r» → «MLADDER: Unknown CITY»,
+   New Game сразу возвращался в меню.
+6. P139_KeyMenuA/B: `static const` с адресами переменных → `const` (адрес через re_gvar не константа); поведение то же.
+7. RE_CRASH_BT — стек при аварии (так найден P42_FindVar: таблица переменных скрипта 0056dc10 была пустой native-копией без записи 0x7f).
+
+Замечено: запись «SAVES\SCORES.HI» — каталога SAVES нет в work/run_game (и в work/run), plat_fopen_game создаёт файл с обратной косой
+чертой в имени в текущем каталоге (не в input/). Нужно: создавать SAVES в каталоге запуска или в plat_fopen_game для режима записи.
+
 ## Блокеры в порядке, в каком они мешают запуску
+
+-1. **v2.03: загрузка уровня — SIGSEGV в P40_DownloadPalette** (← P41_LoadTexPages ← P77_LoadLevel ← P145_LevelLoad ← P136_GameLoop ←
+   P140_LadderRun ← P68_ScreenReset ← Ui0041355B «New Game»). Сценарий: `RE_CRASH_BT=1 RE_KEYS="300:RETURN,400:RETURN" work/run_game.sh 900`.
+   Перед этим «not ported: Call004D303A», «Call005283B5». Вероятно, 64-битные указатели/таблицы страниц текстур уровня (блокер 2) — не выяснено.
 
 0. ~~v2.01: экран главного меню чёрный~~ — **исправлено в v2.02** (см. выше). Осталось: подписи пунктов (P117_TextList → P116_Text, шрифт
    005d57a0) на снимке не видны — не выяснено; ввод (блокер 8) — без клавиш меню не листается, дальше P140_Frontend игра не идёт.
@@ -141,7 +180,7 @@ native (plat CD: «нет устройства» → не пытаться), н�
 5. **Шпионы selftest в игровом бинарнике.** v2.02: все шпионы из `--skip` вне selftest передают вызов переносу (выше). Было: tests/selftest.c линкуется в driver; 41 имя из `--skip` (work/skip_v196.txt) в игре — шпионы, а не перенос (исправлено 2 в v2.00, ещё 16 в v2.01 — список выше; остальные ~23 — P67_*, P66_*, P56_FindIcon, P57_MenuStep, P58_Fn418675 …). Нужно: каждый шпион вне selftest передаёт вызов настоящей функции (по образцу v2.00) либо вынести тесты из игрового бинарника.
 6. **Заглушки unported.h, у которых есть перенос.** 365 строк V/R; часть не связана в links.c (две найдены запуском). Нужно: по журналу «not ported» при каждом новом шаге запуска связывать с перенесёнными функциями (адреса → re_ptr/re_fn).
 7. **Колбэки по адресу Game.exe.** `re_fn` знает только функции из k_fns (game/reptr.c); таймер 00408710 там не было (обойдено в links.c). Нужно: зарегистрировать все адреса, передаваемые в TimerStart/таблицы меню/обработчики.
-8. **DirectInput → клавиатура SDL.** `plat_di_get_state` в SDL возвращает «ничего не нажато» (platform/sdl/plat_di.c); `P48_AnyKey`/меню не получают клавиш. Нужно: буфер 256 DIK из `SDL_GetKeyboardState` (таблица SDL_Scancode → DIK), события SDL в `plat_pump_messages`, мышь/джойстик — потом.
+8. ~~**DirectInput → клавиатура SDL.**~~ **v2.03: клавиатура/геймпад/RE_KEYS сделаны** (выше); мышь и полный DIJOYSTATE — нет. Было: `plat_di_get_state` в SDL возвращает «ничего не нажато» (platform/sdl/plat_di.c); `P48_AnyKey`/меню не получают клавиш. Нужно: буфер 256 DIK из `SDL_GetKeyboardState` (таблица SDL_Scancode → DIK), события SDL в `plat_pump_messages`, мышь/джойстик — потом.
 9. **DirectSound → SDL-микшер.** `plat_ds_*` (v1.93) — учётные заглушки (Lock в буфер 64 КБ), к `plat_snd_*` (SDL audio) не подключены: тишина. Нужно: вторичные буферы DS → голоса SDL-микшера (Play/Stop/SetVolume/SetFrequency/SetPan, 3D-слушатель — упрощённо).
 10. **CD-аудио.** «InitCDAudio: Open CD device failed» — MCI нет; музыка с дорожек CD. Нужно: заменить на файлы дорожек (OGG/WAV) или пропуск (сейчас — пропуск, не блокирует).
 11. **FMV.** CoCreateInstance в SDL отказывает (E_NOTIMPL) — ролики пропускаются, как задумано (v1.95); не блокирует.

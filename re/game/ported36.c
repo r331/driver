@@ -1,25 +1,177 @@
 /* DirectInput: джойстик и геймпад — восстановлено из Game.exe (Input.c). */
 #include "ported36.h"
 #include <string.h>
-GAME_VAR_DEF(int32_t, P36_JoyCount, 0x00b31e14)
-GAME_VAR_DEF(P36_IntArr, P36_JoyAxisCap, 0x00b31d64)
-GAME_VAR_DEF(P36_IntArr, P36_JoyAux, 0x00b31ca0)
-GAME_VAR_DEF(int32_t, P36_JoyFlag, 0x00b31e28)
-GAME_VAR_DEF(int32_t, P36_JoyX, 0x00b31e1c)
-GAME_VAR_DEF(int32_t, P36_PrevJoyX, 0x00b31df8)
-GAME_VAR_DEF(int32_t, P36_PrevFlag, 0x00b31e30)
-GAME_VAR_DEF(int32_t, P36_PrevAux, 0x00b31e34)
-GAME_VAR_DEF(P36_Bytes80, P36_JoyState, 0x00b31d88)
-GAME_VAR_DEF(P36_Bytes80, P36_JoyPrev, 0x00b31d00)
-GAME_VAR_DEF(int32_t, P36_JoyPresent, 0x00562a48)
-GAME_VAR_DEF(P36_Bytes80, P36_KeyCfg, 0x00d04d00)
-GAME_VAR_DEF(uint8_t, P36_PadMode, 0x00c4d70c)
-GAME_VAR_DEF(uint8_t, P36_Pad0, 0x00d11939)
-GAME_VAR_DEF(uint8_t, P36_Pad1, 0x00d11884)
-GAME_VAR_DEF(uint8_t, P36_Pad2, 0x01136acc)
-GAME_VAR_DEF(uint8_t, P36_Pad3, 0x01137370)
-GAME_VAR_DEF(uint8_t, P36_Pad4, 0x01136c50)
-GAME_VAR_DEF(uint8_t, P36_Pad5, 0x0113735c)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_JoyCount")
+#undef P36_JoyCount
+#pragma push_macro("P36_JoyCount") /*gvi*/
+#undef P36_JoyCount /*gvi*/
+int32_t P36_JoyCount;
+#pragma pop_macro("P36_JoyCount") /*gvi*/
+#pragma pop_macro("P36_JoyCount")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_JoyAxisCap")
+#undef P36_JoyAxisCap
+#pragma push_macro("P36_JoyAxisCap") /*gvi*/
+#undef P36_JoyAxisCap /*gvi*/
+P36_IntArr P36_JoyAxisCap;
+#pragma pop_macro("P36_JoyAxisCap") /*gvi*/
+#pragma pop_macro("P36_JoyAxisCap")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_JoyAux")
+#undef P36_JoyAux
+#pragma push_macro("P36_JoyAux") /*gvi*/
+#undef P36_JoyAux /*gvi*/
+P36_IntArr P36_JoyAux;
+#pragma pop_macro("P36_JoyAux") /*gvi*/
+#pragma pop_macro("P36_JoyAux")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_JoyFlag")
+#undef P36_JoyFlag
+#pragma push_macro("P36_JoyFlag") /*gvi*/
+#undef P36_JoyFlag /*gvi*/
+int32_t P36_JoyFlag;
+#pragma pop_macro("P36_JoyFlag") /*gvi*/
+#pragma pop_macro("P36_JoyFlag")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_JoyX")
+#undef P36_JoyX
+#pragma push_macro("P36_JoyX") /*gvi*/
+#undef P36_JoyX /*gvi*/
+int32_t P36_JoyX;
+#pragma pop_macro("P36_JoyX") /*gvi*/
+#pragma pop_macro("P36_JoyX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_PrevJoyX")
+#undef P36_PrevJoyX
+#pragma push_macro("P36_PrevJoyX") /*gvi*/
+#undef P36_PrevJoyX /*gvi*/
+int32_t P36_PrevJoyX;
+#pragma pop_macro("P36_PrevJoyX") /*gvi*/
+#pragma pop_macro("P36_PrevJoyX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_PrevFlag")
+#undef P36_PrevFlag
+#pragma push_macro("P36_PrevFlag") /*gvi*/
+#undef P36_PrevFlag /*gvi*/
+int32_t P36_PrevFlag;
+#pragma pop_macro("P36_PrevFlag") /*gvi*/
+#pragma pop_macro("P36_PrevFlag")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_PrevAux")
+#undef P36_PrevAux
+#pragma push_macro("P36_PrevAux") /*gvi*/
+#undef P36_PrevAux /*gvi*/
+int32_t P36_PrevAux;
+#pragma pop_macro("P36_PrevAux") /*gvi*/
+#pragma pop_macro("P36_PrevAux")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_JoyState")
+#undef P36_JoyState
+#pragma push_macro("P36_JoyState") /*gvi*/
+#undef P36_JoyState /*gvi*/
+P36_Bytes80 P36_JoyState;
+#pragma pop_macro("P36_JoyState") /*gvi*/
+#pragma pop_macro("P36_JoyState")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_JoyPrev")
+#undef P36_JoyPrev
+#pragma push_macro("P36_JoyPrev") /*gvi*/
+#undef P36_JoyPrev /*gvi*/
+P36_Bytes80 P36_JoyPrev;
+#pragma pop_macro("P36_JoyPrev") /*gvi*/
+#pragma pop_macro("P36_JoyPrev")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_JoyPresent")
+#undef P36_JoyPresent
+#pragma push_macro("P36_JoyPresent") /*gvi*/
+#undef P36_JoyPresent /*gvi*/
+int32_t P36_JoyPresent;
+#pragma pop_macro("P36_JoyPresent") /*gvi*/
+#pragma pop_macro("P36_JoyPresent")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_KeyCfg")
+#undef P36_KeyCfg
+#pragma push_macro("P36_KeyCfg") /*gvi*/
+#undef P36_KeyCfg /*gvi*/
+P36_Bytes80 P36_KeyCfg;
+#pragma pop_macro("P36_KeyCfg") /*gvi*/
+#pragma pop_macro("P36_KeyCfg")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_PadMode")
+#undef P36_PadMode
+#pragma push_macro("P36_PadMode") /*gvi*/
+#undef P36_PadMode /*gvi*/
+uint8_t P36_PadMode;
+#pragma pop_macro("P36_PadMode") /*gvi*/
+#pragma pop_macro("P36_PadMode")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_Pad0")
+#undef P36_Pad0
+#pragma push_macro("P36_Pad0") /*gvi*/
+#undef P36_Pad0 /*gvi*/
+uint8_t P36_Pad0;
+#pragma pop_macro("P36_Pad0") /*gvi*/
+#pragma pop_macro("P36_Pad0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_Pad1")
+#undef P36_Pad1
+#pragma push_macro("P36_Pad1") /*gvi*/
+#undef P36_Pad1 /*gvi*/
+uint8_t P36_Pad1;
+#pragma pop_macro("P36_Pad1") /*gvi*/
+#pragma pop_macro("P36_Pad1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_Pad2")
+#undef P36_Pad2
+#pragma push_macro("P36_Pad2") /*gvi*/
+#undef P36_Pad2 /*gvi*/
+uint8_t P36_Pad2;
+#pragma pop_macro("P36_Pad2") /*gvi*/
+#pragma pop_macro("P36_Pad2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_Pad3")
+#undef P36_Pad3
+#pragma push_macro("P36_Pad3") /*gvi*/
+#undef P36_Pad3 /*gvi*/
+uint8_t P36_Pad3;
+#pragma pop_macro("P36_Pad3") /*gvi*/
+#pragma pop_macro("P36_Pad3")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_Pad4")
+#undef P36_Pad4
+#pragma push_macro("P36_Pad4") /*gvi*/
+#undef P36_Pad4 /*gvi*/
+uint8_t P36_Pad4;
+#pragma pop_macro("P36_Pad4") /*gvi*/
+#pragma pop_macro("P36_Pad4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P36_Pad5")
+#undef P36_Pad5
+#pragma push_macro("P36_Pad5") /*gvi*/
+#undef P36_Pad5 /*gvi*/
+uint8_t P36_Pad5;
+#pragma pop_macro("P36_Pad5") /*gvi*/
+#pragma pop_macro("P36_Pad5")
+#endif
 
 int32_t P36_AcquireDevice(int32_t dev) {
   void *d;

@@ -43,10 +43,29 @@ typedef void *p89_list2_t[0x200];
 #define P89_ListFour   GAME_VAR(p89_list4_t, P89_ListFour, 0x00cf1f80)
 #define P89_ListSeven  GAME_VAR(p89_list2_t, P89_ListSeven, 0x00cff9e0)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P89_CntShadow") /*gvi*/
+#undef P89_CntShadow /*gvi*/
+#pragma push_macro("P89_CntFour") /*gvi*/
+#undef P89_CntFour /*gvi*/
+#pragma push_macro("P89_CntSeven") /*gvi*/
+#undef P89_CntSeven /*gvi*/
 extern int32_t P89_CntShadow, P89_CntFour, P89_CntSeven;
+#pragma pop_macro("P89_CntSeven") /*gvi*/
+#pragma pop_macro("P89_CntFour") /*gvi*/
+#pragma pop_macro("P89_CntShadow") /*gvi*/
 extern p89_list4_t P89_ListShadow, P89_ListFour;
 extern p89_list2_t P89_ListSeven;
 #endif
 void P89_Fill1(uint8_t *out);                                   /* 004ef997 */
 void P89_VisMask(int32_t blk, int32_t sub, uint8_t *out);       /* 004ef793 */
 void P89_DrawMap(int32_t mode);                                 /* 004ee8f4 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P89_CntShadow
+#define P89_CntShadow (*(int32_t *)re_gvar(0x00cfe6e4u, sizeof(int32_t), (void *)&P89_CntShadow))
+#undef P89_CntFour
+#define P89_CntFour (*(int32_t *)re_gvar(0x00ce0f24u, sizeof(int32_t), (void *)&P89_CntFour))
+#undef P89_CntSeven
+#define P89_CntSeven (*(int32_t *)re_gvar(0x00d00218u, sizeof(int32_t), (void *)&P89_CntSeven))
+#endif
+/* gvar-img v2.03 end */

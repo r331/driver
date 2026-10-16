@@ -19,7 +19,13 @@ typedef uint32_t p136_pal16_t[256];
 #ifndef RE_HOOK_BUILD
 /* v2.02: 012533e0/012537e0/012587e0 — слоты 2/3/23 таблицы палитр 01252be0 (P14_01252be0, 64 × 0x400), 01252afc — флаг слота 23
    в 01252aa0 (P12_01252aa0); прежде отдельные native-объекты — P137_LoadTsd писал в P14, P136_FrontInit читал нули (меню чёрное) */
+#pragma push_macro("P14_01252be0") /*gvi*/
+#undef P14_01252be0 /*gvi*/
+#pragma push_macro("P12_01252aa0") /*gvi*/
+#undef P12_01252aa0 /*gvi*/
 extern uint8_t P14_01252be0[0x400 * 64]; extern int32_t P12_01252aa0[0x40];
+#pragma pop_macro("P12_01252aa0") /*gvi*/
+#pragma pop_macro("P14_01252be0") /*gvi*/
 #undef P136_TsdPalA
 #undef P136_TsdPalB
 #undef P136_MapPal
@@ -28,11 +34,45 @@ extern uint8_t P14_01252be0[0x400 * 64]; extern int32_t P12_01252aa0[0x40];
 #define P136_TsdPalB  (*(p136_pal_t *)&P14_01252be0[3 * 0x400])
 #define P136_MapPal   (*(p136_pal_t *)&P14_01252be0[23 * 0x400])
 #define P136_MapPalOn (P12_01252aa0[23])
+#pragma push_macro("P136_WheelRot") /*gvi*/
+#undef P136_WheelRot /*gvi*/
+#pragma push_macro("P136_WheelRotB") /*gvi*/
+#undef P136_WheelRotB /*gvi*/
+#pragma push_macro("P136_EvPath") /*gvi*/
+#undef P136_EvPath /*gvi*/
+#pragma push_macro("P136_MapName") /*gvi*/
+#undef P136_MapName /*gvi*/
 extern p136_rot_t P136_WheelRot, P136_WheelRotB; extern p136_path_t P136_EvPath, P136_MapName;
+#pragma pop_macro("P136_MapName") /*gvi*/
+#pragma pop_macro("P136_EvPath") /*gvi*/
+#pragma pop_macro("P136_WheelRotB") /*gvi*/
+#pragma pop_macro("P136_WheelRot") /*gvi*/
+#pragma push_macro("P136_Pal16") /*gvi*/
+#undef P136_Pal16 /*gvi*/
+#pragma push_macro("P136_MapScroll") /*gvi*/
+#undef P136_MapScroll /*gvi*/
 extern p136_pal16_t P136_Pal16; extern int32_t P136_MapScroll;
+#pragma pop_macro("P136_MapScroll") /*gvi*/
+#pragma pop_macro("P136_Pal16") /*gvi*/
 #endif
 void    P136_DrawWheels(int32_t car, const float *mat, int32_t mode);   /* 004a1d4c */
 void    P136_CompileEvents(void);                                       /* 004a3d40 */
 void    P136_GameLoop(int32_t replay);                                  /* 0040c20b */
 int32_t P136_FrontInit(void);                                           /* 0040bf50 */
 void    P136_OverlayMap(void);                                          /* 00501770 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P136_WheelRot
+#define P136_WheelRot (*(p136_rot_t *)re_gvar(0x00b1fce0u, sizeof(p136_rot_t), (void *)&P136_WheelRot))
+#undef P136_WheelRotB
+#define P136_WheelRotB (*(p136_rot_t *)re_gvar(0x00b1fde8u, sizeof(p136_rot_t), (void *)&P136_WheelRotB))
+#undef P136_EvPath
+#define P136_EvPath (*(p136_path_t *)re_gvar(0x01134140u, sizeof(p136_path_t), (void *)&P136_EvPath))
+#undef P136_Pal16
+#define P136_Pal16 (*(p136_pal16_t *)re_gvar(0x01271680u, sizeof(p136_pal16_t), (void *)&P136_Pal16))
+#undef P136_MapName
+#define P136_MapName (*(p136_path_t *)re_gvar(0x00c80fa0u, sizeof(p136_path_t), (void *)&P136_MapName))
+#undef P136_MapScroll
+#define P136_MapScroll (*(int32_t *)re_gvar(0x00c80884u, sizeof(int32_t), (void *)&P136_MapScroll))
+#endif
+/* gvar-img v2.03 end */

@@ -102,10 +102,42 @@
 #include "ported133.h"
 
 #ifndef RE_HOOK_BUILD
-GAME_VAR_DEF(p134_v3_t, P134_Cine0, 0x00c82420)
-GAME_VAR_DEF(p134_v3_t, P134_Cine1, 0x00c824f0)
-GAME_VAR_DEF(float, P134_ScaleB, 0x00c82520)
-GAME_VAR_DEF(float, P134_ScaleE, 0x00c824dc)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P134_Cine0")
+#undef P134_Cine0
+#pragma push_macro("P134_Cine0") /*gvi*/
+#undef P134_Cine0 /*gvi*/
+p134_v3_t P134_Cine0;
+#pragma pop_macro("P134_Cine0") /*gvi*/
+#pragma pop_macro("P134_Cine0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P134_Cine1")
+#undef P134_Cine1
+#pragma push_macro("P134_Cine1") /*gvi*/
+#undef P134_Cine1 /*gvi*/
+p134_v3_t P134_Cine1;
+#pragma pop_macro("P134_Cine1") /*gvi*/
+#pragma pop_macro("P134_Cine1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P134_ScaleB")
+#undef P134_ScaleB
+#pragma push_macro("P134_ScaleB") /*gvi*/
+#undef P134_ScaleB /*gvi*/
+float P134_ScaleB;
+#pragma pop_macro("P134_ScaleB") /*gvi*/
+#pragma pop_macro("P134_ScaleB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P134_ScaleE")
+#undef P134_ScaleE
+#pragma push_macro("P134_ScaleE") /*gvi*/
+#undef P134_ScaleE /*gvi*/
+float P134_ScaleE;
+#pragma pop_macro("P134_ScaleE") /*gvi*/
+#pragma pop_macro("P134_ScaleE")
+#endif
 #endif
 
 static float rdf(const uint8_t *p) { float f; memcpy(&f, p, 4); return f; }

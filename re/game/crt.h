@@ -26,7 +26,14 @@
 void *plat_fopen_game(const char *path, const char *mode);   /* v2.00: пути Windows → native */
 #  define g_fopen(n, m)        plat_fopen_game((n), (m))
 #  define g_fclose(f)          fclose((FILE*)(f))
-#  define g_fgets(b, n, f)     fgets((b), (n), (FILE*)(f))
+#  include <string.h>
+/* v2.03: fgets текстового режима MSVC — «\r\n» → «\n» (файлы данных с CRLF: MLADDER.DML давал «[MIAMI]\r» → Unknown CITY) */
+static inline char *re_crt_fgets(char *b, int n, void *f) {
+  char *r = fgets(b, n, (FILE *)f);
+  if (r != NULL) { size_t l = strlen(b); if (l >= 2 && b[l - 2] == '\r' && b[l - 1] == '\n') { b[l - 2] = '\n'; b[l - 1] = 0; } }
+  return r;
+}
+#  define g_fgets(b, n, f)     re_crt_fgets((b), (n), (f))
 #  define g_fgetc(f)           fgetc((FILE*)(f))
 #  define g_sscanf             sscanf
 #  define g_fscanf(f, ...)     fscanf((FILE*)(f), __VA_ARGS__)

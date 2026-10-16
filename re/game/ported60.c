@@ -2,8 +2,24 @@
 #include <math.h>
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P60_Var1373C0, 0x011373c0)
-GAME_VAR_DEF(int32_t, P60_PartLimit, 0x005759a4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P60_Var1373C0")
+#undef P60_Var1373C0
+#pragma push_macro("P60_Var1373C0") /*gvi*/
+#undef P60_Var1373C0 /*gvi*/
+int32_t P60_Var1373C0;
+#pragma pop_macro("P60_Var1373C0") /*gvi*/
+#pragma pop_macro("P60_Var1373C0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P60_PartLimit")
+#undef P60_PartLimit
+#pragma push_macro("P60_PartLimit") /*gvi*/
+#undef P60_PartLimit /*gvi*/
+int32_t P60_PartLimit;
+#pragma pop_macro("P60_PartLimit") /*gvi*/
+#pragma pop_macro("P60_PartLimit")
+#endif
 
 static int32_t rd32(const uint8_t *p, uint32_t o) { int32_t v; memcpy(&v, p + o, 4); return v; }
 static void    wr32(uint8_t *p, uint32_t o, int32_t v) { memcpy(p + o, &v, 4); }

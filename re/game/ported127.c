@@ -100,26 +100,176 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P127_PauseMenu") /*gvi*/
+#undef P127_PauseMenu /*gvi*/
 p127_pause_t P127_PauseMenu = P127_PAUSE_INIT;   /* .data 00574710 */
+#pragma pop_macro("P127_PauseMenu") /*gvi*/
+#pragma push_macro("P127_NameMenu") /*gvi*/
+#undef P127_NameMenu /*gvi*/
 p127_name_t  P127_NameMenu = P127_NAME_INIT;     /* .data 0054cf80 */
-GAME_VAR_DEF(p127_cur_t, P127_Cursor, 0x005fe97c)
-GAME_VAR_DEF(int32_t, P127_NameLen, 0x005fe980)
-GAME_VAR_DEF(int32_t, P127_BlinkT, 0x005fe984)
-GAME_VAR_DEF(int32_t, P127_BlinkOn, 0x005fe988)
-GAME_VAR_DEF(p127_lamp5_t, P127_Lamp5, 0x00c818c0)
-GAME_VAR_DEF(p127_i5_t, P127_LampOn, 0x00c80f80)
-GAME_VAR_DEF(int32_t, P127_LampPhase, 0x00b31ec0)
-GAME_VAR_DEF(int32_t, P127_SpawnD0, 0x00c82430)
-GAME_VAR_DEF(int32_t, P127_SpawnCnt, 0x00c82504)
-GAME_VAR_DEF(int32_t, P127_SpawnRst, 0x00c82508)
-GAME_VAR_DEF(int32_t, P127_SpawnReq, 0x00c82524)
-GAME_VAR_DEF(int32_t, P127_ScrPos, 0x00c80eec)
-GAME_VAR_DEF(float, P127_GoalX, 0x00c812d0)
-GAME_VAR_DEF(float, P127_GoalZ, 0x00c812d8)
-GAME_VAR_DEF(int32_t, P127_GoalJump, 0x00c81760)
-GAME_VAR_DEF(p127_f16_t, P127_Goal, 0x00c814a0)
-GAME_VAR_DEF(p127_u14_t, P127_GoalSave, 0x00c816c0)
-GAME_VAR_DEF(p127_f16_t, P127_GoalPause, 0x00c81700)
+#pragma pop_macro("P127_NameMenu") /*gvi*/
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_Cursor")
+#undef P127_Cursor
+#pragma push_macro("P127_Cursor") /*gvi*/
+#undef P127_Cursor /*gvi*/
+p127_cur_t P127_Cursor;
+#pragma pop_macro("P127_Cursor") /*gvi*/
+#pragma pop_macro("P127_Cursor")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_NameLen")
+#undef P127_NameLen
+#pragma push_macro("P127_NameLen") /*gvi*/
+#undef P127_NameLen /*gvi*/
+int32_t P127_NameLen;
+#pragma pop_macro("P127_NameLen") /*gvi*/
+#pragma pop_macro("P127_NameLen")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_BlinkT")
+#undef P127_BlinkT
+#pragma push_macro("P127_BlinkT") /*gvi*/
+#undef P127_BlinkT /*gvi*/
+int32_t P127_BlinkT;
+#pragma pop_macro("P127_BlinkT") /*gvi*/
+#pragma pop_macro("P127_BlinkT")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_BlinkOn")
+#undef P127_BlinkOn
+#pragma push_macro("P127_BlinkOn") /*gvi*/
+#undef P127_BlinkOn /*gvi*/
+int32_t P127_BlinkOn;
+#pragma pop_macro("P127_BlinkOn") /*gvi*/
+#pragma pop_macro("P127_BlinkOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_Lamp5")
+#undef P127_Lamp5
+#pragma push_macro("P127_Lamp5") /*gvi*/
+#undef P127_Lamp5 /*gvi*/
+p127_lamp5_t P127_Lamp5;
+#pragma pop_macro("P127_Lamp5") /*gvi*/
+#pragma pop_macro("P127_Lamp5")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_LampOn")
+#undef P127_LampOn
+#pragma push_macro("P127_LampOn") /*gvi*/
+#undef P127_LampOn /*gvi*/
+p127_i5_t P127_LampOn;
+#pragma pop_macro("P127_LampOn") /*gvi*/
+#pragma pop_macro("P127_LampOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_LampPhase")
+#undef P127_LampPhase
+#pragma push_macro("P127_LampPhase") /*gvi*/
+#undef P127_LampPhase /*gvi*/
+int32_t P127_LampPhase;
+#pragma pop_macro("P127_LampPhase") /*gvi*/
+#pragma pop_macro("P127_LampPhase")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_SpawnD0")
+#undef P127_SpawnD0
+#pragma push_macro("P127_SpawnD0") /*gvi*/
+#undef P127_SpawnD0 /*gvi*/
+int32_t P127_SpawnD0;
+#pragma pop_macro("P127_SpawnD0") /*gvi*/
+#pragma pop_macro("P127_SpawnD0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_SpawnCnt")
+#undef P127_SpawnCnt
+#pragma push_macro("P127_SpawnCnt") /*gvi*/
+#undef P127_SpawnCnt /*gvi*/
+int32_t P127_SpawnCnt;
+#pragma pop_macro("P127_SpawnCnt") /*gvi*/
+#pragma pop_macro("P127_SpawnCnt")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_SpawnRst")
+#undef P127_SpawnRst
+#pragma push_macro("P127_SpawnRst") /*gvi*/
+#undef P127_SpawnRst /*gvi*/
+int32_t P127_SpawnRst;
+#pragma pop_macro("P127_SpawnRst") /*gvi*/
+#pragma pop_macro("P127_SpawnRst")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_SpawnReq")
+#undef P127_SpawnReq
+#pragma push_macro("P127_SpawnReq") /*gvi*/
+#undef P127_SpawnReq /*gvi*/
+int32_t P127_SpawnReq;
+#pragma pop_macro("P127_SpawnReq") /*gvi*/
+#pragma pop_macro("P127_SpawnReq")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_ScrPos")
+#undef P127_ScrPos
+#pragma push_macro("P127_ScrPos") /*gvi*/
+#undef P127_ScrPos /*gvi*/
+int32_t P127_ScrPos;
+#pragma pop_macro("P127_ScrPos") /*gvi*/
+#pragma pop_macro("P127_ScrPos")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_GoalX")
+#undef P127_GoalX
+#pragma push_macro("P127_GoalX") /*gvi*/
+#undef P127_GoalX /*gvi*/
+float P127_GoalX;
+#pragma pop_macro("P127_GoalX") /*gvi*/
+#pragma pop_macro("P127_GoalX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_GoalZ")
+#undef P127_GoalZ
+#pragma push_macro("P127_GoalZ") /*gvi*/
+#undef P127_GoalZ /*gvi*/
+float P127_GoalZ;
+#pragma pop_macro("P127_GoalZ") /*gvi*/
+#pragma pop_macro("P127_GoalZ")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_GoalJump")
+#undef P127_GoalJump
+#pragma push_macro("P127_GoalJump") /*gvi*/
+#undef P127_GoalJump /*gvi*/
+int32_t P127_GoalJump;
+#pragma pop_macro("P127_GoalJump") /*gvi*/
+#pragma pop_macro("P127_GoalJump")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_Goal")
+#undef P127_Goal
+#pragma push_macro("P127_Goal") /*gvi*/
+#undef P127_Goal /*gvi*/
+p127_f16_t P127_Goal;
+#pragma pop_macro("P127_Goal") /*gvi*/
+#pragma pop_macro("P127_Goal")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_GoalSave")
+#undef P127_GoalSave
+#pragma push_macro("P127_GoalSave") /*gvi*/
+#undef P127_GoalSave /*gvi*/
+p127_u14_t P127_GoalSave;
+#pragma pop_macro("P127_GoalSave") /*gvi*/
+#pragma pop_macro("P127_GoalSave")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P127_GoalPause")
+#undef P127_GoalPause
+#pragma push_macro("P127_GoalPause") /*gvi*/
+#undef P127_GoalPause /*gvi*/
+p127_f16_t P127_GoalPause;
+#pragma pop_macro("P127_GoalPause") /*gvi*/
+#pragma pop_macro("P127_GoalPause")
+#endif
 #endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }

@@ -20,8 +20,41 @@
 typedef int32_t p110_celltab_t[64];
 #define P110_CellTab  GAME_VAR(p110_celltab_t, P110_CellTab, 0x00574574)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P110_ClipX0") /*gvi*/
+#undef P110_ClipX0 /*gvi*/
+#pragma push_macro("P110_ClipX1") /*gvi*/
+#undef P110_ClipX1 /*gvi*/
+#pragma push_macro("P110_ClipY0") /*gvi*/
+#undef P110_ClipY0 /*gvi*/
+#pragma push_macro("P110_ClipY1") /*gvi*/
+#undef P110_ClipY1 /*gvi*/
+#pragma push_macro("P110_FullClip") /*gvi*/
+#undef P110_FullClip /*gvi*/
 extern float P110_ClipX0, P110_ClipX1, P110_ClipY0, P110_ClipY1; extern int32_t P110_FullClip;
+#pragma pop_macro("P110_FullClip") /*gvi*/
+#pragma pop_macro("P110_ClipY1") /*gvi*/
+#pragma pop_macro("P110_ClipY0") /*gvi*/
+#pragma pop_macro("P110_ClipX1") /*gvi*/
+#pragma pop_macro("P110_ClipX0") /*gvi*/
+#pragma push_macro("P110_GlowIcon") /*gvi*/
+#undef P110_GlowIcon /*gvi*/
+#pragma push_macro("P110_SelCnt") /*gvi*/
+#undef P110_SelCnt /*gvi*/
+#pragma push_macro("P110_SelRep") /*gvi*/
+#undef P110_SelRep /*gvi*/
+#pragma push_macro("P110_IconKX") /*gvi*/
+#undef P110_IconKX /*gvi*/
+#pragma push_macro("P110_IconKY") /*gvi*/
+#undef P110_IconKY /*gvi*/
+#pragma push_macro("P110_CellTab") /*gvi*/
+#undef P110_CellTab /*gvi*/
 extern uint32_t P110_GlowIcon; extern int32_t P110_SelCnt, P110_SelRep; extern float P110_IconKX, P110_IconKY; extern p110_celltab_t P110_CellTab;
+#pragma pop_macro("P110_CellTab") /*gvi*/
+#pragma pop_macro("P110_IconKY") /*gvi*/
+#pragma pop_macro("P110_IconKX") /*gvi*/
+#pragma pop_macro("P110_SelRep") /*gvi*/
+#pragma pop_macro("P110_SelCnt") /*gvi*/
+#pragma pop_macro("P110_GlowIcon") /*gvi*/
 #endif
 
 void    P110_RadarGrid(void);                                                              /* 0050bd09 */
@@ -35,3 +68,29 @@ void    P110_IconQuad(float x, float y, float sx, float sy, const uint8_t *ic, u
 int32_t P110_MenuSel(uint32_t tbl, int32_t cur);                                           /* 00418675 */
 void    P110_ViewSetup(int32_t x, int32_t y, int32_t mode);                                  /* 00425b12 */
 void    P110_SmokeRing(float sc, const float *pos, int32_t ang, uint32_t r, uint32_t g, uint32_t b, int32_t flat, int32_t tex); /* 004e8595 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P110_GlowIcon
+#define P110_GlowIcon (*(uint32_t *)re_gvar(0x01123208u, sizeof(uint32_t), (void *)&P110_GlowIcon))
+#undef P110_SelCnt
+#define P110_SelCnt (*(int32_t *)re_gvar(0x005fea68u, sizeof(int32_t), (void *)&P110_SelCnt))
+#undef P110_SelRep
+#define P110_SelRep (*(int32_t *)re_gvar(0x0054e52cu, sizeof(int32_t), (void *)&P110_SelRep))
+#undef P110_IconKX
+#define P110_IconKX (*(float *)re_gvar(0x0054e520u, sizeof(float), (void *)&P110_IconKX))
+#undef P110_IconKY
+#define P110_IconKY (*(float *)re_gvar(0x0054e524u, sizeof(float), (void *)&P110_IconKY))
+#undef P110_ClipX0
+#define P110_ClipX0 (*(float *)re_gvar(0x01252a84u, sizeof(float), (void *)&P110_ClipX0))
+#undef P110_ClipX1
+#define P110_ClipX1 (*(float *)re_gvar(0x01252a88u, sizeof(float), (void *)&P110_ClipX1))
+#undef P110_ClipY0
+#define P110_ClipY0 (*(float *)re_gvar(0x01252a8cu, sizeof(float), (void *)&P110_ClipY0))
+#undef P110_ClipY1
+#define P110_ClipY1 (*(float *)re_gvar(0x01252a90u, sizeof(float), (void *)&P110_ClipY1))
+#undef P110_FullClip
+#define P110_FullClip (*(int32_t *)re_gvar(0x00bdfa10u, sizeof(int32_t), (void *)&P110_FullClip))
+#undef P110_CellTab
+#define P110_CellTab (*(p110_celltab_t *)re_gvar(0x00574574u, sizeof(p110_celltab_t), (void *)&P110_CellTab))
+#endif
+/* gvar-img v2.03 end */

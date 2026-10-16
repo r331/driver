@@ -13,7 +13,16 @@
 #define P105_SpinAng GAME_VAR(int32_t, P105_SpinAng, 0x00b202e8)   /* угол вращения модели 004ca802 (+0x1e & 0xfff) */
 #define P105_MusLimit GAME_VAR(int32_t, P105_MusLimit, 0x0112b234) /* порог 00d11a5c для поворота трафика */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P105_PixDst") /*gvi*/
+#undef P105_PixDst /*gvi*/
+#pragma push_macro("P105_SpinAng") /*gvi*/
+#undef P105_SpinAng /*gvi*/
+#pragma push_macro("P105_MusLimit") /*gvi*/
+#undef P105_MusLimit /*gvi*/
 extern uint32_t P105_PixDst; extern int32_t P105_SpinAng, P105_MusLimit;
+#pragma pop_macro("P105_MusLimit") /*gvi*/
+#pragma pop_macro("P105_SpinAng") /*gvi*/
+#pragma pop_macro("P105_PixDst") /*gvi*/
 #endif
 
 int32_t  P105_LfbToMenu(void);                      /* 00407c4c */
@@ -22,3 +31,13 @@ void     P105_SpinModel(void *o);                   /* 004ca802 */
 void     P105_ChaseMusic(int32_t *timers);          /* 004d26ea */
 void     P105_BlitScaled(const uint8_t *src);       /* 0040d81b */
 void     P105_StuntHints(int32_t keys, void *car);  /* 004e53b5 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P105_PixDst
+#define P105_PixDst (*(uint32_t *)re_gvar(0x005c6740u, sizeof(uint32_t), (void *)&P105_PixDst))
+#undef P105_SpinAng
+#define P105_SpinAng (*(int32_t *)re_gvar(0x00b202e8u, sizeof(int32_t), (void *)&P105_SpinAng))
+#undef P105_MusLimit
+#define P105_MusLimit (*(int32_t *)re_gvar(0x0112b234u, sizeof(int32_t), (void *)&P105_MusLimit))
+#endif
+/* gvar-img v2.03 end */

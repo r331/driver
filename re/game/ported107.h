@@ -17,8 +17,29 @@ typedef float p107_vblk_t[0x80];   /* GrVertex-ы 00b1ffd0..00b201d0 (004b5049) 
 #define P107_NavRep GAME_VAR(int32_t, P107_NavRep, 0x005755c4)     /* период автоповтора (.data: 10) */
 #define P107_NavCnt GAME_VAR(int32_t, P107_NavCnt, 0x00b5a780)     /* счётчик автоповтора */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P107_SprV") /*gvi*/
+#undef P107_SprV /*gvi*/
+#pragma push_macro("P107_DDE6") /*gvi*/
+#undef P107_DDE6 /*gvi*/
 extern p107_vblk_t P107_SprV; extern uint8_t P107_DDE6;
+#pragma pop_macro("P107_DDE6") /*gvi*/
+#pragma pop_macro("P107_SprV") /*gvi*/
+#pragma push_macro("P107_HornVol") /*gvi*/
+#undef P107_HornVol /*gvi*/
+#pragma push_macro("P107_SteerK") /*gvi*/
+#undef P107_SteerK /*gvi*/
+#pragma push_macro("P107_NavWait") /*gvi*/
+#undef P107_NavWait /*gvi*/
+#pragma push_macro("P107_NavRep") /*gvi*/
+#undef P107_NavRep /*gvi*/
+#pragma push_macro("P107_NavCnt") /*gvi*/
+#undef P107_NavCnt /*gvi*/
 extern int32_t P107_HornVol, P107_SteerK, P107_NavWait, P107_NavRep, P107_NavCnt;
+#pragma pop_macro("P107_NavCnt") /*gvi*/
+#pragma pop_macro("P107_NavRep") /*gvi*/
+#pragma pop_macro("P107_NavWait") /*gvi*/
+#pragma pop_macro("P107_SteerK") /*gvi*/
+#pragma pop_macro("P107_HornVol") /*gvi*/
 #endif
 
 void    P107_TrafficLights(int32_t n, uint8_t *rec);                          /* 00490f3a: n — номер+1, rec — запись TrafficRecs */
@@ -32,3 +53,21 @@ void    P107_CarLight(uint32_t rec, float k);                                 /*
 int32_t P107_MenuNav(uint32_t tab, int32_t pos);                              /* 0050f304: tab — адрес пунктов по 0x14 */
 void    P107_CarInput(int32_t car, uint32_t keys);                            /* 004ddaca */
 int32_t P107_TrafficRow(void);                                                /* 004958b7 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P107_SprV
+#define P107_SprV (*(p107_vblk_t *)re_gvar(0x00b1ffd0u, sizeof(p107_vblk_t), (void *)&P107_SprV))
+#undef P107_DDE6
+#define P107_DDE6 (*(uint8_t *)re_gvar(0x00d0dde6u, sizeof(uint8_t), (void *)&P107_DDE6))
+#undef P107_HornVol
+#define P107_HornVol (*(int32_t *)re_gvar(0x005603ccu, sizeof(int32_t), (void *)&P107_HornVol))
+#undef P107_SteerK
+#define P107_SteerK (*(int32_t *)re_gvar(0x00b87e1cu, sizeof(int32_t), (void *)&P107_SteerK))
+#undef P107_NavWait
+#define P107_NavWait (*(int32_t *)re_gvar(0x005755bcu, sizeof(int32_t), (void *)&P107_NavWait))
+#undef P107_NavRep
+#define P107_NavRep (*(int32_t *)re_gvar(0x005755c4u, sizeof(int32_t), (void *)&P107_NavRep))
+#undef P107_NavCnt
+#define P107_NavCnt (*(int32_t *)re_gvar(0x00b5a780u, sizeof(int32_t), (void *)&P107_NavCnt))
+#endif
+/* gvar-img v2.03 end */

@@ -61,13 +61,91 @@ typedef uint32_t p59_hdr_t[2];
 #define P59_NoKeyFlag   GAME_VAR(int32_t, P59_NoKeyFlag, 0x005feda0)
 #define P59_MenuLock    GAME_VAR(int32_t, P59_MenuLock, 0x005fea54)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P59_CamF1") /*gvi*/
+#undef P59_CamF1 /*gvi*/
+#pragma push_macro("P59_CamLim") /*gvi*/
+#undef P59_CamLim /*gvi*/
+#pragma push_macro("P59_VX") /*gvi*/
+#undef P59_VX /*gvi*/
+#pragma push_macro("P59_VY") /*gvi*/
+#undef P59_VY /*gvi*/
+#pragma push_macro("P59_VZ") /*gvi*/
+#undef P59_VZ /*gvi*/
 extern float P59_CamF1, P59_CamLim, P59_VX, P59_VY, P59_VZ;
+#pragma pop_macro("P59_VZ") /*gvi*/
+#pragma pop_macro("P59_VY") /*gvi*/
+#pragma pop_macro("P59_VX") /*gvi*/
+#pragma pop_macro("P59_CamLim") /*gvi*/
+#pragma pop_macro("P59_CamF1") /*gvi*/
+#pragma push_macro("P59_AngA") /*gvi*/
+#undef P59_AngA /*gvi*/
+#pragma push_macro("P59_AngB") /*gvi*/
+#undef P59_AngB /*gvi*/
+#pragma push_macro("P59_AngC") /*gvi*/
+#undef P59_AngC /*gvi*/
+#pragma push_macro("P59_Mode1137324") /*gvi*/
+#undef P59_Mode1137324 /*gvi*/
 extern uint16_t P59_AngA, P59_AngB, P59_AngC; extern uint8_t P59_Mode1137324, *P59_CarsTab;
+#pragma pop_macro("P59_Mode1137324") /*gvi*/
+#pragma pop_macro("P59_AngC") /*gvi*/
+#pragma pop_macro("P59_AngB") /*gvi*/
+#pragma pop_macro("P59_AngA") /*gvi*/
+#pragma push_macro("P59_C39DC0") /*gvi*/
+#undef P59_C39DC0 /*gvi*/
+#pragma push_macro("P59_ModelCount") /*gvi*/
+#undef P59_ModelCount /*gvi*/
 extern p59_tab_c39dc0_t P59_C39DC0; extern int32_t P59_ModelCount;
+#pragma pop_macro("P59_ModelCount") /*gvi*/
+#pragma pop_macro("P59_C39DC0") /*gvi*/
+#pragma push_macro("P59_Flags9") /*gvi*/
+#undef P59_Flags9 /*gvi*/
+#pragma push_macro("P59_Picked") /*gvi*/
+#undef P59_Picked /*gvi*/
+#pragma push_macro("P59_S4654") /*gvi*/
+#undef P59_S4654 /*gvi*/
+#pragma push_macro("P59_S44CC") /*gvi*/
+#undef P59_S44CC /*gvi*/
+#pragma push_macro("P59_S4790") /*gvi*/
+#undef P59_S4790 /*gvi*/
+#pragma push_macro("P59_S3904") /*gvi*/
+#undef P59_S3904 /*gvi*/
 extern p59_u8x9_t P59_Flags9; extern int8_t P59_Picked; extern int32_t P59_S4654, P59_S44CC, P59_S4790, P59_S3904;
+#pragma pop_macro("P59_S3904") /*gvi*/
+#pragma pop_macro("P59_S4790") /*gvi*/
+#pragma pop_macro("P59_S44CC") /*gvi*/
+#pragma pop_macro("P59_S4654") /*gvi*/
+#pragma pop_macro("P59_Picked") /*gvi*/
+#pragma pop_macro("P59_Flags9") /*gvi*/
+#pragma push_macro("P59_PickTab") /*gvi*/
+#undef P59_PickTab /*gvi*/
+#pragma push_macro("P59_NearN") /*gvi*/
+#undef P59_NearN /*gvi*/
+#pragma push_macro("P59_NearList") /*gvi*/
+#undef P59_NearList /*gvi*/
 extern p59_i32x18_t P59_PickTab; extern int32_t P59_NearN; extern p59_u8x64_t P59_NearList;
+#pragma pop_macro("P59_NearList") /*gvi*/
+#pragma pop_macro("P59_NearN") /*gvi*/
+#pragma pop_macro("P59_PickTab") /*gvi*/
+#pragma push_macro("P59_Sin") /*gvi*/
+#undef P59_Sin /*gvi*/
+#pragma push_macro("P59_Hdr") /*gvi*/
+#undef P59_Hdr /*gvi*/
+#pragma push_macro("P59_Rep57B6B8") /*gvi*/
+#undef P59_Rep57B6B8 /*gvi*/
+#pragma push_macro("P59_One") /*gvi*/
+#undef P59_One /*gvi*/
 extern p59_sin_t P59_Sin; extern p59_hdr_t P59_Hdr; extern p59_rep_t P59_Rep57B6B8; extern float P59_One;
+#pragma pop_macro("P59_One") /*gvi*/
+#pragma pop_macro("P59_Rep57B6B8") /*gvi*/
+#pragma pop_macro("P59_Hdr") /*gvi*/
+#pragma pop_macro("P59_Sin") /*gvi*/
+#pragma push_macro("P59_NoKeyFlag") /*gvi*/
+#undef P59_NoKeyFlag /*gvi*/
+#pragma push_macro("P59_MenuLock") /*gvi*/
+#undef P59_MenuLock /*gvi*/
 extern int32_t P59_NoKeyFlag, P59_MenuLock;
+#pragma pop_macro("P59_MenuLock") /*gvi*/
+#pragma pop_macro("P59_NoKeyFlag") /*gvi*/
 extern char *P59_VarStr[77]; /* native: буферы строковых переменных MScript (в Game.exe указатель лежит в записи таблицы) */
 #endif
 void    P59_InitConsts(void);                                /* native: таблица синусов и константы */
@@ -84,3 +162,59 @@ void    P59_ObjDir(uint8_t *o, int32_t mode);                /* 004daac7 */
 int32_t P59_ReplayCheck(int32_t slot, void *out);            /* 00405fdb */
 int32_t P59_MenuKeys(void);                                  /* 00417d56 */
 void   *P59_ReadBlock(void *file, float scale, int32_t *hdr); /* 0040d4b3 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P59_CamF1
+#define P59_CamF1 (*(float *)re_gvar(0x01270c24u, sizeof(float), (void *)&P59_CamF1))
+#undef P59_CamLim
+#define P59_CamLim (*(float *)re_gvar(0x005460e8u, sizeof(float), (void *)&P59_CamLim))
+#undef P59_VX
+#define P59_VX (*(float *)re_gvar(0x00b1c270u, sizeof(float), (void *)&P59_VX))
+#undef P59_VY
+#define P59_VY (*(float *)re_gvar(0x00b1c274u, sizeof(float), (void *)&P59_VY))
+#undef P59_VZ
+#define P59_VZ (*(float *)re_gvar(0x00b1c278u, sizeof(float), (void *)&P59_VZ))
+#undef P59_AngA
+#define P59_AngA (*(uint16_t *)re_gvar(0x00b1c268u, sizeof(uint16_t), (void *)&P59_AngA))
+#undef P59_AngB
+#define P59_AngB (*(uint16_t *)re_gvar(0x00b1c26au, sizeof(uint16_t), (void *)&P59_AngB))
+#undef P59_AngC
+#define P59_AngC (*(uint16_t *)re_gvar(0x00b1c26cu, sizeof(uint16_t), (void *)&P59_AngC))
+#undef P59_Mode1137324
+#define P59_Mode1137324 (*(uint8_t *)re_gvar(0x01137324u, sizeof(uint8_t), (void *)&P59_Mode1137324))
+#undef P59_C39DC0
+#define P59_C39DC0 (*(p59_tab_c39dc0_t *)re_gvar(0x00c39dc0u, sizeof(p59_tab_c39dc0_t), (void *)&P59_C39DC0))
+#undef P59_ModelCount
+#define P59_ModelCount (*(int32_t *)re_gvar(0x01134120u, sizeof(int32_t), (void *)&P59_ModelCount))
+#undef P59_Flags9
+#define P59_Flags9 (*(p59_u8x9_t *)re_gvar(0x00d04a50u, sizeof(p59_u8x9_t), (void *)&P59_Flags9))
+#undef P59_Picked
+#define P59_Picked (*(int8_t *)re_gvar(0x00d04650u, sizeof(int8_t), (void *)&P59_Picked))
+#undef P59_S4654
+#define P59_S4654 (*(int32_t *)re_gvar(0x00d04654u, sizeof(int32_t), (void *)&P59_S4654))
+#undef P59_S44CC
+#define P59_S44CC (*(int32_t *)re_gvar(0x00d044ccu, sizeof(int32_t), (void *)&P59_S44CC))
+#undef P59_S4790
+#define P59_S4790 (*(int32_t *)re_gvar(0x00d04790u, sizeof(int32_t), (void *)&P59_S4790))
+#undef P59_S3904
+#define P59_S3904 (*(int32_t *)re_gvar(0x00d03904u, sizeof(int32_t), (void *)&P59_S3904))
+#undef P59_PickTab
+#define P59_PickTab (*(p59_i32x18_t *)re_gvar(0x00562ae0u, sizeof(p59_i32x18_t), (void *)&P59_PickTab))
+#undef P59_NearN
+#define P59_NearN (*(int32_t *)re_gvar(0x00c7d7e0u, sizeof(int32_t), (void *)&P59_NearN))
+#undef P59_NearList
+#define P59_NearList (*(p59_u8x64_t *)re_gvar(0x00c7d860u, sizeof(p59_u8x64_t), (void *)&P59_NearList))
+#undef P59_Sin
+#define P59_Sin (*(p59_sin_t *)re_gvar(0x00576f10u, sizeof(p59_sin_t), (void *)&P59_Sin))
+#undef P59_Hdr
+#define P59_Hdr (*(p59_hdr_t *)re_gvar(0x0057b6f0u, sizeof(p59_hdr_t), (void *)&P59_Hdr))
+#undef P59_One
+#define P59_One (*(float *)re_gvar(0x00546020u, sizeof(float), (void *)&P59_One))
+#undef P59_Rep57B6B8
+#define P59_Rep57B6B8 (*(p59_rep_t *)re_gvar(0x0057b6b8u, sizeof(p59_rep_t), (void *)&P59_Rep57B6B8))
+#undef P59_NoKeyFlag
+#define P59_NoKeyFlag (*(int32_t *)re_gvar(0x005feda0u, sizeof(int32_t), (void *)&P59_NoKeyFlag))
+#undef P59_MenuLock
+#define P59_MenuLock (*(int32_t *)re_gvar(0x005fea54u, sizeof(int32_t), (void *)&P59_MenuLock))
+#endif
+/* gvar-img v2.03 end */

@@ -31,8 +31,24 @@
 #include <stdio.h>
 #include <string.h>
 
-GAME_VAR_DEF(uint32_t, P149_DDHead, 0x00a42148)
-GAME_VAR_DEF(uint32_t, P149_DDTail, 0x00a4214c)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P149_DDHead")
+#undef P149_DDHead
+#pragma push_macro("P149_DDHead") /*gvi*/
+#undef P149_DDHead /*gvi*/
+uint32_t P149_DDHead;
+#pragma pop_macro("P149_DDHead") /*gvi*/
+#pragma pop_macro("P149_DDHead")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P149_DDTail")
+#undef P149_DDTail
+#pragma push_macro("P149_DDTail") /*gvi*/
+#undef P149_DDTail /*gvi*/
+uint32_t P149_DDTail;
+#pragma pop_macro("P149_DDTail") /*gvi*/
+#pragma pop_macro("P149_DDTail")
+#endif
 
 static uint32_t rd32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }
 static void wr32(uint8_t *p, uint32_t v) { memcpy(p, &v, 4); }

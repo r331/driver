@@ -27,7 +27,10 @@
 
 GAME_VAR_DEF(p148_drvtab_t, P148_Drv, 0x00bdcb60)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P148_EaxOn") /*gvi*/
+#undef P148_EaxOn /*gvi*/
 int32_t P148_EaxOn = 1;                     /* .data 005511e8 */
+#pragma pop_macro("P148_EaxOn") /*gvi*/
 #endif
 
 static const uint8_t g_iid_l3d[16]   = { 0x84,0xfa,0x9a,0x27,0x81,0x49,0xce,0x11,0xa5,0x21,0x00,0x20,0xaf,0x0b,0xe5,0x60 };  /* 00546320 */

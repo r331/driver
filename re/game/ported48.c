@@ -9,11 +9,51 @@ GAME_VAR_DEF(P48_F1, P48_Drv2C, 0x00bdcb2c)
 GAME_VAR_DEF(P48_F1, P48_Drv40, 0x00bdcb40)
 GAME_VAR_DEF(P48_F3, P48_Drv38, 0x00bdcb38)
 GAME_VAR_DEF(P48_F4, P48_Drv54, 0x00bdcb54)
-GAME_VAR_DEF(P48_VolTabT, P48_VolTab, 0x00b87f80)
-GAME_VAR_DEF(P48_SampleT, P48_Samples, 0x00bdc886)
-GAME_VAR_DEF(int32_t, P48_B91D30, 0x00b91d30)
-GAME_VAR_DEF(P48_Buf64, P48_GlideBuf, 0x00b1c190)
-GAME_VAR_DEF(P48_Pos3, P48_Pos, 0x01136cb4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P48_VolTab")
+#undef P48_VolTab
+#pragma push_macro("P48_VolTab") /*gvi*/
+#undef P48_VolTab /*gvi*/
+P48_VolTabT P48_VolTab;
+#pragma pop_macro("P48_VolTab") /*gvi*/
+#pragma pop_macro("P48_VolTab")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P48_Samples")
+#undef P48_Samples
+#pragma push_macro("P48_Samples") /*gvi*/
+#undef P48_Samples /*gvi*/
+P48_SampleT P48_Samples;
+#pragma pop_macro("P48_Samples") /*gvi*/
+#pragma pop_macro("P48_Samples")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P48_B91D30")
+#undef P48_B91D30
+#pragma push_macro("P48_B91D30") /*gvi*/
+#undef P48_B91D30 /*gvi*/
+int32_t P48_B91D30;
+#pragma pop_macro("P48_B91D30") /*gvi*/
+#pragma pop_macro("P48_B91D30")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P48_GlideBuf")
+#undef P48_GlideBuf
+#pragma push_macro("P48_GlideBuf") /*gvi*/
+#undef P48_GlideBuf /*gvi*/
+P48_Buf64 P48_GlideBuf;
+#pragma pop_macro("P48_GlideBuf") /*gvi*/
+#pragma pop_macro("P48_GlideBuf")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P48_Pos")
+#undef P48_Pos
+#pragma push_macro("P48_Pos") /*gvi*/
+#undef P48_Pos /*gvi*/
+P48_Pos3 P48_Pos;
+#pragma pop_macro("P48_Pos") /*gvi*/
+#pragma pop_macro("P48_Pos")
+#endif
 
 void P48_FreeVoice(int32_t slot) {
   if (G6_00B91CF4 == 0) return;

@@ -10,9 +10,33 @@ GAME_VAR_DEF(void *, P38_DD, 0x00b1c818)
 GAME_VAR_DEF(void *, P38_Obj814, 0x00b1c814)
 GAME_VAR_DEF(void *, P38_DsPrimary, 0x00b1f424)
 GAME_VAR_DEF(void *, P38_Ds, 0x00b1f420)
-GAME_VAR_DEF(int32_t, P38_Letter, 0x00b1c7b0)
-GAME_VAR_DEF(int32_t, P38_TimerSlot, 0x00551130)
-GAME_VAR_DEF(int32_t, P38_TimerFlag, 0x00551134)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P38_Letter")
+#undef P38_Letter
+#pragma push_macro("P38_Letter") /*gvi*/
+#undef P38_Letter /*gvi*/
+int32_t P38_Letter;
+#pragma pop_macro("P38_Letter") /*gvi*/
+#pragma pop_macro("P38_Letter")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P38_TimerSlot")
+#undef P38_TimerSlot
+#pragma push_macro("P38_TimerSlot") /*gvi*/
+#undef P38_TimerSlot /*gvi*/
+int32_t P38_TimerSlot;
+#pragma pop_macro("P38_TimerSlot") /*gvi*/
+#pragma pop_macro("P38_TimerSlot")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P38_TimerFlag")
+#undef P38_TimerFlag
+#pragma push_macro("P38_TimerFlag") /*gvi*/
+#undef P38_TimerFlag /*gvi*/
+int32_t P38_TimerFlag;
+#pragma pop_macro("P38_TimerFlag") /*gvi*/
+#pragma pop_macro("P38_TimerFlag")
+#endif
 
 int32_t P38_MmsRun(void) {
   if (P38_Mms != NULL && plat_mms_set_state(P38_Mms, 1) == 0) return 1;

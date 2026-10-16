@@ -6,11 +6,35 @@
 #include <stdio.h>
 #include <string.h>
 GAME_VAR_DEF(P32_SlotArr, P32_Slots, 0x00621c48)
-GAME_VAR_DEF(P32_PalArr, P32_PalTable, 0x006017c0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P32_PalTable")
+#undef P32_PalTable
+#pragma push_macro("P32_PalTable") /*gvi*/
+#undef P32_PalTable /*gvi*/
+P32_PalArr P32_PalTable;
+#pragma pop_macro("P32_PalTable") /*gvi*/
+#pragma pop_macro("P32_PalTable")
+#endif
 GAME_VAR_DEF(uint8_t *, P32_DevInfo, 0x00a42150)
-GAME_VAR_DEF(int32_t, P32_CurSlot, 0x0054ef30)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P32_CurSlot")
+#undef P32_CurSlot
+#pragma push_macro("P32_CurSlot") /*gvi*/
+#undef P32_CurSlot /*gvi*/
+int32_t P32_CurSlot;
+#pragma pop_macro("P32_CurSlot") /*gvi*/
+#pragma pop_macro("P32_CurSlot")
+#endif
 GAME_VAR_DEF(void *, P32_CurHandle, 0x00a42178)
-GAME_VAR_DEF(P32_MsgArr, P32_Msg, 0x00a42048)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P32_Msg")
+#undef P32_Msg
+#pragma push_macro("P32_Msg") /*gvi*/
+#undef P32_Msg /*gvi*/
+P32_MsgArr P32_Msg;
+#pragma pop_macro("P32_Msg") /*gvi*/
+#pragma pop_macro("P32_Msg")
+#endif
 
 int32_t P32_CreateZSurface(void *back) {
   uint32_t d[31];

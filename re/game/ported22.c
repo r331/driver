@@ -2,20 +2,132 @@
 #include "../platform/plat.h"
 #include "unported.h"
 #include "flush.h"
-GAME_VAR_DEF(int32_t, P22_DevReady, 0x00a421c0)
-GAME_VAR_DEF(int32_t, P22_AlphaRef, 0x0054ef54)
-GAME_VAR_DEF(int32_t, P22_ZFuncCur, 0x0054ef58)
-GAME_VAR_DEF(int32_t, P22_AlphaFunc, 0x0054ef34)
-GAME_VAR_DEF(int32_t, P22_ZWriteOff, 0x00a421d4)
-GAME_VAR_DEF(int32_t, P22_AtestA, 0x0054ef4c)
-GAME_VAR_DEF(int32_t, P22_AtestB, 0x0054ef50)
-GAME_VAR_DEF(int32_t, P22_TexOpCur, 0x0054ef40)
-GAME_VAR_DEF(int32_t, P22_TexVarA, 0x00a421e4)
-GAME_VAR_DEF(int32_t, P22_TexVarB, 0x00a421e8)
-GAME_VAR_DEF(int32_t, P22_VpX, 0x00a421ac)
-GAME_VAR_DEF(int32_t, P22_VpY, 0x00a421b0)
-GAME_VAR_DEF(int32_t, P22_VpW, 0x00a421b4)
-GAME_VAR_DEF(int32_t, P22_VpH, 0x00a421b8)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_DevReady")
+#undef P22_DevReady
+#pragma push_macro("P22_DevReady") /*gvi*/
+#undef P22_DevReady /*gvi*/
+int32_t P22_DevReady;
+#pragma pop_macro("P22_DevReady") /*gvi*/
+#pragma pop_macro("P22_DevReady")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_AlphaRef")
+#undef P22_AlphaRef
+#pragma push_macro("P22_AlphaRef") /*gvi*/
+#undef P22_AlphaRef /*gvi*/
+int32_t P22_AlphaRef;
+#pragma pop_macro("P22_AlphaRef") /*gvi*/
+#pragma pop_macro("P22_AlphaRef")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_ZFuncCur")
+#undef P22_ZFuncCur
+#pragma push_macro("P22_ZFuncCur") /*gvi*/
+#undef P22_ZFuncCur /*gvi*/
+int32_t P22_ZFuncCur;
+#pragma pop_macro("P22_ZFuncCur") /*gvi*/
+#pragma pop_macro("P22_ZFuncCur")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_AlphaFunc")
+#undef P22_AlphaFunc
+#pragma push_macro("P22_AlphaFunc") /*gvi*/
+#undef P22_AlphaFunc /*gvi*/
+int32_t P22_AlphaFunc;
+#pragma pop_macro("P22_AlphaFunc") /*gvi*/
+#pragma pop_macro("P22_AlphaFunc")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_ZWriteOff")
+#undef P22_ZWriteOff
+#pragma push_macro("P22_ZWriteOff") /*gvi*/
+#undef P22_ZWriteOff /*gvi*/
+int32_t P22_ZWriteOff;
+#pragma pop_macro("P22_ZWriteOff") /*gvi*/
+#pragma pop_macro("P22_ZWriteOff")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_AtestA")
+#undef P22_AtestA
+#pragma push_macro("P22_AtestA") /*gvi*/
+#undef P22_AtestA /*gvi*/
+int32_t P22_AtestA;
+#pragma pop_macro("P22_AtestA") /*gvi*/
+#pragma pop_macro("P22_AtestA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_AtestB")
+#undef P22_AtestB
+#pragma push_macro("P22_AtestB") /*gvi*/
+#undef P22_AtestB /*gvi*/
+int32_t P22_AtestB;
+#pragma pop_macro("P22_AtestB") /*gvi*/
+#pragma pop_macro("P22_AtestB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_TexOpCur")
+#undef P22_TexOpCur
+#pragma push_macro("P22_TexOpCur") /*gvi*/
+#undef P22_TexOpCur /*gvi*/
+int32_t P22_TexOpCur;
+#pragma pop_macro("P22_TexOpCur") /*gvi*/
+#pragma pop_macro("P22_TexOpCur")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_TexVarA")
+#undef P22_TexVarA
+#pragma push_macro("P22_TexVarA") /*gvi*/
+#undef P22_TexVarA /*gvi*/
+int32_t P22_TexVarA;
+#pragma pop_macro("P22_TexVarA") /*gvi*/
+#pragma pop_macro("P22_TexVarA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_TexVarB")
+#undef P22_TexVarB
+#pragma push_macro("P22_TexVarB") /*gvi*/
+#undef P22_TexVarB /*gvi*/
+int32_t P22_TexVarB;
+#pragma pop_macro("P22_TexVarB") /*gvi*/
+#pragma pop_macro("P22_TexVarB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_VpX")
+#undef P22_VpX
+#pragma push_macro("P22_VpX") /*gvi*/
+#undef P22_VpX /*gvi*/
+int32_t P22_VpX;
+#pragma pop_macro("P22_VpX") /*gvi*/
+#pragma pop_macro("P22_VpX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_VpY")
+#undef P22_VpY
+#pragma push_macro("P22_VpY") /*gvi*/
+#undef P22_VpY /*gvi*/
+int32_t P22_VpY;
+#pragma pop_macro("P22_VpY") /*gvi*/
+#pragma pop_macro("P22_VpY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_VpW")
+#undef P22_VpW
+#pragma push_macro("P22_VpW") /*gvi*/
+#undef P22_VpW /*gvi*/
+int32_t P22_VpW;
+#pragma pop_macro("P22_VpW") /*gvi*/
+#pragma pop_macro("P22_VpW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P22_VpH")
+#undef P22_VpH
+#pragma push_macro("P22_VpH") /*gvi*/
+#undef P22_VpH /*gvi*/
+int32_t P22_VpH;
+#pragma pop_macro("P22_VpH") /*gvi*/
+#pragma pop_macro("P22_VpH")
+#endif
 
 enum { RS_ZWRITE = 14, RS_ALPHATEST = 15, RS_CULL = 22, RS_ZFUNC = 23, RS_ALPHAREF = 24, RS_ALPHAFUNC = 25 };
 

@@ -1,18 +1,122 @@
 #include "ported9.h"
 #include <string.h>
-GAME_VAR_DEF(int32_t, P9_01134530, 0x01134530)
-GAME_VAR_DEF(int32_t, P9_0113452c, 0x0113452c)
-GAME_VAR_DEF(int32_t, P9_011342e8, 0x011342e8)
-GAME_VAR_DEF(int32_t, P9_005fe9f0, 0x005fe9f0)
-GAME_VAR_DEF(int32_t, P9_00c55a48, 0x00c55a48)
-GAME_VAR_DEF(int32_t, P9_00c55a4c, 0x00c55a4c)
-GAME_VAR_DEF(int32_t, P9_00c55a50, 0x00c55a50)
-GAME_VAR_DEF(int32_t, P9_00c55a54, 0x00c55a54)
-GAME_VAR_DEF(int32_t, P9_0054e258, 0x0054e258)
-GAME_VAR_DEF(int32_t, P9_00b31e20, 0x00b31e20)
-GAME_VAR_DEF(int32_t, P9_00b31dfc, 0x00b31dfc)
-GAME_VAR_DEF(g8_bytes_t, P9_00b31db8, 0x00b31db8)
-GAME_VAR_DEF(g8_bytes_t, P9_00b31d30, 0x00b31d30)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P9_01134530")
+#undef P9_01134530
+#pragma push_macro("P9_01134530") /*gvi*/
+#undef P9_01134530 /*gvi*/
+int32_t P9_01134530;
+#pragma pop_macro("P9_01134530") /*gvi*/
+#pragma pop_macro("P9_01134530")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P9_0113452c")
+#undef P9_0113452c
+#pragma push_macro("P9_0113452c") /*gvi*/
+#undef P9_0113452c /*gvi*/
+int32_t P9_0113452c;
+#pragma pop_macro("P9_0113452c") /*gvi*/
+#pragma pop_macro("P9_0113452c")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P9_011342e8")
+#undef P9_011342e8
+#pragma push_macro("P9_011342e8") /*gvi*/
+#undef P9_011342e8 /*gvi*/
+int32_t P9_011342e8;
+#pragma pop_macro("P9_011342e8") /*gvi*/
+#pragma pop_macro("P9_011342e8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P9_005fe9f0")
+#undef P9_005fe9f0
+#pragma push_macro("P9_005fe9f0") /*gvi*/
+#undef P9_005fe9f0 /*gvi*/
+int32_t P9_005fe9f0;
+#pragma pop_macro("P9_005fe9f0") /*gvi*/
+#pragma pop_macro("P9_005fe9f0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P9_00c55a48")
+#undef P9_00c55a48
+#pragma push_macro("P9_00c55a48") /*gvi*/
+#undef P9_00c55a48 /*gvi*/
+int32_t P9_00c55a48;
+#pragma pop_macro("P9_00c55a48") /*gvi*/
+#pragma pop_macro("P9_00c55a48")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P9_00c55a4c")
+#undef P9_00c55a4c
+#pragma push_macro("P9_00c55a4c") /*gvi*/
+#undef P9_00c55a4c /*gvi*/
+int32_t P9_00c55a4c;
+#pragma pop_macro("P9_00c55a4c") /*gvi*/
+#pragma pop_macro("P9_00c55a4c")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P9_00c55a50")
+#undef P9_00c55a50
+#pragma push_macro("P9_00c55a50") /*gvi*/
+#undef P9_00c55a50 /*gvi*/
+int32_t P9_00c55a50;
+#pragma pop_macro("P9_00c55a50") /*gvi*/
+#pragma pop_macro("P9_00c55a50")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P9_00c55a54")
+#undef P9_00c55a54
+#pragma push_macro("P9_00c55a54") /*gvi*/
+#undef P9_00c55a54 /*gvi*/
+int32_t P9_00c55a54;
+#pragma pop_macro("P9_00c55a54") /*gvi*/
+#pragma pop_macro("P9_00c55a54")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P9_0054e258")
+#undef P9_0054e258
+#pragma push_macro("P9_0054e258") /*gvi*/
+#undef P9_0054e258 /*gvi*/
+int32_t P9_0054e258;
+#pragma pop_macro("P9_0054e258") /*gvi*/
+#pragma pop_macro("P9_0054e258")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P9_00b31e20")
+#undef P9_00b31e20
+#pragma push_macro("P9_00b31e20") /*gvi*/
+#undef P9_00b31e20 /*gvi*/
+int32_t P9_00b31e20;
+#pragma pop_macro("P9_00b31e20") /*gvi*/
+#pragma pop_macro("P9_00b31e20")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P9_00b31dfc")
+#undef P9_00b31dfc
+#pragma push_macro("P9_00b31dfc") /*gvi*/
+#undef P9_00b31dfc /*gvi*/
+int32_t P9_00b31dfc;
+#pragma pop_macro("P9_00b31dfc") /*gvi*/
+#pragma pop_macro("P9_00b31dfc")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P9_00b31db8")
+#undef P9_00b31db8
+#pragma push_macro("P9_00b31db8") /*gvi*/
+#undef P9_00b31db8 /*gvi*/
+g8_bytes_t P9_00b31db8;
+#pragma pop_macro("P9_00b31db8") /*gvi*/
+#pragma pop_macro("P9_00b31db8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P9_00b31d30")
+#undef P9_00b31d30
+#pragma push_macro("P9_00b31d30") /*gvi*/
+#undef P9_00b31d30 /*gvi*/
+g8_bytes_t P9_00b31d30;
+#pragma pop_macro("P9_00b31d30") /*gvi*/
+#pragma pop_macro("P9_00b31d30")
+#endif
 void SelectByDifficulty_00416D17(void) {
   if (P9_005fe9f0 == 1) P9_0054e258 = P9_00c55a4c;
   else if (P9_005fe9f0 == 2) P9_0054e258 = P9_00c55a50;

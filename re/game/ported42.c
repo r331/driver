@@ -3,18 +3,106 @@
 #include "engine.h"
 #include "../platform/plat.h"
 #include <string.h>
-GAME_VAR_DEF(p42_cmdtab_t, P42_Cmds, 0x00563980)
-GAME_VAR_DEF(p42_vartab_t, P42_Vars, 0x0056dc10)
-GAME_VAR_DEF(p42_hs_t, P42_HighScores, 0x00bdfb20)
-GAME_VAR_DEF(int32_t, P42_DevCount, 0x00b1c0e0)
-GAME_VAR_DEF(p42_names_t, P42_DevNames, 0x01270ec4)
-GAME_VAR_DEF(uint16_t, P42_AngY, 0x00d02700)
-GAME_VAR_DEF(uint16_t, P42_AngX, 0x00d02702)
-GAME_VAR_DEF(uint16_t, P42_AngZ, 0x00d02704)
-GAME_VAR_DEF(int32_t, P42_AngBase, 0x00d02718)
-GAME_VAR_DEF(int32_t, P42_CellX, 0x00ce0f2c)
-GAME_VAR_DEF(int32_t, P42_CellY, 0x00ce0f30)
-GAME_VAR_DEF(float, P42_CellScale, 0x0125f3e8)
+GAME_VAR_DEF(p42_cmdtab_t, P42_Cmds, 0x00000000)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P42_Vars")
+#undef P42_Vars
+#pragma push_macro("P42_Vars") /*gvi*/
+#undef P42_Vars /*gvi*/
+p42_vartab_t P42_Vars;
+#pragma pop_macro("P42_Vars") /*gvi*/
+#pragma pop_macro("P42_Vars")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P42_HighScores")
+#undef P42_HighScores
+#pragma push_macro("P42_HighScores") /*gvi*/
+#undef P42_HighScores /*gvi*/
+p42_hs_t P42_HighScores;
+#pragma pop_macro("P42_HighScores") /*gvi*/
+#pragma pop_macro("P42_HighScores")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P42_DevCount")
+#undef P42_DevCount
+#pragma push_macro("P42_DevCount") /*gvi*/
+#undef P42_DevCount /*gvi*/
+int32_t P42_DevCount;
+#pragma pop_macro("P42_DevCount") /*gvi*/
+#pragma pop_macro("P42_DevCount")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P42_DevNames")
+#undef P42_DevNames
+#pragma push_macro("P42_DevNames") /*gvi*/
+#undef P42_DevNames /*gvi*/
+p42_names_t P42_DevNames;
+#pragma pop_macro("P42_DevNames") /*gvi*/
+#pragma pop_macro("P42_DevNames")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P42_AngY")
+#undef P42_AngY
+#pragma push_macro("P42_AngY") /*gvi*/
+#undef P42_AngY /*gvi*/
+uint16_t P42_AngY;
+#pragma pop_macro("P42_AngY") /*gvi*/
+#pragma pop_macro("P42_AngY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P42_AngX")
+#undef P42_AngX
+#pragma push_macro("P42_AngX") /*gvi*/
+#undef P42_AngX /*gvi*/
+uint16_t P42_AngX;
+#pragma pop_macro("P42_AngX") /*gvi*/
+#pragma pop_macro("P42_AngX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P42_AngZ")
+#undef P42_AngZ
+#pragma push_macro("P42_AngZ") /*gvi*/
+#undef P42_AngZ /*gvi*/
+uint16_t P42_AngZ;
+#pragma pop_macro("P42_AngZ") /*gvi*/
+#pragma pop_macro("P42_AngZ")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P42_AngBase")
+#undef P42_AngBase
+#pragma push_macro("P42_AngBase") /*gvi*/
+#undef P42_AngBase /*gvi*/
+int32_t P42_AngBase;
+#pragma pop_macro("P42_AngBase") /*gvi*/
+#pragma pop_macro("P42_AngBase")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P42_CellX")
+#undef P42_CellX
+#pragma push_macro("P42_CellX") /*gvi*/
+#undef P42_CellX /*gvi*/
+int32_t P42_CellX;
+#pragma pop_macro("P42_CellX") /*gvi*/
+#pragma pop_macro("P42_CellX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P42_CellY")
+#undef P42_CellY
+#pragma push_macro("P42_CellY") /*gvi*/
+#undef P42_CellY /*gvi*/
+int32_t P42_CellY;
+#pragma pop_macro("P42_CellY") /*gvi*/
+#pragma pop_macro("P42_CellY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P42_CellScale")
+#undef P42_CellScale
+#pragma push_macro("P42_CellScale") /*gvi*/
+#undef P42_CellScale /*gvi*/
+float P42_CellScale;
+#pragma pop_macro("P42_CellScale") /*gvi*/
+#pragma pop_macro("P42_CellScale")
+#endif
 
 int32_t P42_FindCommand(const char *name, void **out) {
   *out = NULL;

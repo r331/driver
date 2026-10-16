@@ -37,7 +37,16 @@ void P92_DrawAxis(uint32_t m, int32_t idx, const float *pos, int32_t mode);   /*
              перенесена, пока 0); при 0 координаты не пересчитываются (охранная проверка, в оригинале её нет). */
 #define P92_SinIdx GAME_VAR(int32_t, P92_SinIdx, 0x00b1c284)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P92_SinIdx") /*gvi*/
+#undef P92_SinIdx /*gvi*/
 extern int32_t P92_SinIdx;
+#pragma pop_macro("P92_SinIdx") /*gvi*/
 extern const uint8_t *P92_SpinTex;   /* native: прямоугольник текстуры вместо 32-битного G012085F4 (пока никто не задаёт) */
 #endif
 void P92_DrawSpin(uint32_t m, int32_t idx, const float *pos, int32_t mode);   /* 0042a5de */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P92_SinIdx
+#define P92_SinIdx (*(int32_t *)re_gvar(0x00b1c284u, sizeof(int32_t), (void *)&P92_SinIdx))
+#endif
+/* gvar-img v2.03 end */

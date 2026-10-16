@@ -155,14 +155,55 @@
 #  define P107_KEY(a) KeyState[(a) - 0x00d04b00]
 #endif
 
-GAME_VAR_DEF(p107_vblk_t, P107_SprV, 0x00b1ffd0)
-GAME_VAR_DEF(uint8_t, P107_DDE6, 0x00d0dde6)
-GAME_VAR_DEF(int32_t, P107_SteerK, 0x00b87e1c)
-GAME_VAR_DEF(int32_t, P107_NavCnt, 0x00b5a780)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P107_SprV")
+#undef P107_SprV
+#pragma push_macro("P107_SprV") /*gvi*/
+#undef P107_SprV /*gvi*/
+p107_vblk_t P107_SprV;
+#pragma pop_macro("P107_SprV") /*gvi*/
+#pragma pop_macro("P107_SprV")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P107_DDE6")
+#undef P107_DDE6
+#pragma push_macro("P107_DDE6") /*gvi*/
+#undef P107_DDE6 /*gvi*/
+uint8_t P107_DDE6;
+#pragma pop_macro("P107_DDE6") /*gvi*/
+#pragma pop_macro("P107_DDE6")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P107_SteerK")
+#undef P107_SteerK
+#pragma push_macro("P107_SteerK") /*gvi*/
+#undef P107_SteerK /*gvi*/
+int32_t P107_SteerK;
+#pragma pop_macro("P107_SteerK") /*gvi*/
+#pragma pop_macro("P107_SteerK")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P107_NavCnt")
+#undef P107_NavCnt
+#pragma push_macro("P107_NavCnt") /*gvi*/
+#undef P107_NavCnt /*gvi*/
+int32_t P107_NavCnt;
+#pragma pop_macro("P107_NavCnt") /*gvi*/
+#pragma pop_macro("P107_NavCnt")
+#endif
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P107_HornVol") /*gvi*/
+#undef P107_HornVol /*gvi*/
 int32_t P107_HornVol = -10000;   /* .data 005603cc */
+#pragma pop_macro("P107_HornVol") /*gvi*/
+#pragma push_macro("P107_NavWait") /*gvi*/
+#undef P107_NavWait /*gvi*/
 int32_t P107_NavWait = 10;       /* .data 005755bc */
+#pragma pop_macro("P107_NavWait") /*gvi*/
+#pragma push_macro("P107_NavRep") /*gvi*/
+#undef P107_NavRep /*gvi*/
 int32_t P107_NavRep = 10;        /* .data 005755c4 */
+#pragma pop_macro("P107_NavRep") /*gvi*/
 #endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }

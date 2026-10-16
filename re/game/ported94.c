@@ -20,28 +20,186 @@
 #include "smallfuncs2.h"
 #include <string.h>
 
-GAME_VAR_DEF(float, P94_RadarK, 0x00b32978)
-GAME_VAR_DEF(int32_t, P94_MapW, 0x00b32a30)
-GAME_VAR_DEF(int32_t, P94_MapH, 0x00b52a34)
-GAME_VAR_DEF(int32_t, P94_MapX0, 0x00b32a04)
-GAME_VAR_DEF(int32_t, P94_MapY0, 0x00b32a0c)
-GAME_VAR_DEF(int32_t, P94_FadeDir, 0x00d048f0)
-GAME_VAR_DEF(int32_t, P94_FadeVal, 0x00d044d4)
-GAME_VAR_DEF(float, P94_FadePos, 0x00d04478)
-GAME_VAR_DEF(float, P94_FadeSpeed, 0x00d04784)
-GAME_VAR_DEF(uint32_t, P94_IconRec, 0x010faf20)
-GAME_VAR_DEF(uint8_t, P94_QuadPage, 0x010fc9a2)
-GAME_VAR_DEF(p94_quad_t, P94_Quad, 0x010fc9a8)
-GAME_VAR_DEF(int32_t, P94_DirCnt, 0x01145a48)
-GAME_VAR_DEF(p94_dirtab_t, P94_DirTab, 0x01142700)
-GAME_VAR_DEF(p94_curveA_t, P94_CurveA, 0x00b2f414)
-GAME_VAR_DEF(p94_curveB_t, P94_CurveB, 0x00b2eb8c)
-GAME_VAR_DEF(p94_curveB_t, P94_CurveC, 0x00b2ea4c)
-GAME_VAR_DEF(int32_t, P94_WobB, 0x00b201e0)
-GAME_VAR_DEF(float, P94_WobK, 0x00b201e4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_RadarK")
+#undef P94_RadarK
+#pragma push_macro("P94_RadarK") /*gvi*/
+#undef P94_RadarK /*gvi*/
+float P94_RadarK;
+#pragma pop_macro("P94_RadarK") /*gvi*/
+#pragma pop_macro("P94_RadarK")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_MapW")
+#undef P94_MapW
+#pragma push_macro("P94_MapW") /*gvi*/
+#undef P94_MapW /*gvi*/
+int32_t P94_MapW;
+#pragma pop_macro("P94_MapW") /*gvi*/
+#pragma pop_macro("P94_MapW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_MapH")
+#undef P94_MapH
+#pragma push_macro("P94_MapH") /*gvi*/
+#undef P94_MapH /*gvi*/
+int32_t P94_MapH;
+#pragma pop_macro("P94_MapH") /*gvi*/
+#pragma pop_macro("P94_MapH")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_MapX0")
+#undef P94_MapX0
+#pragma push_macro("P94_MapX0") /*gvi*/
+#undef P94_MapX0 /*gvi*/
+int32_t P94_MapX0;
+#pragma pop_macro("P94_MapX0") /*gvi*/
+#pragma pop_macro("P94_MapX0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_MapY0")
+#undef P94_MapY0
+#pragma push_macro("P94_MapY0") /*gvi*/
+#undef P94_MapY0 /*gvi*/
+int32_t P94_MapY0;
+#pragma pop_macro("P94_MapY0") /*gvi*/
+#pragma pop_macro("P94_MapY0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_FadeDir")
+#undef P94_FadeDir
+#pragma push_macro("P94_FadeDir") /*gvi*/
+#undef P94_FadeDir /*gvi*/
+int32_t P94_FadeDir;
+#pragma pop_macro("P94_FadeDir") /*gvi*/
+#pragma pop_macro("P94_FadeDir")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_FadeVal")
+#undef P94_FadeVal
+#pragma push_macro("P94_FadeVal") /*gvi*/
+#undef P94_FadeVal /*gvi*/
+int32_t P94_FadeVal;
+#pragma pop_macro("P94_FadeVal") /*gvi*/
+#pragma pop_macro("P94_FadeVal")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_FadePos")
+#undef P94_FadePos
+#pragma push_macro("P94_FadePos") /*gvi*/
+#undef P94_FadePos /*gvi*/
+float P94_FadePos;
+#pragma pop_macro("P94_FadePos") /*gvi*/
+#pragma pop_macro("P94_FadePos")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_FadeSpeed")
+#undef P94_FadeSpeed
+#pragma push_macro("P94_FadeSpeed") /*gvi*/
+#undef P94_FadeSpeed /*gvi*/
+float P94_FadeSpeed;
+#pragma pop_macro("P94_FadeSpeed") /*gvi*/
+#pragma pop_macro("P94_FadeSpeed")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_IconRec")
+#undef P94_IconRec
+#pragma push_macro("P94_IconRec") /*gvi*/
+#undef P94_IconRec /*gvi*/
+uint32_t P94_IconRec;
+#pragma pop_macro("P94_IconRec") /*gvi*/
+#pragma pop_macro("P94_IconRec")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_QuadPage")
+#undef P94_QuadPage
+#pragma push_macro("P94_QuadPage") /*gvi*/
+#undef P94_QuadPage /*gvi*/
+uint8_t P94_QuadPage;
+#pragma pop_macro("P94_QuadPage") /*gvi*/
+#pragma pop_macro("P94_QuadPage")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_Quad")
+#undef P94_Quad
+#pragma push_macro("P94_Quad") /*gvi*/
+#undef P94_Quad /*gvi*/
+p94_quad_t P94_Quad;
+#pragma pop_macro("P94_Quad") /*gvi*/
+#pragma pop_macro("P94_Quad")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_DirCnt")
+#undef P94_DirCnt
+#pragma push_macro("P94_DirCnt") /*gvi*/
+#undef P94_DirCnt /*gvi*/
+int32_t P94_DirCnt;
+#pragma pop_macro("P94_DirCnt") /*gvi*/
+#pragma pop_macro("P94_DirCnt")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_DirTab")
+#undef P94_DirTab
+#pragma push_macro("P94_DirTab") /*gvi*/
+#undef P94_DirTab /*gvi*/
+p94_dirtab_t P94_DirTab;
+#pragma pop_macro("P94_DirTab") /*gvi*/
+#pragma pop_macro("P94_DirTab")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_CurveA")
+#undef P94_CurveA
+#pragma push_macro("P94_CurveA") /*gvi*/
+#undef P94_CurveA /*gvi*/
+p94_curveA_t P94_CurveA;
+#pragma pop_macro("P94_CurveA") /*gvi*/
+#pragma pop_macro("P94_CurveA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_CurveB")
+#undef P94_CurveB
+#pragma push_macro("P94_CurveB") /*gvi*/
+#undef P94_CurveB /*gvi*/
+p94_curveB_t P94_CurveB;
+#pragma pop_macro("P94_CurveB") /*gvi*/
+#pragma pop_macro("P94_CurveB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_CurveC")
+#undef P94_CurveC
+#pragma push_macro("P94_CurveC") /*gvi*/
+#undef P94_CurveC /*gvi*/
+p94_curveB_t P94_CurveC;
+#pragma pop_macro("P94_CurveC") /*gvi*/
+#pragma pop_macro("P94_CurveC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_WobB")
+#undef P94_WobB
+#pragma push_macro("P94_WobB") /*gvi*/
+#undef P94_WobB /*gvi*/
+int32_t P94_WobB;
+#pragma pop_macro("P94_WobB") /*gvi*/
+#pragma pop_macro("P94_WobB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P94_WobK")
+#undef P94_WobK
+#pragma push_macro("P94_WobK") /*gvi*/
+#undef P94_WobK /*gvi*/
+float P94_WobK;
+#pragma pop_macro("P94_WobK") /*gvi*/
+#pragma pop_macro("P94_WobK")
+#endif
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P94_WobA") /*gvi*/
+#undef P94_WobA /*gvi*/
 int32_t P94_WobA = 10;   /* 00553a18: начальное значение из .data */
+#pragma pop_macro("P94_WobA") /*gvi*/
+#pragma push_macro("P94_WobC") /*gvi*/
+#undef P94_WobC /*gvi*/
 int32_t P94_WobC = 5;    /* 00553a1c */
+#pragma pop_macro("P94_WobC") /*gvi*/
 #endif
 
 /* умножение и сдвиг как у 32-битного imul/sar (с переполнением по модулю 2^32) */

@@ -77,7 +77,15 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
-GAME_VAR_DEF(int32_t, P131_Skip, 0x00d11930)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P131_Skip")
+#undef P131_Skip
+#pragma push_macro("P131_Skip") /*gvi*/
+#undef P131_Skip /*gvi*/
+int32_t P131_Skip;
+#pragma pop_macro("P131_Skip") /*gvi*/
+#pragma pop_macro("P131_Skip")
+#endif
 #endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
@@ -415,7 +423,15 @@ void P131_MissionObj(uint32_t m, const uint8_t *obj, int32_t mode) {
    поворот P95_MapRotate вокруг игрока; в режиме карты (P55_BDFA18) или флаге 2 P131_BDFAA4 — треугольник 0xc0,
    иначе — три линии 0x80. Поля вершин кроме x, y, r, g, b, oow в оригинале не задаются (в native 0). ---- */
 #ifndef RE_HOOK_BUILD
-GAME_VAR_DEF(int32_t, P131_BDFAA4, 0x00bdfaa4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P131_BDFAA4")
+#undef P131_BDFAA4
+#pragma push_macro("P131_BDFAA4") /*gvi*/
+#undef P131_BDFAA4 /*gvi*/
+int32_t P131_BDFAA4;
+#pragma pop_macro("P131_BDFAA4") /*gvi*/
+#pragma pop_macro("P131_BDFAA4")
+#endif
 #endif
 void P131_RadarArrow(int32_t i) {
 #ifndef RE_HOOK_BUILD
@@ -461,8 +477,24 @@ void P131_RadarArrow(int32_t i) {
    для города 6) → .data 00559074 (0x1680 = P28_Dst1 + P128_DmgMap), 0055a6f4 (0x1140 = P28_Dst2 + P131_DenB),
    0055b834 (0x1140, P131_DenC). В Ghidra __fastcall без чтения ECX — явный мусорный параметр (v1.69). ---- */
 #ifndef RE_HOOK_BUILD
-GAME_VAR_DEF(p131_denb_t, P131_DenB, 0x0055a864)
-GAME_VAR_DEF(p131_denc_t, P131_DenC, 0x0055b834)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P131_DenB")
+#undef P131_DenB
+#pragma push_macro("P131_DenB") /*gvi*/
+#undef P131_DenB /*gvi*/
+p131_denb_t P131_DenB;
+#pragma pop_macro("P131_DenB") /*gvi*/
+#pragma pop_macro("P131_DenB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P131_DenC")
+#undef P131_DenC
+#pragma push_macro("P131_DenC") /*gvi*/
+#undef P131_DenC /*gvi*/
+p131_denc_t P131_DenC;
+#pragma pop_macro("P131_DenC") /*gvi*/
+#pragma pop_macro("P131_DenC")
+#endif
 #endif
 static const char *const k_cos[7] = {                  /* .data 00562d60 */
   "LEVELS\\MIAMI_01.COS", "LEVELS\\FRISCO_01.COS", "LEVELS\\LA_01.COS", "LEVELS\\NY_01.COS",
@@ -503,8 +535,24 @@ void P131_LoadCosDen(int32_t junk) {
    столкновения P76_ColObj на расстояние 3000 (.rdata 0054604c, делитель 20 — 00546118; кроме повтора без режима),
    дрожание по P76_Angle < 0x30, затем 0049cad4 / InitXform. ---- */
 #ifndef RE_HOOK_BUILD
-GAME_VAR_DEF(p131_camang_t, P131_CamAng, 0x01137380)
-GAME_VAR_DEF(uint16_t, P131_AngD, 0x00b1c26e)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P131_CamAng")
+#undef P131_CamAng
+#pragma push_macro("P131_CamAng") /*gvi*/
+#undef P131_CamAng /*gvi*/
+p131_camang_t P131_CamAng;
+#pragma pop_macro("P131_CamAng") /*gvi*/
+#pragma pop_macro("P131_CamAng")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P131_AngD")
+#undef P131_AngD
+#pragma push_macro("P131_AngD") /*gvi*/
+#undef P131_AngD /*gvi*/
+uint16_t P131_AngD;
+#pragma pop_macro("P131_AngD") /*gvi*/
+#pragma pop_macro("P131_AngD")
+#endif
 #endif
 void P131_CamShake(void) {
   P59_AngA = P131_CamAng[0]; P59_AngB = P131_CamAng[1]; P59_AngC = P131_CamAng[2]; P131_AngD = P131_CamAng[3];

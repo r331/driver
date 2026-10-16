@@ -150,7 +150,15 @@
 
 #include "ported107.h"
 
-GAME_VAR_DEF(double, P108_FmvLen, 0x00b1c850)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P108_FmvLen")
+#undef P108_FmvLen
+#pragma push_macro("P108_FmvLen") /*gvi*/
+#undef P108_FmvLen /*gvi*/
+double P108_FmvLen;
+#pragma pop_macro("P108_FmvLen") /*gvi*/
+#pragma pop_macro("P108_FmvLen")
+#endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }

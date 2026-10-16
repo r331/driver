@@ -22,7 +22,40 @@
 #define P24_ModeH       GAME_VAR(int32_t, P24_ModeH, 0x00a421a8)
 #ifndef RE_HOOK_BUILD
 extern void *P24_DD, *P24_Primary, *P24_Back, *P24_ZSurf, *P24_Hwnd;
+#pragma push_macro("P24_Fullscreen") /*gvi*/
+#undef P24_Fullscreen /*gvi*/
+#pragma push_macro("P24_Bpp") /*gvi*/
+#undef P24_Bpp /*gvi*/
+#pragma push_macro("P24_RShiftR") /*gvi*/
+#undef P24_RShiftR /*gvi*/
+#pragma push_macro("P24_RShiftL") /*gvi*/
+#undef P24_RShiftL /*gvi*/
+#pragma push_macro("P24_GShiftR") /*gvi*/
+#undef P24_GShiftR /*gvi*/
+#pragma push_macro("P24_GShiftL") /*gvi*/
+#undef P24_GShiftL /*gvi*/
+#pragma push_macro("P24_BShiftR") /*gvi*/
+#undef P24_BShiftR /*gvi*/
+#pragma push_macro("P24_BShiftL") /*gvi*/
+#undef P24_BShiftL /*gvi*/
+#pragma push_macro("P24_RestoreMode") /*gvi*/
+#undef P24_RestoreMode /*gvi*/
+#pragma push_macro("P24_ModeW") /*gvi*/
+#undef P24_ModeW /*gvi*/
+#pragma push_macro("P24_ModeH") /*gvi*/
+#undef P24_ModeH /*gvi*/
 extern int32_t P24_Fullscreen, P24_Bpp, P24_RShiftR, P24_RShiftL, P24_GShiftR, P24_GShiftL, P24_BShiftR, P24_BShiftL, P24_RestoreMode, P24_ModeW, P24_ModeH;
+#pragma pop_macro("P24_ModeH") /*gvi*/
+#pragma pop_macro("P24_ModeW") /*gvi*/
+#pragma pop_macro("P24_RestoreMode") /*gvi*/
+#pragma pop_macro("P24_BShiftL") /*gvi*/
+#pragma pop_macro("P24_BShiftR") /*gvi*/
+#pragma pop_macro("P24_GShiftL") /*gvi*/
+#pragma pop_macro("P24_GShiftR") /*gvi*/
+#pragma pop_macro("P24_RShiftL") /*gvi*/
+#pragma pop_macro("P24_RShiftR") /*gvi*/
+#pragma pop_macro("P24_Bpp") /*gvi*/
+#pragma pop_macro("P24_Fullscreen") /*gvi*/
 #endif
 void   *P24_CreateSurface(void *dd, const void *desc);                 /* 00420c10 */
 void   *P24_CreateDevice(void *d3d, const void *iid, void *surf);      /* 00420cfe */
@@ -36,3 +69,29 @@ int32_t P24_SetClipper(void *surf, void *clipper);                     /* 004212
 int32_t P24_AttachSurface(void *surf, void *attached);                 /* 004214dd */
 void    P24_RestoreDisplay(void);                                      /* 004213a4 */
 void    P24_RestoreSurfaces(void);                                     /* 004212dc */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P24_Fullscreen
+#define P24_Fullscreen (*(int32_t *)re_gvar(0x00a421f4u, sizeof(int32_t), (void *)&P24_Fullscreen))
+#undef P24_Bpp
+#define P24_Bpp (*(int32_t *)re_gvar(0x0054ef28u, sizeof(int32_t), (void *)&P24_Bpp))
+#undef P24_RShiftR
+#define P24_RShiftR (*(int32_t *)re_gvar(0x00a42184u, sizeof(int32_t), (void *)&P24_RShiftR))
+#undef P24_RShiftL
+#define P24_RShiftL (*(int32_t *)re_gvar(0x00a42188u, sizeof(int32_t), (void *)&P24_RShiftL))
+#undef P24_GShiftR
+#define P24_GShiftR (*(int32_t *)re_gvar(0x00a4218cu, sizeof(int32_t), (void *)&P24_GShiftR))
+#undef P24_GShiftL
+#define P24_GShiftL (*(int32_t *)re_gvar(0x00a42190u, sizeof(int32_t), (void *)&P24_GShiftL))
+#undef P24_BShiftR
+#define P24_BShiftR (*(int32_t *)re_gvar(0x00a42194u, sizeof(int32_t), (void *)&P24_BShiftR))
+#undef P24_BShiftL
+#define P24_BShiftL (*(int32_t *)re_gvar(0x00a42198u, sizeof(int32_t), (void *)&P24_BShiftL))
+#undef P24_RestoreMode
+#define P24_RestoreMode (*(int32_t *)re_gvar(0x00a421c4u, sizeof(int32_t), (void *)&P24_RestoreMode))
+#undef P24_ModeW
+#define P24_ModeW (*(int32_t *)re_gvar(0x00a421a4u, sizeof(int32_t), (void *)&P24_ModeW))
+#undef P24_ModeH
+#define P24_ModeH (*(int32_t *)re_gvar(0x00a421a8u, sizeof(int32_t), (void *)&P24_ModeH))
+#endif
+/* gvar-img v2.03 end */

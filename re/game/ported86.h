@@ -25,9 +25,15 @@ typedef void (*p86_texsrc_fn)(int32_t tmu, uint32_t addr, int32_t mask, uint32_t
 #define P86_TexSrc GAME_VAR(p86_texsrc_fn, P86_TexSrc, 0x01270d5c)
 #define P86_Detail GAME_VAR(uint8_t, P86_Detail, 0x00550828)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P86_CurTex") /*gvi*/
+#undef P86_CurTex /*gvi*/
 extern int32_t P86_CurTex;
+#pragma pop_macro("P86_CurTex") /*gvi*/
 extern p86_texsrc_fn P86_TexSrc;
+#pragma push_macro("P86_Detail") /*gvi*/
+#undef P86_Detail /*gvi*/
 extern uint8_t P86_Detail;
+#pragma pop_macro("P86_Detail") /*gvi*/
 /* native: текстуры карты. Страница файла уровня → plat_tex (RGBA); номер слота игры = номер страницы */
 void P86_NativeReset(void);                                           /* освободить текстуры прошлого уровня */
 void P86_NativeCapture(int32_t slot, int pair, const void *page0, const void *page1); /* вызывается из P41_LoadTexPages */
@@ -41,3 +47,11 @@ void P86_TexTriD(uint32_t arg);      /* 00434c58, тип 22 */
 void P86_TexQuadD(uint32_t arg);     /* 0043593e, тип 23 */
 void P86_GouraudTri(uint32_t arg);   /* 00432b77, тип 50 */
 void P86_GouraudQuad(uint32_t arg);  /* 00433017, тип 51 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P86_CurTex
+#define P86_CurTex (*(int32_t *)re_gvar(0x0125f3ecu, sizeof(int32_t), (void *)&P86_CurTex))
+#undef P86_Detail
+#define P86_Detail (*(uint8_t *)re_gvar(0x00550828u, sizeof(uint8_t), (void *)&P86_Detail))
+#endif
+/* gvar-img v2.03 end */

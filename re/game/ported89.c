@@ -10,9 +10,33 @@
 #  define P89_STD
 #endif
 
-GAME_VAR_DEF(int32_t, P89_CntShadow, 0x00cfe6e4)
-GAME_VAR_DEF(int32_t, P89_CntFour, 0x00ce0f24)
-GAME_VAR_DEF(int32_t, P89_CntSeven, 0x00d00218)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P89_CntShadow")
+#undef P89_CntShadow
+#pragma push_macro("P89_CntShadow") /*gvi*/
+#undef P89_CntShadow /*gvi*/
+int32_t P89_CntShadow;
+#pragma pop_macro("P89_CntShadow") /*gvi*/
+#pragma pop_macro("P89_CntShadow")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P89_CntFour")
+#undef P89_CntFour
+#pragma push_macro("P89_CntFour") /*gvi*/
+#undef P89_CntFour /*gvi*/
+int32_t P89_CntFour;
+#pragma pop_macro("P89_CntFour") /*gvi*/
+#pragma pop_macro("P89_CntFour")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P89_CntSeven")
+#undef P89_CntSeven
+#pragma push_macro("P89_CntSeven") /*gvi*/
+#undef P89_CntSeven /*gvi*/
+int32_t P89_CntSeven;
+#pragma pop_macro("P89_CntSeven") /*gvi*/
+#pragma pop_macro("P89_CntSeven")
+#endif
 GAME_VAR_DEF(p89_list4_t, P89_ListShadow, 0x00c97a40)
 GAME_VAR_DEF(p89_list4_t, P89_ListFour, 0x00cf1f80)
 GAME_VAR_DEF(p89_list2_t, P89_ListSeven, 0x00cff9e0)

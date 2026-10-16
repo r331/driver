@@ -36,9 +36,36 @@
 #define P57_ScrW GAME_VAR(int32_t, P57_ScrW, 0x00c80890)
 #define P57_Div1500 GAME_VAR(float, P57_Div1500, 0x005469c4)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P57_S5D5794") /*gvi*/
+#undef P57_S5D5794 /*gvi*/
+#pragma push_macro("P57_S5D5774") /*gvi*/
+#undef P57_S5D5774 /*gvi*/
+#pragma push_macro("P57_S5FE4EC") /*gvi*/
+#undef P57_S5FE4EC /*gvi*/
+#pragma push_macro("P57_S5FE990") /*gvi*/
+#undef P57_S5FE990 /*gvi*/
+#pragma push_macro("P57_S5FE9A0") /*gvi*/
+#undef P57_S5FE9A0 /*gvi*/
+#pragma push_macro("P57_S5D579C") /*gvi*/
+#undef P57_S5D579C /*gvi*/
+#pragma push_macro("P57_S5FE6B8") /*gvi*/
+#undef P57_S5FE6B8 /*gvi*/
+#pragma push_macro("P57_S5FE998") /*gvi*/
+#undef P57_S5FE998 /*gvi*/
 extern int32_t P57_S5D5794, P57_S5D5774, P57_S5FE4EC, P57_S5FE990, P57_S5FE9A0, P57_S5D579C, P57_S5FE6B8, P57_S5FE998,
+#pragma pop_macro("P57_S5FE998") /*gvi*/
+#pragma pop_macro("P57_S5FE6B8") /*gvi*/
+#pragma pop_macro("P57_S5D579C") /*gvi*/
+#pragma pop_macro("P57_S5FE9A0") /*gvi*/
+#pragma pop_macro("P57_S5FE990") /*gvi*/
+#pragma pop_macro("P57_S5FE4EC") /*gvi*/
+#pragma pop_macro("P57_S5D5774") /*gvi*/
+#pragma pop_macro("P57_S5D5794") /*gvi*/
     P57_S5FE9A8, P57_S5FE9E8, P57_S57B568, P57_S5FE848, P57_S5FE924, P57_ScrW;
+#pragma push_macro("P57_Div1500") /*gvi*/
+#undef P57_Div1500 /*gvi*/
 extern float P57_Div1500;
+#pragma pop_macro("P57_Div1500") /*gvi*/
 #endif
 void    P57_InitConsts(void);
 void    P57_MenuDone(void);                         /* 0040cd17: 6 тиков ожидания перед возвратом из экрана */
@@ -66,3 +93,37 @@ int32_t P57_WriteFile(const char *name, const void *buf, int32_t size); /* 004d3
 void    P57_SkipBlock(void *file, int32_t size);    /* 004ec2ec */
 void    P57_ResetTexNodes(void);                    /* 00421a39 */
 void    P57_ScreenToView(float *x, float *y);       /* 005075f6 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P57_S5D5794
+#define P57_S5D5794 (*(int32_t *)re_gvar(0x005d5794u, sizeof(int32_t), (void *)&P57_S5D5794))
+#undef P57_S5D5774
+#define P57_S5D5774 (*(int32_t *)re_gvar(0x005d5774u, sizeof(int32_t), (void *)&P57_S5D5774))
+#undef P57_S5FE4EC
+#define P57_S5FE4EC (*(int32_t *)re_gvar(0x005fe4ecu, sizeof(int32_t), (void *)&P57_S5FE4EC))
+#undef P57_S5FE990
+#define P57_S5FE990 (*(int32_t *)re_gvar(0x005fe990u, sizeof(int32_t), (void *)&P57_S5FE990))
+#undef P57_S5FE9A0
+#define P57_S5FE9A0 (*(int32_t *)re_gvar(0x005fe9a0u, sizeof(int32_t), (void *)&P57_S5FE9A0))
+#undef P57_S5D579C
+#define P57_S5D579C (*(int32_t *)re_gvar(0x005d579cu, sizeof(int32_t), (void *)&P57_S5D579C))
+#undef P57_S5FE6B8
+#define P57_S5FE6B8 (*(int32_t *)re_gvar(0x005fe6b8u, sizeof(int32_t), (void *)&P57_S5FE6B8))
+#undef P57_S5FE998
+#define P57_S5FE998 (*(int32_t *)re_gvar(0x005fe998u, sizeof(int32_t), (void *)&P57_S5FE998))
+#undef P57_S5FE9A8
+#define P57_S5FE9A8 (*(int32_t *)re_gvar(0x005fe9a8u, sizeof(int32_t), (void *)&P57_S5FE9A8))
+#undef P57_S5FE9E8
+#define P57_S5FE9E8 (*(int32_t *)re_gvar(0x005fe9e8u, sizeof(int32_t), (void *)&P57_S5FE9E8))
+#undef P57_S57B568
+#define P57_S57B568 (*(int32_t *)re_gvar(0x0057b568u, sizeof(int32_t), (void *)&P57_S57B568))
+#undef P57_S5FE848
+#define P57_S5FE848 (*(int32_t *)re_gvar(0x005fe848u, sizeof(int32_t), (void *)&P57_S5FE848))
+#undef P57_S5FE924
+#define P57_S5FE924 (*(int32_t *)re_gvar(0x005fe924u, sizeof(int32_t), (void *)&P57_S5FE924))
+#undef P57_ScrW
+#define P57_ScrW (*(int32_t *)re_gvar(0x00c80890u, sizeof(int32_t), (void *)&P57_ScrW))
+#undef P57_Div1500
+#define P57_Div1500 (*(float *)re_gvar(0x005469c4u, sizeof(float), (void *)&P57_Div1500))
+#endif
+/* gvar-img v2.03 end */

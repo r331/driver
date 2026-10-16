@@ -57,12 +57,42 @@ extern p85_rv3_t P85_RV;
 extern p85_raster_fn P85_RasterA, P85_RasterB;
 extern p85_blend_fn P85_BlendFn;
 extern p85_state_fn P85_StateFn;
+#pragma push_macro("P85_StateDirty") /*gvi*/
+#undef P85_StateDirty /*gvi*/
+#pragma push_macro("P85_BlendForce") /*gvi*/
+#undef P85_BlendForce /*gvi*/
 extern int32_t P85_StateDirty, P85_BlendForce;
+#pragma pop_macro("P85_BlendForce") /*gvi*/
+#pragma pop_macro("P85_StateDirty") /*gvi*/
+#pragma push_macro("P85_BlendCur") /*gvi*/
+#undef P85_BlendCur /*gvi*/
 extern uint8_t P85_BlendCur;
+#pragma pop_macro("P85_BlendCur") /*gvi*/
+#pragma push_macro("P85_Clip") /*gvi*/
+#undef P85_Clip /*gvi*/
+#pragma push_macro("P85_D3") /*gvi*/
+#undef P85_D3 /*gvi*/
 extern uint32_t P85_Clip, P85_D3;
+#pragma pop_macro("P85_D3") /*gvi*/
+#pragma pop_macro("P85_Clip") /*gvi*/
+#pragma push_macro("P85_D") /*gvi*/
+#undef P85_D /*gvi*/
 extern p85_d_t P85_D;
+#pragma pop_macro("P85_D") /*gvi*/
+#pragma push_macro("P85_MaxX") /*gvi*/
+#undef P85_MaxX /*gvi*/
+#pragma push_macro("P85_MaxY") /*gvi*/
+#undef P85_MaxY /*gvi*/
+#pragma push_macro("P85_Tmp") /*gvi*/
+#undef P85_Tmp /*gvi*/
 extern float P85_MaxX, P85_MaxY, P85_Tmp;
+#pragma pop_macro("P85_Tmp") /*gvi*/
+#pragma pop_macro("P85_MaxY") /*gvi*/
+#pragma pop_macro("P85_MaxX") /*gvi*/
+#pragma push_macro("P85_ZI") /*gvi*/
+#undef P85_ZI /*gvi*/
 extern int32_t P85_ZI;
+#pragma pop_macro("P85_ZI") /*gvi*/
 /* native: регистрирует в таблицах P84_Handlers обработчики 0/1/32/33 (остальные типы — пропуск записи) и ставит растеризатор на plat_draw_tris */
 void P85_RegisterNative(void);
 void P85_SkipRecord(uint32_t arg);
@@ -82,3 +112,27 @@ void P85_SetBlend(uint8_t m);                  /* смена режима сме
 void P85_CallRaster(void);                     /* три вершины P85_RV → растеризатор (с отсечением при P82_Edge) */
 int  P85_EdgeReject(const p85_vtx *const *vs, int n); /* 1 — все вершины за краем экрана */
 void P85_PutVtx(p85_rv *r, const p85_vtx *v);  /* x, y, oow вершины → вершина растеризатора */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P85_StateDirty
+#define P85_StateDirty (*(int32_t *)re_gvar(0x01270c34u, sizeof(int32_t), (void *)&P85_StateDirty))
+#undef P85_BlendForce
+#define P85_BlendForce (*(int32_t *)re_gvar(0x00b1c38cu, sizeof(int32_t), (void *)&P85_BlendForce))
+#undef P85_BlendCur
+#define P85_BlendCur (*(uint8_t *)re_gvar(0x0125f3e4u, sizeof(uint8_t), (void *)&P85_BlendCur))
+#undef P85_Clip
+#define P85_Clip (*(uint32_t *)re_gvar(0x01147620u, sizeof(uint32_t), (void *)&P85_Clip))
+#undef P85_D
+#define P85_D (*(p85_d_t *)re_gvar(0x01159d5cu, sizeof(p85_d_t), (void *)&P85_D))
+#undef P85_D3
+#define P85_D3 (*(uint32_t *)re_gvar(0x01159d6cu, sizeof(uint32_t), (void *)&P85_D3))
+#undef P85_MaxX
+#define P85_MaxX (*(float *)re_gvar(0x00550820u, sizeof(float), (void *)&P85_MaxX))
+#undef P85_MaxY
+#define P85_MaxY (*(float *)re_gvar(0x00550824u, sizeof(float), (void *)&P85_MaxY))
+#undef P85_Tmp
+#define P85_Tmp (*(float *)re_gvar(0x0057a10eu, sizeof(float), (void *)&P85_Tmp))
+#undef P85_ZI
+#define P85_ZI (*(int32_t *)re_gvar(0x0057a132u, sizeof(int32_t), (void *)&P85_ZI))
+#endif
+/* gvar-img v2.03 end */

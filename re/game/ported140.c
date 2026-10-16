@@ -97,15 +97,82 @@ int re_crt_mkdir(const char *path) {
   return mkdir(np, 0777);
 #  endif
 }
+#pragma push_macro("P140_KeyStr") /*gvi*/
+#undef P140_KeyStr /*gvi*/
 p140_keystr_t P140_KeyStr = P140_KEYSTR_INIT;   /* 0054b4b4, .data */
-GAME_VAR_DEF(p140_keyname_t, P140_KeyName, 0x0054b080)
-GAME_VAR_DEF(int32_t, P140_FrSelA, 0x005fe960)
-GAME_VAR_DEF(int32_t, P140_FrSelB, 0x005fe964)
-GAME_VAR_DEF(int32_t, P140_FrQuit, 0x005fe968)
-GAME_VAR_DEF(int32_t, P140_B91BC0, 0x00b91bc0)
-GAME_VAR_DEF(int32_t, P140_B1F434, 0x00b1f434)
-GAME_VAR_DEF(int32_t, P140_Mrk2644, 0x00d02644)
-GAME_VAR_DEF(p140_f3_t, P140_MrkVel, 0x00b31ea8)
+#pragma pop_macro("P140_KeyStr") /*gvi*/
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P140_KeyName")
+#undef P140_KeyName
+#pragma push_macro("P140_KeyName") /*gvi*/
+#undef P140_KeyName /*gvi*/
+p140_keyname_t P140_KeyName;
+#pragma pop_macro("P140_KeyName") /*gvi*/
+#pragma pop_macro("P140_KeyName")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P140_FrSelA")
+#undef P140_FrSelA
+#pragma push_macro("P140_FrSelA") /*gvi*/
+#undef P140_FrSelA /*gvi*/
+int32_t P140_FrSelA;
+#pragma pop_macro("P140_FrSelA") /*gvi*/
+#pragma pop_macro("P140_FrSelA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P140_FrSelB")
+#undef P140_FrSelB
+#pragma push_macro("P140_FrSelB") /*gvi*/
+#undef P140_FrSelB /*gvi*/
+int32_t P140_FrSelB;
+#pragma pop_macro("P140_FrSelB") /*gvi*/
+#pragma pop_macro("P140_FrSelB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P140_FrQuit")
+#undef P140_FrQuit
+#pragma push_macro("P140_FrQuit") /*gvi*/
+#undef P140_FrQuit /*gvi*/
+int32_t P140_FrQuit;
+#pragma pop_macro("P140_FrQuit") /*gvi*/
+#pragma pop_macro("P140_FrQuit")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P140_B91BC0")
+#undef P140_B91BC0
+#pragma push_macro("P140_B91BC0") /*gvi*/
+#undef P140_B91BC0 /*gvi*/
+int32_t P140_B91BC0;
+#pragma pop_macro("P140_B91BC0") /*gvi*/
+#pragma pop_macro("P140_B91BC0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P140_B1F434")
+#undef P140_B1F434
+#pragma push_macro("P140_B1F434") /*gvi*/
+#undef P140_B1F434 /*gvi*/
+int32_t P140_B1F434;
+#pragma pop_macro("P140_B1F434") /*gvi*/
+#pragma pop_macro("P140_B1F434")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P140_Mrk2644")
+#undef P140_Mrk2644
+#pragma push_macro("P140_Mrk2644") /*gvi*/
+#undef P140_Mrk2644 /*gvi*/
+int32_t P140_Mrk2644;
+#pragma pop_macro("P140_Mrk2644") /*gvi*/
+#pragma pop_macro("P140_Mrk2644")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P140_MrkVel")
+#undef P140_MrkVel
+#pragma push_macro("P140_MrkVel") /*gvi*/
+#undef P140_MrkVel /*gvi*/
+p140_f3_t P140_MrkVel;
+#pragma pop_macro("P140_MrkVel") /*gvi*/
+#pragma pop_macro("P140_MrkVel")
+#endif
 #endif
 
 static uint32_t rd32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }

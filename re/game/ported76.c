@@ -7,13 +7,69 @@
 #  define P76_STD
 #endif
 
-GAME_VAR_DEF(int32_t, P76_Angle, 0x00d02680)
-GAME_VAR_DEF(uint8_t, P76_ColA, 0x00d02668)
-GAME_VAR_DEF(uint8_t, P76_ColB, 0x00d02320)
-GAME_VAR_DEF(uint8_t, P76_ColC, 0x00d02669)
-GAME_VAR_DEF(p76_obj_t, P76_ColObj, 0x00d02650)
-GAME_VAR_DEF(int32_t, P76_NumSlots, 0x00cfe6e0)
-GAME_VAR_DEF(float, P76_K255, 0x00546064)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P76_Angle")
+#undef P76_Angle
+#pragma push_macro("P76_Angle") /*gvi*/
+#undef P76_Angle /*gvi*/
+int32_t P76_Angle;
+#pragma pop_macro("P76_Angle") /*gvi*/
+#pragma pop_macro("P76_Angle")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P76_ColA")
+#undef P76_ColA
+#pragma push_macro("P76_ColA") /*gvi*/
+#undef P76_ColA /*gvi*/
+uint8_t P76_ColA;
+#pragma pop_macro("P76_ColA") /*gvi*/
+#pragma pop_macro("P76_ColA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P76_ColB")
+#undef P76_ColB
+#pragma push_macro("P76_ColB") /*gvi*/
+#undef P76_ColB /*gvi*/
+uint8_t P76_ColB;
+#pragma pop_macro("P76_ColB") /*gvi*/
+#pragma pop_macro("P76_ColB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P76_ColC")
+#undef P76_ColC
+#pragma push_macro("P76_ColC") /*gvi*/
+#undef P76_ColC /*gvi*/
+uint8_t P76_ColC;
+#pragma pop_macro("P76_ColC") /*gvi*/
+#pragma pop_macro("P76_ColC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P76_ColObj")
+#undef P76_ColObj
+#pragma push_macro("P76_ColObj") /*gvi*/
+#undef P76_ColObj /*gvi*/
+p76_obj_t P76_ColObj;
+#pragma pop_macro("P76_ColObj") /*gvi*/
+#pragma pop_macro("P76_ColObj")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P76_NumSlots")
+#undef P76_NumSlots
+#pragma push_macro("P76_NumSlots") /*gvi*/
+#undef P76_NumSlots /*gvi*/
+int32_t P76_NumSlots;
+#pragma pop_macro("P76_NumSlots") /*gvi*/
+#pragma pop_macro("P76_NumSlots")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P76_K255")
+#undef P76_K255
+#pragma push_macro("P76_K255") /*gvi*/
+#undef P76_K255 /*gvi*/
+float P76_K255;
+#pragma pop_macro("P76_K255") /*gvi*/
+#pragma pop_macro("P76_K255")
+#endif
 
 _Static_assert(sizeof(plat_vertex) == 0x20, "plat_vertex");
 

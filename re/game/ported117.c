@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 /* v1.62, ported117 — см. ported117.h */
 #include "ported117.h"
 #include "ported118.h"
@@ -46,15 +48,64 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P117_MenuA") /*gvi*/
+#undef P117_MenuA /*gvi*/
 p117_menuA_t P117_MenuA = P117_MENUA_INIT;
+#pragma pop_macro("P117_MenuA") /*gvi*/
+#pragma push_macro("P117_MenuB") /*gvi*/
+#undef P117_MenuB /*gvi*/
 p117_menuB_t P117_MenuB = P117_MENUB_INIT;
+#pragma pop_macro("P117_MenuB") /*gvi*/
+#pragma push_macro("P117_MenuC") /*gvi*/
+#undef P117_MenuC /*gvi*/
 p117_menuC_t P117_MenuC = P117_MENUC_INIT;
+#pragma pop_macro("P117_MenuC") /*gvi*/
 #endif
-GAME_VAR_DEF(p117_i16_t, P117_PrevCorn, 0x00b5c858)
-GAME_VAR_DEF(p117_i4_t, P117_SkidStA, 0x00b5c8f4)
-GAME_VAR_DEF(p117_u4_t, P117_SkidLastA, 0x00b5c844)
-GAME_VAR_DEF(p117_i4_t, P117_SkidStB, 0x00b5c824)
-GAME_VAR_DEF(p117_u4_t, P117_SkidLastB, 0x00b5c834)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P117_PrevCorn")
+#undef P117_PrevCorn
+#pragma push_macro("P117_PrevCorn") /*gvi*/
+#undef P117_PrevCorn /*gvi*/
+p117_i16_t P117_PrevCorn;
+#pragma pop_macro("P117_PrevCorn") /*gvi*/
+#pragma pop_macro("P117_PrevCorn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P117_SkidStA")
+#undef P117_SkidStA
+#pragma push_macro("P117_SkidStA") /*gvi*/
+#undef P117_SkidStA /*gvi*/
+p117_i4_t P117_SkidStA;
+#pragma pop_macro("P117_SkidStA") /*gvi*/
+#pragma pop_macro("P117_SkidStA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P117_SkidLastA")
+#undef P117_SkidLastA
+#pragma push_macro("P117_SkidLastA") /*gvi*/
+#undef P117_SkidLastA /*gvi*/
+p117_u4_t P117_SkidLastA;
+#pragma pop_macro("P117_SkidLastA") /*gvi*/
+#pragma pop_macro("P117_SkidLastA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P117_SkidStB")
+#undef P117_SkidStB
+#pragma push_macro("P117_SkidStB") /*gvi*/
+#undef P117_SkidStB /*gvi*/
+p117_i4_t P117_SkidStB;
+#pragma pop_macro("P117_SkidStB") /*gvi*/
+#pragma pop_macro("P117_SkidStB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P117_SkidLastB")
+#undef P117_SkidLastB
+#pragma push_macro("P117_SkidLastB") /*gvi*/
+#undef P117_SkidLastB /*gvi*/
+p117_u4_t P117_SkidLastB;
+#pragma pop_macro("P117_SkidLastB") /*gvi*/
+#pragma pop_macro("P117_SkidLastB")
+#endif
 GAME_VAR_DEF(p117_clip_fn, P117_ClipFn, 0x01270d30)
 
 static uint32_t rd_u32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }
@@ -258,6 +309,13 @@ void P117_TextList(void) {
   if (e == NULL) return;
 #endif
   GlobalSet0040B0A4();
+#ifndef RE_HOOK_BUILD
+  { static int dbg = -1, cnt = 0; if (dbg < 0) dbg = getenv("RE_TRACE_TEXT") != NULL;
+    if (dbg && (cnt++ % 50) == 0) { int n = 0; for (const uint8_t *q = e; rd_u32(q + 8) != 0 && n < 64; q += 0x10) n++;
+      const char *s0 = n ? (const char *)re_ptr(rd_u32(e + 8)) : NULL; int fz = 0; for (int i = 0; i < 0x806 * 8; i++) fz += P58_Font[i] != 0;
+      { const uint32_t *q1 = (const uint32_t *)re_ptr(0x0054cc58u), *q2 = (const uint32_t *)re_ptr(0x00c5585cu), *q3 = (const uint32_t *)re_ptr(0x00c55820u); fprintf(stderr, "[text] img cc58=%08x c5585c=%08x c55820=%08x\n", q1 ? *q1 : 0xdead, q2 ? *q2 : 0xdead, q3 ? *q3 : 0xdead); }
+      fprintf(stderr, "[text] PtrA=%08x n=%d f7e58=%d font nz=%d s0=%s font0=%d x=%d y=%d\n", P45_PtrA, n, (int)P56_F7E58, fz, s0 ? s0 : "(null)", n ? e[4] : -1, n ? (int)(int16_t)rd_u32(e) : 0, n ? (int)(int16_t)(rd_u32(e) >> 16) : 0); } }
+#endif
   for (; rd_u32(e + 8) != 0; e += 0x10) {
     MenuSetColor(e[0xc], e[0xd], e[0xe]);
     int16_t x, y; memcpy(&x, e, 2); memcpy(&y, e + 2, 2);

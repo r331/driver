@@ -30,12 +30,50 @@
 #include <ctype.h>
 
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P141_HsMenu") /*gvi*/
+#undef P141_HsMenu /*gvi*/
 p141_hsmenu_t P141_HsMenu = P141_HSMENU_INIT;   /* .data 0054bd10 */
+#pragma pop_macro("P141_HsMenu") /*gvi*/
+#pragma push_macro("P141_HsStr") /*gvi*/
+#undef P141_HsStr /*gvi*/
 p141_hsstr_t  P141_HsStr = P141_HSSTR_INIT;     /* .data 0054bf1c */
-GAME_VAR_DEF(int32_t, P141_LadI, 0x0060038c)
-GAME_VAR_DEF(int32_t, P141_LadDepth, 0x0060039c)
-GAME_VAR_DEF(int32_t, P141_LadRooms, 0x006003a0)
-GAME_VAR_DEF(int32_t, P141_LadVal, 0x00600368)
+#pragma pop_macro("P141_HsStr") /*gvi*/
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P141_LadI")
+#undef P141_LadI
+#pragma push_macro("P141_LadI") /*gvi*/
+#undef P141_LadI /*gvi*/
+int32_t P141_LadI;
+#pragma pop_macro("P141_LadI") /*gvi*/
+#pragma pop_macro("P141_LadI")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P141_LadDepth")
+#undef P141_LadDepth
+#pragma push_macro("P141_LadDepth") /*gvi*/
+#undef P141_LadDepth /*gvi*/
+int32_t P141_LadDepth;
+#pragma pop_macro("P141_LadDepth") /*gvi*/
+#pragma pop_macro("P141_LadDepth")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P141_LadRooms")
+#undef P141_LadRooms
+#pragma push_macro("P141_LadRooms") /*gvi*/
+#undef P141_LadRooms /*gvi*/
+int32_t P141_LadRooms;
+#pragma pop_macro("P141_LadRooms") /*gvi*/
+#pragma pop_macro("P141_LadRooms")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P141_LadVal")
+#undef P141_LadVal
+#pragma push_macro("P141_LadVal") /*gvi*/
+#undef P141_LadVal /*gvi*/
+int32_t P141_LadVal;
+#pragma pop_macro("P141_LadVal") /*gvi*/
+#pragma pop_macro("P141_LadVal")
+#endif
 #endif
 _Static_assert(sizeof(p141_hsmenu_t) == P141_HSMENU_SIZE && sizeof(p141_hsstr_t) == P141_HSSTR_SIZE, "HS");
 

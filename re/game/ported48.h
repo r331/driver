@@ -49,7 +49,22 @@ typedef float    P48_Pos3[3];
 #define P48_Pos GAME_VAR(P48_Pos3, P48_Pos, 0x01136cb4)
 #ifndef RE_HOOK_BUILD
 extern P48_F0 P48_Drv00, P48_Drv08, P48_Drv0C; extern P48_F1 P48_Drv2C, P48_Drv40; extern P48_F3 P48_Drv38; extern P48_F4 P48_Drv54;
+#pragma push_macro("P48_VolTab") /*gvi*/
+#undef P48_VolTab /*gvi*/
+#pragma push_macro("P48_Samples") /*gvi*/
+#undef P48_Samples /*gvi*/
+#pragma push_macro("P48_B91D30") /*gvi*/
+#undef P48_B91D30 /*gvi*/
+#pragma push_macro("P48_GlideBuf") /*gvi*/
+#undef P48_GlideBuf /*gvi*/
+#pragma push_macro("P48_Pos") /*gvi*/
+#undef P48_Pos /*gvi*/
 extern P48_VolTabT P48_VolTab; extern P48_SampleT P48_Samples; extern int32_t P48_B91D30; extern P48_Buf64 P48_GlideBuf; extern P48_Pos3 P48_Pos;
+#pragma pop_macro("P48_Pos") /*gvi*/
+#pragma pop_macro("P48_GlideBuf") /*gvi*/
+#pragma pop_macro("P48_B91D30") /*gvi*/
+#pragma pop_macro("P48_Samples") /*gvi*/
+#pragma pop_macro("P48_VolTab") /*gvi*/
 #endif
 void     P48_FreeVoice(int32_t slot);               /* 00523e07: остановить голос и освободить слот */
 void     P48_SetVoiceVolume(int32_t slot, int32_t vol); /* 00523ffd: громкость голоса (0x7fff — по умолчанию), -10000..0 */
@@ -73,3 +88,17 @@ int32_t  P48_OpRampUp(void);                        /* 004d121b: ctx.f[0x44] += 
 int32_t  P48_OpFlags(void);                         /* 004d142c: 1 — бит 0x20 флагов, 2 — слово ctx[0x40] */
 int32_t  P48_OpRepeat(void);                        /* 004d1672: счётчик повторов с возвратом назад */
 int32_t  P48_OpTurn(void);                          /* 004d0d7c: поворот на угол (0..4095) за шаг; 1 когда осталось меньше шага */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P48_VolTab
+#define P48_VolTab (*(P48_VolTabT *)re_gvar(0x00b87f80u, sizeof(P48_VolTabT), (void *)&P48_VolTab))
+#undef P48_Samples
+#define P48_Samples (*(P48_SampleT *)re_gvar(0x00bdc886u, sizeof(P48_SampleT), (void *)&P48_Samples))
+#undef P48_B91D30
+#define P48_B91D30 (*(int32_t *)re_gvar(0x00b91d30u, sizeof(int32_t), (void *)&P48_B91D30))
+#undef P48_GlideBuf
+#define P48_GlideBuf (*(P48_Buf64 *)re_gvar(0x00b1c190u, sizeof(P48_Buf64), (void *)&P48_GlideBuf))
+#undef P48_Pos
+#define P48_Pos (*(P48_Pos3 *)re_gvar(0x01136cb4u, sizeof(P48_Pos3), (void *)&P48_Pos))
+#endif
+/* gvar-img v2.03 end */

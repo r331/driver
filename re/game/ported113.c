@@ -33,11 +33,51 @@ static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static const float K_ONE  = 1.0f;      /* .rdata 00546020 */
 static const float K_FIVE = 5.0f;      /* .rdata 00546188 */
 
-GAME_VAR_DEF(uint32_t, P113_MrkRec, 0x00c812bc)
-GAME_VAR_DEF(int32_t, P113_MrkId, 0x00d0271c)
-GAME_VAR_DEF(int32_t, P113_MrkFall, 0x00d02648)
-GAME_VAR_DEF(int32_t, P113_MrkGround, 0x00d02714)
-GAME_VAR_DEF(p113_m16_t, P113_MrkMat, 0x00d026c0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P113_MrkRec")
+#undef P113_MrkRec
+#pragma push_macro("P113_MrkRec") /*gvi*/
+#undef P113_MrkRec /*gvi*/
+uint32_t P113_MrkRec;
+#pragma pop_macro("P113_MrkRec") /*gvi*/
+#pragma pop_macro("P113_MrkRec")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P113_MrkId")
+#undef P113_MrkId
+#pragma push_macro("P113_MrkId") /*gvi*/
+#undef P113_MrkId /*gvi*/
+int32_t P113_MrkId;
+#pragma pop_macro("P113_MrkId") /*gvi*/
+#pragma pop_macro("P113_MrkId")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P113_MrkFall")
+#undef P113_MrkFall
+#pragma push_macro("P113_MrkFall") /*gvi*/
+#undef P113_MrkFall /*gvi*/
+int32_t P113_MrkFall;
+#pragma pop_macro("P113_MrkFall") /*gvi*/
+#pragma pop_macro("P113_MrkFall")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P113_MrkGround")
+#undef P113_MrkGround
+#pragma push_macro("P113_MrkGround") /*gvi*/
+#undef P113_MrkGround /*gvi*/
+int32_t P113_MrkGround;
+#pragma pop_macro("P113_MrkGround") /*gvi*/
+#pragma pop_macro("P113_MrkGround")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P113_MrkMat")
+#undef P113_MrkMat
+#pragma push_macro("P113_MrkMat") /*gvi*/
+#undef P113_MrkMat /*gvi*/
+p113_m16_t P113_MrkMat;
+#pragma pop_macro("P113_MrkMat") /*gvi*/
+#pragma pop_macro("P113_MrkMat")
+#endif
 
 #ifndef RE_HOOK_BUILD
 p57_menutab_t P57_MenuTab = { P57_MENU_INIT };

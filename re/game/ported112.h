@@ -10,7 +10,10 @@
 #include "gvar.h"
 #define P112_Wanted GAME_VAR(int32_t, P112_Wanted, 0x0112b2b4)   /* флаг «максимальный розыск» (00d11a5c == 0xfff) */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P112_Wanted") /*gvi*/
+#undef P112_Wanted /*gvi*/
 extern int32_t P112_Wanted;
+#pragma pop_macro("P112_Wanted") /*gvi*/
 #endif
 int32_t P112_OpMoveTo(void);                                                       /* 004d09fd */
 int32_t P112_OpMoveCur(void);                                                      /* 004d1765 */
@@ -23,3 +26,9 @@ void    P112_ScriptTriggers(void);                                              
 void    P112_IconScaled(const uint8_t *ic, float x, float y, float sw, float sh);  /* 004e7755 */
 void    P112_IconBar(const uint8_t *ic, float x, float y, int32_t num, int32_t den); /* 004e7613 */
 void    P112_DirTimeline(int32_t frame);                                           /* 004c68a7 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P112_Wanted
+#define P112_Wanted (*(int32_t *)re_gvar(0x0112b2b4u, sizeof(int32_t), (void *)&P112_Wanted))
+#endif
+/* gvar-img v2.03 end */

@@ -46,17 +46,105 @@
 #include <stdio.h>
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P120_ScrA, 0x00d12420)
-GAME_VAR_DEF(int32_t, P120_ScrB, 0x00d14ee8)
-GAME_VAR_DEF(int32_t, P120_ScrC, 0x00d164e8)
-GAME_VAR_DEF(int32_t, P120_ScrD, 0x00d17ae8)
-GAME_VAR_DEF(int32_t, P120_ScrE, 0x00d17b00)
-GAME_VAR_DEF(int32_t, P120_ScrSeed, 0x00d17af0)
-GAME_VAR_DEF(int32_t, P120_DbgOn, 0x00c8127c)
-GAME_VAR_DEF(int32_t, P120_ConeN, 0x00b31f44)
-GAME_VAR_DEF(uint16_t, P120_ConeTick, 0x00b31f48)
-GAME_VAR_DEF(int32_t, P120_HudA, 0x00c808f8)
-GAME_VAR_DEF(int32_t, P120_HudB, 0x00c80934)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P120_ScrA")
+#undef P120_ScrA
+#pragma push_macro("P120_ScrA") /*gvi*/
+#undef P120_ScrA /*gvi*/
+int32_t P120_ScrA;
+#pragma pop_macro("P120_ScrA") /*gvi*/
+#pragma pop_macro("P120_ScrA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P120_ScrB")
+#undef P120_ScrB
+#pragma push_macro("P120_ScrB") /*gvi*/
+#undef P120_ScrB /*gvi*/
+int32_t P120_ScrB;
+#pragma pop_macro("P120_ScrB") /*gvi*/
+#pragma pop_macro("P120_ScrB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P120_ScrC")
+#undef P120_ScrC
+#pragma push_macro("P120_ScrC") /*gvi*/
+#undef P120_ScrC /*gvi*/
+int32_t P120_ScrC;
+#pragma pop_macro("P120_ScrC") /*gvi*/
+#pragma pop_macro("P120_ScrC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P120_ScrD")
+#undef P120_ScrD
+#pragma push_macro("P120_ScrD") /*gvi*/
+#undef P120_ScrD /*gvi*/
+int32_t P120_ScrD;
+#pragma pop_macro("P120_ScrD") /*gvi*/
+#pragma pop_macro("P120_ScrD")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P120_ScrE")
+#undef P120_ScrE
+#pragma push_macro("P120_ScrE") /*gvi*/
+#undef P120_ScrE /*gvi*/
+int32_t P120_ScrE;
+#pragma pop_macro("P120_ScrE") /*gvi*/
+#pragma pop_macro("P120_ScrE")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P120_ScrSeed")
+#undef P120_ScrSeed
+#pragma push_macro("P120_ScrSeed") /*gvi*/
+#undef P120_ScrSeed /*gvi*/
+int32_t P120_ScrSeed;
+#pragma pop_macro("P120_ScrSeed") /*gvi*/
+#pragma pop_macro("P120_ScrSeed")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P120_DbgOn")
+#undef P120_DbgOn
+#pragma push_macro("P120_DbgOn") /*gvi*/
+#undef P120_DbgOn /*gvi*/
+int32_t P120_DbgOn;
+#pragma pop_macro("P120_DbgOn") /*gvi*/
+#pragma pop_macro("P120_DbgOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P120_ConeN")
+#undef P120_ConeN
+#pragma push_macro("P120_ConeN") /*gvi*/
+#undef P120_ConeN /*gvi*/
+int32_t P120_ConeN;
+#pragma pop_macro("P120_ConeN") /*gvi*/
+#pragma pop_macro("P120_ConeN")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P120_ConeTick")
+#undef P120_ConeTick
+#pragma push_macro("P120_ConeTick") /*gvi*/
+#undef P120_ConeTick /*gvi*/
+uint16_t P120_ConeTick;
+#pragma pop_macro("P120_ConeTick") /*gvi*/
+#pragma pop_macro("P120_ConeTick")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P120_HudA")
+#undef P120_HudA
+#pragma push_macro("P120_HudA") /*gvi*/
+#undef P120_HudA /*gvi*/
+int32_t P120_HudA;
+#pragma pop_macro("P120_HudA") /*gvi*/
+#pragma pop_macro("P120_HudA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P120_HudB")
+#undef P120_HudB
+#pragma push_macro("P120_HudB") /*gvi*/
+#undef P120_HudB /*gvi*/
+int32_t P120_HudB;
+#pragma pop_macro("P120_HudB") /*gvi*/
+#pragma pop_macro("P120_HudB")
+#endif
 
 #define P120_HudC   (*(int32_t *)&P56_Blk84[(0x00c8110c - 0x00c810c0) / 4])    /* 00c8110c — внутри P56_Blk84 */
 #define P120_HudPtr (*(uint32_t *)&P56_Blk84[(0x00c812b8 - 0x00c810c0) / 4])   /* 00c812b8 — uint32-адрес пары int32 */

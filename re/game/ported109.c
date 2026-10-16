@@ -152,9 +152,33 @@
 #include "ported107.h"
 
 
-GAME_VAR_DEF(int32_t, P109_C8089C, 0x00c8089c)
-GAME_VAR_DEF(int32_t, P109_C54B00, 0x00c54b00)
-GAME_VAR_DEF(int32_t, P109_C81268, 0x00c81268)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P109_C8089C")
+#undef P109_C8089C
+#pragma push_macro("P109_C8089C") /*gvi*/
+#undef P109_C8089C /*gvi*/
+int32_t P109_C8089C;
+#pragma pop_macro("P109_C8089C") /*gvi*/
+#pragma pop_macro("P109_C8089C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P109_C54B00")
+#undef P109_C54B00
+#pragma push_macro("P109_C54B00") /*gvi*/
+#undef P109_C54B00 /*gvi*/
+int32_t P109_C54B00;
+#pragma pop_macro("P109_C54B00") /*gvi*/
+#pragma pop_macro("P109_C54B00")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P109_C81268")
+#undef P109_C81268
+#pragma push_macro("P109_C81268") /*gvi*/
+#undef P109_C81268 /*gvi*/
+int32_t P109_C81268;
+#pragma pop_macro("P109_C81268") /*gvi*/
+#pragma pop_macro("P109_C81268")
+#endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }

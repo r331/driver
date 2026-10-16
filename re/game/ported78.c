@@ -2,10 +2,26 @@
 #include <stdio.h>
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P78_VertCount, 0x00d00200)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P78_VertCount")
+#undef P78_VertCount
+#pragma push_macro("P78_VertCount") /*gvi*/
+#undef P78_VertCount /*gvi*/
+int32_t P78_VertCount;
+#pragma pop_macro("P78_VertCount") /*gvi*/
+#pragma pop_macro("P78_VertCount")
+#endif
 GAME_VAR_DEF(void *, P78_VertsA, 0x00d0020c)
 GAME_VAR_DEF(void *, P78_VertsB, 0x00c97a2c)
-GAME_VAR_DEF(p78_hdr_t, P78_LampHdr, 0x00d02300)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P78_LampHdr")
+#undef P78_LampHdr
+#pragma push_macro("P78_LampHdr") /*gvi*/
+#undef P78_LampHdr /*gvi*/
+p78_hdr_t P78_LampHdr;
+#pragma pop_macro("P78_LampHdr") /*gvi*/
+#pragma pop_macro("P78_LampHdr")
+#endif
 
 /* 004eb811: запись на диске 0x2c байта (3 слова, 3 short, 3 слова, 3 short, 2 ushort) → запись 0x40 с w = 1.0f. */
 void P78_LoadVerts(void *f, int32_t size) {

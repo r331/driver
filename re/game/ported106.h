@@ -12,8 +12,14 @@
 #define P106_SkyRot GAME_VAR(int32_t, P106_SkyRot, 0x00cf2f80)   /* индекс записи P56_EulerTab для неба 004ef66a */
 #define P106_PartOn GAME_VAR(int32_t, P106_PartOn, 0x00c56700)   /* частицы включены (00512174) */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P106_PartOn") /*gvi*/
+#undef P106_PartOn /*gvi*/
 extern int32_t P106_PartOn;
+#pragma pop_macro("P106_PartOn") /*gvi*/
+#pragma push_macro("P106_SkyRot") /*gvi*/
+#undef P106_SkyRot /*gvi*/
 extern int32_t P106_SkyRot;
+#pragma pop_macro("P106_SkyRot") /*gvi*/
 #endif
 
 void    P106_CarHeadSpots(int32_t car);                    /* 004ae6fb */
@@ -26,3 +32,11 @@ void    P106_LfbText(uint32_t text);                       /* 004d92d2 */
 void    P106_SkyModels(void);                              /* 004ef66a */
 void    P106_PartTick(void);                               /* 00512174 */
 void    P106_EaxPreset(int32_t i);                         /* 0048bf52 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P106_SkyRot
+#define P106_SkyRot (*(int32_t *)re_gvar(0x00cf2f80u, sizeof(int32_t), (void *)&P106_SkyRot))
+#undef P106_PartOn
+#define P106_PartOn (*(int32_t *)re_gvar(0x00c56700u, sizeof(int32_t), (void *)&P106_PartOn))
+#endif
+/* gvar-img v2.03 end */

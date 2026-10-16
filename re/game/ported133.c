@@ -100,7 +100,15 @@
 #include "ported134.h"
 
 #ifndef RE_HOOK_BUILD
-GAME_VAR_DEF(int32_t, P133_1137320, 0x01137320)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P133_1137320")
+#undef P133_1137320
+#pragma push_macro("P133_1137320") /*gvi*/
+#undef P133_1137320 /*gvi*/
+int32_t P133_1137320;
+#pragma pop_macro("P133_1137320") /*gvi*/
+#pragma pop_macro("P133_1137320")
+#endif
 #endif
 
 static float u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }

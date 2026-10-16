@@ -92,27 +92,195 @@
 #include "ported143.h"
 #include "ported144.h"
 
-GAME_VAR_DEF(p139_u6_t, P139_C818A0, 0x00c818a0)
-GAME_VAR_DEF(int32_t, P139_LineNo, 0x00c80c54)
-GAME_VAR_DEF(int32_t, P139_KeyStA, 0x005fe75c)
-GAME_VAR_DEF(int32_t, P139_KeyPrA, 0x005fe760)
-GAME_VAR_DEF(int32_t, P139_BlinkA, 0x005fe76c)
-GAME_VAR_DEF(int32_t, P139_KeyStB, 0x005fe780)
-GAME_VAR_DEF(int32_t, P139_KeyPrB, 0x005fe784)
-GAME_VAR_DEF(int32_t, P139_BlinkB, 0x005fe794)
-GAME_VAR_DEF(p139_b1000_t, P139_Ladder, 0x005ff368)
-GAME_VAR_DEF(p139_b400_t, P139_LadStr, 0x005fef38)
-GAME_VAR_DEF(p139_u4_t, P139_LadA, 0x005ff358)
-GAME_VAR_DEF(p139_u4_t, P139_LadB, 0x005ff348)
-GAME_VAR_DEF(p139_u4_t, P139_LadC, 0x0060037c)
-GAME_VAR_DEF(p139_u4_t, P139_LadD, 0x005ff338)
-GAME_VAR_DEF(p139_u4_t, P139_LadE, 0x005fef28)
-GAME_VAR_DEF(p139_u4_t, P139_LadF, 0x0060036c)
-GAME_VAR_DEF(uint32_t, P139_LadPtr, 0x0054ea58)
-GAME_VAR_DEF(int32_t, P139_Lad390, 0x00600390)
-GAME_VAR_DEF(int32_t, P139_LadN, 0x00600394)
-GAME_VAR_DEF(int32_t, P139_Lad398, 0x00600398)
-GAME_VAR_DEF(uint32_t, P139_IntroStr, 0x01271044)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_C818A0")
+#undef P139_C818A0
+#pragma push_macro("P139_C818A0") /*gvi*/
+#undef P139_C818A0 /*gvi*/
+p139_u6_t P139_C818A0;
+#pragma pop_macro("P139_C818A0") /*gvi*/
+#pragma pop_macro("P139_C818A0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_LineNo")
+#undef P139_LineNo
+#pragma push_macro("P139_LineNo") /*gvi*/
+#undef P139_LineNo /*gvi*/
+int32_t P139_LineNo;
+#pragma pop_macro("P139_LineNo") /*gvi*/
+#pragma pop_macro("P139_LineNo")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_KeyStA")
+#undef P139_KeyStA
+#pragma push_macro("P139_KeyStA") /*gvi*/
+#undef P139_KeyStA /*gvi*/
+int32_t P139_KeyStA;
+#pragma pop_macro("P139_KeyStA") /*gvi*/
+#pragma pop_macro("P139_KeyStA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_KeyPrA")
+#undef P139_KeyPrA
+#pragma push_macro("P139_KeyPrA") /*gvi*/
+#undef P139_KeyPrA /*gvi*/
+int32_t P139_KeyPrA;
+#pragma pop_macro("P139_KeyPrA") /*gvi*/
+#pragma pop_macro("P139_KeyPrA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_BlinkA")
+#undef P139_BlinkA
+#pragma push_macro("P139_BlinkA") /*gvi*/
+#undef P139_BlinkA /*gvi*/
+int32_t P139_BlinkA;
+#pragma pop_macro("P139_BlinkA") /*gvi*/
+#pragma pop_macro("P139_BlinkA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_KeyStB")
+#undef P139_KeyStB
+#pragma push_macro("P139_KeyStB") /*gvi*/
+#undef P139_KeyStB /*gvi*/
+int32_t P139_KeyStB;
+#pragma pop_macro("P139_KeyStB") /*gvi*/
+#pragma pop_macro("P139_KeyStB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_KeyPrB")
+#undef P139_KeyPrB
+#pragma push_macro("P139_KeyPrB") /*gvi*/
+#undef P139_KeyPrB /*gvi*/
+int32_t P139_KeyPrB;
+#pragma pop_macro("P139_KeyPrB") /*gvi*/
+#pragma pop_macro("P139_KeyPrB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_BlinkB")
+#undef P139_BlinkB
+#pragma push_macro("P139_BlinkB") /*gvi*/
+#undef P139_BlinkB /*gvi*/
+int32_t P139_BlinkB;
+#pragma pop_macro("P139_BlinkB") /*gvi*/
+#pragma pop_macro("P139_BlinkB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_Ladder")
+#undef P139_Ladder
+#pragma push_macro("P139_Ladder") /*gvi*/
+#undef P139_Ladder /*gvi*/
+p139_b1000_t P139_Ladder;
+#pragma pop_macro("P139_Ladder") /*gvi*/
+#pragma pop_macro("P139_Ladder")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_LadStr")
+#undef P139_LadStr
+#pragma push_macro("P139_LadStr") /*gvi*/
+#undef P139_LadStr /*gvi*/
+p139_b400_t P139_LadStr;
+#pragma pop_macro("P139_LadStr") /*gvi*/
+#pragma pop_macro("P139_LadStr")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_LadA")
+#undef P139_LadA
+#pragma push_macro("P139_LadA") /*gvi*/
+#undef P139_LadA /*gvi*/
+p139_u4_t P139_LadA;
+#pragma pop_macro("P139_LadA") /*gvi*/
+#pragma pop_macro("P139_LadA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_LadB")
+#undef P139_LadB
+#pragma push_macro("P139_LadB") /*gvi*/
+#undef P139_LadB /*gvi*/
+p139_u4_t P139_LadB;
+#pragma pop_macro("P139_LadB") /*gvi*/
+#pragma pop_macro("P139_LadB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_LadC")
+#undef P139_LadC
+#pragma push_macro("P139_LadC") /*gvi*/
+#undef P139_LadC /*gvi*/
+p139_u4_t P139_LadC;
+#pragma pop_macro("P139_LadC") /*gvi*/
+#pragma pop_macro("P139_LadC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_LadD")
+#undef P139_LadD
+#pragma push_macro("P139_LadD") /*gvi*/
+#undef P139_LadD /*gvi*/
+p139_u4_t P139_LadD;
+#pragma pop_macro("P139_LadD") /*gvi*/
+#pragma pop_macro("P139_LadD")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_LadE")
+#undef P139_LadE
+#pragma push_macro("P139_LadE") /*gvi*/
+#undef P139_LadE /*gvi*/
+p139_u4_t P139_LadE;
+#pragma pop_macro("P139_LadE") /*gvi*/
+#pragma pop_macro("P139_LadE")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_LadF")
+#undef P139_LadF
+#pragma push_macro("P139_LadF") /*gvi*/
+#undef P139_LadF /*gvi*/
+p139_u4_t P139_LadF;
+#pragma pop_macro("P139_LadF") /*gvi*/
+#pragma pop_macro("P139_LadF")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_LadPtr")
+#undef P139_LadPtr
+#pragma push_macro("P139_LadPtr") /*gvi*/
+#undef P139_LadPtr /*gvi*/
+uint32_t P139_LadPtr;
+#pragma pop_macro("P139_LadPtr") /*gvi*/
+#pragma pop_macro("P139_LadPtr")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_Lad390")
+#undef P139_Lad390
+#pragma push_macro("P139_Lad390") /*gvi*/
+#undef P139_Lad390 /*gvi*/
+int32_t P139_Lad390;
+#pragma pop_macro("P139_Lad390") /*gvi*/
+#pragma pop_macro("P139_Lad390")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_LadN")
+#undef P139_LadN
+#pragma push_macro("P139_LadN") /*gvi*/
+#undef P139_LadN /*gvi*/
+int32_t P139_LadN;
+#pragma pop_macro("P139_LadN") /*gvi*/
+#pragma pop_macro("P139_LadN")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_Lad398")
+#undef P139_Lad398
+#pragma push_macro("P139_Lad398") /*gvi*/
+#undef P139_Lad398 /*gvi*/
+int32_t P139_Lad398;
+#pragma pop_macro("P139_Lad398") /*gvi*/
+#pragma pop_macro("P139_Lad398")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P139_IntroStr")
+#undef P139_IntroStr
+#pragma push_macro("P139_IntroStr") /*gvi*/
+#undef P139_IntroStr /*gvi*/
+uint32_t P139_IntroStr;
+#pragma pop_macro("P139_IntroStr") /*gvi*/
+#pragma pop_macro("P139_IntroStr")
+#endif
 
 _Static_assert(sizeof(p139_u6_t) == 0x18, "00c818a0");
 _Static_assert(sizeof(p139_b1000_t) == 0x1000 && sizeof(p139_b400_t) == 0x400 && sizeof(p139_u4_t) == 0x10, "MLADDER");
@@ -400,13 +568,13 @@ static int32_t keymenu(const keymenu_t *m) {
   }
 }
 int32_t P139_KeyMenuA(void) {
-  static const keymenu_t m = { 0x0054c1e0u, 0x0054c018u, 0x0054c030u, 0x0054c030u, &P139_KeyStA, &P139_KeyPrA, &P139_BlinkA, 0 };
+  const keymenu_t m = { 0x0054c1e0u, 0x0054c018u, 0x0054c030u, 0x0054c030u, &P139_KeyStA, &P139_KeyPrA, &P139_BlinkA, 0 };
   P97_KeyMenuAInit();
   P139_KeyStA = 0; MenuI005FE770 = 1; MenuI005FE774 = 2;
   return keymenu(&m);
 }
 int32_t P139_KeyMenuB(void) {
-  static const keymenu_t m = { 0x0054c530u, 0x0054c338u, 0x0054c350u, 0x0054c350u, &P139_KeyStB, &P139_KeyPrB, &P139_BlinkB, 1 };
+  const keymenu_t m = { 0x0054c530u, 0x0054c338u, 0x0054c350u, 0x0054c350u, &P139_KeyStB, &P139_KeyPrB, &P139_BlinkB, 1 };
   P97_KeyMenuBInit();
   WI005FE78C = 0; P139_KeyStB = 0; MenuI005FE798 = 1; MenuI005FE79C = 2;
   return keymenu(&m);

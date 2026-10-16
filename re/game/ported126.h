@@ -20,9 +20,48 @@ typedef uint8_t p126_spawn_t[4 * 0x18];
 #define P126_SideY     GAME_VAR(float, P126_SideY, 0x00c824c4)
 #define P126_SideW     GAME_VAR(float, P126_SideW, 0x00c824cc)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P126_PicNum") /*gvi*/
+#undef P126_PicNum /*gvi*/
+#pragma push_macro("P126_DebugOn") /*gvi*/
+#undef P126_DebugOn /*gvi*/
+#pragma push_macro("P126_SpawnN") /*gvi*/
+#undef P126_SpawnN /*gvi*/
+#pragma push_macro("P126_SpawnSide") /*gvi*/
+#undef P126_SpawnSide /*gvi*/
+#pragma push_macro("P126_SpawnAxis") /*gvi*/
+#undef P126_SpawnAxis /*gvi*/
+#pragma push_macro("P126_SpawnT") /*gvi*/
+#undef P126_SpawnT /*gvi*/
 extern int32_t P126_PicNum, P126_DebugOn, P126_SpawnN, P126_SpawnSide, P126_SpawnAxis, P126_SpawnT;
+#pragma pop_macro("P126_SpawnT") /*gvi*/
+#pragma pop_macro("P126_SpawnAxis") /*gvi*/
+#pragma pop_macro("P126_SpawnSide") /*gvi*/
+#pragma pop_macro("P126_SpawnN") /*gvi*/
+#pragma pop_macro("P126_DebugOn") /*gvi*/
+#pragma pop_macro("P126_PicNum") /*gvi*/
+#pragma push_macro("P126_Spawn") /*gvi*/
+#undef P126_Spawn /*gvi*/
 extern p126_spawn_t P126_Spawn;
+#pragma pop_macro("P126_Spawn") /*gvi*/
+#pragma push_macro("P126_TgtY") /*gvi*/
+#undef P126_TgtY /*gvi*/
+#pragma push_macro("P126_TgtW") /*gvi*/
+#undef P126_TgtW /*gvi*/
+#pragma push_macro("P126_PtY") /*gvi*/
+#undef P126_PtY /*gvi*/
+#pragma push_macro("P126_PtW") /*gvi*/
+#undef P126_PtW /*gvi*/
+#pragma push_macro("P126_SideY") /*gvi*/
+#undef P126_SideY /*gvi*/
+#pragma push_macro("P126_SideW") /*gvi*/
+#undef P126_SideW /*gvi*/
 extern float P126_TgtY, P126_TgtW, P126_PtY, P126_PtW, P126_SideY, P126_SideW;
+#pragma pop_macro("P126_SideW") /*gvi*/
+#pragma pop_macro("P126_SideY") /*gvi*/
+#pragma pop_macro("P126_PtW") /*gvi*/
+#pragma pop_macro("P126_PtY") /*gvi*/
+#pragma pop_macro("P126_TgtW") /*gvi*/
+#pragma pop_macro("P126_TgtY") /*gvi*/
 #endif
 void P126_ReadMapPals(const char *name);   /* 004efafd: записи {слот, список, число} в 00b31ee8/00b31eec (map.c:0xd88) */
 void P126_PlayerStart(void);               /* 004906f9: позиция/запись игрока (CHASE: ReplayData\Chase\%s.LEADER/PLAYER) */
@@ -34,3 +73,33 @@ void P126_SpawnInit(void);                 /* 004f1745: до 4 точек поя
 void P126_ShowBmpFade(const char *name, int32_t wait); /* 0040c6bb: BMP 640×480 с затемнением 0→1→0 (шаг 0.05) */
 void P126_WheelSmoke(uint8_t *car);        /* 004e10e3: дым после отрыва колёс (+0x78 + 4·i) */
 void P126_KerbDebris(uint8_t *car);        /* 004ad244: обломки у обочины в 10000 от машины */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P126_PicNum
+#define P126_PicNum (*(int32_t *)re_gvar(0x005604b4u, sizeof(int32_t), (void *)&P126_PicNum))
+#undef P126_DebugOn
+#define P126_DebugOn (*(int32_t *)re_gvar(0x00575f4cu, sizeof(int32_t), (void *)&P126_DebugOn))
+#undef P126_Spawn
+#define P126_Spawn (*(p126_spawn_t *)re_gvar(0x00c82440u, sizeof(p126_spawn_t), (void *)&P126_Spawn))
+#undef P126_SpawnN
+#define P126_SpawnN (*(int32_t *)re_gvar(0x00c82528u, sizeof(int32_t), (void *)&P126_SpawnN))
+#undef P126_SpawnSide
+#define P126_SpawnSide (*(int32_t *)re_gvar(0x00c824d4u, sizeof(int32_t), (void *)&P126_SpawnSide))
+#undef P126_SpawnAxis
+#define P126_SpawnAxis (*(int32_t *)re_gvar(0x00c824d8u, sizeof(int32_t), (void *)&P126_SpawnAxis))
+#undef P126_SpawnT
+#define P126_SpawnT (*(int32_t *)re_gvar(0x00c8252cu, sizeof(int32_t), (void *)&P126_SpawnT))
+#undef P126_TgtY
+#define P126_TgtY (*(float *)re_gvar(0x00c82514u, sizeof(float), (void *)&P126_TgtY))
+#undef P126_TgtW
+#define P126_TgtW (*(float *)re_gvar(0x00c8251cu, sizeof(float), (void *)&P126_TgtW))
+#undef P126_PtY
+#define P126_PtY (*(float *)re_gvar(0x00c824b4u, sizeof(float), (void *)&P126_PtY))
+#undef P126_PtW
+#define P126_PtW (*(float *)re_gvar(0x00c824bcu, sizeof(float), (void *)&P126_PtW))
+#undef P126_SideY
+#define P126_SideY (*(float *)re_gvar(0x00c824c4u, sizeof(float), (void *)&P126_SideY))
+#undef P126_SideW
+#define P126_SideW (*(float *)re_gvar(0x00c824ccu, sizeof(float), (void *)&P126_SideW))
+#endif
+/* gvar-img v2.03 end */

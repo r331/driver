@@ -3,14 +3,78 @@
 #include "reptr.h"
 #include "ported53.h"
 #include <string.h>
-GAME_VAR_DEF(int32_t, P53_MenuSel, 0x01271064)
-GAME_VAR_DEF(int32_t, P53_FlagF9F4, 0x00bdf9f4)
-GAME_VAR_DEF(uint32_t, P53_Var2640, 0x00d02640)
-GAME_VAR_DEF(p53_mrk_t, P53_Mrk, 0x00d026a0)
-GAME_VAR_DEF(int32_t, P53_Var2634, 0x00d02634)
-GAME_VAR_DEF(int16_t, P53_Ang2702, 0x00d02702)
-GAME_VAR_DEF(p53_modetab_t, P53_ModeTab, 0x0054d890)
-GAME_VAR_DEF(p53_textab_t, P53_TexTab, 0x00621c4c)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P53_MenuSel")
+#undef P53_MenuSel
+#pragma push_macro("P53_MenuSel") /*gvi*/
+#undef P53_MenuSel /*gvi*/
+int32_t P53_MenuSel;
+#pragma pop_macro("P53_MenuSel") /*gvi*/
+#pragma pop_macro("P53_MenuSel")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P53_FlagF9F4")
+#undef P53_FlagF9F4
+#pragma push_macro("P53_FlagF9F4") /*gvi*/
+#undef P53_FlagF9F4 /*gvi*/
+int32_t P53_FlagF9F4;
+#pragma pop_macro("P53_FlagF9F4") /*gvi*/
+#pragma pop_macro("P53_FlagF9F4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P53_Var2640")
+#undef P53_Var2640
+#pragma push_macro("P53_Var2640") /*gvi*/
+#undef P53_Var2640 /*gvi*/
+uint32_t P53_Var2640;
+#pragma pop_macro("P53_Var2640") /*gvi*/
+#pragma pop_macro("P53_Var2640")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P53_Mrk")
+#undef P53_Mrk
+#pragma push_macro("P53_Mrk") /*gvi*/
+#undef P53_Mrk /*gvi*/
+p53_mrk_t P53_Mrk;
+#pragma pop_macro("P53_Mrk") /*gvi*/
+#pragma pop_macro("P53_Mrk")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P53_Var2634")
+#undef P53_Var2634
+#pragma push_macro("P53_Var2634") /*gvi*/
+#undef P53_Var2634 /*gvi*/
+int32_t P53_Var2634;
+#pragma pop_macro("P53_Var2634") /*gvi*/
+#pragma pop_macro("P53_Var2634")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P53_Ang2702")
+#undef P53_Ang2702
+#pragma push_macro("P53_Ang2702") /*gvi*/
+#undef P53_Ang2702 /*gvi*/
+int16_t P53_Ang2702;
+#pragma pop_macro("P53_Ang2702") /*gvi*/
+#pragma pop_macro("P53_Ang2702")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P53_ModeTab")
+#undef P53_ModeTab
+#pragma push_macro("P53_ModeTab") /*gvi*/
+#undef P53_ModeTab /*gvi*/
+p53_modetab_t P53_ModeTab;
+#pragma pop_macro("P53_ModeTab") /*gvi*/
+#pragma pop_macro("P53_ModeTab")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P53_TexTab")
+#undef P53_TexTab
+#pragma push_macro("P53_TexTab") /*gvi*/
+#undef P53_TexTab /*gvi*/
+p53_textab_t P53_TexTab;
+#pragma pop_macro("P53_TexTab") /*gvi*/
+#pragma pop_macro("P53_TexTab")
+#endif
 
 void P53_StepBounds(void) {
   if (IsSlotActive00524473(0xf) != 0) return;

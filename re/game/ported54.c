@@ -9,25 +9,137 @@
 #endif
 #define P54_MAP_C  "D:\\Driver\\Game\\map.c"
 #define P54_ROAD_C "D:\\Driver\\Game\\roadbits.c"
-GAME_VAR_DEF(p54_i32_t, P54_IconIdx, 0x00549c60)
-GAME_VAR_DEF(p54_out_t, P54_Out, 0x00549b08)
-GAME_VAR_DEF(p54_keysrc_t, P54_KeySrc, 0x0054b7a8)
-GAME_VAR_DEF(p54_keys3_t, P54_Keys3, 0x00d04a70)
-GAME_VAR_DEF(p54_dst_t, P54_Dst, 0x00549f80)
-GAME_VAR_DEF(p54_src6_t, P54_Src6, 0x00c55908)
-GAME_VAR_DEF(p54_i4_t, P54_RoadId, 0x00c39da0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_IconIdx")
+#undef P54_IconIdx
+#pragma push_macro("P54_IconIdx") /*gvi*/
+#undef P54_IconIdx /*gvi*/
+p54_i32_t P54_IconIdx;
+#pragma pop_macro("P54_IconIdx") /*gvi*/
+#pragma pop_macro("P54_IconIdx")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_Out")
+#undef P54_Out
+#pragma push_macro("P54_Out") /*gvi*/
+#undef P54_Out /*gvi*/
+p54_out_t P54_Out;
+#pragma pop_macro("P54_Out") /*gvi*/
+#pragma pop_macro("P54_Out")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_KeySrc")
+#undef P54_KeySrc
+#pragma push_macro("P54_KeySrc") /*gvi*/
+#undef P54_KeySrc /*gvi*/
+p54_keysrc_t P54_KeySrc;
+#pragma pop_macro("P54_KeySrc") /*gvi*/
+#pragma pop_macro("P54_KeySrc")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_Keys3")
+#undef P54_Keys3
+#pragma push_macro("P54_Keys3") /*gvi*/
+#undef P54_Keys3 /*gvi*/
+p54_keys3_t P54_Keys3;
+#pragma pop_macro("P54_Keys3") /*gvi*/
+#pragma pop_macro("P54_Keys3")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_Dst")
+#undef P54_Dst
+#pragma push_macro("P54_Dst") /*gvi*/
+#undef P54_Dst /*gvi*/
+p54_dst_t P54_Dst;
+#pragma pop_macro("P54_Dst") /*gvi*/
+#pragma pop_macro("P54_Dst")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_Src6")
+#undef P54_Src6
+#pragma push_macro("P54_Src6") /*gvi*/
+#undef P54_Src6 /*gvi*/
+p54_src6_t P54_Src6;
+#pragma pop_macro("P54_Src6") /*gvi*/
+#pragma pop_macro("P54_Src6")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_RoadId")
+#undef P54_RoadId
+#pragma push_macro("P54_RoadId") /*gvi*/
+#undef P54_RoadId /*gvi*/
+p54_i4_t P54_RoadId;
+#pragma pop_macro("P54_RoadId") /*gvi*/
+#pragma pop_macro("P54_RoadId")
+#endif
 GAME_VAR_DEF(p54_p4_t, P54_RoadA, 0x00c4bdd0)
 GAME_VAR_DEF(p54_p4_t, P54_RoadB, 0x00c1cc80)
 GAME_VAR_DEF(p54_p4_t, P54_Tab4, 0x00c81b80)
-GAME_VAR_DEF(int32_t, P54_MapA, 0x00b31ed4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_MapA")
+#undef P54_MapA
+#pragma push_macro("P54_MapA") /*gvi*/
+#undef P54_MapA /*gvi*/
+int32_t P54_MapA;
+#pragma pop_macro("P54_MapA") /*gvi*/
+#pragma pop_macro("P54_MapA")
+#endif
 GAME_VAR_DEF(void *, P54_MapAPtr, 0x00b31ecc)
-GAME_VAR_DEF(int32_t, P54_MapB1, 0x00c1ed60)
-GAME_VAR_DEF(int32_t, P54_MapB2, 0x00c1cc68)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_MapB1")
+#undef P54_MapB1
+#pragma push_macro("P54_MapB1") /*gvi*/
+#undef P54_MapB1 /*gvi*/
+int32_t P54_MapB1;
+#pragma pop_macro("P54_MapB1") /*gvi*/
+#pragma pop_macro("P54_MapB1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_MapB2")
+#undef P54_MapB2
+#pragma push_macro("P54_MapB2") /*gvi*/
+#undef P54_MapB2 /*gvi*/
+int32_t P54_MapB2;
+#pragma pop_macro("P54_MapB2") /*gvi*/
+#pragma pop_macro("P54_MapB2")
+#endif
 GAME_VAR_DEF(void *, P54_MapBPtr, 0x00b5a908)
-GAME_VAR_DEF(int32_t, P54_GridN, 0x00c98ecc)
-GAME_VAR_DEF(int32_t, P54_Cnt1E0, 0x00d001e0)
-GAME_VAR_DEF(int32_t, P54_G40, 0x01139a30)
-GAME_VAR_DEF(int32_t, P54_G44, 0x01139a2c)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_GridN")
+#undef P54_GridN
+#pragma push_macro("P54_GridN") /*gvi*/
+#undef P54_GridN /*gvi*/
+int32_t P54_GridN;
+#pragma pop_macro("P54_GridN") /*gvi*/
+#pragma pop_macro("P54_GridN")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_Cnt1E0")
+#undef P54_Cnt1E0
+#pragma push_macro("P54_Cnt1E0") /*gvi*/
+#undef P54_Cnt1E0 /*gvi*/
+int32_t P54_Cnt1E0;
+#pragma pop_macro("P54_Cnt1E0") /*gvi*/
+#pragma pop_macro("P54_Cnt1E0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_G40")
+#undef P54_G40
+#pragma push_macro("P54_G40") /*gvi*/
+#undef P54_G40 /*gvi*/
+int32_t P54_G40;
+#pragma pop_macro("P54_G40") /*gvi*/
+#pragma pop_macro("P54_G40")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P54_G44")
+#undef P54_G44
+#pragma push_macro("P54_G44") /*gvi*/
+#undef P54_G44 /*gvi*/
+int32_t P54_G44;
+#pragma pop_macro("P54_G44") /*gvi*/
+#pragma pop_macro("P54_G44")
+#endif
 
 static void *glide_proc(const char *name) {
   for (int i = 0; i < P33_GlideCount(); i++)

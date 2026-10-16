@@ -73,13 +73,97 @@ typedef uint32_t p55_glide_t[16];
 #define P55_Paper2   GAME_VAR(int32_t, P55_Paper2, 0x00d038fc)
 #define P55_Lang     GAME_VAR(int32_t, P55_Lang, 0x00c557fc)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P55_CntA") /*gvi*/
+#undef P55_CntA /*gvi*/
+#pragma push_macro("P55_CntB") /*gvi*/
+#undef P55_CntB /*gvi*/
+#pragma push_macro("P55_Flag38C") /*gvi*/
+#undef P55_Flag38C /*gvi*/
+#pragma push_macro("P55_VarC0") /*gvi*/
+#undef P55_VarC0 /*gvi*/
+#pragma push_macro("P55_Var20") /*gvi*/
+#undef P55_Var20 /*gvi*/
+#pragma push_macro("P55_VarD2C") /*gvi*/
+#undef P55_VarD2C /*gvi*/
+#pragma push_macro("P55_VarD28") /*gvi*/
+#undef P55_VarD28 /*gvi*/
+#pragma push_macro("P55_VarD24") /*gvi*/
+#undef P55_VarD24 /*gvi*/
+#pragma push_macro("P55_VarD20") /*gvi*/
+#undef P55_VarD20 /*gvi*/
 extern int32_t P55_CntA, P55_CntB, P55_Flag38C, P55_VarC0, P55_Var20, P55_VarD2C, P55_VarD28, P55_VarD24, P55_VarD20;
+#pragma pop_macro("P55_VarD20") /*gvi*/
+#pragma pop_macro("P55_VarD24") /*gvi*/
+#pragma pop_macro("P55_VarD28") /*gvi*/
+#pragma pop_macro("P55_VarD2C") /*gvi*/
+#pragma pop_macro("P55_Var20") /*gvi*/
+#pragma pop_macro("P55_VarC0") /*gvi*/
+#pragma pop_macro("P55_Flag38C") /*gvi*/
+#pragma pop_macro("P55_CntB") /*gvi*/
+#pragma pop_macro("P55_CntA") /*gvi*/
+#pragma push_macro("P55_PopCnt") /*gvi*/
+#undef P55_PopCnt /*gvi*/
+#pragma push_macro("P55_PopSkip") /*gvi*/
+#undef P55_PopSkip /*gvi*/
+#pragma push_macro("P55_PopB2AC") /*gvi*/
+#undef P55_PopB2AC /*gvi*/
+#pragma push_macro("P55_A4219C") /*gvi*/
+#undef P55_A4219C /*gvi*/
+#pragma push_macro("P55_A421A0") /*gvi*/
+#undef P55_A421A0 /*gvi*/
+#pragma push_macro("P55_RecCnt") /*gvi*/
+#undef P55_RecCnt /*gvi*/
+#pragma push_macro("P55_V57B6FC") /*gvi*/
+#undef P55_V57B6FC /*gvi*/
+#pragma push_macro("P55_V1285428") /*gvi*/
+#undef P55_V1285428 /*gvi*/
 extern int32_t P55_PopCnt, P55_PopSkip, P55_PopB2AC, P55_A4219C, P55_A421A0, P55_RecCnt, P55_V57B6FC, P55_V1285428;
+#pragma pop_macro("P55_V1285428") /*gvi*/
+#pragma pop_macro("P55_V57B6FC") /*gvi*/
+#pragma pop_macro("P55_RecCnt") /*gvi*/
+#pragma pop_macro("P55_A421A0") /*gvi*/
+#pragma pop_macro("P55_A4219C") /*gvi*/
+#pragma pop_macro("P55_PopB2AC") /*gvi*/
+#pragma pop_macro("P55_PopSkip") /*gvi*/
+#pragma pop_macro("P55_PopCnt") /*gvi*/
+#pragma push_macro("P55_V1285424") /*gvi*/
+#undef P55_V1285424 /*gvi*/
+#pragma push_macro("P55_BDFA18") /*gvi*/
+#undef P55_BDFA18 /*gvi*/
+#pragma push_macro("P55_B87EB8") /*gvi*/
+#undef P55_B87EB8 /*gvi*/
 extern int32_t P55_V1285424, P55_BDFA18, P55_B87EB8;
+#pragma pop_macro("P55_B87EB8") /*gvi*/
+#pragma pop_macro("P55_BDFA18") /*gvi*/
+#pragma pop_macro("P55_V1285424") /*gvi*/
+#pragma push_macro("P55_Paper0") /*gvi*/
+#undef P55_Paper0 /*gvi*/
+#pragma push_macro("P55_Paper1") /*gvi*/
+#undef P55_Paper1 /*gvi*/
+#pragma push_macro("P55_Paper2") /*gvi*/
+#undef P55_Paper2 /*gvi*/
+#pragma push_macro("P55_Lang") /*gvi*/
+#undef P55_Lang /*gvi*/
 extern int32_t P55_Paper0, P55_Paper1, P55_Paper2, P55_Lang;
+#pragma pop_macro("P55_Lang") /*gvi*/
+#pragma pop_macro("P55_Paper2") /*gvi*/
+#pragma pop_macro("P55_Paper1") /*gvi*/
+#pragma pop_macro("P55_Paper0") /*gvi*/
+#pragma push_macro("P55_VarC6") /*gvi*/
+#undef P55_VarC6 /*gvi*/
 extern uint8_t P55_VarC6; extern const char *P55_DefName; extern uint8_t *P55_RecBase;
+#pragma pop_macro("P55_VarC6") /*gvi*/
+#pragma push_macro("P55_FlagsC") /*gvi*/
+#undef P55_FlagsC /*gvi*/
 extern p55_tabA_t P55_TabA; extern p55_tabB_t P55_TabB; extern p55_flags8_t P55_FlagsC; extern p55_pop_t P55_PopTab;
+#pragma pop_macro("P55_FlagsC") /*gvi*/
+#pragma push_macro("P55_Frustum") /*gvi*/
+#undef P55_Frustum /*gvi*/
+#pragma push_macro("P55_GlideInfo") /*gvi*/
+#undef P55_GlideInfo /*gvi*/
 extern p55_frustum_t P55_Frustum; extern p55_glide_t P55_GlideInfo;
+#pragma pop_macro("P55_GlideInfo") /*gvi*/
+#pragma pop_macro("P55_Frustum") /*gvi*/
 #endif
 
 void    P55_RunTableA(void);            /* 004ef309: для каждой из P55_CntA записей вызвать 004ee18b, матрица = транспонат 011effa0 */
@@ -102,3 +186,63 @@ void    P55_GlideInit(int32_t a, int32_t b, int32_t mode); /* 005226b5: пара
 int32_t P55_SetScreen(int32_t w, int32_t h);               /* 0040c533: сменить разрешение, при сбое вернуть прежнее; всегда 1 */
 void    P55_MenuLangCall(void);         /* 00409d66: номер языка по 005d578c (0x1c..0x20) → 00417651 */
 void    P55_LoadPaper(void);            /* 004e6175: текстуры ELPAPEL/LINE/CROSS, PAPER_xx по языку */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P55_CntA
+#define P55_CntA (*(int32_t *)re_gvar(0x00cf2f88u, sizeof(int32_t), (void *)&P55_CntA))
+#undef P55_CntB
+#define P55_CntB (*(int32_t *)re_gvar(0x00d022e4u, sizeof(int32_t), (void *)&P55_CntB))
+#undef P55_Flag38C
+#define P55_Flag38C (*(int32_t *)re_gvar(0x00b1c38cu, sizeof(int32_t), (void *)&P55_Flag38C))
+#undef P55_VarC0
+#define P55_VarC0 (*(int32_t *)re_gvar(0x00cff9c0u, sizeof(int32_t), (void *)&P55_VarC0))
+#undef P55_Var20
+#define P55_Var20 (*(int32_t *)re_gvar(0x00c97a20u, sizeof(int32_t), (void *)&P55_Var20))
+#undef P55_VarD2C
+#define P55_VarD2C (*(int32_t *)re_gvar(0x00d0022cu, sizeof(int32_t), (void *)&P55_VarD2C))
+#undef P55_VarD28
+#define P55_VarD28 (*(int32_t *)re_gvar(0x00d00228u, sizeof(int32_t), (void *)&P55_VarD28))
+#undef P55_VarD24
+#define P55_VarD24 (*(int32_t *)re_gvar(0x00d00224u, sizeof(int32_t), (void *)&P55_VarD24))
+#undef P55_VarD20
+#define P55_VarD20 (*(int32_t *)re_gvar(0x00d00220u, sizeof(int32_t), (void *)&P55_VarD20))
+#undef P55_VarC6
+#define P55_VarC6 (*(uint8_t *)re_gvar(0x00cff9c6u, sizeof(uint8_t), (void *)&P55_VarC6))
+#undef P55_FlagsC
+#define P55_FlagsC (*(p55_flags8_t *)re_gvar(0x00b5a428u, sizeof(p55_flags8_t), (void *)&P55_FlagsC))
+#undef P55_PopCnt
+#define P55_PopCnt (*(int32_t *)re_gvar(0x00b2c3b0u, sizeof(int32_t), (void *)&P55_PopCnt))
+#undef P55_PopSkip
+#define P55_PopSkip (*(int32_t *)re_gvar(0x00b87eccu, sizeof(int32_t), (void *)&P55_PopSkip))
+#undef P55_PopB2AC
+#define P55_PopB2AC (*(int32_t *)re_gvar(0x00b2c3acu, sizeof(int32_t), (void *)&P55_PopB2AC))
+#undef P55_Frustum
+#define P55_Frustum (*(p55_frustum_t *)re_gvar(0x00cb8f20u, sizeof(p55_frustum_t), (void *)&P55_Frustum))
+#undef P55_A4219C
+#define P55_A4219C (*(int32_t *)re_gvar(0x00a4219cu, sizeof(int32_t), (void *)&P55_A4219C))
+#undef P55_A421A0
+#define P55_A421A0 (*(int32_t *)re_gvar(0x00a421a0u, sizeof(int32_t), (void *)&P55_A421A0))
+#undef P55_RecCnt
+#define P55_RecCnt (*(int32_t *)re_gvar(0x00b5a8c0u, sizeof(int32_t), (void *)&P55_RecCnt))
+#undef P55_V57B6FC
+#define P55_V57B6FC (*(int32_t *)re_gvar(0x0057b6fcu, sizeof(int32_t), (void *)&P55_V57B6FC))
+#undef P55_V1285428
+#define P55_V1285428 (*(int32_t *)re_gvar(0x01285428u, sizeof(int32_t), (void *)&P55_V1285428))
+#undef P55_V1285424
+#define P55_V1285424 (*(int32_t *)re_gvar(0x01285424u, sizeof(int32_t), (void *)&P55_V1285424))
+#undef P55_BDFA18
+#define P55_BDFA18 (*(int32_t *)re_gvar(0x00bdfa18u, sizeof(int32_t), (void *)&P55_BDFA18))
+#undef P55_GlideInfo
+#define P55_GlideInfo (*(p55_glide_t *)re_gvar(0x00bdfa80u, sizeof(p55_glide_t), (void *)&P55_GlideInfo))
+#undef P55_B87EB8
+#define P55_B87EB8 (*(int32_t *)re_gvar(0x00b87eb8u, sizeof(int32_t), (void *)&P55_B87EB8))
+#undef P55_Paper0
+#define P55_Paper0 (*(int32_t *)re_gvar(0x00d03900u, sizeof(int32_t), (void *)&P55_Paper0))
+#undef P55_Paper1
+#define P55_Paper1 (*(int32_t *)re_gvar(0x00d0448cu, sizeof(int32_t), (void *)&P55_Paper1))
+#undef P55_Paper2
+#define P55_Paper2 (*(int32_t *)re_gvar(0x00d038fcu, sizeof(int32_t), (void *)&P55_Paper2))
+#undef P55_Lang
+#define P55_Lang (*(int32_t *)re_gvar(0x00c557fcu, sizeof(int32_t), (void *)&P55_Lang))
+#endif
+/* gvar-img v2.03 end */

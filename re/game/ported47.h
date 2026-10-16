@@ -19,7 +19,25 @@ typedef int32_t P47_SlotArr[4];
 #define P47_WinArg5 GAME_VAR(int32_t, P47_WinArg5, 0x00b1c0dc)
 #define P47_SwapCnt GAME_VAR(int32_t, P47_SwapCnt, 0x01270c30)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P47_Slots") /*gvi*/
+#undef P47_Slots /*gvi*/
+#pragma push_macro("P47_Limit") /*gvi*/
+#undef P47_Limit /*gvi*/
+#pragma push_macro("P47_Flag") /*gvi*/
+#undef P47_Flag /*gvi*/
+#pragma push_macro("P47_CamB") /*gvi*/
+#undef P47_CamB /*gvi*/
+#pragma push_macro("P47_WinArg5") /*gvi*/
+#undef P47_WinArg5 /*gvi*/
+#pragma push_macro("P47_SwapCnt") /*gvi*/
+#undef P47_SwapCnt /*gvi*/
 extern P47_SlotArr P47_Slots; extern int32_t P47_Limit, P47_Flag, P47_CamB, P47_WinArg5, P47_SwapCnt;
+#pragma pop_macro("P47_SwapCnt") /*gvi*/
+#pragma pop_macro("P47_WinArg5") /*gvi*/
+#pragma pop_macro("P47_CamB") /*gvi*/
+#pragma pop_macro("P47_Flag") /*gvi*/
+#pragma pop_macro("P47_Limit") /*gvi*/
+#pragma pop_macro("P47_Slots") /*gvi*/
 #endif
 int32_t P47_ReadLine(void *file, char *buf);   /* 0041c7ad: fgets(buf,128,file): 0 — прочитано, -1 — конец */
 int32_t P47_Call51B111(int32_t a, int32_t b);  /* 004c6091: вызывает 0051b111(a,b), результат отбрасывает, возвращает 1 */
@@ -33,3 +51,19 @@ int32_t P47_PrepareTemp(int32_t a);            /* 00405f2e: 00405fdb, 00406199, 
 int32_t P47_GlideWinOpen(int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5, int32_t a6, int32_t a7); /* 0042467f (stdcall): grSstWinOpen */
 void    P47_GlideSwap(void);                   /* 0042651a: grBufferSwap(0), счётчики кадров */
 void    P47_TexTable(int32_t a, int32_t b, int32_t c, int32_t d); /* 00424921: grTexDownloadTable или 0041d50e */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P47_Slots
+#define P47_Slots (*(P47_SlotArr *)re_gvar(0x00c80f60u, sizeof(P47_SlotArr), (void *)&P47_Slots))
+#undef P47_Limit
+#define P47_Limit (*(int32_t *)re_gvar(0x00c810ccu, sizeof(int32_t), (void *)&P47_Limit))
+#undef P47_Flag
+#define P47_Flag (*(int32_t *)re_gvar(0x0112b268u, sizeof(int32_t), (void *)&P47_Flag))
+#undef P47_CamB
+#define P47_CamB (*(int32_t *)re_gvar(0x00b5a8a4u, sizeof(int32_t), (void *)&P47_CamB))
+#undef P47_WinArg5
+#define P47_WinArg5 (*(int32_t *)re_gvar(0x00b1c0dcu, sizeof(int32_t), (void *)&P47_WinArg5))
+#undef P47_SwapCnt
+#define P47_SwapCnt (*(int32_t *)re_gvar(0x01270c30u, sizeof(int32_t), (void *)&P47_SwapCnt))
+#endif
+/* gvar-img v2.03 end */

@@ -43,16 +43,43 @@ typedef uint8_t p84_b56_t[56];
 #define P84_Arg      GAME_VAR(p84_b56_t, P84_Arg, 0x00550cc4)             /* аргумент обработчика по типу записи */
 #define P84_Lit      GAME_VAR(p84_b56_t, P84_Lit, 0x00550c8c)             /* нужно ли считать освещение плоскости */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P84_Mirror") /*gvi*/
+#undef P84_Mirror /*gvi*/
 extern uint8_t P84_Mirror;
+#pragma pop_macro("P84_Mirror") /*gvi*/
 extern const uintptr_t *P84_Tab0, *P84_Tab1, *P84_Tab2;
+#pragma push_macro("P84_VertRef") /*gvi*/
+#undef P84_VertRef /*gvi*/
 extern uint32_t P84_VertRef;
+#pragma pop_macro("P84_VertRef") /*gvi*/
 extern float *P84_Planes;
+#pragma push_macro("P84_LightIn") /*gvi*/
+#undef P84_LightIn /*gvi*/
 extern p84_light_t P84_LightIn;
+#pragma pop_macro("P84_LightIn") /*gvi*/
+#pragma push_macro("P84_Vis") /*gvi*/
+#undef P84_Vis /*gvi*/
 extern p84_vis_t P84_Vis;
+#pragma pop_macro("P84_Vis") /*gvi*/
+#pragma push_macro("P84_NormLight") /*gvi*/
+#undef P84_NormLight /*gvi*/
 extern p84_nlight_t P84_NormLight;
+#pragma pop_macro("P84_NormLight") /*gvi*/
+#pragma push_macro("P84_MatCache") /*gvi*/
+#undef P84_MatCache /*gvi*/
 extern p84_mats_t P84_MatCache;
+#pragma pop_macro("P84_MatCache") /*gvi*/
+#pragma push_macro("P84_MatFlag") /*gvi*/
+#undef P84_MatFlag /*gvi*/
 extern p84_flags_t P84_MatFlag;
+#pragma pop_macro("P84_MatFlag") /*gvi*/
+#pragma push_macro("P84_Arg") /*gvi*/
+#undef P84_Arg /*gvi*/
+#pragma push_macro("P84_Lit") /*gvi*/
+#undef P84_Lit /*gvi*/
 extern p84_b56_t P84_Arg, P84_Lit;
+#pragma pop_macro("P84_Lit") /*gvi*/
+#pragma pop_macro("P84_Arg") /*gvi*/
 /* native: 6 таблиц обработчиков [набор*3 + режим][56], набор 0 — 0055082c.., набор 1 — 00550cfc.. */
 extern uintptr_t P84_Handlers[6][56];
 void P84_SelectTables(int32_t alt);                 /* как в инициализации рендера: P55_BDFA18 == 0 → набор 0, иначе 1 */
@@ -68,5 +95,42 @@ void P84_DrawCar(uint32_t m, const float *mat, const float *pos, int32_t mode, i
 typedef uint8_t p84_uv_t[0x200];
 #define P84_ShineUV   GAME_VAR(p84_uv_t, P84_ShineUV, 0x01159d80)    /* v1.81: UV блика по нормалям (u8 пары, до 256) */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P84_TexFiltOn") /*gvi*/
+#undef P84_TexFiltOn /*gvi*/
+#pragma push_macro("P84_ShineK") /*gvi*/
+#undef P84_ShineK /*gvi*/
+#pragma push_macro("P84_ShineUV") /*gvi*/
+#undef P84_ShineUV /*gvi*/
 extern int32_t P84_TexFiltOn; extern float P84_ShineK; extern p84_uv_t P84_ShineUV;
+#pragma pop_macro("P84_ShineUV") /*gvi*/
+#pragma pop_macro("P84_ShineK") /*gvi*/
+#pragma pop_macro("P84_TexFiltOn") /*gvi*/
 #endif
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P84_Mirror
+#define P84_Mirror (*(uint8_t *)re_gvar(0x00bdc288u, sizeof(uint8_t), (void *)&P84_Mirror))
+#undef P84_VertRef
+#define P84_VertRef (*(uint32_t *)re_gvar(0x01209614u, sizeof(uint32_t), (void *)&P84_VertRef))
+#undef P84_LightIn
+#define P84_LightIn (*(p84_light_t *)re_gvar(0x012043c0u, sizeof(p84_light_t), (void *)&P84_LightIn))
+#undef P84_Vis
+#define P84_Vis (*(p84_vis_t *)re_gvar(0x01208600u, sizeof(p84_vis_t), (void *)&P84_Vis))
+#undef P84_NormLight
+#define P84_NormLight (*(p84_nlight_t *)re_gvar(0x012496c0u, sizeof(p84_nlight_t), (void *)&P84_NormLight))
+#undef P84_MatCache
+#define P84_MatCache (*(p84_mats_t *)re_gvar(0x01209680u, sizeof(p84_mats_t), (void *)&P84_MatCache))
+#undef P84_MatFlag
+#define P84_MatFlag (*(p84_flags_t *)re_gvar(0x011f0060u, sizeof(p84_flags_t), (void *)&P84_MatFlag))
+#undef P84_Arg
+#define P84_Arg (*(p84_b56_t *)re_gvar(0x00550cc4u, sizeof(p84_b56_t), (void *)&P84_Arg))
+#undef P84_Lit
+#define P84_Lit (*(p84_b56_t *)re_gvar(0x00550c8cu, sizeof(p84_b56_t), (void *)&P84_Lit))
+#undef P84_TexFiltOn
+#define P84_TexFiltOn (*(int32_t *)re_gvar(0x01252bc0u, sizeof(int32_t), (void *)&P84_TexFiltOn))
+#undef P84_ShineK
+#define P84_ShineK (*(float *)re_gvar(0x01159d58u, sizeof(float), (void *)&P84_ShineK))
+#undef P84_ShineUV
+#define P84_ShineUV (*(p84_uv_t *)re_gvar(0x01159d80u, sizeof(p84_uv_t), (void *)&P84_ShineUV))
+#endif
+/* gvar-img v2.03 end */

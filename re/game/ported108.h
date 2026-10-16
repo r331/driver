@@ -13,7 +13,10 @@
 #define P108_FmvLen    GAME_VAR(double, P108_FmvLen, 0x00b1c850)       /* длительность FMV, с (таймер: (len+1)·1000 мс) */
 #define P108_SmokeIcon ICONTAB_VAR(uint32_t, 8)  /* адрес записи значка SMOKE (004ec91e) */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P108_FmvLen") /*gvi*/
+#undef P108_FmvLen /*gvi*/
 extern double P108_FmvLen;
+#pragma pop_macro("P108_FmvLen") /*gvi*/
 #endif
 
 void    P108_ReplayStep(void);                                                   /* 00518ab4 */
@@ -29,3 +32,9 @@ void    P108_RadarShape(uint32_t shape, const int32_t *pos, const int32_t *ofs, 
 void    P108_FillRect(float x, float y, float w, float h, uint32_t rgb);         /* 004d7c46: смешивание 0 */
 void    P108_FillRectB(float x, float y, float w, float h, uint32_t rgb);        /* 004d7deb: смешивание 3 */
 void    P108_MapTexRect(float x, float y, float w, float h, float u0, float v0, float u1, float v1, int32_t tex); /* 00507eea */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P108_FmvLen
+#define P108_FmvLen (*(double *)re_gvar(0x00b1c850u, sizeof(double), (void *)&P108_FmvLen))
+#endif
+/* gvar-img v2.03 end */

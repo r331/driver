@@ -4,7 +4,15 @@
 int32_t P20_Values[4096];
 #endif
 GAME_VAR_DEF(char*, P20_Names, 0x00b31ed8)
-GAME_VAR_DEF(int32_t, P20_Count, 0x00cf2f8c)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P20_Count")
+#undef P20_Count
+#pragma push_macro("P20_Count") /*gvi*/
+#undef P20_Count /*gvi*/
+int32_t P20_Count;
+#pragma pop_macro("P20_Count") /*gvi*/
+#pragma pop_macro("P20_Count")
+#endif
 
 static int ci_eq(const char* a, const char* b) {
   for (;; a++, b++) {

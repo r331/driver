@@ -20,23 +20,159 @@
 #include "ported80.h"
 #include <math.h>
 #include <string.h>
-GAME_VAR_DEF(p43_sintab_t, P43_Sin, 0x00b94280)
-GAME_VAR_DEF(float, P43_Eps, 0x00546aa4)
-GAME_VAR_DEF(float, P43_Four, 0x005461ac)
-GAME_VAR_DEF(float, P43_FadeLen, 0x00576480)
-GAME_VAR_DEF(float, P43_FadeDiv, 0x0054612c)
-GAME_VAR_DEF(int32_t, P43_FadeOn, 0x00b91cf8)
-GAME_VAR_DEF(int32_t, P43_FadeSteps, 0x00b91d1c)
-GAME_VAR_DEF(float, P43_FadeA, 0x00b91d20)
-GAME_VAR_DEF(int32_t, P43_FadeB, 0x00b91d24)
-GAME_VAR_DEF(float, P43_FadeStep, 0x00b91d28)
-GAME_VAR_DEF(float, P43_ScaleA, 0x01251a64)
-GAME_VAR_DEF(float, P43_OffX, 0x01252b7c)
-GAME_VAR_DEF(float, P43_OffY, 0x01252b6c)
-GAME_VAR_DEF(float, P43_Half, 0x0054607c)
-GAME_VAR_DEF(int32_t, P43_FreeCnt, 0x00c56764)
-GAME_VAR_DEF(p43_freelist_t, P43_FreeList, 0x00c594a0)
-GAME_VAR_DEF(p43_anim_t, P43_AnimTab, 0x00c8198c)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_Sin")
+#undef P43_Sin
+#pragma push_macro("P43_Sin") /*gvi*/
+#undef P43_Sin /*gvi*/
+p43_sintab_t P43_Sin;
+#pragma pop_macro("P43_Sin") /*gvi*/
+#pragma pop_macro("P43_Sin")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_Eps")
+#undef P43_Eps
+#pragma push_macro("P43_Eps") /*gvi*/
+#undef P43_Eps /*gvi*/
+float P43_Eps;
+#pragma pop_macro("P43_Eps") /*gvi*/
+#pragma pop_macro("P43_Eps")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_Four")
+#undef P43_Four
+#pragma push_macro("P43_Four") /*gvi*/
+#undef P43_Four /*gvi*/
+float P43_Four;
+#pragma pop_macro("P43_Four") /*gvi*/
+#pragma pop_macro("P43_Four")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_FadeLen")
+#undef P43_FadeLen
+#pragma push_macro("P43_FadeLen") /*gvi*/
+#undef P43_FadeLen /*gvi*/
+float P43_FadeLen;
+#pragma pop_macro("P43_FadeLen") /*gvi*/
+#pragma pop_macro("P43_FadeLen")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_FadeDiv")
+#undef P43_FadeDiv
+#pragma push_macro("P43_FadeDiv") /*gvi*/
+#undef P43_FadeDiv /*gvi*/
+float P43_FadeDiv;
+#pragma pop_macro("P43_FadeDiv") /*gvi*/
+#pragma pop_macro("P43_FadeDiv")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_FadeOn")
+#undef P43_FadeOn
+#pragma push_macro("P43_FadeOn") /*gvi*/
+#undef P43_FadeOn /*gvi*/
+int32_t P43_FadeOn;
+#pragma pop_macro("P43_FadeOn") /*gvi*/
+#pragma pop_macro("P43_FadeOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_FadeSteps")
+#undef P43_FadeSteps
+#pragma push_macro("P43_FadeSteps") /*gvi*/
+#undef P43_FadeSteps /*gvi*/
+int32_t P43_FadeSteps;
+#pragma pop_macro("P43_FadeSteps") /*gvi*/
+#pragma pop_macro("P43_FadeSteps")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_FadeA")
+#undef P43_FadeA
+#pragma push_macro("P43_FadeA") /*gvi*/
+#undef P43_FadeA /*gvi*/
+float P43_FadeA;
+#pragma pop_macro("P43_FadeA") /*gvi*/
+#pragma pop_macro("P43_FadeA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_FadeB")
+#undef P43_FadeB
+#pragma push_macro("P43_FadeB") /*gvi*/
+#undef P43_FadeB /*gvi*/
+int32_t P43_FadeB;
+#pragma pop_macro("P43_FadeB") /*gvi*/
+#pragma pop_macro("P43_FadeB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_FadeStep")
+#undef P43_FadeStep
+#pragma push_macro("P43_FadeStep") /*gvi*/
+#undef P43_FadeStep /*gvi*/
+float P43_FadeStep;
+#pragma pop_macro("P43_FadeStep") /*gvi*/
+#pragma pop_macro("P43_FadeStep")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_ScaleA")
+#undef P43_ScaleA
+#pragma push_macro("P43_ScaleA") /*gvi*/
+#undef P43_ScaleA /*gvi*/
+float P43_ScaleA;
+#pragma pop_macro("P43_ScaleA") /*gvi*/
+#pragma pop_macro("P43_ScaleA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_OffX")
+#undef P43_OffX
+#pragma push_macro("P43_OffX") /*gvi*/
+#undef P43_OffX /*gvi*/
+float P43_OffX;
+#pragma pop_macro("P43_OffX") /*gvi*/
+#pragma pop_macro("P43_OffX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_OffY")
+#undef P43_OffY
+#pragma push_macro("P43_OffY") /*gvi*/
+#undef P43_OffY /*gvi*/
+float P43_OffY;
+#pragma pop_macro("P43_OffY") /*gvi*/
+#pragma pop_macro("P43_OffY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_Half")
+#undef P43_Half
+#pragma push_macro("P43_Half") /*gvi*/
+#undef P43_Half /*gvi*/
+float P43_Half;
+#pragma pop_macro("P43_Half") /*gvi*/
+#pragma pop_macro("P43_Half")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_FreeCnt")
+#undef P43_FreeCnt
+#pragma push_macro("P43_FreeCnt") /*gvi*/
+#undef P43_FreeCnt /*gvi*/
+int32_t P43_FreeCnt;
+#pragma pop_macro("P43_FreeCnt") /*gvi*/
+#pragma pop_macro("P43_FreeCnt")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_FreeList")
+#undef P43_FreeList
+#pragma push_macro("P43_FreeList") /*gvi*/
+#undef P43_FreeList /*gvi*/
+p43_freelist_t P43_FreeList;
+#pragma pop_macro("P43_FreeList") /*gvi*/
+#pragma pop_macro("P43_FreeList")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P43_AnimTab")
+#undef P43_AnimTab
+#pragma push_macro("P43_AnimTab") /*gvi*/
+#undef P43_AnimTab /*gvi*/
+p43_anim_t P43_AnimTab;
+#pragma pop_macro("P43_AnimTab") /*gvi*/
+#pragma pop_macro("P43_AnimTab")
+#endif
 
 static inline uint32_t rd32(const uint8_t *p, int o) { uint32_t v; memcpy(&v, p + o, 4); return v; }
 static inline void wr32(uint8_t *p, int o, uint32_t v) { memcpy(p + o, &v, 4); }

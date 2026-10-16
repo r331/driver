@@ -13,9 +13,30 @@ typedef uint8_t p122_rec44_t[0x44];
 #define P122_BlinkOn  GAME_VAR(int32_t, P122_BlinkOn, 0x005feefc)
 #define P122_Ev24C    GAME_VAR(int32_t, P122_Ev24C, 0x0113424c)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P122_SpotRec") /*gvi*/
+#undef P122_SpotRec /*gvi*/
+#pragma push_macro("P122_GlowRec") /*gvi*/
+#undef P122_GlowRec /*gvi*/
 extern p122_rec44_t P122_SpotRec, P122_GlowRec;
+#pragma pop_macro("P122_GlowRec") /*gvi*/
+#pragma pop_macro("P122_SpotRec") /*gvi*/
 extern uint8_t *P122_EvCur;
+#pragma push_macro("P122_Blink") /*gvi*/
+#undef P122_Blink /*gvi*/
+#pragma push_macro("P122_BlinkOn") /*gvi*/
+#undef P122_BlinkOn /*gvi*/
+#pragma push_macro("P122_Ev118") /*gvi*/
+#undef P122_Ev118 /*gvi*/
+#pragma push_macro("P122_Ev240") /*gvi*/
+#undef P122_Ev240 /*gvi*/
+#pragma push_macro("P122_Ev24C") /*gvi*/
+#undef P122_Ev24C /*gvi*/
 extern int32_t P122_Blink, P122_BlinkOn, P122_Ev118, P122_Ev240, P122_Ev24C;
+#pragma pop_macro("P122_Ev24C") /*gvi*/
+#pragma pop_macro("P122_Ev240") /*gvi*/
+#pragma pop_macro("P122_Ev118") /*gvi*/
+#pragma pop_macro("P122_BlinkOn") /*gvi*/
+#pragma pop_macro("P122_Blink") /*gvi*/
 #endif
 void     P122_SpotShadow(uint32_t pos, int32_t size);   /* 004accf0: пятно-квадрат 2·size под точкой pos (float x,_,z), на дороге */
 void     P122_SpotShadowF(const float *p, int32_t size);  /* v1.68: то же по родному указателю */
@@ -28,3 +49,21 @@ void     P122_IconCopy(int32_t dst, const char *name);  /* 004e7450: копия 
 int32_t  P122_SetVar(p42_cmd_t *cmd, p42_var_t *var);   /* 004f8485: команда установки переменной скрипта (по P65_Tok) */
 int32_t  P122_ObjNames(void);                           /* 004a05fa: индексы моделей объектов по 18 группам 01136940 (+ сортировка) */
 int32_t  P122_NameMenu(void);                          /* 0041ab60: меню ввода имён (таблицы .data 0054e948/0054e828), курсор «.» мигает */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P122_SpotRec
+#define P122_SpotRec (*(p122_rec44_t *)re_gvar(0x010fc9a0u, sizeof(p122_rec44_t), (void *)&P122_SpotRec))
+#undef P122_GlowRec
+#define P122_GlowRec (*(p122_rec44_t *)re_gvar(0x01123280u, sizeof(p122_rec44_t), (void *)&P122_GlowRec))
+#undef P122_Ev118
+#define P122_Ev118 (*(int32_t *)re_gvar(0x01134118u, sizeof(int32_t), (void *)&P122_Ev118))
+#undef P122_Ev240
+#define P122_Ev240 (*(int32_t *)re_gvar(0x01134240u, sizeof(int32_t), (void *)&P122_Ev240))
+#undef P122_Blink
+#define P122_Blink (*(int32_t *)re_gvar(0x0054e9d8u, sizeof(int32_t), (void *)&P122_Blink))
+#undef P122_BlinkOn
+#define P122_BlinkOn (*(int32_t *)re_gvar(0x005feefcu, sizeof(int32_t), (void *)&P122_BlinkOn))
+#undef P122_Ev24C
+#define P122_Ev24C (*(int32_t *)re_gvar(0x0113424cu, sizeof(int32_t), (void *)&P122_Ev24C))
+#endif
+/* gvar-img v2.03 end */

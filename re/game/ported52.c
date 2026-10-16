@@ -10,22 +10,150 @@
 #else
 #  define P52_STD
 #endif
-GAME_VAR_DEF(int32_t, P52_FogOn, 0x00b87e88)
-GAME_VAR_DEF(uint8_t, P52_NoTrail, 0x0056002c)
-GAME_VAR_DEF(int32_t, P52_MenuCnt, 0x00b5a750)
-GAME_VAR_DEF(int32_t, P52_MenuA, 0x00b5a754)
-GAME_VAR_DEF(int32_t, P52_MenuB, 0x00b5a758)
-GAME_VAR_DEF(int32_t, P52_MenuC, 0x00b5a75c)
-GAME_VAR_DEF(int32_t, P52_ResetA, 0x00b5a8a8)
-GAME_VAR_DEF(uint8_t, P52_ResetB, 0x01137354)
-GAME_VAR_DEF(int32_t, P52_ResetC, 0x011237b8)
-GAME_VAR_DEF(int32_t, P52_Ones0, 0x010ffa30)
-GAME_VAR_DEF(int32_t, P52_Ones1, 0x010ffa34)
-GAME_VAR_DEF(int32_t, P52_Ones2, 0x010ffa38)
-GAME_VAR_DEF(int32_t, P52_Ones3, 0x010ffa3c)
-GAME_VAR_DEF(p52_fog_t, P52_FogTab, 0x01252b80)
-GAME_VAR_DEF(p52_names_t, P52_NameTab, 0x00b5a6a8)
-GAME_VAR_DEF(p52_colors_t, P52_ColorTab, 0x00552e0c)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_FogOn")
+#undef P52_FogOn
+#pragma push_macro("P52_FogOn") /*gvi*/
+#undef P52_FogOn /*gvi*/
+int32_t P52_FogOn;
+#pragma pop_macro("P52_FogOn") /*gvi*/
+#pragma pop_macro("P52_FogOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_NoTrail")
+#undef P52_NoTrail
+#pragma push_macro("P52_NoTrail") /*gvi*/
+#undef P52_NoTrail /*gvi*/
+uint8_t P52_NoTrail;
+#pragma pop_macro("P52_NoTrail") /*gvi*/
+#pragma pop_macro("P52_NoTrail")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_MenuCnt")
+#undef P52_MenuCnt
+#pragma push_macro("P52_MenuCnt") /*gvi*/
+#undef P52_MenuCnt /*gvi*/
+int32_t P52_MenuCnt;
+#pragma pop_macro("P52_MenuCnt") /*gvi*/
+#pragma pop_macro("P52_MenuCnt")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_MenuA")
+#undef P52_MenuA
+#pragma push_macro("P52_MenuA") /*gvi*/
+#undef P52_MenuA /*gvi*/
+int32_t P52_MenuA;
+#pragma pop_macro("P52_MenuA") /*gvi*/
+#pragma pop_macro("P52_MenuA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_MenuB")
+#undef P52_MenuB
+#pragma push_macro("P52_MenuB") /*gvi*/
+#undef P52_MenuB /*gvi*/
+int32_t P52_MenuB;
+#pragma pop_macro("P52_MenuB") /*gvi*/
+#pragma pop_macro("P52_MenuB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_MenuC")
+#undef P52_MenuC
+#pragma push_macro("P52_MenuC") /*gvi*/
+#undef P52_MenuC /*gvi*/
+int32_t P52_MenuC;
+#pragma pop_macro("P52_MenuC") /*gvi*/
+#pragma pop_macro("P52_MenuC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_ResetA")
+#undef P52_ResetA
+#pragma push_macro("P52_ResetA") /*gvi*/
+#undef P52_ResetA /*gvi*/
+int32_t P52_ResetA;
+#pragma pop_macro("P52_ResetA") /*gvi*/
+#pragma pop_macro("P52_ResetA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_ResetB")
+#undef P52_ResetB
+#pragma push_macro("P52_ResetB") /*gvi*/
+#undef P52_ResetB /*gvi*/
+uint8_t P52_ResetB;
+#pragma pop_macro("P52_ResetB") /*gvi*/
+#pragma pop_macro("P52_ResetB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_ResetC")
+#undef P52_ResetC
+#pragma push_macro("P52_ResetC") /*gvi*/
+#undef P52_ResetC /*gvi*/
+int32_t P52_ResetC;
+#pragma pop_macro("P52_ResetC") /*gvi*/
+#pragma pop_macro("P52_ResetC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_Ones0")
+#undef P52_Ones0
+#pragma push_macro("P52_Ones0") /*gvi*/
+#undef P52_Ones0 /*gvi*/
+int32_t P52_Ones0;
+#pragma pop_macro("P52_Ones0") /*gvi*/
+#pragma pop_macro("P52_Ones0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_Ones1")
+#undef P52_Ones1
+#pragma push_macro("P52_Ones1") /*gvi*/
+#undef P52_Ones1 /*gvi*/
+int32_t P52_Ones1;
+#pragma pop_macro("P52_Ones1") /*gvi*/
+#pragma pop_macro("P52_Ones1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_Ones2")
+#undef P52_Ones2
+#pragma push_macro("P52_Ones2") /*gvi*/
+#undef P52_Ones2 /*gvi*/
+int32_t P52_Ones2;
+#pragma pop_macro("P52_Ones2") /*gvi*/
+#pragma pop_macro("P52_Ones2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_Ones3")
+#undef P52_Ones3
+#pragma push_macro("P52_Ones3") /*gvi*/
+#undef P52_Ones3 /*gvi*/
+int32_t P52_Ones3;
+#pragma pop_macro("P52_Ones3") /*gvi*/
+#pragma pop_macro("P52_Ones3")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_FogTab")
+#undef P52_FogTab
+#pragma push_macro("P52_FogTab") /*gvi*/
+#undef P52_FogTab /*gvi*/
+p52_fog_t P52_FogTab;
+#pragma pop_macro("P52_FogTab") /*gvi*/
+#pragma pop_macro("P52_FogTab")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_NameTab")
+#undef P52_NameTab
+#pragma push_macro("P52_NameTab") /*gvi*/
+#undef P52_NameTab /*gvi*/
+p52_names_t P52_NameTab;
+#pragma pop_macro("P52_NameTab") /*gvi*/
+#pragma pop_macro("P52_NameTab")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P52_ColorTab")
+#undef P52_ColorTab
+#pragma push_macro("P52_ColorTab") /*gvi*/
+#undef P52_ColorTab /*gvi*/
+p52_colors_t P52_ColorTab;
+#pragma pop_macro("P52_ColorTab") /*gvi*/
+#pragma pop_macro("P52_ColorTab")
+#endif
 
 static void *glide_proc(const char *name) {
   for (int i = 0; i < P33_GlideCount(); i++)

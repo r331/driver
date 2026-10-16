@@ -45,10 +45,52 @@ typedef uint8_t DIRTABLE_T[64];
 #define DirTableA   GAME_VAR(DIRTABLE_T, DirTableA, 0x0055f088)
 #define DirTableB   GAME_VAR(DIRTABLE_T, DirTableB, 0x0055f030)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("TrafficRecs") /*gvi*/
+#undef TrafficRecs /*gvi*/
+#pragma push_macro("DirTableA") /*gvi*/
+#undef DirTableA /*gvi*/
+#pragma push_macro("DirTableB") /*gvi*/
+#undef DirTableB /*gvi*/
 extern TRAFFIC_RECS_T TrafficRecs; extern DIRTABLE_T DirTableA, DirTableB;
+#pragma pop_macro("DirTableB") /*gvi*/
+#pragma pop_macro("DirTableA") /*gvi*/
+#pragma pop_macro("TrafficRecs") /*gvi*/
+#pragma push_macro("DirectorUnk64") /*gvi*/
+#undef DirectorUnk64 /*gvi*/
+#pragma push_macro("DirectorUnk6C") /*gvi*/
+#undef DirectorUnk6C /*gvi*/
+#pragma push_macro("DirectorUnk7C") /*gvi*/
+#undef DirectorUnk7C /*gvi*/
+#pragma push_macro("DirectorUnk84") /*gvi*/
+#undef DirectorUnk84 /*gvi*/
+#pragma push_macro("DirectorUnk88") /*gvi*/
+#undef DirectorUnk88 /*gvi*/
+#pragma push_macro("DirectorUnk8C") /*gvi*/
+#undef DirectorUnk8C /*gvi*/
+#pragma push_macro("GameMode") /*gvi*/
+#undef GameMode /*gvi*/
 extern int32_t DirectorUnk64, DirectorUnk6C, DirectorUnk7C, DirectorUnk84, DirectorUnk88, DirectorUnk8C, GameMode;
+#pragma pop_macro("GameMode") /*gvi*/
+#pragma pop_macro("DirectorUnk8C") /*gvi*/
+#pragma pop_macro("DirectorUnk88") /*gvi*/
+#pragma pop_macro("DirectorUnk84") /*gvi*/
+#pragma pop_macro("DirectorUnk7C") /*gvi*/
+#pragma pop_macro("DirectorUnk6C") /*gvi*/
+#pragma pop_macro("DirectorUnk64") /*gvi*/
+#pragma push_macro("NumCameras") /*gvi*/
+#undef NumCameras /*gvi*/
 extern int32_t NumCameras; extern DIRECTOR_CAMERA *CurCamera; extern DIRECTOR_CAMERA **CameraList;
+#pragma pop_macro("NumCameras") /*gvi*/
+#pragma push_macro("DirectorLastFrame") /*gvi*/
+#undef DirectorLastFrame /*gvi*/
+#pragma push_macro("CamBackupValid") /*gvi*/
+#undef CamBackupValid /*gvi*/
+#pragma push_macro("DirectorBufferCount") /*gvi*/
+#undef DirectorBufferCount /*gvi*/
 extern int32_t DirectorLastFrame, CamBackupValid, DirectorBufferCount;
+#pragma pop_macro("DirectorBufferCount") /*gvi*/
+#pragma pop_macro("CamBackupValid") /*gvi*/
+#pragma pop_macro("DirectorLastFrame") /*gvi*/
 extern DIRECTOR_CAMERA DirectorCam, CamBackup; extern void *DirectorBuffer;
 #endif
 
@@ -88,3 +130,35 @@ void SelectNewCamera(void);                       /* 004c5222 */
 int  CountNearbyCars(void);                       /* 004c5d40 */
 void ClearDirectorTables(void);                   /* 004c810f */
 void CameraDump(const int32_t *cam);              /* 004c567a */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef NumCameras
+#define NumCameras (*(int32_t *)re_gvar(0x00d17b60u, sizeof(int32_t), (void *)&NumCameras))
+#undef DirectorLastFrame
+#define DirectorLastFrame (*(int32_t *)re_gvar(0x00d17b68u, sizeof(int32_t), (void *)&DirectorLastFrame))
+#undef CamBackupValid
+#define CamBackupValid (*(int32_t *)re_gvar(0x00d17bb4u, sizeof(int32_t), (void *)&CamBackupValid))
+#undef DirectorBufferCount
+#define DirectorBufferCount (*(int32_t *)re_gvar(0x00d17b70u, sizeof(int32_t), (void *)&DirectorBufferCount))
+#undef DirectorUnk64
+#define DirectorUnk64 (*(int32_t *)re_gvar(0x00d17b64u, sizeof(int32_t), (void *)&DirectorUnk64))
+#undef DirectorUnk6C
+#define DirectorUnk6C (*(int32_t *)re_gvar(0x00d17b6cu, sizeof(int32_t), (void *)&DirectorUnk6C))
+#undef DirectorUnk7C
+#define DirectorUnk7C (*(int32_t *)re_gvar(0x00d17b7cu, sizeof(int32_t), (void *)&DirectorUnk7C))
+#undef DirectorUnk84
+#define DirectorUnk84 (*(int32_t *)re_gvar(0x00d17b84u, sizeof(int32_t), (void *)&DirectorUnk84))
+#undef DirectorUnk88
+#define DirectorUnk88 (*(int32_t *)re_gvar(0x00d17b88u, sizeof(int32_t), (void *)&DirectorUnk88))
+#undef DirectorUnk8C
+#define DirectorUnk8C (*(int32_t *)re_gvar(0x00d17b8cu, sizeof(int32_t), (void *)&DirectorUnk8C))
+#undef GameMode
+#define GameMode (*(int32_t *)re_gvar(0x005f7e50u, sizeof(int32_t), (void *)&GameMode))
+#undef TrafficRecs
+#define TrafficRecs (*(TRAFFIC_RECS_T *)re_gvar(0x011443e0u, sizeof(TRAFFIC_RECS_T), (void *)&TrafficRecs))
+#undef DirTableA
+#define DirTableA (*(DIRTABLE_T *)re_gvar(0x0055f088u, sizeof(DIRTABLE_T), (void *)&DirTableA))
+#undef DirTableB
+#define DirTableB (*(DIRTABLE_T *)re_gvar(0x0055f030u, sizeof(DIRTABLE_T), (void *)&DirTableB))
+#endif
+/* gvar-img v2.03 end */

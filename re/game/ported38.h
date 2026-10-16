@@ -19,7 +19,16 @@
 #define P38_TimerFlag GAME_VAR(int32_t, P38_TimerFlag, 0x00551134)
 #ifndef RE_HOOK_BUILD
 extern void *P38_Mms, *P38_Mms2, *P38_Sample, *P38_Dest, *P38_Src, *P38_Obj824, *P38_DD, *P38_Obj814, *P38_DsPrimary, *P38_Ds;
+#pragma push_macro("P38_Letter") /*gvi*/
+#undef P38_Letter /*gvi*/
+#pragma push_macro("P38_TimerSlot") /*gvi*/
+#undef P38_TimerSlot /*gvi*/
+#pragma push_macro("P38_TimerFlag") /*gvi*/
+#undef P38_TimerFlag /*gvi*/
 extern int32_t P38_Letter, P38_TimerSlot, P38_TimerFlag;
+#pragma pop_macro("P38_TimerFlag") /*gvi*/
+#pragma pop_macro("P38_TimerSlot") /*gvi*/
+#pragma pop_macro("P38_Letter") /*gvi*/
 #endif
 int32_t P38_MmsRun(void);          /* 0048b2fd: SetState(RUN); 1 — успех */
 void    P38_MmsStop(void);         /* 0048b32b: SetState(STOP) */
@@ -28,3 +37,13 @@ void    P38_FmvRelease(void);      /* 0048ae12: освободить повер�
 void    P38_FmvStop(void);         /* 0048b65d: остановить поток и таймер FMV */
 void    P38_SetPrimaryFormat(int32_t bits, int32_t rate);   /* 0048bdcc: формат первичного буфера (стерео PCM) */
 void    P38_SetSpeakerConfig(int32_t mode);                 /* 0048be68: SetSpeakerConfig (1→3, 2→2, 3→1, 4→5, иначе 4) */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P38_Letter
+#define P38_Letter (*(int32_t *)re_gvar(0x00b1c7b0u, sizeof(int32_t), (void *)&P38_Letter))
+#undef P38_TimerSlot
+#define P38_TimerSlot (*(int32_t *)re_gvar(0x00551130u, sizeof(int32_t), (void *)&P38_TimerSlot))
+#undef P38_TimerFlag
+#define P38_TimerFlag (*(int32_t *)re_gvar(0x00551134u, sizeof(int32_t), (void *)&P38_TimerFlag))
+#endif
+/* gvar-img v2.03 end */

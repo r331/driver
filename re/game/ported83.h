@@ -41,7 +41,16 @@ typedef float p83_v16_t[16];
 #define P83_Flag3     (P84_MatFlag[3072])
 #endif
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P83_LightVec") /*gvi*/
+#undef P83_LightVec /*gvi*/
 extern p83_v16_t P83_LightVec;
+#pragma pop_macro("P83_LightVec") /*gvi*/
 #endif
 int32_t P83_BoxVis(const float *p, float r);       /* 00428672 */
 void    P83_LightMatrices(void);                   /* 00428928 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P83_LightVec
+#define P83_LightVec (*(p83_v16_t *)re_gvar(0x01249680u, sizeof(p83_v16_t), (void *)&P83_LightVec))
+#endif
+/* gvar-img v2.03 end */

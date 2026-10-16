@@ -6,10 +6,42 @@
 #include "engine.h"
 #include "unported.h"
 GAME_VAR_DEF(DIR_NODE*, DirNodeTable, 0x00d17c58)
-GAME_VAR_DEF(int32_t, DirIndicatorOn, 0x00d17bac)
-GAME_VAR_DEF(int32_t, DirIndicatorCnt, 0x00d17b80)
-GAME_VAR_DEF(uint32_t, IndicatorTex, 0x00c55c58)
-GAME_VAR_DEF(uint32_t, DirSelectedColor, 0x00d17b8c)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirIndicatorOn")
+#undef DirIndicatorOn
+#pragma push_macro("DirIndicatorOn") /*gvi*/
+#undef DirIndicatorOn /*gvi*/
+int32_t DirIndicatorOn;
+#pragma pop_macro("DirIndicatorOn") /*gvi*/
+#pragma pop_macro("DirIndicatorOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirIndicatorCnt")
+#undef DirIndicatorCnt
+#pragma push_macro("DirIndicatorCnt") /*gvi*/
+#undef DirIndicatorCnt /*gvi*/
+int32_t DirIndicatorCnt;
+#pragma pop_macro("DirIndicatorCnt") /*gvi*/
+#pragma pop_macro("DirIndicatorCnt")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("IndicatorTex")
+#undef IndicatorTex
+#pragma push_macro("IndicatorTex") /*gvi*/
+#undef IndicatorTex /*gvi*/
+uint32_t IndicatorTex;
+#pragma pop_macro("IndicatorTex") /*gvi*/
+#pragma pop_macro("IndicatorTex")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirSelectedColor")
+#undef DirSelectedColor
+#pragma push_macro("DirSelectedColor") /*gvi*/
+#undef DirSelectedColor /*gvi*/
+uint32_t DirSelectedColor;
+#pragma pop_macro("DirSelectedColor") /*gvi*/
+#pragma pop_macro("DirSelectedColor")
+#endif
 #ifndef RE_HOOK_BUILD
 uint32_t NodeIconTexArr[64];
 #endif
@@ -128,14 +160,22 @@ void DrawNodeMarker(DIR_NODE *n) {
 }
 
 #ifndef RE_HOOK_BUILD
-uint8_t KeyState[0x200]; int32_t CamParamTblArr[0x52*4];
+int32_t CamParamTblArr[0x52*4];   /* v2.03: KeyState — макрос над A_00D04B00 (dirnodes.h) */
 #  define KS(a) KeyState[(a)-0x00d04b00]
 #  define CPT(i) (((int32_t *)&CamParamTbl)[i])   /* v1.44: поле +0xcc таблицы машин P99_Cars */
 #else
 #  define KS(a) (*(uint8_t*)(uintptr_t)(a))
 #  define CPT(i) (((int32_t*)(uintptr_t)0x00d0788c)[i])
 #endif
-GAME_VAR_DEF(int32_t, DirUseDI, 0x00d17ba0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirUseDI")
+#undef DirUseDI
+#pragma push_macro("DirUseDI") /*gvi*/
+#undef DirUseDI /*gvi*/
+int32_t DirUseDI;
+#pragma pop_macro("DirUseDI") /*gvi*/
+#pragma pop_macro("DirUseDI")
+#endif
 
 uint32_t ReadDirectorKeys(void) {
     uint32_t m = 0;

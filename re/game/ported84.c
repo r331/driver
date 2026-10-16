@@ -12,22 +12,118 @@
 #include <math.h>
 #include <string.h>
 
-GAME_VAR_DEF(uint8_t, P84_Mirror, 0x00bdc288)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P84_Mirror")
+#undef P84_Mirror
+#pragma push_macro("P84_Mirror") /*gvi*/
+#undef P84_Mirror /*gvi*/
+uint8_t P84_Mirror;
+#pragma pop_macro("P84_Mirror") /*gvi*/
+#pragma pop_macro("P84_Mirror")
+#endif
 GAME_VAR_DEF(const uintptr_t *, P84_Tab0, 0x011effe0)
 GAME_VAR_DEF(const uintptr_t *, P84_Tab1, 0x01209660)
 GAME_VAR_DEF(const uintptr_t *, P84_Tab2, 0x011f4060)
-GAME_VAR_DEF(uint32_t, P84_VertRef, 0x01209614)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P84_VertRef")
+#undef P84_VertRef
+#pragma push_macro("P84_VertRef") /*gvi*/
+#undef P84_VertRef /*gvi*/
+uint32_t P84_VertRef;
+#pragma pop_macro("P84_VertRef") /*gvi*/
+#pragma pop_macro("P84_VertRef")
+#endif
 GAME_VAR_DEF(float *, P84_Planes, 0x012085f0)
-GAME_VAR_DEF(p84_light_t, P84_LightIn, 0x012043c0)
-GAME_VAR_DEF(p84_vis_t, P84_Vis, 0x01208600)
-GAME_VAR_DEF(p84_nlight_t, P84_NormLight, 0x012496c0)
-GAME_VAR_DEF(p84_mats_t, P84_MatCache, 0x01209680)
-GAME_VAR_DEF(p84_flags_t, P84_MatFlag, 0x011f0060)
-GAME_VAR_DEF(p84_b56_t, P84_Arg, 0x00550cc4)
-GAME_VAR_DEF(p84_b56_t, P84_Lit, 0x00550c8c)
-GAME_VAR_DEF(int32_t, P84_TexFiltOn, 0x01252bc0)
-GAME_VAR_DEF(float, P84_ShineK, 0x01159d58)
-GAME_VAR_DEF(p84_uv_t, P84_ShineUV, 0x01159d80)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P84_LightIn")
+#undef P84_LightIn
+#pragma push_macro("P84_LightIn") /*gvi*/
+#undef P84_LightIn /*gvi*/
+p84_light_t P84_LightIn;
+#pragma pop_macro("P84_LightIn") /*gvi*/
+#pragma pop_macro("P84_LightIn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P84_Vis")
+#undef P84_Vis
+#pragma push_macro("P84_Vis") /*gvi*/
+#undef P84_Vis /*gvi*/
+p84_vis_t P84_Vis;
+#pragma pop_macro("P84_Vis") /*gvi*/
+#pragma pop_macro("P84_Vis")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P84_NormLight")
+#undef P84_NormLight
+#pragma push_macro("P84_NormLight") /*gvi*/
+#undef P84_NormLight /*gvi*/
+p84_nlight_t P84_NormLight;
+#pragma pop_macro("P84_NormLight") /*gvi*/
+#pragma pop_macro("P84_NormLight")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P84_MatCache")
+#undef P84_MatCache
+#pragma push_macro("P84_MatCache") /*gvi*/
+#undef P84_MatCache /*gvi*/
+p84_mats_t P84_MatCache;
+#pragma pop_macro("P84_MatCache") /*gvi*/
+#pragma pop_macro("P84_MatCache")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P84_MatFlag")
+#undef P84_MatFlag
+#pragma push_macro("P84_MatFlag") /*gvi*/
+#undef P84_MatFlag /*gvi*/
+p84_flags_t P84_MatFlag;
+#pragma pop_macro("P84_MatFlag") /*gvi*/
+#pragma pop_macro("P84_MatFlag")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P84_Arg")
+#undef P84_Arg
+#pragma push_macro("P84_Arg") /*gvi*/
+#undef P84_Arg /*gvi*/
+p84_b56_t P84_Arg;
+#pragma pop_macro("P84_Arg") /*gvi*/
+#pragma pop_macro("P84_Arg")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P84_Lit")
+#undef P84_Lit
+#pragma push_macro("P84_Lit") /*gvi*/
+#undef P84_Lit /*gvi*/
+p84_b56_t P84_Lit;
+#pragma pop_macro("P84_Lit") /*gvi*/
+#pragma pop_macro("P84_Lit")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P84_TexFiltOn")
+#undef P84_TexFiltOn
+#pragma push_macro("P84_TexFiltOn") /*gvi*/
+#undef P84_TexFiltOn /*gvi*/
+int32_t P84_TexFiltOn;
+#pragma pop_macro("P84_TexFiltOn") /*gvi*/
+#pragma pop_macro("P84_TexFiltOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P84_ShineK")
+#undef P84_ShineK
+#pragma push_macro("P84_ShineK") /*gvi*/
+#undef P84_ShineK /*gvi*/
+float P84_ShineK;
+#pragma pop_macro("P84_ShineK") /*gvi*/
+#pragma pop_macro("P84_ShineK")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P84_ShineUV")
+#undef P84_ShineUV
+#pragma push_macro("P84_ShineUV") /*gvi*/
+#undef P84_ShineUV /*gvi*/
+p84_uv_t P84_ShineUV;
+#pragma pop_macro("P84_ShineUV") /*gvi*/
+#pragma pop_macro("P84_ShineUV")
+#endif
 #ifndef RE_HOOK_BUILD
 uintptr_t P84_Handlers[6][56];
 #include "p84_data.h"

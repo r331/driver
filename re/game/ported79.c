@@ -3,16 +3,96 @@
 #include <string.h>
 #include "p79_data.h"
 
-GAME_VAR_DEF(p79_tab_t, P79_ModelTab, 0x00cfe7a0)
-GAME_VAR_DEF(int32_t, P79_Total, 0x01159d60)
-GAME_VAR_DEF(int32_t, P79_Outside, 0x0115a074)
-GAME_VAR_DEF(int32_t, P79_SumTotal, 0x00b1c390)
-GAME_VAR_DEF(int32_t, P79_SumOut, 0x00b1c394)
-GAME_VAR_DEF(int32_t, P79_NumAll, 0x00b1c398)
-GAME_VAR_DEF(int32_t, P79_NumMixed, 0x00b1c39c)
-GAME_VAR_DEF(int32_t, P79_NumNone, 0x00b1c3a0)
-GAME_VAR_DEF(float, P79_ClsHi, 0x005460a0)
-GAME_VAR_DEF(float, P79_ClsLo, 0x005460a4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P79_ModelTab")
+#undef P79_ModelTab
+#pragma push_macro("P79_ModelTab") /*gvi*/
+#undef P79_ModelTab /*gvi*/
+p79_tab_t P79_ModelTab;
+#pragma pop_macro("P79_ModelTab") /*gvi*/
+#pragma pop_macro("P79_ModelTab")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P79_Total")
+#undef P79_Total
+#pragma push_macro("P79_Total") /*gvi*/
+#undef P79_Total /*gvi*/
+int32_t P79_Total;
+#pragma pop_macro("P79_Total") /*gvi*/
+#pragma pop_macro("P79_Total")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P79_Outside")
+#undef P79_Outside
+#pragma push_macro("P79_Outside") /*gvi*/
+#undef P79_Outside /*gvi*/
+int32_t P79_Outside;
+#pragma pop_macro("P79_Outside") /*gvi*/
+#pragma pop_macro("P79_Outside")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P79_SumTotal")
+#undef P79_SumTotal
+#pragma push_macro("P79_SumTotal") /*gvi*/
+#undef P79_SumTotal /*gvi*/
+int32_t P79_SumTotal;
+#pragma pop_macro("P79_SumTotal") /*gvi*/
+#pragma pop_macro("P79_SumTotal")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P79_SumOut")
+#undef P79_SumOut
+#pragma push_macro("P79_SumOut") /*gvi*/
+#undef P79_SumOut /*gvi*/
+int32_t P79_SumOut;
+#pragma pop_macro("P79_SumOut") /*gvi*/
+#pragma pop_macro("P79_SumOut")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P79_NumAll")
+#undef P79_NumAll
+#pragma push_macro("P79_NumAll") /*gvi*/
+#undef P79_NumAll /*gvi*/
+int32_t P79_NumAll;
+#pragma pop_macro("P79_NumAll") /*gvi*/
+#pragma pop_macro("P79_NumAll")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P79_NumMixed")
+#undef P79_NumMixed
+#pragma push_macro("P79_NumMixed") /*gvi*/
+#undef P79_NumMixed /*gvi*/
+int32_t P79_NumMixed;
+#pragma pop_macro("P79_NumMixed") /*gvi*/
+#pragma pop_macro("P79_NumMixed")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P79_NumNone")
+#undef P79_NumNone
+#pragma push_macro("P79_NumNone") /*gvi*/
+#undef P79_NumNone /*gvi*/
+int32_t P79_NumNone;
+#pragma pop_macro("P79_NumNone") /*gvi*/
+#pragma pop_macro("P79_NumNone")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P79_ClsHi")
+#undef P79_ClsHi
+#pragma push_macro("P79_ClsHi") /*gvi*/
+#undef P79_ClsHi /*gvi*/
+float P79_ClsHi;
+#pragma pop_macro("P79_ClsHi") /*gvi*/
+#pragma pop_macro("P79_ClsHi")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P79_ClsLo")
+#undef P79_ClsLo
+#pragma push_macro("P79_ClsLo") /*gvi*/
+#undef P79_ClsLo /*gvi*/
+float P79_ClsLo;
+#pragma pop_macro("P79_ClsLo") /*gvi*/
+#pragma pop_macro("P79_ClsLo")
+#endif
 
 /* Значения из .data Game.exe: 0x005460a0 = 1.001f, 0x005460a4 = 0.998f; таблицы шагов записей 0x550acc (112 int) */
 void P79_InitConsts(void) {

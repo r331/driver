@@ -38,10 +38,29 @@ typedef uint8_t P32_PalArr[1024];
 typedef char P32_MsgArr[256];
 #define P32_Msg     GAME_VAR(P32_MsgArr, P32_Msg, 0x00a42048)             /* буфер сообщения */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P32_PalTable") /*gvi*/
+#undef P32_PalTable /*gvi*/
 extern P32_SlotArr P32_Slots; extern P32_PalArr P32_PalTable; extern uint8_t *P32_DevInfo;
+#pragma pop_macro("P32_PalTable") /*gvi*/
+#pragma push_macro("P32_CurSlot") /*gvi*/
+#undef P32_CurSlot /*gvi*/
+#pragma push_macro("P32_Msg") /*gvi*/
+#undef P32_Msg /*gvi*/
 extern int32_t P32_CurSlot; extern void *P32_CurHandle; extern P32_MsgArr P32_Msg;
+#pragma pop_macro("P32_Msg") /*gvi*/
+#pragma pop_macro("P32_CurSlot") /*gvi*/
 #endif
 int32_t P32_CreateZSurface(void *back);                /* 004213dc: Z-буфер размером с заднюю поверхность, прикрепить */
 int32_t P32_CreateSlotPalette(int32_t slot);           /* 00422309: палитра 8-бит текстуры слота (создать/привязать/SetEntries) */
 void    P32_SelectSlotPalette(int32_t slot);           /* 00422c55: выбрать палитру слота по P32_CurPal и поставить как текстуру */
 void P32_SetPalette(int32_t a, int32_t mode, const uint8_t *rgba256); /* 0041f57d: загрузить палитру в таблицу и обновить все слоты */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P32_PalTable
+#define P32_PalTable (*(P32_PalArr *)re_gvar(0x006017c0u, sizeof(P32_PalArr), (void *)&P32_PalTable))
+#undef P32_CurSlot
+#define P32_CurSlot (*(int32_t *)re_gvar(0x0054ef30u, sizeof(int32_t), (void *)&P32_CurSlot))
+#undef P32_Msg
+#define P32_Msg (*(P32_MsgArr *)re_gvar(0x00a42048u, sizeof(P32_MsgArr), (void *)&P32_Msg))
+#endif
+/* gvar-img v2.03 end */

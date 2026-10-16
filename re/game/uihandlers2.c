@@ -1,13 +1,85 @@
 #include "uihandlers2.h"
-GAME_VAR_DEF(int32_t, UiVar005FEA80, 0x005fea80)
-GAME_VAR_DEF(int32_t, UiVar0054E654, 0x0054e654)
-GAME_VAR_DEF(int32_t, UiVar005FEA8C, 0x005fea8c)
-GAME_VAR_DEF(int32_t, UiVar005FEDA0, 0x005feda0)
-GAME_VAR_DEF(int32_t, UiVar005FEA98, 0x005fea98)
-GAME_VAR_DEF(int32_t, UiVar005FEB48, 0x005feb48)
-GAME_VAR_DEF(uint8_t, UiVar01251A70, 0x01251a70)
-GAME_VAR_DEF(int32_t, UiVar011F43B0, 0x011f43b0)
-GAME_VAR_DEF(int32_t, UiVar00B1C280, 0x00b1c280)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("UiVar005FEA80")
+#undef UiVar005FEA80
+#pragma push_macro("UiVar005FEA80") /*gvi*/
+#undef UiVar005FEA80 /*gvi*/
+int32_t UiVar005FEA80;
+#pragma pop_macro("UiVar005FEA80") /*gvi*/
+#pragma pop_macro("UiVar005FEA80")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("UiVar0054E654")
+#undef UiVar0054E654
+#pragma push_macro("UiVar0054E654") /*gvi*/
+#undef UiVar0054E654 /*gvi*/
+int32_t UiVar0054E654;
+#pragma pop_macro("UiVar0054E654") /*gvi*/
+#pragma pop_macro("UiVar0054E654")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("UiVar005FEA8C")
+#undef UiVar005FEA8C
+#pragma push_macro("UiVar005FEA8C") /*gvi*/
+#undef UiVar005FEA8C /*gvi*/
+int32_t UiVar005FEA8C;
+#pragma pop_macro("UiVar005FEA8C") /*gvi*/
+#pragma pop_macro("UiVar005FEA8C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("UiVar005FEDA0")
+#undef UiVar005FEDA0
+#pragma push_macro("UiVar005FEDA0") /*gvi*/
+#undef UiVar005FEDA0 /*gvi*/
+int32_t UiVar005FEDA0;
+#pragma pop_macro("UiVar005FEDA0") /*gvi*/
+#pragma pop_macro("UiVar005FEDA0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("UiVar005FEA98")
+#undef UiVar005FEA98
+#pragma push_macro("UiVar005FEA98") /*gvi*/
+#undef UiVar005FEA98 /*gvi*/
+int32_t UiVar005FEA98;
+#pragma pop_macro("UiVar005FEA98") /*gvi*/
+#pragma pop_macro("UiVar005FEA98")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("UiVar005FEB48")
+#undef UiVar005FEB48
+#pragma push_macro("UiVar005FEB48") /*gvi*/
+#undef UiVar005FEB48 /*gvi*/
+int32_t UiVar005FEB48;
+#pragma pop_macro("UiVar005FEB48") /*gvi*/
+#pragma pop_macro("UiVar005FEB48")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("UiVar01251A70")
+#undef UiVar01251A70
+#pragma push_macro("UiVar01251A70") /*gvi*/
+#undef UiVar01251A70 /*gvi*/
+uint8_t UiVar01251A70;
+#pragma pop_macro("UiVar01251A70") /*gvi*/
+#pragma pop_macro("UiVar01251A70")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("UiVar011F43B0")
+#undef UiVar011F43B0
+#pragma push_macro("UiVar011F43B0") /*gvi*/
+#undef UiVar011F43B0 /*gvi*/
+int32_t UiVar011F43B0;
+#pragma pop_macro("UiVar011F43B0") /*gvi*/
+#pragma pop_macro("UiVar011F43B0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("UiVar00B1C280")
+#undef UiVar00B1C280
+#pragma push_macro("UiVar00B1C280") /*gvi*/
+#undef UiVar00B1C280 /*gvi*/
+int32_t UiVar00B1C280;
+#pragma pop_macro("UiVar00B1C280") /*gvi*/
+#pragma pop_macro("UiVar00B1C280")
+#endif
 int32_t Ui00417B03(void) {
     UiVar0054E4B0 = 1;
     return 1;

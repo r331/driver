@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <stdint.h>
 void plat_dd_stub_enum(int n_dd, int n_dev, uint32_t fm);
+void plat_input_enable(int on);   /* v2.03: platform/sdl/plat_di.c */
 #include <signal.h>
 /* v2.00: RE_WATCHDOG=N — через N с стек (в ASan-сборке) и выход 3: где игра стоит */
 void __sanitizer_print_stack_trace(void) __attribute__((weak));
@@ -43,7 +44,8 @@ int main(int argc, char **argv) {
         if (getenv("RE_WATCHDOG")) { signal(SIGALRM, watchdog); alarm((unsigned)atoi(getenv("RE_WATCHDOG"))); }
         { re_ptr_set_image(re_data_image_base, re_data_image, re_data_image_size);   /* v2.02: таблицы/строки .data по адресам */
         int n = re_init_data_game(); if (getenv("RE_TRACE")) printf("[init] .data Game.exe: %d значений\n", n); }   /* v2.01: блокер 4 */
-        plat_dd_stub_enum(1, 1, 0x100);   /* v2.00: один драйвер DirectDraw и одно устройство D3D (GL) */
+        plat_dd_stub_enum(1, 1, 0x100);
+        plat_input_enable(1);             /* v2.03: клавиатура SDL / геймпад / RE_KEYS → GetDeviceState */   /* v2.00: один драйвер DirectDraw и одно устройство D3D (GL) */
         printf("Driver native: данные %s, запуск WinMain 00521f10\n", data); fflush(stdout);
         int rc = P151_WinMain(1, 0, 0, 1);
         printf("Driver native: WinMain вернул %d\n", rc);

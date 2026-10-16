@@ -35,7 +35,10 @@
 #include <math.h>
 
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P130_LampRGB") /*gvi*/
+#undef P130_LampRGB /*gvi*/
 p130_rgb_t P130_LampRGB = { 0x00, 0x80, 0x80 };   /* .data 0055fc8c */
+#pragma pop_macro("P130_LampRGB") /*gvi*/
 #endif
 
 static int32_t rnd(float v) { P11_00ba52d0 = (int32_t)lrintf(v); return P11_00ba52d0; }

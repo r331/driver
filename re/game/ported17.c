@@ -1,15 +1,95 @@
 #include "ported17.h"
 #include <string.h>
-GAME_VAR_DEF(uint32_t, P17_SqrtArg, 0x0057a136)
-GAME_VAR_DEF(uint32_t, P17_PtrA, 0x00b5a730)
-GAME_VAR_DEF(uint32_t, P17_PtrB, 0x00b5a734)
-GAME_VAR_DEF(int32_t, P17_ValA, 0x00575550)
-GAME_VAR_DEF(int32_t, P17_ValB, 0x00575554)
-GAME_VAR_DEF(int32_t, P17_Const6, 0x005f7e54)
-GAME_VAR_DEF(int32_t, P17_Cond1, 0x00d11934)
-GAME_VAR_DEF(int32_t, P17_Cond2, 0x00b87e38)
-GAME_VAR_DEF(int32_t, P17_Src, 0x00c80ee8)
-GAME_VAR_DEF(int32_t, P17_Dst, 0x0054aa44)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P17_SqrtArg")
+#undef P17_SqrtArg
+#pragma push_macro("P17_SqrtArg") /*gvi*/
+#undef P17_SqrtArg /*gvi*/
+uint32_t P17_SqrtArg;
+#pragma pop_macro("P17_SqrtArg") /*gvi*/
+#pragma pop_macro("P17_SqrtArg")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P17_PtrA")
+#undef P17_PtrA
+#pragma push_macro("P17_PtrA") /*gvi*/
+#undef P17_PtrA /*gvi*/
+uint32_t P17_PtrA;
+#pragma pop_macro("P17_PtrA") /*gvi*/
+#pragma pop_macro("P17_PtrA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P17_PtrB")
+#undef P17_PtrB
+#pragma push_macro("P17_PtrB") /*gvi*/
+#undef P17_PtrB /*gvi*/
+uint32_t P17_PtrB;
+#pragma pop_macro("P17_PtrB") /*gvi*/
+#pragma pop_macro("P17_PtrB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P17_ValA")
+#undef P17_ValA
+#pragma push_macro("P17_ValA") /*gvi*/
+#undef P17_ValA /*gvi*/
+int32_t P17_ValA;
+#pragma pop_macro("P17_ValA") /*gvi*/
+#pragma pop_macro("P17_ValA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P17_ValB")
+#undef P17_ValB
+#pragma push_macro("P17_ValB") /*gvi*/
+#undef P17_ValB /*gvi*/
+int32_t P17_ValB;
+#pragma pop_macro("P17_ValB") /*gvi*/
+#pragma pop_macro("P17_ValB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P17_Const6")
+#undef P17_Const6
+#pragma push_macro("P17_Const6") /*gvi*/
+#undef P17_Const6 /*gvi*/
+int32_t P17_Const6;
+#pragma pop_macro("P17_Const6") /*gvi*/
+#pragma pop_macro("P17_Const6")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P17_Cond1")
+#undef P17_Cond1
+#pragma push_macro("P17_Cond1") /*gvi*/
+#undef P17_Cond1 /*gvi*/
+int32_t P17_Cond1;
+#pragma pop_macro("P17_Cond1") /*gvi*/
+#pragma pop_macro("P17_Cond1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P17_Cond2")
+#undef P17_Cond2
+#pragma push_macro("P17_Cond2") /*gvi*/
+#undef P17_Cond2 /*gvi*/
+int32_t P17_Cond2;
+#pragma pop_macro("P17_Cond2") /*gvi*/
+#pragma pop_macro("P17_Cond2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P17_Src")
+#undef P17_Src
+#pragma push_macro("P17_Src") /*gvi*/
+#undef P17_Src /*gvi*/
+int32_t P17_Src;
+#pragma pop_macro("P17_Src") /*gvi*/
+#pragma pop_macro("P17_Src")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P17_Dst")
+#undef P17_Dst
+#pragma push_macro("P17_Dst") /*gvi*/
+#undef P17_Dst /*gvi*/
+int32_t P17_Dst;
+#pragma pop_macro("P17_Dst") /*gvi*/
+#pragma pop_macro("P17_Dst")
+#endif
 
 /* Слот: 0x2c байта, четыре int16-ячейки со смещением 0, 8, 0x10, 0x18 от 0xc1ed8a (шаг 8 байт). */
 static int16_t slot_cell(int slot, int cell) {

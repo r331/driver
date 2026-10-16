@@ -2,24 +2,168 @@
 #include <math.h>
 #include <string.h>
 
-GAME_VAR_DEF(p61_offs_t, P61_CamOffs, 0x00560968)
-GAME_VAR_DEF(int16_t, P61_Heading, 0x01137322)
-GAME_VAR_DEF(float, P61_TgtX, 0x01136c70)
-GAME_VAR_DEF(float, P61_TgtY, 0x01136c74)
-GAME_VAR_DEF(float, P61_TgtZ, 0x01136c78)
-GAME_VAR_DEF(float, P61_OffX, 0x011373a0)
-GAME_VAR_DEF(float, P61_OffY, 0x011373a4)
-GAME_VAR_DEF(float, P61_OffZ, 0x011373a8)
-GAME_VAR_DEF(uint16_t, P61_AngB8, 0x011373b8)
-GAME_VAR_DEF(uint16_t, P61_AngBA, 0x011373ba)
-GAME_VAR_DEF(uint16_t, P61_AngBC, 0x011373bc)
-GAME_VAR_DEF(float, P61_Dist8, 0x01137368)
-GAME_VAR_DEF(float, P61_DistC, 0x0113731c)
-GAME_VAR_DEF(int32_t, P61_V18, 0x01136c58)
-GAME_VAR_DEF(int32_t, P61_V1C, 0x01137310)
-GAME_VAR_DEF(int32_t, P61_V20, 0x01137318)
-GAME_VAR_DEF(int32_t, P61_V10, 0x01136c48)
-GAME_VAR_DEF(int32_t, P61_V10b, 0x01136c4c)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_CamOffs")
+#undef P61_CamOffs
+#pragma push_macro("P61_CamOffs") /*gvi*/
+#undef P61_CamOffs /*gvi*/
+p61_offs_t P61_CamOffs;
+#pragma pop_macro("P61_CamOffs") /*gvi*/
+#pragma pop_macro("P61_CamOffs")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_Heading")
+#undef P61_Heading
+#pragma push_macro("P61_Heading") /*gvi*/
+#undef P61_Heading /*gvi*/
+int16_t P61_Heading;
+#pragma pop_macro("P61_Heading") /*gvi*/
+#pragma pop_macro("P61_Heading")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_TgtX")
+#undef P61_TgtX
+#pragma push_macro("P61_TgtX") /*gvi*/
+#undef P61_TgtX /*gvi*/
+float P61_TgtX;
+#pragma pop_macro("P61_TgtX") /*gvi*/
+#pragma pop_macro("P61_TgtX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_TgtY")
+#undef P61_TgtY
+#pragma push_macro("P61_TgtY") /*gvi*/
+#undef P61_TgtY /*gvi*/
+float P61_TgtY;
+#pragma pop_macro("P61_TgtY") /*gvi*/
+#pragma pop_macro("P61_TgtY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_TgtZ")
+#undef P61_TgtZ
+#pragma push_macro("P61_TgtZ") /*gvi*/
+#undef P61_TgtZ /*gvi*/
+float P61_TgtZ;
+#pragma pop_macro("P61_TgtZ") /*gvi*/
+#pragma pop_macro("P61_TgtZ")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_OffX")
+#undef P61_OffX
+#pragma push_macro("P61_OffX") /*gvi*/
+#undef P61_OffX /*gvi*/
+float P61_OffX;
+#pragma pop_macro("P61_OffX") /*gvi*/
+#pragma pop_macro("P61_OffX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_OffY")
+#undef P61_OffY
+#pragma push_macro("P61_OffY") /*gvi*/
+#undef P61_OffY /*gvi*/
+float P61_OffY;
+#pragma pop_macro("P61_OffY") /*gvi*/
+#pragma pop_macro("P61_OffY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_OffZ")
+#undef P61_OffZ
+#pragma push_macro("P61_OffZ") /*gvi*/
+#undef P61_OffZ /*gvi*/
+float P61_OffZ;
+#pragma pop_macro("P61_OffZ") /*gvi*/
+#pragma pop_macro("P61_OffZ")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_AngB8")
+#undef P61_AngB8
+#pragma push_macro("P61_AngB8") /*gvi*/
+#undef P61_AngB8 /*gvi*/
+uint16_t P61_AngB8;
+#pragma pop_macro("P61_AngB8") /*gvi*/
+#pragma pop_macro("P61_AngB8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_AngBA")
+#undef P61_AngBA
+#pragma push_macro("P61_AngBA") /*gvi*/
+#undef P61_AngBA /*gvi*/
+uint16_t P61_AngBA;
+#pragma pop_macro("P61_AngBA") /*gvi*/
+#pragma pop_macro("P61_AngBA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_AngBC")
+#undef P61_AngBC
+#pragma push_macro("P61_AngBC") /*gvi*/
+#undef P61_AngBC /*gvi*/
+uint16_t P61_AngBC;
+#pragma pop_macro("P61_AngBC") /*gvi*/
+#pragma pop_macro("P61_AngBC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_Dist8")
+#undef P61_Dist8
+#pragma push_macro("P61_Dist8") /*gvi*/
+#undef P61_Dist8 /*gvi*/
+float P61_Dist8;
+#pragma pop_macro("P61_Dist8") /*gvi*/
+#pragma pop_macro("P61_Dist8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_DistC")
+#undef P61_DistC
+#pragma push_macro("P61_DistC") /*gvi*/
+#undef P61_DistC /*gvi*/
+float P61_DistC;
+#pragma pop_macro("P61_DistC") /*gvi*/
+#pragma pop_macro("P61_DistC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_V18")
+#undef P61_V18
+#pragma push_macro("P61_V18") /*gvi*/
+#undef P61_V18 /*gvi*/
+int32_t P61_V18;
+#pragma pop_macro("P61_V18") /*gvi*/
+#pragma pop_macro("P61_V18")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_V1C")
+#undef P61_V1C
+#pragma push_macro("P61_V1C") /*gvi*/
+#undef P61_V1C /*gvi*/
+int32_t P61_V1C;
+#pragma pop_macro("P61_V1C") /*gvi*/
+#pragma pop_macro("P61_V1C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_V20")
+#undef P61_V20
+#pragma push_macro("P61_V20") /*gvi*/
+#undef P61_V20 /*gvi*/
+int32_t P61_V20;
+#pragma pop_macro("P61_V20") /*gvi*/
+#pragma pop_macro("P61_V20")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_V10")
+#undef P61_V10
+#pragma push_macro("P61_V10") /*gvi*/
+#undef P61_V10 /*gvi*/
+int32_t P61_V10;
+#pragma pop_macro("P61_V10") /*gvi*/
+#pragma pop_macro("P61_V10")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P61_V10b")
+#undef P61_V10b
+#pragma push_macro("P61_V10b") /*gvi*/
+#undef P61_V10b /*gvi*/
+int32_t P61_V10b;
+#pragma pop_macro("P61_V10b") /*gvi*/
+#pragma pop_macro("P61_V10b")
+#endif
 
 static int32_t rd32(const uint8_t *p, uint32_t o) { int32_t v; memcpy(&v, p + o, 4); return v; }
 static void    wr32(uint8_t *p, uint32_t o, int32_t v) { memcpy(p + o, &v, 4); }

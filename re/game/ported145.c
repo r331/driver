@@ -110,16 +110,96 @@
 #include <math.h>
 
 #ifndef RE_HOOK_BUILD
-GAME_VAR_DEF(int32_t, P145_B20304, 0x00b20304)
-GAME_VAR_DEF(int32_t, P145_B20308, 0x00b20308)
-GAME_VAR_DEF(uint16_t, P145_D0FE18, 0x00d0fe18)
-GAME_VAR_DEF(uint16_t, P145_D10E60, 0x00d10e60)
-GAME_VAR_DEF(int32_t, P145_D1184C, 0x00d1184c)
-GAME_VAR_DEF(int32_t, P145_D118C4, 0x00d118c4)
-GAME_VAR_DEF(int32_t, P145_BankCops, 0x00d118cc)
-GAME_VAR_DEF(int32_t, P145_BankMain, 0x00d118d0)
-GAME_VAR_DEF(p145_s24_t, P145_CfgName, 0x00d11900)
-GAME_VAR_DEF(p145_splash_t, P145_Splash, 0x00d14f00)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P145_B20304")
+#undef P145_B20304
+#pragma push_macro("P145_B20304") /*gvi*/
+#undef P145_B20304 /*gvi*/
+int32_t P145_B20304;
+#pragma pop_macro("P145_B20304") /*gvi*/
+#pragma pop_macro("P145_B20304")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P145_B20308")
+#undef P145_B20308
+#pragma push_macro("P145_B20308") /*gvi*/
+#undef P145_B20308 /*gvi*/
+int32_t P145_B20308;
+#pragma pop_macro("P145_B20308") /*gvi*/
+#pragma pop_macro("P145_B20308")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P145_D0FE18")
+#undef P145_D0FE18
+#pragma push_macro("P145_D0FE18") /*gvi*/
+#undef P145_D0FE18 /*gvi*/
+uint16_t P145_D0FE18;
+#pragma pop_macro("P145_D0FE18") /*gvi*/
+#pragma pop_macro("P145_D0FE18")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P145_D10E60")
+#undef P145_D10E60
+#pragma push_macro("P145_D10E60") /*gvi*/
+#undef P145_D10E60 /*gvi*/
+uint16_t P145_D10E60;
+#pragma pop_macro("P145_D10E60") /*gvi*/
+#pragma pop_macro("P145_D10E60")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P145_D1184C")
+#undef P145_D1184C
+#pragma push_macro("P145_D1184C") /*gvi*/
+#undef P145_D1184C /*gvi*/
+int32_t P145_D1184C;
+#pragma pop_macro("P145_D1184C") /*gvi*/
+#pragma pop_macro("P145_D1184C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P145_D118C4")
+#undef P145_D118C4
+#pragma push_macro("P145_D118C4") /*gvi*/
+#undef P145_D118C4 /*gvi*/
+int32_t P145_D118C4;
+#pragma pop_macro("P145_D118C4") /*gvi*/
+#pragma pop_macro("P145_D118C4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P145_BankCops")
+#undef P145_BankCops
+#pragma push_macro("P145_BankCops") /*gvi*/
+#undef P145_BankCops /*gvi*/
+int32_t P145_BankCops;
+#pragma pop_macro("P145_BankCops") /*gvi*/
+#pragma pop_macro("P145_BankCops")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P145_BankMain")
+#undef P145_BankMain
+#pragma push_macro("P145_BankMain") /*gvi*/
+#undef P145_BankMain /*gvi*/
+int32_t P145_BankMain;
+#pragma pop_macro("P145_BankMain") /*gvi*/
+#pragma pop_macro("P145_BankMain")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P145_CfgName")
+#undef P145_CfgName
+#pragma push_macro("P145_CfgName") /*gvi*/
+#undef P145_CfgName /*gvi*/
+p145_s24_t P145_CfgName;
+#pragma pop_macro("P145_CfgName") /*gvi*/
+#pragma pop_macro("P145_CfgName")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P145_Splash")
+#undef P145_Splash
+#pragma push_macro("P145_Splash") /*gvi*/
+#undef P145_Splash /*gvi*/
+p145_splash_t P145_Splash;
+#pragma pop_macro("P145_Splash") /*gvi*/
+#pragma pop_macro("P145_Splash")
+#endif
 #endif
 
 #ifdef RE_HOOK_BUILD

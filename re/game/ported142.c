@@ -61,17 +61,100 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
-GAME_VAR_DEF(int32_t, P142_CopNoDmg, 0x0112d9d0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P142_CopNoDmg")
+#undef P142_CopNoDmg
+#pragma push_macro("P142_CopNoDmg") /*gvi*/
+#undef P142_CopNoDmg /*gvi*/
+int32_t P142_CopNoDmg;
+#pragma pop_macro("P142_CopNoDmg") /*gvi*/
+#pragma pop_macro("P142_CopNoDmg")
+#endif
+#pragma push_macro("P142_CopDmgMax") /*gvi*/
+#undef P142_CopDmgMax /*gvi*/
 int32_t P142_CopDmgMax = 7000;                    /* .data 00575ee0 */
-GAME_VAR_DEF(int32_t, P142_B278, 0x0112b278)
-GAME_VAR_DEF(int32_t, P142_B27C, 0x0112b27c)
-GAME_VAR_DEF(int32_t, P142_B2AC, 0x0112b2ac)
-GAME_VAR_DEF(int32_t, P142_B2B8, 0x0112b2b8)
-GAME_VAR_DEF(int32_t, P142_340C0, 0x011340c0)
-GAME_VAR_DEF(int32_t, P142_340C4, 0x011340c4)
-GAME_VAR_DEF(int32_t, P142_D07788, 0x00d07788)
-GAME_VAR_DEF(int32_t, P142_B87E18, 0x00b87e18)
-GAME_VAR_DEF(int32_t, P142_B2F304, 0x00b2f304)
+#pragma pop_macro("P142_CopDmgMax") /*gvi*/
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P142_B278")
+#undef P142_B278
+#pragma push_macro("P142_B278") /*gvi*/
+#undef P142_B278 /*gvi*/
+int32_t P142_B278;
+#pragma pop_macro("P142_B278") /*gvi*/
+#pragma pop_macro("P142_B278")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P142_B27C")
+#undef P142_B27C
+#pragma push_macro("P142_B27C") /*gvi*/
+#undef P142_B27C /*gvi*/
+int32_t P142_B27C;
+#pragma pop_macro("P142_B27C") /*gvi*/
+#pragma pop_macro("P142_B27C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P142_B2AC")
+#undef P142_B2AC
+#pragma push_macro("P142_B2AC") /*gvi*/
+#undef P142_B2AC /*gvi*/
+int32_t P142_B2AC;
+#pragma pop_macro("P142_B2AC") /*gvi*/
+#pragma pop_macro("P142_B2AC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P142_B2B8")
+#undef P142_B2B8
+#pragma push_macro("P142_B2B8") /*gvi*/
+#undef P142_B2B8 /*gvi*/
+int32_t P142_B2B8;
+#pragma pop_macro("P142_B2B8") /*gvi*/
+#pragma pop_macro("P142_B2B8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P142_340C0")
+#undef P142_340C0
+#pragma push_macro("P142_340C0") /*gvi*/
+#undef P142_340C0 /*gvi*/
+int32_t P142_340C0;
+#pragma pop_macro("P142_340C0") /*gvi*/
+#pragma pop_macro("P142_340C0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P142_340C4")
+#undef P142_340C4
+#pragma push_macro("P142_340C4") /*gvi*/
+#undef P142_340C4 /*gvi*/
+int32_t P142_340C4;
+#pragma pop_macro("P142_340C4") /*gvi*/
+#pragma pop_macro("P142_340C4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P142_D07788")
+#undef P142_D07788
+#pragma push_macro("P142_D07788") /*gvi*/
+#undef P142_D07788 /*gvi*/
+int32_t P142_D07788;
+#pragma pop_macro("P142_D07788") /*gvi*/
+#pragma pop_macro("P142_D07788")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P142_B87E18")
+#undef P142_B87E18
+#pragma push_macro("P142_B87E18") /*gvi*/
+#undef P142_B87E18 /*gvi*/
+int32_t P142_B87E18;
+#pragma pop_macro("P142_B87E18") /*gvi*/
+#pragma pop_macro("P142_B87E18")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P142_B2F304")
+#undef P142_B2F304
+#pragma push_macro("P142_B2F304") /*gvi*/
+#undef P142_B2F304 /*gvi*/
+int32_t P142_B2F304;
+#pragma pop_macro("P142_B2F304") /*gvi*/
+#pragma pop_macro("P142_B2F304")
+#endif
 #endif
 
 /* 32-битная арифметика оригинала: выражение в int64, затем по модулю 2^32 */

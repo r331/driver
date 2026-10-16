@@ -1,90 +1,778 @@
 #include "menuselect.h"
-GAME_VAR_DEF(uint8_t, MenuB00549F8C, 0x00549f8c)
-GAME_VAR_DEF(uint8_t, MenuB00549F9C, 0x00549f9c)
-GAME_VAR_DEF(uint8_t, MenuB00549FBC, 0x00549fbc)
-GAME_VAR_DEF(uint8_t, MenuB00549FCC, 0x00549fcc)
-GAME_VAR_DEF(uint8_t, MenuB00549FDC, 0x00549fdc)
-GAME_VAR_DEF(uint8_t, MenuB00549FEC, 0x00549fec)
-GAME_VAR_DEF(int32_t, MenuI0054A060, 0x0054a060)
-GAME_VAR_DEF(uint8_t, MenuB0054C044, 0x0054c044)
-GAME_VAR_DEF(uint8_t, MenuB0054C054, 0x0054c054)
-GAME_VAR_DEF(uint8_t, MenuB0054C064, 0x0054c064)
-GAME_VAR_DEF(uint8_t, MenuB0054C074, 0x0054c074)
-GAME_VAR_DEF(uint8_t, MenuB0054C084, 0x0054c084)
-GAME_VAR_DEF(uint8_t, MenuB0054C094, 0x0054c094)
-GAME_VAR_DEF(uint8_t, MenuB0054C0A4, 0x0054c0a4)
-GAME_VAR_DEF(uint8_t, MenuB0054C0B4, 0x0054c0b4)
-GAME_VAR_DEF(uint8_t, MenuB0054C0C4, 0x0054c0c4)
-GAME_VAR_DEF(uint8_t, MenuB0054C0D4, 0x0054c0d4)
-GAME_VAR_DEF(uint8_t, MenuB0054C0E4, 0x0054c0e4)
-GAME_VAR_DEF(uint8_t, MenuB0054C0F4, 0x0054c0f4)
-GAME_VAR_DEF(uint8_t, MenuB0054C104, 0x0054c104)
-GAME_VAR_DEF(uint8_t, MenuB0054C114, 0x0054c114)
-GAME_VAR_DEF(uint8_t, MenuB0054C124, 0x0054c124)
-GAME_VAR_DEF(uint8_t, MenuB0054C134, 0x0054c134)
-GAME_VAR_DEF(uint8_t, MenuB0054C144, 0x0054c144)
-GAME_VAR_DEF(uint8_t, MenuB0054C154, 0x0054c154)
-GAME_VAR_DEF(uint8_t, MenuB0054C164, 0x0054c164)
-GAME_VAR_DEF(uint8_t, MenuB0054C174, 0x0054c174)
-GAME_VAR_DEF(uint8_t, MenuB0054C184, 0x0054c184)
-GAME_VAR_DEF(uint8_t, MenuB0054C194, 0x0054c194)
-GAME_VAR_DEF(uint8_t, MenuB0054C1A4, 0x0054c1a4)
-GAME_VAR_DEF(uint8_t, MenuB0054C1B4, 0x0054c1b4)
-GAME_VAR_DEF(uint8_t, MenuB0054C364, 0x0054c364)
-GAME_VAR_DEF(uint8_t, MenuB0054C374, 0x0054c374)
-GAME_VAR_DEF(uint8_t, MenuB0054C384, 0x0054c384)
-GAME_VAR_DEF(uint8_t, MenuB0054C394, 0x0054c394)
-GAME_VAR_DEF(uint8_t, MenuB0054C3A4, 0x0054c3a4)
-GAME_VAR_DEF(uint8_t, MenuB0054C3B4, 0x0054c3b4)
-GAME_VAR_DEF(uint8_t, MenuB0054C3C4, 0x0054c3c4)
-GAME_VAR_DEF(uint8_t, MenuB0054C3D4, 0x0054c3d4)
-GAME_VAR_DEF(uint8_t, MenuB0054C3E4, 0x0054c3e4)
-GAME_VAR_DEF(uint8_t, MenuB0054C3F4, 0x0054c3f4)
-GAME_VAR_DEF(uint8_t, MenuB0054C404, 0x0054c404)
-GAME_VAR_DEF(uint8_t, MenuB0054C414, 0x0054c414)
-GAME_VAR_DEF(uint8_t, MenuB0054C424, 0x0054c424)
-GAME_VAR_DEF(uint8_t, MenuB0054C434, 0x0054c434)
-GAME_VAR_DEF(uint8_t, MenuB0054C444, 0x0054c444)
-GAME_VAR_DEF(uint8_t, MenuB0054C454, 0x0054c454)
-GAME_VAR_DEF(uint8_t, MenuB0054C464, 0x0054c464)
-GAME_VAR_DEF(uint8_t, MenuB0054C474, 0x0054c474)
-GAME_VAR_DEF(uint8_t, MenuB0054C484, 0x0054c484)
-GAME_VAR_DEF(uint8_t, MenuB0054C494, 0x0054c494)
-GAME_VAR_DEF(uint8_t, MenuB0054C4A4, 0x0054c4a4)
-GAME_VAR_DEF(uint8_t, MenuB0054C4B4, 0x0054c4b4)
-GAME_VAR_DEF(uint8_t, MenuB0054C4C4, 0x0054c4c4)
-GAME_VAR_DEF(uint8_t, MenuB0054C4D4, 0x0054c4d4)
-GAME_VAR_DEF(uint8_t, MenuB0054C4E4, 0x0054c4e4)
-GAME_VAR_DEF(uint8_t, MenuB0054C4F4, 0x0054c4f4)
-GAME_VAR_DEF(uint8_t, MenuB0054C504, 0x0054c504)
-GAME_VAR_DEF(uint8_t, MenuB0054C514, 0x0054c514)
-GAME_VAR_DEF(uint8_t, MenuB0054D1B4, 0x0054d1b4)
-GAME_VAR_DEF(uint8_t, MenuB0054D1C4, 0x0054d1c4)
-GAME_VAR_DEF(uint8_t, MenuB0054D1D4, 0x0054d1d4)
-GAME_VAR_DEF(uint8_t, MenuB0054D1E4, 0x0054d1e4)
-GAME_VAR_DEF(uint8_t, MenuB0054D2A4, 0x0054d2a4)
-GAME_VAR_DEF(uint8_t, MenuB0054D2B4, 0x0054d2b4)
-GAME_VAR_DEF(uint8_t, MenuB0054D2C4, 0x0054d2c4)
-GAME_VAR_DEF(uint8_t, MenuB0054D2D4, 0x0054d2d4)
-GAME_VAR_DEF(uint8_t, MenuB0054D2E4, 0x0054d2e4)
-GAME_VAR_DEF(uint8_t, MenuB0054D3BC, 0x0054d3bc)
-GAME_VAR_DEF(uint8_t, MenuB0054D3CC, 0x0054d3cc)
-GAME_VAR_DEF(uint8_t, MenuB0054D3DC, 0x0054d3dc)
-GAME_VAR_DEF(uint8_t, MenuB0054D3EC, 0x0054d3ec)
-GAME_VAR_DEF(uint8_t, MenuB0054D3FC, 0x0054d3fc)
-GAME_VAR_DEF(uint8_t, MenuB0054DFD4, 0x0054dfd4)
-GAME_VAR_DEF(uint8_t, MenuB0054DFE4, 0x0054dfe4)
-GAME_VAR_DEF(uint8_t, MenuB0054DFF4, 0x0054dff4)
-GAME_VAR_DEF(uint8_t, MenuB0054E004, 0x0054e004)
-GAME_VAR_DEF(uint8_t, MenuB0054E1A4, 0x0054e1a4)
-GAME_VAR_DEF(uint8_t, MenuB0054E1B4, 0x0054e1b4)
-GAME_VAR_DEF(int32_t, MenuI0057B730, 0x0057b730)
-GAME_VAR_DEF(int32_t, MenuI005D578C, 0x005d578c)
-GAME_VAR_DEF(int32_t, MenuI005FE770, 0x005fe770)
-GAME_VAR_DEF(int32_t, MenuI005FE774, 0x005fe774)
-GAME_VAR_DEF(int32_t, MenuI005FE798, 0x005fe798)
-GAME_VAR_DEF(int32_t, MenuI005FE79C, 0x005fe79c)
-GAME_VAR_DEF(int32_t, MenuI005FE9D0, 0x005fe9d0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB00549F8C")
+#undef MenuB00549F8C
+#pragma push_macro("MenuB00549F8C") /*gvi*/
+#undef MenuB00549F8C /*gvi*/
+uint8_t MenuB00549F8C;
+#pragma pop_macro("MenuB00549F8C") /*gvi*/
+#pragma pop_macro("MenuB00549F8C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB00549F9C")
+#undef MenuB00549F9C
+#pragma push_macro("MenuB00549F9C") /*gvi*/
+#undef MenuB00549F9C /*gvi*/
+uint8_t MenuB00549F9C;
+#pragma pop_macro("MenuB00549F9C") /*gvi*/
+#pragma pop_macro("MenuB00549F9C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB00549FBC")
+#undef MenuB00549FBC
+#pragma push_macro("MenuB00549FBC") /*gvi*/
+#undef MenuB00549FBC /*gvi*/
+uint8_t MenuB00549FBC;
+#pragma pop_macro("MenuB00549FBC") /*gvi*/
+#pragma pop_macro("MenuB00549FBC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB00549FCC")
+#undef MenuB00549FCC
+#pragma push_macro("MenuB00549FCC") /*gvi*/
+#undef MenuB00549FCC /*gvi*/
+uint8_t MenuB00549FCC;
+#pragma pop_macro("MenuB00549FCC") /*gvi*/
+#pragma pop_macro("MenuB00549FCC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB00549FDC")
+#undef MenuB00549FDC
+#pragma push_macro("MenuB00549FDC") /*gvi*/
+#undef MenuB00549FDC /*gvi*/
+uint8_t MenuB00549FDC;
+#pragma pop_macro("MenuB00549FDC") /*gvi*/
+#pragma pop_macro("MenuB00549FDC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB00549FEC")
+#undef MenuB00549FEC
+#pragma push_macro("MenuB00549FEC") /*gvi*/
+#undef MenuB00549FEC /*gvi*/
+uint8_t MenuB00549FEC;
+#pragma pop_macro("MenuB00549FEC") /*gvi*/
+#pragma pop_macro("MenuB00549FEC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuI0054A060")
+#undef MenuI0054A060
+#pragma push_macro("MenuI0054A060") /*gvi*/
+#undef MenuI0054A060 /*gvi*/
+int32_t MenuI0054A060;
+#pragma pop_macro("MenuI0054A060") /*gvi*/
+#pragma pop_macro("MenuI0054A060")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C044")
+#undef MenuB0054C044
+#pragma push_macro("MenuB0054C044") /*gvi*/
+#undef MenuB0054C044 /*gvi*/
+uint8_t MenuB0054C044;
+#pragma pop_macro("MenuB0054C044") /*gvi*/
+#pragma pop_macro("MenuB0054C044")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C054")
+#undef MenuB0054C054
+#pragma push_macro("MenuB0054C054") /*gvi*/
+#undef MenuB0054C054 /*gvi*/
+uint8_t MenuB0054C054;
+#pragma pop_macro("MenuB0054C054") /*gvi*/
+#pragma pop_macro("MenuB0054C054")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C064")
+#undef MenuB0054C064
+#pragma push_macro("MenuB0054C064") /*gvi*/
+#undef MenuB0054C064 /*gvi*/
+uint8_t MenuB0054C064;
+#pragma pop_macro("MenuB0054C064") /*gvi*/
+#pragma pop_macro("MenuB0054C064")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C074")
+#undef MenuB0054C074
+#pragma push_macro("MenuB0054C074") /*gvi*/
+#undef MenuB0054C074 /*gvi*/
+uint8_t MenuB0054C074;
+#pragma pop_macro("MenuB0054C074") /*gvi*/
+#pragma pop_macro("MenuB0054C074")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C084")
+#undef MenuB0054C084
+#pragma push_macro("MenuB0054C084") /*gvi*/
+#undef MenuB0054C084 /*gvi*/
+uint8_t MenuB0054C084;
+#pragma pop_macro("MenuB0054C084") /*gvi*/
+#pragma pop_macro("MenuB0054C084")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C094")
+#undef MenuB0054C094
+#pragma push_macro("MenuB0054C094") /*gvi*/
+#undef MenuB0054C094 /*gvi*/
+uint8_t MenuB0054C094;
+#pragma pop_macro("MenuB0054C094") /*gvi*/
+#pragma pop_macro("MenuB0054C094")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C0A4")
+#undef MenuB0054C0A4
+#pragma push_macro("MenuB0054C0A4") /*gvi*/
+#undef MenuB0054C0A4 /*gvi*/
+uint8_t MenuB0054C0A4;
+#pragma pop_macro("MenuB0054C0A4") /*gvi*/
+#pragma pop_macro("MenuB0054C0A4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C0B4")
+#undef MenuB0054C0B4
+#pragma push_macro("MenuB0054C0B4") /*gvi*/
+#undef MenuB0054C0B4 /*gvi*/
+uint8_t MenuB0054C0B4;
+#pragma pop_macro("MenuB0054C0B4") /*gvi*/
+#pragma pop_macro("MenuB0054C0B4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C0C4")
+#undef MenuB0054C0C4
+#pragma push_macro("MenuB0054C0C4") /*gvi*/
+#undef MenuB0054C0C4 /*gvi*/
+uint8_t MenuB0054C0C4;
+#pragma pop_macro("MenuB0054C0C4") /*gvi*/
+#pragma pop_macro("MenuB0054C0C4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C0D4")
+#undef MenuB0054C0D4
+#pragma push_macro("MenuB0054C0D4") /*gvi*/
+#undef MenuB0054C0D4 /*gvi*/
+uint8_t MenuB0054C0D4;
+#pragma pop_macro("MenuB0054C0D4") /*gvi*/
+#pragma pop_macro("MenuB0054C0D4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C0E4")
+#undef MenuB0054C0E4
+#pragma push_macro("MenuB0054C0E4") /*gvi*/
+#undef MenuB0054C0E4 /*gvi*/
+uint8_t MenuB0054C0E4;
+#pragma pop_macro("MenuB0054C0E4") /*gvi*/
+#pragma pop_macro("MenuB0054C0E4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C0F4")
+#undef MenuB0054C0F4
+#pragma push_macro("MenuB0054C0F4") /*gvi*/
+#undef MenuB0054C0F4 /*gvi*/
+uint8_t MenuB0054C0F4;
+#pragma pop_macro("MenuB0054C0F4") /*gvi*/
+#pragma pop_macro("MenuB0054C0F4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C104")
+#undef MenuB0054C104
+#pragma push_macro("MenuB0054C104") /*gvi*/
+#undef MenuB0054C104 /*gvi*/
+uint8_t MenuB0054C104;
+#pragma pop_macro("MenuB0054C104") /*gvi*/
+#pragma pop_macro("MenuB0054C104")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C114")
+#undef MenuB0054C114
+#pragma push_macro("MenuB0054C114") /*gvi*/
+#undef MenuB0054C114 /*gvi*/
+uint8_t MenuB0054C114;
+#pragma pop_macro("MenuB0054C114") /*gvi*/
+#pragma pop_macro("MenuB0054C114")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C124")
+#undef MenuB0054C124
+#pragma push_macro("MenuB0054C124") /*gvi*/
+#undef MenuB0054C124 /*gvi*/
+uint8_t MenuB0054C124;
+#pragma pop_macro("MenuB0054C124") /*gvi*/
+#pragma pop_macro("MenuB0054C124")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C134")
+#undef MenuB0054C134
+#pragma push_macro("MenuB0054C134") /*gvi*/
+#undef MenuB0054C134 /*gvi*/
+uint8_t MenuB0054C134;
+#pragma pop_macro("MenuB0054C134") /*gvi*/
+#pragma pop_macro("MenuB0054C134")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C144")
+#undef MenuB0054C144
+#pragma push_macro("MenuB0054C144") /*gvi*/
+#undef MenuB0054C144 /*gvi*/
+uint8_t MenuB0054C144;
+#pragma pop_macro("MenuB0054C144") /*gvi*/
+#pragma pop_macro("MenuB0054C144")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C154")
+#undef MenuB0054C154
+#pragma push_macro("MenuB0054C154") /*gvi*/
+#undef MenuB0054C154 /*gvi*/
+uint8_t MenuB0054C154;
+#pragma pop_macro("MenuB0054C154") /*gvi*/
+#pragma pop_macro("MenuB0054C154")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C164")
+#undef MenuB0054C164
+#pragma push_macro("MenuB0054C164") /*gvi*/
+#undef MenuB0054C164 /*gvi*/
+uint8_t MenuB0054C164;
+#pragma pop_macro("MenuB0054C164") /*gvi*/
+#pragma pop_macro("MenuB0054C164")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C174")
+#undef MenuB0054C174
+#pragma push_macro("MenuB0054C174") /*gvi*/
+#undef MenuB0054C174 /*gvi*/
+uint8_t MenuB0054C174;
+#pragma pop_macro("MenuB0054C174") /*gvi*/
+#pragma pop_macro("MenuB0054C174")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C184")
+#undef MenuB0054C184
+#pragma push_macro("MenuB0054C184") /*gvi*/
+#undef MenuB0054C184 /*gvi*/
+uint8_t MenuB0054C184;
+#pragma pop_macro("MenuB0054C184") /*gvi*/
+#pragma pop_macro("MenuB0054C184")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C194")
+#undef MenuB0054C194
+#pragma push_macro("MenuB0054C194") /*gvi*/
+#undef MenuB0054C194 /*gvi*/
+uint8_t MenuB0054C194;
+#pragma pop_macro("MenuB0054C194") /*gvi*/
+#pragma pop_macro("MenuB0054C194")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C1A4")
+#undef MenuB0054C1A4
+#pragma push_macro("MenuB0054C1A4") /*gvi*/
+#undef MenuB0054C1A4 /*gvi*/
+uint8_t MenuB0054C1A4;
+#pragma pop_macro("MenuB0054C1A4") /*gvi*/
+#pragma pop_macro("MenuB0054C1A4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C1B4")
+#undef MenuB0054C1B4
+#pragma push_macro("MenuB0054C1B4") /*gvi*/
+#undef MenuB0054C1B4 /*gvi*/
+uint8_t MenuB0054C1B4;
+#pragma pop_macro("MenuB0054C1B4") /*gvi*/
+#pragma pop_macro("MenuB0054C1B4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C364")
+#undef MenuB0054C364
+#pragma push_macro("MenuB0054C364") /*gvi*/
+#undef MenuB0054C364 /*gvi*/
+uint8_t MenuB0054C364;
+#pragma pop_macro("MenuB0054C364") /*gvi*/
+#pragma pop_macro("MenuB0054C364")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C374")
+#undef MenuB0054C374
+#pragma push_macro("MenuB0054C374") /*gvi*/
+#undef MenuB0054C374 /*gvi*/
+uint8_t MenuB0054C374;
+#pragma pop_macro("MenuB0054C374") /*gvi*/
+#pragma pop_macro("MenuB0054C374")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C384")
+#undef MenuB0054C384
+#pragma push_macro("MenuB0054C384") /*gvi*/
+#undef MenuB0054C384 /*gvi*/
+uint8_t MenuB0054C384;
+#pragma pop_macro("MenuB0054C384") /*gvi*/
+#pragma pop_macro("MenuB0054C384")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C394")
+#undef MenuB0054C394
+#pragma push_macro("MenuB0054C394") /*gvi*/
+#undef MenuB0054C394 /*gvi*/
+uint8_t MenuB0054C394;
+#pragma pop_macro("MenuB0054C394") /*gvi*/
+#pragma pop_macro("MenuB0054C394")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C3A4")
+#undef MenuB0054C3A4
+#pragma push_macro("MenuB0054C3A4") /*gvi*/
+#undef MenuB0054C3A4 /*gvi*/
+uint8_t MenuB0054C3A4;
+#pragma pop_macro("MenuB0054C3A4") /*gvi*/
+#pragma pop_macro("MenuB0054C3A4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C3B4")
+#undef MenuB0054C3B4
+#pragma push_macro("MenuB0054C3B4") /*gvi*/
+#undef MenuB0054C3B4 /*gvi*/
+uint8_t MenuB0054C3B4;
+#pragma pop_macro("MenuB0054C3B4") /*gvi*/
+#pragma pop_macro("MenuB0054C3B4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C3C4")
+#undef MenuB0054C3C4
+#pragma push_macro("MenuB0054C3C4") /*gvi*/
+#undef MenuB0054C3C4 /*gvi*/
+uint8_t MenuB0054C3C4;
+#pragma pop_macro("MenuB0054C3C4") /*gvi*/
+#pragma pop_macro("MenuB0054C3C4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C3D4")
+#undef MenuB0054C3D4
+#pragma push_macro("MenuB0054C3D4") /*gvi*/
+#undef MenuB0054C3D4 /*gvi*/
+uint8_t MenuB0054C3D4;
+#pragma pop_macro("MenuB0054C3D4") /*gvi*/
+#pragma pop_macro("MenuB0054C3D4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C3E4")
+#undef MenuB0054C3E4
+#pragma push_macro("MenuB0054C3E4") /*gvi*/
+#undef MenuB0054C3E4 /*gvi*/
+uint8_t MenuB0054C3E4;
+#pragma pop_macro("MenuB0054C3E4") /*gvi*/
+#pragma pop_macro("MenuB0054C3E4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C3F4")
+#undef MenuB0054C3F4
+#pragma push_macro("MenuB0054C3F4") /*gvi*/
+#undef MenuB0054C3F4 /*gvi*/
+uint8_t MenuB0054C3F4;
+#pragma pop_macro("MenuB0054C3F4") /*gvi*/
+#pragma pop_macro("MenuB0054C3F4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C404")
+#undef MenuB0054C404
+#pragma push_macro("MenuB0054C404") /*gvi*/
+#undef MenuB0054C404 /*gvi*/
+uint8_t MenuB0054C404;
+#pragma pop_macro("MenuB0054C404") /*gvi*/
+#pragma pop_macro("MenuB0054C404")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C414")
+#undef MenuB0054C414
+#pragma push_macro("MenuB0054C414") /*gvi*/
+#undef MenuB0054C414 /*gvi*/
+uint8_t MenuB0054C414;
+#pragma pop_macro("MenuB0054C414") /*gvi*/
+#pragma pop_macro("MenuB0054C414")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C424")
+#undef MenuB0054C424
+#pragma push_macro("MenuB0054C424") /*gvi*/
+#undef MenuB0054C424 /*gvi*/
+uint8_t MenuB0054C424;
+#pragma pop_macro("MenuB0054C424") /*gvi*/
+#pragma pop_macro("MenuB0054C424")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C434")
+#undef MenuB0054C434
+#pragma push_macro("MenuB0054C434") /*gvi*/
+#undef MenuB0054C434 /*gvi*/
+uint8_t MenuB0054C434;
+#pragma pop_macro("MenuB0054C434") /*gvi*/
+#pragma pop_macro("MenuB0054C434")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C444")
+#undef MenuB0054C444
+#pragma push_macro("MenuB0054C444") /*gvi*/
+#undef MenuB0054C444 /*gvi*/
+uint8_t MenuB0054C444;
+#pragma pop_macro("MenuB0054C444") /*gvi*/
+#pragma pop_macro("MenuB0054C444")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C454")
+#undef MenuB0054C454
+#pragma push_macro("MenuB0054C454") /*gvi*/
+#undef MenuB0054C454 /*gvi*/
+uint8_t MenuB0054C454;
+#pragma pop_macro("MenuB0054C454") /*gvi*/
+#pragma pop_macro("MenuB0054C454")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C464")
+#undef MenuB0054C464
+#pragma push_macro("MenuB0054C464") /*gvi*/
+#undef MenuB0054C464 /*gvi*/
+uint8_t MenuB0054C464;
+#pragma pop_macro("MenuB0054C464") /*gvi*/
+#pragma pop_macro("MenuB0054C464")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C474")
+#undef MenuB0054C474
+#pragma push_macro("MenuB0054C474") /*gvi*/
+#undef MenuB0054C474 /*gvi*/
+uint8_t MenuB0054C474;
+#pragma pop_macro("MenuB0054C474") /*gvi*/
+#pragma pop_macro("MenuB0054C474")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C484")
+#undef MenuB0054C484
+#pragma push_macro("MenuB0054C484") /*gvi*/
+#undef MenuB0054C484 /*gvi*/
+uint8_t MenuB0054C484;
+#pragma pop_macro("MenuB0054C484") /*gvi*/
+#pragma pop_macro("MenuB0054C484")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C494")
+#undef MenuB0054C494
+#pragma push_macro("MenuB0054C494") /*gvi*/
+#undef MenuB0054C494 /*gvi*/
+uint8_t MenuB0054C494;
+#pragma pop_macro("MenuB0054C494") /*gvi*/
+#pragma pop_macro("MenuB0054C494")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C4A4")
+#undef MenuB0054C4A4
+#pragma push_macro("MenuB0054C4A4") /*gvi*/
+#undef MenuB0054C4A4 /*gvi*/
+uint8_t MenuB0054C4A4;
+#pragma pop_macro("MenuB0054C4A4") /*gvi*/
+#pragma pop_macro("MenuB0054C4A4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C4B4")
+#undef MenuB0054C4B4
+#pragma push_macro("MenuB0054C4B4") /*gvi*/
+#undef MenuB0054C4B4 /*gvi*/
+uint8_t MenuB0054C4B4;
+#pragma pop_macro("MenuB0054C4B4") /*gvi*/
+#pragma pop_macro("MenuB0054C4B4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C4C4")
+#undef MenuB0054C4C4
+#pragma push_macro("MenuB0054C4C4") /*gvi*/
+#undef MenuB0054C4C4 /*gvi*/
+uint8_t MenuB0054C4C4;
+#pragma pop_macro("MenuB0054C4C4") /*gvi*/
+#pragma pop_macro("MenuB0054C4C4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C4D4")
+#undef MenuB0054C4D4
+#pragma push_macro("MenuB0054C4D4") /*gvi*/
+#undef MenuB0054C4D4 /*gvi*/
+uint8_t MenuB0054C4D4;
+#pragma pop_macro("MenuB0054C4D4") /*gvi*/
+#pragma pop_macro("MenuB0054C4D4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C4E4")
+#undef MenuB0054C4E4
+#pragma push_macro("MenuB0054C4E4") /*gvi*/
+#undef MenuB0054C4E4 /*gvi*/
+uint8_t MenuB0054C4E4;
+#pragma pop_macro("MenuB0054C4E4") /*gvi*/
+#pragma pop_macro("MenuB0054C4E4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C4F4")
+#undef MenuB0054C4F4
+#pragma push_macro("MenuB0054C4F4") /*gvi*/
+#undef MenuB0054C4F4 /*gvi*/
+uint8_t MenuB0054C4F4;
+#pragma pop_macro("MenuB0054C4F4") /*gvi*/
+#pragma pop_macro("MenuB0054C4F4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C504")
+#undef MenuB0054C504
+#pragma push_macro("MenuB0054C504") /*gvi*/
+#undef MenuB0054C504 /*gvi*/
+uint8_t MenuB0054C504;
+#pragma pop_macro("MenuB0054C504") /*gvi*/
+#pragma pop_macro("MenuB0054C504")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054C514")
+#undef MenuB0054C514
+#pragma push_macro("MenuB0054C514") /*gvi*/
+#undef MenuB0054C514 /*gvi*/
+uint8_t MenuB0054C514;
+#pragma pop_macro("MenuB0054C514") /*gvi*/
+#pragma pop_macro("MenuB0054C514")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D1B4")
+#undef MenuB0054D1B4
+#pragma push_macro("MenuB0054D1B4") /*gvi*/
+#undef MenuB0054D1B4 /*gvi*/
+uint8_t MenuB0054D1B4;
+#pragma pop_macro("MenuB0054D1B4") /*gvi*/
+#pragma pop_macro("MenuB0054D1B4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D1C4")
+#undef MenuB0054D1C4
+#pragma push_macro("MenuB0054D1C4") /*gvi*/
+#undef MenuB0054D1C4 /*gvi*/
+uint8_t MenuB0054D1C4;
+#pragma pop_macro("MenuB0054D1C4") /*gvi*/
+#pragma pop_macro("MenuB0054D1C4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D1D4")
+#undef MenuB0054D1D4
+#pragma push_macro("MenuB0054D1D4") /*gvi*/
+#undef MenuB0054D1D4 /*gvi*/
+uint8_t MenuB0054D1D4;
+#pragma pop_macro("MenuB0054D1D4") /*gvi*/
+#pragma pop_macro("MenuB0054D1D4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D1E4")
+#undef MenuB0054D1E4
+#pragma push_macro("MenuB0054D1E4") /*gvi*/
+#undef MenuB0054D1E4 /*gvi*/
+uint8_t MenuB0054D1E4;
+#pragma pop_macro("MenuB0054D1E4") /*gvi*/
+#pragma pop_macro("MenuB0054D1E4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D2A4")
+#undef MenuB0054D2A4
+#pragma push_macro("MenuB0054D2A4") /*gvi*/
+#undef MenuB0054D2A4 /*gvi*/
+uint8_t MenuB0054D2A4;
+#pragma pop_macro("MenuB0054D2A4") /*gvi*/
+#pragma pop_macro("MenuB0054D2A4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D2B4")
+#undef MenuB0054D2B4
+#pragma push_macro("MenuB0054D2B4") /*gvi*/
+#undef MenuB0054D2B4 /*gvi*/
+uint8_t MenuB0054D2B4;
+#pragma pop_macro("MenuB0054D2B4") /*gvi*/
+#pragma pop_macro("MenuB0054D2B4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D2C4")
+#undef MenuB0054D2C4
+#pragma push_macro("MenuB0054D2C4") /*gvi*/
+#undef MenuB0054D2C4 /*gvi*/
+uint8_t MenuB0054D2C4;
+#pragma pop_macro("MenuB0054D2C4") /*gvi*/
+#pragma pop_macro("MenuB0054D2C4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D2D4")
+#undef MenuB0054D2D4
+#pragma push_macro("MenuB0054D2D4") /*gvi*/
+#undef MenuB0054D2D4 /*gvi*/
+uint8_t MenuB0054D2D4;
+#pragma pop_macro("MenuB0054D2D4") /*gvi*/
+#pragma pop_macro("MenuB0054D2D4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D2E4")
+#undef MenuB0054D2E4
+#pragma push_macro("MenuB0054D2E4") /*gvi*/
+#undef MenuB0054D2E4 /*gvi*/
+uint8_t MenuB0054D2E4;
+#pragma pop_macro("MenuB0054D2E4") /*gvi*/
+#pragma pop_macro("MenuB0054D2E4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D3BC")
+#undef MenuB0054D3BC
+#pragma push_macro("MenuB0054D3BC") /*gvi*/
+#undef MenuB0054D3BC /*gvi*/
+uint8_t MenuB0054D3BC;
+#pragma pop_macro("MenuB0054D3BC") /*gvi*/
+#pragma pop_macro("MenuB0054D3BC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D3CC")
+#undef MenuB0054D3CC
+#pragma push_macro("MenuB0054D3CC") /*gvi*/
+#undef MenuB0054D3CC /*gvi*/
+uint8_t MenuB0054D3CC;
+#pragma pop_macro("MenuB0054D3CC") /*gvi*/
+#pragma pop_macro("MenuB0054D3CC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D3DC")
+#undef MenuB0054D3DC
+#pragma push_macro("MenuB0054D3DC") /*gvi*/
+#undef MenuB0054D3DC /*gvi*/
+uint8_t MenuB0054D3DC;
+#pragma pop_macro("MenuB0054D3DC") /*gvi*/
+#pragma pop_macro("MenuB0054D3DC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D3EC")
+#undef MenuB0054D3EC
+#pragma push_macro("MenuB0054D3EC") /*gvi*/
+#undef MenuB0054D3EC /*gvi*/
+uint8_t MenuB0054D3EC;
+#pragma pop_macro("MenuB0054D3EC") /*gvi*/
+#pragma pop_macro("MenuB0054D3EC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054D3FC")
+#undef MenuB0054D3FC
+#pragma push_macro("MenuB0054D3FC") /*gvi*/
+#undef MenuB0054D3FC /*gvi*/
+uint8_t MenuB0054D3FC;
+#pragma pop_macro("MenuB0054D3FC") /*gvi*/
+#pragma pop_macro("MenuB0054D3FC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054DFD4")
+#undef MenuB0054DFD4
+#pragma push_macro("MenuB0054DFD4") /*gvi*/
+#undef MenuB0054DFD4 /*gvi*/
+uint8_t MenuB0054DFD4;
+#pragma pop_macro("MenuB0054DFD4") /*gvi*/
+#pragma pop_macro("MenuB0054DFD4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054DFE4")
+#undef MenuB0054DFE4
+#pragma push_macro("MenuB0054DFE4") /*gvi*/
+#undef MenuB0054DFE4 /*gvi*/
+uint8_t MenuB0054DFE4;
+#pragma pop_macro("MenuB0054DFE4") /*gvi*/
+#pragma pop_macro("MenuB0054DFE4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054DFF4")
+#undef MenuB0054DFF4
+#pragma push_macro("MenuB0054DFF4") /*gvi*/
+#undef MenuB0054DFF4 /*gvi*/
+uint8_t MenuB0054DFF4;
+#pragma pop_macro("MenuB0054DFF4") /*gvi*/
+#pragma pop_macro("MenuB0054DFF4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054E004")
+#undef MenuB0054E004
+#pragma push_macro("MenuB0054E004") /*gvi*/
+#undef MenuB0054E004 /*gvi*/
+uint8_t MenuB0054E004;
+#pragma pop_macro("MenuB0054E004") /*gvi*/
+#pragma pop_macro("MenuB0054E004")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054E1A4")
+#undef MenuB0054E1A4
+#pragma push_macro("MenuB0054E1A4") /*gvi*/
+#undef MenuB0054E1A4 /*gvi*/
+uint8_t MenuB0054E1A4;
+#pragma pop_macro("MenuB0054E1A4") /*gvi*/
+#pragma pop_macro("MenuB0054E1A4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuB0054E1B4")
+#undef MenuB0054E1B4
+#pragma push_macro("MenuB0054E1B4") /*gvi*/
+#undef MenuB0054E1B4 /*gvi*/
+uint8_t MenuB0054E1B4;
+#pragma pop_macro("MenuB0054E1B4") /*gvi*/
+#pragma pop_macro("MenuB0054E1B4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuI0057B730")
+#undef MenuI0057B730
+#pragma push_macro("MenuI0057B730") /*gvi*/
+#undef MenuI0057B730 /*gvi*/
+int32_t MenuI0057B730;
+#pragma pop_macro("MenuI0057B730") /*gvi*/
+#pragma pop_macro("MenuI0057B730")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuI005D578C")
+#undef MenuI005D578C
+#pragma push_macro("MenuI005D578C") /*gvi*/
+#undef MenuI005D578C /*gvi*/
+int32_t MenuI005D578C;
+#pragma pop_macro("MenuI005D578C") /*gvi*/
+#pragma pop_macro("MenuI005D578C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuI005FE770")
+#undef MenuI005FE770
+#pragma push_macro("MenuI005FE770") /*gvi*/
+#undef MenuI005FE770 /*gvi*/
+int32_t MenuI005FE770;
+#pragma pop_macro("MenuI005FE770") /*gvi*/
+#pragma pop_macro("MenuI005FE770")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuI005FE774")
+#undef MenuI005FE774
+#pragma push_macro("MenuI005FE774") /*gvi*/
+#undef MenuI005FE774 /*gvi*/
+int32_t MenuI005FE774;
+#pragma pop_macro("MenuI005FE774") /*gvi*/
+#pragma pop_macro("MenuI005FE774")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuI005FE798")
+#undef MenuI005FE798
+#pragma push_macro("MenuI005FE798") /*gvi*/
+#undef MenuI005FE798 /*gvi*/
+int32_t MenuI005FE798;
+#pragma pop_macro("MenuI005FE798") /*gvi*/
+#pragma pop_macro("MenuI005FE798")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuI005FE79C")
+#undef MenuI005FE79C
+#pragma push_macro("MenuI005FE79C") /*gvi*/
+#undef MenuI005FE79C /*gvi*/
+int32_t MenuI005FE79C;
+#pragma pop_macro("MenuI005FE79C") /*gvi*/
+#pragma pop_macro("MenuI005FE79C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("MenuI005FE9D0")
+#undef MenuI005FE9D0
+#pragma push_macro("MenuI005FE9D0") /*gvi*/
+#undef MenuI005FE9D0 /*gvi*/
+int32_t MenuI005FE9D0;
+#pragma pop_macro("MenuI005FE9D0") /*gvi*/
+#pragma pop_macro("MenuI005FE9D0")
+#endif
 void MenuSelect00407334(int32_t mode) { if (mode >= 0) { if (mode < 2) { MenuB00549F8C = 3; MenuB00549F9C = 3; } else if (mode == 2) { MenuI0057B730 = 1; MenuI0054A060 = 2; } } }
 void MenuSelect00407421(int32_t mode) { if (mode >= 0) { if (mode < 2) { MenuB00549FBC = 3; } else if (mode == 2) { MenuI0057B730 = 4; MenuI0054A060 = -1; } } }
 void MenuSelect004074FA(int32_t mode) { if (mode >= 0) { if (mode < 2) { MenuB00549FCC = 3; } else if (mode == 2) { MenuI0057B730 = 5; MenuI0054A060 = -1; } } }

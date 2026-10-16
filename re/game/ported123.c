@@ -44,18 +44,106 @@
 #include <math.h>
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P123_GlowN, 0x0112320c)
-GAME_VAR_DEF(p123_glowcars_t, P123_GlowCars, 0x010ffc00)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P123_GlowN")
+#undef P123_GlowN
+#pragma push_macro("P123_GlowN") /*gvi*/
+#undef P123_GlowN /*gvi*/
+int32_t P123_GlowN;
+#pragma pop_macro("P123_GlowN") /*gvi*/
+#pragma pop_macro("P123_GlowN")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P123_GlowCars")
+#undef P123_GlowCars
+#pragma push_macro("P123_GlowCars") /*gvi*/
+#undef P123_GlowCars /*gvi*/
+p123_glowcars_t P123_GlowCars;
+#pragma pop_macro("P123_GlowCars") /*gvi*/
+#pragma pop_macro("P123_GlowCars")
+#endif
 GAME_VAR_DEF(uint8_t *, P123_EvObjCur, 0x00b1ff68)
-GAME_VAR_DEF(float, P123_TgtX, 0x00c82510)
-GAME_VAR_DEF(float, P123_TgtZ, 0x00c82518)
-GAME_VAR_DEF(float, P123_PtX, 0x00c824b0)
-GAME_VAR_DEF(float, P123_PtZ, 0x00c824b8)
-GAME_VAR_DEF(float, P123_SideX, 0x00c824c0)
-GAME_VAR_DEF(float, P123_SideZ, 0x00c824c8)
-GAME_VAR_DEF(int32_t, P123_TgtMode, 0x00c824d0)
-GAME_VAR_DEF(int32_t, P123_TgtDist, 0x00c823dc)
-GAME_VAR_DEF(uint8_t, P123_SideB, 0x00b31ef8)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P123_TgtX")
+#undef P123_TgtX
+#pragma push_macro("P123_TgtX") /*gvi*/
+#undef P123_TgtX /*gvi*/
+float P123_TgtX;
+#pragma pop_macro("P123_TgtX") /*gvi*/
+#pragma pop_macro("P123_TgtX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P123_TgtZ")
+#undef P123_TgtZ
+#pragma push_macro("P123_TgtZ") /*gvi*/
+#undef P123_TgtZ /*gvi*/
+float P123_TgtZ;
+#pragma pop_macro("P123_TgtZ") /*gvi*/
+#pragma pop_macro("P123_TgtZ")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P123_PtX")
+#undef P123_PtX
+#pragma push_macro("P123_PtX") /*gvi*/
+#undef P123_PtX /*gvi*/
+float P123_PtX;
+#pragma pop_macro("P123_PtX") /*gvi*/
+#pragma pop_macro("P123_PtX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P123_PtZ")
+#undef P123_PtZ
+#pragma push_macro("P123_PtZ") /*gvi*/
+#undef P123_PtZ /*gvi*/
+float P123_PtZ;
+#pragma pop_macro("P123_PtZ") /*gvi*/
+#pragma pop_macro("P123_PtZ")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P123_SideX")
+#undef P123_SideX
+#pragma push_macro("P123_SideX") /*gvi*/
+#undef P123_SideX /*gvi*/
+float P123_SideX;
+#pragma pop_macro("P123_SideX") /*gvi*/
+#pragma pop_macro("P123_SideX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P123_SideZ")
+#undef P123_SideZ
+#pragma push_macro("P123_SideZ") /*gvi*/
+#undef P123_SideZ /*gvi*/
+float P123_SideZ;
+#pragma pop_macro("P123_SideZ") /*gvi*/
+#pragma pop_macro("P123_SideZ")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P123_TgtMode")
+#undef P123_TgtMode
+#pragma push_macro("P123_TgtMode") /*gvi*/
+#undef P123_TgtMode /*gvi*/
+int32_t P123_TgtMode;
+#pragma pop_macro("P123_TgtMode") /*gvi*/
+#pragma pop_macro("P123_TgtMode")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P123_TgtDist")
+#undef P123_TgtDist
+#pragma push_macro("P123_TgtDist") /*gvi*/
+#undef P123_TgtDist /*gvi*/
+int32_t P123_TgtDist;
+#pragma pop_macro("P123_TgtDist") /*gvi*/
+#pragma pop_macro("P123_TgtDist")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P123_SideB")
+#undef P123_SideB
+#pragma push_macro("P123_SideB") /*gvi*/
+#undef P123_SideB /*gvi*/
+uint8_t P123_SideB;
+#pragma pop_macro("P123_SideB") /*gvi*/
+#pragma pop_macro("P123_SideB")
+#endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }

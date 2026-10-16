@@ -68,7 +68,15 @@
 #include <stdio.h>
 #include <string.h>
 
-GAME_VAR_DEF(p146_gosub_t, P146_GoSub, 0x00c81300)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P146_GoSub")
+#undef P146_GoSub
+#pragma push_macro("P146_GoSub") /*gvi*/
+#undef P146_GoSub /*gvi*/
+p146_gosub_t P146_GoSub;
+#pragma pop_macro("P146_GoSub") /*gvi*/
+#pragma pop_macro("P146_GoSub")
+#endif
 
 #define B84(a)   (*(int32_t *)&P56_Blk84[((a) - 0x00c810c0u) / 4])   /* поля внутри P56_Blk84 */
 static int32_t fround(float v) { return (int32_t)lrintf(v); }   /* fistp */

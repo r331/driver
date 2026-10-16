@@ -1,7 +1,15 @@
 /* DirectInput: инициализация и перечисление джойстиков — восстановлено из Game.exe (Input.c). */
 #include "ported37.h"
 #include <string.h>
-GAME_VAR_DEF(int32_t, P37_MouseShared, 0x00575f28)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P37_MouseShared")
+#undef P37_MouseShared
+#pragma push_macro("P37_MouseShared") /*gvi*/
+#undef P37_MouseShared /*gvi*/
+int32_t P37_MouseShared;
+#pragma pop_macro("P37_MouseShared") /*gvi*/
+#pragma pop_macro("P37_MouseShared")
+#endif
 
 /* Начальная раскладка клавиш: 20 байт в P36_KeyCfg (данные по 0054b7a8) и 12 байт в P19_Keys1 (0054b7d8). */
 static const uint8_t k_defcfg[20] = { 0x3b,0x3c,0x3d,0x3e,0x2c,0x2d,0x28,0x35,0x39,0x1c,0x2b,0x24,0x25,0x26,0x2e,0x23,0x02,0x03,0x00,0x00 };

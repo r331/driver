@@ -5,9 +5,33 @@
 #include "ported7.h"
 #include "unported.h"
 #include <string.h>
-GAME_VAR_DEF(p40_00b1c3e0_t, P40_00b1c3e0, 0x00b1c3e0)
-GAME_VAR_DEF(uint32_t, P40_ListPtr, 0x00b31ee8)
-GAME_VAR_DEF(int32_t, P40_ListCount, 0x00b31eec)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P40_00b1c3e0")
+#undef P40_00b1c3e0
+#pragma push_macro("P40_00b1c3e0") /*gvi*/
+#undef P40_00b1c3e0 /*gvi*/
+p40_00b1c3e0_t P40_00b1c3e0;
+#pragma pop_macro("P40_00b1c3e0") /*gvi*/
+#pragma pop_macro("P40_00b1c3e0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P40_ListPtr")
+#undef P40_ListPtr
+#pragma push_macro("P40_ListPtr") /*gvi*/
+#undef P40_ListPtr /*gvi*/
+uint32_t P40_ListPtr;
+#pragma pop_macro("P40_ListPtr") /*gvi*/
+#pragma pop_macro("P40_ListPtr")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P40_ListCount")
+#undef P40_ListCount
+#pragma push_macro("P40_ListCount") /*gvi*/
+#undef P40_ListCount /*gvi*/
+int32_t P40_ListCount;
+#pragma pop_macro("P40_ListCount") /*gvi*/
+#pragma pop_macro("P40_ListCount")
+#endif
 #ifdef RE_HOOK_BUILD
 #define P40_STD __attribute__((stdcall))
 #else

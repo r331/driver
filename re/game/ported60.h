@@ -29,3 +29,11 @@ void    AddCamera(int32_t id);              /* 004c459f */
 void    ChangeCamera(int32_t id);           /* 004c483e */
 void    P60_ObjUpdate(uint8_t *o);          /* 004a399a */
 int32_t P60_SpawnParticle(uint8_t *p, int32_t flag); /* 0051378b */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P60_Var1373C0
+#define P60_Var1373C0 (*(int32_t *)re_gvar(0x011373c0u, sizeof(int32_t), (void *)&P60_Var1373C0))
+#undef P60_PartLimit
+#define P60_PartLimit (*(int32_t *)re_gvar(0x005759a4u, sizeof(int32_t), (void *)&P60_PartLimit))
+#endif
+/* gvar-img v2.03 end */

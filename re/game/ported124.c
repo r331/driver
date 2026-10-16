@@ -66,11 +66,38 @@
 #include <stdio.h>
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P124_ReplayPrev, 0x00d17c60)
-GAME_VAR_DEF(int32_t, P124_DirBlink, 0x00d17b78)
-GAME_VAR_DEF(int32_t, P124_LogSize, 0x00b20254)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P124_ReplayPrev")
+#undef P124_ReplayPrev
+#pragma push_macro("P124_ReplayPrev") /*gvi*/
+#undef P124_ReplayPrev /*gvi*/
+int32_t P124_ReplayPrev;
+#pragma pop_macro("P124_ReplayPrev") /*gvi*/
+#pragma pop_macro("P124_ReplayPrev")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P124_DirBlink")
+#undef P124_DirBlink
+#pragma push_macro("P124_DirBlink") /*gvi*/
+#undef P124_DirBlink /*gvi*/
+int32_t P124_DirBlink;
+#pragma pop_macro("P124_DirBlink") /*gvi*/
+#pragma pop_macro("P124_DirBlink")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P124_LogSize")
+#undef P124_LogSize
+#pragma push_macro("P124_LogSize") /*gvi*/
+#undef P124_LogSize /*gvi*/
+int32_t P124_LogSize;
+#pragma pop_macro("P124_LogSize") /*gvi*/
+#pragma pop_macro("P124_LogSize")
+#endif
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P124_LogOn") /*gvi*/
+#undef P124_LogOn /*gvi*/
 int32_t P124_LogOn = 1;                      /* .data 00553bbc */
+#pragma pop_macro("P124_LogOn") /*gvi*/
 #endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }

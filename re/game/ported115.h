@@ -19,7 +19,13 @@
 typedef int32_t p115_i4_t[4];
 #define P115_Tgt     GAME_VAR(p115_i4_t, P115_Tgt, 0x00c80cf4)           /* копия +0x20..+0x2c объекта-цели */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P115_TgtOn") /*gvi*/
+#undef P115_TgtOn /*gvi*/
+#pragma push_macro("P115_Tgt") /*gvi*/
+#undef P115_Tgt /*gvi*/
 extern p85_raster_fn P115_RasterC, P115_RasterD; extern int32_t P115_TgtOn; extern p115_i4_t P115_Tgt;
+#pragma pop_macro("P115_Tgt") /*gvi*/
+#pragma pop_macro("P115_TgtOn") /*gvi*/
 #endif
 void P115_IconAt(float x, float y, uint32_t icon, int32_t r, int32_t g, int32_t b, int32_t flip, int32_t mode);      /* 00418e70 */
 void P115_IconScaled(float x, float y, float sx, float sy, uint32_t icon, int32_t r, int32_t g, int32_t b, int32_t mode); /* 00510e1d */
@@ -33,3 +39,11 @@ void P115_IconDraw(float x, float y, float sx, float sy, float u, float v, float
 void P115_SndUpdate(void);                    /* 00523829 */
 void P115_TargetTick(uint8_t *o);             /* 004a3808 */
 void P115_PaperHud(void);                     /* 004e5b78 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P115_TgtOn
+#define P115_TgtOn (*(int32_t *)re_gvar(0x00c80cf0u, sizeof(int32_t), (void *)&P115_TgtOn))
+#undef P115_Tgt
+#define P115_Tgt (*(p115_i4_t *)re_gvar(0x00c80cf4u, sizeof(p115_i4_t), (void *)&P115_Tgt))
+#endif
+/* gvar-img v2.03 end */

@@ -4,15 +4,33 @@
 
 #ifndef RE_HOOK_BUILD
 char *P65_Line = NULL;
+#pragma push_macro("P65_Tok") /*gvi*/
+#undef P65_Tok /*gvi*/
 p65_tok_t P65_Tok;
+#pragma pop_macro("P65_Tok") /*gvi*/
+#pragma push_macro("P65_Ints") /*gvi*/
+#undef P65_Ints /*gvi*/
 p65_ints_t P65_Ints;
+#pragma pop_macro("P65_Ints") /*gvi*/
+#pragma push_macro("P65_Name") /*gvi*/
+#undef P65_Name /*gvi*/
 p65_name_t P65_Name;
+#pragma pop_macro("P65_Name") /*gvi*/
 const char *P65_NamePtr = NULL;
 const char *P65_NameBg = NULL;
+#pragma push_macro("P65_Screen") /*gvi*/
+#undef P65_Screen /*gvi*/
 p65_screen_t P65_Screen;
+#pragma pop_macro("P65_Screen") /*gvi*/
 p65_texs_t P65_Texs;
+#pragma push_macro("P65_Blend") /*gvi*/
+#undef P65_Blend /*gvi*/
 p65_blend_t P65_Blend;
+#pragma pop_macro("P65_Blend") /*gvi*/
+#pragma push_macro("P65_ColorKey") /*gvi*/
+#undef P65_ColorKey /*gvi*/
 uint8_t P65_ColorKey = 0;
+#pragma pop_macro("P65_ColorKey") /*gvi*/
 #endif
 
 /* 004f6774 */

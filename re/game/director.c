@@ -8,23 +8,111 @@
 #include "directorstorage.h"
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, NumCameras, 0x00d17b60)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("NumCameras")
+#undef NumCameras
+#pragma push_macro("NumCameras") /*gvi*/
+#undef NumCameras /*gvi*/
+int32_t NumCameras;
+#pragma pop_macro("NumCameras") /*gvi*/
+#pragma pop_macro("NumCameras")
+#endif
 GAME_VAR_DEF(DIRECTOR_CAMERA*, CurCamera, 0x00d17c50)
 GAME_VAR_DEF(DIRECTOR_CAMERA**, CameraList, 0x00d17c54)
-GAME_VAR_DEF(int32_t, DirectorLastFrame, 0x00d17b68)
-GAME_VAR_DEF(int32_t, CamBackupValid, 0x00d17bb4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirectorLastFrame")
+#undef DirectorLastFrame
+#pragma push_macro("DirectorLastFrame") /*gvi*/
+#undef DirectorLastFrame /*gvi*/
+int32_t DirectorLastFrame;
+#pragma pop_macro("DirectorLastFrame") /*gvi*/
+#pragma pop_macro("DirectorLastFrame")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("CamBackupValid")
+#undef CamBackupValid
+#pragma push_macro("CamBackupValid") /*gvi*/
+#undef CamBackupValid /*gvi*/
+int32_t CamBackupValid;
+#pragma pop_macro("CamBackupValid") /*gvi*/
+#pragma pop_macro("CamBackupValid")
+#endif
 GAME_VAR_DEF(DIRECTOR_CAMERA, DirectorCam, 0x00d17bc4)
 GAME_VAR_DEF(void*, DirectorBuffer, 0x00d17c5c)
-GAME_VAR_DEF(int32_t, DirectorBufferCount, 0x00d17b70)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirectorBufferCount")
+#undef DirectorBufferCount
+#pragma push_macro("DirectorBufferCount") /*gvi*/
+#undef DirectorBufferCount /*gvi*/
+int32_t DirectorBufferCount;
+#pragma pop_macro("DirectorBufferCount") /*gvi*/
+#pragma pop_macro("DirectorBufferCount")
+#endif
 GAME_VAR_DEF(DIRECTOR_CAMERA, CamBackup, 0x00d17c64)
 
-GAME_VAR_DEF(int32_t, DirectorUnk64, 0x00d17b64)
-GAME_VAR_DEF(int32_t, DirectorUnk6C, 0x00d17b6c)
-GAME_VAR_DEF(int32_t, DirectorUnk7C, 0x00d17b7c)
-GAME_VAR_DEF(int32_t, DirectorUnk84, 0x00d17b84)
-GAME_VAR_DEF(int32_t, DirectorUnk88, 0x00d17b88)
-GAME_VAR_DEF(int32_t, DirectorUnk8C, 0x00d17b8c)
-GAME_VAR_DEF(int32_t, GameMode, 0x005f7e50)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirectorUnk64")
+#undef DirectorUnk64
+#pragma push_macro("DirectorUnk64") /*gvi*/
+#undef DirectorUnk64 /*gvi*/
+int32_t DirectorUnk64;
+#pragma pop_macro("DirectorUnk64") /*gvi*/
+#pragma pop_macro("DirectorUnk64")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirectorUnk6C")
+#undef DirectorUnk6C
+#pragma push_macro("DirectorUnk6C") /*gvi*/
+#undef DirectorUnk6C /*gvi*/
+int32_t DirectorUnk6C;
+#pragma pop_macro("DirectorUnk6C") /*gvi*/
+#pragma pop_macro("DirectorUnk6C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirectorUnk7C")
+#undef DirectorUnk7C
+#pragma push_macro("DirectorUnk7C") /*gvi*/
+#undef DirectorUnk7C /*gvi*/
+int32_t DirectorUnk7C;
+#pragma pop_macro("DirectorUnk7C") /*gvi*/
+#pragma pop_macro("DirectorUnk7C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirectorUnk84")
+#undef DirectorUnk84
+#pragma push_macro("DirectorUnk84") /*gvi*/
+#undef DirectorUnk84 /*gvi*/
+int32_t DirectorUnk84;
+#pragma pop_macro("DirectorUnk84") /*gvi*/
+#pragma pop_macro("DirectorUnk84")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirectorUnk88")
+#undef DirectorUnk88
+#pragma push_macro("DirectorUnk88") /*gvi*/
+#undef DirectorUnk88 /*gvi*/
+int32_t DirectorUnk88;
+#pragma pop_macro("DirectorUnk88") /*gvi*/
+#pragma pop_macro("DirectorUnk88")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirectorUnk8C")
+#undef DirectorUnk8C
+#pragma push_macro("DirectorUnk8C") /*gvi*/
+#undef DirectorUnk8C /*gvi*/
+int32_t DirectorUnk8C;
+#pragma pop_macro("DirectorUnk8C") /*gvi*/
+#pragma pop_macro("DirectorUnk8C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("GameMode")
+#undef GameMode
+#pragma push_macro("GameMode") /*gvi*/
+#undef GameMode /*gvi*/
+int32_t GameMode;
+#pragma pop_macro("GameMode") /*gvi*/
+#pragma pop_macro("GameMode")
+#endif
 
 /* 004c6168 */
 DIRECTOR_CAMERA *FindCameraById(int id) {
@@ -221,9 +309,33 @@ int IsCameraCarFarEnough(const DIRECTOR_CAMERA *cam) {
     return CarMinDist <= car->dist ? 1 : 0;
 }
 
-GAME_VAR_DEF(TRAFFIC_RECS_T, TrafficRecs, 0x011443e0)
-GAME_VAR_DEF(DIRTABLE_T, DirTableA, 0x0055f088)
-GAME_VAR_DEF(DIRTABLE_T, DirTableB, 0x0055f030)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("TrafficRecs")
+#undef TrafficRecs
+#pragma push_macro("TrafficRecs") /*gvi*/
+#undef TrafficRecs /*gvi*/
+TRAFFIC_RECS_T TrafficRecs;
+#pragma pop_macro("TrafficRecs") /*gvi*/
+#pragma pop_macro("TrafficRecs")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirTableA")
+#undef DirTableA
+#pragma push_macro("DirTableA") /*gvi*/
+#undef DirTableA /*gvi*/
+DIRTABLE_T DirTableA;
+#pragma pop_macro("DirTableA") /*gvi*/
+#pragma pop_macro("DirTableA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("DirTableB")
+#undef DirTableB
+#pragma push_macro("DirTableB") /*gvi*/
+#undef DirTableB /*gvi*/
+DIRTABLE_T DirTableB;
+#pragma pop_macro("DirTableB") /*gvi*/
+#pragma pop_macro("DirTableB")
+#endif
 /* 004c57b7 — название типа камеры */
 const char *GetCameraTypeName(int type) {
     switch (type) {

@@ -4,17 +4,105 @@
 #include "flush.h"
 #include <math.h>
 #include <string.h>
-GAME_VAR_DEF(float, P23_ScaleUV_A, 0x0054ef60)
-GAME_VAR_DEF(float, P23_ScaleUV_B, 0x0054ef6c)
-GAME_VAR_DEF(float, P23_ZScale_A, 0x0054ef64)
-GAME_VAR_DEF(float, P23_ZScale_B, 0x0054ef68)
-GAME_VAR_DEF(float, P23_ZNum, 0x0054ef3c)
-GAME_VAR_DEF(float, P23_ZDenA, 0x0054ef38)
-GAME_VAR_DEF(float, P23_ZBias, 0x00a4217c)
-GAME_VAR_DEF(int32_t, P23_BlendCur, 0x0054ef44)
-GAME_VAR_DEF(int32_t, P23_BlendCur2, 0x0054ef48)
-GAME_VAR_DEF(uint32_t, P23_DevCaps, 0x00a421dc)
-GAME_VAR_DEF(int32_t, P23_AlphaMode, 0x00a421e0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P23_ScaleUV_A")
+#undef P23_ScaleUV_A
+#pragma push_macro("P23_ScaleUV_A") /*gvi*/
+#undef P23_ScaleUV_A /*gvi*/
+float P23_ScaleUV_A;
+#pragma pop_macro("P23_ScaleUV_A") /*gvi*/
+#pragma pop_macro("P23_ScaleUV_A")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P23_ScaleUV_B")
+#undef P23_ScaleUV_B
+#pragma push_macro("P23_ScaleUV_B") /*gvi*/
+#undef P23_ScaleUV_B /*gvi*/
+float P23_ScaleUV_B;
+#pragma pop_macro("P23_ScaleUV_B") /*gvi*/
+#pragma pop_macro("P23_ScaleUV_B")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P23_ZScale_A")
+#undef P23_ZScale_A
+#pragma push_macro("P23_ZScale_A") /*gvi*/
+#undef P23_ZScale_A /*gvi*/
+float P23_ZScale_A;
+#pragma pop_macro("P23_ZScale_A") /*gvi*/
+#pragma pop_macro("P23_ZScale_A")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P23_ZScale_B")
+#undef P23_ZScale_B
+#pragma push_macro("P23_ZScale_B") /*gvi*/
+#undef P23_ZScale_B /*gvi*/
+float P23_ZScale_B;
+#pragma pop_macro("P23_ZScale_B") /*gvi*/
+#pragma pop_macro("P23_ZScale_B")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P23_ZNum")
+#undef P23_ZNum
+#pragma push_macro("P23_ZNum") /*gvi*/
+#undef P23_ZNum /*gvi*/
+float P23_ZNum;
+#pragma pop_macro("P23_ZNum") /*gvi*/
+#pragma pop_macro("P23_ZNum")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P23_ZDenA")
+#undef P23_ZDenA
+#pragma push_macro("P23_ZDenA") /*gvi*/
+#undef P23_ZDenA /*gvi*/
+float P23_ZDenA;
+#pragma pop_macro("P23_ZDenA") /*gvi*/
+#pragma pop_macro("P23_ZDenA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P23_ZBias")
+#undef P23_ZBias
+#pragma push_macro("P23_ZBias") /*gvi*/
+#undef P23_ZBias /*gvi*/
+float P23_ZBias;
+#pragma pop_macro("P23_ZBias") /*gvi*/
+#pragma pop_macro("P23_ZBias")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P23_BlendCur")
+#undef P23_BlendCur
+#pragma push_macro("P23_BlendCur") /*gvi*/
+#undef P23_BlendCur /*gvi*/
+int32_t P23_BlendCur;
+#pragma pop_macro("P23_BlendCur") /*gvi*/
+#pragma pop_macro("P23_BlendCur")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P23_BlendCur2")
+#undef P23_BlendCur2
+#pragma push_macro("P23_BlendCur2") /*gvi*/
+#undef P23_BlendCur2 /*gvi*/
+int32_t P23_BlendCur2;
+#pragma pop_macro("P23_BlendCur2") /*gvi*/
+#pragma pop_macro("P23_BlendCur2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P23_DevCaps")
+#undef P23_DevCaps
+#pragma push_macro("P23_DevCaps") /*gvi*/
+#undef P23_DevCaps /*gvi*/
+uint32_t P23_DevCaps;
+#pragma pop_macro("P23_DevCaps") /*gvi*/
+#pragma pop_macro("P23_DevCaps")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P23_AlphaMode")
+#undef P23_AlphaMode
+#pragma push_macro("P23_AlphaMode") /*gvi*/
+#undef P23_AlphaMode /*gvi*/
+int32_t P23_AlphaMode;
+#pragma pop_macro("P23_AlphaMode") /*gvi*/
+#pragma pop_macro("P23_AlphaMode")
+#endif
 
 enum { RS_ZENABLE = 7, RS_ALPHATEST_EN = 15, RS_SRCBLEND = 19, RS_DESTBLEND = 20, RS_ALPHABLEND_EN = 27, RS_ALPHAFUNC = 25 };
 enum { TSS_COLOROP = 1, TSS_COLORARG1 = 2, TSS_COLORARG2 = 3, TSS_ALPHAOP = 4, TSS_ALPHAARG1 = 5 };

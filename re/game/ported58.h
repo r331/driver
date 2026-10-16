@@ -85,15 +85,126 @@ typedef uint8_t p58_cfg_t[0x10c];
 #define P58_CfgOn       GAME_VAR(int32_t, P58_CfgOn, 0x00b87eb8)
 #define P58_CfgLock     GAME_VAR(int32_t, P58_CfgLock, 0x0057b700)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P58_MenuSel") /*gvi*/
+#undef P58_MenuSel /*gvi*/
+#pragma push_macro("P58_MenuFn") /*gvi*/
+#undef P58_MenuFn /*gvi*/
+#pragma push_macro("P58_MenuIdx") /*gvi*/
+#undef P58_MenuIdx /*gvi*/
 extern int32_t P58_MenuSel, P58_MenuFn, P58_MenuIdx; extern p58_cheats_t P58_Cheats; extern int16_t *P58_ItemList;
+#pragma pop_macro("P58_MenuIdx") /*gvi*/
+#pragma pop_macro("P58_MenuFn") /*gvi*/
+#pragma pop_macro("P58_MenuSel") /*gvi*/
+#pragma push_macro("P58_Cnt4EFC03") /*gvi*/
+#undef P58_Cnt4EFC03 /*gvi*/
+#pragma push_macro("P58_CntC814E8") /*gvi*/
+#undef P58_CntC814E8 /*gvi*/
 extern p58_rec_t *P58_Tab4EFC03; extern int32_t P58_Cnt4EFC03, P58_CntC814E8; extern void **P58_PtrsC816A0; extern int32_t *P58_LimC810AC;
+#pragma pop_macro("P58_CntC814E8") /*gvi*/
+#pragma pop_macro("P58_Cnt4EFC03") /*gvi*/
+#pragma push_macro("P58_S5FEA88") /*gvi*/
+#undef P58_S5FEA88 /*gvi*/
+#pragma push_macro("P58_S5FEA8C") /*gvi*/
+#undef P58_S5FEA8C /*gvi*/
+#pragma push_macro("P58_S5FEA7C") /*gvi*/
+#undef P58_S5FEA7C /*gvi*/
+#pragma push_macro("P58_S5FEA80") /*gvi*/
+#undef P58_S5FEA80 /*gvi*/
+#pragma push_macro("P58_S54E654") /*gvi*/
+#undef P58_S54E654 /*gvi*/
+#pragma push_macro("P58_S5FE9C0") /*gvi*/
+#undef P58_S5FE9C0 /*gvi*/
+#pragma push_macro("P58_S5FE9F8") /*gvi*/
+#undef P58_S5FE9F8 /*gvi*/
+#pragma push_macro("P58_Page") /*gvi*/
+#undef P58_Page /*gvi*/
 extern int32_t P58_S5FEA88, P58_S5FEA8C, P58_S5FEA7C, P58_S5FEA80, P58_S54E654, P58_S5FE9C0, P58_S5FE9F8, P58_Page;
+#pragma pop_macro("P58_Page") /*gvi*/
+#pragma pop_macro("P58_S5FE9F8") /*gvi*/
+#pragma pop_macro("P58_S5FE9C0") /*gvi*/
+#pragma pop_macro("P58_S54E654") /*gvi*/
+#pragma pop_macro("P58_S5FEA80") /*gvi*/
+#pragma pop_macro("P58_S5FEA7C") /*gvi*/
+#pragma pop_macro("P58_S5FEA8C") /*gvi*/
+#pragma pop_macro("P58_S5FEA88") /*gvi*/
+#pragma push_macro("P58_S5FE9B4") /*gvi*/
+#undef P58_S5FE9B4 /*gvi*/
+#pragma push_macro("P58_S5FE9B0") /*gvi*/
+#undef P58_S5FE9B0 /*gvi*/
+#pragma push_macro("P58_S5FE9B8") /*gvi*/
+#undef P58_S5FE9B8 /*gvi*/
+#pragma push_macro("P58_TabPtr") /*gvi*/
+#undef P58_TabPtr /*gvi*/
+#pragma push_macro("P58_S54DFC8") /*gvi*/
+#undef P58_S54DFC8 /*gvi*/
+#pragma push_macro("P58_S54DFD8") /*gvi*/
+#undef P58_S54DFD8 /*gvi*/
+#pragma push_macro("P58_S54DFE8") /*gvi*/
+#undef P58_S54DFE8 /*gvi*/
+#pragma push_macro("P58_S54DFF8") /*gvi*/
+#undef P58_S54DFF8 /*gvi*/
+#pragma push_macro("P58_S54E008") /*gvi*/
+#undef P58_S54E008 /*gvi*/
 extern uint32_t P58_S5FE9B4, P58_S5FE9B0, P58_S5FE9B8, P58_TabPtr, P58_S54DFC8, P58_S54DFD8, P58_S54DFE8, P58_S54DFF8, P58_S54E008,
+#pragma pop_macro("P58_S54E008") /*gvi*/
+#pragma pop_macro("P58_S54DFF8") /*gvi*/
+#pragma pop_macro("P58_S54DFE8") /*gvi*/
+#pragma pop_macro("P58_S54DFD8") /*gvi*/
+#pragma pop_macro("P58_S54DFC8") /*gvi*/
+#pragma pop_macro("P58_TabPtr") /*gvi*/
+#pragma pop_macro("P58_S5FE9B8") /*gvi*/
+#pragma pop_macro("P58_S5FE9B0") /*gvi*/
+#pragma pop_macro("P58_S5FE9B4") /*gvi*/
     P58_SC559D8, P58_SC559E0, P58_SC559E4, P58_SC559E8, P58_SC559EC;
 extern p58_blkidx_t P58_BlkIdx; extern int32_t *P58_BlkBuf;
+#pragma push_macro("P58_DemoFlag") /*gvi*/
+#undef P58_DemoFlag /*gvi*/
+#pragma push_macro("P58_S5F7E5C") /*gvi*/
+#undef P58_S5F7E5C /*gvi*/
+#pragma push_macro("P58_DemoNo") /*gvi*/
+#undef P58_DemoNo /*gvi*/
+#pragma push_macro("P58_LangNo") /*gvi*/
+#undef P58_LangNo /*gvi*/
+#pragma push_macro("P58_S32980") /*gvi*/
+#undef P58_S32980 /*gvi*/
+#pragma push_macro("P58_SB87EB0") /*gvi*/
+#undef P58_SB87EB0 /*gvi*/
+#pragma push_macro("P58_CntB31EBC") /*gvi*/
+#undef P58_CntB31EBC /*gvi*/
+#pragma push_macro("P58_GridW") /*gvi*/
+#undef P58_GridW /*gvi*/
+#pragma push_macro("P58_GridH") /*gvi*/
+#undef P58_GridH /*gvi*/
+#pragma push_macro("P58_CfgOn") /*gvi*/
+#undef P58_CfgOn /*gvi*/
+#pragma push_macro("P58_CfgLock") /*gvi*/
+#undef P58_CfgLock /*gvi*/
 extern int32_t P58_DemoFlag, P58_S5F7E5C, P58_DemoNo, P58_LangNo, P58_S32980, P58_SB87EB0, P58_CntB31EBC, P58_GridW, P58_GridH, P58_CfgOn, P58_CfgLock;
+#pragma pop_macro("P58_CfgLock") /*gvi*/
+#pragma pop_macro("P58_CfgOn") /*gvi*/
+#pragma pop_macro("P58_GridH") /*gvi*/
+#pragma pop_macro("P58_GridW") /*gvi*/
+#pragma pop_macro("P58_CntB31EBC") /*gvi*/
+#pragma pop_macro("P58_SB87EB0") /*gvi*/
+#pragma pop_macro("P58_S32980") /*gvi*/
+#pragma pop_macro("P58_LangNo") /*gvi*/
+#pragma pop_macro("P58_DemoNo") /*gvi*/
+#pragma pop_macro("P58_S5F7E5C") /*gvi*/
+#pragma pop_macro("P58_DemoFlag") /*gvi*/
+#pragma push_macro("P58_Objs") /*gvi*/
+#undef P58_Objs /*gvi*/
 extern p58_names_t P58_Demos, P58_Langs; extern p58_objs_t P58_Objs;
+#pragma pop_macro("P58_Objs") /*gvi*/
+#pragma push_macro("P58_Font") /*gvi*/
+#undef P58_Font /*gvi*/
+#pragma push_macro("P58_Cfg") /*gvi*/
+#undef P58_Cfg /*gvi*/
+#pragma push_macro("P58_CfgHdr") /*gvi*/
+#undef P58_CfgHdr /*gvi*/
 extern p58_slot_t *P58_ListB31EC4; extern void **P58_Grid; extern p58_font_t P58_Font; extern p58_cfg_t P58_Cfg; extern p56_hdr_t P58_CfgHdr;
+#pragma pop_macro("P58_CfgHdr") /*gvi*/
+#pragma pop_macro("P58_Cfg") /*gvi*/
+#pragma pop_macro("P58_Font") /*gvi*/
 #endif
 void P58_InitConsts(void);                          /* native: строки таблиц DEMOn/LANG из .data */
 void    P58_MenuSwitch(void);                       /* 00417e0d: выбор экрана по P58_MenuSel (5 вариантов) */
@@ -121,3 +232,91 @@ void    P58_Backgrounds(void);                      /* 0040cf35 */
 int32_t P58_SaveSlot(int32_t slot, char *dst);      /* 00405e79 */
 void    P58_SaveConfig(void);                       /* 00405bfa */
 float   P58_TextWidth(const uint8_t *s, int32_t font); /* 0040b1cc */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P58_MenuSel
+#define P58_MenuSel (*(int32_t *)re_gvar(0x005fed9cu, sizeof(int32_t), (void *)&P58_MenuSel))
+#undef P58_MenuFn
+#define P58_MenuFn (*(int32_t *)re_gvar(0x005fea44u, sizeof(int32_t), (void *)&P58_MenuFn))
+#undef P58_MenuIdx
+#define P58_MenuIdx (*(int32_t *)re_gvar(0x005fea38u, sizeof(int32_t), (void *)&P58_MenuIdx))
+#undef P58_Cnt4EFC03
+#define P58_Cnt4EFC03 (*(int32_t *)re_gvar(0x00b31eecu, sizeof(int32_t), (void *)&P58_Cnt4EFC03))
+#undef P58_CntC814E8
+#define P58_CntC814E8 (*(int32_t *)re_gvar(0x00c814e8u, sizeof(int32_t), (void *)&P58_CntC814E8))
+#undef P58_S5FEA88
+#define P58_S5FEA88 (*(int32_t *)re_gvar(0x005fea88u, sizeof(int32_t), (void *)&P58_S5FEA88))
+#undef P58_S5FEA8C
+#define P58_S5FEA8C (*(int32_t *)re_gvar(0x005fea8cu, sizeof(int32_t), (void *)&P58_S5FEA8C))
+#undef P58_S5FEA7C
+#define P58_S5FEA7C (*(int32_t *)re_gvar(0x005fea7cu, sizeof(int32_t), (void *)&P58_S5FEA7C))
+#undef P58_S5FEA80
+#define P58_S5FEA80 (*(int32_t *)re_gvar(0x005fea80u, sizeof(int32_t), (void *)&P58_S5FEA80))
+#undef P58_S54E654
+#define P58_S54E654 (*(int32_t *)re_gvar(0x0054e654u, sizeof(int32_t), (void *)&P58_S54E654))
+#undef P58_S5FE9C0
+#define P58_S5FE9C0 (*(int32_t *)re_gvar(0x005fe9c0u, sizeof(int32_t), (void *)&P58_S5FE9C0))
+#undef P58_S5FE9B4
+#define P58_S5FE9B4 (*(uint32_t *)re_gvar(0x005fe9b4u, sizeof(uint32_t), (void *)&P58_S5FE9B4))
+#undef P58_S5FE9B0
+#define P58_S5FE9B0 (*(uint32_t *)re_gvar(0x005fe9b0u, sizeof(uint32_t), (void *)&P58_S5FE9B0))
+#undef P58_S5FE9B8
+#define P58_S5FE9B8 (*(uint32_t *)re_gvar(0x005fe9b8u, sizeof(uint32_t), (void *)&P58_S5FE9B8))
+#undef P58_S5FE9F8
+#define P58_S5FE9F8 (*(int32_t *)re_gvar(0x005fe9f8u, sizeof(int32_t), (void *)&P58_S5FE9F8))
+#undef P58_Page
+#define P58_Page (*(int32_t *)re_gvar(0x00575ef0u, sizeof(int32_t), (void *)&P58_Page))
+#undef P58_TabPtr
+#define P58_TabPtr (*(uint32_t *)re_gvar(0x0054e100u, sizeof(uint32_t), (void *)&P58_TabPtr))
+#undef P58_S54DFC8
+#define P58_S54DFC8 (*(uint32_t *)re_gvar(0x0054dfc8u, sizeof(uint32_t), (void *)&P58_S54DFC8))
+#undef P58_S54DFD8
+#define P58_S54DFD8 (*(uint32_t *)re_gvar(0x0054dfd8u, sizeof(uint32_t), (void *)&P58_S54DFD8))
+#undef P58_S54DFE8
+#define P58_S54DFE8 (*(uint32_t *)re_gvar(0x0054dfe8u, sizeof(uint32_t), (void *)&P58_S54DFE8))
+#undef P58_S54DFF8
+#define P58_S54DFF8 (*(uint32_t *)re_gvar(0x0054dff8u, sizeof(uint32_t), (void *)&P58_S54DFF8))
+#undef P58_S54E008
+#define P58_S54E008 (*(uint32_t *)re_gvar(0x0054e008u, sizeof(uint32_t), (void *)&P58_S54E008))
+#undef P58_SC559D8
+#define P58_SC559D8 (*(uint32_t *)re_gvar(0x00c559d8u, sizeof(uint32_t), (void *)&P58_SC559D8))
+#undef P58_SC559E0
+#define P58_SC559E0 (*(uint32_t *)re_gvar(0x00c559e0u, sizeof(uint32_t), (void *)&P58_SC559E0))
+#undef P58_SC559E4
+#define P58_SC559E4 (*(uint32_t *)re_gvar(0x00c559e4u, sizeof(uint32_t), (void *)&P58_SC559E4))
+#undef P58_SC559E8
+#define P58_SC559E8 (*(uint32_t *)re_gvar(0x00c559e8u, sizeof(uint32_t), (void *)&P58_SC559E8))
+#undef P58_SC559EC
+#define P58_SC559EC (*(uint32_t *)re_gvar(0x00c559ecu, sizeof(uint32_t), (void *)&P58_SC559EC))
+#undef P58_DemoFlag
+#define P58_DemoFlag (*(int32_t *)re_gvar(0x00b87f0cu, sizeof(int32_t), (void *)&P58_DemoFlag))
+#undef P58_S5F7E5C
+#define P58_S5F7E5C (*(int32_t *)re_gvar(0x005f7e5cu, sizeof(int32_t), (void *)&P58_S5F7E5C))
+#undef P58_DemoNo
+#define P58_DemoNo (*(int32_t *)re_gvar(0x005d5780u, sizeof(int32_t), (void *)&P58_DemoNo))
+#undef P58_LangNo
+#define P58_LangNo (*(int32_t *)re_gvar(0x00c557fcu, sizeof(int32_t), (void *)&P58_LangNo))
+#undef P58_Objs
+#define P58_Objs (*(p58_objs_t *)re_gvar(0x00c80ce0u, sizeof(p58_objs_t), (void *)&P58_Objs))
+#undef P58_S32980
+#define P58_S32980 (*(int32_t *)re_gvar(0x00b32980u, sizeof(int32_t), (void *)&P58_S32980))
+#undef P58_SB87EB0
+#define P58_SB87EB0 (*(int32_t *)re_gvar(0x00b87eb0u, sizeof(int32_t), (void *)&P58_SB87EB0))
+#undef P58_CntB31EBC
+#define P58_CntB31EBC (*(int32_t *)re_gvar(0x00b31ebcu, sizeof(int32_t), (void *)&P58_CntB31EBC))
+#undef P58_GridW
+#define P58_GridW (*(int32_t *)re_gvar(0x0113452cu, sizeof(int32_t), (void *)&P58_GridW))
+#undef P58_GridH
+#define P58_GridH (*(int32_t *)re_gvar(0x01134530u, sizeof(int32_t), (void *)&P58_GridH))
+#undef P58_Font
+#define P58_Font (*(p58_font_t *)re_gvar(0x005d57a0u, sizeof(p58_font_t), (void *)&P58_Font))
+#undef P58_Cfg
+#define P58_Cfg (*(p58_cfg_t *)re_gvar(0x01285320u, sizeof(p58_cfg_t), (void *)&P58_Cfg))
+#undef P58_CfgHdr
+#define P58_CfgHdr (*(p56_hdr_t *)re_gvar(0x0057b6a0u, sizeof(p56_hdr_t), (void *)&P58_CfgHdr))
+#undef P58_CfgOn
+#define P58_CfgOn (*(int32_t *)re_gvar(0x00b87eb8u, sizeof(int32_t), (void *)&P58_CfgOn))
+#undef P58_CfgLock
+#define P58_CfgLock (*(int32_t *)re_gvar(0x0057b700u, sizeof(int32_t), (void *)&P58_CfgLock))
+#endif
+/* gvar-img v2.03 end */

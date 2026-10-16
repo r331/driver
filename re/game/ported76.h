@@ -34,7 +34,28 @@ typedef uint8_t p76_obj_t[0x40];
 #define P76_NumSlots GAME_VAR(int32_t, P76_NumSlots, 0x00cfe6e0)
 #define P76_K255    GAME_VAR(float, P76_K255, 0x00546064)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P76_Angle") /*gvi*/
+#undef P76_Angle /*gvi*/
+#pragma push_macro("P76_NumSlots") /*gvi*/
+#undef P76_NumSlots /*gvi*/
+#pragma push_macro("P76_ColA") /*gvi*/
+#undef P76_ColA /*gvi*/
+#pragma push_macro("P76_ColB") /*gvi*/
+#undef P76_ColB /*gvi*/
+#pragma push_macro("P76_ColC") /*gvi*/
+#undef P76_ColC /*gvi*/
+#pragma push_macro("P76_ColObj") /*gvi*/
+#undef P76_ColObj /*gvi*/
+#pragma push_macro("P76_K255") /*gvi*/
+#undef P76_K255 /*gvi*/
 extern int32_t P76_Angle, P76_NumSlots; extern uint8_t P76_ColA, P76_ColB, P76_ColC; extern p76_obj_t P76_ColObj; extern float P76_K255;
+#pragma pop_macro("P76_K255") /*gvi*/
+#pragma pop_macro("P76_ColObj") /*gvi*/
+#pragma pop_macro("P76_ColC") /*gvi*/
+#pragma pop_macro("P76_ColB") /*gvi*/
+#pragma pop_macro("P76_ColA") /*gvi*/
+#pragma pop_macro("P76_NumSlots") /*gvi*/
+#pragma pop_macro("P76_Angle") /*gvi*/
 #endif
 void P76_InitConsts(void);
 void P76_TriA1(const int32_t *a, const int32_t *b, const int32_t *c);   /* 0041e926 */
@@ -49,3 +70,21 @@ int32_t P76_InBox(const float *pos, const uint8_t *grid, int32_t cx, int32_t cy)
 void P76_CellFromPos(const float *pos, uint8_t *arg, int32_t *ox, int32_t *oy);      /* 004ee813 */
 void P76_AngleColor(void);                                              /* 004e8f1e */
 int32_t P76_LoadHsTables(void *f);                                      /* 0051caa7 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P76_Angle
+#define P76_Angle (*(int32_t *)re_gvar(0x00d02680u, sizeof(int32_t), (void *)&P76_Angle))
+#undef P76_ColA
+#define P76_ColA (*(uint8_t *)re_gvar(0x00d02668u, sizeof(uint8_t), (void *)&P76_ColA))
+#undef P76_ColB
+#define P76_ColB (*(uint8_t *)re_gvar(0x00d02320u, sizeof(uint8_t), (void *)&P76_ColB))
+#undef P76_ColC
+#define P76_ColC (*(uint8_t *)re_gvar(0x00d02669u, sizeof(uint8_t), (void *)&P76_ColC))
+#undef P76_ColObj
+#define P76_ColObj (*(p76_obj_t *)re_gvar(0x00d02650u, sizeof(p76_obj_t), (void *)&P76_ColObj))
+#undef P76_NumSlots
+#define P76_NumSlots (*(int32_t *)re_gvar(0x00cfe6e0u, sizeof(int32_t), (void *)&P76_NumSlots))
+#undef P76_K255
+#define P76_K255 (*(float *)re_gvar(0x00546064u, sizeof(float), (void *)&P76_K255))
+#endif
+/* gvar-img v2.03 end */

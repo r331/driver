@@ -11,22 +11,150 @@
 #include "unported.h"
 #include <stdio.h>
 #include <string.h>
-GAME_VAR_DEF(p28_evtab_t, P28_EventModels, 0x00d11a60)
-GAME_VAR_DEF(int32_t, P28_EventCount, 0x00d12418)
-GAME_VAR_DEF(p28_models_t, P28_CarClean, 0x010ddfe0)
-GAME_VAR_DEF(p28_models_t, P28_CarDam, 0x010de020)
-GAME_VAR_DEF(p28_models_t, P28_CarLow, 0x010de080)
-GAME_VAR_DEF(p28_deltas_t, P28_CarDelta, 0x010de320)
-GAME_VAR_DEF(p28_sizes_t, P28_CarOpsSize, 0x00e00680)
-GAME_VAR_DEF(int32_t, P28_CarShine, 0x011b6140)
-GAME_VAR_DEF(p28_clear100_t, P28_Clear100, 0x010de120)
-GAME_VAR_DEF(p28_blk1_t, P28_Dst1, 0x00559074)
-GAME_VAR_DEF(p28_src1_t, P28_Src1, 0x005554d4)
-GAME_VAR_DEF(p28_src2_t, P28_Src2, 0x00557694)
-GAME_VAR_DEF(p28_blk2_t, P28_Dst2, 0x0055a6f4)
-GAME_VAR_DEF(int32_t, P28_DbgFlag, 0x00dbb450)
-GAME_VAR_DEF(int32_t, P28_ShineFlag, 0x0055c974)
-GAME_VAR_DEF(int32_t, P28_BadGuyFlag, 0x00b87f04)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_EventModels")
+#undef P28_EventModels
+#pragma push_macro("P28_EventModels") /*gvi*/
+#undef P28_EventModels /*gvi*/
+p28_evtab_t P28_EventModels;
+#pragma pop_macro("P28_EventModels") /*gvi*/
+#pragma pop_macro("P28_EventModels")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_EventCount")
+#undef P28_EventCount
+#pragma push_macro("P28_EventCount") /*gvi*/
+#undef P28_EventCount /*gvi*/
+int32_t P28_EventCount;
+#pragma pop_macro("P28_EventCount") /*gvi*/
+#pragma pop_macro("P28_EventCount")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_CarClean")
+#undef P28_CarClean
+#pragma push_macro("P28_CarClean") /*gvi*/
+#undef P28_CarClean /*gvi*/
+p28_models_t P28_CarClean;
+#pragma pop_macro("P28_CarClean") /*gvi*/
+#pragma pop_macro("P28_CarClean")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_CarDam")
+#undef P28_CarDam
+#pragma push_macro("P28_CarDam") /*gvi*/
+#undef P28_CarDam /*gvi*/
+p28_models_t P28_CarDam;
+#pragma pop_macro("P28_CarDam") /*gvi*/
+#pragma pop_macro("P28_CarDam")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_CarLow")
+#undef P28_CarLow
+#pragma push_macro("P28_CarLow") /*gvi*/
+#undef P28_CarLow /*gvi*/
+p28_models_t P28_CarLow;
+#pragma pop_macro("P28_CarLow") /*gvi*/
+#pragma pop_macro("P28_CarLow")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_CarDelta")
+#undef P28_CarDelta
+#pragma push_macro("P28_CarDelta") /*gvi*/
+#undef P28_CarDelta /*gvi*/
+p28_deltas_t P28_CarDelta;
+#pragma pop_macro("P28_CarDelta") /*gvi*/
+#pragma pop_macro("P28_CarDelta")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_CarOpsSize")
+#undef P28_CarOpsSize
+#pragma push_macro("P28_CarOpsSize") /*gvi*/
+#undef P28_CarOpsSize /*gvi*/
+p28_sizes_t P28_CarOpsSize;
+#pragma pop_macro("P28_CarOpsSize") /*gvi*/
+#pragma pop_macro("P28_CarOpsSize")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_CarShine")
+#undef P28_CarShine
+#pragma push_macro("P28_CarShine") /*gvi*/
+#undef P28_CarShine /*gvi*/
+int32_t P28_CarShine;
+#pragma pop_macro("P28_CarShine") /*gvi*/
+#pragma pop_macro("P28_CarShine")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_Clear100")
+#undef P28_Clear100
+#pragma push_macro("P28_Clear100") /*gvi*/
+#undef P28_Clear100 /*gvi*/
+p28_clear100_t P28_Clear100;
+#pragma pop_macro("P28_Clear100") /*gvi*/
+#pragma pop_macro("P28_Clear100")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_Dst1")
+#undef P28_Dst1
+#pragma push_macro("P28_Dst1") /*gvi*/
+#undef P28_Dst1 /*gvi*/
+p28_blk1_t P28_Dst1;
+#pragma pop_macro("P28_Dst1") /*gvi*/
+#pragma pop_macro("P28_Dst1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_Src1")
+#undef P28_Src1
+#pragma push_macro("P28_Src1") /*gvi*/
+#undef P28_Src1 /*gvi*/
+p28_src1_t P28_Src1;
+#pragma pop_macro("P28_Src1") /*gvi*/
+#pragma pop_macro("P28_Src1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_Src2")
+#undef P28_Src2
+#pragma push_macro("P28_Src2") /*gvi*/
+#undef P28_Src2 /*gvi*/
+p28_src2_t P28_Src2;
+#pragma pop_macro("P28_Src2") /*gvi*/
+#pragma pop_macro("P28_Src2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_Dst2")
+#undef P28_Dst2
+#pragma push_macro("P28_Dst2") /*gvi*/
+#undef P28_Dst2 /*gvi*/
+p28_blk2_t P28_Dst2;
+#pragma pop_macro("P28_Dst2") /*gvi*/
+#pragma pop_macro("P28_Dst2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_DbgFlag")
+#undef P28_DbgFlag
+#pragma push_macro("P28_DbgFlag") /*gvi*/
+#undef P28_DbgFlag /*gvi*/
+int32_t P28_DbgFlag;
+#pragma pop_macro("P28_DbgFlag") /*gvi*/
+#pragma pop_macro("P28_DbgFlag")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_ShineFlag")
+#undef P28_ShineFlag
+#pragma push_macro("P28_ShineFlag") /*gvi*/
+#undef P28_ShineFlag /*gvi*/
+int32_t P28_ShineFlag;
+#pragma pop_macro("P28_ShineFlag") /*gvi*/
+#pragma pop_macro("P28_ShineFlag")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P28_BadGuyFlag")
+#undef P28_BadGuyFlag
+#pragma push_macro("P28_BadGuyFlag") /*gvi*/
+#undef P28_BadGuyFlag /*gvi*/
+int32_t P28_BadGuyFlag;
+#pragma pop_macro("P28_BadGuyFlag") /*gvi*/
+#pragma pop_macro("P28_BadGuyFlag")
+#endif
 #define P28_Ptr(v) ((const uint8_t *)P79_PTR(v))   /* v1.44: ссылки моделей — uint32 (P79_PTR: hook — адрес, native — арена карты) */
 #define MAIN_HWND ((void *)(intptr_t)G6_00BDF9C0)
 #define MAP_C "D:\\Driver\\Game\\map.c"

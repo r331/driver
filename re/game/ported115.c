@@ -39,8 +39,24 @@
 
 GAME_VAR_DEF(p85_raster_fn, P115_RasterC, 0x01270e30)
 GAME_VAR_DEF(p85_raster_fn, P115_RasterD, 0x01270d9c)
-GAME_VAR_DEF(int32_t, P115_TgtOn, 0x00c80cf0)
-GAME_VAR_DEF(p115_i4_t, P115_Tgt, 0x00c80cf4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P115_TgtOn")
+#undef P115_TgtOn
+#pragma push_macro("P115_TgtOn") /*gvi*/
+#undef P115_TgtOn /*gvi*/
+int32_t P115_TgtOn;
+#pragma pop_macro("P115_TgtOn") /*gvi*/
+#pragma pop_macro("P115_TgtOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P115_Tgt")
+#undef P115_Tgt
+#pragma push_macro("P115_Tgt") /*gvi*/
+#undef P115_Tgt /*gvi*/
+p115_i4_t P115_Tgt;
+#pragma pop_macro("P115_Tgt") /*gvi*/
+#pragma pop_macro("P115_Tgt")
+#endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }

@@ -53,53 +53,356 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P100_MenuC810") /*gvi*/
+#undef P100_MenuC810 /*gvi*/
 p100_c810_t P100_MenuC810 = P100_C810_INIT;
+#pragma pop_macro("P100_MenuC810") /*gvi*/
+#pragma push_macro("P100_MenuD4A8") /*gvi*/
+#undef P100_MenuD4A8 /*gvi*/
 p100_d4a8_t P100_MenuD4A8 = P100_D4A8_INIT;
+#pragma pop_macro("P100_MenuD4A8") /*gvi*/
+#pragma push_macro("P100_MenuE0B0") /*gvi*/
+#undef P100_MenuE0B0 /*gvi*/
 p100_e0b0_t P100_MenuE0B0 = P100_E0B0_INIT;
+#pragma pop_macro("P100_MenuE0B0") /*gvi*/
+#pragma push_macro("P100_SpeedTab") /*gvi*/
+#undef P100_SpeedTab /*gvi*/
 p100_u9_t P100_SpeedTab = P100_E33C_U32;
+#pragma pop_macro("P100_SpeedTab") /*gvi*/
+#pragma push_macro("P100_ItemN") /*gvi*/
+#undef P100_ItemN /*gvi*/
 int32_t P100_ItemN = 1;   /* .data 0054e230 */
+#pragma pop_macro("P100_ItemN") /*gvi*/
 #endif
-GAME_VAR_DEF(uint32_t, P100_ItemTab, 0x005fea48)
-GAME_VAR_DEF(int32_t, P100_ItemSel, 0x005fe9f4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_ItemTab")
+#undef P100_ItemTab
+#pragma push_macro("P100_ItemTab") /*gvi*/
+#undef P100_ItemTab /*gvi*/
+uint32_t P100_ItemTab;
+#pragma pop_macro("P100_ItemTab") /*gvi*/
+#pragma pop_macro("P100_ItemTab")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_ItemSel")
+#undef P100_ItemSel
+#pragma push_macro("P100_ItemSel") /*gvi*/
+#undef P100_ItemSel /*gvi*/
+int32_t P100_ItemSel;
+#pragma pop_macro("P100_ItemSel") /*gvi*/
+#pragma pop_macro("P100_ItemSel")
+#endif
 GAME_VAR_DEF(uint8_t *, P100_IconFfwd, 0x005fe9fc)
 GAME_VAR_DEF(uint8_t *, P100_IconPlay, 0x005fea00)
 GAME_VAR_DEF(uint8_t *, P100_IconAccept, 0x005fea04)
-GAME_VAR_DEF(p100_f3_t, P100_PartBase, 0x00c81b60)
-GAME_VAR_DEF(p100_partofs_t, P100_PartOfs, 0x00c81e20)
-GAME_VAR_DEF(p100_nodes_t, P100_PartNodes, 0x00c82020)
-GAME_VAR_DEF(int32_t, P100_PartModel, 0x00c821a4)
-GAME_VAR_DEF(int32_t, P100_PartMode, 0x00c821a8)
-GAME_VAR_DEF(int32_t, P100_PartFlags, 0x00c824e0)
-GAME_VAR_DEF(int32_t, P100_PartModelA, 0x00c97a30)
-GAME_VAR_DEF(int32_t, P100_PartModelB, 0x00ce1f40)
-GAME_VAR_DEF(int32_t, P100_PartRotA, 0x00d00254)
-GAME_VAR_DEF(int32_t, P100_PartRotB, 0x00c98ec4)
-GAME_VAR_DEF(p100_ang_t, P100_DebAng, 0x01123200)
-GAME_VAR_DEF(p100_m16_t, P100_DebMat, 0x01105d20)
-GAME_VAR_DEF(p100_tri_t, P100_DebTri, 0x011173e0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_PartBase")
+#undef P100_PartBase
+#pragma push_macro("P100_PartBase") /*gvi*/
+#undef P100_PartBase /*gvi*/
+p100_f3_t P100_PartBase;
+#pragma pop_macro("P100_PartBase") /*gvi*/
+#pragma pop_macro("P100_PartBase")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_PartOfs")
+#undef P100_PartOfs
+#pragma push_macro("P100_PartOfs") /*gvi*/
+#undef P100_PartOfs /*gvi*/
+p100_partofs_t P100_PartOfs;
+#pragma pop_macro("P100_PartOfs") /*gvi*/
+#pragma pop_macro("P100_PartOfs")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_PartNodes")
+#undef P100_PartNodes
+#pragma push_macro("P100_PartNodes") /*gvi*/
+#undef P100_PartNodes /*gvi*/
+p100_nodes_t P100_PartNodes;
+#pragma pop_macro("P100_PartNodes") /*gvi*/
+#pragma pop_macro("P100_PartNodes")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_PartModel")
+#undef P100_PartModel
+#pragma push_macro("P100_PartModel") /*gvi*/
+#undef P100_PartModel /*gvi*/
+int32_t P100_PartModel;
+#pragma pop_macro("P100_PartModel") /*gvi*/
+#pragma pop_macro("P100_PartModel")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_PartMode")
+#undef P100_PartMode
+#pragma push_macro("P100_PartMode") /*gvi*/
+#undef P100_PartMode /*gvi*/
+int32_t P100_PartMode;
+#pragma pop_macro("P100_PartMode") /*gvi*/
+#pragma pop_macro("P100_PartMode")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_PartFlags")
+#undef P100_PartFlags
+#pragma push_macro("P100_PartFlags") /*gvi*/
+#undef P100_PartFlags /*gvi*/
+int32_t P100_PartFlags;
+#pragma pop_macro("P100_PartFlags") /*gvi*/
+#pragma pop_macro("P100_PartFlags")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_PartModelA")
+#undef P100_PartModelA
+#pragma push_macro("P100_PartModelA") /*gvi*/
+#undef P100_PartModelA /*gvi*/
+int32_t P100_PartModelA;
+#pragma pop_macro("P100_PartModelA") /*gvi*/
+#pragma pop_macro("P100_PartModelA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_PartModelB")
+#undef P100_PartModelB
+#pragma push_macro("P100_PartModelB") /*gvi*/
+#undef P100_PartModelB /*gvi*/
+int32_t P100_PartModelB;
+#pragma pop_macro("P100_PartModelB") /*gvi*/
+#pragma pop_macro("P100_PartModelB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_PartRotA")
+#undef P100_PartRotA
+#pragma push_macro("P100_PartRotA") /*gvi*/
+#undef P100_PartRotA /*gvi*/
+int32_t P100_PartRotA;
+#pragma pop_macro("P100_PartRotA") /*gvi*/
+#pragma pop_macro("P100_PartRotA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_PartRotB")
+#undef P100_PartRotB
+#pragma push_macro("P100_PartRotB") /*gvi*/
+#undef P100_PartRotB /*gvi*/
+int32_t P100_PartRotB;
+#pragma pop_macro("P100_PartRotB") /*gvi*/
+#pragma pop_macro("P100_PartRotB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_DebAng")
+#undef P100_DebAng
+#pragma push_macro("P100_DebAng") /*gvi*/
+#undef P100_DebAng /*gvi*/
+p100_ang_t P100_DebAng;
+#pragma pop_macro("P100_DebAng") /*gvi*/
+#pragma pop_macro("P100_DebAng")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_DebMat")
+#undef P100_DebMat
+#pragma push_macro("P100_DebMat") /*gvi*/
+#undef P100_DebMat /*gvi*/
+p100_m16_t P100_DebMat;
+#pragma pop_macro("P100_DebMat") /*gvi*/
+#pragma pop_macro("P100_DebMat")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_DebTri")
+#undef P100_DebTri
+#pragma push_macro("P100_DebTri") /*gvi*/
+#undef P100_DebTri /*gvi*/
+p100_tri_t P100_DebTri;
+#pragma pop_macro("P100_DebTri") /*gvi*/
+#pragma pop_macro("P100_DebTri")
+#endif
 GAME_VAR_DEF(uint8_t *, P100_RecBuf, 0x00b5a854)
-GAME_VAR_DEF(int32_t, P100_RecKeys, 0x00d1187c)
-GAME_VAR_DEF(p100_u5_t, P100_RecPtr, 0x00c4d720)
-GAME_VAR_DEF(p100_u5_t, P100_RecRep, 0x00c4d780)
-GAME_VAR_DEF(p100_i5_t, P100_RecTot, 0x00c4d880)
-GAME_VAR_DEF(p100_i5_t, P100_RecOff, 0x00c4d940)
-GAME_VAR_DEF(p100_i5_t, P100_RecVal, 0x00c4da40)
-GAME_VAR_DEF(int32_t, P100_RecEnd, 0x00c4da54)
-GAME_VAR_DEF(p100_i5_t, P100_RecCnt, 0x00c55020)
-GAME_VAR_DEF(uint8_t, P100_RecStop, 0x00b5a8ab)
-GAME_VAR_DEF(int32_t, P100_B87E24, 0x00b87e24)
-GAME_VAR_DEF(int32_t, P100_1426FC, 0x011426fc)
-GAME_VAR_DEF(int32_t, P100_143720, 0x01143720)
-GAME_VAR_DEF(int32_t, P100_RadarX, 0x00b32a28)
-GAME_VAR_DEF(int32_t, P100_RadarZ, 0x00b32a2c)
-GAME_VAR_DEF(int32_t, P100_Radar16, 0x00bdfaa0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_RecKeys")
+#undef P100_RecKeys
+#pragma push_macro("P100_RecKeys") /*gvi*/
+#undef P100_RecKeys /*gvi*/
+int32_t P100_RecKeys;
+#pragma pop_macro("P100_RecKeys") /*gvi*/
+#pragma pop_macro("P100_RecKeys")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_RecPtr")
+#undef P100_RecPtr
+#pragma push_macro("P100_RecPtr") /*gvi*/
+#undef P100_RecPtr /*gvi*/
+p100_u5_t P100_RecPtr;
+#pragma pop_macro("P100_RecPtr") /*gvi*/
+#pragma pop_macro("P100_RecPtr")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_RecRep")
+#undef P100_RecRep
+#pragma push_macro("P100_RecRep") /*gvi*/
+#undef P100_RecRep /*gvi*/
+p100_u5_t P100_RecRep;
+#pragma pop_macro("P100_RecRep") /*gvi*/
+#pragma pop_macro("P100_RecRep")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_RecTot")
+#undef P100_RecTot
+#pragma push_macro("P100_RecTot") /*gvi*/
+#undef P100_RecTot /*gvi*/
+p100_i5_t P100_RecTot;
+#pragma pop_macro("P100_RecTot") /*gvi*/
+#pragma pop_macro("P100_RecTot")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_RecOff")
+#undef P100_RecOff
+#pragma push_macro("P100_RecOff") /*gvi*/
+#undef P100_RecOff /*gvi*/
+p100_i5_t P100_RecOff;
+#pragma pop_macro("P100_RecOff") /*gvi*/
+#pragma pop_macro("P100_RecOff")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_RecVal")
+#undef P100_RecVal
+#pragma push_macro("P100_RecVal") /*gvi*/
+#undef P100_RecVal /*gvi*/
+p100_i5_t P100_RecVal;
+#pragma pop_macro("P100_RecVal") /*gvi*/
+#pragma pop_macro("P100_RecVal")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_RecEnd")
+#undef P100_RecEnd
+#pragma push_macro("P100_RecEnd") /*gvi*/
+#undef P100_RecEnd /*gvi*/
+int32_t P100_RecEnd;
+#pragma pop_macro("P100_RecEnd") /*gvi*/
+#pragma pop_macro("P100_RecEnd")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_RecCnt")
+#undef P100_RecCnt
+#pragma push_macro("P100_RecCnt") /*gvi*/
+#undef P100_RecCnt /*gvi*/
+p100_i5_t P100_RecCnt;
+#pragma pop_macro("P100_RecCnt") /*gvi*/
+#pragma pop_macro("P100_RecCnt")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_RecStop")
+#undef P100_RecStop
+#pragma push_macro("P100_RecStop") /*gvi*/
+#undef P100_RecStop /*gvi*/
+uint8_t P100_RecStop;
+#pragma pop_macro("P100_RecStop") /*gvi*/
+#pragma pop_macro("P100_RecStop")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_B87E24")
+#undef P100_B87E24
+#pragma push_macro("P100_B87E24") /*gvi*/
+#undef P100_B87E24 /*gvi*/
+int32_t P100_B87E24;
+#pragma pop_macro("P100_B87E24") /*gvi*/
+#pragma pop_macro("P100_B87E24")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_1426FC")
+#undef P100_1426FC
+#pragma push_macro("P100_1426FC") /*gvi*/
+#undef P100_1426FC /*gvi*/
+int32_t P100_1426FC;
+#pragma pop_macro("P100_1426FC") /*gvi*/
+#pragma pop_macro("P100_1426FC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_143720")
+#undef P100_143720
+#pragma push_macro("P100_143720") /*gvi*/
+#undef P100_143720 /*gvi*/
+int32_t P100_143720;
+#pragma pop_macro("P100_143720") /*gvi*/
+#pragma pop_macro("P100_143720")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_RadarX")
+#undef P100_RadarX
+#pragma push_macro("P100_RadarX") /*gvi*/
+#undef P100_RadarX /*gvi*/
+int32_t P100_RadarX;
+#pragma pop_macro("P100_RadarX") /*gvi*/
+#pragma pop_macro("P100_RadarX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_RadarZ")
+#undef P100_RadarZ
+#pragma push_macro("P100_RadarZ") /*gvi*/
+#undef P100_RadarZ /*gvi*/
+int32_t P100_RadarZ;
+#pragma pop_macro("P100_RadarZ") /*gvi*/
+#pragma pop_macro("P100_RadarZ")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_Radar16")
+#undef P100_Radar16
+#pragma push_macro("P100_Radar16") /*gvi*/
+#undef P100_Radar16 /*gvi*/
+int32_t P100_Radar16;
+#pragma pop_macro("P100_Radar16") /*gvi*/
+#pragma pop_macro("P100_Radar16")
+#endif
 GAME_VAR_DEF(uint8_t *, P100_RadarIcon, 0x00c8088c)
-GAME_VAR_DEF(p100_i4_t, P100_Rect, 0x00c1cd00)
-GAME_VAR_DEF(uint32_t, P100_PixFn, 0x0057b73c)
-GAME_VAR_DEF(p100_i7_t, P100_LfbFmt, 0x005c6744)
-GAME_VAR_DEF(int32_t, P100_LfbPitch, 0x005c6764)
-GAME_VAR_DEF(p100_pal_t, P100_Pal32, 0x012710c0)
-GAME_VAR_DEF(int32_t, P100_ClipN, 0x0115a070)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_Rect")
+#undef P100_Rect
+#pragma push_macro("P100_Rect") /*gvi*/
+#undef P100_Rect /*gvi*/
+p100_i4_t P100_Rect;
+#pragma pop_macro("P100_Rect") /*gvi*/
+#pragma pop_macro("P100_Rect")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_PixFn")
+#undef P100_PixFn
+#pragma push_macro("P100_PixFn") /*gvi*/
+#undef P100_PixFn /*gvi*/
+uint32_t P100_PixFn;
+#pragma pop_macro("P100_PixFn") /*gvi*/
+#pragma pop_macro("P100_PixFn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_LfbFmt")
+#undef P100_LfbFmt
+#pragma push_macro("P100_LfbFmt") /*gvi*/
+#undef P100_LfbFmt /*gvi*/
+p100_i7_t P100_LfbFmt;
+#pragma pop_macro("P100_LfbFmt") /*gvi*/
+#pragma pop_macro("P100_LfbFmt")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_LfbPitch")
+#undef P100_LfbPitch
+#pragma push_macro("P100_LfbPitch") /*gvi*/
+#undef P100_LfbPitch /*gvi*/
+int32_t P100_LfbPitch;
+#pragma pop_macro("P100_LfbPitch") /*gvi*/
+#pragma pop_macro("P100_LfbPitch")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_Pal32")
+#undef P100_Pal32
+#pragma push_macro("P100_Pal32") /*gvi*/
+#undef P100_Pal32 /*gvi*/
+p100_pal_t P100_Pal32;
+#pragma pop_macro("P100_Pal32") /*gvi*/
+#pragma pop_macro("P100_Pal32")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P100_ClipN")
+#undef P100_ClipN
+#pragma push_macro("P100_ClipN") /*gvi*/
+#undef P100_ClipN /*gvi*/
+int32_t P100_ClipN;
+#pragma pop_macro("P100_ClipN") /*gvi*/
+#pragma pop_macro("P100_ClipN")
+#endif
 GAME_VAR_DEF(float *, P100_ClipOut, 0x0115a078)
 GAME_VAR_DEF(uint8_t *, P100_Mirror, 0x00b31f00)
 

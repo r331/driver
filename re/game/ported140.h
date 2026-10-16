@@ -19,8 +19,35 @@ typedef float    p140_f3_t[3];
 #define P140_Mrk2744  (P98_MrkF[9])
 #define P140_Mrk2748  (P98_MrkF[10])
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P140_KeyStr") /*gvi*/
+#undef P140_KeyStr /*gvi*/
+#pragma push_macro("P140_KeyName") /*gvi*/
+#undef P140_KeyName /*gvi*/
+#pragma push_macro("P140_FrSelA") /*gvi*/
+#undef P140_FrSelA /*gvi*/
+#pragma push_macro("P140_FrSelB") /*gvi*/
+#undef P140_FrSelB /*gvi*/
+#pragma push_macro("P140_FrQuit") /*gvi*/
+#undef P140_FrQuit /*gvi*/
 extern p140_keystr_t P140_KeyStr; extern p140_keyname_t P140_KeyName; extern int32_t P140_FrSelA, P140_FrSelB, P140_FrQuit;
+#pragma pop_macro("P140_FrQuit") /*gvi*/
+#pragma pop_macro("P140_FrSelB") /*gvi*/
+#pragma pop_macro("P140_FrSelA") /*gvi*/
+#pragma pop_macro("P140_KeyName") /*gvi*/
+#pragma pop_macro("P140_KeyStr") /*gvi*/
+#pragma push_macro("P140_B91BC0") /*gvi*/
+#undef P140_B91BC0 /*gvi*/
+#pragma push_macro("P140_B1F434") /*gvi*/
+#undef P140_B1F434 /*gvi*/
+#pragma push_macro("P140_Mrk2644") /*gvi*/
+#undef P140_Mrk2644 /*gvi*/
+#pragma push_macro("P140_MrkVel") /*gvi*/
+#undef P140_MrkVel /*gvi*/
 extern int32_t P140_B91BC0, P140_B1F434, P140_Mrk2644; extern p140_f3_t P140_MrkVel;
+#pragma pop_macro("P140_MrkVel") /*gvi*/
+#pragma pop_macro("P140_Mrk2644") /*gvi*/
+#pragma pop_macro("P140_B1F434") /*gvi*/
+#pragma pop_macro("P140_B91BC0") /*gvi*/
 #endif
 void    P140_SaveGame(int32_t slot, const char *name);   /* 00405d60: SAVES\GAME<slot+1>.BIN = заголовок 8 + запись 0x38 */
 void    P140_KeysLoad(void);                             /* 0040ec30: KEYS.<язык> → 0x21 имя клавиши */
@@ -30,3 +57,25 @@ int32_t P140_SndLoadWav(int32_t n, const char *path);    /* 0048bf9a: WAV → б
 int32_t P140_SndInit(int32_t drv, int32_t arg, int32_t eax); /* 005233be: сброс таблиц звука, запуск драйвера; 1 — успех */
 void    P140_BankLine(char *line);                       /* 00524bd8: строка банка сэмплов «ИМЯ /LOOP /2D /FREQ= /VOL= /PRI=» */
 void    P140_MrkFly(void);                               /* 004e9bbf: полёт маркера-вертолёта за машиной игрока */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P140_KeyStr
+#define P140_KeyStr (*(p140_keystr_t *)re_gvar(0x0054b4b4u, sizeof(p140_keystr_t), (void *)&P140_KeyStr))
+#undef P140_KeyName
+#define P140_KeyName (*(p140_keyname_t *)re_gvar(0x0054b080u, sizeof(p140_keyname_t), (void *)&P140_KeyName))
+#undef P140_FrSelA
+#define P140_FrSelA (*(int32_t *)re_gvar(0x005fe960u, sizeof(int32_t), (void *)&P140_FrSelA))
+#undef P140_FrSelB
+#define P140_FrSelB (*(int32_t *)re_gvar(0x005fe964u, sizeof(int32_t), (void *)&P140_FrSelB))
+#undef P140_FrQuit
+#define P140_FrQuit (*(int32_t *)re_gvar(0x005fe968u, sizeof(int32_t), (void *)&P140_FrQuit))
+#undef P140_B91BC0
+#define P140_B91BC0 (*(int32_t *)re_gvar(0x00b91bc0u, sizeof(int32_t), (void *)&P140_B91BC0))
+#undef P140_B1F434
+#define P140_B1F434 (*(int32_t *)re_gvar(0x00b1f434u, sizeof(int32_t), (void *)&P140_B1F434))
+#undef P140_Mrk2644
+#define P140_Mrk2644 (*(int32_t *)re_gvar(0x00d02644u, sizeof(int32_t), (void *)&P140_Mrk2644))
+#undef P140_MrkVel
+#define P140_MrkVel (*(p140_f3_t *)re_gvar(0x00b31ea8u, sizeof(p140_f3_t), (void *)&P140_MrkVel))
+#endif
+/* gvar-img v2.03 end */

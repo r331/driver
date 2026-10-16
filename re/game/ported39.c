@@ -4,9 +4,20 @@
 #include "ported7.h"
 #include "smallfuncs2.h"
 #include <string.h>
-GAME_VAR_DEF(int32_t, P39_Locked, 0x00a421d0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P39_Locked")
+#undef P39_Locked
+#pragma push_macro("P39_Locked") /*gvi*/
+#undef P39_Locked /*gvi*/
+int32_t P39_Locked;
+#pragma pop_macro("P39_Locked") /*gvi*/
+#pragma pop_macro("P39_Locked")
+#endif
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P39_Dummy") /*gvi*/
+#undef P39_Dummy /*gvi*/
 uint8_t P39_Dummy[64];
+#pragma pop_macro("P39_Dummy") /*gvi*/
 #endif
 
 #define DDERR_SURFACELOST_HR ((int32_t)0x887601C2)

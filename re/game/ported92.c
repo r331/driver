@@ -3,7 +3,15 @@
 #include "ported8.h"
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P92_SinIdx, 0x00b1c284)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P92_SinIdx")
+#undef P92_SinIdx
+#pragma push_macro("P92_SinIdx") /*gvi*/
+#undef P92_SinIdx /*gvi*/
+int32_t P92_SinIdx;
+#pragma pop_macro("P92_SinIdx") /*gvi*/
+#pragma pop_macro("P92_SinIdx")
+#endif
 #ifndef RE_HOOK_BUILD
 const uint8_t *P92_SpinTex;
 #endif

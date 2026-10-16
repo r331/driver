@@ -38,11 +38,51 @@
 #ifndef RE_HOOK_BUILD
 p111_icontab_t P111_IconTab;
 #endif
-GAME_VAR_DEF(uint32_t, P111_SparkIcon, 0x010ffbe0)
-GAME_VAR_DEF(uint32_t, P111_LeafIcon, 0x0110e140)
-GAME_VAR_DEF(uint32_t, P111_Ic0110B020, 0x0110b020)
-GAME_VAR_DEF(uint32_t, P111_Ic0111D400, 0x0111d400)
-GAME_VAR_DEF(uint32_t, P111_CopFlare, 0x0111a3e4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P111_SparkIcon")
+#undef P111_SparkIcon
+#pragma push_macro("P111_SparkIcon") /*gvi*/
+#undef P111_SparkIcon /*gvi*/
+uint32_t P111_SparkIcon;
+#pragma pop_macro("P111_SparkIcon") /*gvi*/
+#pragma pop_macro("P111_SparkIcon")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P111_LeafIcon")
+#undef P111_LeafIcon
+#pragma push_macro("P111_LeafIcon") /*gvi*/
+#undef P111_LeafIcon /*gvi*/
+uint32_t P111_LeafIcon;
+#pragma pop_macro("P111_LeafIcon") /*gvi*/
+#pragma pop_macro("P111_LeafIcon")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P111_Ic0110B020")
+#undef P111_Ic0110B020
+#pragma push_macro("P111_Ic0110B020") /*gvi*/
+#undef P111_Ic0110B020 /*gvi*/
+uint32_t P111_Ic0110B020;
+#pragma pop_macro("P111_Ic0110B020") /*gvi*/
+#pragma pop_macro("P111_Ic0110B020")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P111_Ic0111D400")
+#undef P111_Ic0111D400
+#pragma push_macro("P111_Ic0111D400") /*gvi*/
+#undef P111_Ic0111D400 /*gvi*/
+uint32_t P111_Ic0111D400;
+#pragma pop_macro("P111_Ic0111D400") /*gvi*/
+#pragma pop_macro("P111_Ic0111D400")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P111_CopFlare")
+#undef P111_CopFlare
+#pragma push_macro("P111_CopFlare") /*gvi*/
+#undef P111_CopFlare /*gvi*/
+uint32_t P111_CopFlare;
+#pragma pop_macro("P111_CopFlare") /*gvi*/
+#pragma pop_macro("P111_CopFlare")
+#endif
 
 #ifdef RE_HOOK_BUILD
 #  define P111_STD __attribute__((stdcall))

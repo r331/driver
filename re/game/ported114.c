@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 /* v1.59 (см. ported114.h). */
 #include "ported114.h"
 #include "reptr.h"
@@ -52,7 +54,15 @@
 #include <string.h>
 #include <math.h>
 
-GAME_VAR_DEF(p114_rgb_t, P114_Black, 0x00b1ffc0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P114_Black")
+#undef P114_Black
+#pragma push_macro("P114_Black") /*gvi*/
+#undef P114_Black /*gvi*/
+p114_rgb_t P114_Black;
+#pragma pop_macro("P114_Black") /*gvi*/
+#pragma pop_macro("P114_Black")
+#endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
@@ -364,11 +374,38 @@ void P114_RadarMarks(void) {
   P70_RadarNearestB();
 }
 
-GAME_VAR_DEF(int32_t, P114_BlinkCnt, 0x005f7e68)
-GAME_VAR_DEF(int32_t, P114_BlinkOn, 0x005f7e6c)
-GAME_VAR_DEF(int32_t, P114_RepCnt, 0x005f7e70)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P114_BlinkCnt")
+#undef P114_BlinkCnt
+#pragma push_macro("P114_BlinkCnt") /*gvi*/
+#undef P114_BlinkCnt /*gvi*/
+int32_t P114_BlinkCnt;
+#pragma pop_macro("P114_BlinkCnt") /*gvi*/
+#pragma pop_macro("P114_BlinkCnt")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P114_BlinkOn")
+#undef P114_BlinkOn
+#pragma push_macro("P114_BlinkOn") /*gvi*/
+#undef P114_BlinkOn /*gvi*/
+int32_t P114_BlinkOn;
+#pragma pop_macro("P114_BlinkOn") /*gvi*/
+#pragma pop_macro("P114_BlinkOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P114_RepCnt")
+#undef P114_RepCnt
+#pragma push_macro("P114_RepCnt") /*gvi*/
+#undef P114_RepCnt /*gvi*/
+int32_t P114_RepCnt;
+#pragma pop_macro("P114_RepCnt") /*gvi*/
+#pragma pop_macro("P114_RepCnt")
+#endif
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P114_RepDelay") /*gvi*/
+#undef P114_RepDelay /*gvi*/
 int32_t P114_RepDelay = 10;
+#pragma pop_macro("P114_RepDelay") /*gvi*/
 #endif
 
 /* ---- 0040c8f1: шаг меню. Пункт таблицы (0x10): +0 рисовать (мигание), +4 рисовать обычным, +8 выбрать; +0xc/+0xd влево/вправо,
@@ -408,5 +445,11 @@ int32_t P114_MenuStep(uint32_t tbl, int32_t *cur) {
     if (f) ret = f();
   }
   if (was != (uint32_t)*cur) { call1(t, was, 4, 0); call1(t, (uint32_t)*cur, 0, 0); }
+#ifndef RE_HOOK_BUILD
+  { static int tr = -1; if (tr < 0) tr = getenv("RE_TRACE_KEYS") != NULL;
+    static int nc = 0; if (tr && ((nc++ % 30) == 0 || was != (uint32_t)*cur || ret != 0 || P34_Keys[0xcd] || P34_Keys[0x1c]))
+      fprintf(stderr, "[menu] MenuStep %08x: пункт %u → %d, ret=%d, 7e4c=%d keys cd=%02x/%02x 1c=%02x/%02x\n", tbl, was, *cur, ret,
+              (int)D_005f7e4c, P34_Keys[0xcd], P34_KeysPrev[0xcd], P34_Keys[0x1c], P34_KeysPrev[0x1c]); }
+#endif
   return ret;
 }

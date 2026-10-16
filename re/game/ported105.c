@@ -137,9 +137,33 @@
 #  define P105_STD
 #endif
 
-GAME_VAR_DEF(uint32_t, P105_PixDst, 0x005c6740)
-GAME_VAR_DEF(int32_t, P105_SpinAng, 0x00b202e8)
-GAME_VAR_DEF(int32_t, P105_MusLimit, 0x0112b234)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P105_PixDst")
+#undef P105_PixDst
+#pragma push_macro("P105_PixDst") /*gvi*/
+#undef P105_PixDst /*gvi*/
+uint32_t P105_PixDst;
+#pragma pop_macro("P105_PixDst") /*gvi*/
+#pragma pop_macro("P105_PixDst")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P105_SpinAng")
+#undef P105_SpinAng
+#pragma push_macro("P105_SpinAng") /*gvi*/
+#undef P105_SpinAng /*gvi*/
+int32_t P105_SpinAng;
+#pragma pop_macro("P105_SpinAng") /*gvi*/
+#pragma pop_macro("P105_SpinAng")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P105_MusLimit")
+#undef P105_MusLimit
+#pragma push_macro("P105_MusLimit") /*gvi*/
+#undef P105_MusLimit /*gvi*/
+int32_t P105_MusLimit;
+#pragma pop_macro("P105_MusLimit") /*gvi*/
+#pragma pop_macro("P105_MusLimit")
+#endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }

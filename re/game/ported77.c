@@ -3,22 +3,94 @@
 #include <string.h>
 
 GAME_VAR_DEF(const char*, P77_LevelName, 0x00c81164)
-GAME_VAR_DEF(int32_t, P77_ListN, 0x00c81688)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P77_ListN")
+#undef P77_ListN
+#pragma push_macro("P77_ListN") /*gvi*/
+#undef P77_ListN /*gvi*/
+int32_t P77_ListN;
+#pragma pop_macro("P77_ListN") /*gvi*/
+#pragma pop_macro("P77_ListN")
+#endif
 GAME_VAR_DEF(void**, P77_List, 0x00c8175c)
-GAME_VAR_DEF(p77_plane_t, P77_Plane, 0x011cff80)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P77_Plane")
+#undef P77_Plane
+#pragma push_macro("P77_Plane") /*gvi*/
+#undef P77_Plane /*gvi*/
+p77_plane_t P77_Plane;
+#pragma pop_macro("P77_Plane") /*gvi*/
+#pragma pop_macro("P77_Plane")
+#endif
 GAME_VAR_DEF(p77_b590e0_t, P77_B590E0, 0x00b590e0)
 GAME_VAR_DEF(p77_c62d60_t, P77_C62D60, 0x00c62d60)
 GAME_VAR_DEF(p77_c65dc0_t, P77_C65DC0, 0x00c65dc0)
 GAME_VAR_DEF(p77_c5fe00_t, P77_C5FE00, 0x00c5fe00)
 GAME_VAR_DEF(p77_c7d8c0_t, P77_C7D8C0, 0x00c7d8c0)
 GAME_VAR_DEF(p77_c62e60_t, P77_C62E60, 0x00c62e60)
-GAME_VAR_DEF(uint8_t, P77_C7D850, 0x00c7d850)
-GAME_VAR_DEF(int32_t, P77_C7D8A4, 0x00c7d8a4)
-GAME_VAR_DEF(int32_t, P77_C7D8A0, 0x00c7d8a0)
-GAME_VAR_DEF(int32_t, P77_C7D8A8, 0x00c7d8a8)
-GAME_VAR_DEF(int32_t, P77_C65DA4, 0x00c65da4)
-GAME_VAR_DEF(int32_t, P77_B5A0E8, 0x00b5a0e8)
-GAME_VAR_DEF(int32_t, P77_S574570, 0x00574570)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P77_C7D850")
+#undef P77_C7D850
+#pragma push_macro("P77_C7D850") /*gvi*/
+#undef P77_C7D850 /*gvi*/
+uint8_t P77_C7D850;
+#pragma pop_macro("P77_C7D850") /*gvi*/
+#pragma pop_macro("P77_C7D850")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P77_C7D8A4")
+#undef P77_C7D8A4
+#pragma push_macro("P77_C7D8A4") /*gvi*/
+#undef P77_C7D8A4 /*gvi*/
+int32_t P77_C7D8A4;
+#pragma pop_macro("P77_C7D8A4") /*gvi*/
+#pragma pop_macro("P77_C7D8A4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P77_C7D8A0")
+#undef P77_C7D8A0
+#pragma push_macro("P77_C7D8A0") /*gvi*/
+#undef P77_C7D8A0 /*gvi*/
+int32_t P77_C7D8A0;
+#pragma pop_macro("P77_C7D8A0") /*gvi*/
+#pragma pop_macro("P77_C7D8A0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P77_C7D8A8")
+#undef P77_C7D8A8
+#pragma push_macro("P77_C7D8A8") /*gvi*/
+#undef P77_C7D8A8 /*gvi*/
+int32_t P77_C7D8A8;
+#pragma pop_macro("P77_C7D8A8") /*gvi*/
+#pragma pop_macro("P77_C7D8A8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P77_C65DA4")
+#undef P77_C65DA4
+#pragma push_macro("P77_C65DA4") /*gvi*/
+#undef P77_C65DA4 /*gvi*/
+int32_t P77_C65DA4;
+#pragma pop_macro("P77_C65DA4") /*gvi*/
+#pragma pop_macro("P77_C65DA4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P77_B5A0E8")
+#undef P77_B5A0E8
+#pragma push_macro("P77_B5A0E8") /*gvi*/
+#undef P77_B5A0E8 /*gvi*/
+int32_t P77_B5A0E8;
+#pragma pop_macro("P77_B5A0E8") /*gvi*/
+#pragma pop_macro("P77_B5A0E8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P77_S574570")
+#undef P77_S574570
+#pragma push_macro("P77_S574570") /*gvi*/
+#undef P77_S574570 /*gvi*/
+int32_t P77_S574570;
+#pragma pop_macro("P77_S574570") /*gvi*/
+#pragma pop_macro("P77_S574570")
+#endif
 
 /* Неперенесённые: загрузчики блоков уровня, обработчик блока 0x14, финальная подготовка, запись банка звуков. */
 #define P77_UNPORTED_NONE 0

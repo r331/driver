@@ -3,9 +3,27 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P66_Nest") /*gvi*/
+#undef P66_Nest /*gvi*/
+#pragma push_macro("P66_LoadFlag") /*gvi*/
+#undef P66_LoadFlag /*gvi*/
 int32_t P66_Nest = 0, P66_LoadFlag = 0;
+#pragma pop_macro("P66_LoadFlag") /*gvi*/
+#pragma pop_macro("P66_Nest") /*gvi*/
+#pragma push_macro("P66_Scene") /*gvi*/
+#undef P66_Scene /*gvi*/
 uint32_t P66_Scene = 0;
+#pragma pop_macro("P66_Scene") /*gvi*/
+#pragma push_macro("P66_C255") /*gvi*/
+#undef P66_C255 /*gvi*/
+#pragma push_macro("P66_C128") /*gvi*/
+#undef P66_C128 /*gvi*/
+#pragma push_macro("P66_C2") /*gvi*/
+#undef P66_C2 /*gvi*/
 float P66_C255 = 0, P66_C128 = 0, P66_C2 = 0;
+#pragma pop_macro("P66_C2") /*gvi*/
+#pragma pop_macro("P66_C128") /*gvi*/
+#pragma pop_macro("P66_C255") /*gvi*/
 #endif
 
 void P66_InitConsts(void) {

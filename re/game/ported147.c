@@ -64,8 +64,24 @@
 #include <stdio.h>
 #include <string.h>
 
-GAME_VAR_DEF(p147_rec6_t, P147_Rec2A10, 0x00b32a10)
-GAME_VAR_DEF(p147_chase_t, P147_ChaseName, 0x00c80f00)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P147_Rec2A10")
+#undef P147_Rec2A10
+#pragma push_macro("P147_Rec2A10") /*gvi*/
+#undef P147_Rec2A10 /*gvi*/
+p147_rec6_t P147_Rec2A10;
+#pragma pop_macro("P147_Rec2A10") /*gvi*/
+#pragma pop_macro("P147_Rec2A10")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P147_ChaseName")
+#undef P147_ChaseName
+#pragma push_macro("P147_ChaseName") /*gvi*/
+#undef P147_ChaseName /*gvi*/
+p147_chase_t P147_ChaseName;
+#pragma pop_macro("P147_ChaseName") /*gvi*/
+#pragma pop_macro("P147_ChaseName")
+#endif
 
 #define B84(a)   (*(int32_t *)&P56_Blk84[((a) - 0x00c810c0u) / 4])   /* поля внутри P56_Blk84 */
 

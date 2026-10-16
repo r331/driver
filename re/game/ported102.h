@@ -67,14 +67,134 @@ typedef uint8_t  p102_d68_t[0xd68];
 #define P102_HitFrame  GAME_VAR(int32_t, P102_HitFrame, 0x01144324)    /* кадр удара игрока о трафик */
 #define P102_ObjBKey   GAME_VAR(int32_t, P102_ObjBKey, 0x0111d404)     /* ключ FindOrAdd_004BB11F последней отметки */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P102_B5A914") /*gvi*/
+#undef P102_B5A914 /*gvi*/
+#pragma push_macro("P102_HitFrame") /*gvi*/
+#undef P102_HitFrame /*gvi*/
+#pragma push_macro("P102_ObjBKey") /*gvi*/
+#undef P102_ObjBKey /*gvi*/
 extern int32_t P102_B5A914, P102_HitFrame, P102_ObjBKey;
+#pragma pop_macro("P102_ObjBKey") /*gvi*/
+#pragma pop_macro("P102_HitFrame") /*gvi*/
+#pragma pop_macro("P102_B5A914") /*gvi*/
+#pragma push_macro("P102_HudDmg") /*gvi*/
+#undef P102_HudDmg /*gvi*/
+#pragma push_macro("P102_HudFel") /*gvi*/
+#undef P102_HudFel /*gvi*/
+#pragma push_macro("P102_DmgVar") /*gvi*/
+#undef P102_DmgVar /*gvi*/
+#pragma push_macro("P102_FelVar") /*gvi*/
+#undef P102_FelVar /*gvi*/
+#pragma push_macro("P102_OppVar") /*gvi*/
+#undef P102_OppVar /*gvi*/
 extern p102_hud_t P102_HudDmg, P102_HudFel; extern uint32_t P102_DmgVar, P102_FelVar, P102_OppVar; extern uint8_t *P102_MapIcon2;
+#pragma pop_macro("P102_OppVar") /*gvi*/
+#pragma pop_macro("P102_FelVar") /*gvi*/
+#pragma pop_macro("P102_DmgVar") /*gvi*/
+#pragma pop_macro("P102_HudFel") /*gvi*/
+#pragma pop_macro("P102_HudDmg") /*gvi*/
+#pragma push_macro("P102_HudF4") /*gvi*/
+#undef P102_HudF4 /*gvi*/
+#pragma push_macro("P102_DmgMax") /*gvi*/
+#undef P102_DmgMax /*gvi*/
+#pragma push_macro("P102_B52A3C") /*gvi*/
+#undef P102_B52A3C /*gvi*/
+#pragma push_macro("P102_DustPts") /*gvi*/
+#undef P102_DustPts /*gvi*/
+#pragma push_macro("P102_DustN") /*gvi*/
+#undef P102_DustN /*gvi*/
+#pragma push_macro("P102_NbrC") /*gvi*/
+#undef P102_NbrC /*gvi*/
 extern int32_t P102_HudF4, P102_DmgMax, P102_B52A3C; extern p102_pts_t P102_DustPts; extern int32_t P102_DustN; extern int16_t P102_NbrC;
+#pragma pop_macro("P102_NbrC") /*gvi*/
+#pragma pop_macro("P102_DustN") /*gvi*/
+#pragma pop_macro("P102_DustPts") /*gvi*/
+#pragma pop_macro("P102_B52A3C") /*gvi*/
+#pragma pop_macro("P102_DmgMax") /*gvi*/
+#pragma pop_macro("P102_HudF4") /*gvi*/
+#pragma push_macro("P102_Corners") /*gvi*/
+#undef P102_Corners /*gvi*/
+#pragma push_macro("P102_GhostMat") /*gvi*/
+#undef P102_GhostMat /*gvi*/
+#pragma push_macro("P102_SixFlag") /*gvi*/
+#undef P102_SixFlag /*gvi*/
 extern p102_i16_t P102_Corners; extern p102_m16_t P102_GhostMat; extern int32_t P102_SixFlag;
+#pragma pop_macro("P102_SixFlag") /*gvi*/
+#pragma pop_macro("P102_GhostMat") /*gvi*/
+#pragma pop_macro("P102_Corners") /*gvi*/
+#pragma push_macro("P102_D06A00") /*gvi*/
+#undef P102_D06A00 /*gvi*/
+#pragma push_macro("P102_D06A04") /*gvi*/
+#undef P102_D06A04 /*gvi*/
+#pragma push_macro("P102_BlkA") /*gvi*/
+#undef P102_BlkA /*gvi*/
+#pragma push_macro("P102_BlkB") /*gvi*/
+#undef P102_BlkB /*gvi*/
+#pragma push_macro("P102_BlkC") /*gvi*/
+#undef P102_BlkC /*gvi*/
 extern int32_t P102_D06A00, P102_D06A04; extern p102_d68_t P102_BlkA, P102_BlkB, P102_BlkC;
+#pragma pop_macro("P102_BlkC") /*gvi*/
+#pragma pop_macro("P102_BlkB") /*gvi*/
+#pragma pop_macro("P102_BlkA") /*gvi*/
+#pragma pop_macro("P102_D06A04") /*gvi*/
+#pragma pop_macro("P102_D06A00") /*gvi*/
+#pragma push_macro("P102_D0DD74") /*gvi*/
+#undef P102_D0DD74 /*gvi*/
+#pragma push_macro("P102_D0DD78") /*gvi*/
+#undef P102_D0DD78 /*gvi*/
+#pragma push_macro("P102_D0DD7C") /*gvi*/
+#undef P102_D0DD7C /*gvi*/
+#pragma push_macro("P102_D0DD80") /*gvi*/
+#undef P102_D0DD80 /*gvi*/
+#pragma push_macro("P102_D0DD84") /*gvi*/
+#undef P102_D0DD84 /*gvi*/
+#pragma push_macro("P102_D0DDE8") /*gvi*/
+#undef P102_D0DDE8 /*gvi*/
+#pragma push_macro("P102_D0DDEC") /*gvi*/
+#undef P102_D0DDEC /*gvi*/
+#pragma push_macro("P102_D0DDF0") /*gvi*/
+#undef P102_D0DDF0 /*gvi*/
 extern int32_t P102_D0DD74, P102_D0DD78, P102_D0DD7C, P102_D0DD80, P102_D0DD84, P102_D0DDE8, P102_D0DDEC, P102_D0DDF0;
+#pragma pop_macro("P102_D0DDF0") /*gvi*/
+#pragma pop_macro("P102_D0DDEC") /*gvi*/
+#pragma pop_macro("P102_D0DDE8") /*gvi*/
+#pragma pop_macro("P102_D0DD84") /*gvi*/
+#pragma pop_macro("P102_D0DD80") /*gvi*/
+#pragma pop_macro("P102_D0DD7C") /*gvi*/
+#pragma pop_macro("P102_D0DD78") /*gvi*/
+#pragma pop_macro("P102_D0DD74") /*gvi*/
+#pragma push_macro("P102_D0DDD0") /*gvi*/
+#undef P102_D0DDD0 /*gvi*/
+#pragma push_macro("P102_D077A0") /*gvi*/
+#undef P102_D077A0 /*gvi*/
+#pragma push_macro("P102_B2EA38") /*gvi*/
+#undef P102_B2EA38 /*gvi*/
+#pragma push_macro("P102_D04D14") /*gvi*/
+#undef P102_D04D14 /*gvi*/
+#pragma push_macro("P102_5624A4") /*gvi*/
+#undef P102_5624A4 /*gvi*/
+#pragma push_macro("P102_C816F8") /*gvi*/
+#undef P102_C816F8 /*gvi*/
+#pragma push_macro("P102_C816FC") /*gvi*/
+#undef P102_C816FC /*gvi*/
 extern p102_i4_t P102_D0DDD0, P102_D077A0, P102_B2EA38; extern int32_t P102_D04D14, P102_5624A4, P102_C816F8, P102_C816FC;
+#pragma pop_macro("P102_C816FC") /*gvi*/
+#pragma pop_macro("P102_C816F8") /*gvi*/
+#pragma pop_macro("P102_5624A4") /*gvi*/
+#pragma pop_macro("P102_D04D14") /*gvi*/
+#pragma pop_macro("P102_B2EA38") /*gvi*/
+#pragma pop_macro("P102_D077A0") /*gvi*/
+#pragma pop_macro("P102_D0DDD0") /*gvi*/
+#pragma push_macro("P102_57B6A8") /*gvi*/
+#undef P102_57B6A8 /*gvi*/
+#pragma push_macro("P102_57B6F8") /*gvi*/
+#undef P102_57B6F8 /*gvi*/
+#pragma push_macro("P102_BDF9E0") /*gvi*/
+#undef P102_BDF9E0 /*gvi*/
 extern int32_t P102_57B6A8, P102_57B6F8; extern p102_i16_t P102_BDF9E0;
+#pragma pop_macro("P102_BDF9E0") /*gvi*/
+#pragma pop_macro("P102_57B6F8") /*gvi*/
+#pragma pop_macro("P102_57B6A8") /*gvi*/
 #endif
 
 void     P102_CarLights(int32_t car, int32_t side);                                         /* 004aef57 */
@@ -109,3 +229,87 @@ int32_t  P102_TrafficAhead(uint8_t *rec, int32_t dist, int32_t parked);         
 void     P102_DirMenuNodes(void);                                                           /* 004c4ef9 */
 void     P102_ObjMark(const uint8_t *obj, float x, float y, float z, int16_t kind);          /* 004af2fd */
 void     P102_CarTracks(int32_t car, const int16_t *phase, float speed);                      /* 004af619 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P102_HudDmg
+#define P102_HudDmg (*(p102_hud_t *)re_gvar(0x00c80820u, sizeof(p102_hud_t), (void *)&P102_HudDmg))
+#undef P102_HudFel
+#define P102_HudFel (*(p102_hud_t *)re_gvar(0x00c80900u, sizeof(p102_hud_t), (void *)&P102_HudFel))
+#undef P102_DmgVar
+#define P102_DmgVar (*(uint32_t *)re_gvar(0x00c808f0u, sizeof(uint32_t), (void *)&P102_DmgVar))
+#undef P102_FelVar
+#define P102_FelVar (*(uint32_t *)re_gvar(0x00c80898u, sizeof(uint32_t), (void *)&P102_FelVar))
+#undef P102_OppVar
+#define P102_OppVar (*(uint32_t *)re_gvar(0x00c80930u, sizeof(uint32_t), (void *)&P102_OppVar))
+#undef P102_HudF4
+#define P102_HudF4 (*(int32_t *)re_gvar(0x00c808f4u, sizeof(int32_t), (void *)&P102_HudF4))
+#undef P102_DmgMax
+#define P102_DmgMax (*(int32_t *)re_gvar(0x00c810a4u, sizeof(int32_t), (void *)&P102_DmgMax))
+#undef P102_B52A3C
+#define P102_B52A3C (*(int32_t *)re_gvar(0x00b52a3cu, sizeof(int32_t), (void *)&P102_B52A3C))
+#undef P102_DustPts
+#define P102_DustPts (*(p102_pts_t *)re_gvar(0x01143740u, sizeof(p102_pts_t), (void *)&P102_DustPts))
+#undef P102_DustN
+#define P102_DustN (*(int32_t *)re_gvar(0x01144280u, sizeof(int32_t), (void *)&P102_DustN))
+#undef P102_NbrC
+#define P102_NbrC (*(int16_t *)re_gvar(0x00c55da0u, sizeof(int16_t), (void *)&P102_NbrC))
+#undef P102_Corners
+#define P102_Corners (*(p102_i16_t *)re_gvar(0x00b5c910u, sizeof(p102_i16_t), (void *)&P102_Corners))
+#undef P102_GhostMat
+#define P102_GhostMat (*(p102_m16_t *)re_gvar(0x011360a0u, sizeof(p102_m16_t), (void *)&P102_GhostMat))
+#undef P102_SixFlag
+#define P102_SixFlag (*(int32_t *)re_gvar(0x010ff8e0u, sizeof(int32_t), (void *)&P102_SixFlag))
+#undef P102_D06A00
+#define P102_D06A00 (*(int32_t *)re_gvar(0x00d06a00u, sizeof(int32_t), (void *)&P102_D06A00))
+#undef P102_D06A04
+#define P102_D06A04 (*(int32_t *)re_gvar(0x00d06a04u, sizeof(int32_t), (void *)&P102_D06A04))
+#undef P102_BlkA
+#define P102_BlkA (*(p102_d68_t *)re_gvar(0x00d06a20u, sizeof(p102_d68_t), (void *)&P102_BlkA))
+#undef P102_BlkB
+#define P102_BlkB (*(p102_d68_t *)re_gvar(0x00d0de00u, sizeof(p102_d68_t), (void *)&P102_BlkB))
+#undef P102_BlkC
+#define P102_BlkC (*(p102_d68_t *)re_gvar(0x00d0eb80u, sizeof(p102_d68_t), (void *)&P102_BlkC))
+#undef P102_D0DD74
+#define P102_D0DD74 (*(int32_t *)re_gvar(0x00d0dd74u, sizeof(int32_t), (void *)&P102_D0DD74))
+#undef P102_D0DD78
+#define P102_D0DD78 (*(int32_t *)re_gvar(0x00d0dd78u, sizeof(int32_t), (void *)&P102_D0DD78))
+#undef P102_D0DD7C
+#define P102_D0DD7C (*(int32_t *)re_gvar(0x00d0dd7cu, sizeof(int32_t), (void *)&P102_D0DD7C))
+#undef P102_D0DD80
+#define P102_D0DD80 (*(int32_t *)re_gvar(0x00d0dd80u, sizeof(int32_t), (void *)&P102_D0DD80))
+#undef P102_D0DD84
+#define P102_D0DD84 (*(int32_t *)re_gvar(0x00d0dd84u, sizeof(int32_t), (void *)&P102_D0DD84))
+#undef P102_D0DDD0
+#define P102_D0DDD0 (*(p102_i4_t *)re_gvar(0x00d0ddd0u, sizeof(p102_i4_t), (void *)&P102_D0DDD0))
+#undef P102_D0DDE8
+#define P102_D0DDE8 (*(int32_t *)re_gvar(0x00d0dde8u, sizeof(int32_t), (void *)&P102_D0DDE8))
+#undef P102_D0DDEC
+#define P102_D0DDEC (*(int32_t *)re_gvar(0x00d0ddecu, sizeof(int32_t), (void *)&P102_D0DDEC))
+#undef P102_D0DDF0
+#define P102_D0DDF0 (*(int32_t *)re_gvar(0x00d0ddf0u, sizeof(int32_t), (void *)&P102_D0DDF0))
+#undef P102_D077A0
+#define P102_D077A0 (*(p102_i4_t *)re_gvar(0x00d077a0u, sizeof(p102_i4_t), (void *)&P102_D077A0))
+#undef P102_B2EA38
+#define P102_B2EA38 (*(p102_i4_t *)re_gvar(0x00b2ea38u, sizeof(p102_i4_t), (void *)&P102_B2EA38))
+#undef P102_D04D14
+#define P102_D04D14 (*(int32_t *)re_gvar(0x00d04d14u, sizeof(int32_t), (void *)&P102_D04D14))
+#undef P102_5624A4
+#define P102_5624A4 (*(int32_t *)re_gvar(0x005624a4u, sizeof(int32_t), (void *)&P102_5624A4))
+#undef P102_C816F8
+#define P102_C816F8 (*(int32_t *)re_gvar(0x00c816f8u, sizeof(int32_t), (void *)&P102_C816F8))
+#undef P102_C816FC
+#define P102_C816FC (*(int32_t *)re_gvar(0x00c816fcu, sizeof(int32_t), (void *)&P102_C816FC))
+#undef P102_57B6A8
+#define P102_57B6A8 (*(int32_t *)re_gvar(0x0057b6a8u, sizeof(int32_t), (void *)&P102_57B6A8))
+#undef P102_57B6F8
+#define P102_57B6F8 (*(int32_t *)re_gvar(0x0057b6f8u, sizeof(int32_t), (void *)&P102_57B6F8))
+#undef P102_BDF9E0
+#define P102_BDF9E0 (*(p102_i16_t *)re_gvar(0x00bdf9e0u, sizeof(p102_i16_t), (void *)&P102_BDF9E0))
+#undef P102_B5A914
+#define P102_B5A914 (*(int32_t *)re_gvar(0x00b5a914u, sizeof(int32_t), (void *)&P102_B5A914))
+#undef P102_HitFrame
+#define P102_HitFrame (*(int32_t *)re_gvar(0x01144324u, sizeof(int32_t), (void *)&P102_HitFrame))
+#undef P102_ObjBKey
+#define P102_ObjBKey (*(int32_t *)re_gvar(0x0111d404u, sizeof(int32_t), (void *)&P102_ObjBKey))
+#endif
+/* gvar-img v2.03 end */

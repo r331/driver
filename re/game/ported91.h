@@ -8,6 +8,15 @@
    0112b280 < 0x200 — 0112b280 = 0x200. cdecl. Указатель в car+0xcd0 — нативного размера в native, 32-битный в hook. */
 #define G0112B280 GAME_VAR(int32_t, G0112B280, 0x0112b280)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("G0112B280") /*gvi*/
+#undef G0112B280 /*gvi*/
 extern int32_t G0112B280;
+#pragma pop_macro("G0112B280") /*gvi*/
 #endif
 void P91_ReleaseTraffic(uint8_t *car);   /* 004a66ef */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef G0112B280
+#define G0112B280 (*(int32_t *)re_gvar(0x0112b280u, sizeof(int32_t), (void *)&G0112B280))
+#endif
+/* gvar-img v2.03 end */

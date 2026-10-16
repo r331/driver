@@ -11,12 +11,60 @@
 #else
 #  define P47_STD
 #endif
-GAME_VAR_DEF(P47_SlotArr, P47_Slots, 0x00c80f60)
-GAME_VAR_DEF(int32_t, P47_Limit, 0x00c810cc)
-GAME_VAR_DEF(int32_t, P47_Flag, 0x0112b268)
-GAME_VAR_DEF(int32_t, P47_CamB, 0x00b5a8a4)
-GAME_VAR_DEF(int32_t, P47_WinArg5, 0x00b1c0dc)
-GAME_VAR_DEF(int32_t, P47_SwapCnt, 0x01270c30)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P47_Slots")
+#undef P47_Slots
+#pragma push_macro("P47_Slots") /*gvi*/
+#undef P47_Slots /*gvi*/
+P47_SlotArr P47_Slots;
+#pragma pop_macro("P47_Slots") /*gvi*/
+#pragma pop_macro("P47_Slots")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P47_Limit")
+#undef P47_Limit
+#pragma push_macro("P47_Limit") /*gvi*/
+#undef P47_Limit /*gvi*/
+int32_t P47_Limit;
+#pragma pop_macro("P47_Limit") /*gvi*/
+#pragma pop_macro("P47_Limit")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P47_Flag")
+#undef P47_Flag
+#pragma push_macro("P47_Flag") /*gvi*/
+#undef P47_Flag /*gvi*/
+int32_t P47_Flag;
+#pragma pop_macro("P47_Flag") /*gvi*/
+#pragma pop_macro("P47_Flag")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P47_CamB")
+#undef P47_CamB
+#pragma push_macro("P47_CamB") /*gvi*/
+#undef P47_CamB /*gvi*/
+int32_t P47_CamB;
+#pragma pop_macro("P47_CamB") /*gvi*/
+#pragma pop_macro("P47_CamB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P47_WinArg5")
+#undef P47_WinArg5
+#pragma push_macro("P47_WinArg5") /*gvi*/
+#undef P47_WinArg5 /*gvi*/
+int32_t P47_WinArg5;
+#pragma pop_macro("P47_WinArg5") /*gvi*/
+#pragma pop_macro("P47_WinArg5")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P47_SwapCnt")
+#undef P47_SwapCnt
+#pragma push_macro("P47_SwapCnt") /*gvi*/
+#undef P47_SwapCnt /*gvi*/
+int32_t P47_SwapCnt;
+#pragma pop_macro("P47_SwapCnt") /*gvi*/
+#pragma pop_macro("P47_SwapCnt")
+#endif
 
 static void *glide_proc(const char *name) {
   for (int i = 0; i < P33_GlideCount(); i++)

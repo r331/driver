@@ -27,10 +27,44 @@ typedef uint8_t p73_mask_t[16];
 #define P73_D00214 GAME_VAR(int32_t, P73_D00214, 0x00d00214)        /* значение для чётных частиц */
 #define P73_CF56BC GAME_VAR(int32_t, P73_CF56BC, 0x00cf56bc)        /* значение для нечётных частиц */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P73_Mask") /*gvi*/
+#undef P73_Mask /*gvi*/
+#pragma push_macro("P73_C566FC") /*gvi*/
+#undef P73_C566FC /*gvi*/
+#pragma push_macro("P73_C5670C") /*gvi*/
+#undef P73_C5670C /*gvi*/
+#pragma push_macro("P73_C56760") /*gvi*/
+#undef P73_C56760 /*gvi*/
+#pragma push_macro("P73_D00214") /*gvi*/
+#undef P73_D00214 /*gvi*/
+#pragma push_macro("P73_CF56BC") /*gvi*/
+#undef P73_CF56BC /*gvi*/
 extern p73_mask_t P73_Mask; extern int32_t P73_C566FC, P73_C5670C, P73_C56760, P73_D00214, P73_CF56BC;
+#pragma pop_macro("P73_CF56BC") /*gvi*/
+#pragma pop_macro("P73_D00214") /*gvi*/
+#pragma pop_macro("P73_C56760") /*gvi*/
+#pragma pop_macro("P73_C5670C") /*gvi*/
+#pragma pop_macro("P73_C566FC") /*gvi*/
+#pragma pop_macro("P73_Mask") /*gvi*/
 #endif
 void P73_InitConsts(void);                                              /* native: таблица масок из .data */
 void P73_Text(float x, float y, uint32_t txt, int32_t a, int32_t flags);/* 005173d7: позиция/масштаб от центра экрана, цвет b5a834.., строка txt, флаги -> 0040ab6f */
 void P73_RoadSides(void);                                               /* 0051bf82: байт +0x3b записи: 0x82/0x83 нет битов, 0x80/0x81 все биты, 0 иначе; +1 при P17_SlotMapSide != 0 */
 void P73_ParticlesReset(void);                                          /* 00511e60 (метка __fastcall ложная — ecx не читается) */
 void P73_CatmullRom(const float *t, float *out, const float *p0, const float *p1, const float *p2, const float *p3); /* 0049f031: сплайн Катмулла–Рома по 4 точкам, компоненты 0,1,2,4 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P73_Mask
+#define P73_Mask (*(p73_mask_t *)re_gvar(0x00575e34u, sizeof(p73_mask_t), (void *)&P73_Mask))
+#undef P73_C566FC
+#define P73_C566FC (*(int32_t *)re_gvar(0x00c566fcu, sizeof(int32_t), (void *)&P73_C566FC))
+#undef P73_C5670C
+#define P73_C5670C (*(int32_t *)re_gvar(0x00c5670cu, sizeof(int32_t), (void *)&P73_C5670C))
+#undef P73_C56760
+#define P73_C56760 (*(int32_t *)re_gvar(0x00c56760u, sizeof(int32_t), (void *)&P73_C56760))
+#undef P73_D00214
+#define P73_D00214 (*(int32_t *)re_gvar(0x00d00214u, sizeof(int32_t), (void *)&P73_D00214))
+#undef P73_CF56BC
+#define P73_CF56BC (*(int32_t *)re_gvar(0x00cf56bcu, sizeof(int32_t), (void *)&P73_CF56BC))
+#endif
+/* gvar-img v2.03 end */

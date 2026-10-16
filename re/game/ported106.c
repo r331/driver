@@ -136,8 +136,24 @@
 #  define P106_STD
 #endif
 
-GAME_VAR_DEF(int32_t, P106_SkyRot, 0x00cf2f80)
-GAME_VAR_DEF(int32_t, P106_PartOn, 0x00c56700)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P106_SkyRot")
+#undef P106_SkyRot
+#pragma push_macro("P106_SkyRot") /*gvi*/
+#undef P106_SkyRot /*gvi*/
+int32_t P106_SkyRot;
+#pragma pop_macro("P106_SkyRot") /*gvi*/
+#pragma pop_macro("P106_SkyRot")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P106_PartOn")
+#undef P106_PartOn
+#pragma push_macro("P106_PartOn") /*gvi*/
+#undef P106_PartOn /*gvi*/
+int32_t P106_PartOn;
+#pragma pop_macro("P106_PartOn") /*gvi*/
+#pragma pop_macro("P106_PartOn")
+#endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }

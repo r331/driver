@@ -1,32 +1,248 @@
 #include "ported141.h"
 #include "widgets.h"
-GAME_VAR_DEF(int32_t, WI00575EE4, 0x00575ee4)
-GAME_VAR_DEF(int32_t, WI00B87E2C, 0x00b87e2c)
-GAME_VAR_DEF(int32_t, WI005FE694, 0x005fe694)
-GAME_VAR_DEF(uint32_t, WU005FE788, 0x005fe788)
-GAME_VAR_DEF(int32_t, WI005FE78C, 0x005fe78c)
-GAME_VAR_DEF(int32_t, WI005FE790, 0x005fe790)
-GAME_VAR_DEF(float, WF00575F14, 0x00575f14)
-GAME_VAR_DEF(float, WF00575F18, 0x00575f18)
-GAME_VAR_DEF(float, WF00546020, 0x00546020)
-GAME_VAR_DEF(float, WF00546024, 0x00546024)
-GAME_VAR_DEF(float, WF0054606C, 0x0054606c)
-GAME_VAR_DEF(uint32_t, WU0054E830, 0x0054e830)
-GAME_VAR_DEF(uint32_t, WU00C55A70, 0x00c55a70)
-GAME_VAR_DEF(uint32_t, WU0054CBB0, 0x0054cbb0)
-GAME_VAR_DEF(uint32_t, WU0054CBC4, 0x0054cbc4)
-GAME_VAR_DEF(uint32_t, WU0054CBD8, 0x0054cbd8)
-GAME_VAR_DEF(uint32_t, WU0054CBEC, 0x0054cbec)
-GAME_VAR_DEF(uint32_t, WU0054CC00, 0x0054cc00)
-GAME_VAR_DEF(uint32_t, WU0054CC14, 0x0054cc14)
-GAME_VAR_DEF(uint32_t, WU0054CC28, 0x0054cc28)
-GAME_VAR_DEF(wd_ints5_t, WA00B20330, 0x00b20330)
-GAME_VAR_DEF(int32_t, WI00B20344, 0x00b20344)
-GAME_VAR_DEF(wd_pairs4_t, WA0056039C, 0x0056039c)
-GAME_VAR_DEF(int32_t, WI00B20348, 0x00b20348)
-GAME_VAR_DEF(uint16_t, WH00B2C3A8, 0x00b2c3a8)
-GAME_VAR_DEF(wd_bytes_t, WB0054C6D4, 0x0054c6d4)
-GAME_VAR_DEF(wd_bytes_t, WB0054C944, 0x0054c944)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WI00575EE4")
+#undef WI00575EE4
+#pragma push_macro("WI00575EE4") /*gvi*/
+#undef WI00575EE4 /*gvi*/
+int32_t WI00575EE4;
+#pragma pop_macro("WI00575EE4") /*gvi*/
+#pragma pop_macro("WI00575EE4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WI00B87E2C")
+#undef WI00B87E2C
+#pragma push_macro("WI00B87E2C") /*gvi*/
+#undef WI00B87E2C /*gvi*/
+int32_t WI00B87E2C;
+#pragma pop_macro("WI00B87E2C") /*gvi*/
+#pragma pop_macro("WI00B87E2C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WI005FE694")
+#undef WI005FE694
+#pragma push_macro("WI005FE694") /*gvi*/
+#undef WI005FE694 /*gvi*/
+int32_t WI005FE694;
+#pragma pop_macro("WI005FE694") /*gvi*/
+#pragma pop_macro("WI005FE694")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WU005FE788")
+#undef WU005FE788
+#pragma push_macro("WU005FE788") /*gvi*/
+#undef WU005FE788 /*gvi*/
+uint32_t WU005FE788;
+#pragma pop_macro("WU005FE788") /*gvi*/
+#pragma pop_macro("WU005FE788")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WI005FE78C")
+#undef WI005FE78C
+#pragma push_macro("WI005FE78C") /*gvi*/
+#undef WI005FE78C /*gvi*/
+int32_t WI005FE78C;
+#pragma pop_macro("WI005FE78C") /*gvi*/
+#pragma pop_macro("WI005FE78C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WI005FE790")
+#undef WI005FE790
+#pragma push_macro("WI005FE790") /*gvi*/
+#undef WI005FE790 /*gvi*/
+int32_t WI005FE790;
+#pragma pop_macro("WI005FE790") /*gvi*/
+#pragma pop_macro("WI005FE790")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WF00575F14")
+#undef WF00575F14
+#pragma push_macro("WF00575F14") /*gvi*/
+#undef WF00575F14 /*gvi*/
+float WF00575F14;
+#pragma pop_macro("WF00575F14") /*gvi*/
+#pragma pop_macro("WF00575F14")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WF00575F18")
+#undef WF00575F18
+#pragma push_macro("WF00575F18") /*gvi*/
+#undef WF00575F18 /*gvi*/
+float WF00575F18;
+#pragma pop_macro("WF00575F18") /*gvi*/
+#pragma pop_macro("WF00575F18")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WF00546020")
+#undef WF00546020
+#pragma push_macro("WF00546020") /*gvi*/
+#undef WF00546020 /*gvi*/
+float WF00546020;
+#pragma pop_macro("WF00546020") /*gvi*/
+#pragma pop_macro("WF00546020")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WF00546024")
+#undef WF00546024
+#pragma push_macro("WF00546024") /*gvi*/
+#undef WF00546024 /*gvi*/
+float WF00546024;
+#pragma pop_macro("WF00546024") /*gvi*/
+#pragma pop_macro("WF00546024")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WF0054606C")
+#undef WF0054606C
+#pragma push_macro("WF0054606C") /*gvi*/
+#undef WF0054606C /*gvi*/
+float WF0054606C;
+#pragma pop_macro("WF0054606C") /*gvi*/
+#pragma pop_macro("WF0054606C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WU0054E830")
+#undef WU0054E830
+#pragma push_macro("WU0054E830") /*gvi*/
+#undef WU0054E830 /*gvi*/
+uint32_t WU0054E830;
+#pragma pop_macro("WU0054E830") /*gvi*/
+#pragma pop_macro("WU0054E830")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WU00C55A70")
+#undef WU00C55A70
+#pragma push_macro("WU00C55A70") /*gvi*/
+#undef WU00C55A70 /*gvi*/
+uint32_t WU00C55A70;
+#pragma pop_macro("WU00C55A70") /*gvi*/
+#pragma pop_macro("WU00C55A70")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WU0054CBB0")
+#undef WU0054CBB0
+#pragma push_macro("WU0054CBB0") /*gvi*/
+#undef WU0054CBB0 /*gvi*/
+uint32_t WU0054CBB0;
+#pragma pop_macro("WU0054CBB0") /*gvi*/
+#pragma pop_macro("WU0054CBB0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WU0054CBC4")
+#undef WU0054CBC4
+#pragma push_macro("WU0054CBC4") /*gvi*/
+#undef WU0054CBC4 /*gvi*/
+uint32_t WU0054CBC4;
+#pragma pop_macro("WU0054CBC4") /*gvi*/
+#pragma pop_macro("WU0054CBC4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WU0054CBD8")
+#undef WU0054CBD8
+#pragma push_macro("WU0054CBD8") /*gvi*/
+#undef WU0054CBD8 /*gvi*/
+uint32_t WU0054CBD8;
+#pragma pop_macro("WU0054CBD8") /*gvi*/
+#pragma pop_macro("WU0054CBD8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WU0054CBEC")
+#undef WU0054CBEC
+#pragma push_macro("WU0054CBEC") /*gvi*/
+#undef WU0054CBEC /*gvi*/
+uint32_t WU0054CBEC;
+#pragma pop_macro("WU0054CBEC") /*gvi*/
+#pragma pop_macro("WU0054CBEC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WU0054CC00")
+#undef WU0054CC00
+#pragma push_macro("WU0054CC00") /*gvi*/
+#undef WU0054CC00 /*gvi*/
+uint32_t WU0054CC00;
+#pragma pop_macro("WU0054CC00") /*gvi*/
+#pragma pop_macro("WU0054CC00")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WU0054CC14")
+#undef WU0054CC14
+#pragma push_macro("WU0054CC14") /*gvi*/
+#undef WU0054CC14 /*gvi*/
+uint32_t WU0054CC14;
+#pragma pop_macro("WU0054CC14") /*gvi*/
+#pragma pop_macro("WU0054CC14")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WU0054CC28")
+#undef WU0054CC28
+#pragma push_macro("WU0054CC28") /*gvi*/
+#undef WU0054CC28 /*gvi*/
+uint32_t WU0054CC28;
+#pragma pop_macro("WU0054CC28") /*gvi*/
+#pragma pop_macro("WU0054CC28")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WA00B20330")
+#undef WA00B20330
+#pragma push_macro("WA00B20330") /*gvi*/
+#undef WA00B20330 /*gvi*/
+wd_ints5_t WA00B20330;
+#pragma pop_macro("WA00B20330") /*gvi*/
+#pragma pop_macro("WA00B20330")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WI00B20344")
+#undef WI00B20344
+#pragma push_macro("WI00B20344") /*gvi*/
+#undef WI00B20344 /*gvi*/
+int32_t WI00B20344;
+#pragma pop_macro("WI00B20344") /*gvi*/
+#pragma pop_macro("WI00B20344")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WA0056039C")
+#undef WA0056039C
+#pragma push_macro("WA0056039C") /*gvi*/
+#undef WA0056039C /*gvi*/
+wd_pairs4_t WA0056039C;
+#pragma pop_macro("WA0056039C") /*gvi*/
+#pragma pop_macro("WA0056039C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WI00B20348")
+#undef WI00B20348
+#pragma push_macro("WI00B20348") /*gvi*/
+#undef WI00B20348 /*gvi*/
+int32_t WI00B20348;
+#pragma pop_macro("WI00B20348") /*gvi*/
+#pragma pop_macro("WI00B20348")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WH00B2C3A8")
+#undef WH00B2C3A8
+#pragma push_macro("WH00B2C3A8") /*gvi*/
+#undef WH00B2C3A8 /*gvi*/
+uint16_t WH00B2C3A8;
+#pragma pop_macro("WH00B2C3A8") /*gvi*/
+#pragma pop_macro("WH00B2C3A8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WB0054C6D4")
+#undef WB0054C6D4
+#pragma push_macro("WB0054C6D4") /*gvi*/
+#undef WB0054C6D4 /*gvi*/
+wd_bytes_t WB0054C6D4;
+#pragma pop_macro("WB0054C6D4") /*gvi*/
+#pragma pop_macro("WB0054C6D4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("WB0054C944")
+#undef WB0054C944
+#pragma push_macro("WB0054C944") /*gvi*/
+#undef WB0054C944 /*gvi*/
+wd_bytes_t WB0054C944;
+#pragma pop_macro("WB0054C944") /*gvi*/
+#pragma pop_macro("WB0054C944")
+#endif
 static int32_t SelectRow(uint32_t row_addr, int32_t id) {
     WI005FE78C = 1; WU005FE788 = row_addr; WI005FE790 = id; Call00411A9D();
     MenuI005FE798 = WI005FE790; MenuI005FE79C = -1; return 0;

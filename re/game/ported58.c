@@ -7,59 +7,395 @@
 #include "menustate.h"
 #include "ported102.h"
 
-GAME_VAR_DEF(int32_t, P58_MenuSel, 0x005fed9c)
-GAME_VAR_DEF(int32_t, P58_MenuFn, 0x005fea44)
-GAME_VAR_DEF(int32_t, P58_MenuIdx, 0x005fea38)
-GAME_VAR_DEF(p58_cheats_t, P58_Cheats, 0x0054cfd8)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_MenuSel")
+#undef P58_MenuSel
+#pragma push_macro("P58_MenuSel") /*gvi*/
+#undef P58_MenuSel /*gvi*/
+int32_t P58_MenuSel;
+#pragma pop_macro("P58_MenuSel") /*gvi*/
+#pragma pop_macro("P58_MenuSel")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_MenuFn")
+#undef P58_MenuFn
+#pragma push_macro("P58_MenuFn") /*gvi*/
+#undef P58_MenuFn /*gvi*/
+int32_t P58_MenuFn;
+#pragma pop_macro("P58_MenuFn") /*gvi*/
+#pragma pop_macro("P58_MenuFn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_MenuIdx")
+#undef P58_MenuIdx
+#pragma push_macro("P58_MenuIdx") /*gvi*/
+#undef P58_MenuIdx /*gvi*/
+int32_t P58_MenuIdx;
+#pragma pop_macro("P58_MenuIdx") /*gvi*/
+#pragma pop_macro("P58_MenuIdx")
+#endif
+GAME_VAR_DEF(p58_cheats_t, P58_Cheats, 0x00000000)
 GAME_VAR_DEF(int16_t *, P58_ItemList, 0x005f7e64)
 GAME_VAR_DEF(p58_rec_t *, P58_Tab4EFC03, 0x00b31ee8)
-GAME_VAR_DEF(int32_t, P58_Cnt4EFC03, 0x00b31eec)
-GAME_VAR_DEF(int32_t, P58_CntC814E8, 0x00c814e8)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_Cnt4EFC03")
+#undef P58_Cnt4EFC03
+#pragma push_macro("P58_Cnt4EFC03") /*gvi*/
+#undef P58_Cnt4EFC03 /*gvi*/
+int32_t P58_Cnt4EFC03;
+#pragma pop_macro("P58_Cnt4EFC03") /*gvi*/
+#pragma pop_macro("P58_Cnt4EFC03")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_CntC814E8")
+#undef P58_CntC814E8
+#pragma push_macro("P58_CntC814E8") /*gvi*/
+#undef P58_CntC814E8 /*gvi*/
+int32_t P58_CntC814E8;
+#pragma pop_macro("P58_CntC814E8") /*gvi*/
+#pragma pop_macro("P58_CntC814E8")
+#endif
 GAME_VAR_DEF(void **, P58_PtrsC816A0, 0x00c816a0)
 GAME_VAR_DEF(int32_t *, P58_LimC810AC, 0x00c810ac)
-GAME_VAR_DEF(int32_t, P58_S5FEA88, 0x005fea88)
-GAME_VAR_DEF(int32_t, P58_S5FEA8C, 0x005fea8c)
-GAME_VAR_DEF(int32_t, P58_S5FEA7C, 0x005fea7c)
-GAME_VAR_DEF(int32_t, P58_S5FEA80, 0x005fea80)
-GAME_VAR_DEF(int32_t, P58_S54E654, 0x0054e654)
-GAME_VAR_DEF(int32_t, P58_S5FE9C0, 0x005fe9c0)
-GAME_VAR_DEF(uint32_t, P58_S5FE9B4, 0x005fe9b4)
-GAME_VAR_DEF(uint32_t, P58_S5FE9B0, 0x005fe9b0)
-GAME_VAR_DEF(uint32_t, P58_S5FE9B8, 0x005fe9b8)
-GAME_VAR_DEF(int32_t, P58_S5FE9F8, 0x005fe9f8)
-GAME_VAR_DEF(int32_t, P58_Page, 0x00575ef0)
-GAME_VAR_DEF(uint32_t, P58_TabPtr, 0x0054e100)
-GAME_VAR_DEF(uint32_t, P58_S54DFC8, 0x0054dfc8)
-GAME_VAR_DEF(uint32_t, P58_S54DFD8, 0x0054dfd8)
-GAME_VAR_DEF(uint32_t, P58_S54DFE8, 0x0054dfe8)
-GAME_VAR_DEF(uint32_t, P58_S54DFF8, 0x0054dff8)
-GAME_VAR_DEF(uint32_t, P58_S54E008, 0x0054e008)
-GAME_VAR_DEF(uint32_t, P58_SC559D8, 0x00c559d8)
-GAME_VAR_DEF(uint32_t, P58_SC559E0, 0x00c559e0)
-GAME_VAR_DEF(uint32_t, P58_SC559E4, 0x00c559e4)
-GAME_VAR_DEF(uint32_t, P58_SC559E8, 0x00c559e8)
-GAME_VAR_DEF(uint32_t, P58_SC559EC, 0x00c559ec)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S5FEA88")
+#undef P58_S5FEA88
+#pragma push_macro("P58_S5FEA88") /*gvi*/
+#undef P58_S5FEA88 /*gvi*/
+int32_t P58_S5FEA88;
+#pragma pop_macro("P58_S5FEA88") /*gvi*/
+#pragma pop_macro("P58_S5FEA88")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S5FEA8C")
+#undef P58_S5FEA8C
+#pragma push_macro("P58_S5FEA8C") /*gvi*/
+#undef P58_S5FEA8C /*gvi*/
+int32_t P58_S5FEA8C;
+#pragma pop_macro("P58_S5FEA8C") /*gvi*/
+#pragma pop_macro("P58_S5FEA8C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S5FEA7C")
+#undef P58_S5FEA7C
+#pragma push_macro("P58_S5FEA7C") /*gvi*/
+#undef P58_S5FEA7C /*gvi*/
+int32_t P58_S5FEA7C;
+#pragma pop_macro("P58_S5FEA7C") /*gvi*/
+#pragma pop_macro("P58_S5FEA7C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S5FEA80")
+#undef P58_S5FEA80
+#pragma push_macro("P58_S5FEA80") /*gvi*/
+#undef P58_S5FEA80 /*gvi*/
+int32_t P58_S5FEA80;
+#pragma pop_macro("P58_S5FEA80") /*gvi*/
+#pragma pop_macro("P58_S5FEA80")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S54E654")
+#undef P58_S54E654
+#pragma push_macro("P58_S54E654") /*gvi*/
+#undef P58_S54E654 /*gvi*/
+int32_t P58_S54E654;
+#pragma pop_macro("P58_S54E654") /*gvi*/
+#pragma pop_macro("P58_S54E654")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S5FE9C0")
+#undef P58_S5FE9C0
+#pragma push_macro("P58_S5FE9C0") /*gvi*/
+#undef P58_S5FE9C0 /*gvi*/
+int32_t P58_S5FE9C0;
+#pragma pop_macro("P58_S5FE9C0") /*gvi*/
+#pragma pop_macro("P58_S5FE9C0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S5FE9B4")
+#undef P58_S5FE9B4
+#pragma push_macro("P58_S5FE9B4") /*gvi*/
+#undef P58_S5FE9B4 /*gvi*/
+uint32_t P58_S5FE9B4;
+#pragma pop_macro("P58_S5FE9B4") /*gvi*/
+#pragma pop_macro("P58_S5FE9B4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S5FE9B0")
+#undef P58_S5FE9B0
+#pragma push_macro("P58_S5FE9B0") /*gvi*/
+#undef P58_S5FE9B0 /*gvi*/
+uint32_t P58_S5FE9B0;
+#pragma pop_macro("P58_S5FE9B0") /*gvi*/
+#pragma pop_macro("P58_S5FE9B0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S5FE9B8")
+#undef P58_S5FE9B8
+#pragma push_macro("P58_S5FE9B8") /*gvi*/
+#undef P58_S5FE9B8 /*gvi*/
+uint32_t P58_S5FE9B8;
+#pragma pop_macro("P58_S5FE9B8") /*gvi*/
+#pragma pop_macro("P58_S5FE9B8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S5FE9F8")
+#undef P58_S5FE9F8
+#pragma push_macro("P58_S5FE9F8") /*gvi*/
+#undef P58_S5FE9F8 /*gvi*/
+int32_t P58_S5FE9F8;
+#pragma pop_macro("P58_S5FE9F8") /*gvi*/
+#pragma pop_macro("P58_S5FE9F8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_Page")
+#undef P58_Page
+#pragma push_macro("P58_Page") /*gvi*/
+#undef P58_Page /*gvi*/
+int32_t P58_Page;
+#pragma pop_macro("P58_Page") /*gvi*/
+#pragma pop_macro("P58_Page")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_TabPtr")
+#undef P58_TabPtr
+#pragma push_macro("P58_TabPtr") /*gvi*/
+#undef P58_TabPtr /*gvi*/
+uint32_t P58_TabPtr;
+#pragma pop_macro("P58_TabPtr") /*gvi*/
+#pragma pop_macro("P58_TabPtr")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S54DFC8")
+#undef P58_S54DFC8
+#pragma push_macro("P58_S54DFC8") /*gvi*/
+#undef P58_S54DFC8 /*gvi*/
+uint32_t P58_S54DFC8;
+#pragma pop_macro("P58_S54DFC8") /*gvi*/
+#pragma pop_macro("P58_S54DFC8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S54DFD8")
+#undef P58_S54DFD8
+#pragma push_macro("P58_S54DFD8") /*gvi*/
+#undef P58_S54DFD8 /*gvi*/
+uint32_t P58_S54DFD8;
+#pragma pop_macro("P58_S54DFD8") /*gvi*/
+#pragma pop_macro("P58_S54DFD8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S54DFE8")
+#undef P58_S54DFE8
+#pragma push_macro("P58_S54DFE8") /*gvi*/
+#undef P58_S54DFE8 /*gvi*/
+uint32_t P58_S54DFE8;
+#pragma pop_macro("P58_S54DFE8") /*gvi*/
+#pragma pop_macro("P58_S54DFE8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S54DFF8")
+#undef P58_S54DFF8
+#pragma push_macro("P58_S54DFF8") /*gvi*/
+#undef P58_S54DFF8 /*gvi*/
+uint32_t P58_S54DFF8;
+#pragma pop_macro("P58_S54DFF8") /*gvi*/
+#pragma pop_macro("P58_S54DFF8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S54E008")
+#undef P58_S54E008
+#pragma push_macro("P58_S54E008") /*gvi*/
+#undef P58_S54E008 /*gvi*/
+uint32_t P58_S54E008;
+#pragma pop_macro("P58_S54E008") /*gvi*/
+#pragma pop_macro("P58_S54E008")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_SC559D8")
+#undef P58_SC559D8
+#pragma push_macro("P58_SC559D8") /*gvi*/
+#undef P58_SC559D8 /*gvi*/
+uint32_t P58_SC559D8;
+#pragma pop_macro("P58_SC559D8") /*gvi*/
+#pragma pop_macro("P58_SC559D8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_SC559E0")
+#undef P58_SC559E0
+#pragma push_macro("P58_SC559E0") /*gvi*/
+#undef P58_SC559E0 /*gvi*/
+uint32_t P58_SC559E0;
+#pragma pop_macro("P58_SC559E0") /*gvi*/
+#pragma pop_macro("P58_SC559E0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_SC559E4")
+#undef P58_SC559E4
+#pragma push_macro("P58_SC559E4") /*gvi*/
+#undef P58_SC559E4 /*gvi*/
+uint32_t P58_SC559E4;
+#pragma pop_macro("P58_SC559E4") /*gvi*/
+#pragma pop_macro("P58_SC559E4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_SC559E8")
+#undef P58_SC559E8
+#pragma push_macro("P58_SC559E8") /*gvi*/
+#undef P58_SC559E8 /*gvi*/
+uint32_t P58_SC559E8;
+#pragma pop_macro("P58_SC559E8") /*gvi*/
+#pragma pop_macro("P58_SC559E8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_SC559EC")
+#undef P58_SC559EC
+#pragma push_macro("P58_SC559EC") /*gvi*/
+#undef P58_SC559EC /*gvi*/
+uint32_t P58_SC559EC;
+#pragma pop_macro("P58_SC559EC") /*gvi*/
+#pragma pop_macro("P58_SC559EC")
+#endif
 GAME_VAR_DEF(p58_blkidx_t, P58_BlkIdx, 0x00c29da0)
 GAME_VAR_DEF(int32_t *, P58_BlkBuf, 0x00bdfbc4)
-GAME_VAR_DEF(int32_t, P58_DemoFlag, 0x00b87f0c)
-GAME_VAR_DEF(int32_t, P58_S5F7E5C, 0x005f7e5c)
-GAME_VAR_DEF(int32_t, P58_DemoNo, 0x005d5780)
-GAME_VAR_DEF(p58_names_t, P58_Demos, 0x0054a130)
-GAME_VAR_DEF(int32_t, P58_LangNo, 0x00c557fc)
-GAME_VAR_DEF(p58_names_t, P58_Langs, 0x005759e4)
-GAME_VAR_DEF(p58_objs_t, P58_Objs, 0x00c80ce0)
-GAME_VAR_DEF(int32_t, P58_S32980, 0x00b32980)
-GAME_VAR_DEF(int32_t, P58_SB87EB0, 0x00b87eb0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_DemoFlag")
+#undef P58_DemoFlag
+#pragma push_macro("P58_DemoFlag") /*gvi*/
+#undef P58_DemoFlag /*gvi*/
+int32_t P58_DemoFlag;
+#pragma pop_macro("P58_DemoFlag") /*gvi*/
+#pragma pop_macro("P58_DemoFlag")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S5F7E5C")
+#undef P58_S5F7E5C
+#pragma push_macro("P58_S5F7E5C") /*gvi*/
+#undef P58_S5F7E5C /*gvi*/
+int32_t P58_S5F7E5C;
+#pragma pop_macro("P58_S5F7E5C") /*gvi*/
+#pragma pop_macro("P58_S5F7E5C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_DemoNo")
+#undef P58_DemoNo
+#pragma push_macro("P58_DemoNo") /*gvi*/
+#undef P58_DemoNo /*gvi*/
+int32_t P58_DemoNo;
+#pragma pop_macro("P58_DemoNo") /*gvi*/
+#pragma pop_macro("P58_DemoNo")
+#endif
+GAME_VAR_DEF(p58_names_t, P58_Demos, 0x00000000)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_LangNo")
+#undef P58_LangNo
+#pragma push_macro("P58_LangNo") /*gvi*/
+#undef P58_LangNo /*gvi*/
+int32_t P58_LangNo;
+#pragma pop_macro("P58_LangNo") /*gvi*/
+#pragma pop_macro("P58_LangNo")
+#endif
+GAME_VAR_DEF(p58_names_t, P58_Langs, 0x00000000)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_Objs")
+#undef P58_Objs
+#pragma push_macro("P58_Objs") /*gvi*/
+#undef P58_Objs /*gvi*/
+p58_objs_t P58_Objs;
+#pragma pop_macro("P58_Objs") /*gvi*/
+#pragma pop_macro("P58_Objs")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_S32980")
+#undef P58_S32980
+#pragma push_macro("P58_S32980") /*gvi*/
+#undef P58_S32980 /*gvi*/
+int32_t P58_S32980;
+#pragma pop_macro("P58_S32980") /*gvi*/
+#pragma pop_macro("P58_S32980")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_SB87EB0")
+#undef P58_SB87EB0
+#pragma push_macro("P58_SB87EB0") /*gvi*/
+#undef P58_SB87EB0 /*gvi*/
+int32_t P58_SB87EB0;
+#pragma pop_macro("P58_SB87EB0") /*gvi*/
+#pragma pop_macro("P58_SB87EB0")
+#endif
 GAME_VAR_DEF(p58_slot_t *, P58_ListB31EC4, 0x00b31ec4)
-GAME_VAR_DEF(int32_t, P58_CntB31EBC, 0x00b31ebc)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_CntB31EBC")
+#undef P58_CntB31EBC
+#pragma push_macro("P58_CntB31EBC") /*gvi*/
+#undef P58_CntB31EBC /*gvi*/
+int32_t P58_CntB31EBC;
+#pragma pop_macro("P58_CntB31EBC") /*gvi*/
+#pragma pop_macro("P58_CntB31EBC")
+#endif
 GAME_VAR_DEF(void **, P58_Grid, 0x011342e8)
-GAME_VAR_DEF(int32_t, P58_GridW, 0x0113452c)
-GAME_VAR_DEF(int32_t, P58_GridH, 0x01134530)
-GAME_VAR_DEF(p58_font_t, P58_Font, 0x005d57a0)
-GAME_VAR_DEF(p58_cfg_t, P58_Cfg, 0x01285320)
-GAME_VAR_DEF(p56_hdr_t, P58_CfgHdr, 0x0057b6a0)
-GAME_VAR_DEF(int32_t, P58_CfgOn, 0x00b87eb8)
-GAME_VAR_DEF(int32_t, P58_CfgLock, 0x0057b700)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_GridW")
+#undef P58_GridW
+#pragma push_macro("P58_GridW") /*gvi*/
+#undef P58_GridW /*gvi*/
+int32_t P58_GridW;
+#pragma pop_macro("P58_GridW") /*gvi*/
+#pragma pop_macro("P58_GridW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_GridH")
+#undef P58_GridH
+#pragma push_macro("P58_GridH") /*gvi*/
+#undef P58_GridH /*gvi*/
+int32_t P58_GridH;
+#pragma pop_macro("P58_GridH") /*gvi*/
+#pragma pop_macro("P58_GridH")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_Font")
+#undef P58_Font
+#pragma push_macro("P58_Font") /*gvi*/
+#undef P58_Font /*gvi*/
+p58_font_t P58_Font;
+#pragma pop_macro("P58_Font") /*gvi*/
+#pragma pop_macro("P58_Font")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_Cfg")
+#undef P58_Cfg
+#pragma push_macro("P58_Cfg") /*gvi*/
+#undef P58_Cfg /*gvi*/
+p58_cfg_t P58_Cfg;
+#pragma pop_macro("P58_Cfg") /*gvi*/
+#pragma pop_macro("P58_Cfg")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_CfgHdr")
+#undef P58_CfgHdr
+#pragma push_macro("P58_CfgHdr") /*gvi*/
+#undef P58_CfgHdr /*gvi*/
+p56_hdr_t P58_CfgHdr;
+#pragma pop_macro("P58_CfgHdr") /*gvi*/
+#pragma pop_macro("P58_CfgHdr")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_CfgOn")
+#undef P58_CfgOn
+#pragma push_macro("P58_CfgOn") /*gvi*/
+#undef P58_CfgOn /*gvi*/
+int32_t P58_CfgOn;
+#pragma pop_macro("P58_CfgOn") /*gvi*/
+#pragma pop_macro("P58_CfgOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P58_CfgLock")
+#undef P58_CfgLock
+#pragma push_macro("P58_CfgLock") /*gvi*/
+#undef P58_CfgLock /*gvi*/
+int32_t P58_CfgLock;
+#pragma pop_macro("P58_CfgLock") /*gvi*/
+#pragma pop_macro("P58_CfgLock")
+#endif
 
 #ifdef RE_HOOK_BUILD
 _Static_assert(sizeof(p58_cheat_t) == 8 && sizeof(p58_slot_t) == 8 && sizeof(p58_rec_t) == 12 && sizeof(p58_cell_t) == 12 &&

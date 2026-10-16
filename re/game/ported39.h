@@ -12,8 +12,14 @@
 #define P39_Locked GAME_VAR(int32_t, P39_Locked, 0x00a421d0)   /* 1 — поверхность заблокирована (Lock удался) */
 #define P39_Dummy  GAME_VAR(uint8_t, P39_Dummy, 0x006007c0)    /* буфер-пустышка, когда Lock не удался */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P39_Locked") /*gvi*/
+#undef P39_Locked /*gvi*/
 extern int32_t P39_Locked;
+#pragma pop_macro("P39_Locked") /*gvi*/
+#pragma push_macro("P39_Dummy") /*gvi*/
+#undef P39_Dummy /*gvi*/
 extern uint8_t P39_Dummy[64];
+#pragma pop_macro("P39_Dummy") /*gvi*/
 #endif
 /* Описание заблокированной поверхности, которое игра передаёт вызывающим (смещения из Game.exe). */
 typedef struct {
@@ -36,3 +42,11 @@ void    P39_Present(int32_t wait);          /* 0041dec8 (stdcall, 1 арг.): п
 void   *P39_QueryDD4(void *dd);             /* 00420c5a: QueryInterface(IDirectDraw4); 0 — ошибка */
 void   *P39_QueryD3D(void *dd);             /* 00420cac: QueryInterface(IDirect3D3); 0 — ошибка */
 int32_t P39_CreateFrontBack(int32_t w, int32_t h);   /* 00421149: основная поверхность, задний буфер w×h, клиппер; 1 — удалось */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P39_Locked
+#define P39_Locked (*(int32_t *)re_gvar(0x00a421d0u, sizeof(int32_t), (void *)&P39_Locked))
+#undef P39_Dummy
+#define P39_Dummy (*(uint8_t *)re_gvar(0x006007c0u, sizeof(uint8_t), (void *)&P39_Dummy))
+#endif
+/* gvar-img v2.03 end */

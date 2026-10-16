@@ -5,10 +5,26 @@
 #include "ported31.h"
 #include "unported.h"
 #include <string.h>
-GAME_VAR_DEF(P33_CountArr, P33_Count, 0x00621bc0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P33_Count")
+#undef P33_Count
+#pragma push_macro("P33_Count") /*gvi*/
+#undef P33_Count /*gvi*/
+P33_CountArr P33_Count;
+#pragma pop_macro("P33_Count") /*gvi*/
+#pragma pop_macro("P33_Count")
+#endif
 GAME_VAR_DEF(P33_VBufArr, P33_VBuf, 0x00622048)
 GAME_VAR_DEF(void *, P33_Device, 0x00a42160)
-GAME_VAR_DEF(int32_t, P33_GlideOk, 0x00b1c0ec)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P33_GlideOk")
+#undef P33_GlideOk
+#pragma push_macro("P33_GlideOk") /*gvi*/
+#undef P33_GlideOk /*gvi*/
+int32_t P33_GlideOk;
+#pragma pop_macro("P33_GlideOk") /*gvi*/
+#pragma pop_macro("P33_GlideOk")
+#endif
 
 void P33_FlushBatches(void) {
   void *keep_handle = P32_CurHandle;

@@ -10,13 +10,69 @@
 #include "unported.h"
 #include <stdio.h>
 #include <string.h>
-GAME_VAR_DEF(int32_t, P27_ReadBytes, 0x00d117e8)
-GAME_VAR_DEF(int32_t, P27_ReadLimit, 0x00d117f0)
-GAME_VAR_DEF(int32_t, P27_ProgressOn, 0x00b2c3b8)
-GAME_VAR_DEF(int32_t, P27_MemAllocated, 0x00b20380)
-GAME_VAR_DEF(int32_t, P27_MemFreed, 0x00b20398)
-GAME_VAR_DEF(p27_memtab_t, P27_MemTab, 0x00b203a0)
-GAME_VAR_DEF(p27_dent_t, P27_DentTex, 0x00d17d60)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P27_ReadBytes")
+#undef P27_ReadBytes
+#pragma push_macro("P27_ReadBytes") /*gvi*/
+#undef P27_ReadBytes /*gvi*/
+int32_t P27_ReadBytes;
+#pragma pop_macro("P27_ReadBytes") /*gvi*/
+#pragma pop_macro("P27_ReadBytes")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P27_ReadLimit")
+#undef P27_ReadLimit
+#pragma push_macro("P27_ReadLimit") /*gvi*/
+#undef P27_ReadLimit /*gvi*/
+int32_t P27_ReadLimit;
+#pragma pop_macro("P27_ReadLimit") /*gvi*/
+#pragma pop_macro("P27_ReadLimit")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P27_ProgressOn")
+#undef P27_ProgressOn
+#pragma push_macro("P27_ProgressOn") /*gvi*/
+#undef P27_ProgressOn /*gvi*/
+int32_t P27_ProgressOn;
+#pragma pop_macro("P27_ProgressOn") /*gvi*/
+#pragma pop_macro("P27_ProgressOn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P27_MemAllocated")
+#undef P27_MemAllocated
+#pragma push_macro("P27_MemAllocated") /*gvi*/
+#undef P27_MemAllocated /*gvi*/
+int32_t P27_MemAllocated;
+#pragma pop_macro("P27_MemAllocated") /*gvi*/
+#pragma pop_macro("P27_MemAllocated")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P27_MemFreed")
+#undef P27_MemFreed
+#pragma push_macro("P27_MemFreed") /*gvi*/
+#undef P27_MemFreed /*gvi*/
+int32_t P27_MemFreed;
+#pragma pop_macro("P27_MemFreed") /*gvi*/
+#pragma pop_macro("P27_MemFreed")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P27_MemTab")
+#undef P27_MemTab
+#pragma push_macro("P27_MemTab") /*gvi*/
+#undef P27_MemTab /*gvi*/
+p27_memtab_t P27_MemTab;
+#pragma pop_macro("P27_MemTab") /*gvi*/
+#pragma pop_macro("P27_MemTab")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P27_DentTex")
+#undef P27_DentTex
+#pragma push_macro("P27_DentTex") /*gvi*/
+#undef P27_DentTex /*gvi*/
+p27_dent_t P27_DentTex;
+#pragma pop_macro("P27_DentTex") /*gvi*/
+#pragma pop_macro("P27_DentTex")
+#endif
 #define MAIN_HWND ((void *)(intptr_t)G6_00BDF9C0)
 
 int32_t P27_ReadChunked(void *dst, int32_t size, int32_t count, void *file) {

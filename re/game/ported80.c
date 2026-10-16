@@ -3,34 +3,250 @@
 #include <math.h>
 #include <string.h>
 
-GAME_VAR_DEF(p80_boxtab_t, P80_Boxes, 0x00cf56e0)
-GAME_VAR_DEF(p80_class_t, P80_Class, 0x00c98a40)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Boxes")
+#undef P80_Boxes
+#pragma push_macro("P80_Boxes") /*gvi*/
+#undef P80_Boxes /*gvi*/
+p80_boxtab_t P80_Boxes;
+#pragma pop_macro("P80_Boxes") /*gvi*/
+#pragma pop_macro("P80_Boxes")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Class")
+#undef P80_Class
+#pragma push_macro("P80_Class") /*gvi*/
+#undef P80_Class /*gvi*/
+p80_class_t P80_Class;
+#pragma pop_macro("P80_Class") /*gvi*/
+#pragma pop_macro("P80_Class")
+#endif
 GAME_VAR_DEF(p80_lumps_t, P80_LumpTab, 0x00d012e0)
-GAME_VAR_DEF(int32_t, P80_GridH, 0x00562d3c)
-GAME_VAR_DEF(int32_t, P80_Cell, 0x00562d40)
-GAME_VAR_DEF(int32_t, P80_Hdr5, 0x00d01274)
-GAME_VAR_DEF(int32_t, P80_Hdr6, 0x00c97a28)
-GAME_VAR_DEF(int32_t, P80_HalfW, 0x00cb8f08)
-GAME_VAR_DEF(int32_t, P80_HalfH, 0x00cf2f9c)
-GAME_VAR_DEF(float, P80_InvMap, 0x00c1cc60)
-GAME_VAR_DEF(int32_t, P80_Cols, 0x00d00250)
-GAME_VAR_DEF(float, P80_Save0, 0x00d001f0)
-GAME_VAR_DEF(float, P80_Save1, 0x00d001f4)
-GAME_VAR_DEF(float, P80_Save2, 0x00d001f8)
-GAME_VAR_DEF(float, P80_Save3, 0x00d001fc)
-GAME_VAR_DEF(float, P80_Dir3, 0x005507dc)
-GAME_VAR_DEF(float, P80_SaveW, 0x00cb8f00)
-GAME_VAR_DEF(float, P80_Alt0, 0x00d00240)
-GAME_VAR_DEF(float, P80_Alt1, 0x00d00244)
-GAME_VAR_DEF(float, P80_Alt2, 0x00d00248)
-GAME_VAR_DEF(float, P80_Alt3, 0x00d0024c)
-GAME_VAR_DEF(float, P80_AltW, 0x00d01264)
-GAME_VAR_DEF(int32_t, P80_Flag17AEC, 0x00d17aec)
-GAME_VAR_DEF(float, P80_One, 0x00546020)
-GAME_VAR_DEF(float, P80_C45, 0x005461f4)
-GAME_VAR_DEF(float, P80_C02, 0x00546080)
-GAME_VAR_DEF(float, P80_C045, 0x005469ec)
-GAME_VAR_DEF(float, P80_Half, 0x00546068)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_GridH")
+#undef P80_GridH
+#pragma push_macro("P80_GridH") /*gvi*/
+#undef P80_GridH /*gvi*/
+int32_t P80_GridH;
+#pragma pop_macro("P80_GridH") /*gvi*/
+#pragma pop_macro("P80_GridH")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Cell")
+#undef P80_Cell
+#pragma push_macro("P80_Cell") /*gvi*/
+#undef P80_Cell /*gvi*/
+int32_t P80_Cell;
+#pragma pop_macro("P80_Cell") /*gvi*/
+#pragma pop_macro("P80_Cell")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Hdr5")
+#undef P80_Hdr5
+#pragma push_macro("P80_Hdr5") /*gvi*/
+#undef P80_Hdr5 /*gvi*/
+int32_t P80_Hdr5;
+#pragma pop_macro("P80_Hdr5") /*gvi*/
+#pragma pop_macro("P80_Hdr5")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Hdr6")
+#undef P80_Hdr6
+#pragma push_macro("P80_Hdr6") /*gvi*/
+#undef P80_Hdr6 /*gvi*/
+int32_t P80_Hdr6;
+#pragma pop_macro("P80_Hdr6") /*gvi*/
+#pragma pop_macro("P80_Hdr6")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_HalfW")
+#undef P80_HalfW
+#pragma push_macro("P80_HalfW") /*gvi*/
+#undef P80_HalfW /*gvi*/
+int32_t P80_HalfW;
+#pragma pop_macro("P80_HalfW") /*gvi*/
+#pragma pop_macro("P80_HalfW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_HalfH")
+#undef P80_HalfH
+#pragma push_macro("P80_HalfH") /*gvi*/
+#undef P80_HalfH /*gvi*/
+int32_t P80_HalfH;
+#pragma pop_macro("P80_HalfH") /*gvi*/
+#pragma pop_macro("P80_HalfH")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_InvMap")
+#undef P80_InvMap
+#pragma push_macro("P80_InvMap") /*gvi*/
+#undef P80_InvMap /*gvi*/
+float P80_InvMap;
+#pragma pop_macro("P80_InvMap") /*gvi*/
+#pragma pop_macro("P80_InvMap")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Cols")
+#undef P80_Cols
+#pragma push_macro("P80_Cols") /*gvi*/
+#undef P80_Cols /*gvi*/
+int32_t P80_Cols;
+#pragma pop_macro("P80_Cols") /*gvi*/
+#pragma pop_macro("P80_Cols")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Save0")
+#undef P80_Save0
+#pragma push_macro("P80_Save0") /*gvi*/
+#undef P80_Save0 /*gvi*/
+float P80_Save0;
+#pragma pop_macro("P80_Save0") /*gvi*/
+#pragma pop_macro("P80_Save0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Save1")
+#undef P80_Save1
+#pragma push_macro("P80_Save1") /*gvi*/
+#undef P80_Save1 /*gvi*/
+float P80_Save1;
+#pragma pop_macro("P80_Save1") /*gvi*/
+#pragma pop_macro("P80_Save1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Save2")
+#undef P80_Save2
+#pragma push_macro("P80_Save2") /*gvi*/
+#undef P80_Save2 /*gvi*/
+float P80_Save2;
+#pragma pop_macro("P80_Save2") /*gvi*/
+#pragma pop_macro("P80_Save2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Save3")
+#undef P80_Save3
+#pragma push_macro("P80_Save3") /*gvi*/
+#undef P80_Save3 /*gvi*/
+float P80_Save3;
+#pragma pop_macro("P80_Save3") /*gvi*/
+#pragma pop_macro("P80_Save3")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Dir3")
+#undef P80_Dir3
+#pragma push_macro("P80_Dir3") /*gvi*/
+#undef P80_Dir3 /*gvi*/
+float P80_Dir3;
+#pragma pop_macro("P80_Dir3") /*gvi*/
+#pragma pop_macro("P80_Dir3")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_SaveW")
+#undef P80_SaveW
+#pragma push_macro("P80_SaveW") /*gvi*/
+#undef P80_SaveW /*gvi*/
+float P80_SaveW;
+#pragma pop_macro("P80_SaveW") /*gvi*/
+#pragma pop_macro("P80_SaveW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Alt0")
+#undef P80_Alt0
+#pragma push_macro("P80_Alt0") /*gvi*/
+#undef P80_Alt0 /*gvi*/
+float P80_Alt0;
+#pragma pop_macro("P80_Alt0") /*gvi*/
+#pragma pop_macro("P80_Alt0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Alt1")
+#undef P80_Alt1
+#pragma push_macro("P80_Alt1") /*gvi*/
+#undef P80_Alt1 /*gvi*/
+float P80_Alt1;
+#pragma pop_macro("P80_Alt1") /*gvi*/
+#pragma pop_macro("P80_Alt1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Alt2")
+#undef P80_Alt2
+#pragma push_macro("P80_Alt2") /*gvi*/
+#undef P80_Alt2 /*gvi*/
+float P80_Alt2;
+#pragma pop_macro("P80_Alt2") /*gvi*/
+#pragma pop_macro("P80_Alt2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Alt3")
+#undef P80_Alt3
+#pragma push_macro("P80_Alt3") /*gvi*/
+#undef P80_Alt3 /*gvi*/
+float P80_Alt3;
+#pragma pop_macro("P80_Alt3") /*gvi*/
+#pragma pop_macro("P80_Alt3")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_AltW")
+#undef P80_AltW
+#pragma push_macro("P80_AltW") /*gvi*/
+#undef P80_AltW /*gvi*/
+float P80_AltW;
+#pragma pop_macro("P80_AltW") /*gvi*/
+#pragma pop_macro("P80_AltW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Flag17AEC")
+#undef P80_Flag17AEC
+#pragma push_macro("P80_Flag17AEC") /*gvi*/
+#undef P80_Flag17AEC /*gvi*/
+int32_t P80_Flag17AEC;
+#pragma pop_macro("P80_Flag17AEC") /*gvi*/
+#pragma pop_macro("P80_Flag17AEC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_One")
+#undef P80_One
+#pragma push_macro("P80_One") /*gvi*/
+#undef P80_One /*gvi*/
+float P80_One;
+#pragma pop_macro("P80_One") /*gvi*/
+#pragma pop_macro("P80_One")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_C45")
+#undef P80_C45
+#pragma push_macro("P80_C45") /*gvi*/
+#undef P80_C45 /*gvi*/
+float P80_C45;
+#pragma pop_macro("P80_C45") /*gvi*/
+#pragma pop_macro("P80_C45")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_C02")
+#undef P80_C02
+#pragma push_macro("P80_C02") /*gvi*/
+#undef P80_C02 /*gvi*/
+float P80_C02;
+#pragma pop_macro("P80_C02") /*gvi*/
+#pragma pop_macro("P80_C02")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_C045")
+#undef P80_C045
+#pragma push_macro("P80_C045") /*gvi*/
+#undef P80_C045 /*gvi*/
+float P80_C045;
+#pragma pop_macro("P80_C045") /*gvi*/
+#pragma pop_macro("P80_C045")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P80_Half")
+#undef P80_Half
+#pragma push_macro("P80_Half") /*gvi*/
+#undef P80_Half /*gvi*/
+float P80_Half;
+#pragma pop_macro("P80_Half") /*gvi*/
+#pragma pop_macro("P80_Half")
+#endif
 
 /* Значения float-констант из .data Game.exe: 1.0, 45.0, 0.2 (0x3e4ccccd), 0.45 (0x3ee66666), 0.5 */
 void P80_InitConsts(void) {

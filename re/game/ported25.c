@@ -5,12 +5,60 @@
 #include "ported6.h"
 #include "engine.h"
 #include <string.h>
-GAME_VAR_DEF(int32_t, P25_CdOpen, 0x00b91cfc)
-GAME_VAR_DEF(int32_t, P25_CdPlaying, 0x00b91d38)
-GAME_VAR_DEF(int32_t, P25_CdTrack, 0x00b91d3c)
-GAME_VAR_DEF(int32_t, P25_CdTracks, 0x00b91d18)
-GAME_VAR_DEF(int32_t, P25_AuxDev, 0x0057647c)
-GAME_VAR_DEF(int32_t, P25_TimerCnt, 0x00b94028)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P25_CdOpen")
+#undef P25_CdOpen
+#pragma push_macro("P25_CdOpen") /*gvi*/
+#undef P25_CdOpen /*gvi*/
+int32_t P25_CdOpen;
+#pragma pop_macro("P25_CdOpen") /*gvi*/
+#pragma pop_macro("P25_CdOpen")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P25_CdPlaying")
+#undef P25_CdPlaying
+#pragma push_macro("P25_CdPlaying") /*gvi*/
+#undef P25_CdPlaying /*gvi*/
+int32_t P25_CdPlaying;
+#pragma pop_macro("P25_CdPlaying") /*gvi*/
+#pragma pop_macro("P25_CdPlaying")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P25_CdTrack")
+#undef P25_CdTrack
+#pragma push_macro("P25_CdTrack") /*gvi*/
+#undef P25_CdTrack /*gvi*/
+int32_t P25_CdTrack;
+#pragma pop_macro("P25_CdTrack") /*gvi*/
+#pragma pop_macro("P25_CdTrack")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P25_CdTracks")
+#undef P25_CdTracks
+#pragma push_macro("P25_CdTracks") /*gvi*/
+#undef P25_CdTracks /*gvi*/
+int32_t P25_CdTracks;
+#pragma pop_macro("P25_CdTracks") /*gvi*/
+#pragma pop_macro("P25_CdTracks")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P25_AuxDev")
+#undef P25_AuxDev
+#pragma push_macro("P25_AuxDev") /*gvi*/
+#undef P25_AuxDev /*gvi*/
+int32_t P25_AuxDev;
+#pragma pop_macro("P25_AuxDev") /*gvi*/
+#pragma pop_macro("P25_AuxDev")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P25_TimerCnt")
+#undef P25_TimerCnt
+#pragma push_macro("P25_TimerCnt") /*gvi*/
+#undef P25_TimerCnt /*gvi*/
+int32_t P25_TimerCnt;
+#pragma pop_macro("P25_TimerCnt") /*gvi*/
+#pragma pop_macro("P25_TimerCnt")
+#endif
 
 static uint32_t g_tocPos[21], g_tocEnd[21];   /* TOC дорожек (в оригинале пары по 8 байт с b91c20) */
 static uint32_t g_curEnd;                     /* конец текущей дорожки (b91d10) */

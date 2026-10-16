@@ -9,16 +9,96 @@ GAME_VAR_DEF(void *, P31_DDObj1, 0x00a4215c)
 GAME_VAR_DEF(void *, P31_DDObj2, 0x00a42160)
 GAME_VAR_DEF(void *, P31_DDObj3, 0x00a42164)
 GAME_VAR_DEF(void *, P31_DDObj4, 0x00a42174)
-GAME_VAR_DEF(int32_t, P31_DDVal0, 0x00a421ac)
-GAME_VAR_DEF(int32_t, P31_DDVal1, 0x00a421b0)
-GAME_VAR_DEF(int32_t, P31_DDVal2, 0x00a421b4)
-GAME_VAR_DEF(int32_t, P31_DDVal3, 0x00a421b8)
-GAME_VAR_DEF(int32_t, P31_DDVal4, 0x00a421c0)
-GAME_VAR_DEF(int32_t, P31_DDVal5, 0x00a421c8)
-GAME_VAR_DEF(int32_t, P31_Active, 0x00bdf9cc)
-GAME_VAR_DEF(int32_t, P31_WindowMode, 0x00bdf9c8)
-GAME_VAR_DEF(int32_t, P31_PriorityHigh, 0x00b87e8c)
-GAME_VAR_DEF(int32_t, P31_GlideModule, 0x00b1c0e8)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P31_DDVal0")
+#undef P31_DDVal0
+#pragma push_macro("P31_DDVal0") /*gvi*/
+#undef P31_DDVal0 /*gvi*/
+int32_t P31_DDVal0;
+#pragma pop_macro("P31_DDVal0") /*gvi*/
+#pragma pop_macro("P31_DDVal0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P31_DDVal1")
+#undef P31_DDVal1
+#pragma push_macro("P31_DDVal1") /*gvi*/
+#undef P31_DDVal1 /*gvi*/
+int32_t P31_DDVal1;
+#pragma pop_macro("P31_DDVal1") /*gvi*/
+#pragma pop_macro("P31_DDVal1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P31_DDVal2")
+#undef P31_DDVal2
+#pragma push_macro("P31_DDVal2") /*gvi*/
+#undef P31_DDVal2 /*gvi*/
+int32_t P31_DDVal2;
+#pragma pop_macro("P31_DDVal2") /*gvi*/
+#pragma pop_macro("P31_DDVal2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P31_DDVal3")
+#undef P31_DDVal3
+#pragma push_macro("P31_DDVal3") /*gvi*/
+#undef P31_DDVal3 /*gvi*/
+int32_t P31_DDVal3;
+#pragma pop_macro("P31_DDVal3") /*gvi*/
+#pragma pop_macro("P31_DDVal3")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P31_DDVal4")
+#undef P31_DDVal4
+#pragma push_macro("P31_DDVal4") /*gvi*/
+#undef P31_DDVal4 /*gvi*/
+int32_t P31_DDVal4;
+#pragma pop_macro("P31_DDVal4") /*gvi*/
+#pragma pop_macro("P31_DDVal4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P31_DDVal5")
+#undef P31_DDVal5
+#pragma push_macro("P31_DDVal5") /*gvi*/
+#undef P31_DDVal5 /*gvi*/
+int32_t P31_DDVal5;
+#pragma pop_macro("P31_DDVal5") /*gvi*/
+#pragma pop_macro("P31_DDVal5")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P31_Active")
+#undef P31_Active
+#pragma push_macro("P31_Active") /*gvi*/
+#undef P31_Active /*gvi*/
+int32_t P31_Active;
+#pragma pop_macro("P31_Active") /*gvi*/
+#pragma pop_macro("P31_Active")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P31_WindowMode")
+#undef P31_WindowMode
+#pragma push_macro("P31_WindowMode") /*gvi*/
+#undef P31_WindowMode /*gvi*/
+int32_t P31_WindowMode;
+#pragma pop_macro("P31_WindowMode") /*gvi*/
+#pragma pop_macro("P31_WindowMode")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P31_PriorityHigh")
+#undef P31_PriorityHigh
+#pragma push_macro("P31_PriorityHigh") /*gvi*/
+#undef P31_PriorityHigh /*gvi*/
+int32_t P31_PriorityHigh;
+#pragma pop_macro("P31_PriorityHigh") /*gvi*/
+#pragma pop_macro("P31_PriorityHigh")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P31_GlideModule")
+#undef P31_GlideModule
+#pragma push_macro("P31_GlideModule") /*gvi*/
+#undef P31_GlideModule /*gvi*/
+int32_t P31_GlideModule;
+#pragma pop_macro("P31_GlideModule") /*gvi*/
+#pragma pop_macro("P31_GlideModule")
+#endif
 
 void Call00522323(void) { plat_pump_messages(); }
 

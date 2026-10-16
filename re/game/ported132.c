@@ -112,7 +112,15 @@ static void wr16(uint8_t *p, uint16_t v) { memcpy(p, &v, 2); }
 static uint16_t rd16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 
 #ifndef RE_HOOK_BUILD
-GAME_VAR_DEF(int32_t, P132_B87EC8, 0x00b87ec8)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P132_B87EC8")
+#undef P132_B87EC8
+#pragma push_macro("P132_B87EC8") /*gvi*/
+#undef P132_B87EC8 /*gvi*/
+int32_t P132_B87EC8;
+#pragma pop_macro("P132_B87EC8") /*gvi*/
+#pragma pop_macro("P132_B87EC8")
+#endif
 #endif
 
 /* ---- 00417b80 ---- */

@@ -11,7 +11,25 @@
 #define P25_AuxDev    GAME_VAR(int32_t, P25_AuxDev, 0x0057647c)     /* aux-устройство CD или -1 */
 #define P25_TimerCnt  GAME_VAR(int32_t, P25_TimerCnt, 0x00b94028)   /* счётчик таймеров */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P25_CdOpen") /*gvi*/
+#undef P25_CdOpen /*gvi*/
+#pragma push_macro("P25_CdPlaying") /*gvi*/
+#undef P25_CdPlaying /*gvi*/
+#pragma push_macro("P25_CdTrack") /*gvi*/
+#undef P25_CdTrack /*gvi*/
+#pragma push_macro("P25_CdTracks") /*gvi*/
+#undef P25_CdTracks /*gvi*/
+#pragma push_macro("P25_AuxDev") /*gvi*/
+#undef P25_AuxDev /*gvi*/
+#pragma push_macro("P25_TimerCnt") /*gvi*/
+#undef P25_TimerCnt /*gvi*/
 extern int32_t P25_CdOpen, P25_CdPlaying, P25_CdTrack, P25_CdTracks, P25_AuxDev, P25_TimerCnt;
+#pragma pop_macro("P25_TimerCnt") /*gvi*/
+#pragma pop_macro("P25_AuxDev") /*gvi*/
+#pragma pop_macro("P25_CdTracks") /*gvi*/
+#pragma pop_macro("P25_CdTrack") /*gvi*/
+#pragma pop_macro("P25_CdPlaying") /*gvi*/
+#pragma pop_macro("P25_CdOpen") /*gvi*/
 #endif
 int32_t  P25_GetCDTOC(void);                         /* 00524f97 */
 int32_t  P25_InitCDAudio(void);                      /* 00524611 */
@@ -25,3 +43,19 @@ void     P25_TimersShutdown(void);                   /* 005281e1 */
 int32_t  P25_TimerStart(uint32_t delay, uint32_t flags, void (*cb)(void)); /* 00528221 */
 void     P25_TimerStop(int32_t slot);                /* 00528293 */
 void     P25_TimerCb(uint32_t id, uint32_t msg, uint32_t user, uint32_t a, uint32_t b); /* 005282e1, stdcall */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P25_CdOpen
+#define P25_CdOpen (*(int32_t *)re_gvar(0x00b91cfcu, sizeof(int32_t), (void *)&P25_CdOpen))
+#undef P25_CdPlaying
+#define P25_CdPlaying (*(int32_t *)re_gvar(0x00b91d38u, sizeof(int32_t), (void *)&P25_CdPlaying))
+#undef P25_CdTrack
+#define P25_CdTrack (*(int32_t *)re_gvar(0x00b91d3cu, sizeof(int32_t), (void *)&P25_CdTrack))
+#undef P25_CdTracks
+#define P25_CdTracks (*(int32_t *)re_gvar(0x00b91d18u, sizeof(int32_t), (void *)&P25_CdTracks))
+#undef P25_AuxDev
+#define P25_AuxDev (*(int32_t *)re_gvar(0x0057647cu, sizeof(int32_t), (void *)&P25_AuxDev))
+#undef P25_TimerCnt
+#define P25_TimerCnt (*(int32_t *)re_gvar(0x00b94028u, sizeof(int32_t), (void *)&P25_TimerCnt))
+#endif
+/* gvar-img v2.03 end */

@@ -4,7 +4,15 @@
 
 GAME_VAR_DEF(p88_cell_t, P88_CellA, 0x00c97a00)
 GAME_VAR_DEF(p88_cell_t, P88_CellB, 0x00cff9a0)
-GAME_VAR_DEF(int32_t, P88_Mode575, 0x00575efc)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P88_Mode575")
+#undef P88_Mode575
+#pragma push_macro("P88_Mode575") /*gvi*/
+#undef P88_Mode575 /*gvi*/
+int32_t P88_Mode575;
+#pragma pop_macro("P88_Mode575") /*gvi*/
+#pragma pop_macro("P88_Mode575")
+#endif
 
 /* заполнить описатель по координатам блока карты */
 static void fill(p88_cell_t *c, int32_t x, int32_t y) {

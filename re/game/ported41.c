@@ -11,12 +11,60 @@
 #ifndef RE_HOOK_BUILD
 #include "ported86.h"
 #endif
-GAME_VAR_DEF(p41_texsel_t, P41_TexSel, 0x00562d80)
-GAME_VAR_DEF(int32_t, P41_Offset, 0x00b31ee0)
-GAME_VAR_DEF(uint32_t, P41_Arena, 0x00d01260)
-GAME_VAR_DEF(int32_t, P41_Flag, 0x00c82530)
-GAME_VAR_DEF(p41_buf0_t, P41_Buf0, 0x00c98f00)
-GAME_VAR_DEF(p41_buf1_t, P41_Buf1, 0x00ce1f60)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P41_TexSel")
+#undef P41_TexSel
+#pragma push_macro("P41_TexSel") /*gvi*/
+#undef P41_TexSel /*gvi*/
+p41_texsel_t P41_TexSel;
+#pragma pop_macro("P41_TexSel") /*gvi*/
+#pragma pop_macro("P41_TexSel")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P41_Offset")
+#undef P41_Offset
+#pragma push_macro("P41_Offset") /*gvi*/
+#undef P41_Offset /*gvi*/
+int32_t P41_Offset;
+#pragma pop_macro("P41_Offset") /*gvi*/
+#pragma pop_macro("P41_Offset")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P41_Arena")
+#undef P41_Arena
+#pragma push_macro("P41_Arena") /*gvi*/
+#undef P41_Arena /*gvi*/
+uint32_t P41_Arena;
+#pragma pop_macro("P41_Arena") /*gvi*/
+#pragma pop_macro("P41_Arena")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P41_Flag")
+#undef P41_Flag
+#pragma push_macro("P41_Flag") /*gvi*/
+#undef P41_Flag /*gvi*/
+int32_t P41_Flag;
+#pragma pop_macro("P41_Flag") /*gvi*/
+#pragma pop_macro("P41_Flag")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P41_Buf0")
+#undef P41_Buf0
+#pragma push_macro("P41_Buf0") /*gvi*/
+#undef P41_Buf0 /*gvi*/
+p41_buf0_t P41_Buf0;
+#pragma pop_macro("P41_Buf0") /*gvi*/
+#pragma pop_macro("P41_Buf0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P41_Buf1")
+#undef P41_Buf1
+#pragma push_macro("P41_Buf1") /*gvi*/
+#undef P41_Buf1 /*gvi*/
+p41_buf1_t P41_Buf1;
+#pragma pop_macro("P41_Buf1") /*gvi*/
+#pragma pop_macro("P41_Buf1")
+#endif
 #define MAIN_HWND41 ((void *)(intptr_t)G6_00BDF9C0)
 
 static uint8_t *p41_ram;

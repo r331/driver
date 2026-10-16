@@ -1,7 +1,15 @@
 #include "ported83.h"
 #include <string.h>
 
-GAME_VAR_DEF(p83_v16_t, P83_LightVec, 0x01249680)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P83_LightVec")
+#undef P83_LightVec
+#pragma push_macro("P83_LightVec") /*gvi*/
+#undef P83_LightVec /*gvi*/
+p83_v16_t P83_LightVec;
+#pragma pop_macro("P83_LightVec") /*gvi*/
+#pragma pop_macro("P83_LightVec")
+#endif
 
 typedef long double ld;
 

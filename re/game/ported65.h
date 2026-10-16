@@ -34,16 +34,34 @@ typedef char p65_name_t[20];
 #define P65_NameVal Q0057B72C
 #ifndef RE_HOOK_BUILD
 extern char *P65_Line;
+#pragma push_macro("P65_Tok") /*gvi*/
+#undef P65_Tok /*gvi*/
 extern p65_tok_t P65_Tok;
+#pragma pop_macro("P65_Tok") /*gvi*/
+#pragma push_macro("P65_Ints") /*gvi*/
+#undef P65_Ints /*gvi*/
 extern p65_ints_t P65_Ints;
+#pragma pop_macro("P65_Ints") /*gvi*/
 
+#pragma push_macro("P65_Name") /*gvi*/
+#undef P65_Name /*gvi*/
 extern p65_name_t P65_Name;
+#pragma pop_macro("P65_Name") /*gvi*/
 extern const char *P65_NamePtr;
 extern const char *P65_NameBg;
+#pragma push_macro("P65_Screen") /*gvi*/
+#undef P65_Screen /*gvi*/
 extern p65_screen_t P65_Screen;
+#pragma pop_macro("P65_Screen") /*gvi*/
 extern p65_texs_t P65_Texs;
+#pragma push_macro("P65_Blend") /*gvi*/
+#undef P65_Blend /*gvi*/
 extern p65_blend_t P65_Blend;
+#pragma pop_macro("P65_Blend") /*gvi*/
+#pragma push_macro("P65_ColorKey") /*gvi*/
+#undef P65_ColorKey /*gvi*/
 extern uint8_t P65_ColorKey;
+#pragma pop_macro("P65_ColorKey") /*gvi*/
 #endif
 typedef struct p65_ent { const char *name; int32_t value; } p65_ent_t;      /* запись таблицы: имя и значение */
 typedef struct { int32_t count; p65_ent_t **ents; } p65_tab_t;               /* число записей и массив указателей на них */
@@ -56,3 +74,19 @@ void    P65_BlitBlend(const void *page, uint8_t *dst, int32_t w, int32_t h, int3
 void    P65_SpriteKeyed(int32_t x, int32_t y, int32_t tex, int32_t u, int32_t v, int32_t w, int32_t h);  /* 00407cb8 */
 void    P65_SpriteBlend(int32_t x, int32_t y, int32_t tex, int32_t u, int32_t v, int32_t w, int32_t h);  /* 00407d07 */
 int32_t P65_ScriptCall(void);                       /* 004d1529: пропуск 2 байт, слово → 004cfe69, результат 1 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P65_Tok
+#define P65_Tok (*(p65_tok_t *)re_gvar(0x00c81580u, sizeof(p65_tok_t), (void *)&P65_Tok))
+#undef P65_Ints
+#define P65_Ints (*(p65_ints_t *)re_gvar(0x00c80c00u, sizeof(p65_ints_t), (void *)&P65_Ints))
+#undef P65_Name
+#define P65_Name (*(p65_name_t *)re_gvar(0x0057b718u, sizeof(p65_name_t), (void *)&P65_Name))
+#undef P65_Screen
+#define P65_Screen (*(p65_screen_t *)re_gvar(0x0057b740u, sizeof(p65_screen_t), (void *)&P65_Screen))
+#undef P65_Blend
+#define P65_Blend (*(p65_blend_t *)re_gvar(0x012752a0u, sizeof(p65_blend_t), (void *)&P65_Blend))
+#undef P65_ColorKey
+#define P65_ColorKey (*(uint8_t *)re_gvar(0x005c6768u, sizeof(uint8_t), (void *)&P65_ColorKey))
+#endif
+/* gvar-img v2.03 end */

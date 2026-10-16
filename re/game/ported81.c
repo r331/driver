@@ -2,13 +2,69 @@
 #include <math.h>
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P81_Flag, 0x00d02708)
-GAME_VAR_DEF(float, P81_PosX, 0x011f0050)
-GAME_VAR_DEF(float, P81_NegX, 0x01209648)
-GAME_VAR_DEF(float, P81_PosY, 0x011b6144)
-GAME_VAR_DEF(float, P81_NegY, 0x01209664)
-GAME_VAR_DEF(float, P81_PosZ, 0x01209640)
-GAME_VAR_DEF(float, P81_NegZ, 0x01209610)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P81_Flag")
+#undef P81_Flag
+#pragma push_macro("P81_Flag") /*gvi*/
+#undef P81_Flag /*gvi*/
+int32_t P81_Flag;
+#pragma pop_macro("P81_Flag") /*gvi*/
+#pragma pop_macro("P81_Flag")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P81_PosX")
+#undef P81_PosX
+#pragma push_macro("P81_PosX") /*gvi*/
+#undef P81_PosX /*gvi*/
+float P81_PosX;
+#pragma pop_macro("P81_PosX") /*gvi*/
+#pragma pop_macro("P81_PosX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P81_NegX")
+#undef P81_NegX
+#pragma push_macro("P81_NegX") /*gvi*/
+#undef P81_NegX /*gvi*/
+float P81_NegX;
+#pragma pop_macro("P81_NegX") /*gvi*/
+#pragma pop_macro("P81_NegX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P81_PosY")
+#undef P81_PosY
+#pragma push_macro("P81_PosY") /*gvi*/
+#undef P81_PosY /*gvi*/
+float P81_PosY;
+#pragma pop_macro("P81_PosY") /*gvi*/
+#pragma pop_macro("P81_PosY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P81_NegY")
+#undef P81_NegY
+#pragma push_macro("P81_NegY") /*gvi*/
+#undef P81_NegY /*gvi*/
+float P81_NegY;
+#pragma pop_macro("P81_NegY") /*gvi*/
+#pragma pop_macro("P81_NegY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P81_PosZ")
+#undef P81_PosZ
+#pragma push_macro("P81_PosZ") /*gvi*/
+#undef P81_PosZ /*gvi*/
+float P81_PosZ;
+#pragma pop_macro("P81_PosZ") /*gvi*/
+#pragma pop_macro("P81_PosZ")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P81_NegZ")
+#undef P81_NegZ
+#pragma push_macro("P81_NegZ") /*gvi*/
+#undef P81_NegZ /*gvi*/
+float P81_NegZ;
+#pragma pop_macro("P81_NegZ") /*gvi*/
+#pragma pop_macro("P81_NegZ")
+#endif
 
 /* |v| + фон (x87: сумма в расширенной точности, запись во float), потолок 1.0 (сравнение «строго больше»;
    NaN не ограничивается — как test ah,0x41 в оригинале). */

@@ -9,14 +9,78 @@
 #include "engine.h"
 #include <stdio.h>
 #include <string.h>
-GAME_VAR_DEF(int32_t, P26_FxA, 0x00b202e0)
-GAME_VAR_DEF(int32_t, P26_FxB, 0x00b202d4)
-GAME_VAR_DEF(int32_t, P26_FxC, 0x00b202e4)
-GAME_VAR_DEF(uint8_t, P26_FxD, 0x00b20300)
-GAME_VAR_DEF(int32_t, P26_ModelHubcap, 0x00d11820)
-GAME_VAR_DEF(int32_t, P26_ModelClean, 0x00d117f4)
-GAME_VAR_DEF(int32_t, P26_ModelFast, 0x00d117e0)
-GAME_VAR_DEF(int32_t, P26_ModelDam, 0x00d117a0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P26_FxA")
+#undef P26_FxA
+#pragma push_macro("P26_FxA") /*gvi*/
+#undef P26_FxA /*gvi*/
+int32_t P26_FxA;
+#pragma pop_macro("P26_FxA") /*gvi*/
+#pragma pop_macro("P26_FxA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P26_FxB")
+#undef P26_FxB
+#pragma push_macro("P26_FxB") /*gvi*/
+#undef P26_FxB /*gvi*/
+int32_t P26_FxB;
+#pragma pop_macro("P26_FxB") /*gvi*/
+#pragma pop_macro("P26_FxB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P26_FxC")
+#undef P26_FxC
+#pragma push_macro("P26_FxC") /*gvi*/
+#undef P26_FxC /*gvi*/
+int32_t P26_FxC;
+#pragma pop_macro("P26_FxC") /*gvi*/
+#pragma pop_macro("P26_FxC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P26_FxD")
+#undef P26_FxD
+#pragma push_macro("P26_FxD") /*gvi*/
+#undef P26_FxD /*gvi*/
+uint8_t P26_FxD;
+#pragma pop_macro("P26_FxD") /*gvi*/
+#pragma pop_macro("P26_FxD")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P26_ModelHubcap")
+#undef P26_ModelHubcap
+#pragma push_macro("P26_ModelHubcap") /*gvi*/
+#undef P26_ModelHubcap /*gvi*/
+int32_t P26_ModelHubcap;
+#pragma pop_macro("P26_ModelHubcap") /*gvi*/
+#pragma pop_macro("P26_ModelHubcap")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P26_ModelClean")
+#undef P26_ModelClean
+#pragma push_macro("P26_ModelClean") /*gvi*/
+#undef P26_ModelClean /*gvi*/
+int32_t P26_ModelClean;
+#pragma pop_macro("P26_ModelClean") /*gvi*/
+#pragma pop_macro("P26_ModelClean")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P26_ModelFast")
+#undef P26_ModelFast
+#pragma push_macro("P26_ModelFast") /*gvi*/
+#undef P26_ModelFast /*gvi*/
+int32_t P26_ModelFast;
+#pragma pop_macro("P26_ModelFast") /*gvi*/
+#pragma pop_macro("P26_ModelFast")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P26_ModelDam")
+#undef P26_ModelDam
+#pragma push_macro("P26_ModelDam") /*gvi*/
+#undef P26_ModelDam /*gvi*/
+int32_t P26_ModelDam;
+#pragma pop_macro("P26_ModelDam") /*gvi*/
+#pragma pop_macro("P26_ModelDam")
+#endif
 #define MAIN_HWND ((void *)(intptr_t)G6_00BDF9C0)
 
 void P26_WaveSetVolume(uint32_t vol) {

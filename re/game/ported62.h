@@ -77,15 +77,78 @@ typedef uint8_t p62_hs3_t[0x2c * 4];
 #define P62_Hs5      GAME_VAR(p62_hs2_t, P62_Hs5, 0x00b5a928)
 #define P62_Hs6      GAME_VAR(p62_hs3_t, P62_Hs6, 0x00b5c138)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P62_I14428C") /*gvi*/
+#undef P62_I14428C /*gvi*/
+#pragma push_macro("P62_C82434") /*gvi*/
+#undef P62_C82434 /*gvi*/
+#pragma push_macro("P62_C82500") /*gvi*/
+#undef P62_C82500 /*gvi*/
+#pragma push_macro("P62_I137388") /*gvi*/
+#undef P62_I137388 /*gvi*/
+#pragma push_macro("P62_I13738C") /*gvi*/
+#undef P62_I13738C /*gvi*/
+#pragma push_macro("P62_I137390") /*gvi*/
+#undef P62_I137390 /*gvi*/
+#pragma push_macro("P62_I270C44") /*gvi*/
+#undef P62_I270C44 /*gvi*/
+#pragma push_macro("P62_I252A80") /*gvi*/
+#undef P62_I252A80 /*gvi*/
+#pragma push_macro("P62_I252B78") /*gvi*/
+#undef P62_I252B78 /*gvi*/
 extern int32_t P62_I14428C, P62_C82434, P62_C82500, P62_I137388, P62_I13738C, P62_I137390, P62_I270C44, P62_I252A80, P62_I252B78,
+#pragma pop_macro("P62_I252B78") /*gvi*/
+#pragma pop_macro("P62_I252A80") /*gvi*/
+#pragma pop_macro("P62_I270C44") /*gvi*/
+#pragma pop_macro("P62_I137390") /*gvi*/
+#pragma pop_macro("P62_I13738C") /*gvi*/
+#pragma pop_macro("P62_I137388") /*gvi*/
+#pragma pop_macro("P62_C82500") /*gvi*/
+#pragma pop_macro("P62_C82434") /*gvi*/
+#pragma pop_macro("P62_I14428C") /*gvi*/
   P62_I270C48, P62_I252B68, P62_Max, P62_MapN, P62_ModelCount, P62_NoErr,
   P62_Blink, P62_HudOff1, P62_HudOff2, P62_Frame, P62_Alt, P62_Menu1271060, P62_Menu1271064, P62_BusyA, P62_BusyB, P62_BusyC,
   P62_BusyD, P62_BusyE, P62_MapW, P62_MapH, P62_Map1C10, P62_Map1C24, P62_MapC64, P62_Map2C40, P62_Map1C0C, P62_MapCC90;
+#pragma push_macro("P62_F136C54") /*gvi*/
+#undef P62_F136C54 /*gvi*/
+#pragma push_macro("P62_F252A94") /*gvi*/
+#undef P62_F252A94 /*gvi*/
+#pragma push_macro("P62_F25F3F4") /*gvi*/
+#undef P62_F25F3F4 /*gvi*/
+#pragma push_macro("P62_F25F404") /*gvi*/
+#undef P62_F25F404 /*gvi*/
 extern float P62_F136C54, P62_F252A94, P62_F25F3F4, P62_F25F404;
+#pragma pop_macro("P62_F25F404") /*gvi*/
+#pragma pop_macro("P62_F25F3F4") /*gvi*/
+#pragma pop_macro("P62_F252A94") /*gvi*/
+#pragma pop_macro("P62_F136C54") /*gvi*/
+#pragma push_macro("P62_B25F400") /*gvi*/
+#undef P62_B25F400 /*gvi*/
 extern uint8_t P62_B25F400, *P62_MapBuf;
+#pragma pop_macro("P62_B25F400") /*gvi*/
 extern const char *P62_ModelNames, *P62_Unit;
+#pragma push_macro("P62_Page") /*gvi*/
+#undef P62_Page /*gvi*/
 extern p62_page_t P62_Page;
+#pragma pop_macro("P62_Page") /*gvi*/
+#pragma push_macro("P62_Hs1") /*gvi*/
+#undef P62_Hs1 /*gvi*/
+#pragma push_macro("P62_Hs2") /*gvi*/
+#undef P62_Hs2 /*gvi*/
+#pragma push_macro("P62_Hs3") /*gvi*/
+#undef P62_Hs3 /*gvi*/
+#pragma push_macro("P62_Hs4") /*gvi*/
+#undef P62_Hs4 /*gvi*/
+#pragma push_macro("P62_Hs5") /*gvi*/
+#undef P62_Hs5 /*gvi*/
+#pragma push_macro("P62_Hs6") /*gvi*/
+#undef P62_Hs6 /*gvi*/
 extern p62_hs1_t P62_Hs1, P62_Hs2; extern p62_hs2_t P62_Hs3, P62_Hs4, P62_Hs5; extern p62_hs3_t P62_Hs6;
+#pragma pop_macro("P62_Hs6") /*gvi*/
+#pragma pop_macro("P62_Hs5") /*gvi*/
+#pragma pop_macro("P62_Hs4") /*gvi*/
+#pragma pop_macro("P62_Hs3") /*gvi*/
+#pragma pop_macro("P62_Hs2") /*gvi*/
+#pragma pop_macro("P62_Hs1") /*gvi*/
 #endif
 void    P62_InitCamDefaults(void);                          /* 0049c850: камера по умолчанию (расстояния, смещение, углы) */
 void    P62_InitRenderConsts(void);                         /* 00425a50: константы 3D-рендера для размера экрана */
@@ -104,3 +167,101 @@ void    P62_SpeedText(void);                                /* 005025dc: ско�
 void    P62_LoadMapHeader(void *file, int32_t size);        /* 004ec336: размеры карты и буфер данных */
 void    P62_ParticleSet(uint8_t *p, int32_t kind, int32_t a, uint32_t flags, int32_t b); /* 00514c72 */
 void    P62_ParticleInit(uint8_t *p, void *car);            /* 00515813 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P62_C82434
+#define P62_C82434 (*(int32_t *)re_gvar(0x00c82434u, sizeof(int32_t), (void *)&P62_C82434))
+#undef P62_C82500
+#define P62_C82500 (*(int32_t *)re_gvar(0x00c82500u, sizeof(int32_t), (void *)&P62_C82500))
+#undef P62_F136C54
+#define P62_F136C54 (*(float *)re_gvar(0x01136c54u, sizeof(float), (void *)&P62_F136C54))
+#undef P62_I137388
+#define P62_I137388 (*(int32_t *)re_gvar(0x01137388u, sizeof(int32_t), (void *)&P62_I137388))
+#undef P62_I13738C
+#define P62_I13738C (*(int32_t *)re_gvar(0x0113738cu, sizeof(int32_t), (void *)&P62_I13738C))
+#undef P62_I137390
+#define P62_I137390 (*(int32_t *)re_gvar(0x01137390u, sizeof(int32_t), (void *)&P62_I137390))
+#undef P62_F252A94
+#define P62_F252A94 (*(float *)re_gvar(0x01252a94u, sizeof(float), (void *)&P62_F252A94))
+#undef P62_F25F3F4
+#define P62_F25F3F4 (*(float *)re_gvar(0x0125f3f4u, sizeof(float), (void *)&P62_F25F3F4))
+#undef P62_F25F404
+#define P62_F25F404 (*(float *)re_gvar(0x0125f404u, sizeof(float), (void *)&P62_F25F404))
+#undef P62_I270C44
+#define P62_I270C44 (*(int32_t *)re_gvar(0x01270c44u, sizeof(int32_t), (void *)&P62_I270C44))
+#undef P62_I252A80
+#define P62_I252A80 (*(int32_t *)re_gvar(0x01252a80u, sizeof(int32_t), (void *)&P62_I252A80))
+#undef P62_I252B78
+#define P62_I252B78 (*(int32_t *)re_gvar(0x01252b78u, sizeof(int32_t), (void *)&P62_I252B78))
+#undef P62_I270C48
+#define P62_I270C48 (*(int32_t *)re_gvar(0x01270c48u, sizeof(int32_t), (void *)&P62_I270C48))
+#undef P62_I252B68
+#define P62_I252B68 (*(int32_t *)re_gvar(0x01252b68u, sizeof(int32_t), (void *)&P62_I252B68))
+#undef P62_B25F400
+#define P62_B25F400 (*(uint8_t *)re_gvar(0x0125f400u, sizeof(uint8_t), (void *)&P62_B25F400))
+#undef P62_I14428C
+#define P62_I14428C (*(int32_t *)re_gvar(0x0114428cu, sizeof(int32_t), (void *)&P62_I14428C))
+#undef P62_Max
+#define P62_Max (*(int32_t *)re_gvar(0x0112b25cu, sizeof(int32_t), (void *)&P62_Max))
+#undef P62_MapN
+#define P62_MapN (*(int32_t *)re_gvar(0x00c1cc70u, sizeof(int32_t), (void *)&P62_MapN))
+#undef P62_ModelCount
+#define P62_ModelCount (*(int32_t *)re_gvar(0x01134124u, sizeof(int32_t), (void *)&P62_ModelCount))
+#undef P62_NoErr
+#define P62_NoErr (*(int32_t *)re_gvar(0x00bdf9c8u, sizeof(int32_t), (void *)&P62_NoErr))
+#undef P62_Blink
+#define P62_Blink (*(int32_t *)re_gvar(0x00c8092cu, sizeof(int32_t), (void *)&P62_Blink))
+#undef P62_HudOff1
+#define P62_HudOff1 (*(int32_t *)re_gvar(0x00b87ea0u, sizeof(int32_t), (void *)&P62_HudOff1))
+#undef P62_HudOff2
+#define P62_HudOff2 (*(int32_t *)re_gvar(0x00b87e98u, sizeof(int32_t), (void *)&P62_HudOff2))
+#undef P62_Frame
+#define P62_Frame (*(int32_t *)re_gvar(0x00d118c0u, sizeof(int32_t), (void *)&P62_Frame))
+#undef P62_Alt
+#define P62_Alt (*(int32_t *)re_gvar(0x00b5a830u, sizeof(int32_t), (void *)&P62_Alt))
+#undef P62_Menu1271060
+#define P62_Menu1271060 (*(int32_t *)re_gvar(0x01271060u, sizeof(int32_t), (void *)&P62_Menu1271060))
+#undef P62_Menu1271064
+#define P62_Menu1271064 (*(int32_t *)re_gvar(0x01271064u, sizeof(int32_t), (void *)&P62_Menu1271064))
+#undef P62_BusyA
+#define P62_BusyA (*(int32_t *)re_gvar(0x00bdfa44u, sizeof(int32_t), (void *)&P62_BusyA))
+#undef P62_BusyB
+#define P62_BusyB (*(int32_t *)re_gvar(0x00bdfa48u, sizeof(int32_t), (void *)&P62_BusyB))
+#undef P62_BusyC
+#define P62_BusyC (*(int32_t *)re_gvar(0x00bdfa4cu, sizeof(int32_t), (void *)&P62_BusyC))
+#undef P62_BusyD
+#define P62_BusyD (*(int32_t *)re_gvar(0x00bdfa50u, sizeof(int32_t), (void *)&P62_BusyD))
+#undef P62_BusyE
+#define P62_BusyE (*(int32_t *)re_gvar(0x00bdfa58u, sizeof(int32_t), (void *)&P62_BusyE))
+#undef P62_MapW
+#define P62_MapW (*(int32_t *)re_gvar(0x00c1ed60u, sizeof(int32_t), (void *)&P62_MapW))
+#undef P62_MapH
+#define P62_MapH (*(int32_t *)re_gvar(0x00c1cc68u, sizeof(int32_t), (void *)&P62_MapH))
+#undef P62_Map1C10
+#define P62_Map1C10 (*(int32_t *)re_gvar(0x00bf1c10u, sizeof(int32_t), (void *)&P62_Map1C10))
+#undef P62_Map1C24
+#define P62_Map1C24 (*(int32_t *)re_gvar(0x00bf1c24u, sizeof(int32_t), (void *)&P62_Map1C24))
+#undef P62_MapC64
+#define P62_MapC64 (*(int32_t *)re_gvar(0x00c1cc64u, sizeof(int32_t), (void *)&P62_MapC64))
+#undef P62_Map2C40
+#define P62_Map2C40 (*(int32_t *)re_gvar(0x00c12c40u, sizeof(int32_t), (void *)&P62_Map2C40))
+#undef P62_Map1C0C
+#define P62_Map1C0C (*(int32_t *)re_gvar(0x00bf1c0cu, sizeof(int32_t), (void *)&P62_Map1C0C))
+#undef P62_MapCC90
+#define P62_MapCC90 (*(int32_t *)re_gvar(0x00c1cc90u, sizeof(int32_t), (void *)&P62_MapCC90))
+#undef P62_Page
+#define P62_Page (*(p62_page_t *)re_gvar(0x00b32a34u, sizeof(p62_page_t), (void *)&P62_Page))
+#undef P62_Hs1
+#define P62_Hs1 (*(p62_hs1_t *)re_gvar(0x00b5b378u, sizeof(p62_hs1_t), (void *)&P62_Hs1))
+#undef P62_Hs2
+#define P62_Hs2 (*(p62_hs1_t *)re_gvar(0x00b5ba58u, sizeof(p62_hs1_t), (void *)&P62_Hs2))
+#undef P62_Hs3
+#define P62_Hs3 (*(p62_hs2_t *)re_gvar(0x00b5b008u, sizeof(p62_hs2_t), (void *)&P62_Hs3))
+#undef P62_Hs4
+#define P62_Hs4 (*(p62_hs2_t *)re_gvar(0x00b5ac98u, sizeof(p62_hs2_t), (void *)&P62_Hs4))
+#undef P62_Hs5
+#define P62_Hs5 (*(p62_hs2_t *)re_gvar(0x00b5a928u, sizeof(p62_hs2_t), (void *)&P62_Hs5))
+#undef P62_Hs6
+#define P62_Hs6 (*(p62_hs3_t *)re_gvar(0x00b5c138u, sizeof(p62_hs3_t), (void *)&P62_Hs6))
+#endif
+/* gvar-img v2.03 end */

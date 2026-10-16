@@ -67,10 +67,42 @@
 #include <math.h>
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P119_GroundY, 0x00b202b8)
-GAME_VAR_DEF(p119_wheels_t, P119_Wheels, 0x00d069c0)
-GAME_VAR_DEF(uint32_t, P119_SelPtr, 0x005fea14)
-GAME_VAR_DEF(int32_t, P119_SelIdx, 0x005fea18)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P119_GroundY")
+#undef P119_GroundY
+#pragma push_macro("P119_GroundY") /*gvi*/
+#undef P119_GroundY /*gvi*/
+int32_t P119_GroundY;
+#pragma pop_macro("P119_GroundY") /*gvi*/
+#pragma pop_macro("P119_GroundY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P119_Wheels")
+#undef P119_Wheels
+#pragma push_macro("P119_Wheels") /*gvi*/
+#undef P119_Wheels /*gvi*/
+p119_wheels_t P119_Wheels;
+#pragma pop_macro("P119_Wheels") /*gvi*/
+#pragma pop_macro("P119_Wheels")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P119_SelPtr")
+#undef P119_SelPtr
+#pragma push_macro("P119_SelPtr") /*gvi*/
+#undef P119_SelPtr /*gvi*/
+uint32_t P119_SelPtr;
+#pragma pop_macro("P119_SelPtr") /*gvi*/
+#pragma pop_macro("P119_SelPtr")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P119_SelIdx")
+#undef P119_SelIdx
+#pragma push_macro("P119_SelIdx") /*gvi*/
+#undef P119_SelIdx /*gvi*/
+int32_t P119_SelIdx;
+#pragma pop_macro("P119_SelIdx") /*gvi*/
+#pragma pop_macro("P119_SelIdx")
+#endif
 
 #if defined(RE_HOOK_BUILD)
 #  define P119_STD __attribute__((stdcall))

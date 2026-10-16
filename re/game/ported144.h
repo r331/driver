@@ -7,6 +7,15 @@
 typedef uint8_t p144_rec28_t[0x28];
 #define P144_Hist0 GAME_VAR(p144_rec28_t, P144_Hist0, 0x011232e0)   /* история позиций для объектов без флага 0x800000 (фонарь 0) */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P144_Hist0") /*gvi*/
+#undef P144_Hist0 /*gvi*/
 extern p144_rec28_t P144_Hist0;
+#pragma pop_macro("P144_Hist0") /*gvi*/
 #endif
 void P144_FlagFx(const uint8_t *o);   /* 004b588e */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P144_Hist0
+#define P144_Hist0 (*(p144_rec28_t *)re_gvar(0x011232e0u, sizeof(p144_rec28_t), (void *)&P144_Hist0))
+#endif
+/* gvar-img v2.03 end */

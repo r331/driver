@@ -9,16 +9,96 @@ GAME_VAR_DEF(p85_raster_fn, P85_RasterA, 0x01270e08)
 GAME_VAR_DEF(p85_raster_fn, P85_RasterB, 0x01270dfc)
 GAME_VAR_DEF(p85_blend_fn, P85_BlendFn, 0x01270dd0)
 GAME_VAR_DEF(p85_state_fn, P85_StateFn, 0x01270ea0)
-GAME_VAR_DEF(int32_t, P85_StateDirty, 0x01270c34)
-GAME_VAR_DEF(int32_t, P85_BlendForce, 0x00b1c38c)
-GAME_VAR_DEF(uint8_t, P85_BlendCur, 0x0125f3e4)
-GAME_VAR_DEF(uint32_t, P85_Clip, 0x01147620)
-GAME_VAR_DEF(p85_d_t, P85_D, 0x01159d5c)
-GAME_VAR_DEF(uint32_t, P85_D3, 0x01159d6c)
-GAME_VAR_DEF(float, P85_MaxX, 0x00550820)
-GAME_VAR_DEF(float, P85_MaxY, 0x00550824)
-GAME_VAR_DEF(float, P85_Tmp, 0x0057a10e)
-GAME_VAR_DEF(int32_t, P85_ZI, 0x0057a132)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P85_StateDirty")
+#undef P85_StateDirty
+#pragma push_macro("P85_StateDirty") /*gvi*/
+#undef P85_StateDirty /*gvi*/
+int32_t P85_StateDirty;
+#pragma pop_macro("P85_StateDirty") /*gvi*/
+#pragma pop_macro("P85_StateDirty")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P85_BlendForce")
+#undef P85_BlendForce
+#pragma push_macro("P85_BlendForce") /*gvi*/
+#undef P85_BlendForce /*gvi*/
+int32_t P85_BlendForce;
+#pragma pop_macro("P85_BlendForce") /*gvi*/
+#pragma pop_macro("P85_BlendForce")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P85_BlendCur")
+#undef P85_BlendCur
+#pragma push_macro("P85_BlendCur") /*gvi*/
+#undef P85_BlendCur /*gvi*/
+uint8_t P85_BlendCur;
+#pragma pop_macro("P85_BlendCur") /*gvi*/
+#pragma pop_macro("P85_BlendCur")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P85_Clip")
+#undef P85_Clip
+#pragma push_macro("P85_Clip") /*gvi*/
+#undef P85_Clip /*gvi*/
+uint32_t P85_Clip;
+#pragma pop_macro("P85_Clip") /*gvi*/
+#pragma pop_macro("P85_Clip")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P85_D")
+#undef P85_D
+#pragma push_macro("P85_D") /*gvi*/
+#undef P85_D /*gvi*/
+p85_d_t P85_D;
+#pragma pop_macro("P85_D") /*gvi*/
+#pragma pop_macro("P85_D")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P85_D3")
+#undef P85_D3
+#pragma push_macro("P85_D3") /*gvi*/
+#undef P85_D3 /*gvi*/
+uint32_t P85_D3;
+#pragma pop_macro("P85_D3") /*gvi*/
+#pragma pop_macro("P85_D3")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P85_MaxX")
+#undef P85_MaxX
+#pragma push_macro("P85_MaxX") /*gvi*/
+#undef P85_MaxX /*gvi*/
+float P85_MaxX;
+#pragma pop_macro("P85_MaxX") /*gvi*/
+#pragma pop_macro("P85_MaxX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P85_MaxY")
+#undef P85_MaxY
+#pragma push_macro("P85_MaxY") /*gvi*/
+#undef P85_MaxY /*gvi*/
+float P85_MaxY;
+#pragma pop_macro("P85_MaxY") /*gvi*/
+#pragma pop_macro("P85_MaxY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P85_Tmp")
+#undef P85_Tmp
+#pragma push_macro("P85_Tmp") /*gvi*/
+#undef P85_Tmp /*gvi*/
+float P85_Tmp;
+#pragma pop_macro("P85_Tmp") /*gvi*/
+#pragma pop_macro("P85_Tmp")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P85_ZI")
+#undef P85_ZI
+#pragma push_macro("P85_ZI") /*gvi*/
+#undef P85_ZI /*gvi*/
+int32_t P85_ZI;
+#pragma pop_macro("P85_ZI") /*gvi*/
+#pragma pop_macro("P85_ZI")
+#endif
 
 typedef long double ld;
 static uint32_t bits(float f) { uint32_t u; memcpy(&u, &f, 4); return u; }

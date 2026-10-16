@@ -5,9 +5,33 @@
 #include "globalsets.h"
 #include <string.h>
 #include <stddef.h>
-GAME_VAR_DEF(int32_t, P51_PitchCount, 0x00560388)
-GAME_VAR_DEF(float, P51_Half, 0x00546068)
-GAME_VAR_DEF(int32_t, P51_TrafficN, 0x00575ee4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P51_PitchCount")
+#undef P51_PitchCount
+#pragma push_macro("P51_PitchCount") /*gvi*/
+#undef P51_PitchCount /*gvi*/
+int32_t P51_PitchCount;
+#pragma pop_macro("P51_PitchCount") /*gvi*/
+#pragma pop_macro("P51_PitchCount")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P51_Half")
+#undef P51_Half
+#pragma push_macro("P51_Half") /*gvi*/
+#undef P51_Half /*gvi*/
+float P51_Half;
+#pragma pop_macro("P51_Half") /*gvi*/
+#pragma pop_macro("P51_Half")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P51_TrafficN")
+#undef P51_TrafficN
+#pragma push_macro("P51_TrafficN") /*gvi*/
+#undef P51_TrafficN /*gvi*/
+int32_t P51_TrafficN;
+#pragma pop_macro("P51_TrafficN") /*gvi*/
+#pragma pop_macro("P51_TrafficN")
+#endif
 #include "ported12.h"
 
 static inline uint32_t rd32(const uint8_t *p, int o) { uint32_t v; memcpy(&v, p + o, 4); return v; }

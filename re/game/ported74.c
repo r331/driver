@@ -2,28 +2,196 @@
 #include "ported74.h"
 #include <string.h>
 
-GAME_VAR_DEF(p74_dist_t, P74_DistTab, 0x0055272c)
-GAME_VAR_DEF(p74_keys_t, P74_KeyA, 0x0054ae10)
-GAME_VAR_DEF(p74_keys_t, P74_KeyB, 0x0054af10)
-GAME_VAR_DEF(p74_dev_t, P74_DevTab, 0x01270ec0)
-GAME_VAR_DEF(p74_cars_t, P74_Cars, 0x0112e6b4)
-GAME_VAR_DEF(int32_t, P74_C4DA58, 0x00c4da58)
-GAME_VAR_DEF(p74_i5_t, P74_B5A858, 0x00b5a858)
-GAME_VAR_DEF(p74_i5_t, P74_B5A86C, 0x00b5a86c)
-GAME_VAR_DEF(p74_i5_t, P74_B5A880, 0x00b5a880)
-GAME_VAR_DEF(p74_i5_t, P74_C4D7A0, 0x00c4d7a0)
-GAME_VAR_DEF(int32_t, P74_B5A89C, 0x00b5a89c)
-GAME_VAR_DEF(uint8_t, P74_B5A894, 0x00b5a894)
-GAME_VAR_DEF(int32_t, P74_C4D668, 0x00c4d668)
-GAME_VAR_DEF(int32_t, P74_C4BDE0, 0x00c4bde0)
-GAME_VAR_DEF(int32_t, P74_C54D08, 0x00c54d08)
-GAME_VAR_DEF(p74_i4_t, P74_SkidA, 0x00bdfae0)
-GAME_VAR_DEF(p74_i4_t, P74_SkidB, 0x00bdfb10)
-GAME_VAR_DEF(p74_i4_t, P74_SkidC, 0x00bdfab0)
-GAME_VAR_DEF(p74_i4_t, P74_SkidD, 0x00bdfb00)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_DistTab")
+#undef P74_DistTab
+#pragma push_macro("P74_DistTab") /*gvi*/
+#undef P74_DistTab /*gvi*/
+p74_dist_t P74_DistTab;
+#pragma pop_macro("P74_DistTab") /*gvi*/
+#pragma pop_macro("P74_DistTab")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_KeyA")
+#undef P74_KeyA
+#pragma push_macro("P74_KeyA") /*gvi*/
+#undef P74_KeyA /*gvi*/
+p74_keys_t P74_KeyA;
+#pragma pop_macro("P74_KeyA") /*gvi*/
+#pragma pop_macro("P74_KeyA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_KeyB")
+#undef P74_KeyB
+#pragma push_macro("P74_KeyB") /*gvi*/
+#undef P74_KeyB /*gvi*/
+p74_keys_t P74_KeyB;
+#pragma pop_macro("P74_KeyB") /*gvi*/
+#pragma pop_macro("P74_KeyB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_DevTab")
+#undef P74_DevTab
+#pragma push_macro("P74_DevTab") /*gvi*/
+#undef P74_DevTab /*gvi*/
+p74_dev_t P74_DevTab;
+#pragma pop_macro("P74_DevTab") /*gvi*/
+#pragma pop_macro("P74_DevTab")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_Cars")
+#undef P74_Cars
+#pragma push_macro("P74_Cars") /*gvi*/
+#undef P74_Cars /*gvi*/
+p74_cars_t P74_Cars;
+#pragma pop_macro("P74_Cars") /*gvi*/
+#pragma pop_macro("P74_Cars")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_C4DA58")
+#undef P74_C4DA58
+#pragma push_macro("P74_C4DA58") /*gvi*/
+#undef P74_C4DA58 /*gvi*/
+int32_t P74_C4DA58;
+#pragma pop_macro("P74_C4DA58") /*gvi*/
+#pragma pop_macro("P74_C4DA58")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_B5A858")
+#undef P74_B5A858
+#pragma push_macro("P74_B5A858") /*gvi*/
+#undef P74_B5A858 /*gvi*/
+p74_i5_t P74_B5A858;
+#pragma pop_macro("P74_B5A858") /*gvi*/
+#pragma pop_macro("P74_B5A858")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_B5A86C")
+#undef P74_B5A86C
+#pragma push_macro("P74_B5A86C") /*gvi*/
+#undef P74_B5A86C /*gvi*/
+p74_i5_t P74_B5A86C;
+#pragma pop_macro("P74_B5A86C") /*gvi*/
+#pragma pop_macro("P74_B5A86C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_B5A880")
+#undef P74_B5A880
+#pragma push_macro("P74_B5A880") /*gvi*/
+#undef P74_B5A880 /*gvi*/
+p74_i5_t P74_B5A880;
+#pragma pop_macro("P74_B5A880") /*gvi*/
+#pragma pop_macro("P74_B5A880")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_C4D7A0")
+#undef P74_C4D7A0
+#pragma push_macro("P74_C4D7A0") /*gvi*/
+#undef P74_C4D7A0 /*gvi*/
+p74_i5_t P74_C4D7A0;
+#pragma pop_macro("P74_C4D7A0") /*gvi*/
+#pragma pop_macro("P74_C4D7A0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_B5A89C")
+#undef P74_B5A89C
+#pragma push_macro("P74_B5A89C") /*gvi*/
+#undef P74_B5A89C /*gvi*/
+int32_t P74_B5A89C;
+#pragma pop_macro("P74_B5A89C") /*gvi*/
+#pragma pop_macro("P74_B5A89C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_B5A894")
+#undef P74_B5A894
+#pragma push_macro("P74_B5A894") /*gvi*/
+#undef P74_B5A894 /*gvi*/
+uint8_t P74_B5A894;
+#pragma pop_macro("P74_B5A894") /*gvi*/
+#pragma pop_macro("P74_B5A894")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_C4D668")
+#undef P74_C4D668
+#pragma push_macro("P74_C4D668") /*gvi*/
+#undef P74_C4D668 /*gvi*/
+int32_t P74_C4D668;
+#pragma pop_macro("P74_C4D668") /*gvi*/
+#pragma pop_macro("P74_C4D668")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_C4BDE0")
+#undef P74_C4BDE0
+#pragma push_macro("P74_C4BDE0") /*gvi*/
+#undef P74_C4BDE0 /*gvi*/
+int32_t P74_C4BDE0;
+#pragma pop_macro("P74_C4BDE0") /*gvi*/
+#pragma pop_macro("P74_C4BDE0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_C54D08")
+#undef P74_C54D08
+#pragma push_macro("P74_C54D08") /*gvi*/
+#undef P74_C54D08 /*gvi*/
+int32_t P74_C54D08;
+#pragma pop_macro("P74_C54D08") /*gvi*/
+#pragma pop_macro("P74_C54D08")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_SkidA")
+#undef P74_SkidA
+#pragma push_macro("P74_SkidA") /*gvi*/
+#undef P74_SkidA /*gvi*/
+p74_i4_t P74_SkidA;
+#pragma pop_macro("P74_SkidA") /*gvi*/
+#pragma pop_macro("P74_SkidA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_SkidB")
+#undef P74_SkidB
+#pragma push_macro("P74_SkidB") /*gvi*/
+#undef P74_SkidB /*gvi*/
+p74_i4_t P74_SkidB;
+#pragma pop_macro("P74_SkidB") /*gvi*/
+#pragma pop_macro("P74_SkidB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_SkidC")
+#undef P74_SkidC
+#pragma push_macro("P74_SkidC") /*gvi*/
+#undef P74_SkidC /*gvi*/
+p74_i4_t P74_SkidC;
+#pragma pop_macro("P74_SkidC") /*gvi*/
+#pragma pop_macro("P74_SkidC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_SkidD")
+#undef P74_SkidD
+#pragma push_macro("P74_SkidD") /*gvi*/
+#undef P74_SkidD /*gvi*/
+p74_i4_t P74_SkidD;
+#pragma pop_macro("P74_SkidD") /*gvi*/
+#pragma pop_macro("P74_SkidD")
+#endif
 GAME_VAR_DEF(uint8_t *, P74_Skid, 0x00b5c90c)
-GAME_VAR_DEF(p74_rows_t, P74_Rows, 0x012577e0)
-GAME_VAR_DEF(p74_rowtab_t, P74_RowTab, 0x00572a80)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_Rows")
+#undef P74_Rows
+#pragma push_macro("P74_Rows") /*gvi*/
+#undef P74_Rows /*gvi*/
+p74_rows_t P74_Rows;
+#pragma pop_macro("P74_Rows") /*gvi*/
+#pragma pop_macro("P74_Rows")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P74_RowTab")
+#undef P74_RowTab
+#pragma push_macro("P74_RowTab") /*gvi*/
+#undef P74_RowTab /*gvi*/
+p74_rowtab_t P74_RowTab;
+#pragma pop_macro("P74_RowTab") /*gvi*/
+#pragma pop_macro("P74_RowTab")
+#endif
 
 #ifndef RE_HOOK_BUILD
 #include "p74_data.h"

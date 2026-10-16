@@ -8,7 +8,16 @@
 #define P20_Values ((int32_t*)0x00cfe7a0)
 #else
 extern int32_t P20_Values[4096];
+#pragma push_macro("P20_Count") /*gvi*/
+#undef P20_Count /*gvi*/
 extern char* P20_Names; extern int32_t P20_Count;
+#pragma pop_macro("P20_Count") /*gvi*/
 #endif
 int32_t P20_FindNameNoCase(const char* s); /* 004ec837: индекс или -1 */
 int32_t P20_FindNameValue(const char* s);  /* 004ec8a8: значение или 0 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P20_Count
+#define P20_Count (*(int32_t *)re_gvar(0x00cf2f8cu, sizeof(int32_t), (void *)&P20_Count))
+#endif
+/* gvar-img v2.03 end */

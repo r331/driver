@@ -10,39 +10,263 @@
 #include "crt.h"
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P55_CntA, 0x00cf2f88)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_CntA")
+#undef P55_CntA
+#pragma push_macro("P55_CntA") /*gvi*/
+#undef P55_CntA /*gvi*/
+int32_t P55_CntA;
+#pragma pop_macro("P55_CntA") /*gvi*/
+#pragma pop_macro("P55_CntA")
+#endif
 GAME_VAR_DEF(p55_tabA_t, P55_TabA, 0x00ce0f40)
-GAME_VAR_DEF(int32_t, P55_CntB, 0x00d022e4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_CntB")
+#undef P55_CntB
+#pragma push_macro("P55_CntB") /*gvi*/
+#undef P55_CntB /*gvi*/
+int32_t P55_CntB;
+#pragma pop_macro("P55_CntB") /*gvi*/
+#pragma pop_macro("P55_CntB")
+#endif
 GAME_VAR_DEF(p55_tabB_t, P55_TabB, 0x00d00260)
-GAME_VAR_DEF(int32_t, P55_Flag38C, 0x00b1c38c)
-GAME_VAR_DEF(int32_t, P55_VarC0, 0x00cff9c0)
-GAME_VAR_DEF(int32_t, P55_Var20, 0x00c97a20)
-GAME_VAR_DEF(int32_t, P55_VarD2C, 0x00d0022c)
-GAME_VAR_DEF(int32_t, P55_VarD28, 0x00d00228)
-GAME_VAR_DEF(int32_t, P55_VarD24, 0x00d00224)
-GAME_VAR_DEF(int32_t, P55_VarD20, 0x00d00220)
-GAME_VAR_DEF(uint8_t, P55_VarC6, 0x00cff9c6)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_Flag38C")
+#undef P55_Flag38C
+#pragma push_macro("P55_Flag38C") /*gvi*/
+#undef P55_Flag38C /*gvi*/
+int32_t P55_Flag38C;
+#pragma pop_macro("P55_Flag38C") /*gvi*/
+#pragma pop_macro("P55_Flag38C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_VarC0")
+#undef P55_VarC0
+#pragma push_macro("P55_VarC0") /*gvi*/
+#undef P55_VarC0 /*gvi*/
+int32_t P55_VarC0;
+#pragma pop_macro("P55_VarC0") /*gvi*/
+#pragma pop_macro("P55_VarC0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_Var20")
+#undef P55_Var20
+#pragma push_macro("P55_Var20") /*gvi*/
+#undef P55_Var20 /*gvi*/
+int32_t P55_Var20;
+#pragma pop_macro("P55_Var20") /*gvi*/
+#pragma pop_macro("P55_Var20")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_VarD2C")
+#undef P55_VarD2C
+#pragma push_macro("P55_VarD2C") /*gvi*/
+#undef P55_VarD2C /*gvi*/
+int32_t P55_VarD2C;
+#pragma pop_macro("P55_VarD2C") /*gvi*/
+#pragma pop_macro("P55_VarD2C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_VarD28")
+#undef P55_VarD28
+#pragma push_macro("P55_VarD28") /*gvi*/
+#undef P55_VarD28 /*gvi*/
+int32_t P55_VarD28;
+#pragma pop_macro("P55_VarD28") /*gvi*/
+#pragma pop_macro("P55_VarD28")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_VarD24")
+#undef P55_VarD24
+#pragma push_macro("P55_VarD24") /*gvi*/
+#undef P55_VarD24 /*gvi*/
+int32_t P55_VarD24;
+#pragma pop_macro("P55_VarD24") /*gvi*/
+#pragma pop_macro("P55_VarD24")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_VarD20")
+#undef P55_VarD20
+#pragma push_macro("P55_VarD20") /*gvi*/
+#undef P55_VarD20 /*gvi*/
+int32_t P55_VarD20;
+#pragma pop_macro("P55_VarD20") /*gvi*/
+#pragma pop_macro("P55_VarD20")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_VarC6")
+#undef P55_VarC6
+#pragma push_macro("P55_VarC6") /*gvi*/
+#undef P55_VarC6 /*gvi*/
+uint8_t P55_VarC6;
+#pragma pop_macro("P55_VarC6") /*gvi*/
+#pragma pop_macro("P55_VarC6")
+#endif
 GAME_VAR_DEF(const char *, P55_DefName, 0x00c55854)
-GAME_VAR_DEF(p55_flags8_t, P55_FlagsC, 0x00b5a428)
-GAME_VAR_DEF(int32_t, P55_PopCnt, 0x00b2c3b0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_FlagsC")
+#undef P55_FlagsC
+#pragma push_macro("P55_FlagsC") /*gvi*/
+#undef P55_FlagsC /*gvi*/
+p55_flags8_t P55_FlagsC;
+#pragma pop_macro("P55_FlagsC") /*gvi*/
+#pragma pop_macro("P55_FlagsC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_PopCnt")
+#undef P55_PopCnt
+#pragma push_macro("P55_PopCnt") /*gvi*/
+#undef P55_PopCnt /*gvi*/
+int32_t P55_PopCnt;
+#pragma pop_macro("P55_PopCnt") /*gvi*/
+#pragma pop_macro("P55_PopCnt")
+#endif
 GAME_VAR_DEF(p55_pop_t, P55_PopTab, 0x00d10e80)
-GAME_VAR_DEF(int32_t, P55_PopSkip, 0x00b87ecc)
-GAME_VAR_DEF(int32_t, P55_PopB2AC, 0x00b2c3ac)
-GAME_VAR_DEF(p55_frustum_t, P55_Frustum, 0x00cb8f20)
-GAME_VAR_DEF(int32_t, P55_A4219C, 0x00a4219c)
-GAME_VAR_DEF(int32_t, P55_A421A0, 0x00a421a0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_PopSkip")
+#undef P55_PopSkip
+#pragma push_macro("P55_PopSkip") /*gvi*/
+#undef P55_PopSkip /*gvi*/
+int32_t P55_PopSkip;
+#pragma pop_macro("P55_PopSkip") /*gvi*/
+#pragma pop_macro("P55_PopSkip")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_PopB2AC")
+#undef P55_PopB2AC
+#pragma push_macro("P55_PopB2AC") /*gvi*/
+#undef P55_PopB2AC /*gvi*/
+int32_t P55_PopB2AC;
+#pragma pop_macro("P55_PopB2AC") /*gvi*/
+#pragma pop_macro("P55_PopB2AC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_Frustum")
+#undef P55_Frustum
+#pragma push_macro("P55_Frustum") /*gvi*/
+#undef P55_Frustum /*gvi*/
+p55_frustum_t P55_Frustum;
+#pragma pop_macro("P55_Frustum") /*gvi*/
+#pragma pop_macro("P55_Frustum")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_A4219C")
+#undef P55_A4219C
+#pragma push_macro("P55_A4219C") /*gvi*/
+#undef P55_A4219C /*gvi*/
+int32_t P55_A4219C;
+#pragma pop_macro("P55_A4219C") /*gvi*/
+#pragma pop_macro("P55_A4219C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_A421A0")
+#undef P55_A421A0
+#pragma push_macro("P55_A421A0") /*gvi*/
+#undef P55_A421A0 /*gvi*/
+int32_t P55_A421A0;
+#pragma pop_macro("P55_A421A0") /*gvi*/
+#pragma pop_macro("P55_A421A0")
+#endif
 GAME_VAR_DEF(uint8_t *, P55_RecBase, 0x00b5a8bc)
-GAME_VAR_DEF(int32_t, P55_RecCnt, 0x00b5a8c0)
-GAME_VAR_DEF(int32_t, P55_V57B6FC, 0x0057b6fc)
-GAME_VAR_DEF(int32_t, P55_V1285428, 0x01285428)
-GAME_VAR_DEF(int32_t, P55_V1285424, 0x01285424)
-GAME_VAR_DEF(int32_t, P55_BDFA18, 0x00bdfa18)
-GAME_VAR_DEF(p55_glide_t, P55_GlideInfo, 0x00bdfa80)
-GAME_VAR_DEF(int32_t, P55_B87EB8, 0x00b87eb8)
-GAME_VAR_DEF(int32_t, P55_Paper0, 0x00d03900)
-GAME_VAR_DEF(int32_t, P55_Paper1, 0x00d0448c)
-GAME_VAR_DEF(int32_t, P55_Paper2, 0x00d038fc)
-GAME_VAR_DEF(int32_t, P55_Lang, 0x00c557fc)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_RecCnt")
+#undef P55_RecCnt
+#pragma push_macro("P55_RecCnt") /*gvi*/
+#undef P55_RecCnt /*gvi*/
+int32_t P55_RecCnt;
+#pragma pop_macro("P55_RecCnt") /*gvi*/
+#pragma pop_macro("P55_RecCnt")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_V57B6FC")
+#undef P55_V57B6FC
+#pragma push_macro("P55_V57B6FC") /*gvi*/
+#undef P55_V57B6FC /*gvi*/
+int32_t P55_V57B6FC;
+#pragma pop_macro("P55_V57B6FC") /*gvi*/
+#pragma pop_macro("P55_V57B6FC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_V1285428")
+#undef P55_V1285428
+#pragma push_macro("P55_V1285428") /*gvi*/
+#undef P55_V1285428 /*gvi*/
+int32_t P55_V1285428;
+#pragma pop_macro("P55_V1285428") /*gvi*/
+#pragma pop_macro("P55_V1285428")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_V1285424")
+#undef P55_V1285424
+#pragma push_macro("P55_V1285424") /*gvi*/
+#undef P55_V1285424 /*gvi*/
+int32_t P55_V1285424;
+#pragma pop_macro("P55_V1285424") /*gvi*/
+#pragma pop_macro("P55_V1285424")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_BDFA18")
+#undef P55_BDFA18
+#pragma push_macro("P55_BDFA18") /*gvi*/
+#undef P55_BDFA18 /*gvi*/
+int32_t P55_BDFA18;
+#pragma pop_macro("P55_BDFA18") /*gvi*/
+#pragma pop_macro("P55_BDFA18")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_GlideInfo")
+#undef P55_GlideInfo
+#pragma push_macro("P55_GlideInfo") /*gvi*/
+#undef P55_GlideInfo /*gvi*/
+p55_glide_t P55_GlideInfo;
+#pragma pop_macro("P55_GlideInfo") /*gvi*/
+#pragma pop_macro("P55_GlideInfo")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_B87EB8")
+#undef P55_B87EB8
+#pragma push_macro("P55_B87EB8") /*gvi*/
+#undef P55_B87EB8 /*gvi*/
+int32_t P55_B87EB8;
+#pragma pop_macro("P55_B87EB8") /*gvi*/
+#pragma pop_macro("P55_B87EB8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_Paper0")
+#undef P55_Paper0
+#pragma push_macro("P55_Paper0") /*gvi*/
+#undef P55_Paper0 /*gvi*/
+int32_t P55_Paper0;
+#pragma pop_macro("P55_Paper0") /*gvi*/
+#pragma pop_macro("P55_Paper0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_Paper1")
+#undef P55_Paper1
+#pragma push_macro("P55_Paper1") /*gvi*/
+#undef P55_Paper1 /*gvi*/
+int32_t P55_Paper1;
+#pragma pop_macro("P55_Paper1") /*gvi*/
+#pragma pop_macro("P55_Paper1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_Paper2")
+#undef P55_Paper2
+#pragma push_macro("P55_Paper2") /*gvi*/
+#undef P55_Paper2 /*gvi*/
+int32_t P55_Paper2;
+#pragma pop_macro("P55_Paper2") /*gvi*/
+#pragma pop_macro("P55_Paper2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P55_Lang")
+#undef P55_Lang
+#pragma push_macro("P55_Lang") /*gvi*/
+#undef P55_Lang /*gvi*/
+int32_t P55_Lang;
+#pragma pop_macro("P55_Lang") /*gvi*/
+#pragma pop_macro("P55_Lang")
+#endif
 
 #define P55_FILE_C "D:\\Driver\\Game\\file.c"
 

@@ -6,7 +6,15 @@
 #include "ported27.h"
 #include "uihandlers2.h"
 #include "unported.h"
-GAME_VAR_DEF(int32_t, P30_ScreensaverSaved, 0x00b87e0c)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P30_ScreensaverSaved")
+#undef P30_ScreensaverSaved
+#pragma push_macro("P30_ScreensaverSaved") /*gvi*/
+#undef P30_ScreensaverSaved /*gvi*/
+int32_t P30_ScreensaverSaved;
+#pragma pop_macro("P30_ScreensaverSaved") /*gvi*/
+#pragma pop_macro("P30_ScreensaverSaved")
+#endif
 #define MAIN_HWND ((void *)(intptr_t)G6_00BDF9C0)
 
 void P30_FatalError(const char *msg) {

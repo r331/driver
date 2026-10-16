@@ -2,33 +2,241 @@
 #include "ported44.h"
 #include <math.h>
 #include <string.h>
-GAME_VAR_DEF(p44_atan_t, P44_AtanTab, 0x0057670c)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_AtanTab")
+#undef P44_AtanTab
+#pragma push_macro("P44_AtanTab") /*gvi*/
+#undef P44_AtanTab /*gvi*/
+p44_atan_t P44_AtanTab;
+#pragma pop_macro("P44_AtanTab") /*gvi*/
+#pragma pop_macro("P44_AtanTab")
+#endif
 GAME_VAR_DEF(float*, P44_MatPtr, 0x00bdc28c)
-GAME_VAR_DEF(float, P44_BiasX, 0x00ba5280)
-GAME_VAR_DEF(float, P44_BiasY, 0x00ba52d4)
-GAME_VAR_DEF(float, P44_BiasZ, 0x00ba5380)
-GAME_VAR_DEF(uint32_t, P44_XformTag, 0x01270c20)
-GAME_VAR_DEF(float, P44_CamX, 0x00b1c270)
-GAME_VAR_DEF(float, P44_CamY, 0x00b1c274)
-GAME_VAR_DEF(float, P44_CamZ, 0x00b1c278)
-GAME_VAR_DEF(p44_m9_t, P44_ViewMat, 0x011f4080)
-GAME_VAR_DEF(p44_m9_t, P44_ViewMatT, 0x011effa0)
-GAME_VAR_DEF(p44_rst_t, P44_Rst_Tab, 0x0057668c)
-GAME_VAR_DEF(int32_t, P44_Rst_B93CEC, 0x00b93cec)
-GAME_VAR_DEF(int32_t, P44_Rst_B93DFC, 0x00b93dfc)
-GAME_VAR_DEF(int32_t, P44_Rst_B93E00, 0x00b93e00)
-GAME_VAR_DEF(int32_t, P44_Rst_B93CD0, 0x00b93cd0)
-GAME_VAR_DEF(int32_t, P44_Rst_B93CD8, 0x00b93cd8)
-GAME_VAR_DEF(int32_t, P44_Rst_B93CE8, 0x00b93ce8)
-GAME_VAR_DEF(int32_t, P44_Rst_B93CE4, 0x00b93ce4)
-GAME_VAR_DEF(int32_t, P44_Rst_B93CCC, 0x00b93ccc)
-GAME_VAR_DEF(int32_t, P44_Rst_B93DF4, 0x00b93df4)
-GAME_VAR_DEF(int32_t, P44_Rst_B93CF0, 0x00b93cf0)
-GAME_VAR_DEF(int32_t, P44_Rst_B93CD4, 0x00b93cd4)
-GAME_VAR_DEF(int32_t, P44_Rst_B93CDC, 0x00b93cdc)
-GAME_VAR_DEF(int32_t, P44_Rst_B31EA0, 0x00b31ea0)
-GAME_VAR_DEF(int32_t, P44_Rst_B93DF8, 0x00b93df8)
-GAME_VAR_DEF(int32_t, P44_Rst_B93CE0, 0x00b93ce0)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_BiasX")
+#undef P44_BiasX
+#pragma push_macro("P44_BiasX") /*gvi*/
+#undef P44_BiasX /*gvi*/
+float P44_BiasX;
+#pragma pop_macro("P44_BiasX") /*gvi*/
+#pragma pop_macro("P44_BiasX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_BiasY")
+#undef P44_BiasY
+#pragma push_macro("P44_BiasY") /*gvi*/
+#undef P44_BiasY /*gvi*/
+float P44_BiasY;
+#pragma pop_macro("P44_BiasY") /*gvi*/
+#pragma pop_macro("P44_BiasY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_BiasZ")
+#undef P44_BiasZ
+#pragma push_macro("P44_BiasZ") /*gvi*/
+#undef P44_BiasZ /*gvi*/
+float P44_BiasZ;
+#pragma pop_macro("P44_BiasZ") /*gvi*/
+#pragma pop_macro("P44_BiasZ")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_XformTag")
+#undef P44_XformTag
+#pragma push_macro("P44_XformTag") /*gvi*/
+#undef P44_XformTag /*gvi*/
+uint32_t P44_XformTag;
+#pragma pop_macro("P44_XformTag") /*gvi*/
+#pragma pop_macro("P44_XformTag")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_CamX")
+#undef P44_CamX
+#pragma push_macro("P44_CamX") /*gvi*/
+#undef P44_CamX /*gvi*/
+float P44_CamX;
+#pragma pop_macro("P44_CamX") /*gvi*/
+#pragma pop_macro("P44_CamX")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_CamY")
+#undef P44_CamY
+#pragma push_macro("P44_CamY") /*gvi*/
+#undef P44_CamY /*gvi*/
+float P44_CamY;
+#pragma pop_macro("P44_CamY") /*gvi*/
+#pragma pop_macro("P44_CamY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_CamZ")
+#undef P44_CamZ
+#pragma push_macro("P44_CamZ") /*gvi*/
+#undef P44_CamZ /*gvi*/
+float P44_CamZ;
+#pragma pop_macro("P44_CamZ") /*gvi*/
+#pragma pop_macro("P44_CamZ")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_ViewMat")
+#undef P44_ViewMat
+#pragma push_macro("P44_ViewMat") /*gvi*/
+#undef P44_ViewMat /*gvi*/
+p44_m9_t P44_ViewMat;
+#pragma pop_macro("P44_ViewMat") /*gvi*/
+#pragma pop_macro("P44_ViewMat")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_ViewMatT")
+#undef P44_ViewMatT
+#pragma push_macro("P44_ViewMatT") /*gvi*/
+#undef P44_ViewMatT /*gvi*/
+p44_m9_t P44_ViewMatT;
+#pragma pop_macro("P44_ViewMatT") /*gvi*/
+#pragma pop_macro("P44_ViewMatT")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_Tab")
+#undef P44_Rst_Tab
+#pragma push_macro("P44_Rst_Tab") /*gvi*/
+#undef P44_Rst_Tab /*gvi*/
+p44_rst_t P44_Rst_Tab;
+#pragma pop_macro("P44_Rst_Tab") /*gvi*/
+#pragma pop_macro("P44_Rst_Tab")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93CEC")
+#undef P44_Rst_B93CEC
+#pragma push_macro("P44_Rst_B93CEC") /*gvi*/
+#undef P44_Rst_B93CEC /*gvi*/
+int32_t P44_Rst_B93CEC;
+#pragma pop_macro("P44_Rst_B93CEC") /*gvi*/
+#pragma pop_macro("P44_Rst_B93CEC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93DFC")
+#undef P44_Rst_B93DFC
+#pragma push_macro("P44_Rst_B93DFC") /*gvi*/
+#undef P44_Rst_B93DFC /*gvi*/
+int32_t P44_Rst_B93DFC;
+#pragma pop_macro("P44_Rst_B93DFC") /*gvi*/
+#pragma pop_macro("P44_Rst_B93DFC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93E00")
+#undef P44_Rst_B93E00
+#pragma push_macro("P44_Rst_B93E00") /*gvi*/
+#undef P44_Rst_B93E00 /*gvi*/
+int32_t P44_Rst_B93E00;
+#pragma pop_macro("P44_Rst_B93E00") /*gvi*/
+#pragma pop_macro("P44_Rst_B93E00")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93CD0")
+#undef P44_Rst_B93CD0
+#pragma push_macro("P44_Rst_B93CD0") /*gvi*/
+#undef P44_Rst_B93CD0 /*gvi*/
+int32_t P44_Rst_B93CD0;
+#pragma pop_macro("P44_Rst_B93CD0") /*gvi*/
+#pragma pop_macro("P44_Rst_B93CD0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93CD8")
+#undef P44_Rst_B93CD8
+#pragma push_macro("P44_Rst_B93CD8") /*gvi*/
+#undef P44_Rst_B93CD8 /*gvi*/
+int32_t P44_Rst_B93CD8;
+#pragma pop_macro("P44_Rst_B93CD8") /*gvi*/
+#pragma pop_macro("P44_Rst_B93CD8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93CE8")
+#undef P44_Rst_B93CE8
+#pragma push_macro("P44_Rst_B93CE8") /*gvi*/
+#undef P44_Rst_B93CE8 /*gvi*/
+int32_t P44_Rst_B93CE8;
+#pragma pop_macro("P44_Rst_B93CE8") /*gvi*/
+#pragma pop_macro("P44_Rst_B93CE8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93CE4")
+#undef P44_Rst_B93CE4
+#pragma push_macro("P44_Rst_B93CE4") /*gvi*/
+#undef P44_Rst_B93CE4 /*gvi*/
+int32_t P44_Rst_B93CE4;
+#pragma pop_macro("P44_Rst_B93CE4") /*gvi*/
+#pragma pop_macro("P44_Rst_B93CE4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93CCC")
+#undef P44_Rst_B93CCC
+#pragma push_macro("P44_Rst_B93CCC") /*gvi*/
+#undef P44_Rst_B93CCC /*gvi*/
+int32_t P44_Rst_B93CCC;
+#pragma pop_macro("P44_Rst_B93CCC") /*gvi*/
+#pragma pop_macro("P44_Rst_B93CCC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93DF4")
+#undef P44_Rst_B93DF4
+#pragma push_macro("P44_Rst_B93DF4") /*gvi*/
+#undef P44_Rst_B93DF4 /*gvi*/
+int32_t P44_Rst_B93DF4;
+#pragma pop_macro("P44_Rst_B93DF4") /*gvi*/
+#pragma pop_macro("P44_Rst_B93DF4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93CF0")
+#undef P44_Rst_B93CF0
+#pragma push_macro("P44_Rst_B93CF0") /*gvi*/
+#undef P44_Rst_B93CF0 /*gvi*/
+int32_t P44_Rst_B93CF0;
+#pragma pop_macro("P44_Rst_B93CF0") /*gvi*/
+#pragma pop_macro("P44_Rst_B93CF0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93CD4")
+#undef P44_Rst_B93CD4
+#pragma push_macro("P44_Rst_B93CD4") /*gvi*/
+#undef P44_Rst_B93CD4 /*gvi*/
+int32_t P44_Rst_B93CD4;
+#pragma pop_macro("P44_Rst_B93CD4") /*gvi*/
+#pragma pop_macro("P44_Rst_B93CD4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93CDC")
+#undef P44_Rst_B93CDC
+#pragma push_macro("P44_Rst_B93CDC") /*gvi*/
+#undef P44_Rst_B93CDC /*gvi*/
+int32_t P44_Rst_B93CDC;
+#pragma pop_macro("P44_Rst_B93CDC") /*gvi*/
+#pragma pop_macro("P44_Rst_B93CDC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B31EA0")
+#undef P44_Rst_B31EA0
+#pragma push_macro("P44_Rst_B31EA0") /*gvi*/
+#undef P44_Rst_B31EA0 /*gvi*/
+int32_t P44_Rst_B31EA0;
+#pragma pop_macro("P44_Rst_B31EA0") /*gvi*/
+#pragma pop_macro("P44_Rst_B31EA0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93DF8")
+#undef P44_Rst_B93DF8
+#pragma push_macro("P44_Rst_B93DF8") /*gvi*/
+#undef P44_Rst_B93DF8 /*gvi*/
+int32_t P44_Rst_B93DF8;
+#pragma pop_macro("P44_Rst_B93DF8") /*gvi*/
+#pragma pop_macro("P44_Rst_B93DF8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P44_Rst_B93CE0")
+#undef P44_Rst_B93CE0
+#pragma push_macro("P44_Rst_B93CE0") /*gvi*/
+#undef P44_Rst_B93CE0 /*gvi*/
+int32_t P44_Rst_B93CE0;
+#pragma pop_macro("P44_Rst_B93CE0") /*gvi*/
+#pragma pop_macro("P44_Rst_B93CE0")
+#endif
 
 void P44_InitTables(void) {
 #ifndef RE_HOOK_BUILD

@@ -2,17 +2,105 @@
 #include "ported45.h"
 #include "ported58.h"
 #include "reptr.h"
-GAME_VAR_DEF(int32_t, P45_Mode, 0x00b87e38)
-GAME_VAR_DEF(uint32_t, P45_PtrA, 0x005f7e40)
-GAME_VAR_DEF(int32_t, P45_Busy, 0x005f7e44)
-GAME_VAR_DEF(int32_t, P45_Step, 0x005f7e48)
-GAME_VAR_DEF(int32_t, P45_Pick, 0x005fed9c)
-GAME_VAR_DEF(uint32_t, P45_Color, 0x0054e4d8)
-GAME_VAR_DEF(uint32_t, P45_Col0, 0x00c55a6c)
-GAME_VAR_DEF(uint32_t, P45_Col1, 0x00c55a5c)
-GAME_VAR_DEF(uint32_t, P45_Col2, 0x00c55a60)
-GAME_VAR_DEF(uint32_t, P45_Col3, 0x00c55a64)
-GAME_VAR_DEF(uint32_t, P45_Col4, 0x00c55a68)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P45_Mode")
+#undef P45_Mode
+#pragma push_macro("P45_Mode") /*gvi*/
+#undef P45_Mode /*gvi*/
+int32_t P45_Mode;
+#pragma pop_macro("P45_Mode") /*gvi*/
+#pragma pop_macro("P45_Mode")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P45_PtrA")
+#undef P45_PtrA
+#pragma push_macro("P45_PtrA") /*gvi*/
+#undef P45_PtrA /*gvi*/
+uint32_t P45_PtrA;
+#pragma pop_macro("P45_PtrA") /*gvi*/
+#pragma pop_macro("P45_PtrA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P45_Busy")
+#undef P45_Busy
+#pragma push_macro("P45_Busy") /*gvi*/
+#undef P45_Busy /*gvi*/
+int32_t P45_Busy;
+#pragma pop_macro("P45_Busy") /*gvi*/
+#pragma pop_macro("P45_Busy")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P45_Step")
+#undef P45_Step
+#pragma push_macro("P45_Step") /*gvi*/
+#undef P45_Step /*gvi*/
+int32_t P45_Step;
+#pragma pop_macro("P45_Step") /*gvi*/
+#pragma pop_macro("P45_Step")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P45_Pick")
+#undef P45_Pick
+#pragma push_macro("P45_Pick") /*gvi*/
+#undef P45_Pick /*gvi*/
+int32_t P45_Pick;
+#pragma pop_macro("P45_Pick") /*gvi*/
+#pragma pop_macro("P45_Pick")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P45_Color")
+#undef P45_Color
+#pragma push_macro("P45_Color") /*gvi*/
+#undef P45_Color /*gvi*/
+uint32_t P45_Color;
+#pragma pop_macro("P45_Color") /*gvi*/
+#pragma pop_macro("P45_Color")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P45_Col0")
+#undef P45_Col0
+#pragma push_macro("P45_Col0") /*gvi*/
+#undef P45_Col0 /*gvi*/
+uint32_t P45_Col0;
+#pragma pop_macro("P45_Col0") /*gvi*/
+#pragma pop_macro("P45_Col0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P45_Col1")
+#undef P45_Col1
+#pragma push_macro("P45_Col1") /*gvi*/
+#undef P45_Col1 /*gvi*/
+uint32_t P45_Col1;
+#pragma pop_macro("P45_Col1") /*gvi*/
+#pragma pop_macro("P45_Col1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P45_Col2")
+#undef P45_Col2
+#pragma push_macro("P45_Col2") /*gvi*/
+#undef P45_Col2 /*gvi*/
+uint32_t P45_Col2;
+#pragma pop_macro("P45_Col2") /*gvi*/
+#pragma pop_macro("P45_Col2")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P45_Col3")
+#undef P45_Col3
+#pragma push_macro("P45_Col3") /*gvi*/
+#undef P45_Col3 /*gvi*/
+uint32_t P45_Col3;
+#pragma pop_macro("P45_Col3") /*gvi*/
+#pragma pop_macro("P45_Col3")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P45_Col4")
+#undef P45_Col4
+#pragma push_macro("P45_Col4") /*gvi*/
+#undef P45_Col4 /*gvi*/
+uint32_t P45_Col4;
+#pragma pop_macro("P45_Col4") /*gvi*/
+#pragma pop_macro("P45_Col4")
+#endif
 
 int32_t P45_ModeA(void) {
   switch (P45_Mode) {

@@ -1,20 +1,132 @@
 #include "ported75.h"
 #include <string.h>
 
-GAME_VAR_DEF(int32_t, P75_E4, 0x011426e4)
-GAME_VAR_DEF(int32_t, P75_E8, 0x011426e8)
-GAME_VAR_DEF(int32_t, P75_12BC, 0x005512bc)
-GAME_VAR_DEF(int32_t, P75_4288, 0x01144288)
-GAME_VAR_DEF(int32_t, P75_43D0, 0x011443d0)
-GAME_VAR_DEF(int32_t, P75_43CC, 0x011443cc)
-GAME_VAR_DEF(p75_spawn_t, P75_Spawn, 0x01139a60)
-GAME_VAR_DEF(int32_t, P75_B20350, 0x00b20350)
-GAME_VAR_DEF(int32_t, P75_B31EDC, 0x00b31edc)
-GAME_VAR_DEF(int32_t, P75_D022E0, 0x00d022e0)
-GAME_VAR_DEF(int32_t, P75_B31ED0, 0x00b31ed0)
-GAME_VAR_DEF(uint8_t, P75_CF1F60, 0x00cf1f60)
-GAME_VAR_DEF(uint32_t, P75_Ptr562D7C, 0x00562d7c)
-GAME_VAR_DEF(p75_page_t, P75_Page, 0x005d7e40)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_E4")
+#undef P75_E4
+#pragma push_macro("P75_E4") /*gvi*/
+#undef P75_E4 /*gvi*/
+int32_t P75_E4;
+#pragma pop_macro("P75_E4") /*gvi*/
+#pragma pop_macro("P75_E4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_E8")
+#undef P75_E8
+#pragma push_macro("P75_E8") /*gvi*/
+#undef P75_E8 /*gvi*/
+int32_t P75_E8;
+#pragma pop_macro("P75_E8") /*gvi*/
+#pragma pop_macro("P75_E8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_12BC")
+#undef P75_12BC
+#pragma push_macro("P75_12BC") /*gvi*/
+#undef P75_12BC /*gvi*/
+int32_t P75_12BC;
+#pragma pop_macro("P75_12BC") /*gvi*/
+#pragma pop_macro("P75_12BC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_4288")
+#undef P75_4288
+#pragma push_macro("P75_4288") /*gvi*/
+#undef P75_4288 /*gvi*/
+int32_t P75_4288;
+#pragma pop_macro("P75_4288") /*gvi*/
+#pragma pop_macro("P75_4288")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_43D0")
+#undef P75_43D0
+#pragma push_macro("P75_43D0") /*gvi*/
+#undef P75_43D0 /*gvi*/
+int32_t P75_43D0;
+#pragma pop_macro("P75_43D0") /*gvi*/
+#pragma pop_macro("P75_43D0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_43CC")
+#undef P75_43CC
+#pragma push_macro("P75_43CC") /*gvi*/
+#undef P75_43CC /*gvi*/
+int32_t P75_43CC;
+#pragma pop_macro("P75_43CC") /*gvi*/
+#pragma pop_macro("P75_43CC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_Spawn")
+#undef P75_Spawn
+#pragma push_macro("P75_Spawn") /*gvi*/
+#undef P75_Spawn /*gvi*/
+p75_spawn_t P75_Spawn;
+#pragma pop_macro("P75_Spawn") /*gvi*/
+#pragma pop_macro("P75_Spawn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_B20350")
+#undef P75_B20350
+#pragma push_macro("P75_B20350") /*gvi*/
+#undef P75_B20350 /*gvi*/
+int32_t P75_B20350;
+#pragma pop_macro("P75_B20350") /*gvi*/
+#pragma pop_macro("P75_B20350")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_B31EDC")
+#undef P75_B31EDC
+#pragma push_macro("P75_B31EDC") /*gvi*/
+#undef P75_B31EDC /*gvi*/
+int32_t P75_B31EDC;
+#pragma pop_macro("P75_B31EDC") /*gvi*/
+#pragma pop_macro("P75_B31EDC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_D022E0")
+#undef P75_D022E0
+#pragma push_macro("P75_D022E0") /*gvi*/
+#undef P75_D022E0 /*gvi*/
+int32_t P75_D022E0;
+#pragma pop_macro("P75_D022E0") /*gvi*/
+#pragma pop_macro("P75_D022E0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_B31ED0")
+#undef P75_B31ED0
+#pragma push_macro("P75_B31ED0") /*gvi*/
+#undef P75_B31ED0 /*gvi*/
+int32_t P75_B31ED0;
+#pragma pop_macro("P75_B31ED0") /*gvi*/
+#pragma pop_macro("P75_B31ED0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_CF1F60")
+#undef P75_CF1F60
+#pragma push_macro("P75_CF1F60") /*gvi*/
+#undef P75_CF1F60 /*gvi*/
+uint8_t P75_CF1F60;
+#pragma pop_macro("P75_CF1F60") /*gvi*/
+#pragma pop_macro("P75_CF1F60")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_Ptr562D7C")
+#undef P75_Ptr562D7C
+#pragma push_macro("P75_Ptr562D7C") /*gvi*/
+#undef P75_Ptr562D7C /*gvi*/
+uint32_t P75_Ptr562D7C;
+#pragma pop_macro("P75_Ptr562D7C") /*gvi*/
+#pragma pop_macro("P75_Ptr562D7C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P75_Page")
+#undef P75_Page
+#pragma push_macro("P75_Page") /*gvi*/
+#undef P75_Page /*gvi*/
+p75_page_t P75_Page;
+#pragma pop_macro("P75_Page") /*gvi*/
+#pragma pop_macro("P75_Page")
+#endif
 
 static int32_t p75_i32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
 

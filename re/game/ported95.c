@@ -43,66 +43,448 @@
 #include <math.h>
 #include <string.h>
 
-GAME_VAR_DEF(p95_objsA_t, P95_ObjA, 0x010f5160)
-GAME_VAR_DEF(p95_objsB_t, P95_ObjB, 0x0110e500)
-GAME_VAR_DEF(p95_objsA_t, P95_ObjC, 0x011237c0)
-GAME_VAR_DEF(int32_t, P95_ChanState, 0x00d11978)
-GAME_VAR_DEF(int32_t, P95_D1197C, 0x00d1197c)
-GAME_VAR_DEF(int32_t, P95_ChanLast, 0x00d11a34)
-GAME_VAR_DEF(int32_t, P95_D11A38, 0x00d11a38)
-GAME_VAR_DEF(int32_t, P95_SndRate, 0x00d11a40)
-GAME_VAR_DEF(int32_t, P95_D11A4C, 0x00d11a4c)
-GAME_VAR_DEF(int32_t, P95_D11A54, 0x00d11a54)
-GAME_VAR_DEF(int32_t, P95_112D9D4, 0x0112d9d4)
-GAME_VAR_DEF(int32_t, P95_SndReady, 0x0112d9e4)
-GAME_VAR_DEF(int32_t, P95_AmbN, 0x0112b270)
-GAME_VAR_DEF(uint8_t, P95_B87E14, 0x00b87e14)
-GAME_VAR_DEF(int32_t, P95_B87E34, 0x00b87e34)
-GAME_VAR_DEF(int32_t, P95_B87E3C, 0x00b87e3c)
-GAME_VAR_DEF(int32_t, P95_B87E40, 0x00b87e40)
-GAME_VAR_DEF(int32_t, P95_B87EA4, 0x00b87ea4)
-GAME_VAR_DEF(int32_t, P95_B87EB4, 0x00b87eb4)
-GAME_VAR_DEF(int32_t, P95_B87EBC, 0x00b87ebc)
-GAME_VAR_DEF(int32_t, P95_B87EC0, 0x00b87ec0)
-GAME_VAR_DEF(int32_t, P95_B87EC4, 0x00b87ec4)
-GAME_VAR_DEF(int32_t, P95_B87ED0, 0x00b87ed0)
-GAME_VAR_DEF(int32_t, P95_B87ED8, 0x00b87ed8)
-GAME_VAR_DEF(int32_t, P95_B87EDC, 0x00b87edc)
-GAME_VAR_DEF(int32_t, P95_B87EE0, 0x00b87ee0)
-GAME_VAR_DEF(int32_t, P95_B87F08, 0x00b87f08)
-GAME_VAR_DEF(int32_t, P95_BDF9D0, 0x00bdf9d0)
-GAME_VAR_DEF(int32_t, P95_BDF9D4, 0x00bdf9d4)
-GAME_VAR_DEF(int32_t, P95_BDFA0C, 0x00bdfa0c)
-GAME_VAR_DEF(int32_t, P95_BDFA14, 0x00bdfa14)
-GAME_VAR_DEF(int32_t, P95_BDFA5C, 0x00bdfa5c)
-GAME_VAR_DEF(int32_t, P95_BDFA60, 0x00bdfa60)
-GAME_VAR_DEF(int32_t, P95_C818B8, 0x00c818b8)
-GAME_VAR_DEF(int32_t, P95_D11920, 0x00d11920)
-GAME_VAR_DEF(int32_t, P95_575F1C, 0x00575f1c)
-GAME_VAR_DEF(int32_t, P95_Deb0, 0x0107c3c8)
-GAME_VAR_DEF(int32_t, P95_Deb1, 0x010de050)
-GAME_VAR_DEF(p95_u4_t, P95_DebRnd, 0x010de060)
-GAME_VAR_DEF(p95_u16_t, P95_DebPos, 0x010de230)
-GAME_VAR_DEF(uint8_t, P95_PoolPage, 0x01123282)
-GAME_VAR_DEF(p95_u12_t, P95_PoolQuad, 0x01123288)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_ObjA")
+#undef P95_ObjA
+#pragma push_macro("P95_ObjA") /*gvi*/
+#undef P95_ObjA /*gvi*/
+p95_objsA_t P95_ObjA;
+#pragma pop_macro("P95_ObjA") /*gvi*/
+#pragma pop_macro("P95_ObjA")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_ObjB")
+#undef P95_ObjB
+#pragma push_macro("P95_ObjB") /*gvi*/
+#undef P95_ObjB /*gvi*/
+p95_objsB_t P95_ObjB;
+#pragma pop_macro("P95_ObjB") /*gvi*/
+#pragma pop_macro("P95_ObjB")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_ObjC")
+#undef P95_ObjC
+#pragma push_macro("P95_ObjC") /*gvi*/
+#undef P95_ObjC /*gvi*/
+p95_objsA_t P95_ObjC;
+#pragma pop_macro("P95_ObjC") /*gvi*/
+#pragma pop_macro("P95_ObjC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_ChanState")
+#undef P95_ChanState
+#pragma push_macro("P95_ChanState") /*gvi*/
+#undef P95_ChanState /*gvi*/
+int32_t P95_ChanState;
+#pragma pop_macro("P95_ChanState") /*gvi*/
+#pragma pop_macro("P95_ChanState")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_D1197C")
+#undef P95_D1197C
+#pragma push_macro("P95_D1197C") /*gvi*/
+#undef P95_D1197C /*gvi*/
+int32_t P95_D1197C;
+#pragma pop_macro("P95_D1197C") /*gvi*/
+#pragma pop_macro("P95_D1197C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_ChanLast")
+#undef P95_ChanLast
+#pragma push_macro("P95_ChanLast") /*gvi*/
+#undef P95_ChanLast /*gvi*/
+int32_t P95_ChanLast;
+#pragma pop_macro("P95_ChanLast") /*gvi*/
+#pragma pop_macro("P95_ChanLast")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_D11A38")
+#undef P95_D11A38
+#pragma push_macro("P95_D11A38") /*gvi*/
+#undef P95_D11A38 /*gvi*/
+int32_t P95_D11A38;
+#pragma pop_macro("P95_D11A38") /*gvi*/
+#pragma pop_macro("P95_D11A38")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_SndRate")
+#undef P95_SndRate
+#pragma push_macro("P95_SndRate") /*gvi*/
+#undef P95_SndRate /*gvi*/
+int32_t P95_SndRate;
+#pragma pop_macro("P95_SndRate") /*gvi*/
+#pragma pop_macro("P95_SndRate")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_D11A4C")
+#undef P95_D11A4C
+#pragma push_macro("P95_D11A4C") /*gvi*/
+#undef P95_D11A4C /*gvi*/
+int32_t P95_D11A4C;
+#pragma pop_macro("P95_D11A4C") /*gvi*/
+#pragma pop_macro("P95_D11A4C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_D11A54")
+#undef P95_D11A54
+#pragma push_macro("P95_D11A54") /*gvi*/
+#undef P95_D11A54 /*gvi*/
+int32_t P95_D11A54;
+#pragma pop_macro("P95_D11A54") /*gvi*/
+#pragma pop_macro("P95_D11A54")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_112D9D4")
+#undef P95_112D9D4
+#pragma push_macro("P95_112D9D4") /*gvi*/
+#undef P95_112D9D4 /*gvi*/
+int32_t P95_112D9D4;
+#pragma pop_macro("P95_112D9D4") /*gvi*/
+#pragma pop_macro("P95_112D9D4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_SndReady")
+#undef P95_SndReady
+#pragma push_macro("P95_SndReady") /*gvi*/
+#undef P95_SndReady /*gvi*/
+int32_t P95_SndReady;
+#pragma pop_macro("P95_SndReady") /*gvi*/
+#pragma pop_macro("P95_SndReady")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_AmbN")
+#undef P95_AmbN
+#pragma push_macro("P95_AmbN") /*gvi*/
+#undef P95_AmbN /*gvi*/
+int32_t P95_AmbN;
+#pragma pop_macro("P95_AmbN") /*gvi*/
+#pragma pop_macro("P95_AmbN")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87E14")
+#undef P95_B87E14
+#pragma push_macro("P95_B87E14") /*gvi*/
+#undef P95_B87E14 /*gvi*/
+uint8_t P95_B87E14;
+#pragma pop_macro("P95_B87E14") /*gvi*/
+#pragma pop_macro("P95_B87E14")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87E34")
+#undef P95_B87E34
+#pragma push_macro("P95_B87E34") /*gvi*/
+#undef P95_B87E34 /*gvi*/
+int32_t P95_B87E34;
+#pragma pop_macro("P95_B87E34") /*gvi*/
+#pragma pop_macro("P95_B87E34")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87E3C")
+#undef P95_B87E3C
+#pragma push_macro("P95_B87E3C") /*gvi*/
+#undef P95_B87E3C /*gvi*/
+int32_t P95_B87E3C;
+#pragma pop_macro("P95_B87E3C") /*gvi*/
+#pragma pop_macro("P95_B87E3C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87E40")
+#undef P95_B87E40
+#pragma push_macro("P95_B87E40") /*gvi*/
+#undef P95_B87E40 /*gvi*/
+int32_t P95_B87E40;
+#pragma pop_macro("P95_B87E40") /*gvi*/
+#pragma pop_macro("P95_B87E40")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87EA4")
+#undef P95_B87EA4
+#pragma push_macro("P95_B87EA4") /*gvi*/
+#undef P95_B87EA4 /*gvi*/
+int32_t P95_B87EA4;
+#pragma pop_macro("P95_B87EA4") /*gvi*/
+#pragma pop_macro("P95_B87EA4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87EB4")
+#undef P95_B87EB4
+#pragma push_macro("P95_B87EB4") /*gvi*/
+#undef P95_B87EB4 /*gvi*/
+int32_t P95_B87EB4;
+#pragma pop_macro("P95_B87EB4") /*gvi*/
+#pragma pop_macro("P95_B87EB4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87EBC")
+#undef P95_B87EBC
+#pragma push_macro("P95_B87EBC") /*gvi*/
+#undef P95_B87EBC /*gvi*/
+int32_t P95_B87EBC;
+#pragma pop_macro("P95_B87EBC") /*gvi*/
+#pragma pop_macro("P95_B87EBC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87EC0")
+#undef P95_B87EC0
+#pragma push_macro("P95_B87EC0") /*gvi*/
+#undef P95_B87EC0 /*gvi*/
+int32_t P95_B87EC0;
+#pragma pop_macro("P95_B87EC0") /*gvi*/
+#pragma pop_macro("P95_B87EC0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87EC4")
+#undef P95_B87EC4
+#pragma push_macro("P95_B87EC4") /*gvi*/
+#undef P95_B87EC4 /*gvi*/
+int32_t P95_B87EC4;
+#pragma pop_macro("P95_B87EC4") /*gvi*/
+#pragma pop_macro("P95_B87EC4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87ED0")
+#undef P95_B87ED0
+#pragma push_macro("P95_B87ED0") /*gvi*/
+#undef P95_B87ED0 /*gvi*/
+int32_t P95_B87ED0;
+#pragma pop_macro("P95_B87ED0") /*gvi*/
+#pragma pop_macro("P95_B87ED0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87ED8")
+#undef P95_B87ED8
+#pragma push_macro("P95_B87ED8") /*gvi*/
+#undef P95_B87ED8 /*gvi*/
+int32_t P95_B87ED8;
+#pragma pop_macro("P95_B87ED8") /*gvi*/
+#pragma pop_macro("P95_B87ED8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87EDC")
+#undef P95_B87EDC
+#pragma push_macro("P95_B87EDC") /*gvi*/
+#undef P95_B87EDC /*gvi*/
+int32_t P95_B87EDC;
+#pragma pop_macro("P95_B87EDC") /*gvi*/
+#pragma pop_macro("P95_B87EDC")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87EE0")
+#undef P95_B87EE0
+#pragma push_macro("P95_B87EE0") /*gvi*/
+#undef P95_B87EE0 /*gvi*/
+int32_t P95_B87EE0;
+#pragma pop_macro("P95_B87EE0") /*gvi*/
+#pragma pop_macro("P95_B87EE0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_B87F08")
+#undef P95_B87F08
+#pragma push_macro("P95_B87F08") /*gvi*/
+#undef P95_B87F08 /*gvi*/
+int32_t P95_B87F08;
+#pragma pop_macro("P95_B87F08") /*gvi*/
+#pragma pop_macro("P95_B87F08")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_BDF9D0")
+#undef P95_BDF9D0
+#pragma push_macro("P95_BDF9D0") /*gvi*/
+#undef P95_BDF9D0 /*gvi*/
+int32_t P95_BDF9D0;
+#pragma pop_macro("P95_BDF9D0") /*gvi*/
+#pragma pop_macro("P95_BDF9D0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_BDF9D4")
+#undef P95_BDF9D4
+#pragma push_macro("P95_BDF9D4") /*gvi*/
+#undef P95_BDF9D4 /*gvi*/
+int32_t P95_BDF9D4;
+#pragma pop_macro("P95_BDF9D4") /*gvi*/
+#pragma pop_macro("P95_BDF9D4")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_BDFA0C")
+#undef P95_BDFA0C
+#pragma push_macro("P95_BDFA0C") /*gvi*/
+#undef P95_BDFA0C /*gvi*/
+int32_t P95_BDFA0C;
+#pragma pop_macro("P95_BDFA0C") /*gvi*/
+#pragma pop_macro("P95_BDFA0C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_BDFA14")
+#undef P95_BDFA14
+#pragma push_macro("P95_BDFA14") /*gvi*/
+#undef P95_BDFA14 /*gvi*/
+int32_t P95_BDFA14;
+#pragma pop_macro("P95_BDFA14") /*gvi*/
+#pragma pop_macro("P95_BDFA14")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_BDFA5C")
+#undef P95_BDFA5C
+#pragma push_macro("P95_BDFA5C") /*gvi*/
+#undef P95_BDFA5C /*gvi*/
+int32_t P95_BDFA5C;
+#pragma pop_macro("P95_BDFA5C") /*gvi*/
+#pragma pop_macro("P95_BDFA5C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_BDFA60")
+#undef P95_BDFA60
+#pragma push_macro("P95_BDFA60") /*gvi*/
+#undef P95_BDFA60 /*gvi*/
+int32_t P95_BDFA60;
+#pragma pop_macro("P95_BDFA60") /*gvi*/
+#pragma pop_macro("P95_BDFA60")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_C818B8")
+#undef P95_C818B8
+#pragma push_macro("P95_C818B8") /*gvi*/
+#undef P95_C818B8 /*gvi*/
+int32_t P95_C818B8;
+#pragma pop_macro("P95_C818B8") /*gvi*/
+#pragma pop_macro("P95_C818B8")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_D11920")
+#undef P95_D11920
+#pragma push_macro("P95_D11920") /*gvi*/
+#undef P95_D11920 /*gvi*/
+int32_t P95_D11920;
+#pragma pop_macro("P95_D11920") /*gvi*/
+#pragma pop_macro("P95_D11920")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_575F1C")
+#undef P95_575F1C
+#pragma push_macro("P95_575F1C") /*gvi*/
+#undef P95_575F1C /*gvi*/
+int32_t P95_575F1C;
+#pragma pop_macro("P95_575F1C") /*gvi*/
+#pragma pop_macro("P95_575F1C")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_Deb0")
+#undef P95_Deb0
+#pragma push_macro("P95_Deb0") /*gvi*/
+#undef P95_Deb0 /*gvi*/
+int32_t P95_Deb0;
+#pragma pop_macro("P95_Deb0") /*gvi*/
+#pragma pop_macro("P95_Deb0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_Deb1")
+#undef P95_Deb1
+#pragma push_macro("P95_Deb1") /*gvi*/
+#undef P95_Deb1 /*gvi*/
+int32_t P95_Deb1;
+#pragma pop_macro("P95_Deb1") /*gvi*/
+#pragma pop_macro("P95_Deb1")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_DebRnd")
+#undef P95_DebRnd
+#pragma push_macro("P95_DebRnd") /*gvi*/
+#undef P95_DebRnd /*gvi*/
+p95_u4_t P95_DebRnd;
+#pragma pop_macro("P95_DebRnd") /*gvi*/
+#pragma pop_macro("P95_DebRnd")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_DebPos")
+#undef P95_DebPos
+#pragma push_macro("P95_DebPos") /*gvi*/
+#undef P95_DebPos /*gvi*/
+p95_u16_t P95_DebPos;
+#pragma pop_macro("P95_DebPos") /*gvi*/
+#pragma pop_macro("P95_DebPos")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_PoolPage")
+#undef P95_PoolPage
+#pragma push_macro("P95_PoolPage") /*gvi*/
+#undef P95_PoolPage /*gvi*/
+uint8_t P95_PoolPage;
+#pragma pop_macro("P95_PoolPage") /*gvi*/
+#pragma pop_macro("P95_PoolPage")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_PoolQuad")
+#undef P95_PoolQuad
+#pragma push_macro("P95_PoolQuad") /*gvi*/
+#undef P95_PoolQuad /*gvi*/
+p95_u12_t P95_PoolQuad;
+#pragma pop_macro("P95_PoolQuad") /*gvi*/
+#pragma pop_macro("P95_PoolQuad")
+#endif
 GAME_VAR_DEF(p95_line_fn, P95_DrawLine, 0x01270e00)
-GAME_VAR_DEF(p95_vtx_t, P95_LineV0, 0x00b32988)
-GAME_VAR_DEF(p95_vtx_t, P95_LineV1, 0x00b329c8)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_LineV0")
+#undef P95_LineV0
+#pragma push_macro("P95_LineV0") /*gvi*/
+#undef P95_LineV0 /*gvi*/
+p95_vtx_t P95_LineV0;
+#pragma pop_macro("P95_LineV0") /*gvi*/
+#pragma pop_macro("P95_LineV0")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P95_LineV1")
+#undef P95_LineV1
+#pragma push_macro("P95_LineV1") /*gvi*/
+#undef P95_LineV1 /*gvi*/
+p95_vtx_t P95_LineV1;
+#pragma pop_macro("P95_LineV1") /*gvi*/
+#pragma pop_macro("P95_LineV1")
+#endif
 #ifndef RE_HOOK_BUILD
 /* начальные значения .data/.rdata Game.exe */
+#pragma push_macro("P95_Near") /*gvi*/
+#undef P95_Near /*gvi*/
 float P95_Near = 50.0f;                                              /* 0054609c */
+#pragma pop_macro("P95_Near") /*gvi*/
+#pragma push_macro("P95_SndOn") /*gvi*/
+#undef P95_SndOn /*gvi*/
 int32_t P95_SndOn = 1;                                               /* 00575f54 */
+#pragma pop_macro("P95_SndOn") /*gvi*/
+#pragma push_macro("P95_ChanDef") /*gvi*/
+#undef P95_ChanDef /*gvi*/
 p95_chandef_t P95_ChanDef = { 128, 0, 128, 64, 64, 32, 32, 64, 128, 256, 64 };              /* 0055fd50 */
+#pragma pop_macro("P95_ChanDef") /*gvi*/
+#pragma push_macro("P95_ChanVol") /*gvi*/
+#undef P95_ChanVol /*gvi*/
 p95_chanvol_t P95_ChanVol = { 682, 0, 682, 75, 682, 0, 682, 0, 682, 682, 682, 682, 682, 682, 682, 25, 682, 0, 682, 0, 682, 0 };   /* 0055fd80 */
+#pragma pop_macro("P95_ChanVol") /*gvi*/
+#pragma push_macro("P95_Near1") /*gvi*/
+#undef P95_Near1 /*gvi*/
+#pragma push_macro("P95_Near2") /*gvi*/
+#undef P95_Near2 /*gvi*/
 int32_t P95_Near1 = -1, P95_Near2 = -1;                              /* 0056038c/00560390 (в .data — 0, задаются 004d65fa) */
+#pragma pop_macro("P95_Near2") /*gvi*/
+#pragma pop_macro("P95_Near1") /*gvi*/
+#pragma push_macro("P95_ModeSel") /*gvi*/
+#undef P95_ModeSel /*gvi*/
 int32_t P95_ModeSel = 2;                                             /* 00549cc8 */
+#pragma pop_macro("P95_ModeSel") /*gvi*/
+#pragma push_macro("P95_ModeTab") /*gvi*/
+#undef P95_ModeTab /*gvi*/
 p95_modetab_t P95_ModeTab = {                                        /* 0054b6c8: w, h, имя (12 байт), ?, номер */
+#pragma pop_macro("P95_ModeTab") /*gvi*/
   320, 240, 540029491u, 875700344u, 48, 0, 1,   512, 384, 540160309u, 942874744u, 52, 0, 3,
   640, 480, 540030006u, 942940280u, 48, 0, 7,   800, 600, 540028984u, 808853624u, 48, 0, 8,
   1024, 768, 875704369u, 924874784u, 14390, 0, 12,   1280, 1024, 808989233u, 824211488u, 3420720u, 0, 13,
   1600, 1200, 808465969u, 824211488u, 3158066u, 0, 14,   0xffffffffu, 0xffffffffu, 0, 0, 0, 0, 0xffffffffu };
+#pragma push_macro("P95_CrossOfs") /*gvi*/
+#undef P95_CrossOfs /*gvi*/
 p95_i2_t P95_CrossOfs = { -2, 3 };                                   /* 00573f48 */
+#pragma pop_macro("P95_CrossOfs") /*gvi*/
+#pragma push_macro("P95_CrossTab") /*gvi*/
+#undef P95_CrossTab /*gvi*/
 p95_i6_t P95_CrossTab = { -2, -3, 2, 3, 2, -3 };                     /* 00573f50 */
+#pragma pop_macro("P95_CrossTab") /*gvi*/
 #endif
 
 static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }

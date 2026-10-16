@@ -2,8 +2,26 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P67_Items") /*gvi*/
+#undef P67_Items /*gvi*/
 P67_EntArr P67_Ents; P67_ItemArr P67_Items;
+#pragma pop_macro("P67_Items") /*gvi*/
+#pragma push_macro("P67_ItemCnt") /*gvi*/
+#undef P67_ItemCnt /*gvi*/
+#pragma push_macro("P67_Cur") /*gvi*/
+#undef P67_Cur /*gvi*/
+#pragma push_macro("P67_Sel2C") /*gvi*/
+#undef P67_Sel2C /*gvi*/
+#pragma push_macro("P67_Res51C") /*gvi*/
+#undef P67_Res51C /*gvi*/
+#pragma push_macro("P67_Tbl100") /*gvi*/
+#undef P67_Tbl100 /*gvi*/
 int32_t P67_ItemCnt = 0, P67_Cur = 0, P67_Sel2C = 0, P67_Res51C = 0; uint32_t P67_Tbl100 = 0;
+#pragma pop_macro("P67_Tbl100") /*gvi*/
+#pragma pop_macro("P67_Res51C") /*gvi*/
+#pragma pop_macro("P67_Sel2C") /*gvi*/
+#pragma pop_macro("P67_Cur") /*gvi*/
+#pragma pop_macro("P67_ItemCnt") /*gvi*/
 #endif
 
 /* 004bb060 */

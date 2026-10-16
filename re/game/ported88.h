@@ -26,9 +26,18 @@ _Static_assert(sizeof(p88_cell_t) == 0x28, "p88_cell_t");
 #define P88_Mode575 GAME_VAR(int32_t, P88_Mode575, 0x00575efc)
 #ifndef RE_HOOK_BUILD
 extern p88_cell_t P88_CellA, P88_CellB;
+#pragma push_macro("P88_Mode575") /*gvi*/
+#undef P88_Mode575 /*gvi*/
 extern int32_t P88_Mode575;
+#pragma pop_macro("P88_Mode575") /*gvi*/
 #endif
 void P88_CellUpdate(int32_t mode);   /* 004edd08 */
 void P88_StreamTiles(void);          /* 004edaa2 */
 /* не из оригинала: выбор соседних блоков (логика 004edaa2) для проверки; возвращает число блоков 0..3 */
 int32_t P88_PickTiles(const p88_cell_t *b, int32_t *lump, int32_t *slot);
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P88_Mode575
+#define P88_Mode575 (*(int32_t *)re_gvar(0x00575efcu, sizeof(int32_t), (void *)&P88_Mode575))
+#endif
+/* gvar-img v2.03 end */

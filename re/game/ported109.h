@@ -12,7 +12,16 @@
 #define P109_C54B00 GAME_VAR(int32_t, P109_C54B00, 0x00c54b00)   /* режим 3: игрок читает запись */
 #define P109_C81268 GAME_VAR(int32_t, P109_C81268, 0x00c81268)   /* аргумент 00518953 */
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P109_C8089C") /*gvi*/
+#undef P109_C8089C /*gvi*/
+#pragma push_macro("P109_C54B00") /*gvi*/
+#undef P109_C54B00 /*gvi*/
+#pragma push_macro("P109_C81268") /*gvi*/
+#undef P109_C81268 /*gvi*/
 extern int32_t P109_C8089C, P109_C54B00, P109_C81268;
+#pragma pop_macro("P109_C81268") /*gvi*/
+#pragma pop_macro("P109_C54B00") /*gvi*/
+#pragma pop_macro("P109_C8089C") /*gvi*/
 #endif
 
 void    P109_SndPlay(int32_t voice, int32_t sample, float a, float b, float c);          /* 0052498e */
@@ -29,3 +38,13 @@ void    P109_ScriptMarkers(void);                                               
 void    P109_RadarArrows(void);                                                           /* 00504866 */
 void    P109_InputTick(void);                                                             /* 005191c5 */
 void    P109_RadarTraffic(void);                                                          /* 00505b54 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P109_C8089C
+#define P109_C8089C (*(int32_t *)re_gvar(0x00c8089cu, sizeof(int32_t), (void *)&P109_C8089C))
+#undef P109_C54B00
+#define P109_C54B00 (*(int32_t *)re_gvar(0x00c54b00u, sizeof(int32_t), (void *)&P109_C54B00))
+#undef P109_C81268
+#define P109_C81268 (*(int32_t *)re_gvar(0x00c81268u, sizeof(int32_t), (void *)&P109_C81268))
+#endif
+/* gvar-img v2.03 end */

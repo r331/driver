@@ -13,15 +13,42 @@
 #define UiVar011F43B0 GAME_VAR(int32_t, UiVar011F43B0, 0x011f43b0)
 #define UiVar00B1C280 GAME_VAR(int32_t, UiVar00B1C280, 0x00b1c280)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("UiVar005FEA80") /*gvi*/
+#undef UiVar005FEA80 /*gvi*/
 extern int32_t UiVar005FEA80;
+#pragma pop_macro("UiVar005FEA80") /*gvi*/
+#pragma push_macro("UiVar0054E654") /*gvi*/
+#undef UiVar0054E654 /*gvi*/
 extern int32_t UiVar0054E654;
+#pragma pop_macro("UiVar0054E654") /*gvi*/
+#pragma push_macro("UiVar005FEA8C") /*gvi*/
+#undef UiVar005FEA8C /*gvi*/
 extern int32_t UiVar005FEA8C;
+#pragma pop_macro("UiVar005FEA8C") /*gvi*/
+#pragma push_macro("UiVar005FEDA0") /*gvi*/
+#undef UiVar005FEDA0 /*gvi*/
 extern int32_t UiVar005FEDA0;
+#pragma pop_macro("UiVar005FEDA0") /*gvi*/
+#pragma push_macro("UiVar005FEA98") /*gvi*/
+#undef UiVar005FEA98 /*gvi*/
 extern int32_t UiVar005FEA98;
+#pragma pop_macro("UiVar005FEA98") /*gvi*/
+#pragma push_macro("UiVar005FEB48") /*gvi*/
+#undef UiVar005FEB48 /*gvi*/
 extern int32_t UiVar005FEB48;
+#pragma pop_macro("UiVar005FEB48") /*gvi*/
+#pragma push_macro("UiVar01251A70") /*gvi*/
+#undef UiVar01251A70 /*gvi*/
 extern uint8_t UiVar01251A70;
+#pragma pop_macro("UiVar01251A70") /*gvi*/
+#pragma push_macro("UiVar011F43B0") /*gvi*/
+#undef UiVar011F43B0 /*gvi*/
 extern int32_t UiVar011F43B0;
+#pragma pop_macro("UiVar011F43B0") /*gvi*/
+#pragma push_macro("UiVar00B1C280") /*gvi*/
+#undef UiVar00B1C280 /*gvi*/
 extern int32_t UiVar00B1C280;
+#pragma pop_macro("UiVar00B1C280") /*gvi*/
 #endif
 int32_t Ui00417B03(void); /* 00417b03 */
 void Ui004183E8(void); /* 004183e8 */
@@ -71,3 +98,25 @@ int32_t Ui0041FAA2(void); /* 0041faa2 */
 int32_t Ui0041FAAB(void); /* 0041faab */
 void Ui004264A7(void); /* 004264a7 */
 void Ui004268E0(void); /* 004268e0 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef UiVar005FEA80
+#define UiVar005FEA80 (*(int32_t *)re_gvar(0x005fea80u, sizeof(int32_t), (void *)&UiVar005FEA80))
+#undef UiVar0054E654
+#define UiVar0054E654 (*(int32_t *)re_gvar(0x0054e654u, sizeof(int32_t), (void *)&UiVar0054E654))
+#undef UiVar005FEA8C
+#define UiVar005FEA8C (*(int32_t *)re_gvar(0x005fea8cu, sizeof(int32_t), (void *)&UiVar005FEA8C))
+#undef UiVar005FEDA0
+#define UiVar005FEDA0 (*(int32_t *)re_gvar(0x005feda0u, sizeof(int32_t), (void *)&UiVar005FEDA0))
+#undef UiVar005FEA98
+#define UiVar005FEA98 (*(int32_t *)re_gvar(0x005fea98u, sizeof(int32_t), (void *)&UiVar005FEA98))
+#undef UiVar005FEB48
+#define UiVar005FEB48 (*(int32_t *)re_gvar(0x005feb48u, sizeof(int32_t), (void *)&UiVar005FEB48))
+#undef UiVar01251A70
+#define UiVar01251A70 (*(uint8_t *)re_gvar(0x01251a70u, sizeof(uint8_t), (void *)&UiVar01251A70))
+#undef UiVar011F43B0
+#define UiVar011F43B0 (*(int32_t *)re_gvar(0x011f43b0u, sizeof(int32_t), (void *)&UiVar011F43B0))
+#undef UiVar00B1C280
+#define UiVar00B1C280 (*(int32_t *)re_gvar(0x00b1c280u, sizeof(int32_t), (void *)&UiVar00B1C280))
+#endif
+/* gvar-img v2.03 end */

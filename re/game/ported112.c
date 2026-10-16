@@ -41,7 +41,15 @@
 #include <string.h>
 #include <math.h>
 
-GAME_VAR_DEF(int32_t, P112_Wanted, 0x0112b2b4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P112_Wanted")
+#undef P112_Wanted
+#pragma push_macro("P112_Wanted") /*gvi*/
+#undef P112_Wanted /*gvi*/
+int32_t P112_Wanted;
+#pragma pop_macro("P112_Wanted") /*gvi*/
+#pragma pop_macro("P112_Wanted")
+#endif
 
 #ifdef RE_HOOK_BUILD
 #  define P112_STD __attribute__((stdcall))

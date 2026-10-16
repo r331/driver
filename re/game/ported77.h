@@ -52,10 +52,37 @@ typedef uint8_t p77_b590e0_t[0x1008], p77_c62d60_t[0x100], p77_c65dc0_t[0x17a20]
 #define P77_B5A0E8    GAME_VAR(int32_t, P77_B5A0E8, 0x00b5a0e8)
 #define P77_S574570   GAME_VAR(int32_t, P77_S574570, 0x00574570)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P77_ListN") /*gvi*/
+#undef P77_ListN /*gvi*/
+#pragma push_macro("P77_Plane") /*gvi*/
+#undef P77_Plane /*gvi*/
 extern const char *P77_LevelName; extern int32_t P77_ListN; extern void **P77_List; extern p77_plane_t P77_Plane;
+#pragma pop_macro("P77_Plane") /*gvi*/
+#pragma pop_macro("P77_ListN") /*gvi*/
 extern p77_b590e0_t P77_B590E0; extern p77_c62d60_t P77_C62D60; extern p77_c65dc0_t P77_C65DC0; extern p77_c5fe00_t P77_C5FE00;
+#pragma push_macro("P77_C7D850") /*gvi*/
+#undef P77_C7D850 /*gvi*/
 extern p77_c7d8c0_t P77_C7D8C0; extern p77_c62e60_t P77_C62E60; extern uint8_t P77_C7D850;
+#pragma pop_macro("P77_C7D850") /*gvi*/
+#pragma push_macro("P77_C7D8A4") /*gvi*/
+#undef P77_C7D8A4 /*gvi*/
+#pragma push_macro("P77_C7D8A0") /*gvi*/
+#undef P77_C7D8A0 /*gvi*/
+#pragma push_macro("P77_C7D8A8") /*gvi*/
+#undef P77_C7D8A8 /*gvi*/
+#pragma push_macro("P77_C65DA4") /*gvi*/
+#undef P77_C65DA4 /*gvi*/
+#pragma push_macro("P77_B5A0E8") /*gvi*/
+#undef P77_B5A0E8 /*gvi*/
+#pragma push_macro("P77_S574570") /*gvi*/
+#undef P77_S574570 /*gvi*/
 extern int32_t P77_C7D8A4, P77_C7D8A0, P77_C7D8A8, P77_C65DA4, P77_B5A0E8, P77_S574570;
+#pragma pop_macro("P77_S574570") /*gvi*/
+#pragma pop_macro("P77_B5A0E8") /*gvi*/
+#pragma pop_macro("P77_C65DA4") /*gvi*/
+#pragma pop_macro("P77_C7D8A8") /*gvi*/
+#pragma pop_macro("P77_C7D8A0") /*gvi*/
+#pragma pop_macro("P77_C7D8A4") /*gvi*/
 #endif
 void   *P77_OpenLevel(void);                                 /* 004eca08 */
 int32_t P77_LoadLevel(void);                                 /* 004ecade */
@@ -66,3 +93,25 @@ int32_t P77_Menu408770(void);                                /* 00408770 */
 void    P77_ResetTables(void);                               /* 00509c40 */
 int32_t P77_ListAdd(int32_t size);                           /* 004f8643 */
 void    P77_CameraPlane(int32_t d);                          /* 004282f8 */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P77_ListN
+#define P77_ListN (*(int32_t *)re_gvar(0x00c81688u, sizeof(int32_t), (void *)&P77_ListN))
+#undef P77_Plane
+#define P77_Plane (*(p77_plane_t *)re_gvar(0x011cff80u, sizeof(p77_plane_t), (void *)&P77_Plane))
+#undef P77_C7D850
+#define P77_C7D850 (*(uint8_t *)re_gvar(0x00c7d850u, sizeof(uint8_t), (void *)&P77_C7D850))
+#undef P77_C7D8A4
+#define P77_C7D8A4 (*(int32_t *)re_gvar(0x00c7d8a4u, sizeof(int32_t), (void *)&P77_C7D8A4))
+#undef P77_C7D8A0
+#define P77_C7D8A0 (*(int32_t *)re_gvar(0x00c7d8a0u, sizeof(int32_t), (void *)&P77_C7D8A0))
+#undef P77_C7D8A8
+#define P77_C7D8A8 (*(int32_t *)re_gvar(0x00c7d8a8u, sizeof(int32_t), (void *)&P77_C7D8A8))
+#undef P77_C65DA4
+#define P77_C65DA4 (*(int32_t *)re_gvar(0x00c65da4u, sizeof(int32_t), (void *)&P77_C65DA4))
+#undef P77_B5A0E8
+#define P77_B5A0E8 (*(int32_t *)re_gvar(0x00b5a0e8u, sizeof(int32_t), (void *)&P77_B5A0E8))
+#undef P77_S574570
+#define P77_S574570 (*(int32_t *)re_gvar(0x00574570u, sizeof(int32_t), (void *)&P77_S574570))
+#endif
+/* gvar-img v2.03 end */

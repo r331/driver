@@ -73,19 +73,113 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P126_PicNum") /*gvi*/
+#undef P126_PicNum /*gvi*/
 int32_t P126_PicNum = -1;                  /* .data 005604b4 */
+#pragma pop_macro("P126_PicNum") /*gvi*/
+#pragma push_macro("P126_DebugOn") /*gvi*/
+#undef P126_DebugOn /*gvi*/
 int32_t P126_DebugOn = 1;                  /* .data 00575f4c */
-GAME_VAR_DEF(int32_t, P126_SpawnN, 0x00c82528)
-GAME_VAR_DEF(int32_t, P126_SpawnSide, 0x00c824d4)
-GAME_VAR_DEF(int32_t, P126_SpawnAxis, 0x00c824d8)
-GAME_VAR_DEF(int32_t, P126_SpawnT, 0x00c8252c)
-GAME_VAR_DEF(p126_spawn_t, P126_Spawn, 0x00c82440)
-GAME_VAR_DEF(float, P126_TgtY, 0x00c82514)
-GAME_VAR_DEF(float, P126_TgtW, 0x00c8251c)
-GAME_VAR_DEF(float, P126_PtY, 0x00c824b4)
-GAME_VAR_DEF(float, P126_PtW, 0x00c824bc)
-GAME_VAR_DEF(float, P126_SideY, 0x00c824c4)
-GAME_VAR_DEF(float, P126_SideW, 0x00c824cc)
+#pragma pop_macro("P126_DebugOn") /*gvi*/
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P126_SpawnN")
+#undef P126_SpawnN
+#pragma push_macro("P126_SpawnN") /*gvi*/
+#undef P126_SpawnN /*gvi*/
+int32_t P126_SpawnN;
+#pragma pop_macro("P126_SpawnN") /*gvi*/
+#pragma pop_macro("P126_SpawnN")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P126_SpawnSide")
+#undef P126_SpawnSide
+#pragma push_macro("P126_SpawnSide") /*gvi*/
+#undef P126_SpawnSide /*gvi*/
+int32_t P126_SpawnSide;
+#pragma pop_macro("P126_SpawnSide") /*gvi*/
+#pragma pop_macro("P126_SpawnSide")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P126_SpawnAxis")
+#undef P126_SpawnAxis
+#pragma push_macro("P126_SpawnAxis") /*gvi*/
+#undef P126_SpawnAxis /*gvi*/
+int32_t P126_SpawnAxis;
+#pragma pop_macro("P126_SpawnAxis") /*gvi*/
+#pragma pop_macro("P126_SpawnAxis")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P126_SpawnT")
+#undef P126_SpawnT
+#pragma push_macro("P126_SpawnT") /*gvi*/
+#undef P126_SpawnT /*gvi*/
+int32_t P126_SpawnT;
+#pragma pop_macro("P126_SpawnT") /*gvi*/
+#pragma pop_macro("P126_SpawnT")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P126_Spawn")
+#undef P126_Spawn
+#pragma push_macro("P126_Spawn") /*gvi*/
+#undef P126_Spawn /*gvi*/
+p126_spawn_t P126_Spawn;
+#pragma pop_macro("P126_Spawn") /*gvi*/
+#pragma pop_macro("P126_Spawn")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P126_TgtY")
+#undef P126_TgtY
+#pragma push_macro("P126_TgtY") /*gvi*/
+#undef P126_TgtY /*gvi*/
+float P126_TgtY;
+#pragma pop_macro("P126_TgtY") /*gvi*/
+#pragma pop_macro("P126_TgtY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P126_TgtW")
+#undef P126_TgtW
+#pragma push_macro("P126_TgtW") /*gvi*/
+#undef P126_TgtW /*gvi*/
+float P126_TgtW;
+#pragma pop_macro("P126_TgtW") /*gvi*/
+#pragma pop_macro("P126_TgtW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P126_PtY")
+#undef P126_PtY
+#pragma push_macro("P126_PtY") /*gvi*/
+#undef P126_PtY /*gvi*/
+float P126_PtY;
+#pragma pop_macro("P126_PtY") /*gvi*/
+#pragma pop_macro("P126_PtY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P126_PtW")
+#undef P126_PtW
+#pragma push_macro("P126_PtW") /*gvi*/
+#undef P126_PtW /*gvi*/
+float P126_PtW;
+#pragma pop_macro("P126_PtW") /*gvi*/
+#pragma pop_macro("P126_PtW")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P126_SideY")
+#undef P126_SideY
+#pragma push_macro("P126_SideY") /*gvi*/
+#undef P126_SideY /*gvi*/
+float P126_SideY;
+#pragma pop_macro("P126_SideY") /*gvi*/
+#pragma pop_macro("P126_SideY")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P126_SideW")
+#undef P126_SideW
+#pragma push_macro("P126_SideW") /*gvi*/
+#undef P126_SideW /*gvi*/
+float P126_SideW;
+#pragma pop_macro("P126_SideW") /*gvi*/
+#pragma pop_macro("P126_SideW")
+#endif
 #endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }

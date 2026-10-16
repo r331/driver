@@ -114,8 +114,19 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P128_DmgMap") /*gvi*/
+#undef P128_DmgMap /*gvi*/
 p128_dmg_t P128_DmgMap = P128_DMG_INIT;          /* .data 00559254 */
-GAME_VAR_DEF(int32_t, P128_FreeCamLock, 0x01137304)
+#pragma pop_macro("P128_DmgMap") /*gvi*/
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P128_FreeCamLock")
+#undef P128_FreeCamLock
+#pragma push_macro("P128_FreeCamLock") /*gvi*/
+#undef P128_FreeCamLock /*gvi*/
+int32_t P128_FreeCamLock;
+#pragma pop_macro("P128_FreeCamLock") /*gvi*/
+#pragma pop_macro("P128_FreeCamLock")
+#endif
 #endif
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }

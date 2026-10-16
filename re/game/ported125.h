@@ -29,12 +29,57 @@ typedef int32_t p125_mrk_t[6];
 #define P125_ShlG     GAME_VAR(int32_t, P125_ShlG, 0x005c6758)
 #define P125_ShlB     GAME_VAR(int32_t, P125_ShlB, 0x005c675c)
 #ifndef RE_HOOK_BUILD
+#pragma push_macro("P125_C814E0") /*gvi*/
+#undef P125_C814E0 /*gvi*/
+#pragma push_macro("P125_C814E4") /*gvi*/
+#undef P125_C814E4 /*gvi*/
+#pragma push_macro("P125_C81690") /*gvi*/
+#undef P125_C81690 /*gvi*/
+#pragma push_macro("P125_C81694") /*gvi*/
+#undef P125_C81694 /*gvi*/
+#pragma push_macro("P125_D118E4") /*gvi*/
+#undef P125_D118E4 /*gvi*/
+#pragma push_macro("P125_D11680") /*gvi*/
+#undef P125_D11680 /*gvi*/
+#pragma push_macro("P125_CF56C0") /*gvi*/
+#undef P125_CF56C0 /*gvi*/
+#pragma push_macro("P125_DirD17C0C") /*gvi*/
+#undef P125_DirD17C0C /*gvi*/
 extern int32_t P125_C814E0, P125_C814E4, P125_C81690, P125_C81694, P125_D118E4, P125_D11680, P125_CF56C0, P125_DirD17C0C;
+#pragma pop_macro("P125_DirD17C0C") /*gvi*/
+#pragma pop_macro("P125_CF56C0") /*gvi*/
+#pragma pop_macro("P125_D11680") /*gvi*/
+#pragma pop_macro("P125_D118E4") /*gvi*/
+#pragma pop_macro("P125_C81694") /*gvi*/
+#pragma pop_macro("P125_C81690") /*gvi*/
+#pragma pop_macro("P125_C814E4") /*gvi*/
+#pragma pop_macro("P125_C814E0") /*gvi*/
+#pragma push_macro("P125_Pick") /*gvi*/
+#undef P125_Pick /*gvi*/
+#pragma push_macro("P125_PickIdx") /*gvi*/
+#undef P125_PickIdx /*gvi*/
+#pragma push_macro("P125_DropTime") /*gvi*/
+#undef P125_DropTime /*gvi*/
+#pragma push_macro("P125_FpsStr") /*gvi*/
+#undef P125_FpsStr /*gvi*/
 extern p125_pick_t P125_Pick; extern int32_t P125_PickIdx; extern p125_droptime_t P125_DropTime; extern p125_fps_t P125_FpsStr;
+#pragma pop_macro("P125_FpsStr") /*gvi*/
+#pragma pop_macro("P125_DropTime") /*gvi*/
+#pragma pop_macro("P125_PickIdx") /*gvi*/
+#pragma pop_macro("P125_Pick") /*gvi*/
+#pragma push_macro("P125_MrkSave") /*gvi*/
+#undef P125_MrkSave /*gvi*/
+#pragma push_macro("P125_ModelNamesSize") /*gvi*/
+#undef P125_ModelNamesSize /*gvi*/
 extern p125_mrk_t P125_MrkSave; extern int32_t P125_ModelNamesSize;
+#pragma pop_macro("P125_ModelNamesSize") /*gvi*/
+#pragma pop_macro("P125_MrkSave") /*gvi*/
 /* v2.02: 005c6748..005c675c — слова [1..6] формата LFB 005c6744 (P100_LfbFmt, пишет P100_LfbFormat 004078d0); прежде отдельные
    native-объекты с нулями — палитра меню 004079aa сводилась к синему каналу */
+#pragma push_macro("P100_LfbFmt") /*gvi*/
+#undef P100_LfbFmt /*gvi*/
 extern int32_t P100_LfbFmt[7];
+#pragma pop_macro("P100_LfbFmt") /*gvi*/
 #undef P125_ShrR
 #undef P125_ShrG
 #undef P125_ShrB
@@ -60,3 +105,35 @@ void    P125_BlendTable(const uint8_t *pal, uint32_t *out, uint8_t key, uint8_t 
 void    P125_DebrisBurst(const float *pos, int32_t n, int32_t kind); /* 004afa4c: обломки P97_Debris */
 void    P125_ObjABurst(const int32_t *pos, const int32_t *vel, int32_t n, int32_t kind); /* 004b955c: объекты A (0x78) */
 void    P125_PickupTick(const uint8_t *tab);                   /* 004fc0d9: подбор точек (записи 0x14) у машины игрока */
+/* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P125_C814E0
+#define P125_C814E0 (*(int32_t *)re_gvar(0x00c814e0u, sizeof(int32_t), (void *)&P125_C814E0))
+#undef P125_C814E4
+#define P125_C814E4 (*(int32_t *)re_gvar(0x00c814e4u, sizeof(int32_t), (void *)&P125_C814E4))
+#undef P125_C81690
+#define P125_C81690 (*(int32_t *)re_gvar(0x00c81690u, sizeof(int32_t), (void *)&P125_C81690))
+#undef P125_C81694
+#define P125_C81694 (*(int32_t *)re_gvar(0x00c81694u, sizeof(int32_t), (void *)&P125_C81694))
+#undef P125_D118E4
+#define P125_D118E4 (*(int32_t *)re_gvar(0x00d118e4u, sizeof(int32_t), (void *)&P125_D118E4))
+#undef P125_D11680
+#define P125_D11680 (*(int32_t *)re_gvar(0x00d11680u, sizeof(int32_t), (void *)&P125_D11680))
+#undef P125_CF56C0
+#define P125_CF56C0 (*(int32_t *)re_gvar(0x00cf56c0u, sizeof(int32_t), (void *)&P125_CF56C0))
+#undef P125_DirD17C0C
+#define P125_DirD17C0C (*(int32_t *)re_gvar(0x00d17c0cu, sizeof(int32_t), (void *)&P125_DirD17C0C))
+#undef P125_Pick
+#define P125_Pick (*(p125_pick_t *)re_gvar(0x00c81500u, sizeof(p125_pick_t), (void *)&P125_Pick))
+#undef P125_PickIdx
+#define P125_PickIdx (*(int32_t *)re_gvar(0x00c80becu, sizeof(int32_t), (void *)&P125_PickIdx))
+#undef P125_DropTime
+#define P125_DropTime (*(p125_droptime_t *)re_gvar(0x00bde780u, sizeof(p125_droptime_t), (void *)&P125_DropTime))
+#undef P125_FpsStr
+#define P125_FpsStr (*(p125_fps_t *)re_gvar(0x00b5a48cu, sizeof(p125_fps_t), (void *)&P125_FpsStr))
+#undef P125_MrkSave
+#define P125_MrkSave (*(p125_mrk_t *)re_gvar(0x01271070u, sizeof(p125_mrk_t), (void *)&P125_MrkSave))
+#undef P125_ModelNamesSize
+#define P125_ModelNamesSize (*(int32_t *)re_gvar(0x00b1ff64u, sizeof(int32_t), (void *)&P125_ModelNamesSize))
+#endif
+/* gvar-img v2.03 end */

@@ -51,11 +51,51 @@
 #include <stdio.h>
 #include <string.h>
 
-GAME_VAR_DEF(p150_path_t, P150_FmvPath, 0x00b1c59c)
-GAME_VAR_DEF(p150_path_t, P150_CdRoot, 0x00b1c6a0)
-GAME_VAR_DEF(p150_desc_t, P150_VidFmt, 0x00b1c7a8)
-GAME_VAR_DEF(p150_desc_t, P150_PrimDesc, 0x00b1c530)
-GAME_VAR_DEF(int32_t, P150_FmvOff, 0x00b87ef4)
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P150_FmvPath")
+#undef P150_FmvPath
+#pragma push_macro("P150_FmvPath") /*gvi*/
+#undef P150_FmvPath /*gvi*/
+p150_path_t P150_FmvPath;
+#pragma pop_macro("P150_FmvPath") /*gvi*/
+#pragma pop_macro("P150_FmvPath")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P150_CdRoot")
+#undef P150_CdRoot
+#pragma push_macro("P150_CdRoot") /*gvi*/
+#undef P150_CdRoot /*gvi*/
+p150_path_t P150_CdRoot;
+#pragma pop_macro("P150_CdRoot") /*gvi*/
+#pragma pop_macro("P150_CdRoot")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P150_VidFmt")
+#undef P150_VidFmt
+#pragma push_macro("P150_VidFmt") /*gvi*/
+#undef P150_VidFmt /*gvi*/
+p150_desc_t P150_VidFmt;
+#pragma pop_macro("P150_VidFmt") /*gvi*/
+#pragma pop_macro("P150_VidFmt")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P150_PrimDesc")
+#undef P150_PrimDesc
+#pragma push_macro("P150_PrimDesc") /*gvi*/
+#undef P150_PrimDesc /*gvi*/
+p150_desc_t P150_PrimDesc;
+#pragma pop_macro("P150_PrimDesc") /*gvi*/
+#pragma pop_macro("P150_PrimDesc")
+#endif
+#ifndef RE_HOOK_BUILD /* gvar-img */
+#pragma push_macro("P150_FmvOff")
+#undef P150_FmvOff
+#pragma push_macro("P150_FmvOff") /*gvi*/
+#undef P150_FmvOff /*gvi*/
+int32_t P150_FmvOff;
+#pragma pop_macro("P150_FmvOff") /*gvi*/
+#pragma pop_macro("P150_FmvOff")
+#endif
 
 /* GUID из .data Game.exe (00546250, 00546aa8..00546b18) */
 static const uint8_t k_iid_ddms[16]    = { 0xce,0x4f,0x10,0xf4, 0x70,0x9a, 0xd0,0x11, 0x8f,0xde,0x00,0xc0,0x4f,0xd9,0x18,0x9d };  /* IID_IDirectDrawMediaStream 00546aa8 */
