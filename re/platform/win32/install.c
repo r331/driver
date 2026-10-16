@@ -94,6 +94,7 @@
 #include "../../game/ported103.h"
 #include "../../game/ported104.h"
 #include "../../game/ported105.h"
+#include "../../game/ported106.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2050,4 +2051,14 @@ void re_install_all(void) {
     re_hook(0x004d26ea, (void*)P105_ChaseMusic, "P105_ChaseMusic");
     re_hook(0x0040d81b, (void*)P105_BlitScaled, "P105_BlitScaled");
     re_hook(0x004e53b5, (void*)P105_StuntHints, "P105_StuntHints");
+    re_hook(0x004ae6fb, (void*)P106_CarHeadSpots, "P106_CarHeadSpots");
+    re_hook(0x004adfcc, (void*)P106_CarTailLights, "P106_CarTailLights");
+    re_hook(0x004ad837, (void*)P106_CarBrakeLights, "P106_CarBrakeLights");
+    re_hook(0x00420a21, (void*)P106_CanDevTex, "P106_CanDevTex");
+    re_hook(0x0042282f, (void*)P106_EmulUpload8, "P106_EmulUpload8");
+    re_hook(0x004228eb, (void*)P106_EmulUpload16, "P106_EmulUpload16");
+    re_hook(0x004d92d2, (void*)P106_LfbText, "P106_LfbText");
+    re_hook(0x004ef66a, (void*)P106_SkyModels, "P106_SkyModels");
+    re_hook(0x00512174, (void*)P106_PartTick, "P106_PartTick");
+    re_hook(0x0048bf52, (void*)P106_EaxPreset, "P106_EaxPreset");
 }

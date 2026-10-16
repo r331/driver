@@ -24,6 +24,7 @@ void     re_fn_register(uint32_t addr, re_fn_t fn) { (void)addr; (void)fn; }
 #include "ported103.h"
 #include "p103_data.h"
 #include "ported104.h"
+#include "ported106.h"
 #include "ported7.h"
 #include "noop.h"
 #include <string.h>
@@ -66,6 +67,7 @@ static const re_region_t k_regions[] = {
 static const re_fnent_t k_fns[] = {
   { 0x0048bcc0u, (re_fn_t)P50_SoundShutdown }, { 0x0048bd3bu, (re_fn_t)NoopFn0048bd3b },
   { 0x0048bd40u, (re_fn_t)P49_Commit },        { 0x0048bd65u, (re_fn_t)P26_WaveSetVolume },
+  { 0x0048bf52u, (re_fn_t)P106_EaxPreset },
   { 0x0048bdccu, (re_fn_t)P38_SetPrimaryFormat }, { 0x0048be68u, (re_fn_t)P38_SetSpeakerConfig },
   { 0x0048c520u, (re_fn_t)P50_ReleaseVoice },  { 0x0048c74bu, (re_fn_t)P49_ListenerPos },
   { 0x0048c77eu, (re_fn_t)P49_ListenerOrient }, { 0x0048c7bdu, (re_fn_t)P49_ListenerVel },

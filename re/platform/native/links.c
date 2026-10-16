@@ -94,6 +94,7 @@
 #include "../../game/ported103.h"
 #include "../../game/ported104.h"
 #include "../../game/ported105.h"
+#include "../../game/ported106.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -161,6 +162,7 @@ void P55_Fn4ED5F8 (int32_t a0, int32_t a1) { P87_LoadTile(a0, a1); }
 void P55_Fn4EDAA2 (void) { P88_StreamTiles(); }
 int32_t P55_Fn405E79 (int32_t a0, void *a1) { return (int32_t)P58_SaveSlot(a0, a1); }
 int32_t P55_Fn405FDB (int32_t a0, void *a1) { return (int32_t)P59_ReplayCheck(a0, a1); }
+void P55_Fn4D92D2 (uint32_t a0) { P106_LfbText(a0); }
 void P55_Fn5248CD (void) { P25_CDResume(); }
 void P55_Fn424530 (int32_t a0, int32_t a1, int32_t a2) { P74_DevSelect(a0, a1, a2); }
 int32_t P55_Fn4245E2 (void) { return (int32_t)GetVarB1C0D8(); }
@@ -347,6 +349,8 @@ void Call0042793F (void *m, int32_t a1) { P79_Radius(m, a1); }
 void Call004757D2 (void *m) { P79_MarkRecords(m); }
 void Call00475906 (void *m) { P79_FindSameVerts(m); }
 void SetCameraPosition (float x, float y, float z) { PushVec3_00523C99(x, y, z); }
+void P46_Fn4228EB (void *node, int32_t a1) { P106_EmulUpload16(node, a1); }
+void P46_Fn42282F (void *node, int32_t a1) { P106_EmulUpload8(node, a1); }
 void P46_Fn4D6354 (void) { P53_StepBounds(); }
 void P46_Fn51BE3C (void) { P58_BuildBlockIndex(); }
 void P58_Fn4185D2 (uint32_t tbl, int32_t a1, uint32_t tbl2) { P97_MenuCall2(tbl, a1, tbl2); }
