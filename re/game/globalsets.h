@@ -665,10 +665,7 @@ extern int32_t G010FFD08;
 #ifndef RE_HOOK_BUILD
 extern int32_t G01105D60;
 #endif
-#define G01105D80 GAME_VAR(int32_t, G01105D80, 0x01105d80)
-#ifndef RE_HOOK_BUILD
-extern int32_t G01105D80;
-#endif
+#define G01105D80 ICONTAB_VAR(int32_t, 6)   /* v1.56: таблица значков 01105d68 (icontab.h) */
 #define G0110B24C GAME_VAR(int32_t, G0110B24C, 0x0110b24c)
 #ifndef RE_HOOK_BUILD
 extern int32_t G0110B24C;

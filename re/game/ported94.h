@@ -16,7 +16,7 @@
 #define P94_FadeVal   GAME_VAR(int32_t, P94_FadeVal, 0x00d044d4)
 #define P94_FadePos   GAME_VAR(float, P94_FadePos, 0x00d04478)
 #define P94_FadeSpeed GAME_VAR(float, P94_FadeSpeed, 0x00d04784)
-#define P94_IconRec   GAME_VAR(uint8_t *, P94_IconRec, 0x010faf20)  /* запись значка (16 байт, как у 004ec91e) */
+#define P94_IconRec   GAME_VAR(uint32_t, P94_IconRec, 0x010faf20)  /* запись значка (16 байт, как у 004ec91e) */
 #define P94_QuadPage  GAME_VAR(uint8_t, P94_QuadPage, 0x010fc9a2)
 #define P94_Quad      GAME_VAR(p94_quad_t, P94_Quad, 0x010fc9a8)      /* 4 индекса, 8 float uv, 3 × 255.0f */
 #define P94_DirCnt    GAME_VAR(int32_t, P94_DirCnt, 0x01145a48)
@@ -36,7 +36,7 @@ typedef int16_t p94_curveB_t[0xa0];
  extern float P94_RadarK;
 extern int32_t P94_MapW, P94_MapH, P94_MapX0, P94_MapY0;
 extern int32_t P94_FadeDir, P94_FadeVal; extern float P94_FadePos, P94_FadeSpeed;
-extern uint8_t *P94_IconRec; extern uint8_t P94_QuadPage; extern p94_quad_t P94_Quad;
+extern uint32_t P94_IconRec; extern uint8_t P94_QuadPage; extern p94_quad_t P94_Quad;
 extern int32_t P94_DirCnt; extern p94_dirtab_t P94_DirTab;
 extern p94_curveA_t P94_CurveA; extern p94_curveB_t P94_CurveB, P94_CurveC;
 extern int32_t P94_WobA, P94_WobB, P94_WobC; extern float P94_WobK;

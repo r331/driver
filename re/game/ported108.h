@@ -11,9 +11,9 @@
 #include <stdint.h>
 
 #define P108_FmvLen    GAME_VAR(double, P108_FmvLen, 0x00b1c850)       /* длительность FMV, с (таймер: (len+1)·1000 мс) */
-#define P108_SmokeIcon GAME_VAR(uint32_t, P108_SmokeIcon, 0x01105d88)  /* адрес записи значка SMOKE (004ec91e) */
+#define P108_SmokeIcon ICONTAB_VAR(uint32_t, 8)  /* адрес записи значка SMOKE (004ec91e) */
 #ifndef RE_HOOK_BUILD
-extern double P108_FmvLen; extern uint32_t P108_SmokeIcon;
+extern double P108_FmvLen;
 #endif
 
 void    P108_ReplayStep(void);                                                   /* 00518ab4 */

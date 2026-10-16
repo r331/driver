@@ -27,6 +27,12 @@ void     re_fn_register(uint32_t addr, re_fn_t fn) { (void)addr; (void)fn; }
 #include "ported106.h"
 #include "ported7.h"
 #include "noop.h"
+#include "ported10.h"
+#include "ported11.h"
+#include "ported48.h"
+#include "ported65.h"
+#include "smallfuncs.h"
+#include "smallfuncs2.h"
 #include <string.h>
 
 typedef struct { uint32_t addr; uint8_t *p; uint32_t size; } re_region_t;
@@ -76,6 +82,20 @@ static const re_fnent_t k_fns[] = {
   { 0x0048c9b2u, (re_fn_t)P49_SetFreq },       { 0x0048c9e8u, (re_fn_t)P49_SetPos3D },
   { 0x0048ca28u, (re_fn_t)P49_SetVel3D },      { 0x0048ca68u, (re_fn_t)P49_SetMode3D },
   { 0x0048caa0u, (re_fn_t)P49_GetStatus },
+  /* v1.56: опкоды скрипта .data 0055fcac (P111_ScriptTick 004cf2cf); 004d09fd/004d1765/004d0734 ещё не перенесены */
+  { 0x004d03fdu, (re_fn_t)ReturnZero004D03FD },    { 0x004d020bu, (re_fn_t)P48_OpSet3 },
+  { 0x004d02c6u, (re_fn_t)ScriptReadShort3_004D02C6 }, { 0x004d033fu, (re_fn_t)ScriptReadVec3_004D033F },
+  { 0x004d0404u, (re_fn_t)ScriptOpSetBit2_004D0404 }, { 0x004d107eu, (re_fn_t)P48_OpSet4 },
+  { 0x004d1111u, (re_fn_t)ScriptOpSkipClear004D1111 }, { 0x004d1135u, (re_fn_t)ScriptReadU32_004D1135 },
+  { 0x004d116cu, (re_fn_t)P48_OpRampDown },        { 0x004d121bu, (re_fn_t)P48_OpRampUp },
+  { 0x004d133cu, (re_fn_t)ScriptLoopStep_004D133C }, { 0x004d13d8u, (re_fn_t)ScriptOpSetBit4_004D13D8 },
+  { 0x004d1402u, (re_fn_t)ScriptOpClearBit2_004D1402 }, { 0x004d142cu, (re_fn_t)P48_OpFlags },
+  { 0x004d14d8u, (re_fn_t)ScriptSkip16_004D14D8 }, { 0x004d1635u, (re_fn_t)ScriptSkipBack_004D1635 },
+  { 0x004d1672u, (re_fn_t)P48_OpRepeat },          { 0x004d1529u, (re_fn_t)P65_ScriptCall },
+  { 0x004d1601u, (re_fn_t)ScriptOpSkip4_004D1601 }, { 0x004d12cau, (re_fn_t)ScriptReadPair_004D12CA },
+  { 0x004d1737u, (re_fn_t)ScriptOpToggle10_004D1737 }, { 0x004d156au, (re_fn_t)P97_ScriptOpNext },
+  { 0x004d0d7cu, (re_fn_t)P48_OpTurn },            { 0x004d0f28u, (re_fn_t)P95_ScriptTurn },
+  { 0x004d03d0u, (re_fn_t)ScriptOpSetBit200_004D03D0 },
 };
 #define RE_DYN_MAX 4096
 #define RE_FN_MAX 512

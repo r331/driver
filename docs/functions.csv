@@ -2291,7 +2291,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004ab808,FUN_004ab808,P95_PoolIconInit,manual,,,,340,ported
 004ab95c,FUN_004ab95c,P94_IconQuad,manual,,,,288,ported
 004aba7c,FUN_004aba7c,,,,,,749,ported
-004abd69,FUN_004abd69,,,,,,2312,todo
+004abd69,FUN_004abd69,P111_IconsInit,,ported111,,,2312,ported
 004ac671,FUN_004ac671,PoolNext004AC671,manual,Ported6,,,59,ported
 004ac6ac,FUN_004ac6ac,PoolPush004AC6AC,manual,SmallFuncs,,,36,ported
 004ac6d0,FUN_004ac6d0,PoolPop004AC6D0,manual,SmallFuncs,,,50,ported
@@ -2322,7 +2322,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004b00ad,FUN_004b00ad,,,,,,425,todo
 004b0256,FUN_004b0256,,,,,,618,ported
 004b04c0,FUN_004b04c0,P96_SpawnDust,manual,Ported96,,,298,ported
-004b05ea,FUN_004b05ea,,,,,,2788,todo
+004b05ea,FUN_004b05ea,P111_DebrisIcon,,ported111,,,2788,ported
 004b10ce,FUN_004b10ce,,,,,,2245,todo
 004b1993,FUN_004b1993,P108_SmokeA,,ported108,,,1293,ported
 004b1ea0,FUN_004b1ea0,P108_SmokeB,,ported108,,,1368,ported
@@ -2338,7 +2338,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004b5049,FUN_004b5049,P107_CarLight,,ported107,,,917,ported
 004b53de,FUN_004b53de,P110_GlowA,,ported110,,,1200,ported
 004b588e,FUN_004b588e,,,,,,5469,todo
-004b6deb,FUN_004b6deb,,,,,,1544,todo
+004b6deb,FUN_004b6deb,P111_Flare,,ported111,,,1544,ported
 004b73f3,FUN_004b73f3,,,,,,3775,todo
 004b82b2,FUN_004b82b2,P110_GlowC,,ported110,,,1471,ported
 004b8871,FUN_004b8871,P110_GlowB,,ported110,,,1240,ported
@@ -2504,7 +2504,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004cdda6,FUN_004cdda6,P110_ScriptSprites,,ported110,,,842,ported
 004cf100,FUN_004cf100,GlobalSet004CF100,manual,GlobalSets,,,35,ported
 004cf123,FUN_004cf123,,,,,,428,todo
-004cf2cf,FUN_004cf2cf,,,,,,995,todo
+004cf2cf,FUN_004cf2cf,P111_ScriptTick,,ported111,,,995,ported
 004cf6b2,FUN_004cf6b2,P97_ScriptSave,manual,,,,192,ported
 004cf772,FUN_004cf772,P97_ScriptLoad,manual,,,,218,ported
 004cf84c,FUN_004cf84c,,,,,,1565,todo

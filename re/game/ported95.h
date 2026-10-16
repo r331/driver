@@ -54,7 +54,7 @@
 #define P95_Deb1      GAME_VAR(int32_t, P95_Deb1, 0x010de050)
 #define P95_DebRnd    GAME_VAR(p95_u4_t, P95_DebRnd, 0x010de060)
 #define P95_DebPos    GAME_VAR(p95_u16_t, P95_DebPos, 0x010de230)   /* 4 точки по 4 слова (float x, y, z, —) */
-#define P95_PoolIcon  GAME_VAR(uint8_t *, P95_PoolIcon, 0x01105d84) /* запись значка CARPOOL6 (16 байт, P93_FindIcon) */
+#define P95_PoolIcon  ICONTAB_VAR(uint32_t, 7) /* запись значка CARPOOL6 (16 байт, P93_FindIcon) */
 #define P95_PoolPage  GAME_VAR(uint8_t, P95_PoolPage, 0x01123282)
 #define P95_PoolQuad  GAME_VAR(p95_u12_t, P95_PoolQuad, 0x01123288) /* 4 индекса + 8 float uv */
 #define P95_Near1     GAME_VAR(int32_t, P95_Near1, 0x0056038c)      /* ближайшая запись трафика типа 4 (номер+1, −1 — нет) */
@@ -93,7 +93,7 @@ extern p95_chandef_t P95_ChanDef; extern p95_chanvol_t P95_ChanVol; extern int32
 extern int32_t P95_B87E34, P95_B87E3C, P95_B87E40, P95_B87EA4, P95_B87EB4, P95_B87EBC, P95_B87EC0, P95_B87EC4, P95_B87ED0, P95_B87ED8, P95_B87EDC, P95_B87EE0, P95_B87F08;
 extern int32_t P95_BDF9D0, P95_BDF9D4, P95_BDFA0C, P95_BDFA14, P95_BDFA5C, P95_BDFA60, P95_C818B8, P95_D11920, P95_575F1C;
 extern int32_t P95_Deb0, P95_Deb1; extern p95_u4_t P95_DebRnd; extern p95_u16_t P95_DebPos;
-extern uint8_t *P95_PoolIcon; extern uint8_t P95_PoolPage; extern p95_u12_t P95_PoolQuad;
+extern uint8_t P95_PoolPage; extern p95_u12_t P95_PoolQuad;
 extern int32_t P95_Near1, P95_Near2, P95_ModeSel; extern p95_modetab_t P95_ModeTab;
 extern p95_line_fn P95_DrawLine; extern p95_vtx_t P95_LineV0, P95_LineV1; extern p95_i2_t P95_CrossOfs; extern p95_i6_t P95_CrossTab;
 #endif

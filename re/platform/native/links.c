@@ -99,6 +99,7 @@
 #include "../../game/ported108.h"
 #include "../../game/ported109.h"
 #include "../../game/ported110.h"
+#include "../../game/ported111.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -181,6 +182,7 @@ void N54_Fn4913CC (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4) 
 int32_t P53_Fn40EFD5 (void) { return (int32_t)P74_KeyScan(); }
 int32_t P53_Fn4045E0 (void) { return (int32_t)P57_Menu4045E0(); }
 void P52_Fn4E5A1A (void) { P97_FadeIconDraw(); }
+void P52_Fn4ABD69 (void) { P111_IconsInit(); }
 void P52_Fn4AB127 (void) { P104_DebrisTabs(); }
 void P52_Fn4AB500 (void) { P100_DebrisInit(); }
 void P52_Fn4AB808 (void) { P95_PoolIconInit(); }

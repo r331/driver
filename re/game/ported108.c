@@ -151,7 +151,6 @@
 #include "ported107.h"
 
 GAME_VAR_DEF(double, P108_FmvLen, 0x00b1c850)
-GAME_VAR_DEF(uint32_t, P108_SmokeIcon, 0x01105d88)
 
 static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }

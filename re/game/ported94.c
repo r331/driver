@@ -1,6 +1,7 @@
 /* Пачка листовых функций — восстановлено из Game.exe (004a522a, 004e0fd4, 004dab80, 004da76a, 004da5e0, 00496569, 00490591,
    004f2f2a, 004f4c3d, 004b9835, 005061c9, 004094e3, 004e5284, 004ab95c, 00507672). */
 #include "ported94.h"
+#include "reptr.h"
 #include "ported4.h"
 #include "ported6.h"
 #include "ported11.h"
@@ -28,7 +29,7 @@ GAME_VAR_DEF(int32_t, P94_FadeDir, 0x00d048f0)
 GAME_VAR_DEF(int32_t, P94_FadeVal, 0x00d044d4)
 GAME_VAR_DEF(float, P94_FadePos, 0x00d04478)
 GAME_VAR_DEF(float, P94_FadeSpeed, 0x00d04784)
-GAME_VAR_DEF(uint8_t *, P94_IconRec, 0x010faf20)
+GAME_VAR_DEF(uint32_t, P94_IconRec, 0x010faf20)
 GAME_VAR_DEF(uint8_t, P94_QuadPage, 0x010fc9a2)
 GAME_VAR_DEF(p94_quad_t, P94_Quad, 0x010fc9a8)
 GAME_VAR_DEF(int32_t, P94_DirCnt, 0x01145a48)
@@ -259,7 +260,7 @@ void P94_FadeStep(void) {
 
 /* 004ab95c: четырёхугольник значка из записи P94_IconRec (+8 страница, +9 u, +10 v, +0xb ширина, +0xc высота) */
 void P94_IconQuad(void) {
-  const uint8_t *r = P94_IconRec;
+  const uint8_t *r = (const uint8_t *)re_ptr(P94_IconRec);
   if (r == NULL) return;                                /* охранная проверка: в native запись ставит ещё не перенесённый код */
   P94_Quad[0] = 0; P94_Quad[1] = 1; P94_Quad[2] = 2; P94_Quad[3] = 3;
   P94_QuadPage = r[8];

@@ -83,7 +83,6 @@ GAME_VAR_DEF(int32_t, P95_Deb0, 0x0107c3c8)
 GAME_VAR_DEF(int32_t, P95_Deb1, 0x010de050)
 GAME_VAR_DEF(p95_u4_t, P95_DebRnd, 0x010de060)
 GAME_VAR_DEF(p95_u16_t, P95_DebPos, 0x010de230)
-GAME_VAR_DEF(uint8_t *, P95_PoolIcon, 0x01105d84)
 GAME_VAR_DEF(uint8_t, P95_PoolPage, 0x01123282)
 GAME_VAR_DEF(p95_u12_t, P95_PoolQuad, 0x01123288)
 GAME_VAR_DEF(p95_line_fn, P95_DrawLine, 0x01270e00)
@@ -256,8 +255,8 @@ void P95_InitDebris(void) {
 
 /* 004ab808: значок CARPOOL6 → страница и прямоугольник (4 индекса, 8 uv) */
 void P95_PoolIconInit(void) {
-  P95_PoolIcon = P93_FindIcon("CARPOOL6");
-  const uint8_t *r = P95_PoolIcon;
+  const uint8_t *r = P93_FindIcon("CARPOOL6");
+  P95_PoolIcon = re_addr(r);
   if (r == NULL) return;
   P95_PoolQuad[0] = 0; P95_PoolQuad[1] = 1; P95_PoolQuad[2] = 2; P95_PoolQuad[3] = 3;
   P95_PoolPage = r[8];

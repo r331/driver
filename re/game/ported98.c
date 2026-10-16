@@ -70,7 +70,7 @@ GAME_VAR_DEF(p98_gr1_fn, P98_GrD40, 0x01270d40)
 GAME_VAR_DEF(int32_t, P98_IconN, 0x0110e4e8)
 GAME_VAR_DEF(p98_iconidx_t, P98_IconIdx, 0x010ffa40)
 GAME_VAR_DEF(p98_f3_t, P98_IconCol, 0x010fc9d8)
-GAME_VAR_DEF(uint8_t *, P98_SixRec, 0x01123260)
+GAME_VAR_DEF(uint32_t, P98_SixRec, 0x01123260)
 GAME_VAR_DEF(p98_six_t, P98_Six, 0x010ff900)
 GAME_VAR_DEF(uint8_t, P98_DD70, 0x00d0dd70)
 GAME_VAR_DEF(int16_t, P98_DDE4, 0x00d0dde4)
@@ -267,7 +267,7 @@ int32_t P98_CreditsFace(uint8_t *rec) {
 
 /* ---- 004b4095: вывести накопленные значки (00c56804 + i*0xb4 → 004accf0) ---- */
 void P98_IconFlush(void) {
-  if (P94_IconRec == NULL) { P98_IconN = 0; return; }
+  if (P94_IconRec == 0) { P98_IconN = 0; return; }
   float c = (float)((0xff - P14_00d17b18) * 0xff >> 8);
   P98_IconCol[0] = c; P98_IconCol[1] = c; P98_IconCol[2] = c;
   if (P26_FxD != 0 && P98_GrD40 != NULL) P98_GrD40(0);
@@ -287,8 +287,9 @@ void P98_IconFlush(void) {
 void P98_DrawSix(void) {
   if (D_00b87e30 != 2) return;
   if (P85_StateDirty != 4) { if (P85_StateFn) P85_StateFn(3, 1, 0, 1, 0); P85_StateDirty = 4; }
-  if (P98_SixRec == NULL) return;   /* native: запись значка не задана */
-  uint32_t t = P98_SixRec[8];
+  const uint8_t *six = (const uint8_t *)re_ptr(P98_SixRec);
+  if (six == NULL) return;   /* native: запись значка не задана */
+  uint32_t t = six[8];
   if (t != (uint32_t)P86_CurTex) {
     P86_CurTex = (int32_t)t;
     if (P86_TexSrc) P86_TexSrc(0, (uint32_t)rd32(&g_01145a60[t * 0x10 + 8]), 3, (uint32_t)rd32(&g_01145a60[t * 0x10 + 0xc]));

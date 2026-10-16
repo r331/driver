@@ -61,7 +61,7 @@ typedef uint16_t p98_pix_t[0x10000];
 #define P98_IconN     GAME_VAR(int32_t, P98_IconN, 0x0110e4e8)
 #define P98_IconIdx   GAME_VAR(p98_iconidx_t, P98_IconIdx, 0x010ffa40)
 #define P98_IconCol   GAME_VAR(p98_f3_t, P98_IconCol, 0x010fc9d8)
-#define P98_SixRec    GAME_VAR(uint8_t *, P98_SixRec, 0x01123260)
+#define P98_SixRec    GAME_VAR(uint32_t, P98_SixRec, 0x01123260)
 #define P98_Six       GAME_VAR(p98_six_t, P98_Six, 0x010ff900)
 #define P98_DD70      GAME_VAR(uint8_t, P98_DD70, 0x00d0dd70)
 #define P98_DDE4      GAME_VAR(int16_t, P98_DDE4, 0x00d0dde4)
@@ -138,7 +138,7 @@ typedef uint16_t p98_pix_t[0x10000];
 extern p98_credits_t P98_Credits; extern const p98_credh_t P98_CredH; extern const p98_facenames_t P98_FaceNames;
 extern p98_faceblk_t P98_FaceBlk; extern p98_faces_t P98_Faces; extern int32_t P98_FaceCur; extern p98_strtab2_t P98_MisStr;
 extern p98_gr1_fn P98_GrD40; extern int32_t P98_IconN; extern p98_iconidx_t P98_IconIdx; extern p98_f3_t P98_IconCol;
-extern uint8_t *P98_SixRec; extern p98_six_t P98_Six; extern uint8_t P98_DD70; extern int16_t P98_DDE4; extern p98_b54_t P98_TrafX;
+extern uint32_t P98_SixRec; extern p98_six_t P98_Six; extern uint8_t P98_DD70; extern int16_t P98_DDE4; extern p98_b54_t P98_TrafX;
 extern uint32_t P98_CamW; extern float P98_ScaleB; extern p98_f5_t P98_CamQuat; extern p98_camrecs_t P98_CamRecs; extern uint32_t P98_TgtW;
 extern int32_t P98_FreeTurn; extern uint8_t P98_KeyL, P98_KeyR, P98_KeyB, P98_KeyMode, P98_KeyTgt;
 extern int32_t P98_MrkOff, P98_MrkModel; extern p98_f3_t P98_MrkPos, P98_MrkSrc; extern uint32_t P98_MrkW; extern p98_carmat_t P98_CarMat;

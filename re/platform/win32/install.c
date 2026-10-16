@@ -99,6 +99,7 @@
 #include "../../game/ported108.h"
 #include "../../game/ported109.h"
 #include "../../game/ported110.h"
+#include "../../game/ported111.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2102,6 +2103,10 @@ void re_install_all(void) {
     re_hook(0x00504866, (void*)P109_RadarArrows, "P109_RadarArrows");
     re_hook(0x005191c5, (void*)P109_InputTick, "P109_InputTick");
     re_hook(0x00505b54, (void*)P109_RadarTraffic, "P109_RadarTraffic");
+    re_hook(0x004abd69, (void*)P111_IconsInit, "P111_IconsInit");
+    re_hook(0x004b05ea, (void*)P111_DebrisIcon, "P111_DebrisIcon");
+    re_hook(0x004b6deb, (void*)P111_Flare, "P111_Flare");
+    re_hook(0x004cf2cf, (void*)P111_ScriptTick, "P111_ScriptTick");
     re_hook(0x0050bd09, (void*)P110_RadarGrid, "P110_RadarGrid");
     re_hook(0x00502787, (void*)P110_Gauge, "P110_Gauge");
     re_hook(0x004aa4ea, (void*)P110_IconRect, "P110_IconRect");

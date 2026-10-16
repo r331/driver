@@ -12,3 +12,4 @@
 #  define GAME_VAR_DEF(type, name, addr)      type name;
 #endif
 #include "cartab.h"
+#include "icontab.h"
