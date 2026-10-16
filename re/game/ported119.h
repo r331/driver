@@ -24,6 +24,7 @@ extern int32_t P119_GroundY, P119_SelIdx; extern p119_wheels_t P119_Wheels; exte
 #endif
 void    P119_Hubcap(int32_t draw);                                                      /* 004c0c6f */
 int32_t P119_TrafficSpawn(int32_t i, int32_t node, int32_t lane, int32_t x, int32_t z);  /* 00491a56 */
+uint8_t P119_SelByte(int32_t off);                                                      /* байт таблицы выбора машины по P119_SelPtr (native — копия .data 0054e320) */
 int32_t P119_CarSelKey(int32_t row);                                                    /* 00417386 */
 void    P119_MenuFrame(void);                                                           /* 0040cb9f */
 void    P119_CarDust(int32_t i, int32_t kind, int32_t dist);                            /* 004aff92 */

@@ -1,3 +1,4 @@
+#include "ported124.h"
 #include "reptr.h"
 #include "ported12.h"
 #include "ported98.h"
@@ -196,7 +197,7 @@ uint32_t P12_Fn004124AF(void) {
   return 0;
 }
 void P12_Fn0040C813(uint32_t a, int32_t b) {
-  Call0040C610(a, 0);
+  P124_ShowBmp((const char *)re_ptr(a), 0);
   while (R12_4D97E9() != 0) {}
   Call004086B4();
   do { if (b <= g_005d577c) break; } while (R12_4D97E9() == 0);

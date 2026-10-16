@@ -112,6 +112,7 @@
 #include "../../game/ported121.h"
 #include "../../game/ported122.h"
 #include "../../game/ported123.h"
+#include "../../game/ported124.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2209,6 +2210,16 @@ void re_install_all(void) {
     re_hook(0x004f154e, (void*)P123_SideDist, "P123_SideDist");
     re_hook(0x004a45eb, (void*)P123_EvLine, "P123_EvLine");
     re_hook(0x004a3fa6, (void*)P123_EventsChunk, "P123_EventsChunk");
+    re_hook(0x00416794, (void*)P124_MotelKeys, "P124_MotelKeys");
+    re_hook(0x00416d6d, (void*)P124_MotelSample, "P124_MotelSample");
+    re_hook(0x0040c610, (void*)P124_ShowBmp, "P124_ShowBmp");
+    re_hook(0x0040d6e8, (void*)P124_ReadBmp, "P124_ReadBmp");
+    re_hook(0x004182b0, (void*)P124_MotelInit, "P124_MotelInit");
+    re_hook(0x004171f0, (void*)P124_CarSelect, "P124_CarSelect");
+    re_hook(0x004bf2a0, (void*)P124_DebugLog, "P124_DebugLog");
+    re_hook(0x004bf4a1, (void*)P124_WatchShow, "P124_WatchShow");
+    re_hook(0x004c38e2, (void*)P124_ReplayMenu, "P124_ReplayMenu");
+    re_hook(0x004c813d, (void*)P124_HandleDirector, "P124_HandleDirector");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");

@@ -378,6 +378,7 @@ static uint8_t sel_byte(int32_t off) {   /* байт таблицы 005fea14; .d
   return *(const uint8_t *)re_ptr(a);
 #endif
 }
+uint8_t P119_SelByte(int32_t off) { return sel_byte(off); }
 int32_t P119_CarSelKey(int32_t row) {
   if (IsFlagSetNotMasked_004E383A(1) != 0) { Ui00418886(); return -1; }
   if (IsFlagSetNotMasked_004E383A(0xcb) != 0) {

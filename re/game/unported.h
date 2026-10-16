@@ -7,6 +7,9 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
+    V(P124_Fn4D35B2, 0x004d35b2, (void), ()) \
+    R(int32_t, P58_Fn416794, 0x00416794, (void), ())   /* шпион теста; перенесено как P124_MotelKeys (--skip) */ \
+    V(P124_Fn4C43B6, 0x004c43b6, (int32_t node), (node))   /* действие узла меню повтора (нет в Ghidra-списке) */ \
     V(P98_Fn4ACCF0, 0x004accf0, (uint32_t rec, int32_t a), (rec, a)) \
     V(P98_Fn4BA81F, 0x004ba81f, (uint8_t *rec), (rec)) \
     V(P98_Fn4C582F, 0x004c582f, (void *cam), (cam)) \
@@ -185,7 +188,6 @@
     V(Call0052360D, 0x0052360d, (int32_t a0), (a0)) \
     V(Call004184DE, 0x004184de, (uint32_t a0), (a0)) \
     V(Call0041846C, 0x0041846c, (uint32_t a0, uint32_t a1), (a0, a1)) \
-    V(Call0040C610, 0x0040c610, (uint32_t a0, int32_t a1), (a0, a1)) \
     V(Call004086B4, 0x004086b4, (void), ()) \
     V(Call004086EA, 0x004086ea, (void), ()) \
     V(Call004D78F3, 0x004d78f3, (int32_t a0), (a0)) \
@@ -383,7 +385,6 @@
     V(P58_Fn4185D2, 0x004185d2, (uint32_t tbl, int32_t a1, uint32_t tbl2), (tbl, a1, tbl2)) \
     R(int32_t, P58_Fn418675, 0x00418675, (uint32_t tbl, int32_t cur), (tbl, cur)) \
     V(P58_Fn416605, 0x00416605, (void), ()) \
-    R(int32_t, P58_Fn416794, 0x00416794, (void), ()) \
     V(P58_Fn51763A, 0x0051763a, (const char *a0, int32_t a1), (a0, a1)) \
     V(P58_Fn4AA4EA, 0x004aa4ea, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, void *a4, int32_t a5), (a0, a1, a2, a3, a4, a5)) \
     V(P58_Fn40CFDF, 0x0040cfdf, (int32_t x, int32_t y, uint32_t tbl, const char *name, int32_t a4), (x, y, tbl, name, a4)) \
