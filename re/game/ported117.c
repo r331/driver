@@ -1,5 +1,6 @@
 /* v1.62, ported117 — см. ported117.h */
 #include "ported117.h"
+#include "ported118.h"
 #include "p117_data.h"
 #include "reptr.h"
 #include "ported116.h"
@@ -102,10 +103,10 @@ static void skid_rec(const skid_side_t *s, int32_t w, int32_t ang,
   }
   if (!hard) {
     rec[4] = 0;
-    if (P26_FxA == 0 && fr != 0) P117_Fn4B8F4E(p, 100, 500, 2, 0, m, 0);
+    if (P26_FxA == 0 && fr != 0) P118_SkidFx(p, 100, 500, 2, 0, m, 0);
     if (s->set5624) P102_5624A4 = 1;
   } else {
-    if (P26_FxA == 0 && fr != 0) P117_Fn4B8F4E(p, 100, 500, 3, 0, m, 0);
+    if (P26_FxA == 0 && fr != 0) P118_SkidFx(p, 100, 500, 3, 0, m, 0);
     rec[4] = 1;
     if (s->set5624) P102_5624A4 = 0;
   }

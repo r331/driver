@@ -1,4 +1,5 @@
 #include "uihandlers3.h"
+#include "ported118.h"
 #ifndef RE_HOOK_BUILD
 #include "ported92.h"
 #include "ported93.h"
@@ -76,7 +77,7 @@ void UiSetSlot00414621(int32_t a0) {
     if (a0 == 0) UiPtr005FE9B8[0x84] = 2;
 }
 void Ui00418119(int32_t a0) {
-    G005FEA54 = 1; Call0041A1F9(a0);
+    G005FEA54 = 1; P118_CamRoute((uint32_t)a0);
 }
 void Ui004184DE(int32_t a0) {
     G005FEA5C = a0; G005FEA60 = 1;

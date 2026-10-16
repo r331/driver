@@ -1,5 +1,6 @@
 #pragma once
 #include "gvar.h"
+#include "ported118.h"
 #include "unported.h"
 #include "menustate.h"
 #include <stdint.h>
@@ -189,12 +190,8 @@ extern int32_t P12_005feb60;
 #define g_005feb00 G005FEB00
 #define g_005fea54 G005FEA54
 #define g_005feda0 D_005feda0
-typedef uint8_t p12_005febbc_t[0x800];
 #define g_005febbc P12_005febbc
-#define P12_005febbc GAME_VAR(p12_005febbc_t,P12_005febbc,0x005febbc)
-#ifndef RE_HOOK_BUILD
-extern p12_005febbc_t P12_005febbc;
-#endif
+#define P12_005febbc (P118_Route + 0x2c)   /* v1.63: кадры ключей маршрута камеры — поле +0x2c P118_Route 005feb90 */
 #define g_005feeec P8_005feeec
 #define g_005feef0 P12_005feef0
 #define P12_005feef0 GAME_VAR(int32_t,P12_005feef0,0x005feef0)

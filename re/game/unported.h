@@ -32,7 +32,6 @@
     R(int32_t, P68_Fn41B1C0, 0x0041b1c0, (void), ()) \
     V(P68_Fn41B3AB, 0x0041b3ab, (void), ()) \
     V(P67_Fn40ABAC, 0x0040abac, (uint32_t a), (a)) \
-    V(P117_Fn4B8F4E, 0x004b8f4e, (float *pos, int32_t a, int32_t b, int32_t type, int32_t c, float *mat, int32_t d), (pos, a, b, type, c, mat, d)) \
     R(int32_t, P67_Fn514C9F, 0x00514c9f, (void *p, int32_t a, int32_t b), (p, a, b)) \
     V(P67_Fn51500C, 0x0051500c, (void *p), (p)) \
     V(P67_Fn514165, 0x00514165, (void *p), (p)) \
@@ -155,7 +154,6 @@
     V(N14_Fn48A627, 0x0048a627, (void), ()) \
     R(uint32_t, N14_Fn503ECC, 0x00503ecc, (const uint8_t* a0), (a0)) \
     V(Call00405D60, 0x00405d60, (int32_t a0, uint32_t a1), (a0, a1)) \
-    V(Call0049EC01, 0x0049ec01, (int32_t a0, uint32_t a1), (a0, a1)) \
     V(Call0040CCB4, 0x0040ccb4, (uint32_t a0, uint32_t a1), (a0, a1)) \
     R(int32_t, R12_4082A0, 0x004082a0, (void), ()) \
     R(int32_t, R12_413D70, 0x00413d70, (void), ()) \
@@ -241,7 +239,6 @@
     V(Call0040EA70, 0x0040ea70, (void), ()) \
     V(Call00419B35, 0x00419b35, (void), ()) \
     V(Call00414D1F, 0x00414d1f, (void), ()) \
-    V(Call0041A1F9, 0x0041a1f9, (int32_t a0), (a0)) \
     R(int32_t, Call0042655A, 0x0042655a, (int32_t a0), (a0)) \
     V(Call0041D6AA, 0x0041d6aa, (void), ()) \
     V(Call004D90F4, 0x004d90f4, (int32_t a0), (a0)) \

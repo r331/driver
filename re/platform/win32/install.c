@@ -106,6 +106,7 @@
 #include "../../game/ported115.h"
 #include "../../game/ported116.h"
 #include "../../game/ported117.h"
+#include "../../game/ported118.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2153,6 +2154,10 @@ void re_install_all(void) {
     re_hook(0x00504cad, (void*)P117_Radar, "P117_Radar");
     re_hook(0x00502fe2, (void*)P117_FullMap, "P117_FullMap");
     re_hook(0x0040ce31, (void*)P117_TextList, "P117_TextList");
+    re_hook(0x0041a1f9, (void*)P118_CamRoute, "P118_CamRoute");
+    re_hook(0x004932d5, (void*)P118_TrafficTurn, "P118_TrafficTurn");
+    re_hook(0x0048dddb, (void*)P118_TrafficBlocked, "P118_TrafficBlocked");
+    re_hook(0x004b8f4e, (void*)P118_SkidFx, "P118_SkidFx");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");

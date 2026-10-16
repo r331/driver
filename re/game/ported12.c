@@ -1,4 +1,6 @@
 #include "ported12.h"
+#include "ported98.h"
+#include "ported118.h"
 #include "ported40.h"
 #include "ported43.h"
 #include "ported7.h"
@@ -26,7 +28,6 @@ GAME_VAR_DEF(p12_005fe7a8_t,P12_005fe7a8,0x005fe7a8)
 GAME_VAR_DEF(p12_005fe884_t,P12_005fe884,0x005fe884)
 GAME_VAR_DEF(int32_t,P12_00d17b90,0x00d17b90)
 GAME_VAR_DEF(int32_t,P12_005feb60,0x005feb60)
-GAME_VAR_DEF(p12_005febbc_t,P12_005febbc,0x005febbc)
 GAME_VAR_DEF(int32_t,P12_005feef0,0x005feef0)
 GAME_VAR_DEF(int32_t,P12_005feef4,0x005feef4)
 GAME_VAR_DEF(int32_t,P12_005feef8,0x005feef8)
@@ -212,9 +213,9 @@ void P12_Fn0040DA56(uint32_t a) {
 void P12_Fn0041A8CD(void) {
   if (g_005fea98 == rd32(&g_005febbc[(g_005feb60 + 1) * 0x34]) &&
       (g_005feb60 = g_005feb60 + 1, g_005feb60 == g_005feb48 - 1)) {
-    Call0041A1F9(g_005feb00); g_005fea54 = 0; g_005feda0 = 0;
+    P118_CamRoute((uint32_t)g_005feb00); g_005fea54 = 0; g_005feda0 = 0;
   } else {
-    Call0049EC01(g_005fea98, 0x005feb90u + (uint32_t)g_005feb60 * 0xd);
+    P98_CamSpline(g_005fea98, &P118_Route[(uint32_t)g_005feb60 * 0x34]);   /* v1.63: в прежнем переносе шаг ошибочно 0xd байт */
   }
 }
 uint32_t P12_Fn0041AECF(void) {
