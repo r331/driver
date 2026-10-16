@@ -48,6 +48,7 @@
 #include "ported98.h"
 #include "ported100.h"
 #include "ported121.h"
+#include "ported123.h"
 #include "reptr.h"
 #include <stdio.h>
 #include <string.h>
@@ -104,6 +105,9 @@ static void quad_tail(float v[4][3], uint8_t *rec, uint32_t mode, int fade) {
 void P122_SpotShadow(uint32_t pos, int32_t size) {
   const float *p = (const float *)re_ptr(pos);
   if (p == NULL) return;
+  P122_SpotShadowF(p, size);
+}
+void P122_SpotShadowF(const float *p, int32_t size) {   /* v1.68: тело 004accf0 по родному указателю (00502e76) */
   float s = (float)size, v[4][3] = {
     { -s + p[0], 0.0f, s + p[2] }, { s + p[0], 0.0f, s + p[2] },
     { s + p[0], 0.0f, -s + p[2] }, { -s + p[0], 0.0f, -s + p[2] } };
@@ -131,7 +135,7 @@ void P122_ObjATick(void) {
     uint32_t f = (uint32_t)rd32(o + 0x68);
     if ((f & 2) == 0) continue;
     if (f & 4) P100_PartStep((float *)o);
-    else if (f & 8) P122_Fn4B9E9F(o);
+    else if (f & 8) P123_ObjAFall(o);
     else if (f & 0x8000) StepSpeedA_004B9E2B(o);
     else if (f & 0x1000) StepSpeedB_004B9E54(o);
     if (f & 0x9000) {
@@ -176,9 +180,9 @@ char *P122_EventsParse(char *p) {
   P122_Ev118 = 0; P122_Ev240 = 0;
   while (p != NULL && P51_PrefixMatch(p, "EVENT_END") != 1) {
     const uint8_t *q = SkipToIdentStart_004A596B((const uint8_t *)p);
-    uint32_t r = P122_Fn4A45EB(re_addr(q), a);
+    uint32_t r = P123_EvLine(re_addr(q), a);
     char *n = (char *)re_ptr(r);
-    if (n == NULL) return NULL;          /* native: 004a45eb не перенесена (заглушка → 0) */
+    if (n == NULL) return NULL;          /* native: строка вне известных областей */
     p = SkipLine004A59C6(n);
   }
   wr16(P122_EvCur + 4, (int16_t)P122_Ev24C);

@@ -18,6 +18,7 @@ extern uint8_t *P122_EvCur;
 extern int32_t P122_Blink, P122_BlinkOn, P122_Ev118, P122_Ev240, P122_Ev24C;
 #endif
 void     P122_SpotShadow(uint32_t pos, int32_t size);   /* 004accf0: пятно-квадрат 2·size под точкой pos (float x,_,z), на дороге */
+void     P122_SpotShadowF(const float *p, int32_t size);  /* v1.68: то же по родному указателю */
 void     P122_CarGlow(int32_t car);                     /* 004ac779: пятно света фар перед машиной car, гаснет с высотой камеры */
 void     P122_ObjATick(void);                           /* 004ba31b: такт 200 объектов P95_ObjA по флагам, время жизни */
 void     P122_MapNames(const uint8_t *hdr, const char *names, uint8_t page);  /* 0040d56c: имена значков страницы в таблицу P54_MapAPtr */
