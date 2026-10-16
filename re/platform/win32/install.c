@@ -115,6 +115,7 @@
 #include "../../game/ported124.h"
 #include "../../game/ported125.h"
 #include "../../game/ported126.h"
+#include "../../game/ported127.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2244,6 +2245,16 @@ void re_install_all(void) {
     re_hook(0x0040c6bb, (void*)P126_ShowBmpFade, "P126_ShowBmpFade");
     re_hook(0x004e10e3, (void*)P126_WheelSmoke, "P126_WheelSmoke");
     re_hook(0x004ad244, (void*)P126_KerbDebris, "P126_KerbDebris");
+    re_hook(0x004c582f, (void*)P127_AutoCamera, "P127_AutoCamera");
+    re_hook(0x00494e01, (void*)P127_TrafficLane, "P127_TrafficLane");
+    re_hook(0x0050b957, (void*)P127_MapWindow, "P127_MapWindow");
+    re_hook(0x004de381, (void*)P127_PlayerSkid, "P127_PlayerSkid");
+    re_hook(0x004f1a19, (void*)P127_SpawnTick, "P127_SpawnTick");
+    re_hook(0x004ad3b5, (void*)P127_FarDebris, "P127_FarDebris");
+    re_hook(0x004eac70, (void*)P127_LampLights, "P127_LampLights");
+    re_hook(0x0050ee00, (void*)P127_Pause, "P127_Pause");
+    re_hook(0x004f472b, (void*)P127_ScriptTick, "P127_ScriptTick");
+    re_hook(0x004131a0, (void*)P127_NameEntry, "P127_NameEntry");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");

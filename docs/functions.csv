@@ -1489,7 +1489,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00412f74,FUN_00412f74,Ui00412F74,manual,MenuState,,,28,ported
 00412f90,FUN_00412f90,Ui00412F90,manual,MenuState,,,12,ported
 00412f9c,FUN_00412f9c,Ui00412F9C,manual,MenuState,,,20,ported
-004131a0,FUN_004131a0,,,,,,385,todo
+004131a0,FUN_004131a0,P127_NameEntry,,,,,385,ported
 00413381,FUN_00413381,P58_CheatsAll,manual,,,,51,ported
 004133b4,FUN_004133b4,P58_CheatByName,manual,,,,73,ported
 004134a0,FUN_004134a0,P57_Menu4134A0,manual,,,,124,ported
@@ -2145,7 +2145,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004946da,FUN_004946da,InitFlags004946DA,manual,SmallFuncs,,,39,ported
 00494701,FUN_00494701,P100_TrafficSlot,manual,Ported100,,,661,ported
 004949f0,FUN_004949f0,,,,,,972,todo
-00494e01,FUN_00494e01,,,,,,665,todo
+00494e01,FUN_00494e01,P127_TrafficLane,,,,,665,ported
 0049509a,FUN_0049509a,P21_CountActiveEntries,manual,ported21,,,145,ported
 0049512b,FUN_0049512b,TrafficFill,manual,,,,243,ported
 0049521e,FUN_0049521e,,,,,,809,ported
@@ -2302,7 +2302,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004accf0,FUN_004accf0,,,,,,1080,ported
 004ad128,FUN_004ad128,P97_KickDebris,manual,,,,284,ported
 004ad244,FUN_004ad244,P126_KerbDebris,port,,,,369,ported
-004ad3b5,FUN_004ad3b5,,,,,,541,todo
+004ad3b5,FUN_004ad3b5,P127_FarDebris,,,,,541,ported
 004ad5d2,FUN_004ad5d2,P96_AddObjB,manual,Ported96,,,291,ported
 004ad6f5,FUN_004ad6f5,,,,,,322,ported
 004ad837,FUN_004ad837,P106_CarBrakeLights,,ported106,,,1941,ported
@@ -2431,7 +2431,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004c5499,FUN_004c5499,P61_StoreCamState,manual,director,manual,,481,ported
 004c567a,FUN_004c567a,CameraDump,manual,Director,,,317,ported
 004c57b7,FUN_004c57b7,GetCameraTypeName,manual,Director.c,,,43,ported
-004c582f,FUN_004c582f,CreateNewAutoCamera,debug_string,,,,658,named
+004c582f,FUN_004c582f,CreateNewAutoCamera,debug_string,,,,658,ported
 004c5c5d,,NextTrafficCar,manual,Director,,,,ported
 004c5d40,FUN_004c5d40,CountNearbyCars,manual,Director.c,,,200,ported
 004c5e08,FUN_004c5e08,P99_CamCheckPlayer,manual,,,,353,ported
@@ -2655,7 +2655,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004dd262,FUN_004dd262,,,,,,1418,ported
 004dd7ec,FUN_004dd7ec,,,,,,734,ported
 004ddaca,FUN_004ddaca,P107_CarInput,,ported107,,,2231,ported
-004de381,FUN_004de381,,,,,,1259,todo
+004de381,FUN_004de381,P127_PlayerSkid,,,,,1259,ported
 004de86c,FUN_004de86c,,,,,,457,ported
 004dea35,FUN_004dea35,,,,,,356,ported
 004deb99,FUN_004deb99,,,,,,1080,ported
@@ -2732,7 +2732,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004e969f,FUN_004e969f,P113_Heli,manual,Ported113,,,1312,ported
 004e9bbf,FUN_004e9bbf,,,,,,1927,todo
 004ea346,FUN_004ea346,P98_DrawMarker,manual,,,,283,ported
-004eac70,FUN_004eac70,,,,,,797,todo
+004eac70,FUN_004eac70,P127_LampLights,,,,,797,ported
 004eaf8d,FUN_004eaf8d,NegateCamZ004EAF8D,manual,SmallFuncs,,,66,ported
 004eafcf,FUN_004eafcf,P78_LoadLampsBlock,manual,Menu,,,17,ported
 004eafe0,FUN_004eafe0,P78_LoadLamps,manual,lamps,assert,,443,ported
@@ -2793,7 +2793,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004f1325,FUN_004f1325,P100_DrawPartsB,manual,Ported100,,,553,ported
 004f154e,FUN_004f154e,,,,,,503,ported
 004f1745,FUN_004f1745,P126_SpawnInit,port,,,,724,ported
-004f1a19,FUN_004f1a19,,,,,,1350,todo
+004f1a19,FUN_004f1a19,P127_SpawnTick,,,,,1350,ported
 004f2360,FUN_004f2360,,,,,,1687,todo
 004f29f7,FUN_004f29f7,,,,,,675,ported
 004f2c9a,FUN_004f2c9a,P100_MirrorMask,manual,mirror,assert,,656,ported
@@ -2807,7 +2807,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 004f3e78,FUN_004f3e78,P12_Fn004F3E78,manual,Misc12,,,107,ported
 004f4180,FUN_004f4180,,,,,,1046,todo
 004f4596,FUN_004f4596,,,MScript,assert,,405,todo
-004f472b,FUN_004f472b,,,MScript,range,,776,todo
+004f472b,FUN_004f472b,P127_ScriptTick,,MScript,range,,776,ported
 004f4a33,FUN_004f4a33,,,MScript,range,,273,ported
 004f4c3d,FUN_004f4c3d,P94_NearestObjDist,manual,MScript,range,,255,ported
 004f4d3c,FUN_004f4d3c,P99_ScriptMsgs,manual,,range,,468,ported
@@ -2926,7 +2926,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 00509e64,FUN_00509e64,,,,,,759,ported
 0050a15b,FUN_0050a15b,,,,,,3885,todo
 0050b088,FUN_0050b088,,,,,,2198,todo
-0050b957,FUN_0050b957,,,,,,724,todo
+0050b957,FUN_0050b957,P127_MapWindow,,,,,724,ported
 0050bc2b,FUN_0050bc2b,P97_MarkCells,manual,,,,222,ported
 0050bd09,FUN_0050bd09,P110_RadarGrid,,ported110,,,775,ported
 0050c010,FUN_0050c010,P12_Fn0050C010,manual,Misc12,,,119,ported
@@ -2938,7 +2938,7 @@ address,ghidra_name,name,name_source,module,module_source,redriver2,size,status
 0050e963,FUN_0050e963,P12_Fn0050E963,manual,Misc12,,,72,ported
 0050e9ab,FUN_0050e9ab,P96_ReplayScript,manual,Ported96,,,255,ported
 0050eaaa,FUN_0050eaaa,,,,,,854,ported
-0050ee00,FUN_0050ee00,Pause,debug_string,,,,673,named
+0050ee00,FUN_0050ee00,Pause,debug_string,,,,673,ported
 0050f289,FUN_0050f289,P55_StopAudio,manual,,,,123,ported
 0050f304,FUN_0050f304,P107_MenuNav,,ported107,,,613,ported
 0050f569,FUN_0050f569,P99_MenuItems,manual,,,,536,ported

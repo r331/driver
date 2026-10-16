@@ -10,7 +10,8 @@
     R(int32_t, P58_Fn416794, 0x00416794, (void), ())   /* шпион теста; перенесено как P124_MotelKeys (--skip) */ \
     V(P98_Fn4ACCF0, 0x004accf0, (uint32_t rec, int32_t a), (rec, a)) \
     V(P98_Fn4BA81F, 0x004ba81f, (uint8_t *rec), (rec)) \
-    V(P98_Fn4C582F, 0x004c582f, (void *cam), (cam)) \
+    V(P127_Fn50B088, 0x0050b088, (uint32_t a0), (a0)) \
+    R(int32_t, P127_Fn4F8E0C, 0x004f8e0c, (void *cmd), (cmd)) \
     V(P97_Fn52498E, 0x0052498e, (int32_t voice, int32_t sample, float a, float b, float c), (voice, sample, a, b, c)) \
     V(P97_Fn4262CE, 0x004262ce, (float x0, float y0, float x1, float y1, int32_t c), (x0, y0, x1, y1, c)) \
     V(P96_Fn4D7F91, 0x004d7f91, (float x, float y, float w, float h, int32_t c0, int32_t c1, int32_t c2, int32_t c3, int32_t c4, int32_t c5, int32_t c6, int32_t c7, int32_t c8, int32_t c9, int32_t c10, int32_t c11), (x, y, w, h, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11)) \
@@ -202,7 +203,6 @@
     V(Call004B998B, 0x004b998b, (uint32_t a0), (a0)) \
     V(Call004911D9, 0x004911d9, (void), ()) \
     V(Call0050F289, 0x0050f289, (void), ()) \
-    V(Call0050EE00, 0x0050ee00, (void), ()) \
     R(int32_t, R12_40A8B0, 0x0040a8b0, (uint32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4), (a0, a1, a2, a3, a4)) \
     V(Call004DAA36, 0x004daa36, (uint32_t a0, uint32_t a1), (a0, a1)) \
     V(Call00527885, 0x00527885, (int32_t a0, int32_t a1, int32_t a2, uint32_t a3), (a0, a1, a2, a3)) \

@@ -6,6 +6,7 @@
 #include "ported40.h"
 #include "ported43.h"
 #include "ported7.h"
+#include "ported127.h"
 GAME_VAR_DEF(int32_t,P12_00bdfa40,0x00bdfa40)
 GAME_VAR_DEF(int32_t,P12_00b87ef8,0x00b87ef8)
 GAME_VAR_DEF(int32_t,P12_005f7e5c,0x005f7e5c)
@@ -296,7 +297,7 @@ void P12_Fn004AAE34(void) {
 void P12_Fn0050E963(void) {
   if (g_00b5a76c == 0) {
     if (g_00b5a778 != 0 || g_00b5a770 != 0) Call0050F289();
-  } else if (g_00b5a778 == 0 || g_00b5a770 != 0) Call0050EE00();
+  } else if (g_00b5a778 == 0 || g_00b5a770 != 0) P127_Pause();
   g_00b5a770 = 0;
 }
 void P12_Fn0050C010(void) {

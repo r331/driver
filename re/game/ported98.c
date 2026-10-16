@@ -52,6 +52,7 @@
 #include "ported95.h"
 #include "ported97.h"
 #include "unported.h"
+#include "ported127.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -541,7 +542,7 @@ int32_t P98_DirCamNext(void **out) {
   if (c != NULL) { DirectorCam = *c; *out = c; return 1; }
   memset(&tmp, 0, sizeof tmp);
   if (CameraList == NULL) {
-    P98_Fn4C582F(&tmp);
+    P127_AutoCamera(&tmp);
     *out = AddDirectorCamera(&tmp, DirectorUnk6C < 4 ? 2 : DirectorUnk6C);
     return 1;
   }
@@ -550,7 +551,7 @@ int32_t P98_DirCamNext(void **out) {
   if (w != NULL) {
     if (c != NULL && iabs(c->id - w->frame) < 0x96) return 0;
     if (DirectorUnk6C + 0x96 < DirectorLastFrame) {
-      P98_Fn4C582F(&tmp);
+      P127_AutoCamera(&tmp);
       *out = AddDirectorCamera(&tmp, DirectorUnk6C);
       return 1;
     }
