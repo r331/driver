@@ -5,6 +5,7 @@
 #include <string.h>
 #include <strings.h>
 #include <dirent.h>
+#include <sys/stat.h>
 #include <limits.h>
 static SDL_Window *g_win; static SDL_GLContext g_gl;
 static void swap_win(void){ SDL_GL_SwapWindow(g_win); }
@@ -194,13 +195,37 @@ int plat_path_native(const char *path, char *out, int size) {
     snprintf(out, (size_t)size, "%s", res);
     return found;
 }
+static int g_mkdirs;   /* v2.04: создавать недостающие каталоги при записи — только игра (platform/native/main.c) */
+void plat_fs_mkdirs(int on) { g_mkdirs = on; }
 void *plat_fopen_game(const char *path, const char *mode) {
     if (!path || !mode) return NULL;
     char np[PATH_MAX];
     plat_path_native(path, np, sizeof np);
     FILE *f = fopen(np, mode);
-    if (!f) f = fopen(path, mode);   /* каталога нет — как раньше, путь как есть (симметрично для записи и чтения) */
+    if (!f && g_mkdirs && (strchr(mode, 'w') || strchr(mode, 'a'))) {
+        /* v2.04: запись в несуществующий подкаталог («SAVES\\SCORES.HI») — создаём недостающие каталоги пути
+           (mkdir по компонентам native-пути) и пробуем снова. Прежний откат к fopen(path) с буквальной «\\» создавал
+           в текущем каталоге файл с обратной косой чертой в имени — убран. */
+        char d[PATH_MAX]; snprintf(d, sizeof d, "%s", np);
+        for (char *c = d + 1; *c; c++) if (*c == '/') { *c = 0; mkdir(d, 0777); *c = '/'; }
+        f = fopen(np, mode);
+    }
+    if (!f && !strchr(path, '\\')) f = fopen(path, mode);   /* путь без «\\» — как раньше */
+    if (!f && !g_mkdirs && strchr(path, '\\')) {
+        /* v2.04, вне игры (selftest): прежнее поведение v2.03 — путь как есть (файл с «\\» в имени в каталоге теста).
+           Перевод в каталог или плоское имя ломает selftest (SIGSEGV позже в тестах — не выяснено, см. NATIVE_GAPS.md). */
+        f = fopen(path, mode);
+    }
     return f;
+}
+
+/* v2.04: удаление файла игры — путь переводится так же, как в plat_fopen_game (иначе remove("SAVES\\REPLAY3.BIN")
+   не находил файл, созданный по native-пути, и в selftest оставался обрезанный повтор) */
+int plat_remove_game(const char *path) {
+    if (!path) return -1;
+    char np[PATH_MAX]; plat_path_native(path, np, sizeof np);
+    if (remove(np) == 0) return 0;
+    return remove(path);   /* как раньше: путь как есть */
 }
 
 /* --- v2.00: кадры запуска игры: RE_MAX_FRAMES=N — после N-го plat_flip выход 0; RE_SHOT_PNG=путь — снимок кадра N

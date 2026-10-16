@@ -366,7 +366,7 @@ void P120_ConeRec(void) {
 static char p120_buf[32];
 static uint32_t S(int32_t idx) { return P97_StrAddr[idx]; }   /* адрес строки 00c55820 + idx*4 */
 static void T(int32_t x, int32_t y, uint32_t s, int32_t a, int32_t f, uint8_t r, uint8_t g, uint8_t b) { P70_ShadowText(x, y, s, a, (uint32_t)f, r, g, b); }
-#define BUF ((uint32_t)(uintptr_t)p120_buf)
+#define BUF (re_addr(p120_buf))   /* v2.04: re_addr вместо усечения указателя */
 #define PR(...) snprintf(p120_buf, sizeof p120_buf, __VA_ARGS__)
 static const uint8_t *tab(int32_t a) { return (const uint8_t *)re_ptr((uint32_t)a); }
 static int hms(const uint8_t *t, uint32_t st, uint32_t o) { return t != NULL && rd32(t + st) == 8 && (PR("%02d:%02d:%02d", rd32(t + o + 8), rd32(t + o + 4), rd32(t + o)), 1); }

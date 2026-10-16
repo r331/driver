@@ -26,6 +26,9 @@ void plat_log(const char *fmt, ...);
 void *plat_file_open(const char *path, const char *mode); /* case-insensitive lookup */
 /* v2.00: fopen для путей игры: '\\' → '/', поиск каждого компонента без учёта регистра (native); hook — fopen как есть */
 void *plat_fopen_game(const char *path, const char *mode);
+void  plat_fs_mkdirs(int on);
+int   plat_remove_game(const char *path);   /* v2.04: remove с переводом пути как в plat_fopen_game */
+/* */   /* v2.04: plat_fopen_game создаёт недостающие каталоги пути при записи (игра) */
 int plat_path_native(const char *path, char *out, int size);   /* 1 — все компоненты найдены */
 /* v2.00: запуск игры — счётчик кадров (RE_MAX_FRAMES) и снимок (RE_SHOT_PNG); зовётся из plat_flip и цикла сообщений */
 void plat_frame_tick(const char *where);

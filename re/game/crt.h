@@ -19,7 +19,7 @@
 #else
 #  include <stdio.h>
 #  define g_fread(p, s, n, f)  fread((p), (s), (n), (FILE*)(f))
-#  define g_remove(n)          remove((n))
+#  define g_remove(n)          plat_remove_game((n))   /* v2.04: тот же перевод пути, что у g_fopen */
 #  define g_fwrite(p, s, n, f) fwrite((p), (s), (n), (FILE*)(f))
 #  define g_ftell(f)           ftell((FILE*)(f))
 #  define g_fseek(f, o, w)     fseek((FILE*)(f), (o), (w))

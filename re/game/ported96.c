@@ -519,18 +519,18 @@ void P96_ClockText(const uint8_t *t) {
   if (P29_Mode != 0) return;
   if (P13_00b31f04 == 0) {
     snprintf(buf, sizeof buf, "%02d:%02d", rd32(t, 0x14), rd32(t, 0x10));
-    P70_ShadowText(0x140, 2, (uint32_t)(uintptr_t)buf, 1, 1, 0xff, 0xff, 0xff);
+    P70_ShadowText(0x140, 2, re_addr(buf), 1, 1, 0xff, 0xff, 0xff);
     float w = P58_TextWidth((const uint8_t *)buf, 1);
     int32_t x = ((int32_t)lrintf(w) >> 1) + 0x140;
     snprintf(buf, sizeof buf, ".%02d", rd32(t, 0xc));
-    P70_ShadowText(x, 4, (uint32_t)(uintptr_t)buf, 0, 0, 0xff, 0xff, 0xff);
+    P70_ShadowText(x, 4, re_addr(buf), 0, 0, 0xff, 0xff, 0xff);
   } else {
     snprintf(buf, sizeof buf, "%02d:%02d", rd32(t, 0x14), rd32(t, 0x10));
-    P70_ShadowText(10, 0x1a8, (uint32_t)(uintptr_t)buf, 1, 0, 0xff, 0xff, 0xff);
+    P70_ShadowText(10, 0x1a8, re_addr(buf), 1, 0, 0xff, 0xff, 0xff);
     float w = P58_TextWidth((const uint8_t *)buf, 1);
     int32_t x = (int32_t)lrintf(w) + 10;
     snprintf(buf, sizeof buf, ".%02d", rd32(t, 0xc));
-    P70_ShadowText(x, 0x1aa, (uint32_t)(uintptr_t)buf, 0, 0, 0xff, 0xff, 0xff);
+    P70_ShadowText(x, 0x1aa, re_addr(buf), 0, 0, 0xff, 0xff, 0xff);
   }
 }
 

@@ -14,7 +14,8 @@ typedef uint32_t p11_u32arr[0x400];
 #ifdef RE_HOOK_BUILD
 #  define ADDR(x) ((uint32_t)(uintptr_t)&(x))
 #else
-#  define ADDR(x) ((uint32_t)(uintptr_t)&(x))
+#  include "reptr.h"
+#  define ADDR(x) re_addr(&(x))   /* v2.04: адрес Game.exe (образ данных/реестр), а не усечённый 64-битный указатель */
 #endif
 #define P11_00b87e7c GAME_VAR(int32_t, P11_00b87e7c, 0x00b87e7c)
 #ifndef RE_HOOK_BUILD

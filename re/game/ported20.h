@@ -7,7 +7,10 @@
 #ifdef RE_HOOK_BUILD
 #define P20_Values ((int32_t*)0x00cfe7a0)
 #else
-extern int32_t P20_Values[4096];
+/* v2.04: 00cfe7a0 — это таблица моделей P79_ModelTab (в игре — образ данных); отдельный native-массив P20_Values
+   оставался нулевым, и 004ec8a8 не находил ни одной модели («Could not find hubcap/clean player car model»). */
+#include "ported79.h"
+#define P20_Values ((int32_t *)&P79_ModelTab[0])
 #pragma push_macro("P20_Count") /*gvi*/
 #undef P20_Count /*gvi*/
 extern char* P20_Names; extern int32_t P20_Count;

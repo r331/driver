@@ -1,4 +1,5 @@
 /* Автогенерация: tools/gen_native_links.py. Ещё не перенесённые вызовы в native уходят в слабые заглушки stubs.c; здесь — перенесённые. */
+#include <string.h>
 #include <stdio.h>
 #include "../../game/engine.h"
 #include "../../game/unported.h"
@@ -441,3 +442,34 @@ int32_t Call00528221(int32_t a0, int32_t a1, uint32_t a2) {    /* 00528221 Timer
   void (*cb)(void) = a2 == 0x00408710u ? tm_inc_5d577c : (void (*)(void))re_fn(a2);
   if (cb == NULL) { char m[64]; snprintf(m, sizeof m, "TimerStart: no native callback %08x", (unsigned)a2); DebugLog(m); }
   return P25_TimerStart((uint32_t)a0, (uint32_t)a1, cb); }
+/* v2.04: участок [a, a+n) должен лежать в одной области re_ptr (иначе копия пишет за native-объект, напр. в selftest без образа данных) */
+static void *re_span(uint32_t a, uint32_t n) {
+  uint8_t *p = (uint8_t *)re_ptr(a);
+  if (p == NULL || n == 0) return p;
+  return (uint8_t *)re_ptr(a + n - 1) == p + n - 1 ? p : NULL; }
+/* v2.04: 004d303a ReadWholeFile и 005283b5 Copy4 — вызовы по адресам Game.exe (типы не сходятся с переносом — вручную) */
+void Call004D303A(uint32_t a0, uint32_t a1) {
+  const char *name = (const char *)re_ptr(a0); void *buf = re_ptr(a1);
+  if (name == NULL || buf == NULL) { char m[80]; snprintf(m, sizeof m, "Call004D303A: no native object %08x/%08x", (unsigned)a0, (unsigned)a1); DebugLog(m); return; }
+  (void)P53_ReadWholeFile(name, buf); }
+void Call005283B5(uint32_t a0, int32_t a1, int32_t a2) {
+  void *d = a2 > 0 ? re_span(a0, (uint32_t)a2) : NULL; const void *s = a2 > 0 ? re_span((uint32_t)a1, (uint32_t)a2) : NULL;
+  if (d == NULL || s == NULL) { char m[80]; snprintf(m, sizeof m, "Call005283B5: no native object %08x/%08x", (unsigned)a0, (unsigned)a1); DebugLog(m); return; }
+  P44_Copy4(d, s, (uint32_t)a2); }
+/* v2.04: заглушки, у которых есть перенос, найденные запуском загрузки уровня (аргументы-адреса → re_ptr) */
+static void link_miss(const char *fn, uint32_t a, uint32_t b) { char m[96]; snprintf(m, sizeof m, "%s: no native object %08x/%08x", fn, (unsigned)a, (unsigned)b); DebugLog(m); }
+void P56_Fn4DA76A(int32_t *a0, uint8_t *a1) { P94_QuatToMat(a0, (int16_t *)(void *)a1); }               /* 004da76a QuatToMat */
+uint32_t Call004EC8A8(uint32_t a0) { const char *s = (const char *)re_ptr(a0); return s ? (uint32_t)P20_FindNameValue(s) : 0; }   /* 004ec8a8 */
+void Call0048DB65(uint32_t a0, int32_t a1) { void *p = a1 > 0 ? re_span(a0, (uint32_t)a1) : NULL; if (p) P14_Fn0048DB65(p, (uint32_t)a1); else link_miss("Call0048DB65", a0, 0); }
+void Call004248C6(int32_t a0, int32_t a1, int32_t a2, uint32_t a3, int32_t a4) { P54_TexSource(a0, a1, a2, (const uint8_t *)re_ptr(a3), a4); }
+void Call0052B650(uint32_t a0, uint32_t a1, uint32_t a2) {   /* 0052b650 — CRT memcpy/memmove */
+  void *d = re_span(a0, a2); const void *s = re_span(a1, a2);
+  if (d && s) memmove(d, s, a2); else link_miss("Call0052B650", a0, a1); }
+void G6Call0041F57D(int32_t a0, int32_t a1, int32_t a2) { P32_SetPalette(a0, a1, (const uint8_t *)re_ptr((uint32_t)a2)); }   /* 0041f57d SetPalette */
+void Call005261AD(uint32_t a0, uint32_t a1) {   /* 005261ad EulerMatrix(матрица, углы) */
+  float *m = (float *)re_ptr(a0); const int16_t *g = (const int16_t *)re_ptr(a1);
+  if (m && g) P43_EulerMatrix(m, g); else link_miss("Call005261AD", a0, a1); }
+void Call00528461(uint32_t a0, uint32_t a1) {   /* 00528461 Transpose3(источник, приёмник) */
+  const float *s = (const float *)re_ptr(a0); float *d = (float *)re_ptr(a1);
+  if (s && d) P44_Transpose(s, d); else link_miss("Call00528461", a0, a1); }
+void Call004B998B(uint32_t a0) { int32_t *p = (int32_t *)re_ptr(a0); if (p) P101_DebrisBounce(p); else link_miss("Call004B998B", a0, 0); }   /* 004b998b */

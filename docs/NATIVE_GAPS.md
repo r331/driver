@@ -158,12 +158,45 @@ native (plat CD: «нет устройства» → не пытаться), н�
 Замечено: запись «SAVES\SCORES.HI» — каталога SAVES нет в work/run_game (и в work/run), plat_fopen_game создаёт файл с обратной косой
 чертой в имени в текущем каталоге (не в input/). Нужно: создавать SAVES в каталоге запуска или в plat_fopen_game для режима записи.
 
+## Исправлено в v2.04 (по порядку, в каком мешало)
+
+1. **SIGSEGV в P40_DownloadPalette** (← P41_LoadTexPages ← P77_LoadLevel): таблица палитр слотов 00b31ee8 читалась как `uint32 P40_ListPtr`
+   → указатель; с v2.03 этот псевдоним живёт в образе данных и был 0 при ненулевом счётчике (P58_Cnt4EFC03, тот же адрес +4).
+   Теперь читается через P58_Tab4EFC03/P58_Cnt4EFC03 (p58_rec_t — та же 12-байтная запись в hook). Системно по пути загрузки
+   страниц текстур: адреса буферов P41_Buf0/Buf1 и палитр 01252be0 — `re_addr` вместо `(int32_t)(uintptr_t)`; арены RAM-страниц
+   P41_Arena (map.c) и FRONTEND.TSD (P137_LoadTsd) — `re_ptr_register_dyn` на весь размер (было усечение указателя / область 1 байт);
+   `ADDR()` в ported11.h для native — `re_addr(&x)` (10 вызовов: FSIN.DAT, матрицы 011f4080/011effa0 …); строки HUD ported96/120 — re_addr.
+2. **Заглушки с переносом, связаны вручную** (platform/native/links.c, аргументы-адреса → re_ptr; копии — только если участок целиком
+   в одной области re_ptr, `re_span`): 004d303a ReadWholeFile (P53), 005283b5 Copy4 (P44), 004da76a QuatToMat (P94), 004ec8a8
+   FindNameValue (P20), 0048db65 (memset, P14), 004248c6 TexSource (P54), 0052b650 (CRT memcpy), 0041f57d SetPalette (P32, было в stubs.c),
+   005261ad EulerMatrix (P43), 00528461 Transpose3 (P44), 004b998b DebrisBounce (P101). Тест test_v204 (selftest).
+3. **P101_SkyInit → P15_ScaleVertices SIGSEGV**: поля модели +0x20/+0x24 — ссылки арены карты (P79_PTR, смещение от D_00c98ed0), а не адреса
+   re_ptr (в hook — одно и то же).
+4. **«Could not find hubcap/clean player car model»**: 004ec8a8 возвращал значения из отдельного нулевого native-массива P20_Values;
+   00cfe7a0 — это P79_ModelTab (образ данных). В native `P20_Values` — макрос над P79_ModelTab (ported20.h).
+5. **Пути «SAVES\…»** (platform/sdl/plat_sys.c): в игре (`plat_fs_mkdirs(1)` из main.c) запись в отсутствующий подкаталог создаёт
+   каталоги пути (work/run_game/SAVES/SCORES.HI); `g_remove` → `plat_remove_game` с тем же переводом пути. Вне игры (selftest) оставлено
+   прежнее поведение (файл с «\» в имени в каталоге теста): и создание каталога, и плоское имя «SAVES_SCORES.HI» ломают selftest
+   (SIGSEGV позже в тестах, после test_p52; место не найдено — backtrace пуст). Удалены старые файлы с «\» в work/run_game, work/run,
+   re/build-native; selftest/ctest создают «SAVES\SCORES.HI»/«Scripts\Waypoint.tmp» заново в work/run и re/build-native.
+6. **Запись игры в input/**: work/run_game/Scripts был симлинком на input/…/Scripts — игра создала input/game/Data_Files/Scripts/Waypoint.tmp
+   (файл удалён; оригинальные файлы не менялись). Теперь work/run_game/Scripts — каталог с симлинками Events/FlyBy/Missions.
+
+Где останавливается теперь: `RE_CRASH_BT=1 RE_KEYS="300:RETURN,400:RETURN" work/run_game.sh 1500` — New Game → MLADDER → P136_GameLoop →
+P145_LevelLoad (уровень Miami, «Interview 1, Training 0, mode 2») загружается полностью, игра крутит кадры до 1500 без падений и без
+«not ported» в журнале, но **экран чёрный** (work/shot_v204.png; out/native_v2.04.png не создан — игрового кадра нет).
+Журнал: «Could not find required models. Pedestrians have been disabled.», «Attempting to compile event script "Scripts\Events\(null)"»
+(EVENTSCRIPT = NULL — вероятно, ещё один псевдоним адреса), «Error while loading sample».
+
 ## Блокеры в порядке, в каком они мешают запуску
 
--1. **v2.03: загрузка уровня — SIGSEGV в P40_DownloadPalette** (← P41_LoadTexPages ← P77_LoadLevel ← P145_LevelLoad ← P136_GameLoop ←
-   P140_LadderRun ← P68_ScreenReset ← Ui0041355B «New Game»). Сценарий: `RE_CRASH_BT=1 RE_KEYS="300:RETURN,400:RETURN" work/run_game.sh 900`.
-   Перед этим «not ported: Call004D303A», «Call005283B5». Вероятно, 64-битные указатели/таблицы страниц текстур уровня (блокер 2) — не выяснено.
-
+-2. **v2.04: после загрузки уровня экран чёрный.** Кадры идут (Flip), падений нет. Не выяснено: доходит ли кадр до P131_GameFrame/
+   P132_GameDraw и сколько примитивов D3D рисуется после загрузки (RE_TRACE_DD ограничен первыми ~60 вызовами — нужен счётчик за кадр),
+   идёт ли сначала флайбай/интервью (mode 2), не пуст ли EVENTSCRIPT («Scripts\Events\(null)»), пешеходы отключены (модели не найдены).
+-1. ~~v2.03: загрузка уровня — SIGSEGV в P40_DownloadPalette~~ — **исправлено в v2.04** (выше).
+00. **selftest и пути с подкаталогом**: если «SAVES\…» открывается как настоящий каталог или плоское имя, selftest падает SIGSEGV
+   (тест после test_p52, файл повтора/рекордов читается иначе, чем при файле с «\» в имени). Найти и исправить, затем включить
+   перевод путей и для selftest.
 0. ~~v2.01: экран главного меню чёрный~~ — **исправлено в v2.02** (см. выше). Осталось: подписи пунктов (P117_TextList → P116_Text, шрифт
    005d57a0) на снимке не видны — не выяснено; ввод (блокер 8) — без клавиш меню не листается, дальше P140_Frontend игра не идёт.
 00. (было) **v2.01: экран главного меню чёрный.** Цикл меню P140_Frontend идёт (P114_MenuStep/P119_MenuFrame), фон рисуется P67_DrawIcon

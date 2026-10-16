@@ -3,6 +3,8 @@
 #include "ported40.h"
 #include "ported6.h"
 #include "ported7.h"
+#include "ported58.h"
+#include "ported14.h"
 #include "unported.h"
 #include <string.h>
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -137,14 +139,22 @@ void P40_UploadSlotPair(int32_t slot, int32_t data0, int32_t data1) {
   }
 }
 
+/* v2.04: таблица 00b31ee8 читается как P58_Tab4EFC03/P58_Cnt4EFC03 (p58_rec_t: в hook — та же 12-байтная запись,
+   в native — родные указатели, которые пишет P126_ReadMapPals); прежнее чтение uint32 P40_ListPtr как указателя в native
+   давало SIGSEGV (псевдоним в образе данных = 0 при ненулевом счётчике). Адрес палитры — re_addr (в hook тождество). */
 void P40_DownloadPalette(int32_t slot, int32_t palette) {
-  const int32_t *rec = (const int32_t *)(uintptr_t)P40_ListPtr;
-  for (int i = 0; i < P40_ListCount; i++, rec += 3) {
-    if (rec[0] != slot) continue;
-    const int32_t *list = (const int32_t *)(uintptr_t)(uint32_t)rec[1];
-    for (int j = 0; j < rec[2]; j++, list++)
-      Fwd0042482B(slot, palette, *list, (int32_t)(uintptr_t)&P14_01252be0[*list * 0x400]);
+  const p58_rec_t *rec = P58_Tab4EFC03;
+  int32_t n = rec != NULL ? P58_Cnt4EFC03 : 0;
+  for (int i = 0; i < n; i++, rec++) {
+    if (rec->a != slot) continue;
+    const int32_t *list = (const int32_t *)rec->p;
+    for (int j = 0; list != NULL && j < rec->c; j++, list++) {
+#ifndef RE_HOOK_BUILD
+      if ((uint32_t)*list >= 64u) continue;   /* защита: слот палитры вне таблицы 01252be0 */
+#endif
+      Fwd0042482B(slot, palette, *list, (int32_t)re_addr(&P14_01252be0[*list * 0x400]));
+    }
     return;
   }
-  Fwd0042482B(slot, palette, 1, (int32_t)(uintptr_t)&P14_01252be0[0x400]);
+  Fwd0042482B(slot, palette, 1, (int32_t)re_addr(&P14_01252be0[0x400]));
 }

@@ -1,5 +1,6 @@
 #include "ported15.h"
 #include "reptr.h"
+#include "ported79.h"
 #include <string.h>
 GAME_VAR_DEF(uint8_t *, P15_MenuText, 0x005fe9b0)
 GAME_VAR_DEF(uint8_t *, P15_MenuItems, 0x005fe9b8)
@@ -69,14 +70,19 @@ void P15_SetHighlightRange(int32_t from, int32_t to) {
   for (int32_t i = 0; i < from; i++) P15_MenuItems[5 + i * 0x10] &= 0xf7;
   for (int32_t i = from; i <= to; i++) P15_MenuItems[5 + i * 0x10] |= 8;
 }
+/* v2.04: поля модели +0x20/+0x24 — ссылки арены карты (P79_PTR: в native смещение от D_00c98ed0, в hook — адрес),
+   а не адреса re_ptr: прежнее re_ptr(смещение) давало NULL/чужую память → SIGSEGV в P101_SkyInit при загрузке уровня. */
+static uint8_t *mp(const uint8_t *p) { uint32_t v = r32(p); return v != 0 ? (uint8_t *)P79_PTR(v) : NULL; }
 void P15_ScaleVertices(uint8_t *obj, float sx, float sy, float sz) {
-  uint8_t *v = rp(obj + 0x20);
+  uint8_t *v = mp(obj + 0x20);
+  if (v == NULL) return;
   for (int i = 0; i < (int)r16(obj + 0x14); i++, v += 16) {
     wf(v, sx * rf(v)); wf(v + 4, sy * rf(v + 4)); wf(v + 8, sz * rf(v + 8));
   }
 }
 void P15_ScaleNormalW(uint8_t *obj, float s) {
-  uint8_t *v = rp(obj + 0x24);
+  uint8_t *v = mp(obj + 0x24);
+  if (v == NULL) return;
   for (int i = 0; i < (int)r16(obj + 0x16); i++, v += 16) wf(v + 12, s * rf(v + 12));
 }
 void P15_SkipInteger(char **p) {

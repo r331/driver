@@ -1,5 +1,6 @@
 /* Загрузка текстурных страниц карты — восстановлено из Game.exe (map.c, строка 0x225). */
 #include "ported41.h"
+#include "reptr.h"
 #include "ported4.h"
 #include "ported6.h"
 #include "ported27.h"
@@ -118,7 +119,11 @@ void P41_LoadTexPages(void *file) {
   }
   if (total != 0) {
     p41_ram = (uint8_t *)DebugMalloc(total, "D:\\Driver\\Game\\map.c", 0x225);
+#ifdef RE_HOOK_BUILD
     P41_Arena = (uint32_t)(uintptr_t)p41_ram;
+#else
+    P41_Arena = p41_ram != NULL ? re_ptr_register_dyn(p41_ram, (uint32_t)total) : 0;   /* v2.04: адрес арены — синтетический (re_ptr) */
+#endif
     if (p41_ram == NULL) plat_message_box(MAIN_HWND41, "Could not malloc space for RAM texture pages", "ERROR", 0);
   }
   g_fseek(file, start, 0);
@@ -138,7 +143,7 @@ void P41_LoadTexPages(void *file) {
 #ifndef RE_HOOK_BUILD
     P86_NativeCapture(idx, pair, P41_Buf0, P41_Buf1);   /* native: страница → текстура GL */
 #endif
-    int32_t b0 = (int32_t)(uintptr_t)P41_Buf0, b1 = (int32_t)(uintptr_t)P41_Buf1;
+    int32_t b0 = (int32_t)re_addr(P41_Buf0), b1 = (int32_t)re_addr(P41_Buf1);   /* v2.04: re_addr вместо усечения указателя */
     if ((flags & 1) == 0) {
       if ((flags & 4) == 0) {
         if (((flags & 8) != 0 && tex == S_00D1192C) || (flags & 2) != 0) {

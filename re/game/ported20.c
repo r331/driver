@@ -1,7 +1,7 @@
 #include "ported20.h"
 #include <string.h>
 #ifndef RE_HOOK_BUILD
-int32_t P20_Values[4096];
+/* v2.04: P20_Values — макрос над P79_ModelTab (ported20.h) */
 #endif
 GAME_VAR_DEF(char*, P20_Names, 0x00b31ed8)
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -36,7 +36,11 @@ int32_t P20_FindNameValue(const char* s) {
   if (!P20_Names) return 0;
   const char* p = P20_Names;
   for (int i = 0; i < P20_Count; i++) {
+#ifndef RE_HOOK_BUILD
+    if (strcmp(p, s) == 0) return i < 1126 ? P20_Values[i] : 0;   /* native: таблица 00cfe7a0 — 1126 слов */
+#else
     if (strcmp(p, s) == 0) return P20_Values[i];
+#endif
     p += strlen(p) + 1;
   }
   return 0;

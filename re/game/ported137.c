@@ -347,7 +347,7 @@ int32_t P137_LoadTsd(const char *name) {
   P41_Arena = (uint32_t)(uintptr_t)base;
 #else
   p137_tsd = base;
-  P41_Arena = re_addr(base);
+  P41_Arena = base != NULL ? re_ptr_register_dyn(base, (uint32_t)(arena + 0xffff)) : 0;   /* v2.04: вся арена (re_addr давал область 1 байт) */
 #endif
   P41_Offset = (int32_t)((0x10000u - ((uint32_t)(uintptr_t)base & 0xffffu)) & 0xffffu);
   P54_MapAPtr = P98_DebugMalloc(names << 4, "D:\\Driver\\Game\\frontend\\frontend.c", 0x3c0);
