@@ -114,6 +114,7 @@
 #include "../../game/ported123.h"
 #include "../../game/ported124.h"
 #include "../../game/ported125.h"
+#include "../../game/ported126.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2233,6 +2234,16 @@ void re_install_all(void) {
     re_hook(0x004afa4c, (void*)P125_DebrisBurst, "P125_DebrisBurst");
     re_hook(0x004b955c, (void*)P125_ObjABurst, "P125_ObjABurst");
     re_hook(0x004fc0d9, (void*)P125_PickupTick, "P125_PickupTick");
+    re_hook(0x004efafd, (void*)P126_ReadMapPals, "P126_ReadMapPals");
+    re_hook(0x004906f9, (void*)P126_PlayerStart, "P126_PlayerStart");
+    re_hook(0x004e9006, (void*)P126_DropsAt, "P126_DropsAt");
+    re_hook(0x004e919d, (void*)P126_DropScan, "P126_DropScan");
+    re_hook(0x004d9951, (void*)P126_ScreenShot, "P126_ScreenShot");
+    re_hook(0x004d74e0, (void*)P126_DebugKeys, "P126_DebugKeys");
+    re_hook(0x004f1745, (void*)P126_SpawnInit, "P126_SpawnInit");
+    re_hook(0x0040c6bb, (void*)P126_ShowBmpFade, "P126_ShowBmpFade");
+    re_hook(0x004e10e3, (void*)P126_WheelSmoke, "P126_WheelSmoke");
+    re_hook(0x004ad244, (void*)P126_KerbDebris, "P126_KerbDebris");
     re_hook(0x0041f4a1, (void*)P112_TexDownload, "P112_TexDownload");
     re_hook(0x004a9bb0, (void*)P112_FaceIcon, "P112_FaceIcon");
     re_hook(0x004a77b0, (void*)P112_ChaseTick, "P112_ChaseTick");

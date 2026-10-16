@@ -13,118 +13,20 @@ Camera distance is 0
 Cameras maximum distance is 0
 End of Camera dump
 
-not ported: DrawSprite (0051755e)
-not ported: DrawRect (004d7c46)
 not ported: GetMarkerYAdjust (004023c9)
-not ported: DrawSprite (0051755e)
 The game contains 2 replay waypoints.
 Waypoint number 0, dump information:
-Frame index: -777929248
-X position: -768788360
-Z position: 43690
+Frame index: 0
+X position: 0
+Z position: 0
 Waypoint number 1, dump information:
-Frame index: 65535
-X position: 65535
-Z position: -1713495460
-not ported: DrawSprite (0051755e)
-not ported: MenuRefresh (0040500d)
-not ported: MenuRefresh (0040500d)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: Call004E3391 (004e3391)
-not ported: Call004E3391 (004e3391)
+Frame index: 0
+X position: 0
+Z position: 17
 not ported: Call0052A910 (0052a910)
 not ported: Call0052A910 (0052a910)
 not ported: Call0052A910 (0052a910)
 not ported: Call0052A910 (0052a910)
-not ported: MenuRedraw (00409622)
-not ported: Call0052369B (0052369b)
-not ported: Call00414D1F (00414d1f)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: Call0050F7B2 (0050f7b2)
-not ported: Call0050F7B2 (0050f7b2)
-not ported: Call0050F7B2 (0050f7b2)
-not ported: Call0050F7B2 (0050f7b2)
-not ported: Call0050FBF4 (0050fbf4)
-not ported: Call004D94B7 (004d94b7)
-not ported: Fn00416040 (00416040)
-not ported: G6Call00422AE7 (00422ae7)
-not ported: G6Call00422AE7 (00422ae7)
-not ported: G6Call00422AE7 (00422ae7)
-not ported: G6Call00422AE7 (00422ae7)
-not ported: G6Call00422AE7 (00422ae7)
-not ported: G6Call00422AE7 (00422ae7)
-not ported: G6Call00422AE7 (00422ae7)
-not ported: G6Call00422AE7 (00422ae7)
-not ported: G6Call00422AE7 (00422ae7)
-not ported: G6Call00422AE7 (00422ae7)
-not ported: G6Call00422AE7 (00422ae7)
-not ported: G6Call00422AE7 (00422ae7)
-DeleteCamera: Error! Specified camera does not exist.
-SetCamera: Cannot set camera contents, camera does not exist.
-not ported: StoreCameraState (004c5499)
-not ported: StoreCameraState (004c5499)
-not ported: RestoreCameraState (004c536c)
-LoadWaypoints: Unable to open waypoint file.
-CameraDump....
-Camera type is 17(Watch car camera)
-Camera position is x = 0, y = 0, z = 0
-Holding camera position is x = 0, y = 0, z = 0
-Camera angle is 0, 0, 0
-Camera distance is 0
-Cameras maximum distance is 0
-End of Camera dump
-
-not ported: DrawSprite (0051755e)
-not ported: DrawRect (004d7c46)
-not ported: GetMarkerYAdjust (004023c9)
-not ported: DrawSprite (0051755e)
-The game contains 2 replay waypoints.
-Waypoint number 0, dump information:
-Frame index: -353710624
-X position: -988456840
-Z position: 43690
-Waypoint number 1, dump information:
-Frame index: 65535
-X position: 65535
-Z position: -2004868516
-not ported: DrawSprite (0051755e)
-not ported: MenuRefresh (0040500d)
-not ported: MenuRefresh (0040500d)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: Call004E3391 (004e3391)
-not ported: Call004E3391 (004e3391)
-not ported: Call0052A910 (0052a910)
-not ported: Call0052A910 (0052a910)
-not ported: Call0052A910 (0052a910)
-not ported: Call0052A910 (0052a910)
-not ported: MenuRedraw (00409622)
-not ported: Call0052369B (0052369b)
-not ported: Call00414D1F (00414d1f)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: MenuRedraw (00409622)
-not ported: Call0050F7B2 (0050f7b2)
-not ported: Call0050F7B2 (0050f7b2)
-not ported: Call0050F7B2 (0050f7b2)
-not ported: Call0050F7B2 (0050f7b2)
-not ported: Call0050FBF4 (0050fbf4)
-not ported: Call004D94B7 (004d94b7)
 not ported: Fn00416040 (00416040)
 InitCDAudio: Open CD device failed
 PlayCDTrack: Invalid track number
@@ -196,8 +98,6 @@ not ported: Call004EC91E (004ec91e)
 not ported: Call004EC91E (004ec91e)
 not ported: Call004EC91E (004ec91e)
 not ported: Call004EC91E (004ec91e)
-not ported: Call004C1B6C (004c1b6c)
-not ported: Call004C2042 (004c2042)
 not ported: Call004EC91E (004ec91e)
 not ported: Call004EC91E (004ec91e)
 not ported: Call004EC91E (004ec91e)
@@ -265,47 +165,370 @@ not ported: Call004EC91E (004ec91e)
 not ported: Call004EC91E (004ec91e)
 not ported: Call004EC91E (004ec91e)
 not ported: Call004EC91E (004ec91e)
-not ported: Call004C1B6C (004c1b6c)
-not ported: Call004C0218 (004c0218)
-not ported: G6Call00524398 (00524398)
-not ported: Call0052E180 (0052e180)
-not ported: G6Call0050E940 (0050e940)
-not ported: G6Call00524398 (00524398)
-not ported: Call0052E180 (0052e180)
-not ported: G6Call0050E940 (0050e940)
-not ported: Call0052E180 (0052e180)
-not ported: G6Call0050E940 (0050e940)
-not ported: Call0052E180 (0052e180)
-not ported: G6Call0050E940 (0050e940)
-not ported: Call0052E180 (0052e180)
-not ported: G6Call0050E940 (0050e940)
-not ported: Call005243EB (005243eb)
-not ported: Call0052E180 (0052e180)
-not ported: G6Call0050E940 (0050e940)
-not ported: Call005243EB (005243eb)
-not ported: Call0052E180 (0052e180)
-not ported: G6Call00524398 (00524398)
-not ported: Call0052E180 (0052e180)
-not ported: G6Call0050E940 (0050e940)
-not ported: Call0052E180 (0052e180)
-not ported: G6Call00524398 (00524398)
-not ported: Call0052E180 (0052e180)
-not ported: G6Call0050E940 (0050e940)
 not ported: Call0052E180 (0052e180)
 not ported: Call0052E180 (0052e180)
-not ported: G6Call0050E940 (0050e940)
-not ported: Call005243EB (005243eb)
-not ported: G6Call0050E940 (0050e940)
+not ported: Call0052E180 (0052e180)
+not ported: Call0052E180 (0052e180)
+not ported: Call0052E180 (0052e180)
+not ported: Call0052E180 (0052e180)
+not ported: Call0052E180 (0052e180)
+not ported: Call0052E180 (0052e180)
+not ported: Call0052E180 (0052e180)
+not ported: Call0052E180 (0052e180)
+not ported: Call0052E180 (0052e180)
+not ported: Call0052E180 (0052e180)
 not ported: Call0052E180 (0052e180)
 SetDirectorMode: Illegal mode identifier provided, function failed.
 
-not ported: Call004D3402 (004d3402)
-not ported: UiCall00424647 (00424647)
-not ported: UiCall00528455 (00528455)
-not ported: Call004246F0 (004246f0)
-not ported: UiCall00424647 (00424647)
-not ported: UiCall00528455 (00528455)
-not ported: Call004246F0 (004246f0)
-not ported: Call00523595 (00523595)
-not ported: Call00421A39 (00421a39)
+not ported: Call0041D6AA (0041d6aa)
 DIReAcquire: SetDataFormat failed
+GetHighScoreTable: Invalid table request
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call0040C20B (0040c20b)
+not ported: Call0040BF50 (0040bf50)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call0040C20B (0040c20b)
+not ported: Call0040BF50 (0040bf50)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call0040C20B (0040c20b)
+not ported: Call0040BF50 (0040bf50)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call0040C20B (0040c20b)
+not ported: Call0040BF50 (0040bf50)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call00528221 (00528221)
+not ported: P46_Fn4DF024 (004df024)
+not ported: P46_Fn4DF024 (004df024)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call00528221 (00528221)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call00528221 (00528221)
+not ported: P47_Fn405FDB (00405fdb)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: G6Call0048BA20 (0048ba20)
+not ported: N14_Rand (0052e190)
+not ported: Call0048DB65 (0048db65)
+not ported: Call0048DB65 (0048db65)
+not ported: Call0048DB65 (0048db65)
+not ported: P52_Fn4E6310 (004e6310)
+not ported: P52_Fn4E6310 (004e6310)
+not ported: P52_Fn48B3E8 (0048b3e8)
+not ported: P53_Fn4225EB (004225eb)
+not ported: P53_Fn500937 (00500937)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call0040C20B (0040c20b)
+not ported: Call0040BF50 (0040bf50)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call0040C20B (0040c20b)
+not ported: Call0040BF50 (0040bf50)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call0052A910 (0052a910)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call00528221 (00528221)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call00528221 (00528221)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call0040C20B (0040c20b)
+not ported: Call0040BF50 (0040bf50)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call0040C20B (0040c20b)
+not ported: Call0040BF50 (0040bf50)
+not ported: P53_Fn4146FB (004146fb)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call004EC91E (004ec91e)
+not ported: Call004EC91E (004ec91e)
+not ported: Call004EC91E (004ec91e)
+not ported: P56_Fn4DA76A (004da76a)
+not ported: P56_Fn4DA76A (004da76a)
+not ported: P56_Fn4E5284 (004e5284)
+DownloadPageFromBmp: Bitmap not found, operation aborted.
+not ported: P56_DrawText (0051755e)
+not ported: P56_DrawText (0051755e)
+LoadDirector: Unable to open director file, please make sure it exists.
+SaveDirector: Unable to write director data file.  Please make sure target is not write protected.
+not ported: Call0041D6AA (0041d6aa)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: P58_Fn407E2F (00407e2f)
+not ported: P58_Fn407E2F (00407e2f)
+not ported: P47_Fn517D58 (00517d58)
+not ported: Call0040C20B (0040c20b)
+not ported: Call0040BF50 (0040bf50)
+not ported: P47_Fn517D58 (00517d58)
+not ported: Call0040C20B (0040c20b)
+not ported: Call0040BF50 (0040bf50)
+not ported: P58_Fn40CFDF (0040cfdf)
+not ported: P58_Fn40CFDF (0040cfdf)
+not ported: P58_Fn40CFDF (0040cfdf)
+not ported: P58_Fn40CFDF (0040cfdf)
+not ported: P58_Fn40CFDF (0040cfdf)
+not ported: P58_Fn40CFDF (0040cfdf)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call00528221 (00528221)
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+DIReAcquire: SetDataFormat failed
+not ported: Call005261AD (005261ad)
+not ported: Call00528461 (00528461)
+not ported: Call005261AD (005261ad)
+not ported: Call00528461 (00528461)
+not ported: Call0052A910 (0052a910)
+not ported: Call0052A910 (0052a910)
+not ported: Call0052A910 (0052a910)
+not ported: Call0052A910 (0052a910)
+not ported: Call0052A910 (0052a910)
+not ported: Call0052A910 (0052a910)
+not ported: Call0052A910 (0052a910)
+not ported: Call0052A910 (0052a910)
+not ported: Call0052A910 (0052a910)
+not ported: P56_Fn4DA76A (004da76a)
+not ported: P56_Fn4DA76A (004da76a)
+AddCamera: Unknown command id.
+
+not ported: P62_Fn424A02 (00424a02)
+DownloadPageFromBmp: Bitmap not found, operation aborted.
+not ported: P56_DrawText (0051755e)
+not ported: Call00528221 (00528221)
+ChangeSample: Invalid sample number
+ChangeSample: Invalid sample number
+ChangeSample: Error loading sample
+not ported: Call0040BF50 (0040bf50)
+not ported: Call0040BF50 (0040bf50)
+not ported: Call0040BF50 (0040bf50)
+
+Attempting to process Chair placement lump.
+Chair chunk is an incompatible version, ignoring.  Sitting pedestrians will not be available during game.
+
+Attempting to process Chair placement lump.
+Chair chunk is an incompatible version, ignoring.  Sitting pedestrians will not be available during game.
+not ported: Call0052B650 (0052b650)
+not ported: Call0052B650 (0052b650)
+not ported: Call0052B650 (0052b650)
+not ported: Call0052B650 (0052b650)
+not ported: Call0052B650 (0052b650)
+not ported: Call0052B650 (0052b650)
+not ported: Call0052B650 (0052b650)
+not ported: Call0052B650 (0052b650)
+not ported: Call0052B650 (0052b650)
+not ported: Call0052B650 (0052b650)
+not ported: Call00528221 (00528221)
+not ported: Call00528221 (00528221)
+not ported: Call00528221 (00528221)
+
+Attempting to process Chair placement lump.
+Map is 2 cells wide and 2 cells high, pointer is 8 bytes long required memory is 32 (0k).
+ProcessChairLump completed successfully (3 chairs retrieved), routine terminated.
+
+Attempting to process Chair placement lump.
+Chair chunk is an incompatible version, ignoring.  Sitting pedestrians will not be available during game.
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: Call005261AD (005261ad)
+not ported: Call00528461 (00528461)
+not ported: Call0052A910 (0052a910)
+DrawFullscreenMap: No target texture
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: N14_Rand (0052e190)
+not ported: P121_Fn5233BE (005233be)
+not ported: Call00524496 (00524496)
+not ported: Call005261AD (005261ad)
+not ported: Call00528461 (00528461)
+not ported: N14_Rand (0052e190)
+not ported: P56_Fn4DA76A (004da76a)

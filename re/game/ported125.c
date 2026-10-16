@@ -74,6 +74,7 @@
 #include "ported116.h"
 #include "ported117.h"
 #include "ported124.h"
+#include "ported126.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -125,7 +126,7 @@ int32_t P125_LevelLoad(void) {
   P52_NoTrail = 0;
   P124_ShowBmp(P55_Lang == 5 ? "DATA\\USLOADING.BMP" : "DATA\\LOADING.BMP", 0);
   P58_FreeRecs();
-  P125_Fn4EFAFD("LEVELS\\FLAT.D3D");
+  P126_ReadMapPals("LEVELS\\FLAT.D3D");
   P62_HudOff2 = 0; P62_HudOff1 = 0; G6_00B87EA0 = 0;
   MenuVarB201DC = 0; P13_00b201dc = 0; G00B201DC = 0;
   P14_00b87e84 = 0; P52_FogOn = 0; P14_00b202d8 = 0; P14_00b202dc = 0;
@@ -155,7 +156,7 @@ int32_t P125_LevelLoad(void) {
     Pack565Bytes004BF452(0xf0, 0xf0, 0xa0);
     NoopFn004bf471();
     P56_AllocEulerTab(1);
-    P125_Fn4906F9();
+    P126_PlayerStart();
     P125_CF56C0 = 0; P106_SkyRot = 0; P21_FrameTotal = 0;
     P62_Frame = 0; G8_00D118C0 = 0;
     P75_ResetObjs();
