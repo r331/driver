@@ -96,6 +96,7 @@
 #include "../../game/ported105.h"
 #include "../../game/ported106.h"
 #include "../../game/ported107.h"
+#include "../../game/ported108.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2073,4 +2074,17 @@ void re_install_all(void) {
     re_hook(0x0050f304, (void*)P107_MenuNav, "P107_MenuNav");
     re_hook(0x004ddaca, (void*)P107_CarInput, "P107_CarInput");
     re_hook(0x004958b7, (void*)P107_TrafficRow, "P107_TrafficRow");
+    re_hook(0x00518ab4, (void*)P108_ReplayStep, "P108_ReplayStep");
+    re_hook(0x0042205e, (void*)P108_EmulTex16, "P108_EmulTex16");
+    re_hook(0x00421e6c, (void*)P108_EmulTex8, "P108_EmulTex8");
+    re_hook(0x0048b5e3, (void*)P108_FmvStart, "P108_FmvStart");
+    re_hook(0x00504a0a, (void*)P108_RadarArrow, "P108_RadarArrow");
+    re_hook(0x00505e2b, (void*)P108_RadarCar, "P108_RadarCar");
+    re_hook(0x004b1993, (void*)P108_SmokeA, "P108_SmokeA");
+    re_hook(0x004b1ea0, (void*)P108_SmokeB, "P108_SmokeB");
+    re_hook(0x004b4b27, (void*)P108_Sprite, "P108_Sprite");
+    re_hook(0x00503f76, (void*)P108_RadarShape, "P108_RadarShape");
+    re_hook(0x004d7c46, (void*)P108_FillRect, "P108_FillRect");
+    re_hook(0x004d7deb, (void*)P108_FillRectB, "P108_FillRectB");
+    re_hook(0x00507eea, (void*)P108_MapTexRect, "P108_MapTexRect");
 }

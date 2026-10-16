@@ -96,6 +96,7 @@
 #include "../../game/ported105.h"
 #include "../../game/ported106.h"
 #include "../../game/ported107.h"
+#include "../../game/ported108.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -180,6 +181,7 @@ void P52_Fn4AB500 (void) { P100_DebrisInit(); }
 void P52_Fn4AB808 (void) { P95_PoolIconInit(); }
 void P52_Fn4AB95C (void) { P94_IconQuad(); }
 void P52_Fn4ABA7C (void) { P102_SixInit(); }
+int32_t P52_Fn48B5E3 (void) { return (int32_t)P108_FmvStart(); }
 void P52_Fn5173D7 (float a0, float a1, int32_t a2, int32_t a3, int32_t a4) { P73_Text(a0, a1, a2, a3, a4); }
 int32_t P52_Fn405F6F (int32_t a0, void *a1) { return (int32_t)P64_ReplayStart(a0, a1); }
 void P48_Fn516DA0 (void) { P58_LangStrings(); }
@@ -292,6 +294,7 @@ void Call004076E2 (void) { MenuWhite004076E2(); }
 void * FindCameraRecordForFrame (int frame) { return (void *)FindCameraForFrame(frame); }
 void InitNewCamera (void *cam) { P98_CamClamp(cam); }
 void DrawSprite (int x, int y, uint32_t tex, int a, int b, int c, int d, int e) { P70_ShadowText(x, y, tex, a, b, c, d, e); }
+void DrawRect (float x, float y, float w, float h, uint32_t color) { P108_FillRect(x, y, w, h, color); }
 int IsKeyDown (int sc) { return (int)IsFlagSetNotMasked_004E383A(sc); }
 int GetGroundHeight (int *pos) { return (int)P100_RoadHeight(pos); }
 void Call00411A9D (void) { MenuHiliteWhite00411A9D(); }
