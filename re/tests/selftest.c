@@ -113,6 +113,7 @@
 #include "../game/ported107.h"
 #include "../game/ported108.h"
 #include "../game/ported109.h"
+#include "../game/ported110.h"
 #include "../game/nodetab.h"
 #include "../game/reptr.h"
 #include <math.h>
@@ -4596,6 +4597,35 @@ static int test_p109(void) {
   return f;
 }
 
+static int test_p110(void) {
+  int f = 0;
+#define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p110 fail line %d\n",__LINE__); } } while (0)
+  CK(P110_CellTab[0] == 7 && P110_CellTab[30] == 0x1000 && P110_SelRep == 10 && P110_IconKX == 1.0f);
+  P110_RadarGrid();
+  { uint8_t g[0x30]; memset(g, 0, sizeof g); float v; v = 10; memcpy(g + 8, &v, 4); memcpy(g + 0xc, &v, 4);
+    v = 5; memcpy(g + 0x10, &v, 4); v = 2; memcpy(g + 0x14, &v, 4);
+    P110_Gauge(g); memcpy(&v, g + 0x10, 4); CK(v == 5.0f);                 /* выключено — значение не тронуто */
+    int32_t on = 1; memcpy(g + 0x2c, &on, 4); P110_Gauge(g); memcpy(&v, g + 0x10, 4); CK(v == 2.0f); }
+  { uint8_t ic[13] = { 0, 0, 0, 0, 0, 0, 0, 0, 7, 1, 2, 16, 16 }; int32_t t = P86_CurTex, sd = P85_StateDirty; uint8_t bc = P85_BlendCur;
+    P110_IconRect(0, 0, 32, 32, ic, -1); CK(P86_CurTex == 7 && P85_StateDirty == 4 && P85_BlendCur == 0);
+    P110_IconRect(0, 0, 32, 32, ic, 9); CK(P86_CurTex == 9);
+    P110_IconQuad(10, 10, 1, 1, ic, 255, 255, 255, 1); CK(P86_CurTex == 7 && P85_BlendCur == 1);
+    P86_CurTex = t; P85_StateDirty = sd; P85_BlendCur = bc; }
+  { uint32_t gi = P110_GlowIcon; int32_t t = P86_CurTex; float p[0x1c]; memset(p, 0, sizeof p); p[2] = 100.0f;
+    P110_GlowIcon = 0; P86_CurTex = -5; P110_GlowA((const uint8_t *)p); P110_GlowB((const uint8_t *)p); P110_GlowC((const uint8_t *)p); CK(P86_CurTex == -5);
+    static uint8_t ic2[13] = { 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 32, 32 }; P110_GlowIcon = re_addr(ic2);
+    P110_GlowA((const uint8_t *)p); CK(P86_CurTex == 11); P110_GlowIcon = gi; P86_CurTex = t; }
+  { int32_t *st = G2_ScriptStack; int32_t s0[0x70]; memset(s0, 0, sizeof s0); G2_ScriptStack = s0; P110_ScriptSprites(); G2_ScriptStack = st; CK(1); }
+  { CK(P110_MenuSel(0, 3) == 3); }
+  { int32_t w = P19_ScrW, hh = P19_ScrH, fc = P110_FullClip; float sc = P11_0125f3e0, s19 = P19_Scale, f404 = P62_F25F404, ox = P43_OffX, oy = P43_OffY, x0 = P101_ScrX0, y0 = P101_ScrY0;
+    P19_ScrW = 640; P19_ScrH = 480; P110_FullClip = 0; P11_0125f3e0 = 0.5f; P62_F25F404 = 0.5f; P110_ViewSetup(10, 0, 0);
+    CK(P110_ClipX0 == 170.0f && P110_ClipX1 == 490.0f && P110_ClipY0 == 120.0f && P110_ClipY1 == 360.0f && P101_ScrX0 == 330.0f && P19_Scale == 0.5f);
+    P19_ScrW = w; P19_ScrH = hh; P110_FullClip = fc; P11_0125f3e0 = sc; P19_Scale = s19; P62_F25F404 = f404; P43_OffX = ox; P43_OffY = oy; P101_ScrX0 = x0; P101_ScrY0 = y0; }
+  { uint32_t si = P108_SmokeIcon; P108_SmokeIcon = 0; float pos[3] = { 0, 0, 0 }; P110_SmokeRing(1.0f, pos, 0, 1, 2, 3, 0, 1); P108_SmokeIcon = si; CK(1); }
+#undef CK
+  return f;
+}
+
 static int test_p107(void) {
   int f = 0;
 #undef CK
@@ -5349,7 +5379,7 @@ static int test_p86(void) {
 
 int re_selftest(void) {
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_p110) | RUN_T(test_real_level) | RUN_T(test_snd) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

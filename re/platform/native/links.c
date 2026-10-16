@@ -98,6 +98,7 @@
 #include "../../game/ported107.h"
 #include "../../game/ported108.h"
 #include "../../game/ported109.h"
+#include "../../game/ported110.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -351,6 +352,7 @@ void Call004246F0 (void) { P69_FreeDevices(); }
 void Call004C372A (void) { FreeDirectorBuffer(); }
 void Call00421A39 (void) { P57_ResetTexNodes(); }
 void Call0052434A (int32_t a0) { SlotSetOff0052434A(a0); }
+void Call00425B12 (int32_t a0, int32_t a1, int32_t a2) { P110_ViewSetup(a0, a1, a2); }
 void Call004D9663 (void) { P96_LoadBar(); }
 void Call004C1B6C (int32_t a0) { P99_CarOpsReset(a0); }
 void Call005243EB (void) { P48_FadeEnd(); }

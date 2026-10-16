@@ -98,6 +98,7 @@
 #include "../../game/ported107.h"
 #include "../../game/ported108.h"
 #include "../../game/ported109.h"
+#include "../../game/ported110.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2101,4 +2102,15 @@ void re_install_all(void) {
     re_hook(0x00504866, (void*)P109_RadarArrows, "P109_RadarArrows");
     re_hook(0x005191c5, (void*)P109_InputTick, "P109_InputTick");
     re_hook(0x00505b54, (void*)P109_RadarTraffic, "P109_RadarTraffic");
+    re_hook(0x0050bd09, (void*)P110_RadarGrid, "P110_RadarGrid");
+    re_hook(0x00502787, (void*)P110_Gauge, "P110_Gauge");
+    re_hook(0x004aa4ea, (void*)P110_IconRect, "P110_IconRect");
+    re_hook(0x004b53de, (void*)P110_GlowA, "P110_GlowA");
+    re_hook(0x004b8871, (void*)P110_GlowB, "P110_GlowB");
+    re_hook(0x004b82b2, (void*)P110_GlowC, "P110_GlowC");
+    re_hook(0x004cdda6, (void*)P110_ScriptSprites, "P110_ScriptSprites");
+    re_hook(0x0041938a, (void*)P110_IconQuad, "P110_IconQuad");
+    re_hook(0x00418675, (void*)P110_MenuSel, "P110_MenuSel");
+    re_hook(0x004e8595, (void*)P110_SmokeRing, "P110_SmokeRing");
+    re_hook(0x00425b12, (void*)P110_ViewSetup, "P110_ViewSetup");
 }
