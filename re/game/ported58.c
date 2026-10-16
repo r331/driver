@@ -3,6 +3,8 @@
 #include "crt.h"
 #include <string.h>
 #include <stdio.h>
+#include "menustate.h"
+#include "ported102.h"
 
 GAME_VAR_DEF(int32_t, P58_MenuSel, 0x005fed9c)
 GAME_VAR_DEF(int32_t, P58_MenuFn, 0x005fea44)
@@ -371,8 +373,8 @@ int32_t P58_SaveSlot(int32_t slot, char *dst) {
 /* 00405bfa: запись CONFIG.DAT {подпись 0x93587031, сумма} + 0x10c байт настроек. */
 void P58_SaveConfig(void) {
   if (P58_CfgOn == 0 || P58_CfgLock != 0) return;
-  P58_Fn406875(P58_Cfg);
-  int32_t sum = P56_Fn40682D(P58_Cfg, 0x10c);
+  { uint32_t snap[0x43]; P102_ConfigSnap(snap); memcpy(P58_Cfg, snap, 0x10c); }   /* v1.78: 00406875 перенесена (P102) */
+  int32_t sum = SumBytes(P58_Cfg, 0x10c);   /* v1.78: ported 0040682d (была заглушка) */
   P58_CfgHdr[0] = 0x93587031u; P58_CfgHdr[1] = (uint32_t)sum;
   void *f = g_fopen("config.dat", "wb");
   if (f != NULL) {

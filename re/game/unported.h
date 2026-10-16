@@ -7,15 +7,15 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
-    R(int32_t, P132_Fn4055E8, 0x004055e8, (void), ()) /* config.dat; не перенесена (v1.77) */ \
-    V(P132_Fn49F6C7, 0x0049f6c7, (int32_t a0), (a0)) \
-    V(P132_Fn4967D2, 0x004967d2, (void), ()) \
+    V(P133_Fn49D84A, 0x0049d84a, (void), ()) \
+    V(P133_Fn4F0F90, 0x004f0f90, (void), ()) \
+    V(P133_Fn49E16C, 0x0049e16c, (void), ()) \
+    V(P133_Fn4A7FEC, 0x004a7fec, (uint8_t *rec), (rec)) \
+    V(P133_Fn494620, 0x00494620, (uint8_t *rec), (rec)) \
     V(P132_Fn4DACEE, 0x004dacee, (void), ()) \
     V(P132_Fn4E9BBF, 0x004e9bbf, (void), ()) \
     V(P132_Fn42D384, 0x0042d384, (void), ()) /* D3D — не трогать */ \
-    V(P132_Fn4CF84C, 0x004cf84c, (void), ()) \
     V(P132_Fn4B418D, 0x004b418d, (void), ()) \
-    V(P132_Fn4F2360, 0x004f2360, (void), ()) \
     R(int32_t, P131_Fn4F68A1, 0x004f68a1, (void *cmd), (cmd)) \
     V(P131_Fn49CAD4, 0x0049cad4, (void), ()) \
     R(int32_t, P58_Fn416794, 0x00416794, (void), ())   /* шпион теста; перенесено как P124_MotelKeys (--skip) */ \

@@ -15,6 +15,7 @@
    Отступления native: строки читаются в локальный буфер (оригинал пишет в буфер имени), '\r' срезается, файл
    закрывается и при ошибке, индекс ключа 0..0x3e; деление на 0 в 004b9287 — 1; NULL-указатели функций пропускаются. */
 #include "ported132.h"
+#include "ported133.h"
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
@@ -111,7 +112,7 @@ GAME_VAR_DEF(int32_t, P132_B87EC8, 0x00b87ec8)
 
 /* ---- 00417b80 ---- */
 int32_t P132_MenuLoop(uint32_t tab) {
-  P132_Fn4055E8();
+  P133_LoadConfig();
   float sv = P19_Scale;
   P100_ItemTab = tab;
   P59_MenuLock = 0; G005FEA54 = 0;
@@ -157,7 +158,7 @@ void P132_GameLogic(void) {
   }
   if (G6_00B5A778 != 0) {
     P66_Scene = 0x00cb8f20u;
-    P132_Fn49F6C7(0);
+    P133_CamUpdate(0);
     P82_FrustumSetup3D();
     P89_DrawMap(0);
     P12_Fn0050229C();
@@ -185,7 +186,7 @@ void P132_GameLogic(void) {
     }
   }
   P127_SpawnTick(0);
-  if (P14_00b87ee4 == 0) P132_Fn49F6C7(0); else P99_CamScriptStep();
+  if (P14_00b87ee4 == 0) P133_CamUpdate(0); else P99_CamScriptStep();
   P82_FrustumSetup3D();
   if (P12_00b87ef8 != 0) Inc0B1FFBC();
   P89_DrawMap(0);
@@ -212,7 +213,7 @@ void P132_GameLogic(void) {
   if (live) {
     P109_InputTick();
     if ((G6_00B87EA0 | P62_HudOff1) == 0) {
-      P132_Fn4967D2(); Update005012A3(); P112_ChaseTick(); P100_CarSounds(P97_D11980); P14_Fn0051BD9C();
+      P133_TrafficTick(); Update005012A3(); P112_ChaseTick(); P100_CarSounds(P97_D11980); P14_Fn0051BD9C();
     } else Update005012A3();
   }
   P127_PlayerSkid(0);
@@ -253,7 +254,7 @@ void P132_GameDraw(void) {
   if (S_00B5A77C == 0) {
     Ui004268E0();
     if (P26_FxA != 0) G8_00D17B0C = 0;
-    if (P14_00b87ee4 == 0) P132_Fn49F6C7(1);
+    if (P14_00b87ee4 == 0) P133_CamUpdate(1);
     P82_FrustumSetup3D();
     if (P14_00b87e84 != 0) P132_Lights();
     if (P98_MrkOff != 0) P76_AngleColor();
@@ -272,7 +273,7 @@ void P132_GameDraw(void) {
     P128_TrafficDraw();
     P132_Fn42D384();
     P127_SpawnTick(1);
-    P132_Fn4CF84C();
+    P133_EventModels();
     if (P98_MrkOff == 0) { P114_PartModels(); P98_IconFlush(); }
     P123_ObjShadows();
     int32_t e1 = MenuVar575EE8, e2 = P13_00575ee8, e3 = G00575EE8;
@@ -299,7 +300,7 @@ void P132_GameDraw(void) {
     }
     if (P26_FxD == 0) P132_Fn4B418D();
     if (live) P121_ScriptHud();
-    if ((MenuVarB31F04 | P13_00b31f04 | G00B31F04) != 0) P132_Fn4F2360();
+    if ((MenuVarB31F04 | P13_00b31f04 | G00B31F04) != 0) P133_MirrorDraw();
     if (P97_ScrObjOn != 0) {
       const uint8_t *o = (const uint8_t *)re_ptr(P132_BLK(0x00c812b8u));
       if (o) P14_Fn004A39F6(o);
