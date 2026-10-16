@@ -1,3 +1,4 @@
+#include <stdlib.h>
 /* v1.82: ported137 — см. ported137.h.
    004d4663 — конец уровня: если удаётся открыть STARTPOS.X ("wb"), у записи игрока обнуляются скорости/силы
      (+0x40..+0x70 кроме +0x64/+0x74, +0x5c = −0x2aaa, +0x78..+0x84, +0xf8/+0xfc, +0x10c..+0x138) и запись 0 (sizeof) пишется в файл;
@@ -427,15 +428,19 @@ void P137_DrawCar(int32_t car, int32_t rec) {
     P84_DrawCar(P28_CarLow[kind], m, pos, 0, car, kind, timer, shk);
     return;
   }
+  int dskip = 0;
+#ifndef RE_HOOK_BUILD
+  { const char *e = getenv("RE_CARSKIP"); dskip = e ? atoi(e) : 0; }   /* v2.06: отладка — 1 тень, 2 пятна фар, 4 колёса, 8 дым, 16 задние огни */
+#endif
   if (P95_D11920 == 0 || rec != -1) {
-    P138_CarShadow(car);
+    if (!(dskip & 1)) P138_CarShadow(car);
     P82_Edge = edge;
-    P106_CarHeadSpots(car);
+    if (!(dskip & 2)) P106_CarHeadSpots(car);
   }
-  P136_DrawWheels(car, m, vis);
+  if (!(dskip & 4)) P136_DrawWheels(car, m, vis);
   int32_t sp = 0;
   if (car == S_00D11878 && P95_D11920 == 0) {
-    if (c->f10c < 1 || -1 < c->ff8) P106_CarTailLights(car); else P106_CarBrakeLights(car);
+    if (dskip & 16) {} else if (c->f10c < 1 || -1 < c->ff8) P106_CarTailLights(car); else P106_CarBrakeLights(car);
     if (c->f10c < 0 && c->ff8 < 0) P101_CarSkids(car);
     if (c->f10c < 0x4b000 && 0 < c->f10c && 200 < c->ffc) P102_CarLights(car, 0);
     else if (c->f10c < 0x4b000 && 0 < c->f10c && c->ffc < -200) P102_CarLights(car, 1);
@@ -458,7 +463,7 @@ void P137_DrawCar(int32_t car, int32_t rec) {
   if (80000 < sp || sp < -40000) P97_KickDebris(c->pos);
   if (((P95_D11920 == 0 && sp < 60000 && -60000 < sp) || (MenuOptBDFA44 != 0 && car == 0)) &&
       (car == 0 || (car - 1 < 0x40 && tr[(car - 1) * 0x54 + 1] != 1)))
-    P120_CarSmoke(car, sp);
+    { if (!(dskip & 8)) P120_CarSmoke(car, sp); }
   if (MenuVar55384C != 0 && car == 0 && P72_RoadLookup(c->pos[0], c->pos[2]) != 0) {
     uint32_t w = P79_ModelTab[P72_Id];
     if (w != 0 && (*(const uint16_t *)((const uint8_t *)P79_PTR(w) + 2) & 0x80) != 0 && c->pos[1] + P72_Low < 0) {

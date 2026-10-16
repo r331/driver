@@ -348,7 +348,7 @@ void P104_DebrisTabs(void) {
 #ifndef RE_HOOK_BUILD
 static const uint8_t k_dent[] = P104_DENT_INIT;   /* 00554fc4: по модели 0x48 = 6 сторон × 3 номера куска (-1 — конец) */
 static const uint8_t k_face[] = P104_FACE_INIT;   /* 0055b834: по типу машины 0x170 байт — сторона записи операции */
-#define TEXP(i) ((uint8_t *)P65_Texs[(i) & 0xf].p)
+#define TEXP(i) ((uint8_t *)P65_TexPage((int32_t)(i)))   /* v2.06: страница слота (01145a64 = P40_Slots[i].data) */
 #else
 #define TEXP(i) ((uint8_t *)P65_Texs[(i)].p)
 #endif

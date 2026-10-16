@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <stdio.h>
 /* v1.52 (см. ported107.h). Стандарт указателей v1.42: записи .data (CARLIGHT, пункты меню, цвета) — по адресу через re_ptr; обработчики меню — re_fn. */
 #include "ported107.h"
 #include "ported106.h"
@@ -616,6 +618,10 @@ tail:
     if (MenuOptBDFA44 != 0) c->ff8 <<= 1;
   }
   c->f141 = (keys & 8) ? 1 : (keys & 4) ? 0xff : 0;
+#ifndef RE_HOOK_BUILD
+  { static int k; if (car == 0 && getenv("RE_CARDBG") && (k++ % atoi(getenv("RE_CARDBG"))) == 0)
+    fprintf(stderr, "[carin] keys %x mx %d steerK %d ff8 %d ffc %d type %d\n", keys, mx, (int)P107_SteerK, c->ff8, c->ffc, c->f00[2]); }
+#endif
 }
 
 /* ---- 004958b7: ряд машин трафика вдоль дороги перед игроком (сторона P103_1426E0, участки 011426f8 / 011443c0 таблицы 00c12c60),

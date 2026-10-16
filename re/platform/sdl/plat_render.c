@@ -131,6 +131,11 @@ int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int 
 }
 void plat_render_shutdown(void) { g_ok = 0; memset(g_tex, 0, sizeof g_tex); g_swap = NULL; }
 
+int png_write_rgba(const char *path, const uint32_t *px, int w, int h);
+static void tex_dump(int i, int w, int h, const uint32_t *rgba) {   /* v2.06: RE_TEXDUMP=каталог — каждая загрузка текстуры в PNG */
+    static int n; const char *d = getenv("RE_TEXDUMP"); if (!d || !rgba || n >= 400) return;
+    char p[512]; snprintf(p, sizeof p, "%s/t%03d_id%d_%dx%d.png", d, n++, i, w, h); png_write_rgba(p, rgba, w, h);
+}
 int plat_tex_create(int w, int h, const uint32_t *rgba) {
     if (!g_ok || w <= 0 || h <= 0) return 0;
     for (int i = 1; i < MAX_TEX; i++) if (!g_tex[i].id) {
@@ -138,7 +143,7 @@ int plat_tex_create(int w, int h, const uint32_t *rgba) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        g_tex[i].w = w; g_tex[i].h = h; return i;
+        g_tex[i].w = w; g_tex[i].h = h; tex_dump(i, w, h, rgba); return i;
     }
     return 0;
 }
@@ -146,7 +151,7 @@ void plat_tex_update(int tex, int w, int h, const uint32_t *rgba) {   /* v2.01: 
     if (!g_ok || tex <= 0 || tex >= MAX_TEX || !g_tex[tex].id || w <= 0 || h <= 0) return;
     glBindTexture(GL_TEXTURE_2D, g_tex[tex].id);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
-    g_tex[tex].w = w; g_tex[tex].h = h;
+    g_tex[tex].w = w; g_tex[tex].h = h; tex_dump(tex, w, h, rgba);
 }
 void plat_clear_rect(uint32_t c, int x, int y, int w, int h) {   /* v2.01: Blt COLORFILL задней поверхности */
     if (!g_ok || w <= 0 || h <= 0) return;

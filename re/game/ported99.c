@@ -454,7 +454,7 @@ void P99_CarOpsReset(int32_t car) {
     const uint8_t *d = (const uint8_t *)re_ptr((uint32_t)P27_DentTex[0]);
     if (d == NULL) return;                                   /* native: текстуры вмятин не загружены */
     uint8_t t = d[8];
-    CopyWords8000((uint32_t *)P65_Texs[t].p, (uint32_t *)D_00d17ec8);
+    { uint32_t *pg = (uint32_t *)P65_TexPage(t); if (pg == NULL) return; CopyWords8000(pg, (uint32_t *)D_00d17ec8); }   /* v2.06: P65_TexPage (= P40_Slots[t].data) */
     P12_Fn0048A46B(t, (int32_t)re_addr(D_00d17ec8));
     memset(P99_D17ECC, 0, sizeof P99_D17ECC);
   } else {

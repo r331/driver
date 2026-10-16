@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <stdio.h>
 /* v1.87: ported142 — см. ported142.h.
    004a7fec — коп rec[5] (запись 0112da00 + (n−1)·0xcd8, машина 0113a6c4 + rec[0]·0x148): при 0112b268 == 0 или 00c824a0 — газ 0;
      выбывший коп (+0xcc4 == 1) — газ 0, таймер +0xcd4 −= 0.01; сумма повреждений +0x11c..+0x130 (если 0112d9d0 == 0) > 00575ee0 —
@@ -668,6 +670,12 @@ static void body_pt(const uint8_t *p, const int32_t *arm, int32_t *o) {   /* p: 
 
 void P142_CarsStep(void) {
   int32_t n = G6_00D0DDC0;
+#ifndef RE_HOOK_BUILD
+  { static int k; if (getenv("RE_CARDBG") && (k++ % atoi(getenv("RE_CARDBG"))) == 0) { uint8_t *c = (uint8_t *)&P99_Cars[0];
+    fprintf(stderr, "[car] n %d o0 %s 13c %d 110 %d pos %d %d %d p24 %d %d %d v %d %d %d f8 %d fc %d 104 %d 108 %d 10c %d o3 %d\n", n, (n > 0 && G6_00B2F30C[0] == c) ? "car0" : "?",
+      rd16(c + 0x13c), rd32(c + 0x110), rd32(c + 0x18), rd32(c + 0x1c), rd32(c + 0x20), rd32(c + 0x24), rd32(c + 0x28), rd32(c + 0x2c), rd32(c + 0x40), rd32(c + 0x44), rd32(c + 0x48),
+      rd32(c + 0xf8), rd32(c + 0xfc), rd32(c + 0x104), rd32(c + 0x108), rd32(c + 0x10c), c[3]); } }
+#endif
   if (n > (int32_t)(sizeof P102_BlkA / 0x34)) n = (int32_t)(sizeof P102_BlkA / 0x34);
   if (P102_D0DD7C != 0) P102_D0DD7C--;
   P46_UpdateObjects();

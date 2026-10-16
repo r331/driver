@@ -1,6 +1,18 @@
 #include "ported65.h"
 #include <stdio.h>
 #include <string.h>
+#include "ported40.h"
+#include "reptr.h"
+void *P65_TexPage(int32_t t) {
+#ifdef RE_HOOK_BUILD
+  return P65_Texs[t].p;
+#else
+  if (t < 0 || t >= 0x100) return NULL;
+  void *p = P40_Slots[t].data != 0 ? re_ptr(P40_Slots[t].data) : NULL;
+  if (p == NULL && t < 64) p = P65_Texs[t].p;
+  return p;
+#endif
+}
 
 #ifndef RE_HOOK_BUILD
 char *P65_Line = NULL;

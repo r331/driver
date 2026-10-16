@@ -29,6 +29,9 @@ typedef char p65_name_t[20];
 #define P65_NameBg  GAME_VAR(const char *, P65_NameBg, 0x00549ff0)
 #define P65_Screen GAME_VAR(p65_screen_t, P65_Screen, 0x0057b740)
 #define P65_Texs   GAME_VAR(p65_texs_t, P65_Texs, 0x01145a64)
+/* v2.06: страница текстур t. В Game.exe 01145a64 + t·0x10 — то же поле, что P40_Slots[t].data (01145a60 + 4): в native два объекта,
+   поэтому в игре берётся адрес слота (re_ptr), а P65_Texs — только если слот пуст (FRONTEND.TSD). */
+void *P65_TexPage(int32_t t);
 #define P65_Blend  GAME_VAR(p65_blend_t, P65_Blend, 0x012752a0)
 #define P65_ColorKey GAME_VAR(uint8_t, P65_ColorKey, 0x005c6768)
 #define P65_NameVal Q0057B72C

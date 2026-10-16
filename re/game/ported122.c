@@ -274,7 +274,7 @@ void P122_IconCopy(int32_t dst, const char *name) {
   uint32_t sw = s[0xb] ? s[0xb] : 0x100, sh = s[0xc] ? s[0xc] : 0x100;
   uint32_t dw = d[0xb] ? d[0xb] : 0x100, dh = d[0xc] ? d[0xc] : 0x100;
   if (sw != dw || sh != dh || s[8] >= 16 || d[8] >= 16) return;   /* native: страница вне P65_Texs — пропуск */
-  uint8_t *dp = (uint8_t *)P65_Texs[d[8]].p, *sp = (uint8_t *)P65_Texs[s[8]].p;
+  uint8_t *dp = (uint8_t *)P65_TexPage(d[8]), *sp = (uint8_t *)P65_TexPage(s[8]);   /* v2.06 */
   if (sp == NULL || dp == NULL) return;
   const uint8_t *src = sp + ((uint32_t)s[10] * 0x100 + s[9]) * 2;
   uint8_t *out = dp + ((uint32_t)d[10] * 0x100 + d[9]) * 2;

@@ -307,6 +307,9 @@ int32_t plat_d3d_enum_devices(void *d3d, plat_d3d_dev_cb cb, void *ctx) {
                                        FLOATTLVERTEX|DRAWPRIMTLVERTEX|HWRASTERIZATION, текстуры 1..2048 */
             memset(hw, 0, sizeof hw); hw[0] = 0xfc; hw[1] = 3; hw[2] = 2; hw[3] = 0x1u | 0x400u | 0x80000u;
             hw[43] = 1; hw[44] = 1; hw[45] = 2048; hw[46] = 2048;
+            /* v2.06: dpcLineCaps (+0x2c) / dpcTriCaps (+0x64): ZCmp/AlphaCmp — все, Src/DestBlendCaps — все D3DPBLENDCAPS (0x1fff).
+               Без них 0041e9d2 (P23_SetBlendMode) считал аддитивное смешивание недоступным: дым выхлопа — чёрный квадрат. */
+            for (int k = 0; k < 2; k++) { uint32_t *pc = &hw[k == 0 ? 11 : 25]; pc[0] = 0x38; pc[3] = 0xff; pc[4] = 0x1fff; pc[5] = 0x1fff; pc[6] = 0xff; }
             memcpy(hel, hw, sizeof hel); }
         char nm[32]; snprintf(nm, sizeof nm, (g_dde_fail & 0x100) ? "SDL OpenGL %d" : "SDL HAL %d", i);
         if (cb(g, "SDL Direct3D stub", nm, hw, hel, ctx) == 0) break;

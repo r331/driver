@@ -304,6 +304,9 @@ int32_t P151_WinOpen(int32_t hwnd, int32_t mode, int32_t a2, int32_t a3, int32_t
   if (P24_AddViewport(P31_DDObj2, P31_DDObj3, w, h) == 0) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
   if (P151_No8bit == 0) G6_00A421F0 = (int32_t)rd32(dv + 0x588);
   else { G6_00A421F0 = 1; NoopFn0042243f(); }                            /* «User requested no 8bit support» */
+#ifndef RE_HOOK_BUILD
+  if (getenv("RE_NO8BIT")) G6_00A421F0 = atoi(getenv("RE_NO8BIT"));   /* v2.06: отладка — эмуляция 8-битных текстур (палитры по спискам) */
+#endif
   if (P109_EmulInit() == 0) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
   P23_InitRenderStates();
   P22_VpX = 0; P22_VpY = 0; P22_VpW = w; P22_VpH = h;

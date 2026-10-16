@@ -419,6 +419,10 @@ void P84_DrawCar(uint32_t mref, const float *mat, const float *pos, int32_t mode
       else if (d == 0) P86_Detail = 0;
       else if (d < 3) { P86_Detail = 1; P84_ShineK = shk * 50.0f; }
     }
+#ifndef RE_HOOK_BUILD
+    { static int dbg = -1, nn; if (dbg < 0) dbg = getenv("RE_CARTEX") != NULL; if (dbg && nn < 400) { nn++;   /* v2.06: отладка — страница/слот записей кузова */
+      call_h(tab, type); fprintf(stderr, "[cartex] car %d rec %d type %u slot %d page %u fl %u blk %u data %08x ta %08x\n", car, i, type, (int)P22_TexVarA, rec[2], P40_Slots[rec[2]].flags, P40_Slots[rec[2]].block, P40_Slots[rec[2]].data, P40_Slots[rec[2]].texaddr); continue; } }
+#endif
     call_h(tab, type);
   }
   if (shinemode) P86_Detail = 0;
