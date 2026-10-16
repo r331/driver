@@ -41,10 +41,21 @@ jobs:
           SDL=$(otool -L $APP/Contents/MacOS/Driver | awk '/libSDL2/{print $1}')
           cp "$(brew --prefix sdl2)/lib/$(basename $SDL)" $APP/Contents/Frameworks/
           install_name_tool -change "$SDL" "@executable_path/../Frameworks/$(basename $SDL)" $APP/Contents/MacOS/Driver
+          # Homebrew sdl2 = sdl2-compat (API SDL2 поверх SDL3, SDL3 грузится через dlopen) — кладём и libSDL3 рядом
+          if [ -f "$(brew --prefix sdl3 2>/dev/null)/lib/libSDL3.0.dylib" ]; then cp "$(brew --prefix sdl3)/lib/libSDL3.0.dylib" $APP/Contents/Frameworks/; fi
+          chmod u+w $APP/Contents/Frameworks/*.dylib
+          ls -la $APP/Contents/Frameworks
           codesign --force --deep -s - $APP
           otool -L $APP/Contents/MacOS/Driver
           cp re/README_macOS.txt re/build-app/ 2>/dev/null || true
           (cd re/build-app && ditto -c -k --keepParent Driver.app Driver-macos-arm64.zip)
+      - name: Driver.app без Homebrew SDL (проверка вложенных библиотек)
+        run: |
+          brew uninstall --ignore-dependencies sdl2-compat sdl3 sdl2 2>/dev/null || true
+          ls /opt/homebrew/opt/ | grep -i sdl || echo "Homebrew SDL удалён"
+          cd re/build-app && mkdir -p t && cd t
+          set +e; DYLD_PRINT_LIBRARIES=1 ../Driver.app/Contents/MacOS/Driver 2>&1 | grep -i "sdl\|Не найдены"; echo "rc(без данных)=${PIPESTATUS[0]}"
+          SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy ../Driver.app/Contents/MacOS/Driver --selftest > st.log 2>&1; rc=$?; tail -3 st.log; echo "rc(selftest)=$rc"; test $rc -eq 0
       - uses: actions/upload-artifact@v4
         with:
           name: driver-macos-arm64
