@@ -1,5 +1,7 @@
 #include "ported12.h"
 #include "ported40.h"
+#include "ported43.h"
+#include "ported7.h"
 GAME_VAR_DEF(int32_t,P12_00bdfa40,0x00bdfa40)
 GAME_VAR_DEF(int32_t,P12_00b87ef8,0x00b87ef8)
 GAME_VAR_DEF(int32_t,P12_005f7e5c,0x005f7e5c)
@@ -14,8 +16,6 @@ GAME_VAR_DEF(float,P12_00546084,0x00546084)
 GAME_VAR_DEF(p12_00ba53a0_t,P12_00ba53a0,0x00ba53a0)
 GAME_VAR_DEF(p12_01144340_t,P12_01144340,0x01144340)
 GAME_VAR_DEF(p12_0112da00_t,P12_0112da00,0x0112da00)
-GAME_VAR_DEF(p12_00c5678c_t,P12_00c5678c,0x00c5678c)
-GAME_VAR_DEF(p12_00c594a0_t,P12_00c594a0,0x00c594a0)
 GAME_VAR_DEF(int32_t,P12_00bdf980,0x00bdf980)
 GAME_VAR_DEF(int32_t,P12_00bde728,0x00bde728)
 GAME_VAR_DEF(int32_t,P12_00bde764,0x00bde764)
@@ -155,10 +155,11 @@ void P12_Fn0048EBC8(void) {
     if (p[0x32d] != 0 && p[0x333] != 0 && p[0x331] == 0) Call0051551E((int32_t)p[0x334]);
   }
 }
+/* v1.48: исправлено — шаг записи частицы 0xb4 (флаги +0xc — uint32), прежде брался шаг 0x5a; освобождение — P43_FreeSlot */
 void P12_Fn00511FB8(void) {
   for (int32_t i = 0; i < 0x40; i++)
     if ((g_00c5678c[i * 0x2d] & 0x10) != 0)
-      Call0051200F(0x00c56780u + (uint32_t)g_00c594a0[i] * 0x5a);
+      P43_FreeSlot((uint8_t *)A_00C56780 + g_00c594a0[i] * 0xb4);
 }
 void P12_Fn005229F0(void) {
   g_00bdf980 = 0; g_00bde728 = 0; g_00bde764 = 0; g_00bde760 = 0;

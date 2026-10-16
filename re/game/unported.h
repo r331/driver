@@ -60,7 +60,7 @@
     V(P60_CamPrepare, 0x004c6d62, (void *cam), (cam)) \
     V(P60_Fn4CA802, 0x004ca802, (void *o), (o)) \
     V(P60_Fn514261, 0x00514261, (void *p), (p)) \
-    R(int32_t, P59_Fn4A6A57, 0x004a6a57, (const void *a, const void *b, const void *c), (a, b, c)) \
+    R(int32_t, P59_Fn4A6A57, 0x004a6a57, (const void *a, const void *b, const void *c), ((uint8_t *)(uintptr_t)a, (const uint8_t *)b)) \
     V(P59_Fn4A5634, 0x004a5634, (const char *a, int32_t i), (a, i)) \
     R(int32_t, P59_Fn417970, 0x00417970, (void), ()) \
     V(P57_MenuInit, 0x0040c8a0, (uint32_t tbl, int32_t n), (tbl, n)) \
@@ -94,7 +94,7 @@
     V(P56_Fn4DA76A, 0x004da76a, (int32_t *a0, uint8_t *a1), (a0, a1)) \
     R(int32_t, P56_Fn40682D, 0x0040682d, (void *a0, int32_t a1), (a0, a1)) \
     V(P56_Fn4E5284, 0x004e5284, (void *a0), (a0)) \
-    V(P56_Fn4E5011, 0x004e5011, (int32_t a0, void *a1), (a0, a1)) \
+    V(P56_Fn4E5011, 0x004e5011, (int32_t a0, void *a1), ()) \
     V(P56_Fn4E53B5, 0x004e53b5, (int32_t a0, void *a1), (a0, a1)) \
     V(P87_Fn42982E, 0x0042982e, (uint32_t m, int32_t idx, float *pos, int32_t mode), (m, idx, pos, mode)) \
     V(P87_Fn42A423, 0x0042a423, (uint32_t m, int32_t idx, float *pos, int32_t mode), (m, idx, pos, mode)) \

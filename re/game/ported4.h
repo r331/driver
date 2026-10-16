@@ -1,5 +1,6 @@
 /* Партия v0.39: обработчики пунктов меню (phase 0 — пометить, 2 — вызвать), освобождение буферов, мелкие функции. */
 #pragma once
+#include "menutab.h"
 #include "gvar.h"
 #include "engine.h"
 #include "unported.h"
@@ -363,86 +364,26 @@ extern uint8_t D_0054c504;
 #ifndef RE_HOOK_BUILD
 extern uint8_t D_0054c514;
 #endif
-#define D_0054dbc4 GAME_VAR(uint8_t, D_0054dbc4, 0x0054dbc4)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dbc4;
-#endif
-#define D_0054dbd4 GAME_VAR(uint8_t, D_0054dbd4, 0x0054dbd4)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dbd4;
-#endif
-#define D_0054dbe4 GAME_VAR(uint8_t, D_0054dbe4, 0x0054dbe4)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dbe4;
-#endif
-#define D_0054dbf4 GAME_VAR(uint8_t, D_0054dbf4, 0x0054dbf4)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dbf4;
-#endif
-#define D_0054dc04 GAME_VAR(uint8_t, D_0054dc04, 0x0054dc04)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dc04;
-#endif
-#define D_0054dc14 GAME_VAR(uint8_t, D_0054dc14, 0x0054dc14)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dc14;
-#endif
-#define D_0054dc24 GAME_VAR(uint8_t, D_0054dc24, 0x0054dc24)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dc24;
-#endif
-#define D_0054dc34 GAME_VAR(uint8_t, D_0054dc34, 0x0054dc34)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dc34;
-#endif
-#define D_0054dc44 GAME_VAR(uint8_t, D_0054dc44, 0x0054dc44)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dc44;
-#endif
-#define D_0054dc54 GAME_VAR(uint8_t, D_0054dc54, 0x0054dc54)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dc54;
-#endif
-#define D_0054dc64 GAME_VAR(uint8_t, D_0054dc64, 0x0054dc64)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dc64;
-#endif
-#define D_0054dc74 GAME_VAR(uint8_t, D_0054dc74, 0x0054dc74)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dc74;
-#endif
-#define D_0054dc84 GAME_VAR(uint8_t, D_0054dc84, 0x0054dc84)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dc84;
-#endif
-#define D_0054dc94 GAME_VAR(uint8_t, D_0054dc94, 0x0054dc94)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dc94;
-#endif
-#define D_0054dca4 GAME_VAR(uint8_t, D_0054dca4, 0x0054dca4)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dca4;
-#endif
-#define D_0054dcb4 GAME_VAR(uint8_t, D_0054dcb4, 0x0054dcb4)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dcb4;
-#endif
-#define D_0054dcc4 GAME_VAR(uint8_t, D_0054dcc4, 0x0054dcc4)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dcc4;
-#endif
-#define D_0054dcd4 GAME_VAR(uint8_t, D_0054dcd4, 0x0054dcd4)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dcd4;
-#endif
-#define D_0054dce4 GAME_VAR(uint8_t, D_0054dce4, 0x0054dce4)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dce4;
-#endif
-#define D_0054dcf4 GAME_VAR(uint8_t, D_0054dcf4, 0x0054dcf4)
-#ifndef RE_HOOK_BUILD
-extern uint8_t D_0054dcf4;
-#endif
+#define D_0054dbc4 MENUTAB_VAR(uint8_t, D_0054dbc4, 0x0054dbc4)
+#define D_0054dbd4 MENUTAB_VAR(uint8_t, D_0054dbd4, 0x0054dbd4)
+#define D_0054dbe4 MENUTAB_VAR(uint8_t, D_0054dbe4, 0x0054dbe4)
+#define D_0054dbf4 MENUTAB_VAR(uint8_t, D_0054dbf4, 0x0054dbf4)
+#define D_0054dc04 MENUTAB_VAR(uint8_t, D_0054dc04, 0x0054dc04)
+#define D_0054dc14 MENUTAB_VAR(uint8_t, D_0054dc14, 0x0054dc14)
+#define D_0054dc24 MENUTAB_VAR(uint8_t, D_0054dc24, 0x0054dc24)
+#define D_0054dc34 MENUTAB_VAR(uint8_t, D_0054dc34, 0x0054dc34)
+#define D_0054dc44 MENUTAB_VAR(uint8_t, D_0054dc44, 0x0054dc44)
+#define D_0054dc54 MENUTAB_VAR(uint8_t, D_0054dc54, 0x0054dc54)
+#define D_0054dc64 MENUTAB_VAR(uint8_t, D_0054dc64, 0x0054dc64)
+#define D_0054dc74 MENUTAB_VAR(uint8_t, D_0054dc74, 0x0054dc74)
+#define D_0054dc84 MENUTAB_VAR(uint8_t, D_0054dc84, 0x0054dc84)
+#define D_0054dc94 MENUTAB_VAR(uint8_t, D_0054dc94, 0x0054dc94)
+#define D_0054dca4 MENUTAB_VAR(uint8_t, D_0054dca4, 0x0054dca4)
+#define D_0054dcb4 MENUTAB_VAR(uint8_t, D_0054dcb4, 0x0054dcb4)
+#define D_0054dcc4 MENUTAB_VAR(uint8_t, D_0054dcc4, 0x0054dcc4)
+#define D_0054dcd4 MENUTAB_VAR(uint8_t, D_0054dcd4, 0x0054dcd4)
+#define D_0054dce4 MENUTAB_VAR(uint8_t, D_0054dce4, 0x0054dce4)
+#define D_0054dcf4 MENUTAB_VAR(uint8_t, D_0054dcf4, 0x0054dcf4)
 #define D_005d577c GAME_VAR(int32_t, D_005d577c, 0x005d577c)
 #ifndef RE_HOOK_BUILD
 extern int32_t D_005d577c;

@@ -91,6 +91,7 @@
 #include "../../game/ported100.h"
 #include "../../game/ported101.h"
 #include "../../game/ported102.h"
+#include "../../game/ported103.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -123,6 +124,7 @@ void P61_Fn514BC7 (void *p, int32_t a, int32_t b) { InitObjState_00514BC7(p, a, 
 void P60_SetupCamN (int32_t n) { P61_SetupCamN(n); }
 void P60_CamPrepare (void *cam) { P61_CamPrepare(cam); }
 void P60_Fn514261 (void *p) { P61_SpawnPart(p); }
+int32_t P59_Fn4A6A57 (const void *a, const void *b, const void *c) { return (int32_t)P103_CopMeet((uint8_t *)(uintptr_t)a, (const uint8_t *)b); }
 int32_t P59_Fn417970 (void) { return (int32_t)P67_Menu417970(); }
 void P57_MenuInit (uint32_t tbl, int32_t n) { P97_MenuCall0(tbl, n); }
 void P57_Setup40A41C (void) { Copy54A838(); }
@@ -147,6 +149,7 @@ void P57_Fn507672 (float *x, float *y) { P94_MapToScreen(x, y); }
 void P56_CallSetVoice (uint32_t a0, int32_t a1, float a2, float a3, float a4) { P97_SndStart(a0, a1, a2, a3, a4); }
 void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
+void P56_Fn4E5011 (int32_t a0, void *a1) { P103_GhostState(); }
 void P87_Fn42982E (uint32_t m, int32_t idx, float *pos, int32_t mode) { P92_DrawAxis(m, idx, pos, mode); }
 void P87_Fn42A423 (uint32_t m, int32_t idx, float *pos, int32_t mode) { P90_DrawSingle(m, idx, pos, mode); }
 void P87_Fn42A5DE (uint32_t m, int32_t idx, float *pos, int32_t mode) { P92_DrawSpin(m, idx, pos, mode); }

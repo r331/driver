@@ -1,5 +1,6 @@
 /* Партия v0.41 */
 #pragma once
+#include "menutab.h"
 #include "ported5.h"
 #include "smallfuncs.h"
 #include <string.h>
@@ -9,7 +10,7 @@ typedef int32_t (*FnI1)(int32_t);
 typedef uint8_t g6a_01145A60[0x400];
 typedef uint8_t g6a_00549F84[0x400];
 typedef uint8_t g6a_0054A25C[0x400];
-typedef uint8_t g6a_0054DBCC[0x400];
+typedef uint8_t g6a_0054DBCC[0x260];  /* v1.48: до конца таблицы меню 0054de2c (прежде 0x400) */
 typedef uint8_t g6a_0054E56C[0x400];
 typedef uint8_t g6a_0054E834[0x400];
 typedef uint8_t g6a_00562B70[0x100];
@@ -62,10 +63,7 @@ extern g6a_00549F84 G6_00549F84;
 #ifndef RE_HOOK_BUILD
 extern g6a_0054A25C G6_0054A25C;
 #endif
-#define G6_0054DBCC GAME_VAR(g6a_0054DBCC, G6_0054DBCC, 0x0054dbcc)
-#ifndef RE_HOOK_BUILD
-extern g6a_0054DBCC G6_0054DBCC;
-#endif
+#define G6_0054DBCC MENUTAB_VAR(g6a_0054DBCC, G6_0054DBCC, 0x0054dbcc)
 #define G6_0054E56C GAME_VAR(g6a_0054E56C, G6_0054E56C, 0x0054e56c)
 #ifndef RE_HOOK_BUILD
 extern g6a_0054E56C G6_0054E56C;
@@ -290,17 +288,17 @@ extern int32_t G6_00C557F8;
 #ifndef RE_HOOK_BUILD
 extern int32_t G6_00C55800;
 #endif
+/* v1.48: пул частиц 00c56780 (0x40 × 0xb4) в native — только A_00C56780; счётчик свободных 00c56764 — P43_FreeCnt,
+   список свободных 00c594a0 — P43_FreeList (G6_/P12_ — макросы над ними) */
+#ifdef RE_HOOK_BUILD
 #define G6_00C56764 GAME_VAR(int32_t, G6_00C56764, 0x00c56764)
-#ifndef RE_HOOK_BUILD
-extern int32_t G6_00C56764;
-#endif
 #define G6_00C5678C GAME_VAR(g6a_00C5678C, G6_00C5678C, 0x00c5678c)
-#ifndef RE_HOOK_BUILD
-extern g6a_00C5678C G6_00C5678C;
-#endif
 #define G6_00C594A0 GAME_VAR(g6a_00C594A0, G6_00C594A0, 0x00c594a0)
-#ifndef RE_HOOK_BUILD
-extern g6a_00C594A0 G6_00C594A0;
+#else
+extern uint8_t A_00C56780[]; extern int32_t P43_FreeCnt; extern int32_t P43_FreeList[];
+#define G6_00C56764 P43_FreeCnt
+#define G6_00C5678C (*(g6a_00C5678C *)(A_00C56780 + 0xc))
+#define G6_00C594A0 (*(g6a_00C594A0 *)P43_FreeList)
 #endif
 #define G6_00C80C50 GAME_VAR(void*, G6_00C80C50, 0x00c80c50)
 #ifndef RE_HOOK_BUILD

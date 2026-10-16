@@ -21,6 +21,9 @@ void     re_fn_register(uint32_t addr, re_fn_t fn) { (void)addr; (void)fn; }
 #include "ported98.h"
 #include "ported100.h"
 #include "p100_data.h"
+#include "ported103.h"
+#include "p103_data.h"
+#include "ported7.h"
 #include "noop.h"
 #include <string.h>
 
@@ -52,6 +55,9 @@ static const re_region_t k_regions[] = {
   { P100_D4A8_ADDR, P100_MenuD4A8, sizeof P100_MenuD4A8 },
   { P100_E0B0_ADDR, P100_MenuE0B0, sizeof P100_MenuE0B0 },
   { P100_E33C_ADDR, (uint8_t *)P100_SpeedTab, sizeof P100_SpeedTab },
+  { P103_MENUDB58_ADDR, P103_MenuTab.b, P103_MENUDB58_SIZE },  /* v1.48: .data экрана настроек 0054db58..0054de94 (game/menutab.h) */
+  { P103_MOBJ_ADDR, P103_MObj, P103_MOBJ_SIZE },                /* v1.48: объекты миссий 00572f00 (game/p103_data.h) */
+  { 0x00c56780u, A_00C56780, 0x2d00 },                          /* v1.48: пул частиц 0x40 × 0xb4 */
 };
 /* таблица функций: адрес Game.exe → перенесённая native-функция */
 static const re_fnent_t k_fns[] = {

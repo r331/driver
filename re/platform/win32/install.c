@@ -91,6 +91,7 @@
 #include "../../game/ported100.h"
 #include "../../game/ported101.h"
 #include "../../game/ported102.h"
+#include "../../game/ported103.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2016,4 +2017,24 @@ void re_install_all(void) {
     re_hook(0x004c4ef9, (void*)P102_DirMenuNodes, "P102_DirMenuNodes");
     re_hook(0x004af2fd, (void*)P102_ObjMark, "P102_ObjMark");
     re_hook(0x004af619, (void*)P102_CarTracks, "P102_CarTracks");
+    /* v1.48 */
+    re_hook(0x004fede5, (void*)P103_MissionModels, "P103_MissionModels");
+    re_hook(0x004cb102, (void*)P103_Dawn, "P103_Dawn");
+    re_hook(0x004cb2f5, (void*)P103_Dusk, "P103_Dusk");
+    re_hook(0x004e4d35, (void*)P103_Mission4Cars, "P103_Mission4Cars");
+    re_hook(0x004e5011, (void*)P103_GhostState, "P103_GhostState");
+    re_hook(0x00414d1f, (void*)P103_OptionsInit, "P103_OptionsInit");
+    re_hook(0x00493ff7, (void*)P103_TrafficTick, "P103_TrafficTick");
+    re_hook(0x00492f7d, (void*)P103_TrafficReset, "P103_TrafficReset");
+    re_hook(0x0051b208, (void*)P103_RoadNeighbour, "P103_RoadNeighbour");
+    re_hook(0x0049aa14, (void*)P103_CarDamage, "P103_CarDamage");
+    re_hook(0x004a6a57, (void*)P103_CopMeet, "P103_CopMeet");
+    re_hook(0x005179d0, (void*)P103_ReplayReset, "P103_ReplayReset");
+    re_hook(0x00492530, (void*)P103_TrafficSpawn, "P103_TrafficSpawn");
+    re_hook(0x0048edff, (void*)P103_TrafficCanGo, "P103_TrafficCanGo");
+    re_hook(0x004deb99, (void*)P103_CarsOverlap, "P103_CarsOverlap");
+    re_hook(0x0049a520, (void*)P103_BoxContactTime, "P103_BoxContactTime");
+    re_hook(0x004dcb62, (void*)P103_RoadHeight, "P103_RoadHeight");
+    re_hook(0x004dd262, (void*)P103_GroundAt, "P103_GroundAt");
+    re_hook(0x00512de7, (void*)P103_PartPath, "P103_PartPath");
 }

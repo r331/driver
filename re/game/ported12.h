@@ -116,18 +116,19 @@ typedef uint32_t p12_0112da00_t[8*0x336];
 #ifndef RE_HOOK_BUILD
 extern p12_0112da00_t P12_0112da00;
 #endif
-typedef uint16_t p12_00c5678c_t[0x40*0x2d];
-#define g_00c5678c P12_00c5678c
-#define P12_00c5678c GAME_VAR(p12_00c5678c_t,P12_00c5678c,0x00c5678c)
-#ifndef RE_HOOK_BUILD
-extern p12_00c5678c_t P12_00c5678c;
-#endif
+/* v1.48: флаги частиц 00c5678c = A_00C56780 + 0xc (шаг 0xb4), список свободных 00c594a0 = P43_FreeList */
+typedef uint32_t p12_00c5678c_t[0x40*0x2d];
 typedef int32_t p12_00c594a0_t[0x40];
-#define g_00c594a0 P12_00c594a0
+#ifdef RE_HOOK_BUILD
+#define P12_00c5678c GAME_VAR(p12_00c5678c_t,P12_00c5678c,0x00c5678c)
 #define P12_00c594a0 GAME_VAR(p12_00c594a0_t,P12_00c594a0,0x00c594a0)
-#ifndef RE_HOOK_BUILD
-extern p12_00c594a0_t P12_00c594a0;
+#else
+extern uint8_t A_00C56780[]; extern int32_t P43_FreeList[];
+#define P12_00c5678c (*(p12_00c5678c_t *)(A_00C56780 + 0xc))
+#define P12_00c594a0 (*(p12_00c594a0_t *)P43_FreeList)
 #endif
+#define g_00c5678c P12_00c5678c
+#define g_00c594a0 P12_00c594a0
 #define g_00bdf980 P12_00bdf980
 #define P12_00bdf980 GAME_VAR(int32_t,P12_00bdf980,0x00bdf980)
 #ifndef RE_HOOK_BUILD
