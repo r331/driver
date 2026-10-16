@@ -1,3 +1,4 @@
+#include "ported139.h"
 #include "ported5.h"
 GAME_VAR_DEF(float, Q00546028, 0x00546028)
 GAME_VAR_DEF(float, Q0054602C, 0x0054602c)
@@ -248,5 +249,5 @@ void LoadTrail004FBE96(void) {
     Q00C812F0 = Call0052ADB0(0x5701d8, 0x5701d4);
 }
 void Fwd004FC0C7(void) {
-    Call004FBBFC(0x570248);
+    P139_TrailLoad("TRAIL.DAT");   /* 00570248 */
 }

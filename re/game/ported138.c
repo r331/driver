@@ -19,6 +19,7 @@
      машина вне 0..65 — выход; 005181da/0051879f/00518bbc/00517d58 — отсутствующий файл не читается, число PINGS ≤ 0x800, буферы — адреса
      re_ptr_register_dyn в P100_RecPtr; 004fbfad — файл 00c812f0 в native не открыт (как P120), прочитанный TRAIL.DAT хранится в модуле;
      004f4180 — P77_LevelName — родной указатель на P138_LevBuf, обнуление 00c810c0..00c812d0 обновляет и native-псевдонимы внутри. */
+#include "ported139.h"
 #include "ported138.h"
 #include <string.h>
 #include <stdio.h>
@@ -271,7 +272,7 @@ void P138_CarShadow(int32_t car) {
 /* ---- 004f4180 ---- */
 static const char *const k_lev[7] = { "MIAMI_01.LEV", "FRISCO_01.LEV", "LA_01.LEV", "NY_01.LEV", "IVIEW.LEV", "TRAIN.LEV", "NC_01.LEV" };
 static const char *const k_des[7] = { "MIAMI_01.DES", "FRISCO_01.DES", "LA_01.DES", "NY_01.DES", "LEVEL4.DES", "LEVEL5.DES", "NEWCASTLE.DES" };
-static void blk84_clear(void) {   /* memset(00c810c0, 0, 0x210) + native-псевдонимы внутри */
+void P138_Blk84Clear(void) {   /* memset(00c810c0, 0, 0x210) + native-псевдонимы внутри */
   memset(P56_Blk84, 0, sizeof(p56_blk84_t) < 0x210 ? sizeof(p56_blk84_t) : 0x210);
   P14_00c810c4 = 0; P47_Limit = 0; P99_CamDelay = 0; P14_00c810e8 = 0; P14_00c81100 = 0; G6_00C81108 = 0;
   P98_ScrModel = 0; P77_LevelName = NULL; P109_C81268 = 0; P97_ScrObjOn = 0; P120_DbgOn = 0; P113_MrkRec = 0;
@@ -284,7 +285,7 @@ int32_t P138_LoadMission(int32_t n) {
   P101_HudVal = 0; P138_C80F40 = 0; G6_00B31F40 = 0; P102_DmgMax = 0; P58_PtrsC816A0 = NULL; P58_LimC810AC = NULL;
   P58_CntC814E8 = 0; P56_C81880 = 0; P138_C80954 = 0; P97_C810A8 = 0; P127_GoalJump = 0; P14_00d14ee4 = 0; D_00d14ee4 = 0;
   P124_DebugLog("* LoadMission *");
-  blk84_clear();
+  P138_Blk84Clear();
   memset(P58_Objs, 0, sizeof(p58_objs_t));
   memset(&P99_ScrNames, 0, sizeof(P99_ScrNames));
   P138_C80F7C = 0;
@@ -315,7 +316,7 @@ int32_t P138_LoadMission(int32_t n) {
   snprintf(P65_Tok, sizeof(p65_tok_t), "Attempting to load: Scripts\\Missions\\Mission%d.dms", n);
   P124_DebugLog(P65_Tok);
   snprintf(P65_Tok, sizeof(p65_tok_t), "Scripts\\Missions\\Mission%d.dms", n);
-  int32_t r = P138_Fn4F4596(P65_Tok);
+  int32_t r = P139_CompileScript(P65_Tok);
   if (r == 0 || r == 10 || r == 4) {
     Call0048A940(G6_00BDF9C0, P125_C814E0, P125_C814E4);
     P97_ScrObjOn = 1;

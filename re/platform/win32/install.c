@@ -127,6 +127,7 @@
 #include "../../game/ported136.h"
 #include "../../game/ported137.h"
 #include "../../game/ported138.h"
+#include "../../game/ported139.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2326,6 +2327,15 @@ void re_install_all(void) {
     re_hook(0x0051879f, (void*)P138_ReplayInit, "P138_ReplayInit");
     re_hook(0x00518bbc, (void*)P138_LoadPads, "P138_LoadPads");
     re_hook(0x004fbfad, (void*)P138_TrailEnd, "P138_TrailEnd");
+    re_hook(0x004f4596, (void*)P139_CompileScript, "P139_CompileScript");
+    re_hook(0x004fbbfc, (void*)P139_TrailLoad, "P139_TrailLoad");
+    re_hook(0x004f8b0a, (void*)P139_AddLabel, "P139_AddLabel");
+    re_hook(0x004aaf3a, (void*)P139_Effects, "P139_Effects");
+    re_hook(0x00519647, (void*)P139_SaveCfg, "P139_SaveCfg");
+    re_hook(0x00519408, (void*)P139_ReplayEnd, "P139_ReplayEnd");
+    re_hook(0x0040fa60, (void*)P139_KeyMenuA, "P139_KeyMenuA");
+    re_hook(0x00410c30, (void*)P139_KeyMenuB, "P139_KeyMenuB");
+    re_hook(0x0041b1c0, (void*)P139_LadderLoad, "P139_LadderLoad");
     re_hook(0x004b9287, (void*)P132_Smoke, "P132_Smoke");
     re_hook(0x004ca135, (void*)P132_Lights, "P132_Lights");
     re_hook(0x0049f20a, (void*)P132_LoadFlyby, "P132_LoadFlyby");

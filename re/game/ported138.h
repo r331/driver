@@ -24,3 +24,4 @@ void    P138_ReplayLoad(void);                  /* 005181da: PADS/LEADER/PINGS �
 void    P138_ReplayInit(void);                  /* 0051879f: буфер записи, LEADER погони */
 void    P138_LoadPads(void);                    /* 00518bbc: PADS игрока из P138_PadsPath */
 void    P138_TrailEnd(void);                    /* 004fbfad: метка конца TRAIL.DAT, последний конус в лог */
+void    P138_Blk84Clear(void);                 /* memset(00c810c0, 0, 0x210) + native-псевдонимы внутри (v1.84: общая с 004f4596) */

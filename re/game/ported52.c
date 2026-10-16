@@ -1,3 +1,4 @@
+#include "ported139.h"
 #include "ported115.h"
 #include "ported52.h"
 #include "ported135.h"
@@ -122,7 +123,7 @@ void P52_DrawLabel(int32_t a, int32_t b, int32_t c) {
 
 void P52_MenuReload(void) {
   P52_MenuA = 0; P52_MenuB = 0; P52_MenuC = 0;
-  if (GameMode == 0) P52_Fn519408();
+  if (GameMode == 0) P139_ReplayEnd();
   if (P52_Fn405F6F(P52_MenuCnt, (uint8_t *)P52_NameTab + P52_MenuCnt * 0x11) == 0) GlobalSet00511378();
   Call00510784();
 }

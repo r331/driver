@@ -1,3 +1,4 @@
+#include "ported139.h"
 #include "ported138.h"
 #include "ported129.h"
 #include "ported124.h"
@@ -94,7 +95,7 @@ uint32_t P12_Fn004152A7(void) {
 int32_t P12_Fn00407563(void) {
   int32_t r;
   if (g_00b87eec == 0) MenuAction40CD17();
-  r = (g_0057b72c == 0) ? R12_410C30() : R12_40FA60();
+  r = (g_0057b72c == 0) ? P139_KeyMenuB() : P139_KeyMenuA();
   if (r == 0 && g_00b87eec == 0) M12(0x549f60, 0x549f78);
   return r;
 }

@@ -7,7 +7,9 @@
 #include "gvar.h"
 
 #define UNPORTED_LIST(V, R) \
-    R(int32_t, P138_Fn4F4596, 0x004f4596, (const char *a0), (a0)) /* CompileMissionScript; не перенесена (v1.83) */ \
+    V(P139_Fn4B588E, 0x004b588e, (const uint8_t *a0), (a0)) /* эффект флага 0x20000 из 004aaf3a; не перенесена (v1.84) */ \
+    V(P139_Fn4B73F3, 0x004b73f3, (const uint8_t *a0), (a0)) /* эффект флага 0x20 из 004aaf3a; не перенесена (v1.84) */ \
+    R(int32_t, P139_Fn41B8AC, 0x0041b8ac, (char *a0), (a0)) /* строка MLADDER из 0041b1c0; 0 — ошибка; не перенесена (v1.84) */ \
     V(Call0048A940, 0x0048a940, (int32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     V(P136_Fn4D38B7, 0x004d38b7, (void), ()) \
     V(P133_Fn4A7FEC, 0x004a7fec, (uint8_t *rec), (rec)) \
@@ -133,7 +135,6 @@
     R(int32_t, P52_Fn48B3E8, 0x0048b3e8, (int32_t a0), (a0)) \
     R(int32_t, P52_Fn48B5E3, 0x0048b5e3, (void), ()) \
     V(P52_Fn5173D7, 0x005173d7, (float a0, float a1, int32_t a2, int32_t a3, int32_t a4), (a0, a1, a2, a3, a4)) \
-    V(P52_Fn519408, 0x00519408, (void), ()) \
     R(int32_t, P52_Fn405F6F, 0x00405f6f, (int32_t a0, void *a1), (a0, a1)) \
     V(P52_Fn41D53C, 0x0041d53c, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4), (a0, a1, a2, a3, a4)) \
     V(P48_Fn516DA0, 0x00516da0, (void), ()) \
@@ -172,8 +173,6 @@
     R(int32_t, R12_40E870, 0x0040e870, (void), ()) \
     R(int32_t, R12_4123D0, 0x004123d0, (void), ()) \
     R(int32_t, R12_40F2D0, 0x0040f2d0, (void), ()) \
-    R(int32_t, R12_410C30, 0x00410c30, (void), ()) \
-    R(int32_t, R12_40FA60, 0x0040fa60, (void), ()) \
     R(int32_t, R12_408770, 0x00408770, (void), ()) \
     R(int32_t, R12_414C30, 0x00414c30, (void), ()) \
     R(int32_t, R12_407160, 0x00407160, (void), ()) \
@@ -235,7 +234,6 @@
     V(Call00514A47, 0x00514a47, (int32_t a0), (a0)) \
     V(Call005283B5, 0x005283b5, (uint32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     R(int32_t, Call0052ADB0, 0x0052adb0, (uint32_t a0, uint32_t a1), (a0, a1)) \
-    V(Call004FBBFC, 0x004fbbfc, (uint32_t a0), (a0)) \
     V(Call0040EA70, 0x0040ea70, (void), ()) \
     V(Call00419B35, 0x00419b35, (void), ()) \
     V(Call00414D1F, 0x00414d1f, (void), ()) \
