@@ -11,6 +11,7 @@
      0040264e→004c2d73 P102_DirFreeCam, 0040220c→004c2ab0 P97_DirKeys, 00402239→004c2b9a P98_DirCamKeys;
      0040209f→004c419e FindNodeByLink, 00402955→004c4151 FindNodeById, 00401e8d→004c43b6 — действие узла меню повтора,
      нет в Ghidra-списке, вызывается через unported.h P124_Fn4C43B6). */
+#include "ported132.h"
 #include "ported124.h"
 #include "ported125.h"
 #include "unported.h"
@@ -217,7 +218,7 @@ int32_t P124_CarSelect(int32_t row) {
   LoadArrowIcons00417353();
   P66_LoadFlag = 1;
   snprintf(name, sizeof name, "SCRIPTS\\FLYBY\\CARSEL%d.FBD", (int)row);
-  if (P47_Fn49F20A(name) == 0) P30_FatalError("Files missing, please reinstall");
+  if (P132_LoadFlyby(name) == 0) P30_FatalError("Files missing, please reinstall");
   if (row == 1) P119_SelPtr = 0x0054e328u;
   else if (row == 2) P119_SelPtr = 0x0054e330u;
   else { row = 0; P119_SelPtr = 0x0054e320u; }
@@ -233,7 +234,7 @@ int32_t P124_CarSelect(int32_t row) {
       int32_t r = P119_CarSelKey(row);
       if (r != 0) {
         snprintf(name, sizeof name, "SCRIPTS\\FLYBY\\FLAT%d.FBD", (int)D_00b87e30);
-        if (P47_Fn49F20A(name) == 0) P30_FatalError("Files missing, please reinstall");
+        if (P132_LoadFlyby(name) == 0) P30_FatalError("Files missing, please reinstall");
         P12_Fn00418433(0x0054e300u, 0x00417479u);
         P66_LoadFlag = 0;
         return r;

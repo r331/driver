@@ -1,4 +1,5 @@
 /* Мелкие функции игры — восстановлено из Game.exe (cdecl). */
+#include "ported132.h"
 #include "ported47.h"
 #include "ported33.h"
 #include "crt.h"
@@ -71,7 +72,7 @@ int32_t P47_TitleDispatch(void) {
 void P47_LoadFlyby(int32_t n) {
   char name[32];
   snprintf(name, sizeof name, "SCRIPTS\\FLYBY\\FLAT%d.FBD", (int)n);
-  if (P47_Fn49F20A(name) == 0) P30_FatalError("Files missing, please reinstall");
+  if (P132_LoadFlyby(name) == 0) P30_FatalError("Files missing, please reinstall");
 }
 void P47_CameraModeText(void) {
   char text[32];

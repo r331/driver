@@ -10,6 +10,7 @@
      (P21_FrameTicks, ×5 в режиме 6), CD-трек D_00b87e30 + 4, громкость, повтор 004d4fc5.
    004cc1a2 / 004cbc1e — Glide: состояние 3,1,0,1,0 (тег 4), смешение 4,4,0,0 (тег 3), текстура значка +8; вершины
      в оригинале — локальные структуры 0x40 (поля z/ooz/a не задаются — мусор стека; в native 0). */
+#include "ported132.h"
 #include "ported131.h"
 #include "reptr.h"
 #include "director.h"
@@ -120,7 +121,7 @@ uint32_t P131_MenuPick(uint32_t tab) {
   D_00b87e30 = P68_IntroA;
   for (;;) {
     if (i == -1) { GameMode = 1; return 0; }
-    i = P131_Fn417B80(tab);
+    i = P132_MenuLoop(tab);
     if (i >= 0) break;
     if (i == -2) {
       if (D_00b87e30 == 1) set_mode38(0xf7);
@@ -170,7 +171,7 @@ void P131_FlybyStart(void) {
   for (int32_t i = 0; i < 0x20; i++) memset(&P99_CamKeys[i * 0x34 + 0x28], 0, 4);
   P99_CamOn = 0;
   snprintf(name, sizeof name, "SCRIPTS\\FLYBY\\MISSION%d.FBD", (int)P11_00b87e38);   /* .data 0055145c */
-  if (P47_Fn49F20A(name) == 0) { P14_00b87ee4 = 0; return; }
+  if (P132_LoadFlyby(name) == 0) { P14_00b87ee4 = 0; return; }
   const uint8_t *k1 = &P99_CamKeys[0x34];
   float f[3]; uint32_t w;
   P99_CamOn |= 1;
@@ -195,9 +196,9 @@ void P131_GameFrame(void) {
     P61_SetupCamN(0);
     SetLatchValue0050E940(0);
     P12_Fn0050E963();
-    GlobalSet004AADDF(); P131_Fn4D4BFB(); P131_Fn4D4FC5();
+    GlobalSet004AADDF(); P132_GameLogic(); P132_GameDraw();
     P62_Frame = 1; G8_00D118C0 = 1; P67_Cur = 1;
-    GlobalSet004AADDF(); P131_Fn4D4BFB(); P131_Fn4D4FC5();
+    GlobalSet004AADDF(); P132_GameLogic(); P132_GameDraw();
     P62_Frame = 2; G8_00D118C0 = 2; P67_Cur = 2;
     P131_Skip = 0;
     G6_00B5A778 = keep;
@@ -206,14 +207,14 @@ void P131_GameFrame(void) {
   if (P31_Active == 0 && G6_00B5A778 == 0) SetLatchValue0050E940(1);
   P12_Fn0050E963();
   GlobalSet004AADDF();
-  P131_Fn4D4BFB();
+  P132_GameLogic();
   if (G6_00B87E20 == 0) return;
   int32_t n = (int32_t)P21_FrameTicks();
   if (P29_Mode == 6) n *= 5;
   for (; n > 1; n--) {
     if (G6_00B87E20 == 0) return;
     GlobalSet004AADDF();
-    P131_Fn4D4BFB();
+    P132_GameLogic();
     if (G6_00B87E20 == 0) return;
   }
   if (Q00B87E90 != 0 && G6_00B5A778 == 0 && P25_CdPlaying == 0) {
@@ -221,7 +222,7 @@ void P131_GameFrame(void) {
     P25_PlayCDTrack(D_00b87e30 + 4);
   }
   InitSoundVolumes_00523C56();
-  if (P31_Active != 0) { P131_Fn4D4FC5(); P67_Cur++; }
+  if (P31_Active != 0) { P132_GameDraw(); P67_Cur++; }
   if (P99_CamDone != 0) P14_00b87ee4 = 0;
 }
 
@@ -339,7 +340,7 @@ void P131_MissionObj(uint32_t m, const uint8_t *obj, int32_t mode) {
     if (rd32(c + 4) != id) continue;
     float c3 = rdf(c + 0xc), c4 = rdf(c + 0x10), c5 = rdf(c + 0x14);
     int16_t s1c = rd16s(c + 0x1c), s1e = rd16s(c + 0x1e), s20 = rd16s(c + 0x20);
-    float pos[3]; int32_t vel[4] = { 0, 0, 0, 0 };
+    float pos[3]; float vel[4] = { 0.0f, 0.0f, 0.0f, 0.0f };   /* 004b9287 читает float */
     switch (rd32(c)) {
     case 0: case 1: {
       uint8_t l = light_kind(ang);
@@ -357,12 +358,12 @@ void P131_MissionObj(uint32_t m, const uint8_t *obj, int32_t mode) {
     case 5: {
       int32_t n = (int32_t)(N14_Rand() & 0x3f) + 0x50;
       pos[0] = x + c3; pos[1] = y + c4; pos[2] = z + c5;
-      if ((P62_Frame & 7) == 7) P131_Fn4B9287(pos, vel, n, 300, s1c, s1e, s20, -2.0f, 1);
+      if ((P62_Frame & 7) == 7) P132_Smoke(pos, vel, n, 300, s1c, s1e, s20, -2.0f, 1);
       break; }
     case 6: {
       int32_t n = (int32_t)(N14_Rand() & 0x1f) + 0x28;
       pos[0] = x + c3; pos[1] = y + c4; pos[2] = z + c5;
-      if ((P62_Frame & 7) == 3) P131_Fn4B9287(pos, vel, n, n * 6, 2, 0x78, s20, -1.5f, 1);
+      if ((P62_Frame & 7) == 3) P132_Smoke(pos, vel, n, n * 6, 2, 0x78, s20, -1.5f, 1);
       break; }
     case 7: {
       float d = sway(x, z) * (float)s1c;
@@ -381,7 +382,7 @@ void P131_MissionObj(uint32_t m, const uint8_t *obj, int32_t mode) {
       float d = sway(x, z) * (float)s1c;
       y += d;
       pos[0] = x + dx; pos[1] = y + dy; pos[2] = z + dz;
-      if ((P62_Frame & 7) == 7) P131_Fn4B9287(pos, vel, n, 500, 7, 200, s20, -1.0f, 1);
+      if ((P62_Frame & 7) == 7) P132_Smoke(pos, vel, n, 500, 7, 200, s20, -1.0f, 1);
       break; }
     case 10: case 0xc: case 0xe:
       P101_AddObjB(obj, c3, c4, c5, s20, s1e, 0x100);
@@ -397,7 +398,7 @@ void P131_MissionObj(uint32_t m, const uint8_t *obj, int32_t mode) {
       int32_t n = (int32_t)(N14_Rand() & 0x1f) + 0x32;
       float f = (float)(N14_Rand() & 0xf) / 15.0f + 0.1f;   /* .rdata 00546a08 / 005461bc */
       pos[0] = x + c3; pos[1] = y + c4; pos[2] = z + c5;
-      if ((P62_Frame & 7) == 3) P131_Fn4B9287(pos, vel, n, n * 5, 4, 0x32, 2, -f, 1);
+      if ((P62_Frame & 7) == 3) P132_Smoke(pos, vel, n, n * 5, 4, 0x32, 2, -f, 1);
       break; }
     default: break;
     }

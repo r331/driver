@@ -120,6 +120,7 @@
 #include "../../game/ported129.h"
 #include "../../game/ported130.h"
 #include "../../game/ported131.h"
+#include "../../game/ported132.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -2281,6 +2282,12 @@ void re_install_all(void) {
     re_hook(0x00507925, (void*)P131_RadarArrow, "P131_RadarArrow");
     re_hook(0x004ef9cd, (void*)P131_LoadCosDen, "P131_LoadCosDen");
     re_hook(0x0049e7a8, (void*)P131_CamShake, "P131_CamShake");
+    re_hook(0x00417b80, (void*)P132_MenuLoop, "P132_MenuLoop");
+    re_hook(0x004d4bfb, (void*)P132_GameLogic, "P132_GameLogic");
+    re_hook(0x004d4fc5, (void*)P132_GameDraw, "P132_GameDraw");
+    re_hook(0x004b9287, (void*)P132_Smoke, "P132_Smoke");
+    re_hook(0x004ca135, (void*)P132_Lights, "P132_Lights");
+    re_hook(0x0049f20a, (void*)P132_LoadFlyby, "P132_LoadFlyby");
     re_hook(0x004cd3fb, (void*)P128_ModelHit, "P128_ModelHit");
     re_hook(0x004c032a, (void*)P128_CarDeform, "P128_CarDeform");
     re_hook(0x004949f0, (void*)P128_TrafficNode, "P128_TrafficNode");
