@@ -203,6 +203,10 @@ windowed_res = 1600x900
 (PNG, квадрат 256..1024, обычно 1024×1024 — апскейл ×4 нейросетью). Пак — производная данных игры, поэтому в репозитории его нет:
 его делают у себя из своей копии игры.
 
+**Готовый пак (приватный):** [r331/driver-texpack](https://github.com/r331/driver-texpack) — апскейл ×4 (4x_foolhardy_Remacri),
+NY_01 целиком, miami_01. Доступ только у владельца, не публиковать. Подключение: `git clone https://github.com/r331/driver-texpack.git`,
+затем `texpack = /путь/driver-texpack` в `driver.cfg` или `RE_TEXPACK=/путь/driver-texpack` (16-бит — с v2.17, 8-бит и подмена в игре — с v2.18).
+
 ```sh
 pip install numpy pillow torch spandrel          # torch — CPU-сборки достаточно
 python3 tools/texpack.py Data_Files/Levels/NY_01.lev texpack --model 4x_foolhardy_Remacri.pth   # ~1 мин/страница на CPU
