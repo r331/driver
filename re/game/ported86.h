@@ -42,6 +42,19 @@ int  P86_NativeHandle(int32_t slot);                                  /* plat_te
    отклонённых сверкой; итог загрузки уровня → лог «[texpack] загружено N страниц» */
 int  P86_NativeTexW(int32_t slot);
 extern int32_t P86_TexpackN, P86_TexpackRejected;
+/* v2.18: 8-битные страницы — текстура на пару (страница, слот палитры), палитра — текущая g_01252b74 (P12_Fn00426580);
+   P86_Texpack8N — из них из пака (pNNN_cKKKK.png), P86_Pal8Tex — всего текстур пар; ширина текстуры пары; статистика RE_TEXLOG */
+extern int32_t P86_Texpack8N, P86_Pal8Tex;
+int  P86_NativeTexW8(int32_t slot, int32_t pal);
+int  P86_TexLogOn(void);                /* задан RE_TEXLOG (кэш) */
+void P86_NativeStat(const float *xy);   /* экранные x,y трёх вершин треугольника */
+void P86_NativeStatFlush(void);         /* записать статистику RE_TEXLOG (выход по RE_MAX_FRAMES — _Exit) */
+/* v2.18: путь игры (D3D-эмуляция Game.exe): HD из пака к поверхностям plat_dd — 16-битная страница по содержимому (слот),
+   8-битная — пометка страницы на PAL8-поверхности слота (поставщик пар) или эмулированная текстура пары (страница, палитра) */
+void P86_GameAttach16(void *surf, const uint16_t *src);
+void P86_GameTag8(void *surf, const uint8_t *src);
+void P86_GameAttachEmul8(void *surf, int32_t page, int32_t pal);
+extern int32_t P86_GameAttachN;
 void P86_NativeCaptureEnd(void);
 extern int32_t P86_TexCount;
 void P86_NativeInit(void);                                            /* ставит P86_TexSrc, регистрирует обработчики 20..23/50/51 */

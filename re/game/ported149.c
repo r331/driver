@@ -28,6 +28,9 @@
 #include "reptr.h"
 #include "unported.h"
 #include "../platform/plat.h"
+#ifndef RE_HOOK_BUILD
+#include "ported86.h"
+#endif
 #include <stdio.h>
 #include <string.h>
 
@@ -247,6 +250,9 @@ static int32_t emul_upload(uint8_t *o, int32_t src, int32_t pal) {
   P74_Conv8to16((const uint8_t *)re_ptr((uint32_t)src), (const uint8_t *)re_ptr((uint32_t)pal),
                 (uint16_t *)re_ptr(d[9]), (int32_t)d[4]);
   plat_dd_unlock(s);
+#ifndef RE_HOOK_BUILD
+  P86_GameAttachEmul8(s, (int32_t)rd32(o), (int32_t)rd32(o + 4));   /* v2.18: HD-пак — пара (страница = handle, слот палитры = +4) */
+#endif
   return 1;
 }
 

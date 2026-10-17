@@ -337,6 +337,10 @@ static uint32_t col8(float f) { int i = (int)lrintf(f); return (uint32_t)(i < 0 
 static void P85_STD native_raster(const p85_rv *a, const p85_rv *b, const p85_rv *c) {
   const p85_rv *vs[3] = { a, b, c };
   plat_vertex pv[3];
+  if (g_textured) {   /* v2.18: палитра 8-битной страницы может смениться между треугольниками (P12_Fn00426580) — текстура пары */
+    plat_tex_bind(P86_NativeHandle(P86_CurTex));
+    if (P86_TexLogOn()) { const float xy[6] = { a->x, a->y, b->x, b->y, c->x, c->y }; P86_NativeStat(xy); }
+  }
   for (int i = 0; i < 3; i++) {
     const p85_rv *r = vs[i];
     float oow = r->oow < 0 ? 0 : r->oow;

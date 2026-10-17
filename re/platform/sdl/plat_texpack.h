@@ -16,6 +16,18 @@ uint32_t *re_texpack_load(const char *dir, const char *level, int idx, int *w, i
 /* сверка HD-картинки с исходной страницей ARGB1555 256×256: картинка уменьшается до 256 (среднее блока), err — средняя
    |ΔRGB| (0..255) по всем пикселям (какое состояние бита 0x8000 прозрачно, решает альфа-тест при рисовании), amis — доля пикселей, где альфа (>=128) не совпала с битом 0x8000 */
 void re_texpack_compare(const uint32_t *hd, int w, int h, const uint16_t *page, double *err, double *amis);
+/* v2.18: 8-битные страницы (пара, флаг 0x10). Текстура Glide GR_TEXFMT_P_8 / поверхность PAL8 + палитра — 256 записей B,G,R,X из
+   таблицы палитр уровня 01252be0, слот выбирает P12_Fn00426580 (00426580) во время рисования. Альфа 255: прозрачного индекса нет.
+   Пак: <dir>/<level>/pNNN_cKKKK.png, NNN — индекс страницы (как у 16-битных), KKKK — номер слота палитры (0..49, из файла уровня).
+   Каталог уровня ищется как есть, строчными и ПРОПИСНЫМИ (игра пишет MIAMI_01, файл — miami_01.lev). */
+uint32_t *re_texpack_load8(const char *dir, const char *level, int idx, int pal, int *w, int *h);
+/* индексы 256×256 + палитра (NULL — серый по индексу) → RGBA как plat_tex_create */
+void re_texpack_pal8_rgba(const uint8_t *idx, const uint8_t *pal, uint32_t *out);
+/* сверка HD-картинки с эталоном RGBA 256×256: средняя |ΔRGB| и доля расхождений альфы (>=128) */
+void re_texpack_compare_rgba(const uint32_t *hd, int w, int h, const uint32_t *ref, double *err, double *amis);
+/* путь игры (поверхности plat_dd): orig — страница 256×256 в RGBA так, как её загрузила игра; hd — w×w. 1 — принята
+   (средняя |ΔRGB| <= RE_TEXPACK_MAX_ERR), альфа hd заменена альфой orig (nearest): прозрачность как у оригинала. */
+int re_texpack_merge(const uint32_t *orig, uint32_t *hd, int w, double *err);
 /* порог: страница принимается, если err <= RE_TEXPACK_MAX_ERR и amis <= RE_TEXPACK_MAX_AMIS (иначе — перепутан индекс) */
 #define RE_TEXPACK_MAX_ERR  24.0
 #define RE_TEXPACK_MAX_AMIS 0.02

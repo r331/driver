@@ -1,13 +1,16 @@
 /* SDL-вариант объектов DirectDraw/Direct3D: учётные записи без устройства.
    Игровой код (game/ported24.c) работает с дескрипторами; реальное окно/буфер даёт plat_render.c. */
 #include "../plat.h"
+#include "plat_texpack.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 typedef struct dd_obj { uint32_t tag; int32_t lost; int32_t attached; int32_t clipper; int32_t w, h;
     /* v2.01: игра (g_game_present) — поверхность с памятью пикселей */
     uint8_t *px; int32_t pitch, bpp; uint32_t pf[8]; uint32_t addr; int gltex, dirty, role; uint32_t caps;
-    struct dd_obj *surf; struct dd_obj *pal; uint8_t pal_rgba[256 * 4]; uint32_t ck_lo, ck_hi; int has_ck; } dd_obj;
+    struct dd_obj *surf; struct dd_obj *pal; uint8_t pal_rgba[256 * 4]; uint32_t ck_lo, ck_hi; int has_ck;
+    uint32_t *hd; int hdw, hd_page, hd_pal;     /* v2.18: HD-картинка страницы из пака (plat_dd_attach_hd), 16 бит */
+    int page8; uint64_t page8_key; } dd_obj;      /* v2.18: поверхность PAL8 со страницей уровня (plat_dd_tag_page8), -1 — нет */
 static int g_game_present;   /* v2.00: 1 — игра (plat_dd_stub_enum с 0x100): Flip показывает кадр GL; v2.01: поверхности с памятью */
 /* v2.01: адрес памяти поверхности для 32-битного поля lpSurface (game/reptr.c — синтетический адрес 0x80000000+) */
 uint32_t re_ptr_register_dyn(void *native, uint32_t size);
@@ -48,7 +51,7 @@ static int gs_alloc(dd_obj *o) {
     o->pitch = ((o->w * o->bpp / 8) + 3) & ~3;
     o->px = (uint8_t *)calloc((size_t)o->pitch * (size_t)o->h, 1); if (!o->px) return 0;
     o->addr = re_ptr_register_dyn(o->px, (uint32_t)(o->pitch * o->h));
-    o->dirty = 1; return 1;
+    o->page8 = -1; o->dirty = 1; return 1;
 }
 static uint8_t mask8(uint32_t v, uint32_t m) {
     if (!m) return 0; int sh = 0; while (!((m >> sh) & 1)) sh++; uint32_t mm = m >> sh, x = (v & m) >> sh;
@@ -77,12 +80,38 @@ static uint32_t *gs_to_rgba(const dd_obj *o, int overlay) {
     }
     return out;
 }
+/* v2.18: HD-пак в игре. 16 бит: картинка прикрепляется к поверхности слота и при загрузке в GL сверяется с её памятью
+   (re_texpack_merge). PAL8: поверхность помечена страницей; при рисовании поставщик (game/ported86.c) по странице и текущей палитре
+   поверхности отдаёт готовую GL-текстуру пары (страница, палитра) — смена палитры не требует перезагрузки. Запись в поверхность
+   (Unlock) снимает и картинку, и пометку: код слота ставит их заново после своей загрузки. */
+static int g_hd_up, g_hd_rej, g_hd_att, g_pal8_bind;
+static plat_pal8_provider g_pal8_prov;
+void plat_dd_set_pal8_provider(plat_pal8_provider fn) { g_pal8_prov = fn; }
+static int is_surf(void *v) { return v && g_game_present && !dsm_is(v) && ((dd_obj *)v)->px; }
+void plat_dd_attach_hd(void *v, uint32_t *rgba, int w, int page, int pal) {
+    dd_obj *o = (dd_obj *)v;
+    if (!is_surf(v)) { free(rgba); return; }
+    if (!rgba) { if (o->hd) { free(o->hd); o->hd = NULL; o->dirty = 1; } return; }   /* снять (в слоте другая страница) */
+    free(o->hd); o->hd = rgba; o->hdw = w; o->hd_page = page; o->hd_pal = pal; o->dirty = 1; g_hd_att++;
+}
+int plat_dd_hd_page(void *v, int *pal) { dd_obj *o = (dd_obj *)v; if (!is_surf(v) || !o->hd) return -1; if (pal) *pal = o->hd_pal; return o->hd_page; }
+void plat_dd_tag_page8(void *v, int page, uint64_t key) { dd_obj *o = (dd_obj *)v; if (!is_surf(v) || o->bpp != 8) return; o->page8 = page; o->page8_key = key; }
+void plat_dd_hd_stats(int *att, int *up, int *rej, int *pal8) { if (att) *att = g_hd_att; if (up) *up = g_hd_up; if (rej) *rej = g_hd_rej; if (pal8) *pal8 = g_pal8_bind; }
 static void gs_upload(dd_obj *o, int overlay) {
     if (!o->px || !o->dirty) return;
     uint32_t *rgba = gs_to_rgba(o, overlay); if (!rgba) return;
     if (trace_dd()) { int nz = 0, pz = 0; for (int i = 0; i < o->pitch * o->h; i++) nz += o->px[i] != 0;
         if (o->pal) for (int i = 0; i < 1024; i++) pz += o->pal->pal_rgba[i] != 0;
         TR("upload %p %dx%d bpp %d nz %d pal %p palnz %d rgba0 %08x mid %08x\n", (void *)o, o->w, o->h, o->bpp, nz, (void *)o->pal, pz, rgba[0], rgba[o->w * o->h / 2 + o->w / 2]); }
+    if (o->hd && o->w == 256 && o->h == 256 && !overlay) {   /* v2.18: HD из пака — если память поверхности всё ещё та страница */
+        double e = 0;
+        if (re_texpack_merge(rgba, o->hd, o->hdw, &e)) {
+            if (o->gltex) plat_tex_update(o->gltex, o->hdw, o->hdw, o->hd); else o->gltex = plat_tex_create(o->hdw, o->hdw, o->hd);
+            g_hd_up++; free(rgba); o->dirty = 0; return;
+        }
+        plat_log("[texpack] игра: HD страницы %d отклонён: не похож на загруженную страницу (ошибка %.1f)\n", o->hd_page, e);
+        free(o->hd); o->hd = NULL; g_hd_rej++;
+    }
     if (o->gltex) plat_tex_update(o->gltex, o->w, o->h, rgba); else o->gltex = plat_tex_create(o->w, o->h, rgba);
     if (getenv("RE_ATDBG")) { int a0 = 0, a255 = 0, nz = 0; for (int i = 0; i < o->w * o->h; i++) { unsigned a = rgba[i] >> 24; a0 += a == 0; a255 += a == 255; nz += (rgba[i] & 0xffffff) != 0; }
         fprintf(stderr, "[tex] gl %d %dx%d bpp %d pf %08x masks %08x %08x %08x %08x ck %d %x-%x a0 %d a255 %d nz %d\n", o->gltex, o->w, o->h, o->bpp, o->pf[1], o->pf[4], o->pf[5], o->pf[6], o->pf[7],
@@ -134,6 +163,7 @@ void plat_dd_release(void *v) {
     dd_obj *o = (dd_obj *)v;
     if (o->px) { re_ptr_unregister(o->px); free(o->px); }
     if (o->gltex) plat_tex_free(o->gltex);
+    free(o->hd);
     if (o == g_gs_back) g_gs_back = NULL;
     if (o == g_gs_primary) g_gs_primary = NULL;
     free(o); g_live--; }
@@ -182,6 +212,10 @@ void plat_set_texture(int stage, void *tex) {
     if (!g_game_present || stage != 0) return;
     dd_obj *t = (dd_obj *)tex, *s = (t && t->tag == 6) ? t->surf : (t && t->tag == 1 ? t : NULL);
     TR("set_texture %p surf %p\n", tex, (void *)s);
+    if (s && s->px && s->bpp == 8 && s->page8 >= 0 && !s->has_ck && g_pal8_prov && s->pal) {   /* v2.18: PAL8 со страницей — текстура пары из пака */
+        int h = g_pal8_prov(s->page8, s->page8_key, s->pal->pal_rgba);
+        if (h > 0) { g_pal8_bind++; plat_tex_bind(h); return; }
+    }
     if (s && s->px) { gs_upload(s, 0); plat_tex_bind(s->gltex); } else plat_tex_bind(0); }
 void *plat_stub_last_texture(int *stage) { if (stage) *stage = g_tex_stage; return g_tex; }
 int plat_stub_pal_stats(int *a, int *b) { *a = g_pal_entries; *b = g_pal_changed; return 1; }
@@ -215,7 +249,9 @@ int32_t plat_dd_lock(void *s, void *d) {
         TR("lock %p role %d addr %08x pitch %d\n", (void *)o, o->role, o->addr, o->pitch);
         return 0; }
     u[4] = 640; u[9] = (uint32_t)(uintptr_t)g_lock_mem; g_locks++; return 0; }
-int32_t plat_dd_unlock(void *s) { if (!s) return -1; g_unlocks++; if (g_game_present && ((dd_obj *)s)->px) ((dd_obj *)s)->dirty = 1; return 0; }
+int32_t plat_dd_unlock(void *s) { if (!s) return -1; g_unlocks++;
+    if (g_game_present && !dsm_is(s) && ((dd_obj *)s)->px) { dd_obj *o = (dd_obj *)s; o->dirty = 1; o->page8 = -1; if (o->hd) { free(o->hd); o->hd = NULL; } }
+    return 0; }
 int32_t plat_dd_get_pixel_format(void *s, uint32_t *pf) {
     if (g_game_present && s && ((dd_obj *)s)->tag == 1) { memcpy(pf, ((dd_obj *)s)->pf, 32); pf[0] = 0x20; return 0; }
     if (!s || g_pf_fail) return -1;

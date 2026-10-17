@@ -253,6 +253,16 @@ int     plat_fmv_stub_stats(int *state, int *updates, int32_t *rect4, int *blts,
 /* Поверхности: блокировка, формат пикселей, показ кадра (0041eb8c, 0041ec82, 0041d3ed, 0041dec8, 00420c5a, 00420cac, 00421149) */
 int32_t plat_dd_lock(void *surf, void *desc124);                          /* Lock(NULL, desc, DDLOCK_WAIT, NULL); desc[0]=0x7c; lpSurface — desc[9], pitch — desc[4]; HRESULT */
 int32_t plat_dd_unlock(void *surf);                                       /* Unlock(NULL) */
+/* v2.18 (SDL, игра): HD-пак. attach_hd — картинка w×w (RGBA, владение переходит; NULL — снять) для текстурной поверхности 256×256
+   16-битной страницы page; при загрузке в GL сверяется с памятью поверхности, альфа — оригинала. tag_page8 — поверхность PAL8
+   хранит страницу page (key — хэш её данных); поставщик отдаёт GL-текстуру пары (страница, палитра) по палитре поверхности
+   (записи r,g,b,flags) или 0 — обычная загрузка. Unlock снимает и картинку, и пометку. */
+typedef int (*plat_pal8_provider)(int page, uint64_t key, const uint8_t *pal_rgba);
+void    plat_dd_attach_hd(void *surf, uint32_t *rgba, int w, int page, int pal);
+int     plat_dd_hd_page(void *surf, int *pal);
+void    plat_dd_tag_page8(void *surf, int page, uint64_t key);
+void    plat_dd_set_pal8_provider(plat_pal8_provider fn);
+void    plat_dd_hd_stats(int *attached, int *uploaded, int *rejected, int *pal8_binds);
 int32_t plat_dd_get_pixel_format(void *surf, uint32_t *pf8);              /* GetPixelFormat: DDPIXELFORMAT 32 байта (pf8[0]=0x20 на входе); HRESULT */
 void   *plat_dd_query_dd4(void *dd);                                      /* QueryInterface(IID_IDirectDraw4); NULL — ошибка */
 void   *plat_dd_query_d3d(void *dd);                                      /* QueryInterface(IID_IDirect3D3); NULL — ошибка */

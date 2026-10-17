@@ -419,6 +419,9 @@ int32_t P109_SlotUpload8(const uint8_t *src, int32_t slot) {
     src += 0x100;
   }
   plat_dd_unlock(s);
+#ifndef RE_HOOK_BUILD
+  P86_GameTag8(s, src - 0x10000);   /* v2.18: HD-пак — страница уровня на PAL8-поверхности слота */
+#endif
   return 1;
 }
 
@@ -442,6 +445,9 @@ int32_t P109_SlotUpload16(const uint16_t *src, int32_t slot) {
     row += (d[4] >> 1);
   }
   plat_dd_unlock(s);
+#ifndef RE_HOOK_BUILD
+  P86_GameAttach16(s, src - 0x10000);   /* v2.18: HD-пак — 16-битная страница по содержимому */
+#endif
   return 1;
 }
 

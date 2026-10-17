@@ -433,6 +433,9 @@ void plat_frame_tick(const char *where) {
         if (maxf > 0 && g_frames >= maxf) {
             if (!g_shot_done) frame_shot();
             frame_stat_report();
+            { extern void P86_NativeStatFlush(void); P86_NativeStatFlush(); }   /* v2.18: RE_TEXLOG перед _Exit */
+            { int a = 0, u = 0, r = 0, p8 = 0; plat_dd_hd_stats(&a, &u, &r, &p8);
+              if (a || p8) fprintf(stderr, "[texpack] игра: 16 бит — прикреплено %d, загрузок в GL %d, отклонено %d; PAL8 — привязок текстуры пары %d\n", a, u, r, p8); }
             fprintf(stderr, "[frame] RE_MAX_FRAMES=%d достигнут — выход\n", maxf); fflush(NULL); _Exit(0);
         }
     } else {

@@ -354,6 +354,9 @@ void P106_EmulUpload8(void *node, int32_t src) {
       P74_Conv8to16((const uint8_t *)re_ptr((uint32_t)src), (const uint8_t *)re_rd_ptr(n + 0xc),
                     (uint16_t *)re_ptr(d[9]), (int32_t)d[4]);
       plat_dd_unlock(s);
+#ifndef RE_HOOK_BUILD
+      { uint32_t pg, kd; memcpy(&pg, n, 4); memcpy(&kd, n + 4, 4); P86_GameAttachEmul8(s, (int32_t)pg, (int32_t)kd); }   /* v2.18 */
+#endif
     } else NoopFn0042243f();                          /* «Lock emultexture8() failed» */
   }
 }
