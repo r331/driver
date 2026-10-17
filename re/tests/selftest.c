@@ -7161,11 +7161,71 @@ static int test_gfx(void) {
   char b[600]; printf("gfx: %s\n", re_gfx_describe(&c, b, sizeof b));
   return 0;
 }
+/* v2.17: HD-пак текстур — PNG (stb_image), сверка со страницей, подмена 256 → 1024 в P86_NativeCapture; синтетика без данных игры */
+#include "../platform/sdl/plat_texpack.h"
+static int test_texpack(void) {
+  char lv[64];
+  re_texpack_level_name("Levels/NY_01.lev", lv, sizeof lv); CHECK(!strcmp(lv, "NY_01"));
+  re_texpack_level_name("Levels\\Miami_02.LEV", lv, sizeof lv); CHECK(!strcmp(lv, "Miami_02"));
+  { static const unsigned char junk[16] = { 1, 2, 3 }; int w = 0, h = 0; CHECK(re_texpack_decode_png(junk, 16, &w, &h) == NULL); }
+  static uint16_t page[256 * 256];
+  for (int y = 0; y < 256; y++) for (int x = 0; x < 256; x++) {
+    int hole = x >= 96 && x < 160 && y >= 96 && y < 160;          /* chroma-key: прозрачный квадрат в центре */
+    uint16_t c = (uint16_t)(((x >> 3) & 31) << 10 | ((y >> 3) & 31) << 5 | (((x + y) >> 4) & 31));
+    page[y * 256 + x] = hole ? c : (uint16_t)(0x8000 | c);
+  }
+  enum { HW = 1024 };
+  uint32_t *hd = (uint32_t *)malloc((size_t)HW * HW * 4), *bad = (uint32_t *)malloc((size_t)HW * HW * 4);
+  CHECK(hd && bad);
+  for (int y = 0; y < HW; y++) for (int x = 0; x < HW; x++) {        /* «апскейл» ×4 nearest, как пак */
+    uint16_t s = page[(y / 4) * 256 + x / 4];
+    uint32_t r = (s >> 10) & 31, g = (s >> 5) & 31, b = s & 31; r = r << 3 | r >> 2; g = g << 3 | g >> 2; b = b << 3 | b >> 2;
+    hd[(size_t)y * HW + x] = ((s & 0x8000) ? 0xFF000000u : 0) | b << 16 | g << 8 | r;
+    bad[(size_t)y * HW + x] = hd[(size_t)y * HW + x] ^ 0x00FFFFFFu;   /* «чужая страница» — инверсия цвета */
+  }
+  mkdir("texpack_test", 0777); mkdir("texpack_test/TPTEST", 0777);
+  CHECK(png_write_rgba("texpack_test/TPTEST/p200.png", hd, HW, HW) == 0);
+  CHECK(png_write_rgba("texpack_test/TPTEST/p201.png", bad, HW, HW) == 0);
+  CHECK(png_write_rgba("texpack_test/TPTEST/p203.png", hd, 512, 256) == 0);   /* не квадрат — не принимается */
+  int w = 0, h = 0; uint32_t *ld = re_texpack_load("texpack_test", "TPTEST", 200, &w, &h);
+  CHECK(ld && w == HW && h == HW && !memcmp(ld, hd, (size_t)HW * HW * 4));
+  double err = -1, am = -1; re_texpack_compare(ld, w, h, page, &err, &am);
+  CHECK(err < 0.5 && am == 0.0);
+  free(ld);
+  ld = re_texpack_load("texpack_test/", "TPTEST", 201, &w, &h); CHECK(ld != NULL);
+  re_texpack_compare(ld, w, h, page, &err, &am); CHECK(err > RE_TEXPACK_MAX_ERR); free(ld);
+  /* v2.17: «dilation по биту 0x8000» затирает содержимое страницы (цвет пикселей с битом заменён тёмным) — тоже отклоняется */
+  for (size_t i = 0; i < (size_t)HW * HW; i++) if (hd[i] >> 24) hd[i] = 0xFF080808u;
+  CHECK(png_write_rgba("texpack_test/TPTEST/p204.png", hd, HW, HW) == 0);
+  ld = re_texpack_load("texpack_test", "TPTEST", 204, &w, &h); CHECK(ld != NULL);
+  re_texpack_compare(ld, w, h, page, &err, &am); CHECK(err > RE_TEXPACK_MAX_ERR && am == 0.0); free(ld);
+  remove("texpack_test/TPTEST/p204.png");
+  CHECK(re_texpack_load("texpack_test", "TPTEST", 202, &w, &h) == NULL && re_texpack_load("texpack_test", "TPTEST", 203, &w, &h) == NULL);
+  free(hd); free(bad);
+  /* подмена в P86_NativeCapture (нужен GL: OSMesa) */
+  if (!getenv("RE_TEXPACK") && plat_render_offscreen(640, 480) == 0) {
+    re_gfx_cfg *c = re_gfx(); char keep[512]; memcpy(keep, c->texpack, sizeof keep);
+    char lp[256]; memcpy(lp, P77_CurLevelPath, sizeof lp);
+    CHECK(re_gfx_set(c, "texpack", "texpack_test") == 0 && re_texpack_dir() && !strcmp(re_texpack_dir(), "texpack_test"));
+    snprintf(P77_CurLevelPath, sizeof P77_CurLevelPath, "Levels/TPTEST.lev");
+    int32_t n0 = P86_TexpackN, r0 = P86_TexpackRejected;
+    P86_NativeCapture(200, 0, page, NULL); CHECK(P86_NativeHandle(200) > 0 && P86_NativeTexW(200) == HW && P86_TexpackN == n0 + 1);
+    P86_NativeCapture(201, 0, page, NULL); CHECK(P86_NativeHandle(201) > 0 && P86_NativeTexW(201) == 256 && P86_TexpackRejected == r0 + 1);
+    P86_NativeCapture(202, 0, page, NULL); CHECK(P86_NativeHandle(202) > 0 && P86_NativeTexW(202) == 256);   /* нет файла — как раньше */
+    c->texpack[0] = 0;
+    P86_NativeCapture(200, 0, page, NULL); CHECK(P86_NativeTexW(200) == 256 && !re_texpack_dir());          /* без каталога — как раньше */
+    memcpy(c->texpack, keep, sizeof keep); memcpy(P77_CurLevelPath, lp, sizeof lp);
+    printf("texpack: подмена 256→%d ok, отклонение чужой страницы ok\n", HW);
+  } else printf("texpack: PNG/сверка ok (подмена в GL — SKIP: нет OSMesa или задан RE_TEXPACK)\n");
+  remove("texpack_test/TPTEST/p200.png"); remove("texpack_test/TPTEST/p201.png"); remove("texpack_test/TPTEST/p203.png");
+  remove("texpack_test/TPTEST"); remove("texpack_test");   /* пустые каталоги */
+  return 0;
+}
 int re_selftest_on;   /* v2.00: 1 — идёт selftest (шпионы), 0 — игра */
 int re_selftest(void) {
   re_selftest_on = 1;
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_p110) | RUN_T(test_p111) | RUN_T(test_p112) | RUN_T(test_p113) | RUN_T(test_p114) | RUN_T(test_p115) | RUN_T(test_p116) | RUN_T(test_p117) | RUN_T(test_p118) | RUN_T(test_p119) | RUN_T(test_p120) | RUN_T(test_p121) | RUN_T(test_p122) | RUN_T(test_p123) | RUN_T(test_p124) | RUN_T(test_p125) | RUN_T(test_p126) | RUN_T(test_p127) | RUN_T(test_p128) | RUN_T(test_p129) | RUN_T(test_p130) | RUN_T(test_p131) | RUN_T(test_p132) | RUN_T(test_p133) | RUN_T(test_p134) | RUN_T(test_p135) | RUN_T(test_p136) | RUN_T(test_p137) | RUN_T(test_p138) | RUN_T(test_p139) | RUN_T(test_p140) | RUN_T(test_p141) | RUN_T(test_p142) | RUN_T(test_p143) | RUN_T(test_p144) | RUN_T(test_p145) | RUN_T(test_p146) | RUN_T(test_p147) | RUN_T(test_p148) | RUN_T(test_p149) | RUN_T(test_p150) | RUN_T(test_p151) | RUN_T(test_p152) | RUN_T(test_v204) | RUN_T(test_real_level) | RUN_T(test_snd) | RUN_T(test_aspect) | RUN_T(test_gfx) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_p110) | RUN_T(test_p111) | RUN_T(test_p112) | RUN_T(test_p113) | RUN_T(test_p114) | RUN_T(test_p115) | RUN_T(test_p116) | RUN_T(test_p117) | RUN_T(test_p118) | RUN_T(test_p119) | RUN_T(test_p120) | RUN_T(test_p121) | RUN_T(test_p122) | RUN_T(test_p123) | RUN_T(test_p124) | RUN_T(test_p125) | RUN_T(test_p126) | RUN_T(test_p127) | RUN_T(test_p128) | RUN_T(test_p129) | RUN_T(test_p130) | RUN_T(test_p131) | RUN_T(test_p132) | RUN_T(test_p133) | RUN_T(test_p134) | RUN_T(test_p135) | RUN_T(test_p136) | RUN_T(test_p137) | RUN_T(test_p138) | RUN_T(test_p139) | RUN_T(test_p140) | RUN_T(test_p141) | RUN_T(test_p142) | RUN_T(test_p143) | RUN_T(test_p144) | RUN_T(test_p145) | RUN_T(test_p146) | RUN_T(test_p147) | RUN_T(test_p148) | RUN_T(test_p149) | RUN_T(test_p150) | RUN_T(test_p151) | RUN_T(test_p152) | RUN_T(test_v204) | RUN_T(test_real_level) | RUN_T(test_snd) | RUN_T(test_aspect) | RUN_T(test_gfx) | RUN_T(test_texpack) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

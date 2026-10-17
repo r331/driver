@@ -96,6 +96,9 @@ int32_t P77_S574570;
 #define P77_UNPORTED_NONE 0
 
 /* 004eca08: имя файла уровня зависит от режима (00b87eec — плоская карта, состояние 4 / 00b87e98 — iview, 5 / 00b87ea8 — train). */
+#ifndef RE_HOOK_BUILD
+char P77_CurLevelPath[256];   /* v2.17: путь последнего открытого .lev (native) */
+#endif
 void *P77_OpenLevel(void) {
   char path[256];
   const char *p;
@@ -113,6 +116,7 @@ void *P77_OpenLevel(void) {
   for (; p[i] != 0 && i + 1 < sizeof native; i++) native[i] = p[i] == '\\' ? '/' : p[i];
   native[i] = 0;
   p = native;
+  snprintf(P77_CurLevelPath, sizeof P77_CurLevelPath, "%s", native);   /* v2.17: имя уровня для HD-пака текстур */
 #endif
   return g_fopen(p, "rb");
 }

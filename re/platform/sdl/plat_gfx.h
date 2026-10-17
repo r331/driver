@@ -27,6 +27,7 @@ typedef struct {
     char   aspect[24];      /* "" — не задано (RE_ASPECT / auto) */
     int    fullscreen;      /* -1 не задано, 0 окно, 1 полный экран */
     int    win_w, win_h;    /* windowed_res, 0 — не задано */
+    char   texpack[512];    /* v2.17: каталог HD-пака текстур ("" — выкл.; RE_TEXPACK важнее) */
     char   source[512];     /* откуда прочитан driver.cfg ("" — файла нет) */
 } re_gfx_cfg;
 

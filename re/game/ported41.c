@@ -198,4 +198,7 @@ void P41_LoadTexPages(void *file) {
     }
     i += pair ? 2 : 1;
   }
+#ifndef RE_HOOK_BUILD
+  P86_NativeCaptureEnd();   /* v2.17: итог HD-пака */
+#endif
 }

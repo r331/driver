@@ -38,6 +38,11 @@ extern uint8_t P86_Detail;
 void P86_NativeReset(void);                                           /* освободить текстуры прошлого уровня */
 void P86_NativeCapture(int32_t slot, int pair, const void *page0, const void *page1); /* вызывается из P41_LoadTexPages */
 int  P86_NativeHandle(int32_t slot);                                  /* plat_tex слота или 0 */
+/* v2.17: HD-пак (RE_TEXPACK / texpack): размер текстуры слота (256 или из пака), число подменённых страниц уровня,
+   отклонённых сверкой; итог загрузки уровня → лог «[texpack] загружено N страниц» */
+int  P86_NativeTexW(int32_t slot);
+extern int32_t P86_TexpackN, P86_TexpackRejected;
+void P86_NativeCaptureEnd(void);
 extern int32_t P86_TexCount;
 void P86_NativeInit(void);                                            /* ставит P86_TexSrc, регистрирует обработчики 20..23/50/51 */
 #endif

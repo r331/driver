@@ -21,3 +21,4 @@ sharpen      = 0           # 0..1 — лёгкая резкость в пост-
 #aspect       = auto        # auto | 4:3 | 16:9 | 21:9 ... (как RE_ASPECT)
 #fullscreen   = 1           # 1 — полный экран, 0 — окно
 #windowed_res = 1600x900    # размер окна
+#texpack      = /путь/к/texpack   # v2.17: HD-пак текстур (<каталог>/<уровень>/pNNN.png, см. README «HD-текстуры»; RE_TEXPACK важнее)

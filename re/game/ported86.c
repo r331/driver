@@ -5,7 +5,12 @@
 #include "smallfuncs2.h"
 #include "ported33.h"
 #include "../platform/plat.h"
+#ifndef RE_HOOK_BUILD
+#include "ported77.h"
+#include "../platform/sdl/plat_texpack.h"
+#endif
 #include <string.h>
+#include <stdlib.h>
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P86_CurTex")
@@ -142,11 +147,41 @@ void P86_GouraudQuad(uint32_t arg) { do_gouraud(arg, 4, 0x18, 0x28, 0x34); }
 
 #ifndef RE_HOOK_BUILD
 int32_t P86_TexCount;
-static int g_tex[256];
+static int g_tex[256], g_texw[256];
 static int g_bound;
+int32_t P86_TexpackN, P86_TexpackRejected;
 void P86_NativeReset(void) {
-  for (int i = 0; i < 256; i++) { if (g_tex[i]) plat_tex_free(g_tex[i]); g_tex[i] = 0; }
-  P86_TexCount = 0;
+  for (int i = 0; i < 256; i++) { if (g_tex[i]) plat_tex_free(g_tex[i]); g_tex[i] = 0; g_texw[i] = 0; }
+  P86_TexCount = 0; P86_TexpackN = 0; P86_TexpackRejected = 0;
+}
+int P86_NativeTexW(int32_t slot) { return slot >= 0 && slot < 256 && g_tex[slot] ? g_texw[slot] : 0; }
+/* v2.17: страница из HD-пака: <RE_TEXPACK>/<уровень>/pNNN.png (NNN = slot = индекс i в P41_LoadTexPages). UV в бэкенде
+   нормализованы по странице (u/256 в plat_render.c), поэтому 1024×1024 ложится на те же координаты без масштабирования.
+   Сверка с исходной страницей защищает от перепутанной индексации: при большой ошибке остаётся оригинал 256×256. */
+static int texpack_try(int32_t slot, const uint16_t *page) {
+  const char *dir = re_texpack_dir();
+  if (!dir) return 0;
+  char lv[128]; re_texpack_level_name(P77_CurLevelPath, lv, sizeof lv);
+  int w = 0, h = 0;
+  uint32_t *hd = re_texpack_load(dir, lv, slot, &w, &h);
+  if (!hd) return 0;
+  double err = 0, am = 0;
+  re_texpack_compare(hd, w, h, page, &err, &am);
+  if (err > RE_TEXPACK_MAX_ERR || am > RE_TEXPACK_MAX_AMIS) {
+    plat_log("[texpack] %s/p%03d.png отклонён: не похож на страницу %d (ошибка %.1f, альфа %.2f%%)\n", lv, (int)slot, (int)slot, err, am * 100.0);
+    free(hd); P86_TexpackRejected++; return 0;
+  }
+  if (g_tex[slot]) plat_tex_free(g_tex[slot]);
+  g_tex[slot] = plat_tex_create(w, h, hd);   /* chroma-key/альфа-тест, мипмапы, dilation, aniso — тот же tex_upload */
+  free(hd);
+  if (!g_tex[slot]) return 0;
+  g_texw[slot] = w; P86_TexCount++; P86_TexpackN++;
+  return 1;
+}
+void P86_NativeCaptureEnd(void) {
+  const char *dir = re_texpack_dir();
+  if (dir) { char lv[128]; re_texpack_level_name(P77_CurLevelPath, lv, sizeof lv);
+    plat_log("[texpack] загружено %d страниц (%s/%s, отклонено %d)\n", (int)P86_TexpackN, dir, lv, (int)P86_TexpackRejected); }
 }
 int P86_NativeHandle(int32_t slot) { return slot >= 0 && slot < 256 ? g_tex[slot] : 0; }
 static int pick_palette(void) {
@@ -159,6 +194,7 @@ void P86_NativeCapture(int32_t slot, int pair, const void *page0, const void *pa
   if (slot < 0 || slot >= 256) return;
   if (!pair) {
     const uint16_t *s = (const uint16_t *)page0;       /* ARGB1555 */
+    if (texpack_try(slot, s)) return;
     for (int i = 0; i < 256 * 256; i++) {
       uint16_t w = s[i];
       uint32_t r = (w >> 10) & 31, g = (w >> 5) & 31, b = w & 31, a = (w & 0x8000) ? 255u : 0u;
@@ -167,7 +203,7 @@ void P86_NativeCapture(int32_t slot, int pair, const void *page0, const void *pa
     }
     if (g_tex[slot]) plat_tex_free(g_tex[slot]);
     g_tex[slot] = plat_tex_create(256, 256, px);
-    if (g_tex[slot]) P86_TexCount++;
+    if (g_tex[slot]) { P86_TexCount++; g_texw[slot] = 256; }
     return;
   }
   for (int h = 0; h < 2; h++) {
@@ -183,7 +219,7 @@ void P86_NativeCapture(int32_t slot, int pair, const void *page0, const void *pa
     if (slot + h >= 256) break;
     if (g_tex[slot + h]) plat_tex_free(g_tex[slot + h]);
     g_tex[slot + h] = plat_tex_create(256, 256, px);
-    if (g_tex[slot + h]) P86_TexCount++;
+    if (g_tex[slot + h]) { P86_TexCount++; g_texw[slot + h] = 256; }
   }
 }
 static void native_texsrc(int32_t tmu, uint32_t addr, int32_t mask, uint32_t info) {

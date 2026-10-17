@@ -67,6 +67,7 @@ int re_gfx_set(re_gfx_cfg *c, const char *k, const char *v) {
     if (ieq(k, "gamma")) return pdbl(v, &c->gamma);
     if (ieq(k, "brightness")) return pdbl(v, &c->brightness);
     if (ieq(k, "sharpen")) return pdbl(v, &c->sharpen);
+    if (ieq(k, "texpack")) { if (strlen(v) >= sizeof c->texpack) return -2; scpy(c->texpack, v, sizeof c->texpack); return 0; }
     if (ieq(k, "aspect")) { if (strlen(v) >= sizeof c->aspect) return -2; scpy(c->aspect, v, sizeof c->aspect); return 0; }
     if (ieq(k, "fullscreen")) { if (pbool(v, &b)) return -2; c->fullscreen = b; return 0; }
     if (ieq(k, "windowed_res")) {
@@ -112,7 +113,7 @@ int re_gfx_env(re_gfx_cfg *c, const char *(*g)(const char *)) {
     static const char *map[][2] = { { "RE_MSAA", "msaa" }, { "RE_A2C", "a2c" }, { "RE_FXAA", "fxaa" }, { "RE_ANISO", "aniso" },
         { "RE_MIPMAPS", "mipmaps" }, { "RE_DILATE", "dilate" }, { "RE_FILTER", "filter" }, { "RE_HUD_FILTER", "hud_filter" },
         { "RE_RENDER_SCALE", "render_scale" }, { "RE_VSYNC", "vsync" }, { "RE_FPS_LIMIT", "fps_limit" }, { "RE_GAMMA", "gamma" },
-        { "RE_BRIGHTNESS", "brightness" }, { "RE_SHARPEN", "sharpen" } };
+        { "RE_BRIGHTNESS", "brightness" }, { "RE_SHARPEN", "sharpen" }, { "RE_TEXPACK", "texpack" } };
     int errs = 0; const char *v;
     if (!g) return 0;
     if ((v = g("RE_PRESET")) && *v && re_gfx_preset(c, v)) errs++;
@@ -142,10 +143,10 @@ void re_gfx_clamp(re_gfx_cfg *c) {
 }
 const char *re_gfx_describe(const re_gfx_cfg *c, char *b, int n) {
     static const char *fl[] = { "nearest", "linear", "trilinear" }, *hf[] = { "nearest", "linear", "sharp" };
-    snprintf(b, (size_t)n, "preset %s: msaa %d a2c %d fxaa %d aniso %d mipmaps %d dilate %d filter %s hud_filter %s render_scale %.2f vsync %s fps_limit %d gamma %.2f brightness %.2f sharpen %.2f aspect %s fullscreen %d windowed_res %dx%d cfg %s",
+    snprintf(b, (size_t)n, "preset %s: msaa %d a2c %d fxaa %d aniso %d mipmaps %d dilate %d filter %s hud_filter %s render_scale %.2f vsync %s fps_limit %d gamma %.2f brightness %.2f sharpen %.2f aspect %s fullscreen %d windowed_res %dx%d texpack %s cfg %s",
              c->preset, c->msaa, c->a2c, c->fxaa, c->aniso, c->mipmaps, c->dilate, fl[c->filter], hf[c->hud_filter], c->render_scale,
              c->vsync == RE_VSYNC_ADAPTIVE ? "adaptive" : c->vsync ? "on" : "off", c->fps_limit, c->gamma, c->brightness, c->sharpen,
-             c->aspect[0] ? c->aspect : "-", c->fullscreen, c->win_w, c->win_h, c->source[0] ? c->source : "-");
+             c->aspect[0] ? c->aspect : "-", c->fullscreen, c->win_w, c->win_h, c->texpack[0] ? c->texpack : "-", c->source[0] ? c->source : "-");
     return b;
 }
 

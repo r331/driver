@@ -85,6 +85,9 @@ extern int32_t P77_C7D8A4, P77_C7D8A0, P77_C7D8A8, P77_C65DA4, P77_B5A0E8, P77_S
 #pragma pop_macro("P77_C7D8A4") /*gvi*/
 #endif
 void   *P77_OpenLevel(void);                                 /* 004eca08 */
+#ifndef RE_HOOK_BUILD
+extern char P77_CurLevelPath[256];                           /* v2.17: путь последнего открытого уровня ("Levels/NY_01.lev") */
+#endif
 int32_t P77_LoadLevel(void);                                 /* 004ecade */
 int32_t P77_LoadBank(const char *name, uint16_t slot);       /* 00524496 */
 int32_t P77_Menu407160(void);                                /* 00407160 */
