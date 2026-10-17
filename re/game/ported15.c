@@ -24,7 +24,14 @@ P15_u8x9 P15_Flags9;
 #else
 GAME_VAR_DEF(P15_u8x9, P15_Flags9, 0x00d04a50)
 #endif
+#ifndef RE_HOOK_BUILD /* v2.25 gvar-img */
+#pragma push_macro("P15_Vals9")
+#undef P15_Vals9
+P15_i32x9 P15_Vals9;
+#pragma pop_macro("P15_Vals9")
+#else
 GAME_VAR_DEF(P15_i32x9, P15_Vals9, 0x00d044a0)
+#endif
 GAME_VAR_DEF(uint8_t *, P15_Limits, 0x00d0448c)
 
 static uint16_t r16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
@@ -144,7 +151,15 @@ void P15_RaiseLimits(void) {
   if (P15_State == 4) {
     for (int i = 0; i < 9; i++) {
       if (P15_Flags9[i]) {
+#ifndef RE_HOOK_BUILD
+        /* v2.25: 00d0448c — 32-битный адрес значка LINE (P55_LoadPaper пишет его в ячейку образа P55_Paper1), а не native-указатель:
+           отдельный объект P15_Limits был NULL → SIGSEGV на первом засчитанном манёвре интервью */
+        const uint8_t *limp = (const uint8_t *)re_ptr(*(uint32_t *)re_gvar(0x00d0448cu, sizeof(uint32_t), (void *)&P15_Limits));
+        if (limp == NULL) continue;
+        uint8_t lim = limp[0xb];
+#else
         uint8_t lim = P15_Limits[0xb];
+#endif
         P15_Vals9[i] += 3;
         if ((int32_t)lim < P15_Vals9[i]) P15_Vals9[i] = lim;
       }

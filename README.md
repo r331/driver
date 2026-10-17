@@ -24,7 +24,7 @@
 python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv')) if x['module']!='CRT']; print(sum(x['status']=='ported' for x in r), 'из', len(r))"
 ```
 
-**Native как игра — v2.24** (проверено сценариями `RE_KEYS` и настоящей клавиатурой X11 (xdotool) под Xvfb, Linux arm64; сборка, selftest и inputtest — на macOS arm64 в CI):
+**Native как игра — v2.25** (проверено сценариями `RE_KEYS` и настоящей клавиатурой X11 (xdotool) под Xvfb, Linux arm64; сборка, selftest и inputtest — на macOS arm64 в CI):
 - работает: заставки и главное меню, режим **Take A Ride** в Майами — езда по городу (стриминг блоков карты), трафик, столкновения, HUD (Damage/Felony, радар, спидометр);
 - управление машиной: газ, тормоз/задний ход, ручник, резкий руль, смена камеры (вид с капота), пауза по Esc с меню (Continue / Restart / Sound Setup / Gfx Details / Film Director / Quick Replay / Show Map / Exit) — см. «Управление»;
 - звук: DirectSound эмулируется собственным микшером (SDL_audio или запись в WAV), двигатель и шумы слышны, мягкий ограничитель — без клиппинга; музыка — эмуляция CD-audio (v2.22, дорожки из файлов вашего диска — см. «CD-музыка»);

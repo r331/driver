@@ -212,6 +212,7 @@ void P56_DrawSpr (float a0, float a1, float a2, float a3, void *a4, int32_t a5, 
 void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
 void P56_Fn4E5011 (int32_t a0, void *a1) { P103_GhostState(); }
+void P56_Fn4E5284 (void *a0) { (void)a0; P94_FadeStep(); }   /* v2.25: секундомер интервью (конец по времени) */
 void P56_Fn4E53B5 (int32_t a0, void *a1) { P105_StuntHints(a0, a1); }
 void P87_Fn42982E (uint32_t m, int32_t idx, float *pos, int32_t mode) { P92_DrawAxis(m, idx, pos, mode); }
 void P87_Fn42A423 (uint32_t m, int32_t idx, float *pos, int32_t mode) { P90_DrawSingle(m, idx, pos, mode); }
@@ -432,7 +433,19 @@ void P58_Fn51763A (const char *a0, int32_t a1) { P98_LoadLang(a0, a1); }
 void P58_Fn406875 (void *a0) { P102_ConfigSnap(a0); }
 void P58_Fn413E37 (void) { P100_PadMenuInit(); }
 
+static void link_miss0(const char *fn, uint32_t a, uint32_t b) { char m[96]; snprintf(m, sizeof m, "%s: no native object %08x/%08x", fn, (unsigned)a, (unsigned)b); DebugLog(m); }
 /* v2.00: заглушки unported.h, у которых уже есть перенос (найдены запуском игры: «not ported» в журнале) */
+/* v2.25: 0052a910 — CRT sprintf(dst, fmt, a) по адресам Game.exe: строки сообщений интервью/тренировки (004e5982 → буфер 00d04680,
+   строка языка 00c55820[n]) и счётчик 0057b560; формат — один целый аргумент или без аргументов (%s в формате не допускается) */
+void Call0052A910(uint32_t a0, uint32_t a1, int32_t a2) {
+  char *d = (char *)re_ptr(a0); const char *f = (const char *)re_ptr(a1);
+  if (d == NULL || f == NULL) { link_miss0("Call0052A910", a0, a1); return; }
+  int ok = 1; for (const char *q = f; *q; q++) if (q[0] == '%' && q[1] != '%' && q[1] != 'd' && q[1] != 'i' && q[1] != 'u' && q[1] != 'x' && q[1] != 'X') ok = 0;
+  char tmp[256];
+  if (ok) snprintf(tmp, sizeof tmp, f, a2); else snprintf(tmp, sizeof tmp, "%s", f);
+  uint8_t *e = (uint8_t *)re_ptr(a0 + (uint32_t)strlen(tmp));
+  if (e != (uint8_t *)d + strlen(tmp)) { link_miss0("Call0052A910", a0, a1); return; }   /* приёмник короче строки */
+  memcpy(d, tmp, strlen(tmp) + 1); }
 uint32_t R12_40DAE1(uint32_t a0, int32_t a1, int32_t a2) {   /* 0040dae1 BmpToPage → адрес страницы (re_addr) */
   const uint8_t *src = (const uint8_t *)re_ptr(a0);
   return src ? re_addr(P75_BmpToPage(src, a1, a2)) : 0; }

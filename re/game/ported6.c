@@ -7,6 +7,8 @@
 #include "ported40.h"
 #include "engine.h"
 #include "flush.h"
+#include <stdio.h>
+#include <stdlib.h>
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("G6_011368C4")
 #undef G6_011368C4
@@ -880,8 +882,14 @@ void SoundSetPos00523F8A(int32_t i, int32_t v) {
 void SoundPlay00523E50(uint32_t id, int32_t b, int32_t c) {
     int32_t h;
     if (G6_00B91CF4 != 0 && G00575F40 != 0) {
+        uint32_t id0 = id; (void)id0;
         if (0xfff < (int32_t)id) id = (id & 0xff) + (uint32_t)G6_00B91BC4[(int32_t)id >> 12];
+        h = -2;
         if ((int32_t)id < G6_00B91D34 && (h = G6Call00523CDA(id, b, 0, 0, 0)) != -1) SoundSetPos00523F8A(h, c);
+#ifndef RE_HOOK_BUILD
+        { static int dbg = -1; if (dbg < 0) dbg = getenv("RE_IVDBG") != NULL;
+          if (dbg && id0 > 0xfff) fprintf(stderr, "[iv] play %04x -> sample %d (of %d) voice %d h %d\n", (unsigned)id0, (int)id, (int)G6_00B91D34, (int)b, (int)h); }
+#endif
     }
 }
 void Mask004D9028(uint32_t a, uint32_t b) {

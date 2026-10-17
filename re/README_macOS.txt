@@ -26,6 +26,9 @@ Driver (1999) — нативная сборка для macOS (Apple Silicon, arm
   RE_WINDOWED=1 — в окне, RE_RES=1440x1080 — размер окна, RE_FULLSCREEN=1 — полный экран. Cmd+Q — выход.
 Если клавиши не работают: RE_INPUTDBG=1 ./Driver.app/Contents/MacOS/Driver  → пришлите ~/Library/Logs/driver_input.log
 
+Интервью в гараже (Undercover, v2.25): Burnout — клавиша \ (обратная косая черта), ручник — Enter, тормоз — / или ↓;
+  газ и руль — как в езде (↑ или ', ←/→ или Z/X).
+
 Тёмный экран, хотя звук есть (v2.24):
   1) запустите в окне:                RE_WINDOWED=1 ./Driver.app/Contents/MacOS/Driver
   2) если тёмно и в окне — без FBO:     RE_WINDOWED=1 RE_FBO=0 ./Driver.app/Contents/MacOS/Driver

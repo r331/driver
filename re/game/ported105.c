@@ -333,6 +333,23 @@ void P105_StuntHints(int32_t keys, void *carp) {
   if (lat < 0) lat = -lat;
   if (P98_M4460 < lat) P98_M4460 = lat;
   int32_t dmg = Get138(car) >> 3;
+#ifndef RE_HOOK_BUILD
+  { static int dbg = -1; if (dbg < 0) { const char *e = getenv("RE_IVDBG"); dbg = e ? atoi(e) : 0; if (dbg < 0) dbg = 0; }
+    if (dbg > 0 && P62_Frame % dbg == 0)
+      fprintf(stderr, "[iv] f=%d st=%d picked=%d fl=%d%d%d%d%d%d%d%d%d keys=%03x spd=%d v=%d lat=%d dmg=%d hits=%d cell=%d pos=%d,%d t=%d\n",
+              (int)P62_Frame, (int)P59_S4654, (int)P59_Picked, P59_Flags9[0], P59_Flags9[1], P59_Flags9[2], P59_Flags9[3], P59_Flags9[4],
+              P59_Flags9[5], P59_Flags9[6], P59_Flags9[7], P59_Flags9[8], (unsigned)keys & 0x1ff, (int)spd, (int)rd32(car + 0x10c), (int)lat,
+              (int)dmg, (int)P98_M4660, (int)P15_GridCell(rd32(car + 200), rd32(car + 0xd0)), (int)rd32(car + 200), (int)rd32(car + 0xd0), 0); }
+#endif
+#ifndef RE_HOOK_BUILD
+  { /* v2.25: RE_IVPICK="кадр:задание;…" — отладка: на кадре P62_Frame засчитать задание интервью 0..8 (как засчитывает игра, P59_PickUp) */
+    static int pn = -1; static int32_t pf[16], pi[16];
+    if (pn < 0) { pn = 0; const char *e = getenv("RE_IVPICK");
+      while (e && *e && pn < 16) { int32_t f, i; if (sscanf(e, "%d:%d", &f, &i) != 2) break; pf[pn] = f; pi[pn] = i; pn++; e = strchr(e, ';'); if (e) e++; } }
+    for (int t = 0; t < pn; t++) if ((int32_t)P62_Frame == pf[t] && pi[t] >= 0 && pi[t] < 9 && P59_S4654 == 1) {
+      fprintf(stderr, "[iv] RE_IVPICK кадр %d → задание %d\n", (int)P62_Frame, (int)pi[t]); P59_PickUp(pi[t]); }
+  }
+#endif
   if (P59_S4654 == 1 && P98_M4660 == 4) {
     P59_S4654 = 3; G2_00D04654 = 3;
     P14_00d118a8 = 1; G2_00D118A8 = 1;

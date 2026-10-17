@@ -48,4 +48,7 @@ void P15_RaiseLimits(void);                    /* 004e5f5b */
 #define P15_State (*(int32_t *)re_gvar(0x00b87e30u, sizeof(int32_t), (void *)&P15_State))
 #undef P15_Flags9
 #define P15_Flags9 (*(P15_u8x9 *)re_gvar(0x00d04a50u, sizeof(P15_u8x9), (void *)&P15_Flags9))
+/* v2.25: полосы «бумаги» интервью 00d044a0 (P114_PaperMark читает их же) — тоже ячейка образа */
+#undef P15_Vals9
+#define P15_Vals9 (*(P15_i32x9 *)re_gvar(0x00d044a0u, sizeof(P15_i32x9), (void *)&P15_Vals9))
 #endif

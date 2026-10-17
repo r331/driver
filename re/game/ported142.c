@@ -675,11 +675,11 @@ void P142_CarsStep(void) {
     fprintf(stderr, "[car] n %d o0 %s 13c %d 110 %d pos %d %d %d p24 %d %d %d v %d %d %d f8 %d fc %d 104 %d 108 %d 10c %d o3 %d\n", n, (n > 0 && G6_00B2F30C[0] == c) ? "car0" : "?",
       rd16(c + 0x13c), rd32(c + 0x110), rd32(c + 0x18), rd32(c + 0x1c), rd32(c + 0x20), rd32(c + 0x24), rd32(c + 0x28), rd32(c + 0x2c), rd32(c + 0x40), rd32(c + 0x44), rd32(c + 0x48),
       rd32(c + 0xf8), rd32(c + 0xfc), rd32(c + 0x104), rd32(c + 0x108), rd32(c + 0x10c), c[3]); } }
-  { /* v2.21: RE_TELEPORT="кадр:x:z;кадр:x:z…" — отладка прохождения миссий (как RE_COPNEAR): на кадре P62_Frame машина игрока
+  { /* v2.21: RE_TELEPORT="кадр:x:z;кадр:x:z…" (v2.25: до 64 точек) — отладка прохождения миссий (как RE_COPNEAR): на кадре P62_Frame машина игрока
        переносится в (x, z): позиция +0x18/+0xc8 и fixed ×16 +0x24, скорости +0x40..+0x74 обнуляются, высота и курс прежние */
-    static int tn = -1; static int32_t tf[16], tx[16], tz[16];
+    static int tn = -1; static int32_t tf[64], tx[64], tz[64];   /* v2.25: до 64 точек (обход клеток интервью) */
     if (tn < 0) { tn = 0; const char *e = getenv("RE_TELEPORT");
-      while (e && *e && tn < 16) { int32_t f, x, z;
+      while (e && *e && tn < 64) { int32_t f, x, z;
         if (sscanf(e, "%d:%d:%d", &f, &x, &z) != 3) break;
         tf[tn] = f; tx[tn] = x; tz[tn] = z; tn++; e = strchr(e, ';'); if (e) e++; } }
     for (int t = 0; t < tn; t++) if ((int32_t)P62_Frame == tf[t]) {

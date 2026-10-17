@@ -2,6 +2,7 @@
 #include "sintab_data.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P59_CamF1")
@@ -377,6 +378,9 @@ int32_t P59_NearCars(const int32_t *self) {
 /* 004e5ea2: подобрать предмет i (9 штук): подпись, звук; после девятого — режим 2. */
 int32_t P59_PickUp(int32_t i) {
   if (P59_Flags9[i] != 0) return 0;
+#ifndef RE_HOOK_BUILD
+  { static int dbg = -1; if (dbg < 0) dbg = getenv("RE_IVDBG") != NULL; if (dbg) fprintf(stderr, "[iv] засчитано задание %d\n", (int)i); }
+#endif
   P59_Flags9[i] = 1;
   P59_Picked++;
   P12_Fn004E5982(P59_PickTab[i * 2], 0x96, 0);
