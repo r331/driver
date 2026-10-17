@@ -7000,6 +7000,20 @@ static int test_v220(void) {
 #undef CK
 #define CK(c) do { if (!(c)) { fprintf(stderr, "v220 fail line %d: %s\n", __LINE__, #c); f = 1; } } while (0)
   re_init_consts();
+  /* состояние, которое тест меняет, — сохраняется и восстанавливается (CI macOS: единичный «тихий» FAIL selftest на d8e2465 —
+     курсор записей G2_011F4064 оставался в освобождённой арене) */
+  struct { void *p; size_t n; void *b; } sv[] = {
+    { &G2_011F4064, sizeof G2_011F4064, 0 }, { &P84_VertRef, sizeof P84_VertRef, 0 }, { &P44_MatPtr, sizeof P44_MatPtr, 0 },
+    { &P44_ViewMat[0], sizeof(p44_m9_t), 0 }, { &P44_BiasX, sizeof P44_BiasX, 0 }, { &P44_BiasY, sizeof P44_BiasY, 0 },
+    { &P44_BiasZ, sizeof P44_BiasZ, 0 }, { &P44_XformTag, sizeof P44_XformTag, 0 }, { &P43_ScaleA, sizeof P43_ScaleA, 0 },
+    { &P43_OffX, sizeof P43_OffX, 0 }, { &P43_OffY, sizeof P43_OffY, 0 }, { &P43_Half, sizeof P43_Half, 0 },
+    { &P12_00ba53a0[0], 0x400 * sizeof P12_00ba53a0[0], 0 }, { &P85_VCache[0], 8 * sizeof(p85_vtx), 0 },
+    { &P85_RV[0], 4 * sizeof P85_RV[0], 0 }, { &P82_Edge, sizeof P82_Edge, 0 }, { &P85_StateDirty, sizeof P85_StateDirty, 0 },
+    { &P85_BlendFn, sizeof P85_BlendFn, 0 }, { &P85_RasterA, sizeof P85_RasterA, 0 }, { &P85_RasterB, sizeof P85_RasterB, 0 },
+    { &P86_TexSrc, sizeof P86_TexSrc, 0 }, { &P85_MaxX, sizeof P85_MaxX, 0 }, { &P85_MaxY, sizeof P85_MaxY, 0 },
+    { &P100_ClipN, sizeof P100_ClipN, 0 }, { &P100_ClipOut, sizeof P100_ClipOut, 0 } };
+  const int nsv = (int)(sizeof sv / sizeof sv[0]);
+  for (int i = 0; i < nsv; i++) { sv[i].b = malloc(sv[i].n); memcpy(sv[i].b, sv[i].p, sv[i].n); }
   void *saved = D_00c98ed0; uint8_t *arena = (uint8_t *)calloc(1, 0x1000);
   float *vert = (float *)(arena + 0x100); uint8_t *rec = arena + 0x400;
   D_00c98ed0 = arena;
@@ -7065,6 +7079,7 @@ static int test_v220(void) {
   for (int k = 0; k < 4; k++) { const float *v = (const float *)(arena + 0x200 + 0x10 * k); CK(fabsf(v[0] - 17.0f) < 1e-4f && fabsf(v[2] - 17.0f) < 1e-4f); }
   memcpy(&P79_ModelTab[0], tab_saved, sizeof tab_saved); D_00b87e30 = city_saved;
   D_00c98ed0 = saved; free(arena);
+  for (int i = 0; i < nsv; i++) { memcpy(sv[i].p, sv[i].b, sv[i].n); free(sv[i].b); }
 #undef CK
   return f;
 }
