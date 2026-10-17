@@ -36,13 +36,13 @@ else()
     endif()
   endif()
 
-  set(NATIVE_SRC ${GAME_SRC} platform/native/main.c platform/native/engine_native.c platform/native/stubs.c platform/native/links.c platform/native/crt_msvc.c platform/native/game_fwd.c platform/native/fn_table.c platform/native/thunk_table.c platform/sdl/plat_sys.c platform/sdl/plat_render.c platform/sdl/plat_dd.c platform/sdl/plat_di.c ${RENDER_OFFSCREEN} platform/sdl/plat_snd.c platform/sdl/plat_dsmix.c tests/selftest.c tests/render_test.c tests/snd_test.c tests/input_test.c)
+  set(NATIVE_SRC ${GAME_SRC} platform/native/main.c platform/native/engine_native.c platform/native/stubs.c platform/native/links.c platform/native/crt_msvc.c platform/native/game_fwd.c platform/native/fn_table.c platform/native/thunk_table.c platform/sdl/plat_sys.c platform/sdl/plat_gfx.c platform/sdl/plat_render.c platform/sdl/plat_dd.c platform/sdl/plat_di.c ${RENDER_OFFSCREEN} platform/sdl/plat_snd.c platform/sdl/plat_dsmix.c tests/selftest.c tests/render_test.c tests/snd_test.c tests/input_test.c)
 
   if(APPLE AND RE_MACOS_BUNDLE)
     add_executable(driver MACOSX_BUNDLE ${NATIVE_SRC})
     set_target_properties(driver PROPERTIES OUTPUT_NAME Driver
       MACOSX_BUNDLE_BUNDLE_NAME Driver MACOSX_BUNDLE_GUI_IDENTIFIER org.r331.driver
-      MACOSX_BUNDLE_SHORT_VERSION_STRING 2.15
+      MACOSX_BUNDLE_SHORT_VERSION_STRING 2.16
       MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Info.plist.in)   # v2.14: NSPrincipalClass, NSHighResolutionCapable
     target_compile_definitions(driver PRIVATE RE_MACOS_BUNDLE)
   else()

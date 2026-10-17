@@ -84,6 +84,9 @@ int  plat_view_extra(void);                               /* S текущего 
 void plat_hud_anchor(int a);
 int  plat_is_main_thread(void);                          /* v2.14: 1 — главный поток процесса (macOS: pthread_main_np) */
 void plat_render_shutdown(void);
+/* v2.16 (SDL): графика — driver.cfg/RE_* (sdl/plat_gfx.h): MSAA-FBO, FXAA, мипмапы, анизотропия, render_scale, гамма */
+const char *plat_render_gfx_info(char *buf, int n);           /* что реально включено (цель, MSAA, aniso) */
+int  plat_render_uploads(int *pixels);                       /* число загрузок текстур (и пикселей) с начала */
 /* Звук и CD-аудио */
 int  plat_snd_create(const void *pcm, int bytes, int rate, int channels, int bits);
 void plat_snd_destroy(int h);

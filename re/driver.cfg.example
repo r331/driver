@@ -1,0 +1,23 @@
+# driver.cfg — настройки графики native-сборки Driver (v2.16).
+# Где ищется (первый найденный): $RE_CFG; рядом с бинарником; macOS — ~/Library/Application Support/Driver/driver.cfg,
+# Linux — ${XDG_CONFIG_HOME:-~/.config}/driver/driver.cfg. Переменные окружения RE_* важнее файла.
+# Комментарии — # или ;. Сначала применяется preset, остальные ключи — поверх.
+
+preset       = enhanced    # enhanced (по умолчанию) | original (как v2.15: билинейная, без мипмапов и сглаживания)
+msaa         = 4           # 0 | 2 | 4 | 8 — мультисэмпловый FBO; больше, чем умеет драйвер, — понижается
+a2c          = on          # alpha-to-coverage для пальм/заборов/деревьев (только при msaa >= 2)
+fxaa         = off         # пост-проход FXAA (можно вместе с msaa)
+aniso        = 16          # 1..16 — анизотропная фильтрация (если есть GL_EXT/ARB_texture_filter_anisotropic)
+mipmaps      = on          # мипмапы (dilation цвета + сохранение покрытия альфа-теста)
+dilate       = on          # цвет непрозрачных соседей в прозрачные пиксели — без чёрных/пурпурных ореолов
+filter       = trilinear   # nearest (пиксельный) | linear | trilinear — 3D-текстуры
+hud_filter   = sharp       # sharp (sharp-bilinear: чёткие шрифты) | linear | nearest — HUD, меню, шрифты
+render_scale = 1.0         # 0.5..2.0 — разрешение кадра относительно окна (2.0 — SSAA 4x)
+vsync        = on          # on | off | adaptive
+fps_limit    = 0           # 0 — без ограничения
+gamma        = 1.0         # 0.5..2.5
+brightness   = 1.0         # 0.5..2.0
+sharpen      = 0           # 0..1 — лёгкая резкость в пост-проходе
+#aspect       = auto        # auto | 4:3 | 16:9 | 21:9 ... (как RE_ASPECT)
+#fullscreen   = 1           # 1 — полный экран, 0 — окно
+#windowed_res = 1600x900    # размер окна

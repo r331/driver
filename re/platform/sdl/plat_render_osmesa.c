@@ -2,11 +2,15 @@
 #include "../plat.h"
 #include <GL/osmesa.h>
 #include <stdlib.h>
+#include "plat_gfx.h"
 static OSMesaContext g_ctx; static void *g_buf;
+static const char *ge(const char *n) { return getenv(n); }
 static void *getproc(const char *n) { return (void *)OSMesaGetProcAddress(n); }
 int plat_render_offscreen(int w, int h) {
     const int attr[] = { OSMESA_FORMAT, OSMESA_RGBA, OSMESA_DEPTH_BITS, 24, OSMESA_PROFILE, OSMESA_CORE_PROFILE,
                          OSMESA_CONTEXT_MAJOR_VERSION, 3, OSMESA_CONTEXT_MINOR_VERSION, 3, 0 };
+    /* v2.16: тесты offscreen — пресет original (пиксели как v2.15), если не задан RE_PRESET/RE_* */
+    { static int once; if (!once) { once = 1; re_gfx_cfg *c = re_gfx(); if (!getenv("RE_PRESET")) re_gfx_preset(c, "original"); re_gfx_env(c, ge); } }
     g_ctx = OSMesaCreateContextAttribs(attr, NULL); if (!g_ctx) return -10;
     g_buf = malloc((size_t)w * h * 4); if (!g_buf || !OSMesaMakeCurrent(g_ctx, g_buf, GL_UNSIGNED_BYTE, w, h)) return -11;
     return plat_render_attach(getproc, NULL, w, h);

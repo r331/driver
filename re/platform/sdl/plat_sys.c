@@ -2,6 +2,7 @@
 #define _GNU_SOURCE   /* v2.10: dladdr, ucontext (RE_CRASH_BT) */
 #endif
 #include "../plat.h"
+#include "plat_gfx.h"
 #include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,7 +14,18 @@
 #include <limits.h>
 static SDL_Window *g_win; static SDL_GLContext g_gl;
 static void update_drawable(void);
-static void swap_win(void){ SDL_GL_SwapWindow(g_win); update_drawable(); }   /* v2.14: размер буфера мог измениться (окно, полный экран, Retina) */
+int plat_fixed_dt(void);
+/* v2.16: ограничение FPS (fps_limit, driver.cfg/RE_FPS_LIMIT) — ожидание до следующего срока после показа; при RE_FIXED_DT не действует */
+static void fps_wait(void) {
+    static Uint64 next; int lim = re_gfx()->fps_limit;
+    if (lim <= 0 || plat_fixed_dt()) return;
+    Uint64 f = SDL_GetPerformanceFrequency(), per = f / (Uint64)lim, now = SDL_GetPerformanceCounter();
+    if (!next || now > next + per * 4) next = now;   /* старт или долгий кадр — без «догоняния» */
+    next += per;
+    while ((now = SDL_GetPerformanceCounter()) < next) { Uint64 ms = (next - now) * 1000 / f; if (ms > 1) SDL_Delay((Uint32)(ms - 1)); }
+}
+void plat_gfx_err(const char *m) { plat_log("[gfx] %s\n", m); }
+static void swap_win(void){ SDL_GL_SwapWindow(g_win); fps_wait(); update_drawable(); }   /* v2.14: размер буфера мог измениться (окно, полный экран, Retina) */
 /* v2.08: RE_FIXED_DT=1 — виртуальное время для воспроизводимых прогонов: каждый вызов plat_time_ms +1 мс, каждый показанный
    кадр (plat_flip) — не меньше кадр·20 мс (такт логики P21_FrameTicks = 20 мс → один такт на кадр), plat_sleep_ms только
    сдвигает часы; таймеры (plat_timer_start) срабатывают в основном потоке по виртуальным часам (plat_vt_timers, plat_snd.c). */
@@ -56,6 +68,22 @@ int plat_window_open(const char *t,int w,int h,int fs){
     SDL_SetHint(SDL_HINT_MAC_BACKGROUND_APP, "0");     /* v2.14: обычное приложение с окном/Dock — получает клавиатуру */
 #endif
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER)) return -1;
+    /* v2.16: driver.cfg — RE_CFG, рядом с бинарником, затем каталог пользователя (macOS: ~/Library/Application Support/Driver,
+       Linux: $XDG_CONFIG_HOME/driver или ~/.config/driver); переменные RE_* важнее файла */
+    {   char ud[PATH_MAX] = ""; const char *home = getenv("HOME");
+#if defined(__APPLE__)
+        if (home) snprintf(ud, sizeof ud, "%s/Library/Application Support/Driver", home);
+#else
+        const char *xdg = getenv("XDG_CONFIG_HOME");
+        if (xdg && *xdg) snprintf(ud, sizeof ud, "%s/driver", xdg); else if (home) snprintf(ud, sizeof ud, "%s/.config/driver", home);
+#endif
+        char *bp = SDL_GetBasePath();
+        int errs = re_gfx_load(bp, ud, plat_gfx_err);
+        if (bp) SDL_free(bp);
+        if (errs) plat_log("[gfx] driver.cfg/RE_*: %d ошибок разбора (строки пропущены)\n", errs);
+        const re_gfx_cfg *gc = re_gfx();
+        if (gc->aspect[0] && !getenv("RE_ASPECT")) plat_render_set_aspect(gc->aspect);
+    }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG); /* macOS требует */
@@ -74,6 +102,10 @@ int plat_window_open(const char *t,int w,int h,int fs){
             ww = w * k; wh = h * k;
         }
     }
+    {   const re_gfx_cfg *gc = re_gfx();   /* v2.16: driver.cfg fullscreen / windowed_res (переменные RE_* — ниже, важнее) */
+        if (gc->fullscreen >= 0) full = gc->fullscreen;
+        if (!(res && *res) && gc->win_w > 0 && gc->win_h > 0) { ww = gc->win_w; wh = gc->win_h; if (gc->fullscreen != 1) full = 0; }
+    }
     if (env_on("RE_WINDOWED")) full = 0;
     if (env_on("RE_FULLSCREEN")) full = 1;
     g_fs_on = full;
@@ -82,7 +114,9 @@ int plat_window_open(const char *t,int w,int h,int fs){
     if (!g_win) return -1;
     SDL_SetWindowMinimumSize(g_win, w / 2, h / 2);
     g_gl = SDL_GL_CreateContext(g_win); if (!g_gl) return -2;
-    SDL_GL_SetSwapInterval(1);
+    {   int vs = re_gfx()->vsync;   /* v2.16: vsync on/off/adaptive (adaptive недоступен — on) */
+        if (SDL_GL_SetSwapInterval(vs) != 0) { plat_log("[gfx] vsync %d недоступен (%s)%s\n", vs, SDL_GetError(), vs == -1 ? " — включён обычный" : ""); if (vs == -1) SDL_GL_SetSwapInterval(1); }
+    }
     SDL_RaiseWindow(g_win);   /* v2.14: окно — ключевое (фокус клавиатуры) сразу после запуска */
     int r = plat_render_attach((void *(*)(const char *))SDL_GL_GetProcAddress, swap_win, w, h);
     if (r == 0) update_drawable();
@@ -357,6 +391,27 @@ static void frame_shot(void) {
     if (plat_render_readback(px) == 0 && png_write_rgba(png, px, w, h) == 0) { fprintf(stderr, "[frame] снимок %s (%dx%d), кадр %d\n", png, w, h, g_frames); g_shot_done = 1; }
     free(px);
 }
+/* v2.16: RE_FRAMESTAT=N — время кадра (стенные часы между plat_flip: логика игры + рендер + показ) с кадра N; итог при выходе */
+static double *g_ft; static int g_ftn, g_ftcap, g_ftfrom = -2; static Uint64 g_ftlast;
+static int dcmp(const void *a, const void *b) { double x = *(const double *)a, y = *(const double *)b; return x < y ? -1 : x > y; }
+static void frame_stat_report(void) {
+    if (g_ftn <= 0) return;
+    double sum = 0; for (int i = 0; i < g_ftn; i++) sum += g_ft[i];
+    qsort(g_ft, (size_t)g_ftn, sizeof *g_ft, dcmp);
+    int up_px = 0, up = plat_render_uploads(&up_px);
+    fprintf(stderr, "[framestat] кадров %d (с %d): среднее %.2f мс, медиана %.2f, p95 %.2f, мин %.2f, макс %.2f; загрузок текстур всего %d (%d Мпикс)\n", g_ftn, g_ftfrom,
+            sum / g_ftn, g_ft[g_ftn / 2], g_ft[(int)(g_ftn * 0.95)], g_ft[0], g_ft[g_ftn - 1], up, up_px / 1000000);
+}
+static void frame_stat(void) {
+    if (g_ftfrom == -2) { const char *e = getenv("RE_FRAMESTAT"); g_ftfrom = e ? atoi(e) : -1; }
+    if (g_ftfrom < 0) return;
+    Uint64 now = SDL_GetPerformanceCounter();
+    if (g_frames > g_ftfrom && g_ftlast) {
+        if (g_ftn == g_ftcap) { g_ftcap = g_ftcap ? g_ftcap * 2 : 1024; g_ft = (double *)realloc(g_ft, (size_t)g_ftcap * sizeof *g_ft); if (!g_ft) { g_ftfrom = -1; return; } }
+        g_ft[g_ftn++] = (double)(now - g_ftlast) * 1000.0 / (double)SDL_GetPerformanceFrequency();
+    }
+    g_ftlast = now;
+}
 int g_re_dbg[16];   /* v2.05: счётчики RE_GSTAT=N: 0 GameFrame, 1 GameDraw, 2 GlideSwap, 3 draw_prim, 4 вершин, 5 записей P85_SkipRecord, 6 DrawMap, 7 клеток, 8 моделей (draw_core), 9 обработчиков записей, 10 CarsStep, 11 P100_RecKeys, 12 P36_PadMode, 13 KeyCfg[6,4,5], 14 условие демо-клавиш */
 void plat_frame_tick(const char *where) {
     static int maxf = -2, maxp = -2, gst = -2;
@@ -369,6 +424,7 @@ void plat_frame_tick(const char *where) {
     if (maxf == -2) { const char *e = getenv("RE_MAX_FRAMES"); maxf = e ? atoi(e) : -1; e = getenv("RE_MAX_PUMPS"); maxp = e ? atoi(e) : -1; }
     if (where && !strcmp(where, "flip")) {
         g_frames++;
+        frame_stat();
         flip_events();
         if (plat_fixed_dt()) vt_advance((uint32_t)g_frames * 20u);   /* v2.08: RE_FIXED_DT */
         if (g_frames == 1) fprintf(stderr, "[frame] первый кадр (plat_flip)\n");
@@ -376,6 +432,7 @@ void plat_frame_tick(const char *where) {
         if (!g_shot_done && sf && *sf == '1') frame_shot();
         if (maxf > 0 && g_frames >= maxf) {
             if (!g_shot_done) frame_shot();
+            frame_stat_report();
             fprintf(stderr, "[frame] RE_MAX_FRAMES=%d достигнут — выход\n", maxf); fflush(NULL); _Exit(0);
         }
     } else {

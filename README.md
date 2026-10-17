@@ -24,7 +24,7 @@
 python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv')) if x['module']!='CRT']; print(sum(x['status']=='ported' for x in r), 'из', len(r))"
 ```
 
-**Native как игра — v2.15** (проверено сценариями `RE_KEYS` и настоящей клавиатурой X11 (xdotool) под Xvfb, Linux arm64; сборка, selftest и inputtest — на macOS arm64 в CI):
+**Native как игра — v2.16** (проверено сценариями `RE_KEYS` и настоящей клавиатурой X11 (xdotool) под Xvfb, Linux arm64; сборка, selftest и inputtest — на macOS arm64 в CI):
 - работает: заставки и главное меню, режим **Take A Ride** в Майами — езда по городу (стриминг блоков карты), трафик, столкновения, HUD (Damage/Felony, радар, спидометр);
 - управление машиной: газ, тормоз/задний ход, ручник, резкий руль, смена камеры (вид с капота), пауза по Esc с меню (Continue / Restart / Sound Setup / Gfx Details / Film Director / Quick Replay / Show Map / Exit) — см. «Управление»;
 - звук: DirectSound эмулируется собственным микшером (SDL_audio или запись в WAV), двигатель и шумы слышны, мягкий ограничитель — без клиппинга; музыки нет (в оригинале — CD-audio);
@@ -34,6 +34,7 @@ python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv'))
 - гудок H слышен (v2.12: 3D-источник у машины);
 - v2.14: нативное разрешение — кадр игры 4:3 вписывается в окно/экран любого размера (Retina, 1080p, 2560×1600) с полосами по бокам; 3D растеризуется в разрешении экрана; на macOS по умолчанию полный экран; езда стрелками и пробелом (ручник) в дополнение к оригинальным клавишам;
 - v2.15: любое соотношение сторон (Hor+) — на широком экране (16:10, 16:9, 21:9, 32:9) вертикальный угол как в оригинале, а по бокам видно больше города; HUD прижат к краям экрана, меню — по центру 4:3; см. «Разрешение и соотношение сторон»;
+- v2.16: улучшение графики — MSAA (2/4/8x, мультисэмпловый FBO) с alpha-to-coverage для пальм и заборов, FXAA, render_scale 0.5–2.0 (SSAA), мипмапы без ореолов, анизотропная фильтрация до 16x, выбор фильтрации, чёткий HUD (sharp-bilinear), vsync/ограничение FPS, гамма/яркость; файл `driver.cfg` и пресеты original/enhanced — см. «Графика»;
 - не проверены/не работают: ночь и другие города (SF, LA, NY); FMV-ролики пропускаются.
 
 Подробно: [docs/NATIVE_GAPS.md](docs/NATIVE_GAPS.md) (разрывы native, переключатели отладки), [docs/PLATFORM_PLAN.md](docs/PLATFORM_PLAN.md) (журнал переноса по шагам),
@@ -131,6 +132,56 @@ cmake -S . -B build-app -DCMAKE_BUILD_TYPE=Release -DRE_MACOS_BUNDLE=ON && cmake
   `FRUSTRUM.DAT` — сам файл не меняется), экранные проверки спрайтов/огней. Hook-сборка (DINPUT.dll) работает как оригинал (4:3).
 - Проверено на Linux под Xvfb (1920×1080, 2560×1600, 3440×1440, 5120×1440, 1080×1920); на реальном Mac — пока нет.
 
+## Графика
+
+С v2.16 native-сборка рисует кадр игры во внеэкранный буфер (FBO) и выводит его в окно пост-проходом. Игровая логика не меняется
+(детерминизм `RE_FIXED_DT` тот же); hook-сборка (DINPUT.dll) рисует как оригинал.
+
+- **Сглаживание:** MSAA 2/4/8x — мультисэмпловый FBO с resolve (не default framebuffer); alpha-to-coverage для текстур с альфа-тестом
+  (пальмы, заборы, деревья, шлагбаумы) — край прозрачности сглаживается вместе с MSAA; FXAA — пост-проход (шейдер в коде);
+  `render_scale` 0.5–2.0 — разрешение кадра относительно окна (2.0 = SSAA 4x, 0.5 — для слабых машин; HUD рисуется в том же кадре).
+- **Текстуры:** свои мипмапы для страниц текстур игры: цвет видимых соседей переносится в прозрачные пиксели (dilation), уменьшение
+  взвешено альфой, у chroma-key-текстур сохраняется доля видимых пикселей — вдали нет чёрных/пурпурных ореолов и «облысения» пальм.
+  Игра рисует страницы ARGB1555 и с «видно при альфе 0» (ALPHAFUNC LESS), и с обычной семантикой, поэтому обработанная копия
+  строится под ту семантику, с которой текстуру рисуют (рисование без альфа-теста — исходная картинка).
+  Анизотропная фильтрация до 16x (если драйвер даёт `GL_EXT/ARB_texture_filter_anisotropic`, на macOS — есть); фильтрация 3D:
+  `nearest` (оригинально-пиксельная), `linear`, `trilinear`.
+- **HUD/меню/шрифты:** `sharp-bilinear` — внутри текселя чёткий цвет, на границе — переход в один пиксель экрана (шрифты меню не мылятся
+  при масштабе 640×480 → 1080p/Retina); можно `linear` или `nearest`.
+- **Прочее:** vsync on/off/adaptive, ограничение FPS, гамма и яркость (пост-проход), лёгкая резкость (`sharpen`).
+- Нет поддержки (нет MSAA нужной кратности, нет анизотропии, FBO не создаётся) — понижение/выключение с сообщением `[gfx]` в stderr, без падения.
+
+**Пресеты:** `enhanced` (по умолчанию) — MSAA 4x + alpha-to-coverage, анизотропия 16x, трилинейная, мипмапы, dilation, HUD sharp, FXAA выкл.;
+`original` — как v2.15: билинейная без мипмапов, без сглаживания, HUD линейно.
+
+**Файл `driver.cfg`** (первый найденный): `$RE_CFG`; рядом с бинарником; macOS — `~/Library/Application Support/Driver/driver.cfg`;
+Linux — `${XDG_CONFIG_HOME:-~/.config}/driver/driver.cfg`. Переменные `RE_*` важнее файла. Полный пример с пояснениями — `re/driver.cfg.example`:
+
+```ini
+preset       = enhanced    # enhanced | original
+msaa         = 4           # 0 | 2 | 4 | 8
+a2c          = on          # alpha-to-coverage (при msaa)
+fxaa         = off
+aniso        = 16          # 1..16
+mipmaps      = on
+filter       = trilinear   # nearest | linear | trilinear
+hud_filter   = sharp       # sharp | linear | nearest
+render_scale = 1.0         # 0.5..2.0
+vsync        = on          # on | off | adaptive
+fps_limit    = 0           # 0 — без ограничения
+gamma        = 1.0
+brightness   = 1.0
+aspect       = auto        # auto | 4:3 | 21:9 …
+fullscreen   = 1
+windowed_res = 1600x900
+```
+
+Переменные: `RE_PRESET`, `RE_MSAA`, `RE_A2C`, `RE_FXAA`, `RE_ANISO`, `RE_MIPMAPS`, `RE_DILATE`, `RE_FILTER`, `RE_HUD_FILTER`, `RE_RENDER_SCALE`,
+`RE_VSYNC`, `RE_FPS_LIMIT`, `RE_GAMMA`, `RE_BRIGHTNESS`, `RE_SHARPEN`, `RE_CFG` (путь к файлу), `RE_NO_FBO=1` (рисовать прямо в окно, как v2.15),
+`RE_FRAMESTAT=N` (время кадра с кадра N, итог при выходе по `RE_MAX_FRAMES`). Что реально включилось — строки `[gfx]` в stderr.
+
+Проверено на Linux под Xvfb (Mesa llvmpipe: MSAA до 4x, анизотропия 16x); на реальном Mac — пока нет.
+
 ## Запуск
 
 ### Данные игры
@@ -219,6 +270,7 @@ RE_KEYS="300:LEFT,340:LEFT,380:LEFT,460:RETURN,560:RETURN,660:RETURN,700:APOSTRO
 | `RE_WINDOWED=1` / `RE_FULLSCREEN=1` | v2.14: окно / полный экран (по умолчанию: macOS — полный экран, остальные — окно) |
 | `RE_RES=WxH` | v2.14: размер окна (по умолчанию — наибольшее целое кратное 640×480 в 85% экрана); снимок `RE_SHOT_PNG` — в размере буфера окна |
 | `RE_ASPECT=auto\|4:3\|W:H` | v2.15: соотношение сторон 3D (Hor+): по окну (по умолчанию), оригинальное 4:3 или заданное — см. «Разрешение и соотношение сторон» |
+| `RE_PRESET`, `RE_MSAA`, `RE_FXAA`, `RE_ANISO`, `RE_FILTER`, `RE_RENDER_SCALE`, … | v2.16: графика — см. «Графика» (переопределяют `driver.cfg`) |
 | `RE_ARROWKEYS=0` | v2.14: не добавлять стрелки/пробел к клавишам езды |
 
 Остальные отладочные переключатели (`RE_TRACE*`, `RE_GSTAT`, `RE_CARDBG` …) описаны в [docs/NATIVE_GAPS.md](docs/NATIVE_GAPS.md).
