@@ -8,8 +8,22 @@ GAME_VAR_DEF(int32_t, P15_MenuMode, 0x005fe9bc)
 GAME_VAR_DEF(int32_t, P15_MenuSel, 0x01271064)
 GAME_VAR_DEF(uint8_t *, P15_ListHead, 0x00d12408)
 GAME_VAR_DEF(uint8_t *, P15_ListCur, 0x00d12410)
+#ifndef RE_HOOK_BUILD /* v2.21 gvar-img */
+#pragma push_macro("P15_State")
+#undef P15_State
+int32_t P15_State;
+#pragma pop_macro("P15_State")
+#else
 GAME_VAR_DEF(int32_t, P15_State, 0x00b87e30)
+#endif
+#ifndef RE_HOOK_BUILD /* v2.21 gvar-img */
+#pragma push_macro("P15_Flags9")
+#undef P15_Flags9
+P15_u8x9 P15_Flags9;
+#pragma pop_macro("P15_Flags9")
+#else
 GAME_VAR_DEF(P15_u8x9, P15_Flags9, 0x00d04a50)
+#endif
 GAME_VAR_DEF(P15_i32x9, P15_Vals9, 0x00d044a0)
 GAME_VAR_DEF(uint8_t *, P15_Limits, 0x00d0448c)
 

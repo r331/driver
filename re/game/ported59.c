@@ -319,7 +319,7 @@ int32_t P59_TrafficFind(uint32_t self, int32_t a, uint32_t b) {
 int32_t P59_TrafficCheck(const uint8_t *r, int32_t flag) {
   uint32_t node = rd32(r, 0x2c);
   if (flag != 0 && Ret1() == 0) return 1;
-  int16_t v = (node < 64) ? rd16s(P59_BF1C48, node * 0x42) : 0;
+  int16_t v = (node < P59_NODES_MAX) ? rd16s(P59_BF1C48, node * 0x42) : 0;   /* v2.21: было node < 64 */
   if (v < 4 && P51_TrafficConflict(r[0], (int32_t)node, r[0x30], (int32_t)rd32(r, 0x20)) != 0) return 1;
   return P59_TrafficFind(r[0], (int32_t)node, r[0x30]);
 }

@@ -21,3 +21,26 @@ extern uint8_t P16_ParticleBase;
 void P16_StepParticles(void);                 /* 004b9d79 */
 void P16_IdleTimer(void);                     /* 004e12e4 */
 void P16_FillHudRect(uint32_t *p, uint32_t a, uint32_t rgb, uint32_t b, int c, int d); /* 0050268f */
+/* v2.21: ячейки образа данных — один объект на адрес. Раньше эти имена были отдельными native-переменными (tools/gen_gvar_img.py
+   не разбирает обёртку P15_VAR/P16_VAR), и запись через другой псевдоним (D_00b87e30, P14_00c810c4, G6_00B5A778 …) через них не была
+   видна: так, интервью Undercover (ladder пишет D_00b87e30 = 4) не запускалось — P56_HudTick/P145_LevelLoad проверяли P15_State.
+   Пары: P16_IdleMode = P14_00c810c4 (итог миссии: 0x8000 — успех, 0xff0 — провал), P16_IdleArg1/2 = P14_00c810e8/P14_00c81100,
+   P16_FlagA = G6_00B5A778, P16_FlagB = P14_00b87ee4, P16_FlagC/D = P14_00bdfa58/P14_00bdfa44, P16_IdleCounter = P14_00d0778c. */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P16_IdleMode
+#define P16_IdleMode (*(int32_t *)re_gvar(0x00c810c4u, sizeof(int32_t), (void *)&P16_IdleMode))
+#undef P16_FlagA
+#define P16_FlagA (*(int32_t *)re_gvar(0x00b5a778u, sizeof(int32_t), (void *)&P16_FlagA))
+#undef P16_FlagB
+#define P16_FlagB (*(int32_t *)re_gvar(0x00b87ee4u, sizeof(int32_t), (void *)&P16_FlagB))
+#undef P16_IdleCounter
+#define P16_IdleCounter (*(int32_t *)re_gvar(0x00d0778cu, sizeof(int32_t), (void *)&P16_IdleCounter))
+#undef P16_FlagC
+#define P16_FlagC (*(int32_t *)re_gvar(0x00bdfa58u, sizeof(int32_t), (void *)&P16_FlagC))
+#undef P16_FlagD
+#define P16_FlagD (*(int32_t *)re_gvar(0x00bdfa44u, sizeof(int32_t), (void *)&P16_FlagD))
+#undef P16_IdleArg1
+#define P16_IdleArg1 (*(int32_t *)re_gvar(0x00c810e8u, sizeof(int32_t), (void *)&P16_IdleArg1))
+#undef P16_IdleArg2
+#define P16_IdleArg2 (*(int32_t *)re_gvar(0x00c81100u, sizeof(int32_t), (void *)&P16_IdleArg2))
+#endif

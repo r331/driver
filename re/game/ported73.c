@@ -1,6 +1,8 @@
 #include "ported73.h"
 #include "ported43.h"   /* v2.09: P43_FreeCnt/P43_FreeList/A_00C56780 — объекты образа данных (пешеходы) */
 #include "ported7.h"
+#include "ported59.h"   /* v2.21: P59_NODES_MAX */
+#include "reptr.h"
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -83,12 +85,21 @@ void P73_Text(float x, float y, uint32_t txt, int32_t a, int32_t flags) {
   P67_Fn40ABAC(txt);
 }
 
-/* 0051bf82: индекс типа в таблице масок берётся как есть (в оригинале индекс до 255 читает соседние данные — тут >8 даёт маску 0) */
+/* 0051bf82: одностороннее движение — байт +0x3d узла 00bf1c40 (0x80..0x83 — участок одностороннего движения по стороне 0..3,
+   0 — двустороннее; его читают появление трафика 00491a56 и др.). Индекс типа в таблице масок 00575e34 берётся как есть: в оригинале
+   индекс до 255 читает соседние данные — в native они из образа данных (re_ptr), без образа (selftest) >8 даёт маску 0.
+   v2.21: цикл шёл только по первым 64 узлам (i < 64 — размер прежней native-таблицы); в Майами 356 узлов — у узлов ≥ 64 флаг
+   оставался 0, и трафик появлялся на односторонних улицах в обе стороны («встречка»). */
 void P73_RoadSides(void) {
-  for (int32_t i = 0; i < P11_00b5a8e8 && i < 64; i++) {
+  for (int32_t i = 0; i < P11_00b5a8e8 && i < P59_NODES_MAX; i++) {
     uint8_t *e = P17_MapBase + i * 0x42;
     uint8_t kind = e[4];
     uint8_t mask = kind < 9 ? P73_Mask[kind] : 0;
+#ifndef RE_HOOK_BUILD
+    if (kind >= 9) { const uint8_t *m = (const uint8_t *)re_ptr(0x00575e34u + kind); if (m != NULL) mask = *m; }
+#else
+    mask = P73_Mask[kind];
+#endif
     uint8_t bits = (uint8_t)(e[5] & mask);
     if (bits == 0)         e[0x3b] = P17_SlotMapSide(i) == 0 ? 0x82 : 0x83;
     else if (bits == mask) e[0x3b] = P17_SlotMapSide(i) == 0 ? 0x80 : 0x81;

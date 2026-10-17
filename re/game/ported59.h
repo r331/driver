@@ -20,8 +20,12 @@
    проверка REPLAYn.BIN 00405fdb, горячие клавиши меню 00417d56, чтение блока из файла 0040d4b3. Все cdecl.
    Таблица синусов (0x576f10) для native берётся из sintab_data.h (P59_InitConsts). */
 typedef uint8_t p59_u8x64k_t[0x148 * 64];
-typedef uint8_t p59_tab_bf1c48_t[0x42 * 64];
-typedef uint8_t p59_tab_c39dc0_t[0x24 * 64];
+/* v2.21: число узлов дороги — таблицы 00bf1c40 (0x42), 00c12c60 (0x14), 00c39dc0 (0x24) в .bss Game.exe рассчитаны на 0x800 записей
+   (по расстоянию до следующих глобалов: 00c39dc0 + 0x800·0x24 = 00c4bdc0 < 00c4bdc4); P11_00b5a8e8 — фактическое число (Майами — 356).
+   Раньше native-типы были на 64 узла, и проверки границ отрезали узлы ≥ 64. */
+#define P59_NODES_MAX 0x800
+typedef uint8_t p59_tab_bf1c48_t[0x42 * P59_NODES_MAX];
+typedef uint8_t p59_tab_c39dc0_t[0x24 * P59_NODES_MAX];
 typedef int32_t p59_i32x18_t[18];
 typedef uint8_t p59_u8x9_t[9];
 typedef uint8_t p59_u8x64_t[64];

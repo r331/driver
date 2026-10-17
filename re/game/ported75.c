@@ -134,7 +134,7 @@ static int32_t p75_i32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v
    Шаг между позициями 0x5dc. rev — считать с конца, last==0xff — случайная позиция, cls==1 — последняя. Результат — 01139a30 (x), 01139a2c (y);
    затем (кроме pick==1) случайный сдвиг поперёк стороны. Флаг направления — бит 0 байта 0x34 записи 0x42 таблицы 00bf1c48. */
 void P75_TrafficPos(int32_t cls, int32_t side, int32_t rev, int32_t last, uint32_t pick) {
-  if (cls < 0 || cls >= 64 || side < 0 || side > 3) return;
+  if (cls < 0 || cls >= P59_NODES_MAX || side < 0 || side > 3) return;   /* v2.21: было cls >= 64 — у узлов ≥ 64 позиция не считалась (оставалась от прошлого вызова) */
   const uint8_t *rec = P59_C39DC0 + cls * 0x24;
   int32_t n = (int32_t)rec[side] - 1;
   int32_t off;

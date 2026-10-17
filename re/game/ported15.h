@@ -39,3 +39,13 @@ void P15_ListClearActiveByTag(uint32_t tag);   /* 004cff20 */
 void P15_ListClearAllActive(void);             /* 004d0021 */
 int32_t P15_GridCell(int32_t x, int32_t y);    /* 004e58ba */
 void P15_RaiseLimits(void);                    /* 004e5f5b */
+/* v2.21: ячейки образа данных — один объект на адрес. Раньше эти имена были отдельными native-переменными (tools/gen_gvar_img.py
+   не разбирает обёртку P15_VAR/P16_VAR), и запись через другой псевдоним (D_00b87e30, P14_00c810c4, G6_00B5A778 …) через них не была
+   видна: так, интервью Undercover (ladder пишет D_00b87e30 = 4) не запускалось — P56_HudTick/P145_LevelLoad проверяли P15_State.
+   Пары: P15_State = D_00b87e30 (режим: 4 — интервью), P15_Flags9 = G6_00D04A50/P59_Flags9. */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P15_State
+#define P15_State (*(int32_t *)re_gvar(0x00b87e30u, sizeof(int32_t), (void *)&P15_State))
+#undef P15_Flags9
+#define P15_Flags9 (*(P15_u8x9 *)re_gvar(0x00d04a50u, sizeof(P15_u8x9), (void *)&P15_Flags9))
+#endif

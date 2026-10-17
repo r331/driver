@@ -2,14 +2,70 @@
 #include <string.h>
 GAME_VAR_DEF(int32_t, P16_ParticleCount, 0x011171a0)
 GAME_VAR_DEF(uint8_t, P16_ParticleBase, 0x0110e160)
+#ifndef RE_HOOK_BUILD /* v2.21 gvar-img */
+#pragma push_macro("P16_IdleMode")
+#undef P16_IdleMode
+int32_t P16_IdleMode;
+#pragma pop_macro("P16_IdleMode")
+#else
 GAME_VAR_DEF(int32_t, P16_IdleMode, 0x00c810c4)
+#endif
+#ifndef RE_HOOK_BUILD /* v2.21 gvar-img */
+#pragma push_macro("P16_FlagA")
+#undef P16_FlagA
+int32_t P16_FlagA;
+#pragma pop_macro("P16_FlagA")
+#else
 GAME_VAR_DEF(int32_t, P16_FlagA, 0x00b5a778)
+#endif
+#ifndef RE_HOOK_BUILD /* v2.21 gvar-img */
+#pragma push_macro("P16_FlagB")
+#undef P16_FlagB
+int32_t P16_FlagB;
+#pragma pop_macro("P16_FlagB")
+#else
 GAME_VAR_DEF(int32_t, P16_FlagB, 0x00b87ee4)
+#endif
+#ifndef RE_HOOK_BUILD /* v2.21 gvar-img */
+#pragma push_macro("P16_IdleCounter")
+#undef P16_IdleCounter
+int32_t P16_IdleCounter;
+#pragma pop_macro("P16_IdleCounter")
+#else
 GAME_VAR_DEF(int32_t, P16_IdleCounter, 0x00d0778c)
+#endif
+#ifndef RE_HOOK_BUILD /* v2.21 gvar-img */
+#pragma push_macro("P16_FlagC")
+#undef P16_FlagC
+int32_t P16_FlagC;
+#pragma pop_macro("P16_FlagC")
+#else
 GAME_VAR_DEF(int32_t, P16_FlagC, 0x00bdfa58)
+#endif
+#ifndef RE_HOOK_BUILD /* v2.21 gvar-img */
+#pragma push_macro("P16_FlagD")
+#undef P16_FlagD
+int32_t P16_FlagD;
+#pragma pop_macro("P16_FlagD")
+#else
 GAME_VAR_DEF(int32_t, P16_FlagD, 0x00bdfa44)
+#endif
+#ifndef RE_HOOK_BUILD /* v2.21 gvar-img */
+#pragma push_macro("P16_IdleArg1")
+#undef P16_IdleArg1
+int32_t P16_IdleArg1;
+#pragma pop_macro("P16_IdleArg1")
+#else
 GAME_VAR_DEF(int32_t, P16_IdleArg1, 0x00c810e8)
+#endif
+#ifndef RE_HOOK_BUILD /* v2.21 gvar-img */
+#pragma push_macro("P16_IdleArg2")
+#undef P16_IdleArg2
+int32_t P16_IdleArg2;
+#pragma pop_macro("P16_IdleArg2")
+#else
 GAME_VAR_DEF(int32_t, P16_IdleArg2, 0x00c81100)
+#endif
 
 static float rf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
 static void wf(uint8_t *p, float v) { memcpy(p, &v, 4); }

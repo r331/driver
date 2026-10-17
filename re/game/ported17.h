@@ -4,7 +4,7 @@
 #include <stdint.h>
 /* Мелкие функции: слот-таблица 0x2c байта, целочисленный корень, переключение экрана. */
 typedef uint8_t p17_slots_t[0x2c * 128];
-typedef uint8_t p17_map_t[0x42 * 64 + 8];
+typedef uint8_t p17_map_t[0x42 * 0x800 + 8];   /* v2.21: 0x800 узлов (было 64; в Майами 356) */
 #define P17_SlotBase    SLOTTAB_VAR(p17_slots_t, P17_SlotBase, 0x00c1ed8a)   /* v1.46: над P11_00c1ed80 */
 #define P17_MapBase     NODETAB_VAR(p17_map_t, P17_MapBase, 0x00bf1c42)      /* v1.46: над P11_00bf1c40 */
 #define P17_SqrtArg     GAME_VAR(uint32_t, P17_SqrtArg, 0x0057a136)
