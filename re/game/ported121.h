@@ -17,8 +17,10 @@ extern uint32_t P121_CamW;
 #endif
 void     P121_ScriptHud(void);                 /* 004f4a33: сообщения миссии (FAILED/SMASHED/OUTOFRANGE/CARGOTAWAY) и часы скрипта */
 uint16_t P121_ParseCamLine(char *s);           /* 004a4a5f: строка сценария камеры → номер команды 1..32 (0 — ошибка, 0x32 — комментарий) */
+void     P121_TexTriFlat(uint32_t arg);        /* 00430b13 (v2.20): запись модели 0x38 — текстурный треугольник с цветом записи */
 void     P121_TexQuadFlat(uint32_t arg);       /* 00431016: запись модели 0x44 — текстурный четырёхугольник с цветом записи */
 void     P121_DustDraw(void);                  /* 004b2c4b: частицы пыли P96_Dust значками SWBIRD2/SWBIRD1 */
+void     P121_ClipTexTri(uint32_t arg);       /* 00439b42 (v2.20): запись 0x38 — текстурный треугольник с отсечением ближней плоскостью */
 void     P121_ClipQuad(uint32_t arg);          /* 00447753: запись 0x24 — однотонный четырёхугольник с отсечением дальней плоскостью */
 void     P121_ClipTexQuad(uint32_t arg);       /* 0043a5be: запись 0x44 — текстурный четырёхугольник с отсечением ближней плоскостью */
 void     P121_WheelDust(void);                 /* 0051dc18: пыль из-под колёс 0 и 2 игрока (004b955c) */

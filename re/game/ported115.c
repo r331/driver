@@ -223,10 +223,11 @@ void P115_RoadArrow(const float *pos) {
 /* ---- записи модели с растеризатором 01270e30 / 01270d9c ---- */
 static p85_vtx *prep(int32_t idx) {
   p85_vtx *c = &P85_VCache[idx];
-  if (c->stamp != P44_XformTag) {
+  if (!P85_VC_VALID(c, P85_FMT_BIAS)) {
     const float *src = (const float *)((const uint8_t *)P79_PTR(P84_VertRef) + (size_t)idx * 16);
     c->x = src[0]; c->y = src[1]; c->z = src[2];
     P101_ProjT((float *)c);
+    P85_VC_FMT(c, P85_FMT_PROJ);
   }
   return c;
 }

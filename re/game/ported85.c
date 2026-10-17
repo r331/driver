@@ -118,6 +118,7 @@ void P85_Project(p85_vtx *v) {
   P85_ZI = (int32_t)lrintl(sz);                    /* fist: округление к ближайшему чётному */
   v->vx = fx; v->vy = fy; v->z = fz;
   v->stamp = P44_XformTag;
+  P85_VC_FMT(v, P85_FMT_PROJ);
   {
     int32_t zi = P85_ZI;
 #ifndef RE_HOOK_BUILD
@@ -146,7 +147,7 @@ void P85_Project(p85_vtx *v) {
 /* общие части обработчиков */
 p85_vtx *P85_Prep(int32_t idx) {
   p85_vtx *c = &P85_VCache[idx];
-  if (c->stamp != P44_XformTag) {
+  if (!P85_VC_VALID(c, P85_FMT_BIAS)) {
     const float *src = (const float *)((const uint8_t *)P79_PTR(P84_VertRef) + (size_t)idx * 16);
     c->x = src[0]; c->y = src[1]; c->z = src[2];
     P85_Project(c);

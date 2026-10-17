@@ -22,6 +22,21 @@
    Отсечение при P82_Edge≠0: все вершины слева/сверху за краем (знаковый бит) → пропуск. Курсор записей G2_011F4064 сдвигается на размер записи. */
 typedef struct { uint32_t stamp; float oow; uint32_t pad8; float x, y, z, vx, vy; } p85_vtx;
 _Static_assert(sizeof(p85_vtx) == 32, "p85_vtx");
+/* v2.20, только native: формат записи кэша вершин P85_VCache в pad8. В оригинале модель рисуется одним набором обработчиков
+   (режим 0 — проекция 00528ac8: x,y — экран, z/vx/vy — камера, oow; режимы с отсечением — 00528c91/0052859a: x,y,z — камера),
+   поэтому одна метка кадра stamp однозначна. В native в наборы с отсечением подставлены обработчики режима 0 (P84_HandNoClip),
+   и в одной модели запись с отсечением (P121_ClipTexQuad, prep_bias) и подставленная (P85_Prep) делят вершины: вторая брала
+   запись первой как готовую (координаты камеры как экранные, oow прошлого кадра) — треугольники через экран, чёрные дыры
+   неба/дороги. Метка формата: запись чужого формата пересчитывается из вершин модели. 0 — неизвестно (записи P122/P138). */
+#ifndef RE_HOOK_BUILD
+#  define P85_FMT_PROJ 0x4a4f5250u   /* "PROJ" */
+#  define P85_FMT_BIAS 0x53414942u   /* "BIAS" */
+#  define P85_VC_VALID(c, other) ((c)->stamp == P44_XformTag && (c)->pad8 != (other))
+#  define P85_VC_FMT(c, f) ((c)->pad8 = (f))
+#else
+#  define P85_VC_VALID(c, other) ((c)->stamp == P44_XformTag)
+#  define P85_VC_FMT(c, f) ((void)0)
+#endif
 typedef struct { float x, y, z, r, g, b, ooz, a, oow; float tmu[7]; } p85_rv;
 _Static_assert(sizeof(p85_rv) == 64, "p85_rv");
 #ifdef RE_HOOK_BUILD

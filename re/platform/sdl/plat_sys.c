@@ -428,6 +428,16 @@ void plat_frame_tick(const char *where) {
         flip_events();
         if (plat_fixed_dt()) vt_advance((uint32_t)g_frames * 20u);   /* v2.08: RE_FIXED_DT */
         if (g_frames == 1) fprintf(stderr, "[frame] первый кадр (plat_flip)\n");
+        { /* v2.20: RE_SHOT_EVERY=N [RE_SHOT_FROM=K] — серия снимков RE_SHOT_PNG без .png + _NNNNN.png каждые N кадров (с кадра K) */
+          static int ev = -2, from = 0; if (ev == -2) { const char *e = getenv("RE_SHOT_EVERY"); ev = e ? atoi(e) : 0; e = getenv("RE_SHOT_FROM"); from = e ? atoi(e) : 0; }
+          const char *png = getenv("RE_SHOT_PNG");
+          if (ev > 0 && png && g_frames >= from && g_frames % ev == 0 && g_win) {
+              char nm[PATH_MAX]; size_t l = strlen(png); if (l > 4 && !strcmp(png + l - 4, ".png")) l -= 4;
+              snprintf(nm, sizeof nm, "%.*s_%05d.png", (int)l, png, g_frames);
+              int w = 0, h = 0; SDL_GL_GetDrawableSize(g_win, &w, &h);
+              uint32_t *px = (w > 0 && h > 0) ? malloc((size_t)w * h * 4) : NULL;
+              if (px) { if (plat_render_readback(px) == 0) png_write_rgba(nm, px, w, h); free(px); }
+          } }
         const char *sf = getenv("RE_SHOT_FIRST");
         if (!g_shot_done && sf && *sf == '1') frame_shot();
         if (maxf > 0 && g_frames >= maxf) {

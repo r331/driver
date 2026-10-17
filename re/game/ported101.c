@@ -881,21 +881,16 @@ static const char *const SKYTAB[44] = {
   "NY_SKY", 0, "NY_NIGHT", 0, "NY_RAIN", 0, "NY_NIGHT", 0, "NY_DUSK", 0, 0, 0, 0, 0 };
 #endif
 /* ---- 004ef3cd: масштаб моделей неба ×1.7, копия текстуры неба по погоде/времени на место дневной ---- */
+/* v2.20: в native ссылка модели — смещение в арене карты, и первая модель уровня (небо, P79_ModelTab[0]) лежит по смещению 0.
+   Прежняя проверка «ссылка == 0 → пропуск» (как пустой указатель оригинала) пропускала её: четверть купола оставалась в масштабе
+   1/1.7 — ближе и ниже трёх других, на стыках — незакрашенная чёрная изогнутая полоса неба. Теперь пропуска нет (в оригинале
+   его тоже нет: 004ef3cd масштабирует 00cfe7a0..ac безусловно); без арены (тесты) — выход. */
 void P101_SkyInit(void) {
-  for (int32_t k = 0; k < 4; k++) {
-    uint8_t *o = (uint8_t *)P79_PTR(P79_ModelTab[k]);
 #ifndef RE_HOOK_BUILD
-    if (P79_ModelTab[k] == 0) continue;
+  if (P79_MBASE == 0) return;
 #endif
-    P15_ScaleVertices(o, 1.7f, 1.7f, 1.7f);
-  }
-  for (int32_t k = 0; k < 4; k++) {
-    uint8_t *o = (uint8_t *)P79_PTR(P79_ModelTab[k]);
-#ifndef RE_HOOK_BUILD
-    if (P79_ModelTab[k] == 0) continue;
-#endif
-    P15_ScaleNormalW(o, 1.7f);
-  }
+  for (int32_t k = 0; k < 4; k++) P15_ScaleVertices((uint8_t *)P79_PTR(P79_ModelTab[k]), 1.7f, 1.7f, 1.7f);
+  for (int32_t k = 0; k < 4; k++) P15_ScaleNormalW((uint8_t *)P79_PTR(P79_ModelTab[k]), 1.7f);
   if (D_00b87e30 >= 4) return;
 #ifndef RE_HOOK_BUILD
   if (D_00b87e30 < 0) return;

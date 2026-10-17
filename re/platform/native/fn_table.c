@@ -830,12 +830,14 @@ void P120_ScriptReset(void);
 void P121_CamSounds(void);
 void P121_ClipQuad(void);
 void P121_ClipTexQuad(void);
+void P121_ClipTexTri(void);
 void P121_CopSync(void);
 void P121_DustDraw(void);
 void P121_ParseCamLine(void);
 void P121_ScriptHud(void);
 void P121_SndNextDev(void);
 void P121_TexQuadFlat(void);
+void P121_TexTriFlat(void);
 void P121_WheelDust(void);
 void P122_CarGlow(void);
 void P122_EventsParse(void);
@@ -3132,6 +3134,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x0042f7b8u, (re_fn_t)AdvanceOpPtr0042F7B8 },
   { 0x0042f7d9u, (re_fn_t)P85_FlatTri },
   { 0x0042fc29u, (re_fn_t)P85_FlatQuad },
+  { 0x00430b13u, (re_fn_t)P121_TexTriFlat },
   { 0x00431016u, (re_fn_t)P121_TexQuadFlat },
   { 0x00432186u, (re_fn_t)P85_LitTri },
   { 0x00432601u, (re_fn_t)P85_LitQuad },
@@ -3141,6 +3144,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x00433f4cu, (re_fn_t)P86_TexQuad },
   { 0x00434c58u, (re_fn_t)P86_TexTriD },
   { 0x0043593eu, (re_fn_t)P86_TexQuadD },
+  { 0x00439b42u, (re_fn_t)P121_ClipTexTri },
   { 0x0043a5beu, (re_fn_t)P121_ClipTexQuad },
   { 0x00447753u, (re_fn_t)P121_ClipQuad },
   { 0x00452327u, (re_fn_t)P115_FlatTriC },

@@ -226,6 +226,7 @@ static void shad_vtx(p85_vtx *v, const int32_t *c) {
   v->y = (-10.0f - P44_CamY) - (float)c[1];                 /* .rdata 00546a84 = −10 */
   v->z = (float)c[2] - P44_CamZ;
   v->stamp = P44_XformTag;
+  P85_VC_FMT(v, 0);
 }
 void P138_CarShadow(int32_t car) {
   float m[16];
@@ -300,7 +301,7 @@ void P138_CarShadow(int32_t car) {
         v->x = pos[0] - P44_CamX;
         v->y = (-10.0f - P44_CamY) - pos[1];
         v->z = pos[2] - P44_CamZ;
-        v->stamp = P44_XformTag;
+        v->stamp = P44_XformTag; P85_VC_FMT(v, 0);
         P44_Xform(&v->x);
         if (Q00546030 < v->z) { P44_XformTag++; return; }
         if (P95_Near <= v->z) P43_ProjectGrid((uint8_t *)v);

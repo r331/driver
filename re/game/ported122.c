@@ -127,7 +127,7 @@ static void quad_tail(float v[4][3], uint8_t *rec, uint32_t mode, int fade) {
     p85_vtx *c = &P85_VCache[k];
     c->x = v[k][0] - P44_CamX; c->y = v[k][1] - P44_CamY; c->z = v[k][2] - P44_CamZ;
   }
-  for (int k = 0; k < 4; k++) P85_VCache[k].stamp = P44_XformTag;
+  for (int k = 0; k < 4; k++) { P85_VCache[k].stamp = P44_XformTag; P85_VC_FMT(&P85_VCache[k], 0); }
   if (P84_Mirror == 0) P44_MatPtr = (float *)P44_ViewMatT;
   else { memcpy(m, P44_ViewMatT, sizeof m); m[0] = -m[0]; m[3] = -m[3]; m[6] = -m[6]; P44_MatPtr = m; }
   for (int k = 0; k < 4; k++) {

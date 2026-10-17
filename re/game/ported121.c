@@ -206,6 +206,29 @@ void P121_TexQuadFlat(uint32_t arg) {
   if (P85_RasterA && P85_RasterB) P85_CallRaster();
 }
 
+/* ---- 00430b13 (v2.20): запись модели 0x38 (тип 4/36) — текстурный треугольник с цветом записи, без освещения.
+   Треугольный вариант 00431016 (Ghidra функцией не опознала — по дизассемблеру): индексы +8/+0xc/+0x10, uv +0x14..+0x28
+   (вершины 0, 1, 2), цвет +0x2c/+0x30/+0x34; порядок вершин растеризатора — 0, 1, 2 (у четырёхугольника 0, 2, 1). ---- */
+void P121_TexTriFlat(uint32_t arg) {
+  const uint8_t *rec = G2_011F4064;
+  int32_t i0 = rd32(rec + 8), i1 = rd32(rec + 0xc), i2 = rd32(rec + 0x10);
+  G2_011F4064 = (uint8_t *)rec + 0x38;
+#ifndef RE_HOOK_BUILD
+  if ((uint32_t)i0 >= 0x2000u || (uint32_t)i1 >= 0x2000u || (uint32_t)i2 >= 0x2000u) return;
+#endif
+  p85_vtx *v0 = P85_Prep(i0), *v1 = P85_Prep(i1), *v2 = P85_Prep(i2);
+  if ((uint8_t)P82_Edge) { const p85_vtx *vs[3] = { v0, v1, v2 }; if (P85_EdgeReject(vs, 3)) return; }
+  for (int i = 0; i < 3; i++) { P85_RV[i].r = rdf(rec + 0x2c); P85_RV[i].g = rdf(rec + 0x30); P85_RV[i].b = rdf(rec + 0x34); }
+  if (P85_StateDirty != 4) { if (P85_StateFn) P85_StateFn(3, 1, 0, 1, 0); P85_StateDirty = 4; }
+  tex_page(rec[2]);
+  if (P85_BlendFn) P85_SetBlend((uint8_t)arg);
+  P85_RV[0].tmu[0] = rdf(rec + 0x14) * v0->oow; P85_RV[0].tmu[1] = rdf(rec + 0x18) * v0->oow;
+  P85_RV[1].tmu[0] = rdf(rec + 0x1c) * v1->oow; P85_RV[1].tmu[1] = rdf(rec + 0x20) * v1->oow;
+  P85_RV[2].tmu[0] = rdf(rec + 0x24) * v2->oow; P85_RV[2].tmu[1] = rdf(rec + 0x28) * v2->oow;
+  P85_PutVtx(&P85_RV[0], v0); P85_PutVtx(&P85_RV[1], v1); P85_PutVtx(&P85_RV[2], v2);
+  if (P85_RasterA && P85_RasterB) P85_CallRaster();
+}
+
 /* ---- 004b2c4b ---- */
 static void dust_end(void) {
   if (P62_I252B78 != 0) {
@@ -259,10 +282,11 @@ void P121_DustDraw(void) {
 /* ---- 00447753 / 0043a5be: четырёхугольник с отсечением плоскостью ---- */
 static p85_vtx *prep_bias(int32_t idx) {
   p85_vtx *c = &P85_VCache[idx];
-  if (c->stamp != P44_XformTag) {
+  if (!P85_VC_VALID(c, P85_FMT_PROJ)) {
     const float *src = (const float *)((const uint8_t *)P79_PTR(P84_VertRef) + (size_t)idx * 16);
     c->x = src[0]; c->y = src[1]; c->z = src[2];
     P44_XformBias((float *)(void *)c);
+    P85_VC_FMT(c, P85_FMT_BIAS);
   }
   return c;
 }
@@ -298,21 +322,27 @@ static int clip_reject(const float *xs, const float *ys, int n) {
   P85_Clip = o; if (o == 0) return 1;
   return 0;
 }
-static void clip_quad(uint32_t arg, int tex) {
+/* nv = 4 — четырёхугольник (0x24 однотонный / 0x44 текстурный: uv +0x18, цвет +0x18 / +0x38);
+   nv = 3 — 00439b42 (v2.20): текстурный треугольник 0x38 (тип 4 набора с ближней плоскостью 00550cfc+0x1c0): индексы +8..+0x10,
+   uv +0x14..+0x28, цвет +0x2c; та же схема — отсечение рёбер 0x401514 (P101_ClipNearUV), 3 вершины — (0,1,2), 4 — (0,2,1),(0,2,3).
+   До v2.20 вместо него стоял обработчик без отсечения: у полигонов неба/земли, пересекающих ближнюю плоскость, — пропуски. */
+static void clip_poly(uint32_t arg, int tex, int nv) {
   const uint8_t *rec = G2_011F4064;
-  int32_t ix[4] = { rd32(rec + 8), rd32(rec + 0xc), rd32(rec + 0x10), rd32(rec + 0x14) };
-  G2_011F4064 = (uint8_t *)rec + (tex ? 0x44 : 0x24);
+  int32_t ix[4] = { rd32(rec + 8), rd32(rec + 0xc), rd32(rec + 0x10), nv == 4 ? rd32(rec + 0x14) : 0 };
+  const int uvo = nv == 4 ? 0x18 : 0x14;
+  G2_011F4064 = (uint8_t *)rec + (nv == 3 ? 0x38 : tex ? 0x44 : 0x24);
 #ifndef RE_HOOK_BUILD
-  for (int i = 0; i < 4; i++) if ((uint32_t)ix[i] >= 0x2000u) return;
+  for (int i = 0; i < nv; i++) if ((uint32_t)ix[i] >= 0x2000u) return;
 #endif
   p85_vtx *v[4];
-  for (int i = 0; i < 4; i++) v[i] = prep_bias(ix[i]);
+  for (int i = 0; i < nv; i++) v[i] = prep_bias(ix[i]);
   P100_ClipN = 0;
   P100_ClipOut = &P121_ClipBuf[0];
-  for (int i = 0; i < 4; i++) {
-    const uint8_t *a = (const uint8_t *)v[i], *b = (const uint8_t *)v[(i + 1) & 3];
+  for (int i = 0; i < nv; i++) {
+    const int j = (i + 1) % nv;
+    const uint8_t *a = (const uint8_t *)v[i], *b = (const uint8_t *)v[j];
     if (tex) {
-      const float *ua = (const float *)(rec + 0x18 + 8 * i), *ub = (const float *)(rec + 0x18 + 8 * ((i + 1) & 3));
+      const float *ua = (const float *)(rec + uvo + 8 * i), *ub = (const float *)(rec + uvo + 8 * j);
       P101_ClipNearUV(a, b, rdf(ua), rdf(ua + 1), rdf(ub), rdf(ub + 1));
     } else P100_ClipFar(a, b);
   }
@@ -331,7 +361,7 @@ static void clip_quad(uint32_t arg, int tex) {
     tex_page(rec[2]);
   } else if (P85_StateDirty != 0) { if (P85_StateFn) P85_StateFn(1, 0, 0, 2, 0); P85_StateDirty = 0; }
   if (P85_BlendFn) P85_SetBlend((uint8_t)arg);
-  const uint8_t *col = rec + (tex ? 0x38 : 0x18);
+  const uint8_t *col = rec + (nv == 3 ? 0x2c : tex ? 0x38 : 0x18);
   for (int i = 0; i < 3; i++) { P85_RV[i].r = rdf(col); P85_RV[i].g = rdf(col + 4); P85_RV[i].b = rdf(col + 8); }
   /* веер: 3 — (0,1,2); 4 — (0,2,1),(0,2,3); 5 — ещё (0,4,3) */
   static const int8_t fan[3][3] = { { 0, 2, 1 }, { 0, 2, 3 }, { 0, 4, 3 } };
@@ -346,8 +376,9 @@ static void clip_quad(uint32_t arg, int tex) {
     raster_b(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
   }
 }
-void P121_ClipQuad(uint32_t arg) { clip_quad(arg, 0); }
-void P121_ClipTexQuad(uint32_t arg) { clip_quad(arg, 1); }
+void P121_ClipQuad(uint32_t arg) { clip_poly(arg, 0, 4); }
+void P121_ClipTexQuad(uint32_t arg) { clip_poly(arg, 1, 4); }
+void P121_ClipTexTri(uint32_t arg) { clip_poly(arg, 1, 3); }
 
 /* ---- 0051dc18 ---- */
 void P121_WheelDust(void) {

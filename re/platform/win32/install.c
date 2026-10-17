@@ -2213,8 +2213,10 @@ void re_install_all(void) {
     re_hook(0x005032ce, (void*)P120_HudTimes, "P120_HudTimes");
     re_hook(0x004f4a33, (void*)P121_ScriptHud, "P121_ScriptHud");
     re_hook(0x004a4a5f, (void*)P121_ParseCamLine, "P121_ParseCamLine");
+    re_hook(0x00430b13, (void*)P121_TexTriFlat, "P121_TexTriFlat");
     re_hook(0x00431016, (void*)P121_TexQuadFlat, "P121_TexQuadFlat");
     re_hook(0x004b2c4b, (void*)P121_DustDraw, "P121_DustDraw");
+    re_hook(0x00439b42, (void*)P121_ClipTexTri, "P121_ClipTexTri");
     re_hook(0x00447753, (void*)P121_ClipQuad, "P121_ClipQuad");
     re_hook(0x0043a5be, (void*)P121_ClipTexQuad, "P121_ClipTexQuad");
     re_hook(0x0051dc18, (void*)P121_WheelDust, "P121_WheelDust");
