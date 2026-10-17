@@ -68,6 +68,11 @@ int re_frustum_union(const uint8_t *tab, int sec, int k, uint8_t *mask) {
   return n;
 }
 
+int re_game_screen(int native, int32_t *w, int32_t *h) {
+  if (!native || w == NULL || h == NULL || (*w == RE_ASPECT_W && *h == RE_ASPECT_H)) return 0;
+  *w = RE_ASPECT_W; *h = RE_ASPECT_H; return 1;
+}
+
 #ifndef RE_HOOK_BUILD
 int re_view_extra(void) { return P19_ScrW == RE_ASPECT_W ? plat_view_extra() : 0; }
 #else
@@ -104,6 +109,10 @@ int re_aspect_selftest(void) {
   int t = 0;
 #define T(c) do { t++; if (!(c)) return t; } while (0)
   T(re_aspect_parse("auto") == 0.0 && re_aspect_parse(NULL) == 0.0);
+  { int32_t w = 1024, h = 768;   /* v2.26: режим игры → 640×480 в native, original — как есть */
+    T(re_game_screen(1, &w, &h) == 1 && w == 640 && h == 480 && re_game_screen(1, &w, &h) == 0);
+    w = 1280; h = 1024; T(re_game_screen(0, &w, &h) == 0 && w == 1280 && h == 1024);
+    w = 320; h = 240; T(re_game_screen(1, &w, &h) == 1 && w == 640 && h == 480); }
   T(fabs(re_aspect_parse("4:3") - 4.0 / 3.0) < 1e-12 && fabs(re_aspect_parse("21:9") - 21.0 / 9.0) < 1e-12);
   T(fabs(re_aspect_parse("2.35") - 2.35) < 1e-12 && re_aspect_parse("abc") < 0 && re_aspect_parse("0:3") < 0);
   T(re_aspect_extra(4.0 / 3.0) == 0 && re_aspect_extra(1080.0 / 1920.0) == 0 && re_aspect_extra(1.0) == 0);

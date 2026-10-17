@@ -26,6 +26,7 @@ int re_gfx_preset(re_gfx_cfg *c, const char *name) {
     scpy(k.aspect, c->aspect, sizeof k.aspect); k.fullscreen = c->fullscreen; k.win_w = c->win_w; k.win_h = c->win_h;
     scpy(k.source, c->source, sizeof k.source);
     scpy(k.music_dir, c->music_dir, sizeof k.music_dir);   /* v2.22: и каталог музыки */
+    k.game_res = c->game_res;                              /* v2.26: и разрешение кадра игры */
     *c = k; return 0;
 }
 void re_gfx_defaults(re_gfx_cfg *c) { memset(c, 0, sizeof *c); c->fullscreen = -1; re_gfx_preset(c, "enhanced"); }
@@ -76,6 +77,11 @@ int re_gfx_set(re_gfx_cfg *c, const char *k, const char *v) {
     if (ieq(k, "texpack")) { if (strlen(v) >= sizeof c->texpack) return -2; scpy(c->texpack, v, sizeof c->texpack); return 0; }
     if (ieq(k, "aspect")) { if (strlen(v) >= sizeof c->aspect) return -2; scpy(c->aspect, v, sizeof c->aspect); return 0; }
     if (ieq(k, "fbo")) { if (ieq(v, "auto")) { c->fbo = 1; return 0; } return pbool(v, &c->fbo); }   /* v2.24 */
+    if (ieq(k, "game_res")) {   /* v2.26: native (640×480 внутри, по умолчанию) | original (режим из меню/config.dat игры) */
+        if (ieq(v, "native") || ieq(v, "auto") || ieq(v, "640x480")) { c->game_res = 0; return 0; }
+        if (ieq(v, "original") || ieq(v, "game")) { c->game_res = 1; return 0; }
+        return -2;
+    }
     if (ieq(k, "fullscreen")) {   /* v2.24: + desktop / exclusive */
         if (ieq(v, "desktop")) { c->fullscreen = 1; return 0; }
         if (ieq(v, "exclusive")) { c->fullscreen = 2; return 0; }
@@ -124,7 +130,7 @@ int re_gfx_env(re_gfx_cfg *c, const char *(*g)(const char *)) {
     static const char *map[][2] = { { "RE_MSAA", "msaa" }, { "RE_A2C", "a2c" }, { "RE_FXAA", "fxaa" }, { "RE_ANISO", "aniso" },
         { "RE_MIPMAPS", "mipmaps" }, { "RE_DILATE", "dilate" }, { "RE_FILTER", "filter" }, { "RE_HUD_FILTER", "hud_filter" },
         { "RE_RENDER_SCALE", "render_scale" }, { "RE_VSYNC", "vsync" }, { "RE_FPS_LIMIT", "fps_limit" }, { "RE_GAMMA", "gamma" },
-        { "RE_BRIGHTNESS", "brightness" }, { "RE_SHARPEN", "sharpen" }, { "RE_TEXPACK", "texpack" }, { "RE_DRAW_DIST", "draw_distance" }, { "RE_FBO", "fbo" } };
+        { "RE_BRIGHTNESS", "brightness" }, { "RE_SHARPEN", "sharpen" }, { "RE_TEXPACK", "texpack" }, { "RE_DRAW_DIST", "draw_distance" }, { "RE_FBO", "fbo" }, { "RE_GAME_RES", "game_res" } };
     int errs = 0; const char *v;
     if (!g) return 0;
     if ((v = g("RE_PRESET")) && *v && re_gfx_preset(c, v)) errs++;
@@ -158,9 +164,9 @@ void re_gfx_clamp(re_gfx_cfg *c) {
 }
 const char *re_gfx_describe(const re_gfx_cfg *c, char *b, int n) {
     static const char *fl[] = { "nearest", "linear", "trilinear" }, *hf[] = { "nearest", "linear", "sharp" };
-    snprintf(b, (size_t)n, "preset %s: msaa %d a2c %d fxaa %d aniso %d mipmaps %d dilate %d filter %s hud_filter %s render_scale %.2f vsync %s fps_limit %d gamma %.2f brightness %.2f sharpen %.2f draw_distance %.2f fbo %d aspect %s fullscreen %d windowed_res %dx%d texpack %s cfg %s",
+    snprintf(b, (size_t)n, "preset %s: msaa %d a2c %d fxaa %d aniso %d mipmaps %d dilate %d filter %s hud_filter %s render_scale %.2f vsync %s fps_limit %d gamma %.2f brightness %.2f sharpen %.2f draw_distance %.2f fbo %d game_res %s aspect %s fullscreen %d windowed_res %dx%d texpack %s cfg %s",
              c->preset, c->msaa, c->a2c, c->fxaa, c->aniso, c->mipmaps, c->dilate, fl[c->filter], hf[c->hud_filter], c->render_scale,
-             c->vsync == RE_VSYNC_ADAPTIVE ? "adaptive" : c->vsync ? "on" : "off", c->fps_limit, c->gamma, c->brightness, c->sharpen, c->draw_distance, c->fbo,
+             c->vsync == RE_VSYNC_ADAPTIVE ? "adaptive" : c->vsync ? "on" : "off", c->fps_limit, c->gamma, c->brightness, c->sharpen, c->draw_distance, c->fbo, c->game_res ? "original" : "native",
              c->aspect[0] ? c->aspect : "-", c->fullscreen, c->win_w, c->win_h, c->texpack[0] ? c->texpack : "-", c->source[0] ? c->source : "-");
     return b;
 }

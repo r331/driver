@@ -111,5 +111,21 @@ int test_render(const char *png_path) {
         printf("render: v2.24 проверка показа и откат FBO — OK\n"); }
     printf("render: OK (%s)\n", png_path);
     free(px); plat_tex_free(tx); plat_render_shutdown();
+    /* v2.26: буфер 16:10 (320×200) — 3D игры x ∈ [−S, 640 + S] заполняет кадр до краёв (углы), HUD с якорем вправо — у правого края */
+    {   enum { W2 = 320, H2 = 200 };
+        CHECK(plat_render_offscreen(W2, H2) == 0);
+        plat_render_set_aspect("auto"); plat_render_set_logical(640, 480); plat_render_set_drawable(W2, H2);
+        int S = plat_view_extra(); CHECK(S == 64);
+        plat_clear(0xFF2040C0, 1); plat_set_zbuffer(0, 0); plat_set_blend(0, 0, 0); plat_tex_bind(0);
+        float x0 = (float)-S, x1 = (float)(640 + S);
+        QUAD(full, x0, 0, x1, 480, .5f, red); plat_draw_tris(full, 6);
+        plat_hud_anchor(1); QUAD(hud, 630, 230, 640, 250, .1f, grn); plat_draw_tris(hud, 6); plat_hud_anchor(0);
+        uint32_t *p2 = malloc(W2 * H2 * 4); CHECK(p2 && plat_render_readback(p2) == 0);
+        #define P2(x, y) p2[(y) * W2 + (x)]
+        CHECK(near_px(P2(1, 1), 255, 0, 0) && near_px(P2(W2 - 2, 1), 255, 0, 0) && near_px(P2(1, H2 - 2), 255, 0, 0) && near_px(P2(W2 - 2, H2 - 2), 255, 0, 0));
+        CHECK(near_px(P2(W2 - 2, H2 / 2), 0, 255, 0) && near_px(P2(W2 / 2, H2 / 2), 255, 0, 0));
+        { int x, y, w, h, tw, th; plat_render_content(&x, &y, &w, &h, &tw, &th); CHECK(x == 0 && y == 0 && w == W2 && h == H2 && tw == W2 && th == H2); }
+        free(p2); plat_render_shutdown();
+        printf("render: v2.26 кадр 16:10 во весь буфер (Hor+ S=%d), HUD у правого края — OK\n", S); }
     return 0;
 }

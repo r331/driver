@@ -95,17 +95,31 @@ static int g_fs_on, g_fs_mode = 1;   /* v2.24: g_fs_mode — 1 рабочий с
 static int env_on(const char *n) { const char *e = getenv(n); return e && *e && *e != '0'; }
 /* v2.24: размер буфера из SDL_GL_GetDrawableSize; 0×0 (окно ещё не показано / переход в полноэкранное пространство macOS) — пропуск,
    прежняя цель остаётся; любое изменение → пересоздание FBO (plat_render_set_drawable) и запись в журнал */
+/* v2.26: RE_FAKE_HIDPI=k — имитация Retina под X11/Xvfb: окно в k раз больше в пикселях, «точки» окна = пиксели / k
+   (буфер ≠ окно, как на macOS 2×). Размеры окна (RE_RES, windowed_res, кратность по рабочей области) задаются в точках. */
+static int g_fake_k = 1;
+static void win_points(int *w, int *h) { SDL_GetWindowSize(g_win, w, h); if (g_fake_k > 1) { *w /= g_fake_k; *h /= g_fake_k; } }
 static void update_drawable(void) {
     int dw = 0, dh = 0, ww = 0, wh = 0; static int pdw = -1, pdh = -1;
     if (!g_win) return;
-    SDL_GL_GetDrawableSize(g_win, &dw, &dh); SDL_GetWindowSize(g_win, &ww, &wh);
+    SDL_GL_GetDrawableSize(g_win, &dw, &dh); win_points(&ww, &wh);
     if (dw != pdw || dh != pdh) {
-        static int n; if (n++ < 40 || plat_gfx_dbg()) plat_gfx_logf("[gfx] буфер окна %dx%d (окно %dx%d точек, полный экран %d, флаги 0x%x)\n", dw, dh, ww, wh, g_fs_on, SDL_GetWindowFlags(g_win));
+        static int n; if (n++ < 40 || plat_gfx_dbg()) plat_gfx_logf("[gfx] буфер окна %dx%d (окно %dx%d точек, плотность %.2f, полный экран %d, флаги 0x%x)\n", dw, dh, ww, wh, ww > 0 ? (double)dw / ww : 0.0, g_fs_on, SDL_GetWindowFlags(g_win));
+        /* v2.26: буфер изменился (ресайз, полный экран, переход на дисплей с другой плотностью) — контекст GL снова текущий:
+           на macOS (Cocoa/NSOpenGLContext) это обновляет поверхность под новый размер окна в пикселях, иначе до обновления
+           показывается поверхность прежнего размера (кадр меньше окна, по центру, с чёрными полями) */
+        if (pdw > 0 && g_gl) SDL_GL_MakeCurrent(g_win, g_gl);
         pdw = dw; pdh = dh;
     }
     if (dw <= 0 || dh <= 0) return;
     plat_render_set_drawable(dw, dh);
+    {   /* v2.26: журнал — прямоугольник кадра игры в цели (раз на изменение): заполняет ли кадр окно */
+        static int pcw = -1, pch = -1, plw = -1; int cx, cy, cw, ch, tw, th, lw = 0, lh = 0; plat_render_content(&cx, &cy, &cw, &ch, &tw, &th); plat_render_size(NULL, NULL, &lw, &lh);
+        if (cw != pcw || ch != pch || lw != plw) { static int m; pcw = cw; pch = ch; plw = lw;
+            if (m++ < 40 || plat_gfx_dbg()) plat_gfx_logf("[gfx] кадр игры %dx%d (Hor+ S=%d) → %dx%d+%d+%d в цели %dx%d%s\n", lw, lh, plat_view_extra(), cw, ch, cx, cy, tw, th,
+                                                       (cw < tw - 2 && ch < th - 2) ? " — ВНИМАНИЕ: поля со всех сторон" : ""); } }
 }
+int plat_game_res_native(void) { return re_gfx()->game_res == 0; }   /* v2.26: driver.cfg game_res / RE_GAME_RES */
 static Uint32 fs_flag(int mode) { return mode == 2 ? SDL_WINDOW_FULLSCREEN : mode ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0; }
 int plat_render_fbo_on(void); int plat_render_set_fbo(int on);
 /* v2.24: аварийный откат на окно — полный экран не показал кадр (проверка в plat_render_selfcheck / RE_GFXTEST=fsfail) */
@@ -153,11 +167,13 @@ int plat_window_open(const char *t,int w,int h,int fs){
 #else
     int full = fs;
 #endif
+    { const char *fk = getenv("RE_FAKE_HIDPI"); g_fake_k = fk ? atoi(fk) : 1; if (g_fake_k < 1 || g_fake_k > 4) g_fake_k = 1; }
     int ww = w, wh = h; const char *res = getenv("RE_RES");
     if (res && sscanf(res, "%dx%d", &ww, &wh) == 2 && ww > 0 && wh > 0) full = 0;
     else {
         ww = w; wh = h; SDL_Rect ub;
         if (SDL_GetDisplayUsableBounds(0, &ub) == 0 && ub.w > 0 && ub.h > 0) {
+            ub.w /= g_fake_k; ub.h /= g_fake_k;   /* v2.26: в точках */
             int k = 1; while (w * (k + 1) <= ub.w * 85 / 100 && h * (k + 1) <= ub.h * 85 / 100) k++;
             ww = w * k; wh = h * k;
         }
@@ -172,12 +188,13 @@ int plat_window_open(const char *t,int w,int h,int fs){
         if (f && *f) { if (!strcmp(f, "exclusive")) { full = 1; g_fs_mode = 2; } else if (!strcmp(f, "desktop") || env_on("RE_FULLSCREEN")) { full = 1; g_fs_mode = 1; } else full = 0; }
     }
     g_fs_on = full;
-    g_win = SDL_CreateWindow(t, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww, wh,
+    if (g_fake_k > 1) plat_gfx_logf("[gfx] RE_FAKE_HIDPI=%d: окно %dx%d точек = %dx%d пикселей X11\n", g_fake_k, ww, wh, ww * g_fake_k, wh * g_fake_k);
+    g_win = SDL_CreateWindow(t, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww * g_fake_k, wh * g_fake_k,
                              SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE | (full ? fs_flag(g_fs_mode) : 0));
     if (!g_win && full) { plat_gfx_logf("[gfx] окно в полном экране не создано (%s) — пробую окно\n", SDL_GetError()); full = g_fs_on = 0;
-        g_win = SDL_CreateWindow(t, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww, wh, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE); }
+        g_win = SDL_CreateWindow(t, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww * g_fake_k, wh * g_fake_k, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE); }
     if (!g_win) { plat_gfx_logf("[gfx] SDL_CreateWindow: %s\n", SDL_GetError()); return -1; }
-    SDL_SetWindowMinimumSize(g_win, w / 2, h / 2);
+    SDL_SetWindowMinimumSize(g_win, w / 2 * g_fake_k, h / 2 * g_fake_k);
     g_gl = SDL_GL_CreateContext(g_win); if (!g_gl) { plat_gfx_logf("[gfx] SDL_GL_CreateContext (OpenGL 3.3 core): %s\n", SDL_GetError()); return -2; }
     SDL_GL_MakeCurrent(g_win, g_gl);
     {   int vs = re_gfx()->vsync;   /* v2.16: vsync on/off/adaptive (adaptive недоступен — on) */
@@ -190,7 +207,7 @@ int plat_window_open(const char *t,int w,int h,int fs){
       fprintf(stderr, "[window] кадр игры %dx%d, окно %dx%d, буфер %dx%d, %s, главный поток %d\n", w, h, ww, wh, dw, dh,
               full ? "полный экран" : "окно", plat_is_main_thread());
       plat_input_dbg("окно: кадр %dx%d, окно %dx%d, буфер %dx%d, полный экран %d, главный поток %d", w, h, ww, wh, dw, dh, full, plat_is_main_thread());
-      int ax = 0, ay = 0; SDL_GetWindowSize(g_win, &ax, &ay);
+      int ax = 0, ay = 0; win_points(&ax, &ay);
       plat_gfx_logf("[gfx] окно: кадр игры %dx%d, окно %dx%d точек, буфер %dx%d пикселей, %s, attach %d\n", w, h, ax, ay, dw, dh,
                     full ? (g_fs_mode == 2 ? "полный экран (эксклюзивный)" : "полный экран (рабочий стол)") : "окно", r); }
     if (r != 0) plat_gfx_logf("[gfx] рендер не запущен (код %d) — см. строки выше\n", r);
@@ -350,7 +367,29 @@ void plat_pump_messages(void){
       while (plat_cd_take_notify(&h, &wp, &lp)) if (g_wproc && !g_wtrap) g_wproc(h ? h : (void *)(intptr_t)1, 0x3b9, wp, lp); }
     if(!g_wtrap) plat_frame_tick("pump");
 }
+/* v2.26: RE_TEST_WIN="N:WxH,N:fs,N:win,N:fbo0,N:fbo1" — на кадре N: размер окна (точки), полный экран, окно, FBO выкл./вкл.
+   (проверка смены размера/режима посреди заезда под Xvfb; снимки — RE_SHOT_EVERY / RE_SHOT_PNG или import -window root) */
+static int g_frames;   /* ниже — счётчик кадров plat_frame_tick */
+static void test_win_step(int frame) {
+    const char *s = getenv("RE_TEST_WIN"); if (!s || !*s || !g_win) return;
+    while (*s) {
+        int n = 0, w = 0, h = 0, k = 0; char op[8] = "";
+        if (sscanf(s, "%d:%dx%d%n", &n, &w, &h, &k) == 3 && k > 0) {
+            if (n == frame) { if (g_fs_on) { g_fs_on = 0; SDL_SetWindowFullscreen(g_win, 0); } SDL_SetWindowSize(g_win, w * g_fake_k, h * g_fake_k); plat_gfx_logf("[gfx] RE_TEST_WIN кадр %d: окно %dx%d точек\n", frame, w, h); }
+        } else if (sscanf(s, "%d:%7[a-z0-9]%n", &n, op, &k) == 2 && k > 0) {
+            if (n == frame) {
+                if (!strcmp(op, "fs") && !g_fs_on) plat_toggle_fullscreen();
+                else if (!strcmp(op, "win") && g_fs_on) plat_toggle_fullscreen();
+                else if (!strcmp(op, "fbo0")) plat_render_set_fbo(0);
+                else if (!strcmp(op, "fbo1")) plat_render_set_fbo(1);
+                plat_gfx_logf("[gfx] RE_TEST_WIN кадр %d: %s\n", frame, op);
+            }
+        } else break;
+        s += k; while (*s == ',' || *s == ' ') s++;
+    }
+}
 static void flip_events(void) {   /* из plat_frame_tick("flip") */
+    test_win_step(g_frames);
     if (!g_pumped && g_win && !g_wtrap && SDL_WasInit(SDL_INIT_VIDEO)) drain_events();
     g_pumped = 0;
 }

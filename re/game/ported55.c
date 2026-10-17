@@ -8,6 +8,10 @@
 #include "ported48.h"
 #include "ported51.h"
 #include "crt.h"
+#include "aspect.h"
+#ifndef RE_HOOK_BUILD
+#include "../platform/plat.h"
+#endif
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -446,6 +450,15 @@ void P55_GlideInit(int32_t a, int32_t b, int32_t mode) {
 }
 
 int32_t P55_SetScreen(int32_t w, int32_t h) {
+#ifndef RE_HOOK_BUILD
+  {   /* v2.26: native — кадр игры всегда 640×480 (вывод в разрешении окна, Hor+); game_res = original — режим как есть */
+    int32_t w0 = w, h0 = h;
+    if (re_game_screen(plat_game_res_native(), &w, &h)) {
+      static int n; if (n++ < 4) plat_log("[gfx] режим игры %dx%d → кадр игры 640x480 (вывод — в разрешении окна; game_res = original в driver.cfg — как в оригинале)\n", (int)w0, (int)h0);
+      if (P19_ScrW == w && P19_ScrH == h) return 1;   /* уже 640×480 — переоткрывать устройство незачем (как при совпадении у вызывающих) */
+    }
+  }
+#endif
   int32_t oldW = P19_ScrW, oldH = P19_ScrH;
   P55_Fn4264A7();
   P19_ScrW = w; P19_ScrH = h;

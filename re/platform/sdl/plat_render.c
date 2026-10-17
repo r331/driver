@@ -201,6 +201,9 @@ void plat_render_set_drawable(int dw, int dh) {
     if (g_ok) glViewport(g_cx, g_cy, g_cw, g_ch);
 }
 void plat_render_set_logical(int w, int h) { if (w > 0 && h > 0) { g_w = w; g_h = h; content_rect(); if (g_ok) glViewport(g_cx, g_cy, g_cw, g_ch); } }
+void plat_render_content(int *x, int *y, int *w, int *h, int *tw, int *th) {   /* v2.26 */
+    if (x) *x = g_cx; if (y) *y = g_cy; if (w) *w = g_cw; if (h) *h = g_ch; if (tw) *tw = g_tw; if (th) *th = g_th;
+}
 void plat_render_size(int *dw, int *dh, int *lw, int *lh) { if (dw) *dw = g_dw; if (dh) *dh = g_dh; if (lw) *lw = g_w; if (lh) *lh = g_h; }
 /* v2.15 */
 void plat_render_set_aspect(const char *mode) { g_amode = re_aspect_parse(mode); g_amode_set = 1; content_rect(); if (g_ok) glViewport(g_cx, g_cy, g_cw, g_ch); }
