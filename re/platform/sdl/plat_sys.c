@@ -224,6 +224,7 @@ void *plat_game_window_create(void *hinst,int32_t show,const char *title,int w,i
     if(g_wtrap) return (void *)(intptr_t)1;
     return plat_window_open(title,w,h,0)==0 ? (void *)(intptr_t)1 : NULL;
 }
+int plat_cd_take_notify(void **hwnd, uint32_t *wp, int32_t *lp);   /* v2.22: plat_cdaudio.c */
 void plat_input_dbg_event(const void *ev);   /* v2.14: plat_di.c, RE_INPUTDBG=1 */
 void plat_input_key_event(int scancode, int down, int repeat);   /* v2.14: plat_di.c — защёлка коротких нажатий */
 /* v2.14: разбор очереди событий SDL — только из главного потока (на macOS события Cocoa приходят только туда).
@@ -266,6 +267,8 @@ void plat_pump_messages(void){
        под Xvfb фокус-событий нет) и при SDL_WINDOWEVENT_FOCUS_GAINED/LOST — иначе фронтенд ждёт P31_Active вечно */
     if (g_active_sent < 0) send_activate(1);
     drain_events(); g_pumped = 1;
+    { void *h; uint32_t wp; int32_t lp;   /* v2.22: конец CD-дорожки — MM_MCINOTIFY в оконную процедуру, как из очереди Windows */
+      while (plat_cd_take_notify(&h, &wp, &lp)) if (g_wproc && !g_wtrap) g_wproc(h ? h : (void *)(intptr_t)1, 0x3b9, wp, lp); }
     if(!g_wtrap) plat_frame_tick("pump");
 }
 static void flip_events(void) {   /* из plat_frame_tick("flip") */

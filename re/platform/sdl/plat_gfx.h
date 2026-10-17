@@ -30,6 +30,7 @@ typedef struct {
     double draw_distance;   /* v2.19: множитель дальности прорисовки 1.0 (оригинал) .. 4.0; enhanced — 2.0 */
     char   texpack[512];    /* v2.17: каталог HD-пака текстур ("" — выкл.; RE_TEXPACK важнее) */
     char   source[512];     /* откуда прочитан driver.cfg ("" — файла нет) */
+    char   music_dir[512];  /* v2.22: каталог дорожек CD-музыки ("" — ./Music; RE_MUSIC_DIR важнее) */
 } re_gfx_cfg;
 
 void re_gfx_defaults(re_gfx_cfg *c);                         /* пресет enhanced */

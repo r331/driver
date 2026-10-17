@@ -36,7 +36,7 @@ else()
     endif()
   endif()
 
-  set(NATIVE_SRC ${GAME_SRC} platform/native/main.c platform/native/engine_native.c platform/native/stubs.c platform/native/links.c platform/native/crt_msvc.c platform/native/game_fwd.c platform/native/fn_table.c platform/native/thunk_table.c platform/sdl/plat_sys.c platform/sdl/plat_gfx.c platform/sdl/plat_texpack.c platform/sdl/plat_render.c platform/sdl/plat_dd.c platform/sdl/plat_di.c ${RENDER_OFFSCREEN} platform/sdl/plat_snd.c platform/sdl/plat_dsmix.c tests/selftest.c tests/render_test.c tests/snd_test.c tests/input_test.c)
+  set(NATIVE_SRC ${GAME_SRC} platform/native/main.c platform/native/engine_native.c platform/native/stubs.c platform/native/links.c platform/native/crt_msvc.c platform/native/game_fwd.c platform/native/fn_table.c platform/native/thunk_table.c platform/sdl/plat_sys.c platform/sdl/plat_gfx.c platform/sdl/plat_texpack.c platform/sdl/plat_render.c platform/sdl/plat_dd.c platform/sdl/plat_di.c ${RENDER_OFFSCREEN} platform/sdl/plat_snd.c platform/sdl/plat_dsmix.c platform/sdl/plat_cdaudio.c tests/selftest.c tests/render_test.c tests/snd_test.c tests/cd_test.c tests/input_test.c)
 
   if(APPLE AND RE_MACOS_BUNDLE)
     add_executable(driver MACOSX_BUNDLE ${NATIVE_SRC})

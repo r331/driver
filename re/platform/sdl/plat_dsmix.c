@@ -23,6 +23,7 @@ typedef struct dsm_buf {
 static dsm_buf *g_bufs[DSM_MAX];
 static float g_lp[3], g_lf[3] = { 0, 0, 1 }, g_lt[3] = { 0, 1, 0 }, g_roll = 1.0f, g_distf = 1.0f, g_dopf = 1.0f;
 void plat_snd_lockdev(int on);
+void cda_mix(float *acc, int frames);   /* v2.22: plat_cdaudio.c */
 int dsm_is(const void *o) { return o && ((const dsm_buf *)o)->tag == DSM_TAG; }
 static dsm_buf *nb(int kind) {
   dsm_buf *b = (dsm_buf *)calloc(1, sizeof *b); if (!b) return NULL;
@@ -177,6 +178,7 @@ void dsm_mix(int16_t *out, int frames) {
         if (b->pos >= (double)total) { if (b->loop) b->pos -= (double)total; else { b->playing = 0; b->pos = 0; break; } }
       }
     }
+    cda_mix(acc, n);   /* v2.22: CD-музыка (plat_cdaudio.c) — до ограничителя */
     for (int i = 0; i < 2 * n; i++) { float y = dsm_soft(acc[i]) * 32760.0f;   /* tanhf в float доходит до 1.0 только при x ≫ 1 — запас до 32767 */ o[i] = (int16_t)lrintf(y); }
   }
 }

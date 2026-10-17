@@ -24,6 +24,7 @@ int re_gfx_preset(re_gfx_cfg *c, const char *name) {
     /* окно/аспект/источник пресет не трогает */
     scpy(k.aspect, c->aspect, sizeof k.aspect); k.fullscreen = c->fullscreen; k.win_w = c->win_w; k.win_h = c->win_h;
     scpy(k.source, c->source, sizeof k.source);
+    scpy(k.music_dir, c->music_dir, sizeof k.music_dir);   /* v2.22: и каталог музыки */
     *c = k; return 0;
 }
 void re_gfx_defaults(re_gfx_cfg *c) { memset(c, 0, sizeof *c); c->fullscreen = -1; re_gfx_preset(c, "enhanced"); }
@@ -70,6 +71,7 @@ int re_gfx_set(re_gfx_cfg *c, const char *k, const char *v) {
     if (ieq(k, "gamma")) return pdbl(v, &c->gamma);
     if (ieq(k, "brightness")) return pdbl(v, &c->brightness);
     if (ieq(k, "sharpen")) return pdbl(v, &c->sharpen);
+    if (ieq(k, "music_dir")) { if (strlen(v) >= sizeof c->music_dir) return -2; scpy(c->music_dir, v, sizeof c->music_dir); return 0; }   /* v2.22 */
     if (ieq(k, "texpack")) { if (strlen(v) >= sizeof c->texpack) return -2; scpy(c->texpack, v, sizeof c->texpack); return 0; }
     if (ieq(k, "aspect")) { if (strlen(v) >= sizeof c->aspect) return -2; scpy(c->aspect, v, sizeof c->aspect); return 0; }
     if (ieq(k, "fullscreen")) { if (pbool(v, &b)) return -2; c->fullscreen = b; return 0; }
