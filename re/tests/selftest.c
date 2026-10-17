@@ -7150,6 +7150,27 @@ static int test_v220(void) {
   }
   P101_SkyInit();
   for (int k = 0; k < 4; k++) { const float *v = (const float *)(arena + 0x200 + 0x10 * k); CK(fabsf(v[0] - 17.0f) < 1e-4f && fabsf(v[2] - 17.0f) < 1e-4f); }
+  /* 7) v2.27: шов неба — v колец купола у четвертей приводится к медиане (Майами: кольцо 29° 50/47/48/48 → 48, 8° 115/116/115/115 → 115);
+     шапка (v = 1) и u не меняются; RE_SKYFIX=0 и незнакомый тип записи — без изменений */
+  { memset(arena, 0, 0x1000);
+    static const float ring_v[4][2] = { { 50, 115 }, { 47, 116 }, { 48, 115 }, { 48, 115 } };
+    for (int k = 0; k < 4; k++) {
+      uint8_t *m = arena + 0x40 * k; uint32_t vr = 0x200 + 0x40 * k, rr = 0x400 + 0x80 * k;
+      *(uint16_t *)(m + 0x14) = 3; *(uint16_t *)(m + 0x16) = 1; memcpy(m + 0x20, &vr, 4); memcpy(m + 0x2c, &rr, 4);
+      float vs[12] = { 100, -129.4f, 0, 1,  100, -34.0f, 0, 1,  50, -250.0f, 0, 1 }; memcpy(arena + vr, vs, sizeof vs);
+      uint8_t *r = arena + rr; r[0] = 5;
+      int32_t idx[4] = { 0, 1, 1, 2 }; memcpy(r + 8, idx, 16);
+      float uv[8] = { 255, ring_v[k][0], 255, ring_v[k][1], 1, ring_v[k][1], 7, 1 }; memcpy(r + 24, uv, 32);
+      P79_ModelTab[k] = 0x40u * (uint32_t)k;
+    }
+    P101_SkyUvFix();
+    CK(P101_SkyUvFixed == 4);
+    for (int k = 0; k < 4; k++) { const float *uv = (const float *)(arena + 0x400 + 0x80 * k + 24);
+      CK(uv[1] == 48.0f && uv[3] == 115.0f && uv[5] == 115.0f && uv[7] == 1.0f && uv[0] == 255.0f && uv[6] == 7.0f); }
+    float bad = 50.0f; memcpy(arena + 0x400 + 24 + 4, &bad, 4);
+    setenv("RE_SKYFIX", "0", 1); P101_SkyUvFix(); unsetenv("RE_SKYFIX");
+    CK(P101_SkyUvFixed == 0 && ((const float *)(arena + 0x400 + 24))[1] == 50.0f);
+    arena[0x400 + 0x80] = 9; P101_SkyUvFix(); CK(P101_SkyUvFixed == 0 && ((const float *)(arena + 0x400 + 24))[1] == 50.0f); }
   memcpy(&P79_ModelTab[0], tab_saved, sizeof tab_saved); D_00b87e30 = city_saved;
   D_00c98ed0 = saved; free(arena);
   for (int i = 0; i < nsv; i++) { memcpy(sv[i].p, sv[i].b, sv[i].n); free(sv[i].b); }
@@ -7565,6 +7586,20 @@ static int test_texpack8(void) {
   int w = 0, h = 0; uint32_t *ld = re_texpack_load8("texpack_test", "TPTEST", 210, 5, &w, &h);
   CHECK(ld && w == HW && !memcmp(ld, hd, (size_t)HW * HW * 4)); free(ld);
   CHECK(re_texpack_load8("texpack_test", "TPTEST", 211, 5, &w, &h) == NULL && re_texpack_load("texpack_test", "TPTEST", 210, &w, &h) == NULL);
+  { /* v2.27: оверлей неба — <пак>/sky.txt называет подкаталог, его файлы важнее основного пака; RE_TEXPACK_SKY=0 — выкл. */
+    char od[256]; CHECK(re_texpack_overlay("texpack_test", od, sizeof od) == NULL);
+    mkdir("texpack_test/sky_t", 0777); mkdir("texpack_test/sky_t/tptest", 0777);
+    uint32_t px4 = hd[0]; hd[0] = 0xFF123456u;
+    CHECK(png_write_rgba("texpack_test/sky_t/tptest/p210_c0005.png", hd, HW, HW) == 0);
+    FILE *sf = fopen("texpack_test/sky.txt", "wb"); CHECK(sf); fputs("sky_t\n", sf); fclose(sf);
+    CHECK(re_texpack_overlay("texpack_test", od, sizeof od) && !strcmp(od, "texpack_test/sky_t"));
+    uint32_t *lo = re_texpack_load8("texpack_test", "TPTEST", 210, 5, &w, &h); CHECK(lo && lo[0] == 0xFF123456u); free(lo);
+    lo = re_texpack_load8("texpack_test", "TPTEST", 210, 6, &w, &h); CHECK(lo && lo[0] == px4); free(lo);   /* нет в оверлее — основной */
+    setenv("RE_TEXPACK_SKY", "0", 1); CHECK(re_texpack_overlay("texpack_test", od, sizeof od) == NULL);
+    lo = re_texpack_load8("texpack_test", "TPTEST", 210, 5, &w, &h); CHECK(lo && lo[0] == px4); free(lo); unsetenv("RE_TEXPACK_SKY");
+    hd[0] = px4;
+    remove("texpack_test/sky.txt"); remove("texpack_test/sky_t/tptest/p210_c0005.png"); remove("texpack_test/sky_t/tptest"); remove("texpack_test/sky_t");
+    lo = re_texpack_load8("texpack_test", "TPTEST", 210, 5, &w, &h); CHECK(lo && lo[0] == px4); free(lo); }
   if (!getenv("RE_TEXPACK") && plat_render_offscreen(640, 480) == 0) {
     re_gfx_cfg *c = re_gfx(); char keep[512]; memcpy(keep, c->texpack, sizeof keep);
     char lp[256]; memcpy(lp, P77_CurLevelPath, sizeof lp);

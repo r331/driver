@@ -56,8 +56,34 @@ static void level_case(const char *in, char *out, int n, int mode) {   /* 0 — 
     for (; in[i] && i < n - 1; i++) { char ch = in[i]; out[i] = mode == 1 && ch >= 'A' && ch <= 'Z' ? (char)(ch | 32) : mode == 2 && ch >= 'a' && ch <= 'z' ? (char)(ch & ~32) : ch; }
     out[i] = 0;
 }
-/* v2.18: каталог уровня — как в игре (P77_CurLevelPath, напр. MIAMI_01), строчными, ПРОПИСНЫМИ (файл miami_01.lev) */
+/* v2.27: вариант неба — оверлей пака: $RE_TEXPACK_SKY (подкаталог пака или полный путь; «0»/пусто — выкл.), иначе первое слово
+   файла <пак>/sky.txt (напр. «sky_cc0»). Файлы оверлея (<пак>/<оверлей>/<уровень>/pNNN[_cKKKK].png) ищутся раньше основного
+   пака и проходят ту же сверку со страницей. */
+const char *re_texpack_overlay(const char *dir, char *out, int n) {
+    if (!out || n <= 0) return NULL;
+    out[0] = 0; if (!dir || !*dir) return NULL;
+    char name[256] = { 0 };
+    const char *e = getenv("RE_TEXPACK_SKY");
+    if (e) { if (!*e || !strcmp(e, "0")) return NULL; snprintf(name, sizeof name, "%s", e); }
+    else {
+        char fn[1024]; snprintf(fn, sizeof fn, "%s%ssky.txt", dir, dir[strlen(dir) - 1] != '/' ? "/" : "");
+        FILE *f = fopen(fn, "rb"); if (!f) return NULL;
+        if (fscanf(f, "%255s", name) != 1) name[0] = 0;
+        fclose(f);
+        if (!name[0] || !strcmp(name, "0")) return NULL;
+    }
+    if (name[0] == '/' || strstr(name, ":\\") || strstr(name, ":/")) snprintf(out, (size_t)n, "%s", name);
+    else snprintf(out, (size_t)n, "%s%s%s", dir, dir[strlen(dir) - 1] != '/' ? "/" : "", name);
+    return out;
+}
+static uint32_t *load_one(const char *dir, const char *level, int idx, int pal, int *w, int *h);
 static uint32_t *load_any(const char *dir, const char *level, int idx, int pal, int *w, int *h) {
+    char odir[1024];   /* sky.txt читается при каждой загрузке страницы (их сотни за уровень, файл крошечный) */
+    if (re_texpack_overlay(dir, odir, sizeof odir)) { uint32_t *px = load_one(odir, level, idx, pal, w, h); if (px) return px; }
+    return load_one(dir, level, idx, pal, w, h);
+}
+/* v2.18: каталог уровня — как в игре (P77_CurLevelPath, напр. MIAMI_01), строчными, ПРОПИСНЫМИ (файл miami_01.lev) */
+static uint32_t *load_one(const char *dir, const char *level, int idx, int pal, int *w, int *h) {
     char path[1024];
     for (int c = 0; c < 3; c++) {
         char lv[128]; level_case(level, lv, sizeof lv, c); if (c && !strcmp(lv, level)) continue;

@@ -26,4 +26,7 @@ draw_distance = 2.0        # v2.19: дальность прорисовки, м�
 #fbo          = on          # v2.24: off — рисовать прямо в окно без FBO (нет MSAA/FXAA/render_scale/гаммы); при тёмном экране
 #windowed_res = 1600x900    # размер окна
 #texpack      = /путь/к/texpack   # v2.17: HD-пак текстур (<каталог>/<уровень>/pNNN.png, см. README «HD-текстуры»; RE_TEXPACK важнее)
+#                           # v2.27: небо пака — RE_TEXPACK_SKY=sky_cc0 (подкаталог пака или путь; 0 — выкл.) или файл <пак>/sky.txt
+#                           #   со словом sky_cc0 (небо из CC0-панорам); без него — sky_hd из каталогов уровней
+#                           # v2.27: шов неба исправляется автоматически (только native); RE_SKYFIX=0 — как в оригинале
 #music_dir    = /путь/к/Music   # v2.22: дорожки CD-музыки TrackNN.wav|flac|ogg|mp3 или .cue+.bin (по умолчанию ./Music в каталоге данных; RE_MUSIC_DIR важнее)

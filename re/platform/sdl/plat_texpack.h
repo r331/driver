@@ -28,6 +28,8 @@ void re_texpack_compare_rgba(const uint32_t *hd, int w, int h, const uint32_t *r
 /* путь игры (поверхности plat_dd): orig — страница 256×256 в RGBA так, как её загрузила игра; hd — w×w. 1 — принята
    (средняя |ΔRGB| <= RE_TEXPACK_MAX_ERR), альфа hd заменена альфой orig (nearest): прозрачность как у оригинала. */
 int re_texpack_merge(const uint32_t *orig, uint32_t *hd, int w, double *err);
+/* v2.27: оверлей неба: $RE_TEXPACK_SKY или первое слово <dir>/sky.txt → полный путь в out; NULL — нет оверлея */
+const char *re_texpack_overlay(const char *dir, char *out, int n);
 /* порог: страница принимается, если err <= RE_TEXPACK_MAX_ERR и amis <= RE_TEXPACK_MAX_AMIS (иначе — перепутан индекс) */
 #define RE_TEXPACK_MAX_ERR  24.0
 #define RE_TEXPACK_MAX_AMIS 0.02

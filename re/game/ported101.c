@@ -46,6 +46,7 @@
 #include "ported99.h"
 #include "ported100.h"
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
@@ -880,6 +881,57 @@ static const char *const SKYTAB[44] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   "NY_SKY", 0, "NY_NIGHT", 0, "NY_RAIN", 0, "NY_NIGHT", 0, "NY_DUSK", 0, 0, 0, 0, 0 };
 #endif
+#ifndef RE_HOOK_BUILD
+/* v2.27: шов неба. Купол — 4 модели-четверти (P79_ModelTab[0..3]) с кольцами вершин на одинаковой высоте, но координата v
+   текстуры на кольцах в данных уровня у четвертей расходится (Майами: кольцо 29° — v 50/47/48/48, кольцо 8° — 115/116/115/115),
+   поэтому на стыках облака и градиент сдвинуты на 1–3 строки — тонкий косой шов (есть и в оригинале 1999 г.).
+   Только native и только UV (логика, геометрия, порядок рисования не меняются): по каждому кольцу (одинаковая высота y вершины)
+   v всех четвертей приводится к медиане, если разброс 1..4 текселя; v <= 1.5 (шапка купола — одна строка текстуры) не трогается.
+   Записи моделей неба: тип 4 (треугольник, 56 байт) и 5 (четырёхугольник, 68 байт): заголовок 4, плоскость 4, индексы вершин n×4,
+   UV n×(float u, float v) в текселях, цвет 3×float. Другой тип — ничего не меняется. RE_SKYFIX=0 — без исправления. */
+#define SKY_RINGS 16
+int32_t P101_SkyUvFixed;   /* сколько координат v изменено при последней загрузке уровня (тесты) */
+static int sky_rec_n(const uint8_t *r) { return r[0] == 4 ? 3 : r[0] == 5 ? 4 : 0; }
+void P101_SkyUvFix(void) {
+  P101_SkyUvFixed = 0;
+  { const char *e = getenv("RE_SKYFIX"); if (e && e[0] == '0') return; }
+  float ry[SKY_RINGS], rv[SKY_RINGS][64], target[SKY_RINGS]; int rn[SKY_RINGS], nring = 0;
+  for (int pass = 0; pass < 2; pass++) {
+    if (pass == 1) {
+      for (int i = 0; i < nring; i++) {
+        float lo = rv[i][0], hi = rv[i][0];
+        for (int j = 1; j < rn[i]; j++) { if (rv[i][j] < lo) lo = rv[i][j]; if (rv[i][j] > hi) hi = rv[i][j]; }
+        target[i] = -1.0f;
+        if (rn[i] < 4 || hi - lo < 0.5f || hi - lo > 4.0f) continue;
+        for (int a = 1; a < rn[i]; a++) for (int b = a; b > 0 && rv[i][b - 1] > rv[i][b]; b--) { float t = rv[i][b]; rv[i][b] = rv[i][b - 1]; rv[i][b - 1] = t; }
+        target[i] = rv[i][rn[i] / 2];
+      }
+    }
+    for (int k = 0; k < 4; k++) {
+      uint8_t *m = (uint8_t *)P79_PTR(P79_ModelTab[k]);
+      int nv = *(uint16_t *)(m + 0x14), nr = *(uint16_t *)(m + 0x16);
+      const float *vv = (const float *)P79_PTR(*(uint32_t *)(m + 0x20));
+      uint8_t *r = (uint8_t *)P79_PTR(*(uint32_t *)(m + 0x2c));
+      for (int i = 0, n; i < nr; i++, r += 8 + n * 4 + n * 8 + 12) {
+        n = sky_rec_n(r);
+        if (!n) { if (pass == 0) return; break; }   /* незнакомая запись — ничего не меняем */
+        for (int j = 0; j < n; j++) {
+          int32_t vi; float v; memcpy(&vi, r + 8 + j * 4, 4); memcpy(&v, r + 8 + n * 4 + j * 8 + 4, 4);
+          if (vi < 0 || vi >= nv || v <= 1.5f) continue;
+          float y = vv[vi * 4 + 1]; int ri = 0;
+          while (ri < nring && fabsf(ry[ri] - y) > 0.01f) ri++;
+          if (pass == 0) {
+            if (ri == nring) { if (nring == SKY_RINGS) continue; ry[nring] = y; rn[nring++] = 0; }
+            if (rn[ri] < 64) rv[ri][rn[ri]++] = v;
+          } else if (ri < nring && target[ri] >= 0.0f && v != target[ri]) {
+            memcpy(r + 8 + n * 4 + j * 8 + 4, &target[ri], 4); P101_SkyUvFixed++;
+          }
+        }
+      }
+    }
+  }
+}
+#endif
 /* ---- 004ef3cd: масштаб моделей неба ×1.7, копия текстуры неба по погоде/времени на место дневной ---- */
 /* v2.20: в native ссылка модели — смещение в арене карты, и первая модель уровня (небо, P79_ModelTab[0]) лежит по смещению 0.
    Прежняя проверка «ссылка == 0 → пропуск» (как пустой указатель оригинала) пропускала её: четверть купола оставалась в масштабе
@@ -891,6 +943,9 @@ void P101_SkyInit(void) {
 #endif
   for (int32_t k = 0; k < 4; k++) P15_ScaleVertices((uint8_t *)P79_PTR(P79_ModelTab[k]), 1.7f, 1.7f, 1.7f);
   for (int32_t k = 0; k < 4; k++) P15_ScaleNormalW((uint8_t *)P79_PTR(P79_ModelTab[k]), 1.7f);
+#ifndef RE_HOOK_BUILD
+  P101_SkyUvFix();
+#endif
   if (D_00b87e30 >= 4) return;
 #ifndef RE_HOOK_BUILD
   if (D_00b87e30 < 0) return;

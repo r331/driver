@@ -187,6 +187,10 @@ void    P101_CarLight(int32_t car, const float *v, int32_t flags);            /*
 void    P101_DebrisFly(void);                                                 /* 004b9aec */
 void    P101_WheelsGround(const uint8_t *car, float *out);                    /* 0051d97e */
 void    P101_SkyInit(void);                                                   /* 004ef3cd */
+#ifndef RE_HOOK_BUILD
+void    P101_SkyUvFix(void);    /* v2.27: v колец купола неба у четвертей — к медиане (шов неба) */
+extern int32_t P101_SkyUvFixed;
+#endif
 int32_t P101_RoadNode(int32_t x, int32_t z, int8_t side);                     /* 0051b974 */
 void    P101_MirrorMaskR(float r);                                            /* 004f29f7 */
 void    P101_CarSkids(int32_t car);                                           /* 004aecb1 */
