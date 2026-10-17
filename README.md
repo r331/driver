@@ -24,7 +24,7 @@
 python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv')) if x['module']!='CRT']; print(sum(x['status']=='ported' for x in r), 'из', len(r))"
 ```
 
-**Native как игра — v2.14** (проверено сценариями `RE_KEYS` и настоящей клавиатурой X11 (xdotool) под Xvfb, Linux arm64; сборка, selftest и inputtest — на macOS arm64 в CI):
+**Native как игра — v2.15** (проверено сценариями `RE_KEYS` и настоящей клавиатурой X11 (xdotool) под Xvfb, Linux arm64; сборка, selftest и inputtest — на macOS arm64 в CI):
 - работает: заставки и главное меню, режим **Take A Ride** в Майами — езда по городу (стриминг блоков карты), трафик, столкновения, HUD (Damage/Felony, радар, спидометр);
 - управление машиной: газ, тормоз/задний ход, ручник, резкий руль, смена камеры (вид с капота), пауза по Esc с меню (Continue / Restart / Sound Setup / Gfx Details / Film Director / Quick Replay / Show Map / Exit) — см. «Управление»;
 - звук: DirectSound эмулируется собственным микшером (SDL_audio или запись в WAV), двигатель и шумы слышны, мягкий ограничитель — без клиппинга; музыки нет (в оригинале — CD-audio);
@@ -33,7 +33,8 @@ python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv'))
 - Undercover: интервью в гараже запускается; с пропуском интервью (RE_SKIP_INTERVIEW=1, как чит) — мотель, автоответчик (←/→ — кнопка, Enter — действие, «принять» — миссия) и **первая миссия Майами** «Get to the bank.» (прохождение не проверено);
 - гудок H слышен (v2.12: 3D-источник у машины);
 - v2.14: нативное разрешение — кадр игры 4:3 вписывается в окно/экран любого размера (Retina, 1080p, 2560×1600) с полосами по бокам; 3D растеризуется в разрешении экрана; на macOS по умолчанию полный экран; езда стрелками и пробелом (ручник) в дополнение к оригинальным клавишам;
-- не проверены/не работают: ночь и другие города (SF, LA, NY); FMV-ролики пропускаются; широкоэкранный FOV (Hor+) не сделан — 3D тоже 4:3.
+- v2.15: любое соотношение сторон (Hor+) — на широком экране (16:10, 16:9, 21:9, 32:9) вертикальный угол как в оригинале, а по бокам видно больше города; HUD прижат к краям экрана, меню — по центру 4:3; см. «Разрешение и соотношение сторон»;
+- не проверены/не работают: ночь и другие города (SF, LA, NY); FMV-ролики пропускаются.
 
 Подробно: [docs/NATIVE_GAPS.md](docs/NATIVE_GAPS.md) (разрывы native, переключатели отладки), [docs/PLATFORM_PLAN.md](docs/PLATFORM_PLAN.md) (журнал переноса по шагам),
 [re/README.md](re/README.md) (правила переноса и история версий).
@@ -88,8 +89,8 @@ CMake подключает `plat_render_nogl.c` и тест рендера пр�
   Клавиши берутся по физическому положению (scancode) — раскладка (русская и т. п.) не важна. `RE_ARROWKEYS=0` — без стрелок в езде.
 - Полный экран по умолчанию (во весь дисплей, в нативном разрешении Retina); **Cmd+Enter** (или Alt/Option+Enter) — окно/полный экран.
   `RE_WINDOWED=1` — запуск в окне, `RE_RES=1440x1080` — размер окна в точках, `RE_FULLSCREEN=1` — принудительно полный экран.
-  Кадр игры (640×480, 4:3) вписывается без искажений: по бокам чёрные полосы; 3D рисуется в полном разрешении экрана, меню и HUD
-  масштабируются с сохранением пропорций. Cmd+Q или закрытие окна — выход.
+  3D рисуется в полном разрешении экрана и на всю его ширину (v2.15, Hor+ — см. «Разрешение и соотношение сторон»), меню — 4:3 по центру,
+  HUD — у краёв экрана, без растяжения. Cmd+Q или закрытие окна — выход.
 - Если клавиши не работают: запустите из Терминала
   `RE_INPUTDBG=1 ./Driver.app/Contents/MacOS/Driver` (или `RE_INPUTDBG=1 ./driver --data …`), понажимайте клавиши в меню и в езде,
   закройте игру и пришлите файл **`~/Library/Logs/driver_input.log`** — там версия SDL, поток цикла событий, события окна/фокуса,
@@ -114,6 +115,21 @@ cmake -S . -B build-app -DCMAKE_BUILD_TYPE=Release -DRE_MACOS_BUNDLE=ON && cmake
 и `driver --selftest`, модульные проверки перенесённых функций
 на синтетических данных (тест настоящего уровня `RE_REAL_LEVEL` и рендер-снимок OSMesa на macOS пропускаются); Linux x86_64 —
 то же плюс hook-сборка `DINPUT.dll` ([.github/workflows/linux.yml](.github/workflows/linux.yml)).
+
+## Разрешение и соотношение сторон
+
+С v2.15 native-сборка рисует 3D на всю ширину экрана любого соотношения сторон (**Hor+**): вертикальный угол обзора как в оригинале
+(фокус 384 при высоте 480, ≈ 64°), горизонтальный растёт с аспектом — на 16:9 ≈ 96° вместо 79.6° у 4:3, на 21:9 ≈ 112°, на 32:9 ≈ 131°.
+Картинка не растягивается: логический кадр игры — (480·аспект)×480, 3D растеризуется в нативном разрешении (Retina — в пикселях).
+
+- `RE_ASPECT=auto` (по умолчанию) — по размеру окна/экрана; `RE_ASPECT=4:3` — как в оригинале (кадр 4:3 с полосами по бокам, как v2.14);
+  `RE_ASPECT=21:9` (любое `W:H` или число `2.35`) — кадр этого аспекта, остаток окна — полосы.
+- Экран уже 4:3 (портрет, 5:4) — кадр 4:3 по ширине с полосами сверху и снизу (letterbox); угол не меняется.
+- Меню, фронтенд и меню паузы — 640×480 по центру с полосами (pillarbox). HUD в езде привязан к краям: Damage/Felony — слева сверху,
+  радар и спидометр — справа снизу, счётчики режимов — справа сверху, часы миссии и сообщения — по центру.
+- Отсечение расширено в коде: окно отсечения 3D, боковые плоскости пирамиды, обход клеток карты (объединение соседних секторов
+  `FRUSTRUM.DAT` — сам файл не меняется), экранные проверки спрайтов/огней. Hook-сборка (DINPUT.dll) работает как оригинал (4:3).
+- Проверено на Linux под Xvfb (1920×1080, 2560×1600, 3440×1440, 5120×1440, 1080×1920); на реальном Mac — пока нет.
 
 ## Запуск
 
@@ -202,6 +218,7 @@ RE_KEYS="300:LEFT,340:LEFT,380:LEFT,460:RETURN,560:RETURN,660:RETURN,700:APOSTRO
 | `RE_INPUTDBG=1` | v2.14: журнал ввода `driver_input.log` (macOS — `~/Library/Logs/`, иначе рядом с бинарником или в текущем каталоге) |
 | `RE_WINDOWED=1` / `RE_FULLSCREEN=1` | v2.14: окно / полный экран (по умолчанию: macOS — полный экран, остальные — окно) |
 | `RE_RES=WxH` | v2.14: размер окна (по умолчанию — наибольшее целое кратное 640×480 в 85% экрана); снимок `RE_SHOT_PNG` — в размере буфера окна |
+| `RE_ASPECT=auto\|4:3\|W:H` | v2.15: соотношение сторон 3D (Hor+): по окну (по умолчанию), оригинальное 4:3 или заданное — см. «Разрешение и соотношение сторон» |
 | `RE_ARROWKEYS=0` | v2.14: не добавлять стрелки/пробел к клавишам езды |
 
 Остальные отладочные переключатели (`RE_TRACE*`, `RE_GSTAT`, `RE_CARDBG` …) описаны в [docs/NATIVE_GAPS.md](docs/NATIVE_GAPS.md).
@@ -246,7 +263,7 @@ A decompilation and C port of **Driver** (PC, 1999, Reflections / GT Interactive
 - **Status:** 3292 of 3292 non-CRT functions are marked `ported` in `docs/functions.csv`. The native build (v2.12) runs the menus and
   *Take A Ride* in Miami (driving, traffic, HUD, brake/reverse, handbrake, bonnet camera, Esc pause menu) with sound (own DirectSound
   mixer, soft limiter; no CD music). Pedestrians are rendered but appear far from the player; cops pursue and ram the player once felony
-  is raised (verified with a debug placement); FMV is skipped; Undercover reaches the motel and the first Miami mission. See `docs/NATIVE_GAPS.md`.
+  is raised (verified with a debug placement); FMV is skipped; Undercover reaches the motel and the first Miami mission. v2.15: any aspect ratio (Hor+: original vertical FOV, wider horizontal FOV, HUD anchored to screen edges, menus 4:3 centered; `RE_ASPECT=auto|4:3|W:H`). See `docs/NATIVE_GAPS.md`.
 - **Build (Linux, verified on arm64):** `apt-get install build-essential cmake libsdl2-dev libgl-dev libegl-dev libosmesa6-dev`, then
   `cmake -S re -B build-native -DCMAKE_BUILD_TYPE=Release && cmake --build build-native -j && (cd build-native && ctest --output-on-failure)`.
   macOS (Apple Silicon): `brew install cmake sdl2`, same commands; build + selftest verified in GitHub Actions on `macos-14` (arm64),

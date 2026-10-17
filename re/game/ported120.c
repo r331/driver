@@ -8,6 +8,7 @@
    004a4d84 — разбор целого (или имени модели при mode 4) для P68_CamI0..3;
    004fbeb2 — запись конусов в файл Q00C812F0 (клавиши 00d04b3f/00d04b40);
    005032ce — HUD времени/счёта по режиму игры 01271060 (строки P97_StrAddr, sprintf → P70_ShadowText). */
+#include "../platform/plat.h"
 #include "ported120.h"
 #include "cartab.h"
 #include "globalsets.h"
@@ -370,7 +371,17 @@ static void T(int32_t x, int32_t y, uint32_t s, int32_t a, int32_t f, uint8_t r,
 #define PR(...) snprintf(p120_buf, sizeof p120_buf, __VA_ARGS__)
 static const uint8_t *tab(int32_t a) { return (const uint8_t *)re_ptr((uint32_t)a); }
 static int hms(const uint8_t *t, uint32_t st, uint32_t o) { return t != NULL && rd32(t + st) == 8 && (PR("%02d:%02d:%02d", rd32(t + o + 8), rd32(t + o + 4), rd32(t + o)), 1); }
+#ifndef RE_HOOK_BUILD
+static void P120_HudTimesBody(void);
+#endif
 void P120_HudTimes(void) {
+#ifndef RE_HOOK_BUILD
+  plat_hud_anchor(1);   /* v2.15: счётчики/время режимов (x 470..570 в 640-кадре) — к правому краю */
+  P120_HudTimesBody();
+  plat_hud_anchor(0);
+}
+static void P120_HudTimesBody(void) {
+#endif
   const uint8_t *ta = tab(P71_Tab2A40);
   switch (MenuMode1271060) {
   case 1:

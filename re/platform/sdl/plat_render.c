@@ -2,10 +2,12 @@
    x,y — пиксели окна, z 0..1, rhw = 1/w; шейдер восстанавливает перспективно-корректные интерполяции.
    GL-функции берутся через get_proc (SDL_GL_GetProcAddress или OSMesaGetProcAddress), без линковки с libGL. */
 #include "../plat.h"
+#include "../../game/aspect.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 typedef unsigned int GLenum, GLuint, GLbitfield;
 typedef int GLint, GLsizei;
@@ -48,9 +50,9 @@ GLFUNCS(DECL)
 static const char *VS =
  "#version 330 core\n"
  "layout(location=0) in vec4 aPos; layout(location=1) in vec4 aCol; layout(location=2) in vec4 aSpec; layout(location=3) in vec2 aUV;\n"
- "uniform vec2 uView; out vec4 vCol; out vec3 vSpec; out vec2 vUV;\n"
+ "uniform vec2 uView; uniform float uShift; out vec4 vCol; out vec3 vSpec; out vec2 vUV;\n"
  "void main(){ float rhw = aPos.w == 0.0 ? 1.0 : aPos.w; float w = 1.0 / rhw;\n"
- "  vec3 n = vec3(aPos.x / uView.x * 2.0 - 1.0, 1.0 - aPos.y / uView.y * 2.0, aPos.z * 2.0 - 1.0);\n"
+ "  vec3 n = vec3((aPos.x + uShift) / uView.x * 2.0 - 1.0, 1.0 - aPos.y / uView.y * 2.0, aPos.z * 2.0 - 1.0);\n"
  "  gl_Position = vec4(n * w, w); vCol = aCol.bgra; vSpec = aSpec.bgr; vUV = aUV; }\n";
 /* v2.01: стадия 0 текстур D3D (COLOROP/ALPHAOP, ARG1/ARG2: 0 diffuse, 1 current, 2 texture) и альфа-тест D3DCMP по ALPHAREF;
    op 0 (не задан) — прежнее поведение: modulate, альфа-тест a < 0.5 */
@@ -76,28 +78,44 @@ typedef struct { int w, h; unsigned id; } tex_t;
 static tex_t g_tex[MAX_TEX];
 static int g_ok, g_w, g_h, g_cur;
 static unsigned g_prog, g_vao, g_vbo, g_white;
-static int g_uAlphaTest, g_at = 1, g_uView, g_uTex, g_zt = 1, g_zw = 1, g_blend, g_bs = 5, g_bd = 6;
+static int g_uShift, g_uAlphaTest, g_at = 1, g_uView, g_uTex, g_zt = 1, g_zw = 1, g_blend, g_bs = 5, g_bd = 6;
 static int g_zf = 4, g_vp[4], g_vpset, g_rs[64], g_tss[8][32], g_uCOp, g_uAOp, g_uAFunc, g_uARef, g_af, g_aref;
 static void (*g_swap)(void);
 /* v2.14: нативное разрешение. g_w×g_h — логический кадр игры (640×480: в нём игра даёт x,y вершин, прямоугольники 2D и
    viewport); g_dw×g_dh — реальный буфер окна (SDL_GL_GetDrawableSize, на Retina — в пикселях). Кадр игры вписывается
    в буфер с сохранением пропорций (4:3, полосы по бокам — pillarbox, сверху/снизу — letterbox); 3D растеризуется
    в разрешении буфера (вершины — float), 2D/HUD масштабируются линейно тем же коэффициентом. */
-static int g_dw, g_dh, g_cx, g_cy, g_cw, g_ch; static double g_sc = 1.0;
+static int g_dw, g_dh, g_cx, g_cy, g_cw, g_ch; static double g_scx = 1.0, g_scy = 1.0;
+/* v2.15: Hor+. g_s — добавка S логических пикселей с каждой стороны кадра 640 (aspect.h): логическая ширина g_ew = 640 + 2S.
+   Игра считает в координатах 640×480 (центр 320); 3D выходит в x ∈ [−S, 640 + S], всё сдвигается на g_shift при отрисовке:
+   S — по центру (меню/фронтенд — pillarbox, 3D — во всю ширину), 0 / 2S — HUD с якорем к левому / правому краю (plat_hud_anchor).
+   RE_ASPECT=auto (по окну, по умолчанию) | 4:3 (оригинал, S = 0 — как v2.14) | W:H. Уже 4:3 (портрет) — S = 0, letterbox. */
+static int g_s, g_ew = 640, g_shift, g_amode_set; static double g_amode;
+static void aspect_mode_init(void) { if (!g_amode_set) { g_amode = re_aspect_parse(getenv("RE_ASPECT")); g_amode_set = 1; } }
 static void content_rect(void) {
     if (g_dw <= 0 || g_dh <= 0) { g_dw = g_w; g_dh = g_h; }
-    double sx = (double)g_dw / g_w, sy = (double)g_dh / g_h; g_sc = sx < sy ? sx : sy;
-    g_cw = (int)(g_w * g_sc + 0.5); g_ch = (int)(g_h * g_sc + 0.5);
+    aspect_mode_init();
+    int s = (g_w == RE_ASPECT_W && g_h == RE_ASPECT_H) ? re_aspect_extra(re_aspect_target(g_dw, g_dh, g_amode)) : 0;
+    g_shift = g_shift - g_s + s; g_s = s; g_ew = g_w + 2 * g_s;
+    double sx = (double)g_dw / g_ew, sy = (double)g_dh / g_h, sc = sx < sy ? sx : sy;
+    if (sx / sy > 0.99 && sx / sy < 1.01) { g_scx = sx; g_scy = sy; }   /* S округлено до пикселя: заполнить буфер без полос в 1–2 px */
+    else { g_scx = sc; g_scy = sc; }
+    g_cw = (int)(g_ew * g_scx + 0.5); g_ch = (int)(g_h * g_scy + 0.5);
     if (g_cw > g_dw) g_cw = g_dw;
     if (g_ch > g_dh) g_ch = g_dh;
     g_cx = (g_dw - g_cw) / 2; g_cy = (g_dh - g_ch) / 2;
 }
-/* логический прямоугольник (верх-лево, y вниз) → прямоугольник GL в буфере (низ-лево) */
+/* логический прямоугольник кадра шириной g_ew (верх-лево, y вниз; x уже со сдвигом) → прямоугольник GL в буфере (низ-лево) */
 static void map_rect(int x, int y, int w, int h, int *o) {
-    double x0 = g_cx + x * g_sc, x1 = g_cx + (x + w) * g_sc, y0 = g_cy + (g_h - y - h) * g_sc, y1 = g_cy + (g_h - y) * g_sc;
+    double x0 = g_cx + x * g_scx, x1 = g_cx + (x + w) * g_scx, y0 = g_cy + (g_h - y - h) * g_scy, y1 = g_cy + (g_h - y) * g_scy;
     o[0] = (int)(x0 + 0.5); o[1] = (int)(y0 + 0.5); o[2] = (int)(x1 + 0.5) - o[0]; o[3] = (int)(y1 + 0.5) - o[1];
 }
 static void scissor_logical(int x, int y, int w, int h) { int r[4]; map_rect(x, y, w, h, r); glScissor(r[0], r[1], r[2], r[3]); }
+/* прямоугольник игры (координаты 640×480): весь кадр 640×480 → вся логическая ширина, иначе — со сдвигом текущего якоря */
+static void game_rect(int *x, int *w) {
+    if (*x <= 0 && *x + *w >= g_w) { *x = 0; *w = g_ew; }
+    else *x += g_shift;
+}
 void plat_render_set_drawable(int dw, int dh) {
     if (dw <= 0 || dh <= 0) return;
     g_dw = dw; g_dh = dh; content_rect();
@@ -105,11 +123,15 @@ void plat_render_set_drawable(int dw, int dh) {
 }
 void plat_render_set_logical(int w, int h) { if (w > 0 && h > 0) { g_w = w; g_h = h; content_rect(); if (g_ok) glViewport(g_cx, g_cy, g_cw, g_ch); } }
 void plat_render_size(int *dw, int *dh, int *lw, int *lh) { if (dw) *dw = g_dw; if (dh) *dh = g_dh; if (lw) *lw = g_w; if (lh) *lh = g_h; }
-/* окно → логические координаты кадра (мышь); 0 — точка в полосе */
+/* v2.15 */
+void plat_render_set_aspect(const char *mode) { g_amode = re_aspect_parse(mode); g_amode_set = 1; content_rect(); if (g_ok) glViewport(g_cx, g_cy, g_cw, g_ch); }
+int  plat_view_extra(void) { return g_s; }
+void plat_hud_anchor(int a) { g_shift = g_s + (a < 0 ? -g_s : a > 0 ? g_s : 0); }
+/* окно → логические координаты кадра игры 640×480 (мышь; меню — по центру); 0 — точка вне 640×480 */
 int plat_render_to_logical(double px, double py, int *lx, int *ly) {
-    double x = (px - g_cx) / g_sc, y = (py - (g_dh - g_cy - g_ch)) / g_sc;
-    if (lx) *lx = (int)x;
-    if (ly) *ly = (int)y;
+    double x = (px - g_cx) / g_scx - g_s, y = (py - (g_dh - g_cy - g_ch)) / g_scy;
+    if (lx) *lx = (int)floor(x);
+    if (ly) *ly = (int)floor(y);
     return x >= 0 && y >= 0 && x < g_w && y < g_h;
 }
 /* после показа кадра: весь буфер (и полосы) — чёрный; содержимое заднего буфера после swap в GL не определено */
@@ -132,7 +154,7 @@ static unsigned compile(unsigned type, const char *src) {
 static void apply_state(void) {
     static const unsigned zf[9] = { GL_LEQUAL, GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS };
     if (g_zt) { glEnable(GL_DEPTH_TEST); glDepthFunc(zf[g_zf >= 1 && g_zf <= 8 ? g_zf : 4]); } else glDisable(GL_DEPTH_TEST);
-    if (g_vpset) { glEnable(GL_SCISSOR_TEST); scissor_logical(g_vp[0], g_vp[1], g_vp[2], g_vp[3]); }
+    if (g_vpset) { glEnable(GL_SCISSOR_TEST); scissor_logical(g_vp[0], g_vp[1], g_vp[2], g_vp[3]); }   /* g_vp — уже со сдвигом (v2.15) */
     else if (g_cw != g_dw || g_ch != g_dh) { glEnable(GL_SCISSOR_TEST); glScissor(g_cx, g_cy, g_cw, g_ch); }   /* v2.14: не рисовать в полосы */
     else glDisable(GL_SCISSOR_TEST);
     glDepthMask(g_zw ? 1 : 0);
@@ -146,7 +168,7 @@ int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int 
     g_prog = glCreateProgram(); glAttachShader(g_prog, vs); glAttachShader(g_prog, fs); glLinkProgram(g_prog);
     GLint ok = 0; glGetProgramiv(g_prog, GL_LINK_STATUS, &ok);
     if (!ok) { char log[1024]; glGetProgramInfoLog(g_prog, sizeof log, NULL, log); plat_log("GL link: %s\n", log); return -3; }
-    g_uView = glGetUniformLocation(g_prog, "uView"); g_uTex = glGetUniformLocation(g_prog, "uTex"); g_uAlphaTest = glGetUniformLocation(g_prog, "uAlphaTest");
+    g_uView = glGetUniformLocation(g_prog, "uView"); g_uShift = glGetUniformLocation(g_prog, "uShift"); g_uTex = glGetUniformLocation(g_prog, "uTex"); g_uAlphaTest = glGetUniformLocation(g_prog, "uAlphaTest");
     g_uCOp = glGetUniformLocation(g_prog, "uCOp"); g_uAOp = glGetUniformLocation(g_prog, "uAOp");
     g_uAFunc = glGetUniformLocation(g_prog, "uAFunc"); g_uARef = glGetUniformLocation(g_prog, "uARef");
     glGenVertexArrays(1, &g_vao); glBindVertexArray(g_vao);
@@ -162,7 +184,7 @@ int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &one);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glDisable(GL_CULL_FACE);
-    g_w = w; g_h = h; g_dw = w; g_dh = h; content_rect(); g_swap = swap; g_ok = 1; g_cur = 0;
+    g_w = w; g_h = h; g_dw = w; g_dh = h; g_shift = g_s; content_rect(); g_swap = swap; g_ok = 1; g_cur = 0;
     memset(g_tss, 0, sizeof g_tss); g_af = 0; g_aref = 0;   /* v2.01: новый контекст — состояние стадий с нуля (op 0 — прежнее поведение) */
     g_tss[0][2] = 2; g_tss[0][3] = 1; g_tss[0][5] = 2; g_tss[0][6] = 1;   /* v2.01: умолчания D3D: ARG1 = TEXTURE, ARG2 = CURRENT */
     glViewport(g_cx, g_cy, g_cw, g_ch);
@@ -195,6 +217,7 @@ void plat_tex_update(int tex, int w, int h, const uint32_t *rgba) {   /* v2.01: 
 }
 void plat_clear_rect(uint32_t c, int x, int y, int w, int h) {   /* v2.01: Blt COLORFILL задней поверхности */
     if (!g_ok || w <= 0 || h <= 0) return;
+    game_rect(&x, &w);
     glEnable(GL_SCISSOR_TEST); scissor_logical(x, y, w, h);
     glClearColor(((c >> 16) & 255) / 255.f, ((c >> 8) & 255) / 255.f, (c & 255) / 255.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT); glDisable(GL_SCISSOR_TEST);
@@ -229,7 +252,9 @@ void plat_set_tex_stage(int stage, int type, uint32_t value) {
     if (stage >= 0 && stage < 8 && type >= 0 && type < 32) g_tss[stage][type] = (int)value;
 }
 void plat_set_viewport(int x, int y, int w, int h) {
-    g_vp[0] = x; g_vp[1] = y; g_vp[2] = w; g_vp[3] = h; g_vpset = (w > 0 && h > 0 && !(x == 0 && y == 0 && w >= g_w && h >= g_h));
+    /* v2.15: полный вид — и 640×480 без расширения, и расширенный [−S, 640 + S] (окно отсечения 3D P110_Clip*); иначе — со сдвигом якоря */
+    int full = (x <= -g_s && y <= 0 && x + w >= g_w + g_s && y + h >= g_h) || (g_s == 0 && x == 0 && y == 0 && w >= g_w && h >= g_h);
+    g_vp[0] = x + g_shift; g_vp[1] = y; g_vp[2] = w; g_vp[3] = h; g_vpset = (w > 0 && h > 0 && !full);
 }
 uint32_t plat_get_tex_stage(int stage, int type) {
     if (stage >= 0 && stage < 8 && type >= 0 && type < 32) return (uint32_t)g_tss[stage][type];
@@ -251,7 +276,7 @@ void plat_draw_prim(int ptype, const plat_vertex *v, int count) {
 int plat_draw_prim_last(int *ptype, int *count) { if (ptype) *ptype = g_dp_type; if (count) *count = g_dp_count; return g_dp_calls; }
 static void draw(const plat_vertex *v, int count, unsigned mode) {
     apply_state();
-    glUseProgram(g_prog); glUniform2f(g_uView, (float)g_w, (float)g_h); glUniform1i(g_uTex, 0); glUniform1i(g_uAlphaTest, g_at);
+    glUseProgram(g_prog); glUniform2f(g_uView, (float)g_ew, (float)g_h); glUniform1f(g_uShift, (float)g_shift); glUniform1i(g_uTex, 0); glUniform1i(g_uAlphaTest, g_at);
     glUniform3i(g_uCOp, g_tss[0][1], g_tss[0][2], g_tss[0][3]); glUniform3i(g_uAOp, g_tss[0][4], g_tss[0][5], g_tss[0][6]);
     glUniform1i(g_uAFunc, g_af >= 1 && g_af <= 8 ? g_af : 0); glUniform1f(g_uARef, (float)g_aref / 255.f);
     glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, g_cur ? g_tex[g_cur].id : g_white);
@@ -273,6 +298,7 @@ int plat_get_render_state(int state) { return (state >= 0 && state < 64) ? g_rs[
 void plat_clear_depth(void *viewport, int x, int y, int w, int h, float z) {
     (void)viewport;
     if (!g_ok) return;
+    game_rect(&x, &w);
     glEnable(GL_SCISSOR_TEST); scissor_logical(x, y, w, h);
     glDepthMask(1); glClearDepth((double)z); glClear(GL_DEPTH_BUFFER_BIT);
     glClearDepth(1.0);

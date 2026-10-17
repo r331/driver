@@ -42,7 +42,7 @@ else()
     add_executable(driver MACOSX_BUNDLE ${NATIVE_SRC})
     set_target_properties(driver PROPERTIES OUTPUT_NAME Driver
       MACOSX_BUNDLE_BUNDLE_NAME Driver MACOSX_BUNDLE_GUI_IDENTIFIER org.r331.driver
-      MACOSX_BUNDLE_SHORT_VERSION_STRING 2.14
+      MACOSX_BUNDLE_SHORT_VERSION_STRING 2.15
       MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Info.plist.in)   # v2.14: NSPrincipalClass, NSHighResolutionCapable
     target_compile_definitions(driver PRIVATE RE_MACOS_BUNDLE)
   else()

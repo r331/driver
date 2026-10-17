@@ -1,5 +1,6 @@
 /* v1.55 (см. ported110.h). */
 #include "ported110.h"
+#include "aspect.h"
 #include "p110_data.h"
 #include "ported109.h"
 #include "ported108.h"
@@ -623,14 +624,22 @@ void P110_ViewSetup(int32_t x, int32_t y, int32_t mode) {
   }
   sc = P11_0125f3e0;
   P19_Scale = sc;   /* native-псевдонимы 0125f3e0 */
+#ifndef RE_HOOK_BUILD
+  /* v2.15 Hor+ (aspect.h): основной вид (ширина 640) — окно отсечения шире на S с каждой стороны, центр проекции прежний (W/2 + x) */
+  const int32_t ex = re_view_extra();
+  const float Wc = (float)(W + 2 * ex);
+#else
+  const int32_t ex = 0;
+  const float Wc = (float)W;
+#endif
   if (P110_FullClip == 0) {
-    P110_ClipX0 = ((float)W / 2.0f + (float)x) - ((float)W * sc) / 2.0f;
+    P110_ClipX0 = ((float)W / 2.0f + (float)x) - (Wc * sc) / 2.0f;
     P110_ClipY0 = ((float)H / 2.0f + (float)y) - ((float)H * sc) / 2.0f;
-    P110_ClipX1 = (float)W * sc + P110_ClipX0;
+    P110_ClipX1 = Wc * sc + P110_ClipX0;
     P110_ClipY1 = (float)H * sc + P110_ClipY0;
   } else {
-    P110_ClipX0 = 0.0f; P110_ClipY0 = 0.0f;
-    P110_ClipX1 = (float)W + 0.0f; P110_ClipY1 = (float)H + 0.0f;
+    P110_ClipX0 = 0.0f - (float)ex; P110_ClipY0 = 0.0f;
+    P110_ClipX1 = (float)(W + ex) + 0.0f; P110_ClipY1 = (float)H + 0.0f;
   }
   P101_ScrX0 = (float)(W / 2) + (float)x;
   P101_ScrY0 = (float)(H / 2) + (float)y;
@@ -640,7 +649,7 @@ void P110_ViewSetup(int32_t x, int32_t y, int32_t mode) {
   P62_F25F3F4 = (float)(H / 2);
   uint8_t m = (uint8_t)mode;
   if (m == 1) {
-    clip_window(0, 0, W, H);
+    clip_window(-ex, 0, W + ex, H);
     buffer_clear(0, 0, 0xffff);
     clip_round();
   } else if (m == 2) {

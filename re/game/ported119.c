@@ -1,4 +1,5 @@
 /* v1.64: ported119 — см. ported119.h */
+#include "../platform/plat.h"
 #include "ported119.h"
 #include "cartab.h"
 #include "nodetab.h"
@@ -650,6 +651,18 @@ static int32_t var24(uint32_t addr) {
 #endif
   return rd32(p + 0x24);
 }
+/* v2.15: полоса (Damage/Felony/соперник) — якорь по её центру в 640-кадре: левая треть — к левому краю, правая — к правому */
+static void gauge_anchored(uint8_t *p) {
+#ifndef RE_HOOK_BUILD
+  float x, w; memcpy(&x, p, 4); memcpy(&w, p + 8, 4);
+  float c = x + w * 0.5f;
+  plat_hud_anchor(c < 213.0f ? -1 : (c > 427.0f ? 1 : 0));
+#endif
+  P110_Gauge(p);
+#ifndef RE_HOOK_BUILD
+  plat_hud_anchor(0);
+#endif
+}
 void P119_Hud(void) {
   if (P29_Mode != 0) return;
   if (P102_DmgVar != 0 && MenuOptBDFA4C == 0) SetField24_00502779((uint8_t *)P102_HudDmg, var24(P102_DmgVar));
@@ -663,6 +676,9 @@ void P119_Hud(void) {
   else P12_00c808d0 = (float)P95_BDFA0C;
   if (D_00b87e30 < 4) hud_setf(P102_HudFel, 4, (float)G2_00D11A5C);
   if (MenuOptBDFA4C == 0) hud_setf(P102_HudDmg, 4, (float)G00BDF984);
+#ifndef RE_HOOK_BUILD
+  plat_hud_anchor(1);   /* v2.15: радар, стрелки погони и спидометр — к правому краю (x 640-кадра + 2S) */
+#endif
   if (MenuVarD118C8 != 0 && P62_HudOff1 == 0 && P56_B87EA8 == 0 && P62_HudOff2 == 0) {
     if (P95_SndReady != 0 && 0x2a9 < G2_00D11A5C && MenuVarB31F04 == 0) P109_RadarArrows();
     tex_filter(0, 0, 0);
@@ -670,12 +686,15 @@ void P119_Hud(void) {
     tex_filter(0, 1, 1);
     P62_SpeedText();
   }
+#ifndef RE_HOOK_BUILD
+  plat_hud_anchor(0);
+#endif
   if (P62_HudOff1 == 0 && P62_HudOff2 == 0 && P17_Cond1 == 0) {
-    if (MenuOptBDFA4C == 0) { hud_setf(P102_HudDmg, 5, (float)P102_DmgMax); P110_Gauge((uint8_t *)P102_HudDmg); }
-    P110_Gauge((uint8_t *)P102_HudFel);
-    P110_Gauge((uint8_t *)P101_Hud);
+    if (MenuOptBDFA4C == 0) { hud_setf(P102_HudDmg, 5, (float)P102_DmgMax); gauge_anchored((uint8_t *)P102_HudDmg); }
+    gauge_anchored((uint8_t *)P102_HudFel);
+    gauge_anchored((uint8_t *)P101_Hud);
   } else if ((MenuMode1271060 == 6 || MenuMode1271060 == 0xb) && MenuOptBDFA4C == 0) {
     hud_setf(P102_HudDmg, 5, (float)P102_DmgMax);
-    P110_Gauge((uint8_t *)P102_HudDmg);
+    gauge_anchored((uint8_t *)P102_HudDmg);
   }
 }

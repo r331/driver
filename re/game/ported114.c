@@ -1,3 +1,4 @@
+#include "aspect.h"
 #include <stdio.h>
 #include <stdlib.h>
 /* v1.59 (см. ported114.h). */
@@ -343,7 +344,11 @@ void P114_CamFadeFrame(void) {
     float f = (float)P99_CamFade, w = (float)P19_ScrW, h = (float)P99_CamMax, oow = (P55_BDFA18 == 0) ? 0.015625f : 1.0f;
     p85_rv a, b, c;
     memset(&a, 0, sizeof a); memset(&b, 0, sizeof b); memset(&c, 0, sizeof c);
-    a.x = 0; a.y = 0; b.x = w; b.y = h; c.x = 0; c.y = h;
+    float x0 = 0;
+#ifndef RE_HOOK_BUILD
+    x0 = (float)-re_view_extra(); w += (float)re_view_extra();   /* v2.15: затемнение на всю ширину Hor+ */
+#endif
+    a.x = x0; a.y = 0; b.x = w; b.y = h; c.x = x0; c.y = h;
     a.r = a.g = a.b = b.r = b.g = b.b = c.r = c.g = c.b = f;
     a.oow = b.oow = c.oow = oow;
     if (FnPtr01270E80) FnPtr01270E80(0);

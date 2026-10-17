@@ -77,6 +77,11 @@ void plat_render_set_drawable(int dw, int dh);           /* размер буф�
 void plat_render_set_logical(int w, int h);              /* логический размер кадра игры (640×480) */
 void plat_render_size(int *dw, int *dh, int *lw, int *lh);
 int  plat_render_to_logical(double px, double py, int *lx, int *ly);   /* пиксель буфера → логические координаты; 0 — в полосе */
+/* v2.15: Hor+ (game/aspect.h). S — добавка логических пикселей с каждой стороны кадра 640 (0 — 4:3, как оригинал); RE_ASPECT=auto|4:3|W:H.
+   Игра считает в 640×480, 3D занимает x ∈ [−S, 640 + S]; plat_hud_anchor(−1/0/+1) — сдвиг 2D к левому краю / по центру / к правому. */
+void plat_render_set_aspect(const char *mode);            /* NULL/"auto" — по окну; тесты и смена на лету */
+int  plat_view_extra(void);                               /* S текущего окна; hook — нет (игра зовёт только в native) */
+void plat_hud_anchor(int a);
 int  plat_is_main_thread(void);                          /* v2.14: 1 — главный поток процесса (macOS: pthread_main_np) */
 void plat_render_shutdown(void);
 /* Звук и CD-аудио */

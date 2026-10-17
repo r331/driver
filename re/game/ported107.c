@@ -1,3 +1,4 @@
+#include "aspect.h"
 #include <stdlib.h>
 #include <stdio.h>
 /* v1.52 (см. ported107.h). Стандарт указателей v1.42: записи .data (CARLIGHT, пункты меню, цвета) — по адресу через re_ptr; обработчики меню — re_fn. */
@@ -438,7 +439,7 @@ void P107_CarLight(uint32_t recaddr, float k) {
   if (rd32(r + 4) == 0 || P13_00575f30 == 0) return;
   float x = rdf(r + 0x10), y = rdf(r + 0x14);
   float f = ((float)P19_ScrW / P19_DivW) * (rdf(r + 0x18) / P19_DivC) * P19_Scale;
-  if (!(0.0f <= f + x && x - f < (float)P19_ScrW && 0.0f <= f + y && y - f < (float)P19_ScrH)) return;
+  if (!((float)-RE_VIEW_EX() <= f + x && x - f < (float)(P19_ScrW + RE_VIEW_EX()) && 0.0f <= f + y && y - f < (float)P19_ScrH)) return;   /* v2.15: ±S */
   const uint8_t *ic = (const uint8_t *)re_rd_ptr(r + 4);
 #ifndef RE_HOOK_BUILD
   if (ic == NULL) return;

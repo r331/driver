@@ -3,11 +3,13 @@
    только туда); (2) событие SDL_KEYDOWN/KEYUP, вставленное SDL_PushEvent, проходит разбор событий игры
    (plat_pump_messages) и попадает в GetDeviceState как DIK — даже если отпущено до опроса (защёлка);
    (3) Cmd+Enter / Alt+Enter не доходит до игры (переключение полного экрана); (4) стрелки/пробел дают биты езды
-   P36_GetPadButtons; (5) вписывание кадра 640×480 в буфер 1920×1080 / 2560×1600 (pillarbox/letterbox).
+   P36_GetPadButtons; (5) вписывание кадра 640×480 в буфер 1920×1080 / 2560×1600 (pillarbox/letterbox при RE_ASPECT=4:3);
+   (6) v2.15 Hor+: S для 16:9/16:10/21:9/32:9/портрета, мышь в меню (640×480 по центру), математика проекции re_aspect_selftest.
    Не проверяет реальную клавиатуру macOS (нужен человек: RE_INPUTDBG=1 → driver_input.log). */
 #include "../platform/plat.h"
 #include "../game/ported34.h"
 #include "../game/ported36.h"
+#include "../game/aspect.h"
 #include <SDL.h>
 #include <stdio.h>
 #include <string.h>
@@ -54,12 +56,29 @@ int re_input_test(void) {
     memset(P34_Keys, 0, 256);
     /* (5) вписывание кадра (без GL: только арифметика) */
     int lx, ly;
+    plat_render_set_aspect("4:3");                                                      /* v2.14: оригинал, полосы */
     plat_render_set_logical(640, 480); plat_render_set_drawable(1920, 1080);
+    CHK(plat_view_extra() == 0);
     CHK(plat_render_to_logical(240.0, 0.0, &lx, &ly) && lx == 0 && ly == 0);           /* полоса слева 240 px */
     CHK(!plat_render_to_logical(100.0, 500.0, &lx, &ly));
     CHK(plat_render_to_logical(1679.0, 1079.0, &lx, &ly) && lx == 639 && ly == 479);
     plat_render_set_drawable(2560, 1600);                                               /* 4:3 в 16:10 — 2133×1600 */
     CHK(plat_render_to_logical(1280.0, 800.0, &lx, &ly) && lx == 320 && ly == 240);
+    /* (6) v2.15 Hor+ (RE_ASPECT=auto): вертикаль 480, ширина 480·аспект; меню/мышь — в 640×480 по центру */
+    { int r = re_aspect_selftest(); if (r) printf("re_aspect_selftest: проверка %d\n", r); CHK(r == 0); }
+    plat_render_set_aspect("auto");
+    plat_render_set_drawable(1920, 1080); CHK(plat_view_extra() == 107);                  /* 16:9: 854×480 */
+    CHK(plat_render_to_logical(960.0, 540.0, &lx, &ly) && lx == 320 && ly == 240);
+    CHK(!plat_render_to_logical(100.0, 540.0, &lx, &ly) && lx < 0);                     /* 3D/HUD вне 640 — не меню */
+    plat_render_set_drawable(2560, 1600); CHK(plat_view_extra() == 64);                   /* 16:10: 768×480 */
+    plat_render_set_drawable(3440, 1440); CHK(plat_view_extra() == 253);                  /* 21:9 */
+    plat_render_set_drawable(5120, 1440); CHK(plat_view_extra() == 533);                  /* 32:9 */
+    plat_render_set_drawable(1080, 1920); CHK(plat_view_extra() == 0);                    /* портрет: letterbox 4:3 */
+    CHK(plat_render_to_logical(540.0, 960.0, &lx, &ly) && lx == 320 && ly == 240);
+    CHK(!plat_render_to_logical(540.0, 100.0, &lx, &ly));                                /* полоса сверху */
+    plat_render_set_aspect("21:9"); plat_render_set_drawable(1920, 1080); CHK(plat_view_extra() == 240);   /* 1120×480 в 16:9 — letterbox */
+    CHK(!plat_render_to_logical(960.0, 10.0, &lx, &ly));
+    plat_render_set_aspect(NULL);
     SDL_Quit();
     printf("inputtest: OK\n");
     return 0;

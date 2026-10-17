@@ -9,6 +9,7 @@
    00415014 — переключение звукового устройства (005233be), банк TITLE/MOTEL.DSS;
    004a7d80 — позиция машины → запись копа P12_0112da00 (шаг 0x336 слов), 004a706a в свой кадр;
    004d602e — такт звуков у камеры. */
+#include "aspect.h"
 #include "ported140.h"
 #include "ported128.h"
 #include "ported121.h"
@@ -267,6 +268,23 @@ static p85_vtx *prep_bias(int32_t idx) {
 }
 static int clip_reject(const float *xs, const float *ys, int n) {
   uint32_t a = 0x80000000u;
+#ifndef RE_HOOK_BUILD
+  const float ex = (float)re_view_extra();   /* v2.15 Hor+: экран по x — [−S, 639 + S] */
+  if (ex > 0.0f) {
+    for (int i = 0; i < n; i++) a &= bits(xs[i] + ex);
+    P85_Clip = a; if (a) return 1;
+    a = 0x80000000u;
+    for (int i = 0; i < n; i++) a &= bits(ys[i]);
+    P85_Clip = a; if (a) return 1;
+    uint32_t o = 0;
+    for (int i = 0; i < n; i++) o |= bits(xs[i] - (P85_MaxX + ex));
+    P85_Clip = o; if (o == 0) return 1;
+    o = 0;
+    for (int i = 0; i < n; i++) o |= bits(ys[i] - P85_MaxY);
+    P85_Clip = o; if (o == 0) return 1;
+    return 0;
+  }
+#endif
   for (int i = 0; i < n; i++) a &= bits(xs[i]);
   P85_Clip = a; if (a) return 1;
   a = 0x80000000u;

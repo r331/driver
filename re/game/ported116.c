@@ -1,4 +1,5 @@
 /* v1.61 (см. ported116.h). */
+#include "aspect.h"
 #include "ported116.h"
 #include "reptr.h"
 #include "ported107.h"
@@ -535,7 +536,7 @@ void P116_Reflections(void) {
     wr32(p + 0x1c, rd32(p + 0x14) + half);
     wr32(p + 0x20, rd32(p + 0x18));
     int32_t sx = rd32(p + 0x14), sy = rd32(p + 0x18);
-    if (!(0 < sx && sx < P19_ScrW && 0 < sy && sy < P19_ScrH)) continue;
+    if (!(-RE_VIEW_EX() < sx && sx < P19_ScrW + RE_VIEW_EX() && 0 < sy && sy < P19_ScrH)) continue;   /* v2.15: ±S */
     P11_00ba52d0 = (int32_t)lrintf((rdf(p) - P44_CamX) * k); int32_t qa = P11_00ba52d0;
     P11_00ba52d0 = (int32_t)lrintf((rdf(p + 8) - P44_CamZ) * k); int32_t qb = P11_00ba52d0;
     float q[3] = { (float)qa + P44_CamX, v[1], (float)qb + P44_CamZ };

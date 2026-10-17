@@ -1,4 +1,6 @@
 #include "ported82.h"
+#include "aspect.h"
+#include <math.h>
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -139,14 +141,26 @@ static float plane_d(const float *v, const float *n, int use_y) {
 
 static int sgn(float f) { uint32_t u; memcpy(&u, &f, 4); return (int)(u >> 31); }
 
+
+/* v2.15 Hor+: боковые плоскости для расширенного кадра — угол re_aspect_half_angle(S) (запас оригинала сохранён), точки ±(320 + S);
+   верх/низ — как в оригинале (P82_FovXc/FovYc). S = 0 — ровно оригинальные значения. */
+static void side_fov(float *c, float *s, float *hw) {
+  *c = P82_FovXc; *s = P82_FovYc; *hw = 320.0f;
+#ifndef RE_HOOK_BUILD
+  int S = re_view_extra();
+  if (S > 0) { double th = re_aspect_half_angle(S); *c = (float)cos(th); *s = (float)sin(th); *hw = (float)(320 + S); }
+#endif
+}
+
 /* 00427abe */
 void P82_FrustumSetup2D(void) {
   float v[3];
   P82_FovXc = P82_FovX;
   P82_FovYc = P82_FovY;
-  xf(-P82_FovXc, 0.0f, -P82_FovYc, v);
+  float sc_, ss_, hw_; side_fov(&sc_, &ss_, &hw_);
+  xf(-sc_, 0.0f, -ss_, v);
   P82_PlL[0] = v[0]; P82_PlL[1] = 0.0f; P82_PlL[2] = v[2];
-  xf(P82_FovXc, 0.0f, -P82_FovYc, v);
+  xf(sc_, 0.0f, -ss_, v);
   P82_PlR[0] = v[0]; P82_PlR[1] = 0.0f; P82_PlR[2] = v[2];
   xf(0.0f, 0.0f, -1.0f, v);
   P82_PlF[0] = v[0]; P82_PlF[1] = 0.0f; P82_PlF[2] = v[2];
@@ -155,9 +169,9 @@ void P82_FrustumSetup2D(void) {
   P82_PlF[3] = (float)(((ld)v[2] + (ld)P44_CamZ) * (ld)P82_PlF[2] + ((ld)v[0] + (ld)P44_CamX) * (ld)P82_PlF[0]);
   xf(0.0f, 0.0f, P11_01270c24, v);
   P77_Plane[3] = (float)(((ld)v[2] + (ld)P44_CamZ) * (ld)P77_Plane[2] + ((ld)v[0] + (ld)P44_CamX) * (ld)P77_Plane[0]);
-  xf(-320.0f, 0.0f, P43_ScaleA, v);
+  xf(-hw_, 0.0f, P43_ScaleA, v);
   P82_PlL[3] = plane_d(v, P82_PlL, 1);
-  xf(320.0f, 0.0f, P43_ScaleA, v);
+  xf(hw_, 0.0f, P43_ScaleA, v);
   P82_PlR[3] = plane_d(v, P82_PlR, 1);
 }
 
@@ -170,9 +184,10 @@ void P82_FrustumSetup3D(void) {
   memcpy(P82_PlT, v, 12);
   xf(0.0f, P82_FovXc, -P82_FovYc, v);
   memcpy(P82_PlB, v, 12);
-  xf(-P82_FovXc, 0.0f, -P82_FovYc, v);
+  float sc_, ss_, hw_; side_fov(&sc_, &ss_, &hw_);
+  xf(-sc_, 0.0f, -ss_, v);
   memcpy(P82_PlL, v, 12);
-  xf(P82_FovXc, 0.0f, -P82_FovYc, v);
+  xf(sc_, 0.0f, -ss_, v);
   memcpy(P82_PlR, v, 12);
   xf(0.0f, 0.0f, -1.0f, v);
   memcpy(P82_PlF, v, 12);
@@ -181,9 +196,9 @@ void P82_FrustumSetup3D(void) {
   P82_PlF[3] = plane_d(v, P82_PlF, 1);
   xf(0.0f, 0.0f, P11_01270c24, v);
   P77_Plane[3] = plane_d(v, P77_Plane, 1);
-  xf(-320.0f, 0.0f, P43_ScaleA, v);
+  xf(-hw_, 0.0f, P43_ScaleA, v);
   P82_PlL[3] = plane_d(v, P82_PlL, 1);
-  xf(320.0f, 0.0f, P43_ScaleA, v);
+  xf(hw_, 0.0f, P43_ScaleA, v);
   P82_PlR[3] = plane_d(v, P82_PlR, 1);
   xf(0.0f, -240.0f, P43_ScaleA, v);
   P82_PlT[3] = plane_d(v, P82_PlT, 1);

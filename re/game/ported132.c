@@ -14,6 +14,8 @@
      флаг +0x28 |= 1, последний ключ дублируется, P99_CamLast = последний + 1.
    Отступления native: строки читаются в локальный буфер (оригинал пишет в буфер имени), '\r' срезается, файл
    закрывается и при ошибке, индекс ключа 0..0x3e; деление на 0 в 004b9287 — 1; NULL-указатели функций пропускаются. */
+#include "aspect.h"
+#include "../platform/plat.h"
 #include "ported150.h"
 #include "ported140.h"
 #include "ported142.h"
@@ -287,6 +289,11 @@ void P132_GameDraw(void) {
       for (int sl = 0; sl < 4; sl++) for (int i = 0; i < N * N; i++) ne[sl] += ((int32_t *)G6_00D01268)[sl * N * N + i] != -1;
       fprintf(stderr, "[gdraw] lumps %d %d %d %d cellA %d pc %d heads %d %d %d %d\n", (int)P87_SlotLumpA[0], (int)P87_SlotLumpA[1], (int)P87_SlotLumpA[2], (int)P87_SlotLumpA[3],
         (int)P88_CellA.cell, (int)P88_CellA.pc, ne[0], ne[1], ne[2], ne[3]); } }
+#endif
+#ifndef RE_HOOK_BUILD
+  /* v2.15 Hor+: кадр начинается с центрального сдвига; при смене S (окно/полный экран) — окно отсечения 3D заново (P110_ViewSetup) */
+  { static int last_ex = -1; int ex = re_view_extra(); plat_hud_anchor(0);
+    if (ex != last_ex && P19_ScrH == 0x1e0) { last_ex = ex; P110_ViewSetup(0, 0, 0); } }
 #endif
   uint8_t fxd = P26_FxD;
   if ((MenuVar575F3C | P13_00575f3c | G00575F3C) == 0) P26_FxD = 0;

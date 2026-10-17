@@ -1,6 +1,7 @@
 /* Пачка простых/листовых функций — восстановлено из Game.exe (004d90f4, 004a2c98, 004a32e9, 004f652e, 004f6612, 004e8440,
    0048db8e, 004d7a21, 004d9663, 004e71dc, 004e72f8, 004b9464, 004b04c0, 004ad5d2, 004fba23, 005199bc, 00516ed3, 0051718a,
    005172bb, 005222cf, 0050fab0, 0050e9ab, 00513cc7, 00513ce0, 0052008e). */
+#include "../platform/plat.h"
 #include "ported96.h"
 #include "crt.h"
 #include "director.h"
@@ -525,12 +526,18 @@ void P96_ClockText(const uint8_t *t) {
     snprintf(buf, sizeof buf, ".%02d", rd32(t, 0xc));
     P70_ShadowText(x, 4, re_addr(buf), 0, 0, 0xff, 0xff, 0xff);
   } else {
+#ifndef RE_HOOK_BUILD
+    plat_hud_anchor(-1);   /* v2.15: часы внизу слева (при зеркале) — к левому краю */
+#endif
     snprintf(buf, sizeof buf, "%02d:%02d", rd32(t, 0x14), rd32(t, 0x10));
     P70_ShadowText(10, 0x1a8, re_addr(buf), 1, 0, 0xff, 0xff, 0xff);
     float w = P58_TextWidth((const uint8_t *)buf, 1);
     int32_t x = (int32_t)lrintf(w) + 10;
     snprintf(buf, sizeof buf, ".%02d", rd32(t, 0xc));
     P70_ShadowText(x, 0x1aa, re_addr(buf), 0, 0, 0xff, 0xff, 0xff);
+#ifndef RE_HOOK_BUILD
+    plat_hud_anchor(0);
+#endif
   }
 }
 

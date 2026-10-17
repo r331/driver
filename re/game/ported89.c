@@ -1,6 +1,7 @@
 /* Маска видимости клеток и главный обход клеток карты — восстановлено из Game.exe (004ef997, 004ef793, 004ee8f4). */
 #include "redbg.h"
 #include "ported89.h"
+#include "aspect.h"
 #include "ported13.h"
 #include <string.h>
 #include <stdlib.h>
@@ -171,7 +172,33 @@ void P89_DrawMap(int32_t mode) {
       if (ry == N) { ry = 0; P88_CellA.py++; }
       y0++;
     }
-  } else {
+  }
+#ifndef RE_HOOK_BUILD
+  else if (re_view_extra() > 0) {
+    /* v2.15 Hor+: FRUSTRUM.DAT рассчитан на угол 4:3 — обходим объединение секторов курса ±k (aspect.h), таблица не меняется.
+       Порядок обхода и запись P88_CellA.px/py/pc — как в ветке оригинала: строки сверху вниз, клетки слева направо. */
+    static uint8_t um[31 * 31];
+    int32_t sec = (((int32_t)(int16_t)P59_AngB + (((int32_t)(int16_t)P59_AngB >> 31) & 0xf)) >> 4);
+    re_frustum_union((const uint8_t *)P55_Frustum, sec, re_aspect_sectors(re_view_extra()), um);
+    const uint8_t *lg = (const uint8_t *)P82_LightGrid;
+    for (int32_t r = 0; r < 31; r++) {
+      int32_t y = P88_CellA.y - 0xf + r;
+      if (y < 0 || y >= P80_GridH) continue;
+      P88_CellA.py = (uint8_t)(y / N);
+      int32_t ry2 = y - ((y / N) & 0xff) * N;
+      for (int32_t c = 0; c < 31; c++) {
+        if (um[r * 31 + c] == 0) continue;
+        int32_t x = cx - 0xf + c;
+        if (x < 0 || x >= P21_GridDiv || lg[(size_t)r * P21_GridStride + c] == 0) continue;
+        P88_CellA.px = (uint8_t)(x / N);
+        int32_t rx = x - ((x / N) & 0xff) * N;
+        P88_CellA.pc = (uint8_t)((P88_CellA.px & 1) + (P88_CellA.py & 1) * 2);
+        walk_cell(heads[(size_t)P88_CellA.pc * nn + rx + ry2 * N], 1);
+      }
+    }
+  }
+#endif
+  else {
     for (int32_t r = first; r < rows; r++) {
       int32_t c = rd16s(row + (size_t)(r * 2 + 2) * 2);
       if (c != -1) {
