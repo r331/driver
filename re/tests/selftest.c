@@ -478,6 +478,49 @@ static int test_p12(void) {
   P12_Fn0050229C(); if (g_00b32980 != -1.0f) return 2;
   g_00574530[2] = 3; g_00574530[3] = 2; P12_Fn0050C010();
   if (g_00c7d800[1] != 3 + 2 * 0x37 || g_00c7d828 != 0x00c7d82c) return 3;
+  /* 0048ebc8 must dispatch all eight cop slots to the real nearby-particle
+     initializer, resolving the record's 32-bit car address on native builds. */
+  {
+    p12_0112da00_t saved_cops;
+    uint8_t saved_particles[0x40 * 0xb4], car[0x148] = {0};
+    int32_t saved_alt = P62_Alt, saved_round = P11_00ba52d0;
+    int failures = 0;
+    memcpy(saved_cops, P12_0112da00, sizeof saved_cops);
+    memcpy(saved_particles, A_00C56780, sizeof saved_particles);
+    int32_t cx = 30000, cz = 40000, vz = 25600;
+    memcpy(car + 0xc8, &cx, 4); memcpy(car + 0xd0, &cz, 4);
+    memcpy(car + 0x48, &vz, 4);
+    uint32_t addr = re_ptr_register_dyn(car, sizeof car);
+    P62_Alt = 0;
+    for (int slot = 0; slot < 8; slot++) {
+      for (int gate = 0; gate < 6; gate++) {
+        memset(P12_0112da00, 0, sizeof saved_cops);
+        memset(A_00C56780, 0, sizeof saved_particles);
+        uint32_t *rec = &P12_0112da00[slot * 0x336];
+        rec[0x32d] = gate != 0; rec[0x333] = gate != 1;
+        rec[0x331] = gate == 2;
+        rec[0x334] = gate == 4 ? 0 : gate == 5 ? 0x70000000u : addr;
+        /* Record 0 is near this car; record 1 is far away. */
+        uint32_t flags = 0x10, kind = 4;
+        float x = (float)cx + 10.0f, z = (float)cz;
+        for (int j = 0; j < 2; j++) {
+          uint8_t *p = A_00C56780 + j * 0xb4;
+          memcpy(p + 0xc, &flags, 4); memcpy(p + 0x1c, &kind, 4);
+        }
+        memcpy(A_00C56780 + 0x84, &x, 4); memcpy(A_00C56780 + 0x8c, &z, 4);
+        P12_Fn0048EBC8();
+        uint32_t near_flags, far_flags;
+        memcpy(&near_flags, A_00C56780 + 0xc, 4);
+        memcpy(&far_flags, A_00C56780 + 0xb4 + 0xc, 4);
+        if (near_flags != (gate == 3 ? 0x90u : 0x10u) || far_flags != 0x10u) failures++;
+      }
+    }
+    re_ptr_unregister(car);
+    memcpy(P12_0112da00, saved_cops, sizeof saved_cops);
+    memcpy(A_00C56780, saved_particles, sizeof saved_particles);
+    P62_Alt = saved_alt; P11_00ba52d0 = saved_round;
+    if (failures) { fprintf(stderr, "p12 nearby-particle dispatch failed: %d cases\n", failures); return 4; }
+  }
   return 0;
 }
 static int test_p13(void) {

@@ -190,7 +190,6 @@
     V(Call00527885, 0x00527885, (int32_t a0, int32_t a1, int32_t a2, uint32_t a3), (a0, a1, a2, a3)) \
     V(Call004D6190, 0x004d6190, (int32_t a0), (a0)) \
     V(Call0048DB65, 0x0048db65, (uint32_t a0, int32_t a1), (a0, a1)) \
-    V(Call0051551E, 0x0051551e, (int32_t a0), (a0)) \
     V(Call00493ECE, 0x00493ece, (int32_t a0), (a0)) \
     V(Call0051200F, 0x0051200f, (uint32_t a0), (a0)) \
     V(Call005186CE, 0x005186ce, (void), ()) \

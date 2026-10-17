@@ -2,6 +2,7 @@
 #include "ported140.h"
 #include "ported138.h"
 #include "ported129.h"
+#include "ported71.h"
 #include "ported124.h"
 #include "reptr.h"
 #include "ported12.h"
@@ -592,7 +593,11 @@ void P12_Fn00491360(void) {
 void P12_Fn0048EBC8(void) {
   for (int32_t i = 0; i < 8; i++) {
     const uint32_t *p = &g_0112da00[i * 0x336];
-    if (p[0x32d] != 0 && p[0x333] != 0 && p[0x331] == 0) Call0051551E((int32_t)p[0x334]);
+    if (p[0x32d] != 0 && p[0x333] != 0 && p[0x331] == 0) {
+      /* +0xcd0 stores a Game.exe car address, not a native pointer. */
+      uint8_t *car = (uint8_t *)re_ptr(p[0x334]);
+      if (car != NULL) P71_InitNear(car);
+    }
   }
 }
 /* v1.48: исправлено — шаг записи частицы 0xb4 (флаги +0xc — uint32), прежде брался шаг 0x5a; освобождение — P43_FreeSlot */
