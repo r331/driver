@@ -503,6 +503,8 @@ int plat_remove_game(const char *path) {
 int png_write_rgba(const char *path, const uint32_t *px, int w, int h);   /* tests/render_test.c */
 static int g_frames, g_pumps, g_shot_done;
 int plat_frame_no(void) { return g_frames; }
+static int g_exit_at;   /* v2.29: отладка — выход на этом кадре (plat_exit_after, RE_END_EXIT) */
+void plat_exit_after(int n) { if (n >= 0 && (g_exit_at == 0 || g_frames + n < g_exit_at)) g_exit_at = g_frames + n; }
 static void frame_shot(void) {
     const char *png = getenv("RE_SHOT_PNG"); int w = 0, h = 0;
     if (!png || !*png || !g_win) return;
@@ -561,7 +563,8 @@ void plat_frame_tick(const char *where) {
           } }
         const char *sf = getenv("RE_SHOT_FIRST");
         if (!g_shot_done && sf && *sf == '1') frame_shot();
-        if (maxf > 0 && g_frames >= maxf) {
+        if ((maxf > 0 && g_frames >= maxf) || (g_exit_at > 0 && g_frames >= g_exit_at)) {
+            if (g_exit_at > 0 && g_frames >= g_exit_at) maxf = g_frames;
             if (!g_shot_done) frame_shot();
             frame_stat_report();
             { extern void P86_NativeStatFlush(void); P86_NativeStatFlush(); }   /* v2.18: RE_TEXLOG перед _Exit */

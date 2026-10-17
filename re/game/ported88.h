@@ -39,6 +39,9 @@ extern int32_t P88_Mode575;
 #endif
 void P88_CellUpdate(int32_t mode);   /* 004edd08 */
 void P88_StreamTiles(void);          /* 004edaa2 */
+#ifndef RE_HOOK_BUILD
+extern int P88_TeleportReload;       /* v2.29: 1 — на следующем P88_CellUpdate перезагрузить блоки (отладочный перенос) */
+#endif
 /* не из оригинала: выбор соседних блоков (логика 004edaa2) для проверки; возвращает число блоков 0..3 */
 int32_t P88_PickTiles(const p88_cell_t *b, int32_t *lump, int32_t *slot);
 /* gvar-img v2.03 begin (tools/gen_gvar_img.py) */

@@ -1,6 +1,10 @@
 /* Положение камеры в сетке блоков карты и подгрузка соседей — восстановлено из Game.exe (004edd08, 004edaa2). */
 #include "ported88.h"
 #include <string.h>
+#include "ported55.h"
+#ifndef RE_HOOK_BUILD
+int P88_TeleportReload;   /* v2.29: отладка переноса */
+#endif
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P88_CellA")
@@ -99,5 +103,11 @@ void P88_CellUpdate(int32_t mode) {
     fill(&P88_CellB, (int32_t)fx, (int32_t)fy);
   }
   P12_00cff9ac = P88_CellB.cell;                       /* в native 00cff9ac — отдельная переменная P12 */
+#ifndef RE_HOOK_BUILD
+  if (P88_TeleportReload) {   /* v2.29: после отладочного переноса машины (RE_TELEPORT/RE_AUTOTARGET) — блоки вокруг нового места,
+                                 как команда скрипта 0x8e (004ee129: слоты сброшены, текущий блок + соседи); в игре без отладки не ставится */
+    P88_TeleportReload = 0; P55_ResetSel(); return;
+  }
+#endif
   P88_StreamTiles();
 }

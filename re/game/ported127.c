@@ -100,6 +100,9 @@
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD
+int plat_frame_no(void);   /* v2.29: номер показанного кадра — для журналов отладки */
+#endif
+#ifndef RE_HOOK_BUILD
 #pragma push_macro("P127_PauseMenu") /*gvi*/
 #undef P127_PauseMenu /*gvi*/
 p127_pause_t P127_PauseMenu = P127_PAUSE_INIT;   /* .data 00574710 */
@@ -755,6 +758,12 @@ void P127_ScriptTick(void) {
   }
   while (P127_ScrPos < P77_ListN && P14_00c810c4 != 0xff0) {
     int32_t pos = P127_ScrPos;
+#ifndef RE_HOOK_BUILD
+    { /* v2.29: RE_MISSDBG=1 — журнал команд скрипта миссии (номер, код, первый аргумент) при смене номера */
+      static int dbg = -1; static int32_t last = -1; if (dbg < 0) dbg = getenv("RE_MISSDBG") != NULL;
+      if (dbg && pos != last) { const int32_t *q = (const int32_t *)P77_List[pos];
+        fprintf(stderr, "[mis] w=%d f=%d cmd#%d код 0x%02x a1=%d c4=%x\n", plat_frame_no(), (int)P62_Frame, (int)pos, q ? (int)q[0] : -1, q ? (int)q[1] : 0, (unsigned)P14_00c810c4); last = pos; } }
+#endif
     int32_t r = P146_ScriptCmd(P77_List[pos]);
     if (r == 0xd) break;
 #ifndef RE_HOOK_BUILD

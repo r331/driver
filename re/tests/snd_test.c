@@ -31,3 +31,22 @@ int test_snd(void) {
     CHK(plat_snd_create(NULL, 10, 44100, 1, 16) == 0);
     printf("snd mixer ok\n"); return 0;
 }
+
+/* v2.29: пустое звуковое устройство (нет SDL_audio): plat_snd_pump микширует по часам без вывода — буфер доигрывает,
+   а не остаётся «играющим» навсегда (игра ждала конца речи после интервью). */
+void plat_snd_null_for_test(int ms); void plat_snd_pump(void);
+int test_v229(void) {
+    int16_t pcm[441]; for (int i = 0; i < 441; i++) pcm[i] = 12000;      /* 10 мс */
+    int h = plat_snd_create(pcm, sizeof pcm, 44100, 1, 16); CHK(h > 0);
+    int16_t out[2 * 8];
+    plat_snd_set(h, 0, 44100, 0); plat_snd_play(h, 0);
+    plat_snd_null_for_test(0); plat_snd_pump();                           /* часы не ушли — буфер ещё играет */
+    plat_snd_mix(out, 4); CHK(out[0] > 11000);
+    plat_snd_play(h, 0);
+    plat_snd_null_for_test(50); plat_snd_pump();                          /* прошло 50 мс > 10 мс — доиграл */
+    plat_snd_mix(out, 4); CHK(out[0] == 0 && out[1] == 0);
+    plat_snd_null_for_test(-1); plat_snd_play(h, 1); plat_snd_pump();     /* выключено — pump ничего не микширует */
+    plat_snd_mix(out, 4); CHK(out[0] > 11000);
+    plat_snd_destroy(h);
+    printf("v229 null audio ok\n"); return 0;
+}

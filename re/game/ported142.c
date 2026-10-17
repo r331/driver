@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 /* v1.87: ported142 — см. ported142.h.
    004a7fec — коп rec[5] (запись 0112da00 + (n−1)·0xcd8, машина 0113a6c4 + rec[0]·0x148): при 0112b268 == 0 или 00c824a0 — газ 0;
      выбывший коп (+0xcc4 == 1) — газ 0, таймер +0xcd4 −= 0.01; сумма повреждений +0x11c..+0x130 (если 0112d9d0 == 0) > 00575ee0 —
@@ -36,6 +37,7 @@
 #include "ported46.h"
 #include "ported48.h"
 #include "ported56.h"
+#include "ported58.h"
 #include "ported59.h"
 #include "ported62.h"
 #include "ported74.h"
@@ -62,6 +64,9 @@
 #include "widgets.h"
 #include <string.h>
 
+#ifndef RE_HOOK_BUILD
+int plat_frame_no(void);   /* v2.29: номер показанного кадра — для журналов отладки */
+#endif
 #ifndef RE_HOOK_BUILD
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P142_CopNoDmg")
@@ -687,7 +692,35 @@ void P142_CarsStep(void) {
       wr32(c + 0x18, tx[t]); wr32(c + 0x20, tz[t]); wr32(c + 0x24, tx[t] * 16); wr32(c + 0x2c, tz[t] * 16);
       P99_Cars[0].pos[0] = tx[t]; P99_Cars[0].pos[2] = tz[t];
       for (int m = 0x40; m < 0x78; m += 4) wr32(c + m, 0);
+      P88_TeleportReload = 1;   /* v2.29: блоки карты вокруг нового места */
       fprintf(stderr, "[teleport] кадр %d → %d %d\n", (int)P62_Frame, (int)tx[t], (int)tz[t]);
+    }
+  }
+  { /* v2.29: RE_AUTOTARGET=N[:D] — отладка прохождения кампании: с кадра P62_Frame N (каждой миссии) машина игрока переносится
+       к включённой цели скрипта миссии (00c80ce0 + i·0x34: +0x10 флаги, 1 — включена, 8 — цель-событие; +0 радиус, +0x14 x, +0x1c z),
+       если цель включена не меньше D кадров (по умолчанию 150) и игрок дальше трети радиуса. Засчитывает цель игра сама
+       (P115_TargetTick/скрипт), перенос только заменяет езду; цели-события (машина) не трогаются — только журнал. */
+    static int on = -1; static int32_t from = 0, delay = 150, seen[10], since[10];
+    if (on < 0) { const char *e = getenv("RE_AUTOTARGET"); on = e != NULL; if (e) { from = atoi(e); const char *c = strchr(e, ':'); if (c) delay = atoi(c + 1); } }
+    if (on && (int32_t)P62_Frame >= from && P99_Cars[0].pos[0] | P99_Cars[0].pos[2]) {
+      uint8_t *c = (uint8_t *)&P99_Cars[0];
+      for (int i = 0; i < 10; i++) {
+        const uint8_t *o = P58_Objs[i];
+        int32_t fl = (int32_t)rd32(o + 0x10), rad = (int32_t)rd32(o), x = (int32_t)rd32(o + 0x14), z = (int32_t)rd32(o + 0x1c);
+        int32_t key = (fl & 9) == 1 ? (x ^ (z << 1) ^ rad) | 1 : 0;
+        if (key != seen[i] || (int32_t)P62_Frame < since[i]) { seen[i] = key; since[i] = (int32_t)P62_Frame;
+          if (fl & 1) fprintf(stderr, "[autotarget] кадр %d: цель %d флаги %x радиус %d (%d, %d)%s\n", (int)P62_Frame, i, (unsigned)fl, (int)rad,
+                              (int)x, (int)z, (fl & 8) ? " — событие, не переносим" : ""); }
+        if (key == 0 || (int32_t)P62_Frame - since[i] < delay) continue;
+        double dx = (double)x - (int32_t)rd32(c + 0x18), dz = (double)z - (int32_t)rd32(c + 0x20);
+        if (dx * dx + dz * dz <= ((double)rad / 3) * ((double)rad / 3)) continue;
+        wr32(c + 0x18, x); wr32(c + 0x20, z); wr32(c + 0x24, x * 16); wr32(c + 0x2c, z * 16);
+        P99_Cars[0].pos[0] = x; P99_Cars[0].pos[2] = z;
+        for (int m = 0x40; m < 0x78; m += 4) wr32(c + m, 0);
+        P88_TeleportReload = 1;
+        fprintf(stderr, "[autotarget] w=%d кадр %d → цель %d (%d, %d), было в %.0f\n", plat_frame_no(), (int)P62_Frame, i, (int)x, (int)z, sqrt(dx * dx + dz * dz));
+        break;
+      }
     }
   }
 #endif

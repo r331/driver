@@ -125,6 +125,9 @@ static void wr16(uint8_t *p, uint16_t v) { memcpy(p, &v, 2); }
 static uint16_t rd16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 
 #ifndef RE_HOOK_BUILD
+int plat_frame_no(void);   /* v2.29: номер показанного кадра — для журналов отладки */
+#endif
+#ifndef RE_HOOK_BUILD
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P132_B87EC8")
 #undef P132_B87EC8
@@ -212,11 +215,27 @@ void P132_GameLogic(void) {
   }
   P66_Scene = 0x00cb8f20u;
   G6_00D0DDC0 = 0;
+#ifndef RE_HOOK_BUILD
+  { /* v2.29: RE_MISSDBG=1 — отсчёт конца миссии 00c81100 (каждые 25 кадров) и ожидание речи 004d6209 */
+    static int dbg = -1; if (dbg < 0) dbg = getenv("RE_MISSDBG") != NULL;
+    if (dbg && P14_00c81100 != 0 && (P14_00c81100 % 25) == 1)
+      fprintf(stderr, "[end] w=%d f=%d t=%d e8=%d c4=%x hud2=%d речь=%d\n", plat_frame_no(), (int)P62_Frame, (int)P14_00c81100, (int)P14_00c810e8,
+              (unsigned)P14_00c810c4, (int)P62_HudOff2, (int)P42_ActionBound()); }
+#endif
   if (P14_00c81100 != 0) {
     P14_00c81100--;
     if (P14_00c81100 == 0) {
       if (P62_HudOff2 != 0 && P42_ActionBound() != 0) P14_00c81100 = 0x32;
-      else SetLatchValue0050E940(1);
+      else {
+        SetLatchValue0050E940(1);
+#ifndef RE_HOOK_BUILD
+        { /* v2.29: RE_MISSDBG — итог миссии (00c810e8 = 2 — провал, иначе — успех); RE_END_EXIT=N — выход через N кадров окна (снимок итога) */
+          extern void plat_exit_after(int n); const char *e = getenv("RE_END_EXIT");
+          if (getenv("RE_MISSDBG")) fprintf(stderr, "[end] w=%d f=%d итог миссии: %s (e8=%d c4=%x)\n", plat_frame_no(), (int)P62_Frame,
+                                            P14_00c810e8 == 2 ? "ПРОВАЛ" : "успех", (int)P14_00c810e8, (unsigned)P14_00c810c4);
+          if (e) plat_exit_after(atoi(e)); }
+#endif
+      }
     }
   }
   P127_SpawnTick(0);

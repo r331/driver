@@ -71,17 +71,24 @@ void plat_snd_open_game(void){
   const char *w=getenv("RE_WAV_OUT");
   if(w&&*w){ g_wav=fopen(w,"wb"); if(g_wav){ uint8_t z[44]={0}; fwrite(z,1,44,g_wav); g_wav_on=1; g_wav_ms0=plat_time_ms(); atexit(wav_close);
       fprintf(stderr,"[snd] RE_WAV_OUT %s\n",w); } return; }
-  if(!plat_snd_open()) fprintf(stderr,"[snd] SDL_audio: нет устройства (%s) — без звука\n",SDL_GetError());
+  if(!plat_snd_open()){
+    /* v2.29: нет устройства — «пустое» устройство: микс по часам plat_time_ms на каждом plat_flip, без вывода. Иначе буферы
+       DirectSound никогда не доигрывали (GetStatus — PLAYING навсегда), и игра вечно ждала конца речи (слот 0xf, 004d6209):
+       после интервью не наступал MISSION COMPLETE. */
+    fprintf(stderr,"[snd] SDL_audio: нет устройства (%s) — без звука (пустое устройство по часам игры)\n",SDL_GetError());
+    g_wav_ms0=plat_time_ms(); g_wav_on=1; }
 }
 /* на каждом показанном кадре: дописать в WAV столько кадров, сколько прошло по plat_time_ms */
 void plat_snd_pump(void){
-  if(!g_wav_on||!g_wav) return;
+  if(!g_wav_on) return;   /* v2.29: g_wav == NULL — пустое устройство (микс без вывода) */
   uint64_t ms=(uint64_t)plat_time_ms()-g_wav_ms0, want=ms*SND_OUT_RATE/1000;
   static int16_t buf[4096*2];
-  while(g_wav_frames<want){ int n=(int)(want-g_wav_frames); if(n>4096) n=4096; plat_snd_mix(buf,n); fwrite(buf,4,(size_t)n,g_wav); g_wav_frames+=(uint64_t)n; }
+  while(g_wav_frames<want){ int n=(int)(want-g_wav_frames); if(n>4096) n=4096; plat_snd_mix(buf,n); if(g_wav) fwrite(buf,4,(size_t)n,g_wav); g_wav_frames+=(uint64_t)n; }
   if(getenv("RE_SND_LOG")&&(++g_pump_n%50)==0) fprintf(stderr,"[snd] flip %d ms %llu frames %llu active %d\n",g_pump_n,(unsigned long long)ms,(unsigned long long)g_wav_frames,dsm_active());
   if((g_pump_n%200)==0) wav_hdr();
 }
+/* v2.29: для selftest — включить пустое устройство с часами, отстающими на ms (ms < 0 — выключить) */
+void plat_snd_null_for_test(int ms){ if(ms<0){ g_wav_on=0; g_wav_frames=0; return; } g_wav=NULL; g_wav_frames=0; g_wav_ms0=(uint64_t)plat_time_ms()-(uint64_t)ms; g_wav_on=1; }
 void plat_snd_close(void){ if(g_dev){ SDL_CloseAudioDevice(g_dev); g_dev=0; } }
 static int g_cd_track=0;
 int plat_cd_play(int t){ if(t<1||t>99) return 0; g_cd_track=t; return 1;}
