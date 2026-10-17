@@ -158,7 +158,7 @@ void P144_FlagFx(const uint8_t *o) {
     uint8_t br = (uint8_t)ftol(k * 255.0f);                                                                   /* 00546064 */
     PushEntry_004CC784((const uint32_t *)(o + 0x10), (uint8_t)(typ == 5 ? 9 : typ), br);
   }
-  float oow = P12_00ba53a0[(int32_t)lrintf(z)];
+  float oow = RE_OOW((int32_t)lrintf(z));
   float sc = P43_ScaleA * oow;
   float hs = h * sc;                                                  /* [ebp−0x198] — ширина следа */
   float nh = -h;

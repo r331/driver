@@ -83,9 +83,9 @@ static uint32_t bits(float f) { uint32_t u; memcpy(&u, &f, 4); return u; }
 static float oow_at(float z) {
   long zi = lrintf(z);
 #ifndef RE_HOOK_BUILD
-  if (zi < 0 || zi >= (long)(sizeof P12_00ba53a0 / sizeof P12_00ba53a0[0])) return 0.0f;
+  if (zi < 0 || zi >= (long)(RE_OOW_N)) return 0.0f;
 #endif
-  return P12_00ba53a0[zi];
+  return RE_OOW(zi);
 }
 static void tex_page(uint32_t tex) {
   if (tex != (uint32_t)P86_CurTex) {

@@ -140,7 +140,7 @@ void P143_SunFlare(void) {
   sv[0] = 0.0f; sv[1] = -10000.0f; sv[2] = 32000.0f;
   P44_Xform(sv);
   if (sv[2] < P95_Near) return;
-  float oow = P12_00ba53a0[fist(sv[2])];
+  float oow = RE_OOW(fist(sv[2]));
   float s = P43_ScaleA * oow;
   sv[0] *= s; sv[1] *= s;
   float fx0 = (P43_OffX - P43_Half) + sv[0], fy0 = (P43_OffY - P43_Half) + sv[1];
@@ -262,7 +262,7 @@ void P143_LampGlow(const uint8_t *o) {
   float xb = x + 40.0f, xc = x + 40.0f, xd = x;                       /* .rdata 005460fc = 40 */
   float yc = y + 40.0f, yd = y + 40.0f;
   if (P84_Mirror != 0) { x = -x; xb = -xb; xc = -xc; xd = -xd; }
-  float oow = P12_00ba53a0[(int32_t)lrintf(z)];
+  float oow = RE_OOW((int32_t)lrintf(z));
   float s = P43_ScaleA * oow;
   p85_rv v0, v1, v2, v3;
   memset(&v0, 0, sizeof v0); memset(&v1, 0, sizeof v1); memset(&v2, 0, sizeof v2); memset(&v3, 0, sizeof v3);

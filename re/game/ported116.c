@@ -121,7 +121,7 @@ static const float SNAP = 1048576.0f;     /* .rdata 0054607c */
 static const float NEAR_Z = 50.0f;        /* .rdata 0054609c */
 static const float FAR_Z = 45000.0f;      /* .rdata 00546030 */
 static const float SKID_R = 6000.0f;      /* .rdata 00546a80 / 00546a7c (−) */
-#define ZTAB_N ((int32_t)(sizeof P12_00ba53a0 / sizeof P12_00ba53a0[0]))
+#define ZTAB_N ((int32_t)(RE_OOW_N))
 
 static void state_set(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e, int32_t tag) {
   if (P85_StateDirty != tag) { if (P85_StateFn) P85_StateFn(a, b, c, d, e); P85_StateDirty = tag; }
@@ -452,9 +452,9 @@ static void skids(uint8_t *tab, const int32_t *cnt, const int32_t *start) {
         if (!(NEAR_Z < b[2] && b[2] <= FAR_Z)) continue;
         rel(d, r + 0x38); P44_Xform(d);
         if (!(NEAR_Z < d[2] && d[2] <= FAR_Z)) continue;
-        V[0].oow = P12_00ba53a0[zidx(a[2])]; proj(&V[0], a, V[0].oow);
-        V[1].oow = P12_00ba53a0[zidx(b[2])]; proj(&V[1], b, V[1].oow);
-        V[2].oow = P12_00ba53a0[zidx(c[2])]; proj(&V[2], c, V[2].oow);
+        V[0].oow = RE_OOW(zidx(a[2])); proj(&V[0], a, V[0].oow);
+        V[1].oow = RE_OOW(zidx(b[2])); proj(&V[1], b, V[1].oow);
+        V[2].oow = RE_OOW(zidx(c[2])); proj(&V[2], c, V[2].oow);
         ok = 1;
       } else {
         first = 1;
@@ -466,11 +466,11 @@ static void skids(uint8_t *tab, const int32_t *cnt, const int32_t *start) {
         if (!(NEAR_Z < c[2])) continue;
         rel(d, r + 0x38); P44_Xform(d);
         if (!(NEAR_Z < d[2])) continue;
-        V[2].oow = P12_00ba53a0[zidx(c[2])]; proj(&V[2], c, V[2].oow);
+        V[2].oow = RE_OOW(zidx(c[2])); proj(&V[2], c, V[2].oow);
         ok = 1;
       }
       if (!ok) continue;
-      w3 = P12_00ba53a0[zidx(d[2])];
+      w3 = RE_OOW(zidx(d[2]));
       { float f = w3 * P43_ScaleA; V[3].x = (d[0] * f + P43_OffX) - SNAP; V[3].y = (d[1] * f + P43_OffY) - SNAP; }
       first = 0;
       int16_t typ = rd16(r + 2); uint8_t lit = r[4];
@@ -525,7 +525,7 @@ void P116_Reflections(void) {
     v[0] -= P44_CamX; v[1] = gy - P44_CamY; v[2] -= P44_CamZ;
     P44_Xform(v);
     if (!(NEAR_Z <= v[2] && v[2] < P11_01270c24)) continue;
-    float w = P12_00ba53a0[zidx(v[2])], f = P43_ScaleA * w;
+    float w = RE_OOW(zidx(v[2])), f = P43_ScaleA * w;
     P11_00ba52d0 = (int32_t)lrintf((float)((hgt >> 3) + 0x50) * f);
     int32_t t = P11_00ba52d0, half = t >> 1;
     float k = 0.7f - v[2] / 8000.0f;
@@ -544,7 +544,7 @@ void P116_Reflections(void) {
     q[0] -= P44_CamX; q[1] = ((float)-h2 - 28.0f) - P44_CamY; q[2] -= P44_CamZ;
     P44_Xform(q);
     if (!(NEAR_Z <= q[2] && q[2] < P11_01270c24)) continue;
-    float w2 = P12_00ba53a0[zidx(q[2])], f2 = P43_ScaleA * w2;
+    float w2 = RE_OOW(zidx(q[2])), f2 = P43_ScaleA * w2;
     P11_00ba52d0 = (int32_t)lrintf((float)((hgt >> 3) + 0x14) * f2);
     int32_t a4 = P11_00ba52d0 >> 2, a8 = P11_00ba52d0 >> 3;
     P11_00ba52d0 = (int32_t)lrintf(((q[0] * f2 + P43_OffX) - (float)a8) - SNAP); wr32(p + 0x2c, P11_00ba52d0);

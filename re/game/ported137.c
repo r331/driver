@@ -1,3 +1,4 @@
+#include "drawdist.h"
 #include <stdlib.h>
 /* v1.82: ported137 — см. ported137.h.
    004d4663 — конец уровня: если удаётся открыть STARTPOS.X ("wb"), у записи игрока обнуляются скорости/силы
@@ -424,7 +425,12 @@ void P137_DrawCar(int32_t car, int32_t rec) {
   else shk = 0.0f;
   if (Q01270C24 - 1000.0f < pos[2]) return;
   int32_t timer = p137_rd(&P98_CarTimer[slot * 4]);
+#ifndef RE_HOOK_BUILD
+  /* v2.19: порог деталей машины (тень, фары, колёса, огни) × draw_distance — только во время 3D-вида */
+  if (!(pos[2] <= 15000.0f * re_dd_vis() || P60_Var1373C0 != 0)) {
+#else
   if (!(pos[2] <= 15000.0f || P60_Var1373C0 != 0)) {
+#endif
     P84_DrawCar(P28_CarLow[kind], m, pos, 0, car, kind, timer, shk);
     return;
   }

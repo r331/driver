@@ -1,4 +1,6 @@
 /* Проверка перенесённых модулей в нативной сборке: ./driver --selftest */
+#include "../game/drawdist.h"
+#include "../platform/sdl/plat_gfx.h"
 #include "../game/uihandlers3.h"
 #include "../game/uihandlers4.h"
 #include "../game/menuselect.h"
@@ -6581,10 +6583,11 @@ static int test_real_level(void) {
       int32_t yaw = getenv("RE_REAL_ANG") ? (atoi(getenv("RE_REAL_ANG")) & 0xfff) : 0;
       if (yaw) { P44_RotY(P44_ViewMat, (int32_t)(int16_t)yaw); P44_Transpose(P44_ViewMat, P44_ViewMatT); }
       fprintf(stderr, "city: yaw %d view %g %g %g | %g %g %g | %g %g %g\n", (int)yaw, P44_ViewMat[0], P44_ViewMat[1], P44_ViewMat[2], P44_ViewMat[3], P44_ViewMat[4], P44_ViewMat[5], P44_ViewMat[6], P44_ViewMat[7], P44_ViewMat[8]); }
-    if (!P56_EulerTab) P56_AllocEulerTab(1);
+    P56_AllocEulerTab(1);   /* v2.19: всегда своя таблица — в native указатель из образа данных Game.exe может быть не нулём (падение) */
     { const float *e = (const float *)P56_EulerTab; fprintf(stderr, "euler0: %g %g %g | %g %g %g | %g %g %g ; e1024: %g %g %g\n", e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7], e[8], ((const float *)(P56_EulerTab + 0x10000))[0], ((const float *)(P56_EulerTab + 0x10000))[2], ((const float *)(P56_EulerTab + 0x10000))[6]); }
     P43_ScaleA = 500.0f; P43_OffX = 320.0f + 1048576.0f; P43_OffY = 240.0f + 1048576.0f; P43_Half = 1048576.0f;
     for (int i = 1; i < 0x2000; i++) P12_00ba53a0[i] = 1.0f / (float)i;
+    if (getenv("RE_REAL_DD")) { for (int i = 0x2000; i < 0xdbba; i++) P12_00ba53a0[i] = 1.0f / (float)i; P11_0125f3e0 = 1.0f; }   /* v2.19: дальняя плоскость > 8192 */
     G2_011F43B0 = 0; P84_Mirror = 0; P82_Edge = 0; P63_SphN = 0;
     for (int i = 0; i < 4096; i++) P84_LightIn[i] = 1.0f;
     for (int i = 0; i < 8192; i++) P84_NormLight[i] = 1.0f;
@@ -6608,12 +6611,21 @@ static int test_real_level(void) {
       P89_DrawMap(0);
       fprintf(stderr, "map: frustum=%d cell %d,%d block %d slot %d (rx %d ry %d) slots %d %d %d %d vis %d (stride %d)\n", (int)fr, (int)P88_CellA.x, (int)P88_CellA.y, (int)P88_CellA.cell, (int)P88_CellA.pc, (int)P88_CellA.rx, (int)P88_CellA.ry,
               (int)P87_SlotLumpA[0], (int)P87_SlotLumpA[1], (int)P87_SlotLumpA[2], (int)P87_SlotLumpA[3], (int)D_00d00204, (int)P21_GridStride);
+      /* v2.19: RE_REAL_DD=m — дальность × m как в игре (P132_GameDraw): дальняя плоскость × m, обход за 31×31, кэш блоков */
+      float dd_far0 = P11_01270c24, dd_q0 = Q01270C24;
+      if (getenv("RE_REAL_DD") && atof(getenv("RE_REAL_DD")) > 1.0) {
+        double m = re_dd_clamp(atof(getenv("RE_REAL_DD")));
+        re_gfx()->draw_distance = m; P11_01270c24 = (float)(dd_far0 * m); Q01270C24 = P11_01270c24; P82_FrustumSetup3D();
+        re_oow_n = re_dd_oow_n(P11_01270c24); re_dd_on = 1; re_dd_warm();
+        fprintf(stderr, "map: draw_distance %.2f far %.0f\n", m, P11_01270c24);
+      }
       int32_t t0 = P85_Tris;
       P89_DrawMap(1);
       int32_t t1 = P85_Tris, na = P55_CntA, nb = P55_CntB;
       P55_RunTableA(); P55_RunTableB();
       fprintf(stderr, "map: DrawMap triangles %d, tables A %d B %d -> +%d, four %d seven %d shadow %d\n", (int)(t1 - t0), (int)na, (int)nb, (int)(P85_Tris - t1), (int)P89_CntFour, (int)P89_CntSeven, (int)P89_CntShadow);
       drawn = t1 - t0 + na + nb;
+      if (re_dd_on) { re_dd_on = 0; re_oow_n = 0xdbba; P11_01270c24 = dd_far0; Q01270C24 = dd_q0; re_gfx()->draw_distance = 1.0; }
     } else drawn = P87_DrawCells(ex, ey, getenv("RE_REAL_R") ? atoi(getenv("RE_REAL_R")) : 4);
     fprintf(stderr, "city: objects drawn %d, triangles %d (blend 0/1/2/3: %d/%d/%d/%d)\n", (int)drawn, (int)P85_Tris, (int)P85_TrisBy[0], (int)P85_TrisBy[1], (int)P85_TrisBy[2], (int)P85_TrisBy[3]);
     if (plat_render_readback(px) == 0) png_write_rgba(getenv("RE_REAL_PNG"), px, 640, 480);
@@ -7109,6 +7121,23 @@ static int test_aspect(void) {
          re_aspect_sectors(re_aspect_extra(32.0 / 9)), re_aspect_half_angle(0) * 57.29578, re_aspect_half_angle(re_aspect_extra(32.0 / 9)) * 57.29578);
   return 0;
 }
+/* v2.19: draw_distance — математика расширенного обхода клеток за окном FRUSTRUM.DAT 31×31 (game/drawdist.c, без данных игры) */
+#include "../game/drawdist.h"
+#include "../platform/sdl/plat_gfx.h"
+static int test_drawdist(void) {
+  int r = re_dd_selftest();
+  if (r) printf("FAIL re_dd_selftest: проверка %d\n", r);
+  CHECK(r == 0);
+  { re_gfx_cfg c; re_gfx_defaults(&c); CHECK(c.draw_distance == 2.0);              /* enhanced — 2.0 */
+    CHECK(re_gfx_preset(&c, "original") == 0 && c.draw_distance == 1.0);
+    CHECK(re_gfx_set(&c, "draw_distance", "3.5") == 0 && c.draw_distance == 3.5);
+    CHECK(re_gfx_set(&c, "draw_distance", "9") == 0); re_gfx_clamp(&c); CHECK(c.draw_distance == 4.0);
+    CHECK(re_gfx_set(&c, "draw_distance", "0.2") == 0); re_gfx_clamp(&c); CHECK(c.draw_distance == 1.0);
+    CHECK(re_gfx_set(&c, "draw_distance", "abc") == -2); }
+  printf("drawdist: R 1.0=%d 2.0=%d 3.0=%d 4.0=%d, таблица 1/z far 45000=%d 135000=%d\n", re_dd_radius(1.0), re_dd_radius(2.0),
+         re_dd_radius(3.0), re_dd_radius(4.0), (int)re_dd_oow_n(45000.0), (int)re_dd_oow_n(135000.0));
+  return 0;
+}
 /* v2.16: настройки графики (driver.cfg/RE_*) и обработка текстур (dilation, мипмапы с сохранением покрытия) — без GL и данных игры */
 #include "../platform/sdl/plat_gfx.h"
 static const char *gfx_fake_env(const char *n) {
@@ -7302,7 +7331,7 @@ int re_selftest_on;   /* v2.00: 1 — идёт selftest (шпионы), 0 — и
 int re_selftest(void) {
   re_selftest_on = 1;
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_p110) | RUN_T(test_p111) | RUN_T(test_p112) | RUN_T(test_p113) | RUN_T(test_p114) | RUN_T(test_p115) | RUN_T(test_p116) | RUN_T(test_p117) | RUN_T(test_p118) | RUN_T(test_p119) | RUN_T(test_p120) | RUN_T(test_p121) | RUN_T(test_p122) | RUN_T(test_p123) | RUN_T(test_p124) | RUN_T(test_p125) | RUN_T(test_p126) | RUN_T(test_p127) | RUN_T(test_p128) | RUN_T(test_p129) | RUN_T(test_p130) | RUN_T(test_p131) | RUN_T(test_p132) | RUN_T(test_p133) | RUN_T(test_p134) | RUN_T(test_p135) | RUN_T(test_p136) | RUN_T(test_p137) | RUN_T(test_p138) | RUN_T(test_p139) | RUN_T(test_p140) | RUN_T(test_p141) | RUN_T(test_p142) | RUN_T(test_p143) | RUN_T(test_p144) | RUN_T(test_p145) | RUN_T(test_p146) | RUN_T(test_p147) | RUN_T(test_p148) | RUN_T(test_p149) | RUN_T(test_p150) | RUN_T(test_p151) | RUN_T(test_p152) | RUN_T(test_v204) | RUN_T(test_real_level) | RUN_T(test_snd) | RUN_T(test_aspect) | RUN_T(test_gfx) | RUN_T(test_texpack) | RUN_T(test_texpack8) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_p110) | RUN_T(test_p111) | RUN_T(test_p112) | RUN_T(test_p113) | RUN_T(test_p114) | RUN_T(test_p115) | RUN_T(test_p116) | RUN_T(test_p117) | RUN_T(test_p118) | RUN_T(test_p119) | RUN_T(test_p120) | RUN_T(test_p121) | RUN_T(test_p122) | RUN_T(test_p123) | RUN_T(test_p124) | RUN_T(test_p125) | RUN_T(test_p126) | RUN_T(test_p127) | RUN_T(test_p128) | RUN_T(test_p129) | RUN_T(test_p130) | RUN_T(test_p131) | RUN_T(test_p132) | RUN_T(test_p133) | RUN_T(test_p134) | RUN_T(test_p135) | RUN_T(test_p136) | RUN_T(test_p137) | RUN_T(test_p138) | RUN_T(test_p139) | RUN_T(test_p140) | RUN_T(test_p141) | RUN_T(test_p142) | RUN_T(test_p143) | RUN_T(test_p144) | RUN_T(test_p145) | RUN_T(test_p146) | RUN_T(test_p147) | RUN_T(test_p148) | RUN_T(test_p149) | RUN_T(test_p150) | RUN_T(test_p151) | RUN_T(test_p152) | RUN_T(test_v204) | RUN_T(test_real_level) | RUN_T(test_snd) | RUN_T(test_aspect) | RUN_T(test_drawdist) | RUN_T(test_gfx) | RUN_T(test_texpack) | RUN_T(test_texpack8) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

@@ -150,9 +150,9 @@ static int32_t project(int32_t *r, float zfar) {
   long zi = lrintf(v[2]);
   float oow = 0.0f;
 #ifndef RE_HOOK_BUILD
-  if (zi >= 0 && zi < (long)(sizeof P12_00ba53a0 / sizeof P12_00ba53a0[0]))
+  if (zi >= 0 && zi < (long)(RE_OOW_N))
 #endif
-    oow = P12_00ba53a0[zi];
+    oow = RE_OOW(zi);
   float k = P43_ScaleA * oow;
   r[8] = (int32_t)((v[0] * k + P43_OffX) - 1048576.0f);
   r[9] = (int32_t)((v[1] * k + P43_OffY) - 1048576.0f);
@@ -183,9 +183,9 @@ void P130_RainStep(void) {
     long zi = lrintf(v[2]);
     float oow = 0.0f;
 #ifndef RE_HOOK_BUILD
-    if (zi >= 0 && zi < (long)(sizeof P12_00ba53a0 / sizeof P12_00ba53a0[0]))
+    if (zi >= 0 && zi < (long)(RE_OOW_N))
 #endif
-      oow = P12_00ba53a0[zi];
+      oow = RE_OOW(zi);
     float k = P43_ScaleA * oow;
     r[8] = (int32_t)((v[0] * k + P43_OffX) - 1048576.0f);
     r[9] = (int32_t)((v[1] * k + P43_OffY) - 1048576.0f);

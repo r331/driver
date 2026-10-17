@@ -286,9 +286,9 @@ static void raster(const p85_rv *a, const p85_rv *b, const p85_rv *c) { if (P85_
 static float oow_at(float z) {
   long zi = lrintf(z);
 #ifndef RE_HOOK_BUILD
-  if (zi < 0 || zi >= (long)(sizeof P12_00ba53a0 / sizeof P12_00ba53a0[0])) return 0.0f;
+  if (zi < 0 || zi >= (long)(RE_OOW_N)) return 0.0f;
 #endif
-  return P12_00ba53a0[zi];
+  return RE_OOW(zi);
 }
 
 /* ---- 0050bd09: отладочная сетка радара — 55×55 клеток P77_C5FE00 по 4×4 пикселя, цвет по типу клетки (.data 00574574).

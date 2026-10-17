@@ -96,7 +96,7 @@ static const float SPL_FAR = 1536.0f;     /* .rdata 00546888 */
 static const float SCR_W = 640.0f;        /* .rdata 00546060 */
 static const float SCR_H = 480.0f;        /* .rdata 0054605c */
 static const float SPL_SZ = 32.0f;        /* .rdata 00546100 */
-#define ZTAB_N ((int32_t)(sizeof P12_00ba53a0 / sizeof P12_00ba53a0[0]))
+#define ZTAB_N ((int32_t)(RE_OOW_N))
 
 static void set_menu_mode(int32_t v) { MenuMode1271060 = v; P11_01271060 = v; P62_Menu1271060 = v; G01271060 = v; }
 static void set_mode38(int32_t v) { P11_00b87e38 = v; P17_Cond2 = v; P19_Cond = v; P45_Mode = v; UiVar00B87E38 = v; }
@@ -259,7 +259,7 @@ void P131_Splash(void) {
     v[1] = ((float)-h - P44_CamY) - NEAR_Z;
     P44_Xform(v);
     if (!(NEAR_Z <= v[2] && v[2] < SPL_FAR)) continue;
-    float w = P12_00ba53a0[zidx(v[2])], f = P43_ScaleA * w;
+    float w = RE_OOW(zidx(v[2])), f = P43_ScaleA * w;
     float sx = (v[0] * f + P43_OffX) - SNAP, sy = (v[1] * f + P43_OffY) - SNAP;
     if (!(0.0f < sx && sx < SCR_W && 0.0f < sy && sy < SCR_H)) continue;
     P11_00ba52d0 = (int32_t)lrintf(SPL_SZ * f);

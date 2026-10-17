@@ -115,9 +115,9 @@ static void tex_page(uint32_t tex) {
 static float oow_at(float z) {
   long zi = lrintf(z);
 #ifndef RE_HOOK_BUILD
-  if (zi < 0 || zi >= (long)(sizeof P12_00ba53a0 / sizeof P12_00ba53a0[0])) return 0.0f;
+  if (zi < 0 || zi >= (long)(RE_OOW_N)) return 0.0f;
 #endif
-  return P12_00ba53a0[zi];
+  return RE_OOW(zi);
 }
 
 /* ---- 004abd69: значок по имени (P93_FindIcon); +9/+10 += 1, +0xb/+0xc — правый/нижний край (ширина/высота + левый/верхний − 1) ---- */

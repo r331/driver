@@ -313,9 +313,9 @@ static void smoke_quad(const uint8_t *o, const uint8_t *ic, float cr, float cg, 
   if (P84_Mirror != 0) { xl = -xl; xr = -xr; }
   int32_t zi = (int32_t)lrintf(z);
 #ifndef RE_HOOK_BUILD
-  if (zi < 0 || zi >= (int32_t)(sizeof P12_00ba53a0 / sizeof P12_00ba53a0[0])) return;
+  if (zi < 0 || zi >= (int32_t)(RE_OOW_N)) return;
 #endif
-  float w = P12_00ba53a0[zi], f = P43_ScaleA * w;
+  float w = RE_OOW(zi), f = P43_ScaleA * w;
   p85_rv v[4];
   memset(v, 0, sizeof v);
   v[0].x = (xl * f + P43_OffX) - SNAP; v[0].y = (yt * f + P43_OffY) - SNAP;
@@ -418,9 +418,9 @@ void P108_RadarShape(uint32_t shape, const int32_t *pos, const int32_t *ofs, con
   if (!(50.0f <= v[2])) return;
   int32_t zi = (int32_t)lrintf(v[2]);
 #ifndef RE_HOOK_BUILD
-  if (zi < 0 || zi >= (int32_t)(sizeof P12_00ba53a0 / sizeof P12_00ba53a0[0])) return;
+  if (zi < 0 || zi >= (int32_t)(RE_OOW_N)) return;
 #endif
-  float w = P12_00ba53a0[zi], f = P43_ScaleA * w;
+  float w = RE_OOW(zi), f = P43_ScaleA * w;
   p85_rv a, b, c;
   memset(&a, 0, sizeof a); memset(&b, 0, sizeof b); memset(&c, 0, sizeof c);
   a.r = b.r = c.r = 255.0f;

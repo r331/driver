@@ -295,7 +295,7 @@ void P43_QuatToMat(const float *q, float *m) {
 }
 void P43_ProjectGrid(uint8_t *p) {
   int32_t idx = (int32_t)lrintf(rdf(p, 0x14));
-  wrf(p, 4, ((const float *)&P12_00ba53a0[0])[idx]);
+  wrf(p, 4, RE_OOW(idx));
   float k = P43_ScaleA * rdf(p, 4);
   wr32(p, 0x18, rd32(p, 0xc));
   wr32(p, 0x1c, rd32(p, 0x10));

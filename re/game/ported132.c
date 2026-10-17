@@ -15,6 +15,7 @@
    Отступления native: строки читаются в локальный буфер (оригинал пишет в буфер имени), '\r' срезается, файл
    закрывается и при ошибке, индекс ключа 0..0x3e; деление на 0 в 004b9287 — 1; NULL-указатели функций пропускаются. */
 #include "aspect.h"
+#include "drawdist.h"
 #include "../platform/plat.h"
 #include "ported150.h"
 #include "ported140.h"
@@ -304,6 +305,15 @@ void P132_GameDraw(void) {
     Ui004268E0();
     if (P26_FxA != 0) G8_00D17B0C = 0;
     if (P14_00b87ee4 == 0) P133_CamUpdate(1);
+#ifndef RE_HOOK_BUILD
+    /* v2.19 draw_distance: на время 3D-вида дальняя плоскость (P11_01270c24 и её копия для отсечения полигонов Q01270C24) × m,
+       таблица 1/z продолжается за 0xdbba; значения опции (сохранение в config, ползунок меню) не меняются — восстановление перед бликом солнца */
+    float dd_far0 = P11_01270c24, dd_q0 = Q01270C24;
+    { double m = re_draw_distance();
+      if (m > 1.0) { P11_01270c24 = (float)(dd_far0 * m); Q01270C24 = (float)(dd_q0 * m); re_dd_on = 1;
+        re_oow_n = re_dd_oow_n(P11_01270c24 > Q01270C24 ? P11_01270c24 : Q01270C24); }
+      else { re_dd_on = 0; re_oow_n = 0xdbba; } }
+#endif
     P82_FrustumSetup3D();
     if (P14_00b87e84 != 0) P132_Lights();
     if (P98_MrkOff != 0) P76_AngleColor();
@@ -347,6 +357,9 @@ void P132_GameDraw(void) {
       if (o) P60_ObjUpdate(o);
       CallIfD14EE4();
     }
+#ifndef RE_HOOK_BUILD
+    if (re_dd_on) { P11_01270c24 = dd_far0; Q01270C24 = dd_q0; re_dd_on = 0; re_oow_n = 0xdbba; }
+#endif
     if (P26_FxD == 0) P143_SunFlare();
     if (live) P121_ScriptHud();
     if ((MenuVarB31F04 | P13_00b31f04 | G00B31F04) != 0) P133_MirrorDraw();

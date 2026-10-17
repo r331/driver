@@ -113,7 +113,7 @@ static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
 static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
 static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-#define NZ ((int32_t)(sizeof P12_00ba53a0 / sizeof P12_00ba53a0[0]))
+#define NZ ((int32_t)(RE_OOW_N))
 
 static void raster(const p85_rv *a, const p85_rv *b, const p85_rv *c) { if (P85_RasterB) P85_RasterB(a, b, c); }
 static void blend(uint8_t m, int32_t a, int32_t b, int32_t c, int32_t d) {
@@ -131,7 +131,7 @@ static int zw(float z, float *w) {
 #ifndef RE_HOOK_BUILD
   if (i < 0 || i >= NZ) return 0;
 #endif
-  *w = P12_00ba53a0[i];
+  *w = RE_OOW(i);
   return 1;
 }
 static void scr(p85_rv *v, float x, float y, float w) {

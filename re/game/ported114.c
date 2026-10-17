@@ -231,9 +231,9 @@ void P114_PathDraw(uint8_t *p, int32_t mode) {
     int32_t zi = (int32_t)lrintf(v[2]);
     if (zi <= 0x32 || zi >= 45000) continue;
 #ifndef RE_HOOK_BUILD
-    if (zi >= (int32_t)(sizeof P12_00ba53a0 / sizeof P12_00ba53a0[0])) continue;
+    if (zi >= (int32_t)(RE_OOW_N)) continue;
 #endif
-    float k = P43_ScaleA * P12_00ba53a0[zi];
+    float k = P43_ScaleA * RE_OOW(zi);
     float sx = (v[0] * k + P43_OffX) - P43_Half, sy = (v[1] * k + P43_OffY) - P43_Half, sz = 500.0f * k;
     float qx = sx - sz / 2.0f, qy = sy - sz / 2.0f;                 /* .rdata 00546050 */
     if (rd16s(p + 0x18) == 9) {

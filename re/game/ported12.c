@@ -5,6 +5,7 @@
 #include "ported124.h"
 #include "reptr.h"
 #include "ported12.h"
+#include "drawdist.h"
 #include "ported98.h"
 #include "ported118.h"
 #include "ported40.h"
@@ -565,6 +566,13 @@ void P12_Fn0050229C(void) {
     if (g_00546020 <= g_00b3297c) g_00b3297c = -1.0f;
   }
 }
+#ifndef RE_HOOK_BUILD
+int32_t re_oow_n = 0xdbba;
+float re_oow_get(int32_t i) {
+  if (i >= 0 && i < 0xdbba) return g_00ba53a0[i];
+  return re_dd_oow(g_0125f3e0, i);       /* v2.19: продолжение таблицы (как в 00526427: k / z); z < 0 — 0 */
+}
+#endif
 void P12_Fn00526427(void) {
   for (int32_t i = 0; i < 0xdbba; i++) {
     if (i == 0) g_00ba53a0[0] = 0;

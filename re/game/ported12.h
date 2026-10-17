@@ -120,6 +120,17 @@ extern float P12_00546084;
 #define g_0125f3e0 P11_0125f3e0
 #define g_01270c38 P11_01270c38
 typedef float p12_00ba53a0_t[0xdbba];
+/* v2.19: доступ к таблице 1/z через RE_OOW: в native за пределами 0xdbba — k/z (draw_distance > 1, дальняя плоскость дальше 56250),
+   RE_OOW_N — допустимый размер (0xdbba при draw_distance = 1 — поведение прежнее); в hook — таблица оригинала */
+#ifndef RE_HOOK_BUILD
+float re_oow_get(int32_t i);
+extern int32_t re_oow_n;
+#define RE_OOW(i) re_oow_get((int32_t)(i))
+#define RE_OOW_N re_oow_n
+#else
+#define RE_OOW(i) (P12_00ba53a0[i])
+#define RE_OOW_N 0xdbba
+#endif
 #define g_00ba53a0 P12_00ba53a0
 #define P12_00ba53a0 GAME_VAR(p12_00ba53a0_t,P12_00ba53a0,0x00ba53a0)
 #ifndef RE_HOOK_BUILD

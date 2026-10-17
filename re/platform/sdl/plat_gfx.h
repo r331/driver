@@ -27,6 +27,7 @@ typedef struct {
     char   aspect[24];      /* "" — не задано (RE_ASPECT / auto) */
     int    fullscreen;      /* -1 не задано, 0 окно, 1 полный экран */
     int    win_w, win_h;    /* windowed_res, 0 — не задано */
+    double draw_distance;   /* v2.19: множитель дальности прорисовки 1.0 (оригинал) .. 4.0; enhanced — 2.0 */
     char   texpack[512];    /* v2.17: каталог HD-пака текстур ("" — выкл.; RE_TEXPACK важнее) */
     char   source[512];     /* откуда прочитан driver.cfg ("" — файла нет) */
 } re_gfx_cfg;
@@ -37,7 +38,7 @@ int  re_gfx_preset(re_gfx_cfg *c, const char *name);         /* 0 — ok, -1 —
    возврат — число ошибок (неизвестный ключ/плохое значение — строка пропускается, в лог через err, если не NULL) */
 int  re_gfx_parse(re_gfx_cfg *c, const char *text, void (*err)(const char *msg));
 /* переопределения из окружения: getter(имя) → значение или NULL (в игре — getenv); RE_PRESET, RE_MSAA, RE_A2C, RE_FXAA,
-   RE_ANISO, RE_MIPMAPS, RE_DILATE, RE_FILTER, RE_HUD_FILTER, RE_RENDER_SCALE, RE_VSYNC, RE_FPS_LIMIT, RE_GAMMA, RE_BRIGHTNESS, RE_SHARPEN */
+   RE_ANISO, RE_MIPMAPS, RE_DILATE, RE_FILTER, RE_HUD_FILTER, RE_RENDER_SCALE, RE_VSYNC, RE_FPS_LIMIT, RE_GAMMA, RE_BRIGHTNESS, RE_SHARPEN, RE_TEXPACK, RE_DRAW_DIST */
 int  re_gfx_env(re_gfx_cfg *c, const char *(*getter)(const char *));
 void re_gfx_clamp(re_gfx_cfg *c);                            /* привести к допустимым значениям */
 int  re_gfx_set(re_gfx_cfg *c, const char *key, const char *val);   /* 0 ok, -1 ключ, -2 значение */

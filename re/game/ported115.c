@@ -207,9 +207,9 @@ void P115_RoadArrow(const float *pos) {
   for (int i = 0; i < 3; i++) {
     int32_t zi = (int32_t)q[i][2];                                 /* __ftol */
 #ifndef RE_HOOK_BUILD
-    if (zi < 0 || zi >= (int32_t)(sizeof(P12_00ba53a0) / sizeof(P12_00ba53a0[0]))) return;
+    if (zi < 0 || zi >= (int32_t)(RE_OOW_N)) return;
 #endif
-    float oow = P12_00ba53a0[zi];
+    float oow = RE_OOW(zi);
     float k = oow * P43_ScaleA;
     rv[i].x = (q[i][0] * k + P43_OffX) - P43_Half;
     rv[i].y = (q[i][1] * k + P43_OffY) - P43_Half;

@@ -165,9 +165,9 @@ static void tex_filter(int32_t a, int32_t b, int32_t c) {   /* (*01270d6c) = grT
 static float oow_at(float z) {
   long zi = lrintf(z);
 #ifndef RE_HOOK_BUILD
-  if (zi < 0 || zi >= (long)(sizeof P12_00ba53a0 / sizeof P12_00ba53a0[0])) return 0.0f;
+  if (zi < 0 || zi >= (long)(RE_OOW_N)) return 0.0f;
 #endif
-  return P12_00ba53a0[zi];
+  return RE_OOW(zi);
 }
 
 /* ---- 004c0c6f: колпак ---- */

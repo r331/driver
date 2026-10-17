@@ -1040,9 +1040,9 @@ void P101_CarSkids(int32_t car) {
 static float zinv(float z) {
   P85_ZI = (int32_t)lrintf(z);   /* fist */
 #ifndef RE_HOOK_BUILD
-  if (P85_ZI < 0 || P85_ZI >= (int32_t)(sizeof P12_00ba53a0 / sizeof P12_00ba53a0[0])) return 0.0f;
+  if (P85_ZI < 0 || P85_ZI >= (int32_t)(RE_OOW_N)) return 0.0f;
 #endif
-  return P12_00ba53a0[P85_ZI];
+  return RE_OOW(P85_ZI);
 }
 
 /* ---- 00528bb7: v[3..5] → вид по транспонированной матрице + смещение; x,y → v[6],v[7]; z → v[5]; экран → v[3],v[4] ---- */

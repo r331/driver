@@ -123,11 +123,11 @@ void P85_Project(p85_vtx *v) {
 #ifndef RE_HOOK_BUILD
     /* v2.05, отступление native: z вне таблицы 1/z (за камерой или ≥ 0xdbba) — в оригинале такие вершины уходят в набор с
        отсечением (не перенесён); только в игре (вне игры — прежнее поведение тестов города): oow = 0 — P85_CallRaster такой треугольник не рисует (вместо чтения за границей таблицы). */
-    if ((zi < 1 || zi >= (int32_t)(sizeof(p12_00ba53a0_t) / sizeof(float))) && re_ptr_has_image()) {
+    if ((zi < 1 || zi >= (int32_t)(RE_OOW_N)) && re_ptr_has_image()) {
       /* v2.07: ближе z = 1 — метка P85_OOW_NEAR (u·oow остаётся восстановимым), P85_CallRaster отсекает треугольник по z = 1 */
       v->oow = zi < 1 ? P85_OOW_NEAR : 0.0f; v->x = 0; v->y = 0; return; }
 #endif
-    v->oow = ((const float *)&P12_00ba53a0[0])[zi];
+    v->oow = RE_OOW(zi);
   }
   {
     ld kk = (ld)v->oow * (ld)P43_ScaleA;           /* держится на стеке x87 (расширенная точность) */
@@ -175,7 +175,7 @@ void P85_SetBlend(uint8_t m) {
    пропускался целиком — у камеры пропадали пол и стены (чёрные дыры). P85_PutVtx запоминает координаты камеры вершины;
    новая вершина на z = 1 проецируется как в P85_Project, u/v (хранятся как u·oow) — с учётом перспективы, цвет — линейно. */
 static struct { float vx, vy, z, oow, x; int ok; } s_cam[3];
-static float near_oow(void) { return ((const float *)&P12_00ba53a0[0])[1]; }
+static float near_oow(void) { return RE_OOW(1); }
 static void near_vtx(p85_rv *o, const p85_rv *a, const p85_rv *b, int ia, int ib) {
   float za = s_cam[ia].z, zb = s_cam[ib].z, t = (1.0f - za) / (zb - za);
   float vx = s_cam[ia].vx + t * (s_cam[ib].vx - s_cam[ia].vx), vy = s_cam[ia].vy + t * (s_cam[ib].vy - s_cam[ia].vy);
