@@ -31,7 +31,8 @@ enum {
     GL_DEPTH_ATTACHMENT = 0x8D00, GL_DEPTH_COMPONENT24 = 0x81A6, GL_RGBA8 = 0x8058, GL_FRAMEBUFFER_COMPLETE = 0x8CD5, GL_MAX_SAMPLES = 0x8D57,
     GL_SAMPLE_ALPHA_TO_COVERAGE = 0x809E, GL_LINEAR_MIPMAP_LINEAR = 0x2703, GL_LINEAR_MIPMAP_NEAREST = 0x2701, GL_NEAREST_MIPMAP_NEAREST = 0x2700,
     GL_TEXTURE_MAX_LEVEL = 0x813D, GL_NUM_EXTENSIONS = 0x821D, GL_EXTENSIONS = 0x1F03, GL_MAX_TEXTURE_SIZE = 0x0D33, GL_MAX_RENDERBUFFER_SIZE = 0x84E8,
-    GL_TEXTURE_MAX_ANISOTROPY = 0x84FE, GL_MAX_TEXTURE_MAX_ANISOTROPY = 0x84FF, GL_RENDERER = 0x1F01
+    GL_TEXTURE_MAX_ANISOTROPY = 0x84FE, GL_MAX_TEXTURE_MAX_ANISOTROPY = 0x84FF, GL_RENDERER = 0x1F01,
+    GL_VENDOR = 0x1F00, GL_MAX_VIEWPORT_DIMS = 0x0D3A, GL_SHADING_LANGUAGE_VERSION = 0x8B8C   /* v2.24 */
 };
 #define GLFUNCS(X) \
  X(void, Enable, (GLenum)) X(void, Disable, (GLenum)) X(void, BlendFunc, (GLenum, GLenum)) X(void, DepthFunc, (GLenum)) \
@@ -59,9 +60,23 @@ enum {
  X(void, BlitFramebuffer, (GLint, GLint, GLint, GLint, GLint, GLint, GLint, GLint, GLbitfield, GLenum)) \
  X(void, GetIntegerv, (GLenum, GLint *)) X(void, GetFloatv, (GLenum, GLfloat *)) X(const unsigned char *, GetStringi, (GLenum, GLuint)) \
  X(void, GenSamplers, (GLsizei, GLuint *)) X(void, DeleteSamplers, (GLsizei, const GLuint *)) X(void, BindSampler, (GLuint, GLuint)) \
- X(void, SamplerParameteri, (GLuint, GLenum, GLint)) X(void, SamplerParameterf, (GLuint, GLenum, GLfloat))
+ X(void, SamplerParameteri, (GLuint, GLenum, GLint)) X(void, SamplerParameterf, (GLuint, GLenum, GLfloat)) \
+ X(GLenum, GetError, (void))
 #define DECL(r, n, a) static r (*gl##n) a;
 GLFUNCS(DECL)
+/* v2.24: журнал графики (plat_sys.c): всегда — заголовок (GL_VENDOR/RENDERER/VERSION, окно/буфер, FBO), ошибки GL/FBO/шейдеров
+   и откаты; RE_GFXDBG=1 — подробнее. Файл: macOS ~/Library/Logs/driver_gfx.log, Linux ~/.config/driver/driver_gfx.log (RE_GFXLOG=путь|off). */
+void plat_gfx_logf(const char *fmt, ...);
+int  plat_gfx_dbg(void);
+static int g_glerr_n;
+static int glerr(const char *where) {   /* все накопившиеся ошибки GL; возврат — была ли ошибка */
+    int any = 0;
+    for (int i = 0; i < 8; i++) {
+        GLenum e = glGetError(); if (!e) break;
+        any = 1; if (g_glerr_n++ < 64) plat_gfx_logf("[gfx] ошибка GL 0x%04x (%s)\n", e, where);
+    }
+    return any;
+}
 
 static const char *VS =
  "#version 330 core\n"
@@ -137,6 +152,8 @@ static void (*g_swap)(void);
 static unsigned g_fbo, g_fbo_ms, g_ctex, g_drb, g_crb_ms, g_drb_ms, g_pprog, g_pvao, g_s3d, g_s2d, g_spl, g_spn;
 static int g_tw, g_th, g_msaa, g_maxs, g_aniso_hw, g_a2c, g_uSharp, g_uTexSize, g_uPxScale, g_uA2C, g_pu[8], g_fbo_off, g_tex_proc;
 static double g_rscale = 1.0; static float g_aniso;
+static int g_chk_flips, g_chk_fail, g_chk_ok;   /* v2.24: показы с последней настройки цели; откат по проверке кадра */
+const char *plat_render_gfx_info(char *b, int n);
 static unsigned target_fbo(void) { return g_fbo_ms ? g_fbo_ms : g_fbo; }
 /* v2.14: нативное разрешение. g_w×g_h — логический кадр игры (640×480: в нём игра даёт x,y вершин, прямоугольники 2D и
    viewport); g_dw×g_dh — реальный буфер окна (SDL_GL_GetDrawableSize, на Retina — в пикселях). Кадр игры вписывается
@@ -211,7 +228,7 @@ static unsigned blendf(int d3d) {
 static unsigned compile(unsigned type, const char *src) {
     unsigned s = glCreateShader(type); glShaderSource(s, 1, &src, NULL); glCompileShader(s);
     GLint ok = 0; glGetShaderiv(s, GL_COMPILE_STATUS, &ok);
-    if (!ok) { char log[1024]; glGetShaderInfoLog(s, sizeof log, NULL, log); plat_log("GL shader: %s\n", log); return 0; }
+    if (!ok) { char log[1024]; log[0] = 0; glGetShaderInfoLog(s, sizeof log, NULL, log); plat_gfx_logf("[gfx] ошибка компиляции шейдера (%s): %s\n", type == GL_VERTEX_SHADER ? "вершинный" : "фрагментный", log); return 0; }
     return s;
 }
 static void apply_state(void) {
@@ -237,7 +254,9 @@ static int fbo_ms_try(int n) {
     glGenFramebuffers(1, &g_fbo_ms); glBindFramebuffer(GL_FRAMEBUFFER, g_fbo_ms);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, g_crb_ms);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, g_drb_ms);
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) return 1;
+    GLenum st = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (st == GL_FRAMEBUFFER_COMPLETE && !glerr("MSAA FBO")) return 1;
+    plat_gfx_logf("[gfx] MSAA-FBO %dx %dx%d: статус 0x%04x — не готов\n", n, g_tw, g_th, st);
     glDeleteFramebuffers(1, &g_fbo_ms); glDeleteRenderbuffers(1, &g_crb_ms); glDeleteRenderbuffers(1, &g_drb_ms);
     g_fbo_ms = g_crb_ms = g_drb_ms = 0; return 0;
 }
@@ -245,7 +264,11 @@ static void fbo_setup(void) {
     const re_gfx_cfg *c = re_gfx(); GLint mt = 0, mr = 0;
     fbo_free();
     g_rscale = c->render_scale;
+    GLint vp[2] = { 0, 0 };
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mt); glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &mr); if (mr > 0 && mr < mt) mt = mr; if (mt <= 0) mt = 4096;
+    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, vp); if (vp[0] > 0 && vp[0] < mt) mt = vp[0]; if (vp[1] > 0 && vp[1] < mt) mt = vp[1];   /* v2.24 */
+    glerr("до FBO");
+    if (!c->fbo && !g_fbo_off) { g_fbo_off = 1; plat_gfx_logf("[gfx] fbo = off (driver.cfg / RE_FBO / preset safe) — рисую прямо в окно\n"); }
     g_tw = (int)(g_dw * g_rscale + 0.5); g_th = (int)(g_dh * g_rscale + 0.5);
     if (g_tw < 1) g_tw = 1;
     if (g_th < 1) g_th = 1;
@@ -270,13 +293,21 @@ static void fbo_setup(void) {
             glBindFramebuffer(GL_FRAMEBUFFER, g_fbo); glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, g_drb);
         }
         glBindFramebuffer(GL_FRAMEBUFFER, g_fbo);
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) { plat_log("[gfx] FBO недоступен — рисую прямо в окно (без MSAA/пост-эффектов)\n"); fbo_free(); g_fbo_off = 1; }
+        GLenum st = glCheckFramebufferStatus(GL_FRAMEBUFFER); int er = glerr("FBO");
+        { const char *t = getenv("RE_GFXTEST"); if (t && strstr(t, "fboerr")) st = 0; }   /* v2.24: проверка отката */
+        if (st != GL_FRAMEBUFFER_COMPLETE || er) {
+            plat_gfx_logf("[gfx] FBO %dx%d (окно %dx%d, MSAA %d): статус 0x%04x%s — откат: рисую прямо в окно (без MSAA/пост-эффектов)\n", g_tw, g_th, g_dw, g_dh, g_msaa, st, er ? ", ошибка GL" : "");
+            fbo_free(); g_fbo_off = 1;
+        }
     }
     if (g_fbo_off) { g_tw = g_dw; g_th = g_dh; g_msaa = 0; g_rscale = 1.0; }
     g_a2c = g_msaa >= 2 && c->a2c;
     glBindFramebuffer(GL_FRAMEBUFFER, target_fbo());
     content_rect(); glViewport(g_cx, g_cy, g_cw, g_ch);
     glDisable(GL_SCISSOR_TEST); glClearColor(0, 0, 0, 1); glDepthMask(1); glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (glerr("настройка цели") && g_fbo) { plat_gfx_logf("[gfx] ошибка GL при настройке FBO — откат на прямой рендер\n"); fbo_free(); g_fbo_off = 1; g_tw = g_dw; g_th = g_dh; g_msaa = 0; g_a2c = 0; g_rscale = 1.0; glBindFramebuffer(GL_FRAMEBUFFER, 0); content_rect(); glViewport(g_cx, g_cy, g_cw, g_ch); }
+    g_chk_flips = 0; g_chk_ok = 0;   /* v2.24: проверка показа — заново после каждой перенастройки */
+    { static int n; if (n++ < 12 || plat_gfx_dbg()) { char b[256]; plat_gfx_logf("[gfx] цель рисования: %s\n", plat_render_gfx_info(b, sizeof b)); } }
 }
 static void samplers_setup(void) {
     const re_gfx_cfg *c = re_gfx();
@@ -307,7 +338,7 @@ static unsigned link_prog(const char *vsrc, const char *fsrc) {
     if (!vs || !fs) return 0;
     unsigned p = glCreateProgram(); glAttachShader(p, vs); glAttachShader(p, fs); glLinkProgram(p);
     GLint ok = 0; glGetProgramiv(p, GL_LINK_STATUS, &ok);
-    if (!ok) { char log[1024]; glGetProgramInfoLog(p, sizeof log, NULL, log); plat_log("GL link: %s\n", log); return 0; }
+    if (!ok) { char log[1024]; log[0] = 0; glGetProgramInfoLog(p, sizeof log, NULL, log); plat_gfx_logf("[gfx] ошибка линковки шейдеров: %s\n", log); return 0; }
     return p;
 }
 /* resolve MSAA и пост-проход в буфер окна (идемпотентно: снимок и показ могут вызвать дважды); затем снова цель рисования */
@@ -325,23 +356,25 @@ static void compose(void) {
     glUniform1i(g_pu[3], c->fxaa); glUniform1f(g_pu[4], (float)c->gamma); glUniform1f(g_pu[5], (float)c->brightness); glUniform1f(g_pu[6], (float)c->sharpen);
     glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, g_ctex);
     glBindSampler(0, (g_tw == g_dw && g_th == g_dh && !c->fxaa) ? g_spn : g_spl);
-    glBindVertexArray(g_pvao); glDrawArrays(GL_TRIANGLES, 0, 3);
+    { const char *t = getenv("RE_GFXTEST"); int nopost = t && strstr(t, "nopost");   /* v2.24: имитация «пост-проход не рисует» (тест отката) */
+      if (!nopost) { glBindVertexArray(g_pvao); glDrawArrays(GL_TRIANGLES, 0, 3); }
+      else { glClearColor(0, 0, 0, 1); glClear(GL_COLOR_BUFFER_BIT); } }
     glBindSampler(0, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, target_fbo()); glViewport(g_cx, g_cy, g_cw, g_ch);
 }
 const char *plat_render_gfx_info(char *b, int n) {   /* v2.16: что реально включено (лог, тесты) */
     snprintf(b, (size_t)n, "цель %dx%d (окно %dx%d, scale %.2f), MSAA %d (max %d), A2C %d, aniso %.0f (max %d), FBO %s", g_tw, g_th, g_dw, g_dh, g_rscale, g_msaa, g_maxs,
-             g_a2c, g_aniso, g_aniso_hw, g_fbo ? "да" : "нет");
+             g_a2c, g_aniso, g_aniso_hw, g_fbo ? "да" : g_fbo_off ? "нет (прямо в окно)" : "нет");
     return b;
 }
 int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int w, int h) {
-#define LOAD(r, n, a) if (!(gl##n = (r (*) a)get_proc("gl" #n))) { plat_log("GL: нет gl" #n "\n"); return -1; }
+#define LOAD(r, n, a) if (!(gl##n = (r (*) a)get_proc("gl" #n))) { plat_gfx_logf("[gfx] GL: нет функции gl" #n "\n"); return -1; }
     GLFUNCS(LOAD)
     unsigned vs = compile(GL_VERTEX_SHADER, VS), fs = compile(GL_FRAGMENT_SHADER, FS);
     if (!vs || !fs) return -2;
     g_prog = glCreateProgram(); glAttachShader(g_prog, vs); glAttachShader(g_prog, fs); glLinkProgram(g_prog);
     GLint ok = 0; glGetProgramiv(g_prog, GL_LINK_STATUS, &ok);
-    if (!ok) { char log[1024]; glGetProgramInfoLog(g_prog, sizeof log, NULL, log); plat_log("GL link: %s\n", log); return -3; }
+    if (!ok) { char log[1024]; log[0] = 0; glGetProgramInfoLog(g_prog, sizeof log, NULL, log); plat_gfx_logf("[gfx] ошибка линковки шейдеров: %s\n", log); return -3; }
     g_uView = glGetUniformLocation(g_prog, "uView"); g_uShift = glGetUniformLocation(g_prog, "uShift"); g_uTex = glGetUniformLocation(g_prog, "uTex"); g_uAlphaTest = glGetUniformLocation(g_prog, "uAlphaTest");
     g_uCOp = glGetUniformLocation(g_prog, "uCOp"); g_uAOp = glGetUniformLocation(g_prog, "uAOp");
     g_uAFunc = glGetUniformLocation(g_prog, "uAFunc"); g_uARef = glGetUniformLocation(g_prog, "uARef");
@@ -374,8 +407,13 @@ int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int 
     memset(g_tss, 0, sizeof g_tss); g_af = 0; g_aref = 0;   /* v2.01: новый контекст — состояние стадий с нуля (op 0 — прежнее поведение) */
     g_tss[0][2] = 2; g_tss[0][3] = 1; g_tss[0][5] = 2; g_tss[0][6] = 1;   /* v2.01: умолчания D3D: ARG1 = TEXTURE, ARG2 = CURRENT */
     glViewport(g_cx, g_cy, g_cw, g_ch);
-    plat_log("GL %s (%s)\n", (const char *)glGetString(GL_VERSION), (const char *)glGetString(GL_RENDERER));
-    { char b[512], b2[256]; plat_log("[gfx] %s\n[gfx] %s\n", re_gfx_describe(re_gfx(), b, sizeof b), plat_render_gfx_info(b2, sizeof b2)); }
+    { const char *ve = (const char *)glGetString(GL_VENDOR), *re = (const char *)glGetString(GL_RENDERER), *vv = (const char *)glGetString(GL_VERSION), *sl = (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
+      GLint mt = 0, mr = 0, vp[2] = { 0, 0 }; glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mt); glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &mr); glGetIntegerv(GL_MAX_VIEWPORT_DIMS, vp);
+      plat_log("GL %s (%s)\n", vv ? vv : "?", re ? re : "?");
+      plat_gfx_logf("[gfx] GL_VENDOR %s | GL_RENDERER %s | GL_VERSION %s | GLSL %s | MAX_TEXTURE %d MAX_RENDERBUFFER %d MAX_VIEWPORT %dx%d MAX_SAMPLES %d\n",
+                    ve ? ve : "?", re ? re : "?", vv ? vv : "?", sl ? sl : "?", mt, mr, vp[0], vp[1], g_maxs); }
+    glerr("инициализация");
+    { char b[512], b2[256]; plat_gfx_logf("[gfx] %s\n[gfx] %s\n", re_gfx_describe(re_gfx(), b, sizeof b), plat_render_gfx_info(b2, sizeof b2)); }
     return 0;
 }
 void plat_render_shutdown(void) { g_ok = 0; for (int i = 0; i < MAX_TEX; i++) free(g_tex[i].src); memset(g_tex, 0, sizeof g_tex); g_swap = NULL; g_fbo = g_fbo_ms = g_ctex = g_drb = g_crb_ms = g_drb_ms = 0; g_tw = g_th = 0; }
@@ -568,9 +606,58 @@ void plat_clear_depth(void *viewport, int x, int y, int w, int h, float z) {
     glClearDepth(1.0);
 }
 void plat_snd_pump(void);
+/* v2.24: проверка показа. После resolve/пост-прохода сравнить кадр в FBO (что нарисовала игра) с буфером окна (что будет показано):
+   сетка 8×8 точек кадра. В FBO есть изображение, а в окне — пусто, или ошибка GL при показе → откат на прямой рендер без FBO
+   (как v2.15 / preset safe). Проверяется на 3-м, 30-м и 150-м показе после каждой настройки цели (и каждые 600 показов при RE_GFXDBG). */
+static int grid_nonblack(unsigned fb, int x0, int y0, int w, int h, unsigned *sum) {
+    int n = 0; unsigned char px[4]; *sum = 0;
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fb); glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    for (int j = 0; j < 8; j++) for (int i = 0; i < 8; i++) {
+        int x = x0 + (int)((i + 0.5) * w / 8), y = y0 + (int)((j + 0.5) * h / 8);
+        px[0] = px[1] = px[2] = px[3] = 0; glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, px);
+        unsigned s = (unsigned)px[0] + px[1] + px[2]; *sum += s; n += s > 12;
+    }
+    return n;
+}
+static void fbo_setup(void);
+int plat_render_selfcheck(int *fbo_nb, int *win_nb) {   /* 0 — норма (или нечего сравнивать), 1 — был откат на прямой рендер */
+    if (!g_ok || !g_fbo) return 0;
+    unsigned sf = 0, sw = 0;
+    int er = glerr("показ кадра");
+    int nf = grid_nonblack(g_fbo, g_cx, g_cy, g_cw, g_ch, &sf);
+    int ox = (int)((double)g_cx * g_dw / g_tw), oy = (int)((double)g_cy * g_dh / g_th), ow = (int)((double)g_cw * g_dw / g_tw), oh = (int)((double)g_ch * g_dh / g_th);
+    int nw = grid_nonblack(0, ox, oy, ow, oh, &sw);
+    er |= glerr("чтение кадра");
+    glBindFramebuffer(GL_FRAMEBUFFER, target_fbo());
+    if (fbo_nb) *fbo_nb = nf;
+    if (nf >= 4 && nw >= 2 && !er) { if (!g_chk_ok) plat_gfx_logf("[gfx] проверка показа: кадр через FBO виден в окне (%d/64 точек) — норма\n", nw); g_chk_ok = 1; }
+    if (win_nb) *win_nb = nw;
+    if (plat_gfx_dbg() || er || (nf >= 4 && nw == 0)) plat_gfx_logf("[gfx] проверка показа %d: в FBO непусто %d/64 (сумма %u), в окне %d/64 (сумма %u)%s\n", g_chk_flips, nf, sf, nw, sw, er ? ", ошибка GL" : "");
+    if (er || (nf >= 4 && nw == 0)) {
+        g_chk_fail++;
+        plat_gfx_logf("[gfx] ОТКАТ: %s — дальше рисую прямо в окно без FBO (MSAA/FXAA/render_scale/гамма выключены). Чтобы не ждать проверки: fbo = off в driver.cfg или RE_FBO=0\n",
+                      er ? "ошибка GL при показе кадра через FBO" : "кадр в FBO есть, а в окне пусто");
+        fbo_free(); g_fbo_off = 1; fbo_setup();
+        { void plat_fullscreen_fallback(const char *why); const char *f = getenv("RE_FULLSCREEN");
+          if (!(f && *f)) plat_fullscreen_fallback("полный экран после отката FBO"); }   /* v2.24: заодно — в окно, если полный экран не задан явно */
+        return 1;
+    }
+    return 0;
+}
+/* v2.24: переключение на лету (Cmd/Alt+Shift+Enter — plat_sys.c): 1 — через FBO (если доступен), 0 — прямо в окно */
+int plat_render_set_fbo(int on) {
+    if (!g_ok) return -1;
+    if (on && g_pprog) g_fbo_off = 0; else g_fbo_off = 1;
+    fbo_setup(); plat_gfx_logf("[gfx] переключено: %s\n", g_fbo ? "через FBO" : "прямо в окно");
+    return g_fbo ? 1 : 0;
+}
+int plat_render_fbo_on(void) { return g_fbo != 0; }
 void plat_flip(void) {
     plat_snd_pump(); if (!g_ok) return;
     if (g_swap) compose();   /* v2.16: resolve + пост-проход в буфер окна до снимка/показа */
+    /* v2.24: проверка — на 3-м показе, затем каждые 30, пока не будет кадра с изображением (заставки бывают чёрными), до 6000 показов */
+    if (g_swap) { g_chk_flips++; if (g_fbo && ((!g_chk_ok && g_chk_flips <= 6000 && (g_chk_flips == 3 || g_chk_flips % 30 == 0)) || (plat_gfx_dbg() && g_chk_flips % 600 == 0))) plat_render_selfcheck(NULL, NULL); }
+    else if (g_chk_flips < 4) glerr("кадр");
     glFinish();
     if (g_swap) { plat_frame_tick("flip"); g_swap(); clear_bars(); }
 }

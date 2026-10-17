@@ -26,5 +26,15 @@ Driver (1999) — нативная сборка для macOS (Apple Silicon, arm
   RE_WINDOWED=1 — в окне, RE_RES=1440x1080 — размер окна, RE_FULLSCREEN=1 — полный экран. Cmd+Q — выход.
 Если клавиши не работают: RE_INPUTDBG=1 ./Driver.app/Contents/MacOS/Driver  → пришлите ~/Library/Logs/driver_input.log
 
+Тёмный экран, хотя звук есть (v2.24):
+  1) запустите в окне:                RE_WINDOWED=1 ./Driver.app/Contents/MacOS/Driver
+  2) если тёмно и в окне — без FBO:     RE_WINDOWED=1 RE_FBO=0 ./Driver.app/Contents/MacOS/Driver
+     (или в driver.cfg: preset = safe — то же, что original, но без FBO; fullscreen = 0 — всегда окно)
+  3) подробный журнал:                 RE_GFXDBG=1 ./Driver.app/Contents/MacOS/Driver
+     и пришлите ~/Library/Logs/driver_gfx.log (пишется всегда, RE_GFXDBG=1 — подробнее; на Linux — ~/.config/driver/driver_gfx.log).
+  Игра сама проверяет первые кадры: если через FBO в окне пусто — переходит на прямой рендер и (если полный экран
+  не задан явно) в окно; в журнале это строки «ОТКАТ». Cmd+Shift+Enter — FBO вкл./выкл. на лету, Cmd+Enter — окно/полный экран.
+  Полный экран: RE_FULLSCREEN=desktop (по умолчанию, как раньше) или RE_FULLSCREEN=exclusive (смена режима дисплея).
+
 Статус: сборка, selftest и inputtest проверены в CI на macos-14 (arm64). v2.13 на Mac M1 (Роман): окно есть, управление не работало;
 v2.14 — исправления ввода и нативное разрешение, на реальном Mac ещё не проверено.

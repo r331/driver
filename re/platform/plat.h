@@ -87,6 +87,11 @@ void plat_render_shutdown(void);
 /* v2.16 (SDL): графика — driver.cfg/RE_* (sdl/plat_gfx.h): MSAA-FBO, FXAA, мипмапы, анизотропия, render_scale, гамма */
 const char *plat_render_gfx_info(char *buf, int n);           /* что реально включено (цель, MSAA, aniso) */
 int  plat_render_uploads(int *pixels);                       /* число загрузок текстур (и пикселей) с начала */
+/* v2.24: устойчивость показа: проверка «кадр в FBO есть, а в окне пусто / ошибка GL» → откат на прямой рендер; переключение FBO на лету */
+int  plat_render_selfcheck(int *fbo_nonblack, int *win_nonblack);   /* 1 — был откат */
+int  plat_render_set_fbo(int on);                                   /* 1 — через FBO, 0 — прямо в окно */
+int  plat_render_fbo_on(void);
+void plat_gfx_logf(const char *fmt, ...);                           /* driver_gfx.log + stderr */
 /* Звук и CD-аудио */
 int  plat_snd_create(const void *pcm, int bytes, int rate, int channels, int bits);
 void plat_snd_destroy(int h);

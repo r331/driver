@@ -11,13 +11,14 @@ static int ieq(const char *a, const char *b) { for (; *a && *b; a++, b++) if (to
 
 int re_gfx_preset(re_gfx_cfg *c, const char *name) {
     re_gfx_cfg k; memset(&k, 0, sizeof k);
-    k.render_scale = 1.0; k.gamma = 1.0; k.brightness = 1.0; k.vsync = RE_VSYNC_ON; k.fullscreen = -1; k.hud_filter = RE_HUD_SHARP;
+    k.render_scale = 1.0; k.gamma = 1.0; k.brightness = 1.0; k.vsync = RE_VSYNC_ON; k.fullscreen = -1; k.hud_filter = RE_HUD_SHARP; k.fbo = 1;
     if (!name || ieq(name, "enhanced")) {
         scpy(k.preset, "enhanced", sizeof k.preset);
         k.msaa = 4; k.a2c = 1; k.fxaa = 0; k.aniso = 16; k.mipmaps = 1; k.dilate = 1; k.filter = RE_FILTER_TRILINEAR;
         k.draw_distance = 2.0;
-    } else if (ieq(name, "original")) {   /* как v2.15: билинейная без мипмапов, без сглаживания, HUD — линейно */
-        scpy(k.preset, "original", sizeof k.preset);
+    } else if (ieq(name, "original") || ieq(name, "safe")) {   /* как v2.15: билинейная без мипмапов, без сглаживания, HUD — линейно */
+        scpy(k.preset, ieq(name, "safe") ? "safe" : "original", sizeof k.preset);
+        if (ieq(name, "safe")) k.fbo = 0;   /* v2.24: safe — ещё и без FBO: игра рисует прямо в буфер окна, как v2.15 */
         k.msaa = 0; k.a2c = 0; k.fxaa = 0; k.aniso = 1; k.mipmaps = 0; k.dilate = 0; k.filter = RE_FILTER_LINEAR; k.hud_filter = RE_HUD_LINEAR;
         k.draw_distance = 1.0;
     } else return -1;
@@ -74,7 +75,12 @@ int re_gfx_set(re_gfx_cfg *c, const char *k, const char *v) {
     if (ieq(k, "music_dir")) { if (strlen(v) >= sizeof c->music_dir) return -2; scpy(c->music_dir, v, sizeof c->music_dir); return 0; }   /* v2.22 */
     if (ieq(k, "texpack")) { if (strlen(v) >= sizeof c->texpack) return -2; scpy(c->texpack, v, sizeof c->texpack); return 0; }
     if (ieq(k, "aspect")) { if (strlen(v) >= sizeof c->aspect) return -2; scpy(c->aspect, v, sizeof c->aspect); return 0; }
-    if (ieq(k, "fullscreen")) { if (pbool(v, &b)) return -2; c->fullscreen = b; return 0; }
+    if (ieq(k, "fbo")) { if (ieq(v, "auto")) { c->fbo = 1; return 0; } return pbool(v, &c->fbo); }   /* v2.24 */
+    if (ieq(k, "fullscreen")) {   /* v2.24: + desktop / exclusive */
+        if (ieq(v, "desktop")) { c->fullscreen = 1; return 0; }
+        if (ieq(v, "exclusive")) { c->fullscreen = 2; return 0; }
+        if (pbool(v, &b)) return -2; c->fullscreen = b; return 0;
+    }
     if (ieq(k, "windowed_res")) {
         int w = 0, h = 0; char x = 0;
         if (sscanf(v, "%d%c%d", &w, &x, &h) != 3 || (x != 'x' && x != 'X') || w < 160 || h < 120 || w > 16384 || h > 16384) return -2;
@@ -118,7 +124,7 @@ int re_gfx_env(re_gfx_cfg *c, const char *(*g)(const char *)) {
     static const char *map[][2] = { { "RE_MSAA", "msaa" }, { "RE_A2C", "a2c" }, { "RE_FXAA", "fxaa" }, { "RE_ANISO", "aniso" },
         { "RE_MIPMAPS", "mipmaps" }, { "RE_DILATE", "dilate" }, { "RE_FILTER", "filter" }, { "RE_HUD_FILTER", "hud_filter" },
         { "RE_RENDER_SCALE", "render_scale" }, { "RE_VSYNC", "vsync" }, { "RE_FPS_LIMIT", "fps_limit" }, { "RE_GAMMA", "gamma" },
-        { "RE_BRIGHTNESS", "brightness" }, { "RE_SHARPEN", "sharpen" }, { "RE_TEXPACK", "texpack" }, { "RE_DRAW_DIST", "draw_distance" } };
+        { "RE_BRIGHTNESS", "brightness" }, { "RE_SHARPEN", "sharpen" }, { "RE_TEXPACK", "texpack" }, { "RE_DRAW_DIST", "draw_distance" }, { "RE_FBO", "fbo" } };
     int errs = 0; const char *v;
     if (!g) return 0;
     if ((v = g("RE_PRESET")) && *v && re_gfx_preset(c, v)) errs++;
@@ -144,15 +150,17 @@ void re_gfx_clamp(re_gfx_cfg *c) {
     if (c->brightness > 2.0) c->brightness = 2.0;
     if (!(c->sharpen >= 0)) c->sharpen = 0;
     if (c->sharpen > 1) c->sharpen = 1;
+    c->fbo = c->fbo != 0;
+    if (c->fullscreen < -1 || c->fullscreen > 2) c->fullscreen = 1;
     if (!(c->draw_distance >= 1.0)) c->draw_distance = 1.0;
     if (c->draw_distance > 4.0) c->draw_distance = 4.0;
     c->a2c = c->a2c != 0; c->fxaa = c->fxaa != 0; c->mipmaps = c->mipmaps != 0; c->dilate = c->dilate != 0;
 }
 const char *re_gfx_describe(const re_gfx_cfg *c, char *b, int n) {
     static const char *fl[] = { "nearest", "linear", "trilinear" }, *hf[] = { "nearest", "linear", "sharp" };
-    snprintf(b, (size_t)n, "preset %s: msaa %d a2c %d fxaa %d aniso %d mipmaps %d dilate %d filter %s hud_filter %s render_scale %.2f vsync %s fps_limit %d gamma %.2f brightness %.2f sharpen %.2f draw_distance %.2f aspect %s fullscreen %d windowed_res %dx%d texpack %s cfg %s",
+    snprintf(b, (size_t)n, "preset %s: msaa %d a2c %d fxaa %d aniso %d mipmaps %d dilate %d filter %s hud_filter %s render_scale %.2f vsync %s fps_limit %d gamma %.2f brightness %.2f sharpen %.2f draw_distance %.2f fbo %d aspect %s fullscreen %d windowed_res %dx%d texpack %s cfg %s",
              c->preset, c->msaa, c->a2c, c->fxaa, c->aniso, c->mipmaps, c->dilate, fl[c->filter], hf[c->hud_filter], c->render_scale,
-             c->vsync == RE_VSYNC_ADAPTIVE ? "adaptive" : c->vsync ? "on" : "off", c->fps_limit, c->gamma, c->brightness, c->sharpen, c->draw_distance,
+             c->vsync == RE_VSYNC_ADAPTIVE ? "adaptive" : c->vsync ? "on" : "off", c->fps_limit, c->gamma, c->brightness, c->sharpen, c->draw_distance, c->fbo,
              c->aspect[0] ? c->aspect : "-", c->fullscreen, c->win_w, c->win_h, c->texpack[0] ? c->texpack : "-", c->source[0] ? c->source : "-");
     return b;
 }

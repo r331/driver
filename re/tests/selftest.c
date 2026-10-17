@@ -7342,6 +7342,11 @@ static const char *gfx_fake_env(const char *n) {
 }
 static int test_gfx(void) {
   re_gfx_cfg c; re_gfx_defaults(&c);
+  /* v2.24: fbo / preset safe / fullscreen desktop|exclusive */
+  CHECK(c.fbo == 1 && re_gfx_set(&c, "fbo", "off") == 0 && c.fbo == 0 && re_gfx_set(&c, "fbo", "auto") == 0 && c.fbo == 1 && re_gfx_set(&c, "fbo", "x") == -2);
+  CHECK(re_gfx_preset(&c, "safe") == 0 && c.fbo == 0 && c.msaa == 0 && !strcmp(c.preset, "safe") && re_gfx_preset(&c, "original") == 0 && c.fbo == 1);
+  CHECK(re_gfx_set(&c, "fullscreen", "exclusive") == 0 && c.fullscreen == 2 && re_gfx_set(&c, "fullscreen", "desktop") == 0 && c.fullscreen == 1 && re_gfx_set(&c, "fullscreen", "0") == 0 && c.fullscreen == 0);
+  re_gfx_defaults(&c);
   CHECK(!strcmp(c.preset, "enhanced") && c.msaa == 4 && c.aniso == 16 && c.mipmaps && c.filter == RE_FILTER_TRILINEAR && !c.fxaa && c.render_scale == 1.0);
   const char *txt = "# driver.cfg\n[graphics]\npreset = original ; комментарий\nmsaa = 3\nfxaa = on\naniso=32\nfilter = trilinear\nrender_scale = 4\n"
                     "vsync = adaptive\nfps_limit = 60\ngamma = 1.2\naspect = 21:9\nfullscreen = 0\nwindowed_res = 1280x720\nhud_filter = sharp\nbogus = 1\nmipmaps = maybe\n";

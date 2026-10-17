@@ -3,7 +3,7 @@
 # Linux — ${XDG_CONFIG_HOME:-~/.config}/driver/driver.cfg. Переменные окружения RE_* важнее файла.
 # Комментарии — # или ;. Сначала применяется preset, остальные ключи — поверх.
 
-preset       = enhanced    # enhanced (по умолчанию) | original (как v2.15: билинейная, без мипмапов и сглаживания)
+preset       = enhanced    # enhanced (по умолчанию) | original (как v2.15: билинейная, без мипмапов и сглаживания) | safe (v2.24: original без FBO)
 msaa         = 4           # 0 | 2 | 4 | 8 — мультисэмпловый FBO; больше, чем умеет драйвер, — понижается
 a2c          = on          # alpha-to-coverage для пальм/заборов/деревьев (только при msaa >= 2)
 fxaa         = off         # пост-проход FXAA (можно вместе с msaa)
@@ -20,7 +20,8 @@ brightness   = 1.0         # 0.5..2.0
 sharpen      = 0           # 0..1 — лёгкая резкость в пост-проходе
 draw_distance = 2.0        # v2.19: дальность прорисовки, множитель к опции игры «дальность» (1.0 — оригинал, до 4.0; enhanced — 2.0, original — 1.0; RE_DRAW_DIST важнее)
 #aspect       = auto        # auto | 4:3 | 16:9 | 21:9 ... (как RE_ASPECT)
-#fullscreen   = 1           # 1 — полный экран, 0 — окно
+#fullscreen   = 1           # 1 | desktop — полный экран рабочего стола, exclusive — эксклюзивный (v2.24), 0 — окно
+#fbo          = on          # v2.24: off — рисовать прямо в окно без FBO (нет MSAA/FXAA/render_scale/гаммы); при тёмном экране
 #windowed_res = 1600x900    # размер окна
 #texpack      = /путь/к/texpack   # v2.17: HD-пак текстур (<каталог>/<уровень>/pNNN.png, см. README «HD-текстуры»; RE_TEXPACK важнее)
 #music_dir    = /путь/к/Music   # v2.22: дорожки CD-музыки TrackNN.wav|flac|ogg|mp3 или .cue+.bin (по умолчанию ./Music в каталоге данных; RE_MUSIC_DIR важнее)

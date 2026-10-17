@@ -90,6 +90,25 @@ int test_render(const char *png_path) {
     CHECK(near_px(PX(240, 140), 255, 0, 0));                /* ZFUNC GREATER: ближний зелёный не прошёл */
     CHECK(near_px(PX(240, 165), 0, 0, 255));                /* ZFUNC GREATER: дальний синий прошёл */
     CHECK(png_write_rgba(png_path, px, W, H) == 0);
+    /* v2.24: проверка показа: FBO → окно (норма), затем имитация «пост-проход не рисует» → откат на прямой рендер, кадр снова непустой */
+    {   int nf = -1, nw = -1;
+        CHECK(plat_render_fbo_on() == 1 && plat_render_selfcheck(&nf, &nw) == 0 && nf >= 4 && nw >= 4);
+        setenv("RE_GFXTEST", "nopost", 1);
+        plat_flip(); CHECK(plat_render_readback(px) == 0);
+        CHECK(plat_render_selfcheck(&nf, &nw) == 1 && nf >= 4 && nw == 0 && plat_render_fbo_on() == 0);   /* откат */
+        unsetenv("RE_GFXTEST");
+        plat_clear(0xFF2040C0, 1); plat_set_blend(0, 0, 0); plat_set_zbuffer(1, 1); plat_draw_tris(n, 6);
+        CHECK(plat_render_readback(px) == 0 && near_px(PX(250, 5), 0x20, 0x40, 0xC0) && near_px(PX(145, 165), 255, 0, 0));   /* прямой рендер: кадр есть */
+        CHECK(plat_render_set_fbo(1) == 1 && plat_render_fbo_on() == 1);   /* обратно через FBO */
+        plat_clear(0xFF2040C0, 1); plat_draw_tris(n, 6);
+        CHECK(plat_render_readback(px) == 0 && near_px(PX(250, 5), 0x20, 0x40, 0xC0) && near_px(PX(145, 165), 255, 0, 0));
+        plat_render_set_drawable(320, 240); plat_render_set_drawable(W, H);   /* смена размера — пересоздание FBO, кадр непустой */
+        plat_clear(0xFF2040C0, 1); plat_draw_tris(n, 6);
+        CHECK(plat_render_readback(px) == 0 && near_px(PX(145, 165), 255, 0, 0));
+        CHECK(plat_render_set_fbo(0) == 0); plat_clear(0xFF2040C0, 1); plat_draw_tris(n, 6);
+        CHECK(plat_render_readback(px) == 0 && near_px(PX(145, 165), 255, 0, 0));
+        plat_render_set_fbo(1);
+        printf("render: v2.24 проверка показа и откат FBO — OK\n"); }
     printf("render: OK (%s)\n", png_path);
     free(px); plat_tex_free(tx); plat_render_shutdown();
     return 0;

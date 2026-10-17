@@ -9,7 +9,7 @@ enum { RE_HUD_NEAREST = 0, RE_HUD_LINEAR = 1, RE_HUD_SHARP = 2 };               
 enum { RE_VSYNC_OFF = 0, RE_VSYNC_ON = 1, RE_VSYNC_ADAPTIVE = -1 };
 
 typedef struct {
-    char   preset[16];      /* original | enhanced */
+    char   preset[16];      /* original | enhanced | safe (v2.24: original + без FBO) */
     int    msaa;            /* 0/1 — выкл., 2/4/8 — сэмплов (мультисэмпловый FBO + resolve) */
     int    a2c;             /* alpha-to-coverage для альфа-теста (пальмы, заборы) при MSAA */
     int    fxaa;            /* пост-проход FXAA */
@@ -25,8 +25,9 @@ typedef struct {
     double brightness;      /* 0.5..2.0, 1 — как есть */
     double sharpen;         /* 0..1, 0 — выкл. */
     char   aspect[24];      /* "" — не задано (RE_ASPECT / auto) */
-    int    fullscreen;      /* -1 не задано, 0 окно, 1 полный экран */
+    int    fullscreen;      /* -1 не задано, 0 окно, 1 полный экран рабочего стола, 2 — эксклюзивный (v2.24) */
     int    win_w, win_h;    /* windowed_res, 0 — не задано */
+    int    fbo;             /* v2.24: 1 — кадр через FBO (MSAA/FXAA/render_scale/гамма), 0 — прямо в окно (безопасный режим, как v2.15) */
     double draw_distance;   /* v2.19: множитель дальности прорисовки 1.0 (оригинал) .. 4.0; enhanced — 2.0 */
     char   texpack[512];    /* v2.17: каталог HD-пака текстур ("" — выкл.; RE_TEXPACK важнее) */
     char   source[512];     /* откуда прочитан driver.cfg ("" — файла нет) */
@@ -39,7 +40,7 @@ int  re_gfx_preset(re_gfx_cfg *c, const char *name);         /* 0 — ok, -1 —
    возврат — число ошибок (неизвестный ключ/плохое значение — строка пропускается, в лог через err, если не NULL) */
 int  re_gfx_parse(re_gfx_cfg *c, const char *text, void (*err)(const char *msg));
 /* переопределения из окружения: getter(имя) → значение или NULL (в игре — getenv); RE_PRESET, RE_MSAA, RE_A2C, RE_FXAA,
-   RE_ANISO, RE_MIPMAPS, RE_DILATE, RE_FILTER, RE_HUD_FILTER, RE_RENDER_SCALE, RE_VSYNC, RE_FPS_LIMIT, RE_GAMMA, RE_BRIGHTNESS, RE_SHARPEN, RE_TEXPACK, RE_DRAW_DIST */
+   RE_ANISO, RE_MIPMAPS, RE_DILATE, RE_FILTER, RE_HUD_FILTER, RE_RENDER_SCALE, RE_VSYNC, RE_FPS_LIMIT, RE_GAMMA, RE_BRIGHTNESS, RE_SHARPEN, RE_TEXPACK, RE_DRAW_DIST, RE_FBO (v2.24) */
 int  re_gfx_env(re_gfx_cfg *c, const char *(*getter)(const char *));
 void re_gfx_clamp(re_gfx_cfg *c);                            /* привести к допустимым значениям */
 int  re_gfx_set(re_gfx_cfg *c, const char *key, const char *val);   /* 0 ok, -1 ключ, -2 значение */

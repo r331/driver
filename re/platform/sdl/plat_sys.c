@@ -12,6 +12,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <limits.h>
+#include <time.h>
+int plat_frame_no(void);
 static SDL_Window *g_win; static SDL_GLContext g_gl;
 static void update_drawable(void);
 int plat_fixed_dt(void);
@@ -24,7 +26,44 @@ static void fps_wait(void) {
     next += per;
     while ((now = SDL_GetPerformanceCounter()) < next) { Uint64 ms = (next - now) * 1000 / f; if (ms > 1) SDL_Delay((Uint32)(ms - 1)); }
 }
-void plat_gfx_err(const char *m) { plat_log("[gfx] %s\n", m); }
+/* v2.24: журнал графики driver_gfx.log — всегда (заголовок GL, окно/буфер, ошибки GL/FBO/шейдеров, откаты), RE_GFXDBG=1 — подробно
+   (события окна, размеры, проверки показа, активация). Путь: RE_GFXLOG (off — выкл.), иначе macOS ~/Library/Logs/driver_gfx.log,
+   Linux $XDG_CONFIG_HOME/driver или ~/.config/driver/driver_gfx.log, если не открылся — рядом с бинарником, затем текущий каталог. */
+static FILE *g_glog; static int g_glog_state, g_gdbg = -1;
+int plat_gfx_dbg(void) { if (g_gdbg < 0) { const char *e = getenv("RE_GFXDBG"); g_gdbg = e && *e && *e != '0'; } return g_gdbg; }
+static FILE *glog(void) {
+    if (g_glog_state) return g_glog;
+    g_glog_state = 1;
+    const char *e = getenv("RE_GFXLOG"); char path[PATH_MAX] = "";
+    if (e && (!strcmp(e, "off") || !strcmp(e, "0"))) return NULL;
+    if (e && *e) { snprintf(path, sizeof path, "%s", e); g_glog = fopen(path, "w"); }
+    const char *home = getenv("HOME");
+#if defined(__APPLE__)
+    if (!g_glog && home) { snprintf(path, sizeof path, "%s/Library/Logs/driver_gfx.log", home); g_glog = fopen(path, "w"); }
+#else
+    if (!g_glog) {
+        const char *xdg = getenv("XDG_CONFIG_HOME"); char d[PATH_MAX] = "";
+        if (xdg && *xdg) snprintf(d, sizeof d, "%s/driver", xdg); else if (home) snprintf(d, sizeof d, "%s/.config/driver", home);
+        if (d[0]) { mkdir(d, 0755); snprintf(path, sizeof path, "%s/driver_gfx.log", d); g_glog = fopen(path, "w"); }
+    }
+#endif
+    if (!g_glog) { char *b = SDL_WasInit(0) ? SDL_GetBasePath() : NULL; if (b) { snprintf(path, sizeof path, "%sdriver_gfx.log", b); SDL_free(b); g_glog = fopen(path, "w"); } }
+    if (!g_glog) { snprintf(path, sizeof path, "driver_gfx.log"); g_glog = fopen(path, "w"); }
+    if (g_glog) {
+        SDL_version c, l; SDL_VERSION(&c); SDL_GetVersion(&l); time_t t = time(NULL); char ts[64]; strftime(ts, sizeof ts, "%Y-%m-%d %H:%M:%S", localtime(&t));
+        fprintf(g_glog, "Driver gfx log v2.24, %s. SDL headers %d.%d.%d, library %d.%d.%d, platform %s, video %s, RE_GFXDBG %d\n", ts, c.major, c.minor, c.patch,
+                l.major, l.minor, l.patch, SDL_GetPlatform(), SDL_GetCurrentVideoDriver() ? SDL_GetCurrentVideoDriver() : "-", plat_gfx_dbg());
+        fflush(g_glog); fprintf(stderr, "[gfx] журнал графики: %s\n", path);
+    }
+    return g_glog;
+}
+void plat_gfx_logf(const char *fmt, ...) {   /* в stderr и в driver_gfx.log */
+    va_list a; va_start(a, fmt); vfprintf(stderr, fmt, a); va_end(a);
+    FILE *f = glog(); if (!f) return;
+    fprintf(f, "[%6u ms, кадр %d] ", SDL_WasInit(SDL_INIT_TIMER) ? SDL_GetTicks() : 0u, plat_frame_no());
+    va_start(a, fmt); vfprintf(f, fmt, a); va_end(a); fflush(f);
+}
+void plat_gfx_err(const char *m) { plat_gfx_logf("[gfx] %s\n", m); }
 static void swap_win(void){ SDL_GL_SwapWindow(g_win); fps_wait(); update_drawable(); }   /* v2.14: размер буфера мог измениться (окно, полный экран, Retina) */
 /* v2.08: RE_FIXED_DT=1 — виртуальное время для воспроизводимых прогонов: каждый вызов plat_time_ms +1 мс, каждый показанный
    кадр (plat_flip) — не меньше кадр·20 мс (такт логики P21_FrameTicks = 20 мс → один такт на кадр), plat_sleep_ms только
@@ -52,14 +91,35 @@ void *plat_file_open(const char *path, const char *mode){
    macOS — по умолчанию полный экран рабочего стола (SDL_WINDOW_FULLSCREEN_DESKTOP), другие системы — окно.
    RE_WINDOWED=1 — окно; RE_FULLSCREEN=1 — полный экран; RE_RES=WxH — размер окна (точки; подразумевает окно, если нет RE_FULLSCREEN).
    Окно без RE_RES — наибольшее целое кратное w×h, умещающееся в 85% рабочей области дисплея. Cmd+Enter / Alt+Enter — переключение. */
-static int g_fs_on;
+static int g_fs_on, g_fs_mode = 1;   /* v2.24: g_fs_mode — 1 рабочий стол (SDL_WINDOW_FULLSCREEN_DESKTOP), 2 эксклюзивный */
 static int env_on(const char *n) { const char *e = getenv(n); return e && *e && *e != '0'; }
-static void update_drawable(void) { int dw = 0, dh = 0; if (!g_win) return; SDL_GL_GetDrawableSize(g_win, &dw, &dh); plat_render_set_drawable(dw, dh); }
+/* v2.24: размер буфера из SDL_GL_GetDrawableSize; 0×0 (окно ещё не показано / переход в полноэкранное пространство macOS) — пропуск,
+   прежняя цель остаётся; любое изменение → пересоздание FBO (plat_render_set_drawable) и запись в журнал */
+static void update_drawable(void) {
+    int dw = 0, dh = 0, ww = 0, wh = 0; static int pdw = -1, pdh = -1;
+    if (!g_win) return;
+    SDL_GL_GetDrawableSize(g_win, &dw, &dh); SDL_GetWindowSize(g_win, &ww, &wh);
+    if (dw != pdw || dh != pdh) {
+        static int n; if (n++ < 40 || plat_gfx_dbg()) plat_gfx_logf("[gfx] буфер окна %dx%d (окно %dx%d точек, полный экран %d, флаги 0x%x)\n", dw, dh, ww, wh, g_fs_on, SDL_GetWindowFlags(g_win));
+        pdw = dw; pdh = dh;
+    }
+    if (dw <= 0 || dh <= 0) return;
+    plat_render_set_drawable(dw, dh);
+}
+static Uint32 fs_flag(int mode) { return mode == 2 ? SDL_WINDOW_FULLSCREEN : mode ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0; }
+int plat_render_fbo_on(void); int plat_render_set_fbo(int on);
+/* v2.24: аварийный откат на окно — полный экран не показал кадр (проверка в plat_render_selfcheck / RE_GFXTEST=fsfail) */
+void plat_fullscreen_fallback(const char *why) {
+    if (!g_win || !g_fs_on) return;
+    plat_gfx_logf("[gfx] ОТКАТ: %s — переключаюсь в окно (RE_WINDOWED=1 / fullscreen = 0 в driver.cfg, чтобы сразу)\n", why);
+    g_fs_on = 0; SDL_SetWindowFullscreen(g_win, 0); SDL_GL_MakeCurrent(g_win, g_gl); update_drawable();
+}
 void plat_input_dbg(const char *fmt, ...);   /* plat_di.c */
 void plat_toggle_fullscreen(void) {
     if (!g_win) return;
     g_fs_on = !g_fs_on;
-    SDL_SetWindowFullscreen(g_win, g_fs_on ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+    if (SDL_SetWindowFullscreen(g_win, g_fs_on ? fs_flag(g_fs_mode) : 0) != 0) plat_gfx_logf("[gfx] SDL_SetWindowFullscreen: %s\n", SDL_GetError());
+    SDL_GL_MakeCurrent(g_win, g_gl);   /* v2.24: контекст — снова текущий после смены режима */
     update_drawable();
     plat_input_dbg("полный экран %d", g_fs_on);
 }
@@ -104,16 +164,22 @@ int plat_window_open(const char *t,int w,int h,int fs){
     }
     {   const re_gfx_cfg *gc = re_gfx();   /* v2.16: driver.cfg fullscreen / windowed_res (переменные RE_* — ниже, важнее) */
         if (gc->fullscreen >= 0) full = gc->fullscreen;
-        if (!(res && *res) && gc->win_w > 0 && gc->win_h > 0) { ww = gc->win_w; wh = gc->win_h; if (gc->fullscreen != 1) full = 0; }
+        if (!(res && *res) && gc->win_w > 0 && gc->win_h > 0) { ww = gc->win_w; wh = gc->win_h; if (gc->fullscreen < 1) full = 0; }
     }
+    if (full == 2) { g_fs_mode = 2; full = 1; }
     if (env_on("RE_WINDOWED")) full = 0;
-    if (env_on("RE_FULLSCREEN")) full = 1;
+    {   const char *f = getenv("RE_FULLSCREEN");   /* v2.24: 1 | desktop — рабочий стол, exclusive — эксклюзивный, 0 — окно */
+        if (f && *f) { if (!strcmp(f, "exclusive")) { full = 1; g_fs_mode = 2; } else if (!strcmp(f, "desktop") || env_on("RE_FULLSCREEN")) { full = 1; g_fs_mode = 1; } else full = 0; }
+    }
     g_fs_on = full;
     g_win = SDL_CreateWindow(t, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww, wh,
-                             SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE | (full ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
-    if (!g_win) return -1;
+                             SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE | (full ? fs_flag(g_fs_mode) : 0));
+    if (!g_win && full) { plat_gfx_logf("[gfx] окно в полном экране не создано (%s) — пробую окно\n", SDL_GetError()); full = g_fs_on = 0;
+        g_win = SDL_CreateWindow(t, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww, wh, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE); }
+    if (!g_win) { plat_gfx_logf("[gfx] SDL_CreateWindow: %s\n", SDL_GetError()); return -1; }
     SDL_SetWindowMinimumSize(g_win, w / 2, h / 2);
-    g_gl = SDL_GL_CreateContext(g_win); if (!g_gl) return -2;
+    g_gl = SDL_GL_CreateContext(g_win); if (!g_gl) { plat_gfx_logf("[gfx] SDL_GL_CreateContext (OpenGL 3.3 core): %s\n", SDL_GetError()); return -2; }
+    SDL_GL_MakeCurrent(g_win, g_gl);
     {   int vs = re_gfx()->vsync;   /* v2.16: vsync on/off/adaptive (adaptive недоступен — on) */
         if (SDL_GL_SetSwapInterval(vs) != 0) { plat_log("[gfx] vsync %d недоступен (%s)%s\n", vs, SDL_GetError(), vs == -1 ? " — включён обычный" : ""); if (vs == -1) SDL_GL_SetSwapInterval(1); }
     }
@@ -123,7 +189,11 @@ int plat_window_open(const char *t,int w,int h,int fs){
     { int dw = 0, dh = 0; SDL_GL_GetDrawableSize(g_win, &dw, &dh);
       fprintf(stderr, "[window] кадр игры %dx%d, окно %dx%d, буфер %dx%d, %s, главный поток %d\n", w, h, ww, wh, dw, dh,
               full ? "полный экран" : "окно", plat_is_main_thread());
-      plat_input_dbg("окно: кадр %dx%d, окно %dx%d, буфер %dx%d, полный экран %d, главный поток %d", w, h, ww, wh, dw, dh, full, plat_is_main_thread()); }
+      plat_input_dbg("окно: кадр %dx%d, окно %dx%d, буфер %dx%d, полный экран %d, главный поток %d", w, h, ww, wh, dw, dh, full, plat_is_main_thread());
+      int ax = 0, ay = 0; SDL_GetWindowSize(g_win, &ax, &ay);
+      plat_gfx_logf("[gfx] окно: кадр игры %dx%d, окно %dx%d точек, буфер %dx%d пикселей, %s, attach %d\n", w, h, ax, ay, dw, dh,
+                    full ? (g_fs_mode == 2 ? "полный экран (эксклюзивный)" : "полный экран (рабочий стол)") : "окно", r); }
+    if (r != 0) plat_gfx_logf("[gfx] рендер не запущен (код %d) — см. строки выше\n", r);
     return r;
 }
 int plat_poll_events(void){ SDL_Event e; while (SDL_PollEvent(&e)) if (e.type==SDL_QUIT) return 0; return 1; }
@@ -234,6 +304,7 @@ static int g_active_sent = -1, g_pumped;
 static void send_activate(int on) {
     if (g_wtrap || !g_wproc || g_active_sent == on) return;
     g_active_sent = on; plat_input_dbg("WM_ACTIVATEAPP %d", on);
+    { static int n; if (n++ < 20 || plat_gfx_dbg()) plat_gfx_logf("[gfx] активация игры (WM_ACTIVATEAPP) %d%s\n", on, on ? "" : " — игра не рисует меню, пока окно без фокуса"); }
     g_wproc((void *)(intptr_t)1, 0x1c, (uint32_t)on, 0);
 }
 static void drain_events(void) {
@@ -248,11 +319,19 @@ static void drain_events(void) {
         } else if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP) {
             int sc = e.key.keysym.scancode, mod = e.key.keysym.mod;
             if (e.type == SDL_KEYDOWN && !e.key.repeat && (sc == SDL_SCANCODE_RETURN || sc == SDL_SCANCODE_KP_ENTER) && (mod & (KMOD_GUI | KMOD_ALT))) {
-                plat_toggle_fullscreen(); continue;   /* Cmd+Enter / Alt+Enter — игре не передаётся */
+                if (mod & KMOD_SHIFT) plat_render_set_fbo(!plat_render_fbo_on());   /* v2.24: Cmd/Alt+Shift+Enter — FBO вкл./выкл. */
+                else plat_toggle_fullscreen();   /* Cmd+Enter / Alt+Enter — игре не передаётся */
+                continue;
             }
             plat_input_key_event(sc, e.type == SDL_KEYDOWN, e.key.repeat);
         } else if (e.type == SDL_WINDOWEVENT) {
-            if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED || e.window.event == SDL_WINDOWEVENT_RESIZED) update_drawable();
+            if (plat_gfx_dbg() && e.window.event != SDL_WINDOWEVENT_MOVED) plat_gfx_logf("[gfx] событие окна %d (%d, %d), активна игра %d\n", e.window.event, e.window.data1, e.window.data2, g_active_sent);
+            if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED || e.window.event == SDL_WINDOWEVENT_RESIZED || e.window.event == SDL_WINDOWEVENT_SHOWN
+                || e.window.event == SDL_WINDOWEVENT_RESTORED || e.window.event == SDL_WINDOWEVENT_MAXIMIZED
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+                || e.window.event == SDL_WINDOWEVENT_DISPLAY_CHANGED
+#endif
+               ) update_drawable();
             else if (e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED || e.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
                 send_activate(e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED);
         }
