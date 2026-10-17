@@ -192,7 +192,7 @@ static void near_vtx(p85_rv *o, const p85_rv *a, const p85_rv *b, int ia, int ib
   o->x = (kk * vx + P43_OffX) - P43_Half;
   o->y = (kk * vy + P43_OffY) - P43_Half;
 }
-static int near_clip_raster(void) {
+static int near_clip_raster_fn(p85_raster_fn fa, p85_raster_fn fb) {
   p85_rv in[3], out[4];
   int n = 0, inside[3], cnt = 0;
   for (int i = 0; i < 3; i++) {
@@ -209,11 +209,26 @@ static int near_clip_raster(void) {
   }
   for (int k = 1; k + 1 < n; k++) {
     P85_RV[0] = out[0]; P85_RV[1] = out[k]; P85_RV[2] = out[k + 1];
-    if ((uint8_t)P82_Edge == 0) P85_RasterA(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
-    else P85_RasterB(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
+    p85_raster_fn f = (uint8_t)P82_Edge == 0 ? fa : fb;
+    if (f) f(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
   }
   memcpy(P85_RV, in, sizeof in);   /* обработчик четырёхугольника использует RV[0], RV[1] повторно */
   return 1;
+}
+static int near_clip_raster(void) { return near_clip_raster_fn(P85_RasterA, P85_RasterB); }
+/* v2.23: то же для обработчиков со своим растеризатором (P115_*C: 01270e30/01270d9c) — вершина ближе z = 1 или за дальней
+   плоскостью растеризатору напрямую не отдаётся (см. P85_CallRasterWith) */
+void P85_NoteCam(int i, const p85_vtx *v) {
+  if (i >= 0 && i < 3) { s_cam[i].vx = v->vx; s_cam[i].vy = v->vy; s_cam[i].z = v->z; s_cam[i].oow = v->oow; s_cam[i].x = v->x; s_cam[i].ok = 1; }
+}
+void P85_CallRasterWith(p85_raster_fn fa, p85_raster_fn fb) {
+  if (re_ptr_has_image() && (!(P85_RV[0].oow > 0.0f) || !(P85_RV[1].oow > 0.0f) || !(P85_RV[2].oow > 0.0f) ||
+      P85_RV[0].oow == P85_OOW_NEAR || P85_RV[1].oow == P85_OOW_NEAR || P85_RV[2].oow == P85_OOW_NEAR)) {
+    (void)near_clip_raster_fn(fa, fb);
+    return;
+  }
+  p85_raster_fn f = (uint8_t)P82_Edge == 0 ? fa : fb;
+  if (f) f(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
 }
 #endif
 void P85_CallRaster(void) {

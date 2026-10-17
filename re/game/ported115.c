@@ -227,15 +227,33 @@ static p85_vtx *prep(int32_t idx) {
     const float *src = (const float *)((const uint8_t *)P79_PTR(P84_VertRef) + (size_t)idx * 16);
     c->x = src[0]; c->y = src[1]; c->z = src[2];
     P101_ProjT((float *)c);
+#ifndef RE_HOOK_BUILD
+    /* v2.23, только игра: z вне таблицы 1/z — метки как у P85_Project (ближе z = 1 — P85_OOW_NEAR, x = y = 0; дальше — oow 0).
+       Без них P101_ProjT давал oow 0 и центр экрана (320, 240), а запись того же кадра от P85_Project — (0, 0) с oow 1e−30. */
+    if ((P85_ZI < 1 || P85_ZI >= (int32_t)(RE_OOW_N)) && re_ptr_has_image()) { c->oow = P85_ZI < 1 ? P85_OOW_NEAR : 0.0f; c->x = 0; c->y = 0; }
+#endif
     P85_VC_FMT(c, P85_FMT_PROJ);
   }
   return c;
 }
+/* v2.23, отступление native: в наборе с ближней плоскостью (режим 1) типы 0..3 не перенесены (00459b21..), вместо них стоят эти
+   обработчики режима 0 — вершины за камерой (метки P85_OOW_NEAR / oow 0, экран (0,0) / (320,240)) уходили в растеризатор как есть:
+   треугольник от левого верхнего угла/центра на дальней плоскости — серый полигон поверх неба (виден там, где ничего ближе нет).
+   Теперь — как P85_CallRaster: целиком за камерой — пропуск, пересекающий z = 1 — отсечение (P85_CallRasterWith). */
 static void raster_c(void) {
+#ifndef RE_HOOK_BUILD
+  P85_CallRasterWith(P115_RasterC, P115_RasterD);
+#else
   p85_raster_fn f = ((uint8_t)P82_Edge == 0) ? P115_RasterC : P115_RasterD;
   if (f) f(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
+#endif
 }
-static void put_xyz(p85_rv *r, const p85_vtx *v) { r->x = v->x; r->y = v->y; r->z = v->z; r->oow = v->oow; }
+static void put_xyz(p85_rv *r, const p85_vtx *v) {
+  r->x = v->x; r->y = v->y; r->z = v->z; r->oow = v->oow;
+#ifndef RE_HOOK_BUILD
+  P85_NoteCam((int)(r - &P85_RV[0]), v);
+#endif
+}
 static void put_rgb(p85_rv *r, const uint8_t *c) { r->r = rdf(c); r->g = rdf(c + 4); r->b = rdf(c + 8); }
 static void tri_c(uint32_t arg, uint32_t size, int gouraud) {
   const uint8_t *rec = G2_011F4064;

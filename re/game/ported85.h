@@ -130,6 +130,10 @@ void P85_SetBlend(uint8_t m);                  /* смена режима сме
 void P85_CallRaster(void);                     /* три вершины P85_RV → растеризатор (с отсечением при P82_Edge) */
 int  P85_EdgeReject(const p85_vtx *const *vs, int n); /* 1 — все вершины за краем экрана */
 void P85_PutVtx(p85_rv *r, const p85_vtx *v);  /* x, y, oow вершины → вершина растеризатора */
+#ifndef RE_HOOK_BUILD
+void P85_NoteCam(int i, const p85_vtx *v);     /* v2.23: координаты камеры вершины RV[i] для отсечения по z = 1 */
+void P85_CallRasterWith(p85_raster_fn fa, p85_raster_fn fb);   /* v2.23: P85_CallRaster со своим растеризатором */
+#endif
 /* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
 #if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
 #undef P85_StateDirty
