@@ -199,6 +199,13 @@ windowed_res = 1600x900
 
 Проверено на Linux под Xvfb (Mesa llvmpipe: MSAA до 4x, анизотропия 16x); на реальном Mac — пока нет.
 
+## Rendering diagnostics
+
+To capture a rendering problem with a screenshot, car/camera position history,
+graphics settings, model records and submitted vertices, see
+[Rendering diagnostics](docs/DIAGNOSTICS.md). On macOS run
+`sh scripts/run_diagnostics_macos.sh` and press **Cmd+Shift+D** at the problem.
+
 ## HD-текстуры
 
 С v2.17 native-сборка может подменять 16-битные страницы текстур уровня (256×256, ARGB1555) картинками высокого разрешения

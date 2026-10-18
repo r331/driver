@@ -911,13 +911,13 @@ static plat_vertex *vslot(void) {
 }
 void P98_QuadA(int32_t unused, const uint8_t *v) {
   (void)unused;
-  if (P22_DevReady == 0) return;
+  if (P22_DevReady == 0 || !P33_EnsureRoom(P22_TexVarA, 6)) return;
   static const int32_t off[6] = { 0, 0x3c, 0x78, 0, 0x78, 0xb4 };
   for (int32_t i = 0; i < 6; i++) P23_ConvVertexA((const int32_t *)(const void *)(v + off[i]), vslot());
 }
 void P98_QuadB(int32_t unused, const uint8_t *v) {
   (void)unused;
-  if (P22_DevReady == 0) return;
+  if (P22_DevReady == 0 || !P33_EnsureRoom(P22_TexVarA, 6)) return;
   static const int32_t off[6] = { 0, 0x3c, 0x78, 0, 0x78, 0xb4 };
   for (int32_t i = 0; i < 6; i++) P23_ConvVertexB((const int32_t *)(const void *)(v + off[i]), vslot());
 }

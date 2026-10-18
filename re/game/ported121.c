@@ -13,6 +13,9 @@
 #include "ported140.h"
 #include "ported128.h"
 #include "ported121.h"
+#ifndef RE_HOOK_BUILD
+#include "../platform/native/diagnostics.h"
+#endif
 #include "cartab.h"
 #include "unported.h"
 #include "smallfuncs.h"
@@ -347,7 +350,12 @@ static void clip_poly(uint32_t arg, int tex, int nv) {
     } else P100_ClipFar(a, b);
   }
   int32_t n = P100_ClipN;
-  if (n < 3 || n > 5) return;
+  if (n < 3 || n > 5) {
+#ifndef RE_HOOK_BUILD
+    re_diag_count(RE_DIAG_POLY_EMPTY);
+#endif
+    return;
+  }
   float xs[5], ys[5], ow[5];
   for (int32_t i = 0; i < n; i++) {
     const float *o = &P121_ClipBuf[i * 12];

@@ -3,6 +3,9 @@
 #include "ported85.h"
 #include "ported86.h"
 #include "../platform/plat.h"
+#ifndef RE_HOOK_BUILD
+#include "../platform/native/diagnostics.h"
+#endif
 #include <string.h>
 
 GAME_VAR_DEF(p85_vcache_t, P85_VCache, 0x011cffa0)
@@ -125,6 +128,7 @@ void P85_Project(p85_vtx *v) {
     /* v2.05, отступление native: z вне таблицы 1/z (за камерой или ≥ 0xdbba) — в оригинале такие вершины уходят в набор с
        отсечением (не перенесён); только в игре (вне игры — прежнее поведение тестов города): oow = 0 — P85_CallRaster такой треугольник не рисует (вместо чтения за границей таблицы). */
     if ((zi < 1 || zi >= (int32_t)(RE_OOW_N)) && re_ptr_has_image()) {
+      re_diag_count(zi < 1 ? RE_DIAG_PROJECT_NEAR : RE_DIAG_PROJECT_FAR);
       /* v2.07: ближе z = 1 — метка P85_OOW_NEAR (u·oow остаётся восстановимым), P85_CallRaster отсекает треугольник по z = 1 */
       v->oow = zi < 1 ? P85_OOW_NEAR : 0.0f; v->x = 0; v->y = 0; return; }
 #endif
@@ -196,11 +200,12 @@ static int near_clip_raster_fn(p85_raster_fn fa, p85_raster_fn fb) {
   p85_rv in[3], out[4];
   int n = 0, inside[3], cnt = 0;
   for (int i = 0; i < 3; i++) {
-    if (!(s_cam[i].ok && s_cam[i].oow == P85_RV[i].oow && s_cam[i].x == P85_RV[i].x)) return 0;   /* вершина не из P85_PutVtx */
-    if (!(P85_RV[i].oow > 0.0f)) return 0;                                                          /* дальняя — пропуск, как в v2.05 */
+    if (!(s_cam[i].ok && s_cam[i].oow == P85_RV[i].oow && s_cam[i].x == P85_RV[i].x)) {
+      re_diag_count(RE_DIAG_CLIP_STALE); return 0; }   /* вершина не из P85_PutVtx */
+    if (!(P85_RV[i].oow > 0.0f)) { re_diag_count(RE_DIAG_CLIP_FAR); return 0; } /* дальняя — пропуск */
     inside[i] = P85_RV[i].oow != P85_OOW_NEAR && s_cam[i].z >= 1.0f; cnt += inside[i];
   }
-  if (cnt == 0) return 0;
+  if (cnt == 0) { re_diag_count(RE_DIAG_CLIP_BEHIND); return 0; }
   memcpy(in, P85_RV, sizeof in);
   for (int i = 0; i < 3; i++) {
     int j = (i + 1) % 3;
@@ -211,6 +216,7 @@ static int near_clip_raster_fn(p85_raster_fn fa, p85_raster_fn fb) {
     P85_RV[0] = out[0]; P85_RV[1] = out[k]; P85_RV[2] = out[k + 1];
     p85_raster_fn f = (uint8_t)P82_Edge == 0 ? fa : fb;
     if (f) f(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
+    if (f) re_diag_count(RE_DIAG_CLIP_EMITTED);
   }
   memcpy(P85_RV, in, sizeof in);   /* обработчик четырёхугольника использует RV[0], RV[1] повторно */
   return 1;

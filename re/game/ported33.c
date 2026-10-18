@@ -5,6 +5,9 @@
 #include "ported31.h"
 #include "unported.h"
 #include <string.h>
+#ifndef RE_HOOK_BUILD
+#include "../platform/native/diagnostics.h"
+#endif
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P33_Count")
 #undef P33_Count
@@ -25,6 +28,29 @@ int32_t P33_GlideOk;
 #pragma pop_macro("P33_GlideOk") /*gvi*/
 #pragma pop_macro("P33_GlideOk")
 #endif
+
+/* A texture slot holds 4096 vertices. Flush before a complete primitive would
+   cross that boundary; dropping later vertices makes nearby road tiles vanish. */
+int P33_EnsureRoom(int32_t slot, int32_t vertices) {
+  const int32_t capacity = (int32_t)(sizeof P33_VBuf[0] / sizeof(plat_vertex));
+  if (slot < 0 || slot >= 33 || vertices <= 0 || vertices > capacity) return 0;
+  int32_t n = P33_Count[slot];
+  if (n < 0 || n > capacity || n % 3 != 0) return 0;
+  if (n > capacity - vertices) {
+#ifndef RE_HOOK_BUILD
+    /* The SDL accessor returns the actual binding, which may differ from the
+       palette cache. FlushBatches restores that cache but leaves its last texture bound. */
+    void *texture = plat_stub_last_texture(NULL);
+    re_diag_count(RE_DIAG_BATCH_ROLLOVER);
+    re_diag_log("Vertex batch rollover: slot=%d queued=%d incoming=%d capacity=%d\n", slot, n, vertices, capacity);
+#endif
+    P33_FlushBatches();
+#ifndef RE_HOOK_BUILD
+    plat_set_texture(0, texture);
+#endif
+  }
+  return 1;
+}
 
 void P33_FlushBatches(void) {
   void *keep_handle = P32_CurHandle;

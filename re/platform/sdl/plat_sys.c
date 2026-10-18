@@ -3,6 +3,7 @@
 #endif
 #include "../plat.h"
 #include "plat_gfx.h"
+#include "../native/diagnostics.h"
 #include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,6 +60,7 @@ static FILE *glog(void) {
 }
 void plat_gfx_logf(const char *fmt, ...) {   /* в stderr и в driver_gfx.log */
     va_list a; va_start(a, fmt); vfprintf(stderr, fmt, a); va_end(a);
+    va_start(a, fmt); re_diag_logv(fmt, a); va_end(a);
     FILE *f = glog(); if (!f) return;
     fprintf(f, "[%6u ms, кадр %d] ", SDL_WasInit(SDL_INIT_TIMER) ? SDL_GetTicks() : 0u, plat_frame_no());
     va_start(a, fmt); vfprintf(f, fmt, a); va_end(a); fflush(f);
@@ -75,7 +77,8 @@ static void vt_advance(uint32_t t){ if (t > g_vt) g_vt = t; plat_vt_timers(g_vt)
 uint32_t plat_time_ms(void){ if (!plat_fixed_dt()) return SDL_GetTicks(); vt_advance(g_vt + 1); return g_vt; }
 void plat_vt_poll(void){ if (plat_fixed_dt()) vt_advance(g_vt + 1); }
 void plat_sleep_ms(uint32_t ms){ if (!plat_fixed_dt()) { SDL_Delay(ms); return; } vt_advance(g_vt + ms); }
-void plat_log(const char *f, ...){ va_list a; va_start(a,f); vfprintf(stderr,f,a); va_end(a); }
+void plat_log(const char *f, ...){ va_list a; va_start(a,f); vfprintf(stderr,f,a); va_end(a);
+    va_start(a,f); re_diag_logv(f,a); va_end(a); }
 void *plat_file_open(const char *path, const char *mode){
     FILE *f = fopen(path, mode); if (f) return f;
     char dir[PATH_MAX], *s; strncpy(dir, path, sizeof dir - 1); dir[sizeof dir - 1] = 0;
@@ -335,6 +338,10 @@ static void drain_events(void) {
             if (!g_wtrap) { fprintf(stderr, "[window] закрытие окна — выход\n"); fflush(NULL); exit(0); }   /* v2.14: Cmd+Q / закрытие окна */
         } else if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP) {
             int sc = e.key.keysym.scancode, mod = e.key.keysym.mod;
+            if (sc == SDL_SCANCODE_D && (mod & KMOD_SHIFT) && (mod & (KMOD_GUI | KMOD_CTRL))) {
+                if (e.type == SDL_KEYDOWN && !e.key.repeat) re_diag_request();
+                continue;
+            }
             if (e.type == SDL_KEYDOWN && !e.key.repeat && (sc == SDL_SCANCODE_RETURN || sc == SDL_SCANCODE_KP_ENTER) && (mod & (KMOD_GUI | KMOD_ALT))) {
                 if (mod & KMOD_SHIFT) plat_render_set_fbo(!plat_render_fbo_on());   /* v2.24: Cmd/Alt+Shift+Enter — FBO вкл./выкл. */
                 else plat_toggle_fullscreen();   /* Cmd+Enter / Alt+Enter — игре не передаётся */
@@ -549,6 +556,7 @@ void plat_frame_tick(const char *where) {
         g_frames++;
         frame_stat();
         flip_events();
+        re_diag_frame(g_frames);
         if (plat_fixed_dt()) vt_advance((uint32_t)g_frames * 20u);   /* v2.08: RE_FIXED_DT */
         if (g_frames == 1) fprintf(stderr, "[frame] первый кадр (plat_flip)\n");
         { /* v2.20: RE_SHOT_EVERY=N [RE_SHOT_FROM=K] — серия снимков RE_SHOT_PNG без .png + _NNNNN.png каждые N кадров (с кадра K) */

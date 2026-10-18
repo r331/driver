@@ -76,15 +76,14 @@ _Static_assert(sizeof(plat_vertex) == 0x20, "plat_vertex");
 
 void P76_InitConsts(void) { P76_K255 = 255.0f; }
 
-/* Три вершины подряд в буфер текущего слота текстуры (P22_TexVarA); оригинал не проверяет границ буфера (0x1000 вершин) — здесь проверка есть. */
+/* Append one complete triangle, flushing batches before the slot fills. */
 static void tri(const int32_t *v0, const int32_t *v1, const int32_t *v2, int variant_b) {
   const int32_t *in[3] = { v0, v1, v2 };
   if (P22_DevReady == 0) return;
   int32_t slot = P22_TexVarA;
-  if (slot < 0 || slot >= 33) return;
+  if (!P33_EnsureRoom(slot, 3)) return;
   for (int i = 0; i < 3; i++) {
     int32_t n = P33_Count[slot];
-    if (n < 0 || n >= 0x1000) return;
     plat_vertex *dst = (plat_vertex *)(P33_VBuf[slot] + (size_t)n * 0x20);
     P33_Count[slot] = n + 1;
     if (variant_b) P23_ConvVertexB(in[i], dst); else P23_ConvVertexA(in[i], dst);

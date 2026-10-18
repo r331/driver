@@ -3,6 +3,7 @@
    GL-функции берутся через get_proc (SDL_GL_GetProcAddress или OSMesaGetProcAddress), без линковки с libGL. */
 #include "../plat.h"
 #include "../../game/aspect.h"
+#include "../native/diagnostics.h"
 #include "plat_gfx.h"
 #include <stddef.h>
 #include <stdio.h>
@@ -567,6 +568,7 @@ void plat_draw_prim(int ptype, const plat_vertex *v, int count) {
 }
 int plat_draw_prim_last(int *ptype, int *count) { if (ptype) *ptype = g_dp_type; if (count) *count = g_dp_count; return g_dp_calls; }
 static void draw(const plat_vertex *v, int count, unsigned mode) {
+    re_diag_draw(v, count, mode, g_cur, g_zt, g_zw, g_zf, g_blend, g_bs, g_bd, g_at, g_af, g_aref);
     apply_state();
     glUseProgram(g_prog); glUniform2f(g_uView, (float)g_ew, (float)g_h); glUniform1f(g_uShift, (float)g_shift); glUniform1i(g_uTex, 0); glUniform1i(g_uAlphaTest, g_at);
     glUniform3i(g_uCOp, g_tss[0][1], g_tss[0][2], g_tss[0][3]); glUniform3i(g_uAOp, g_tss[0][4], g_tss[0][5], g_tss[0][6]);

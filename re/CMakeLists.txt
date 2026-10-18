@@ -38,6 +38,19 @@ else()
 
   set(NATIVE_SRC ${GAME_SRC} platform/native/main.c platform/native/engine_native.c platform/native/stubs.c platform/native/links.c platform/native/crt_msvc.c platform/native/game_fwd.c platform/native/fn_table.c platform/native/thunk_table.c platform/sdl/plat_sys.c platform/sdl/plat_gfx.c platform/sdl/plat_texpack.c platform/sdl/plat_render.c platform/sdl/plat_dd.c platform/sdl/plat_di.c ${RENDER_OFFSCREEN} platform/sdl/plat_snd.c platform/sdl/plat_dsmix.c platform/sdl/plat_cdaudio.c tests/selftest.c tests/render_test.c tests/snd_test.c tests/cd_test.c tests/input_test.c)
 
+  list(APPEND NATIVE_SRC platform/native/diagnostics.c)
+  execute_process(COMMAND git rev-parse --short HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE RE_BUILD_REV OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+  if(NOT RE_BUILD_REV)
+    set(RE_BUILD_REV unknown)
+  endif()
+  execute_process(COMMAND git diff --quiet HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    RESULT_VARIABLE RE_BUILD_DIRTY OUTPUT_QUIET ERROR_QUIET)
+  if(RE_BUILD_DIRTY EQUAL 1)
+    string(APPEND RE_BUILD_REV "-dirty")
+  endif()
+  set_source_files_properties(platform/native/diagnostics.c PROPERTIES COMPILE_DEFINITIONS "RE_BUILD_REV=\"${RE_BUILD_REV}\"")
+
   if(APPLE AND RE_MACOS_BUNDLE)
     add_executable(driver MACOSX_BUNDLE ${NATIVE_SRC})
     set_target_properties(driver PROPERTIES OUTPUT_NAME Driver

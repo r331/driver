@@ -12,6 +12,9 @@
 #include "ported85.h"
 #include "redbg.h"
 #include "cartab.h"
+#ifndef RE_HOOK_BUILD
+#include "../platform/native/diagnostics.h"
+#endif
 #include <math.h>
 #include <string.h>
 
@@ -200,6 +203,7 @@ static void call_h(const uintptr_t *tab, uint32_t type) {
   RE_DBG(9);
 #ifndef RE_HOOK_BUILD
   if (f == (uintptr_t)P85_SkipRecord) RE_DBG(5);
+  re_diag_record(P79_OFF(G2_011F4064), type, !f || f == (uintptr_t)P85_SkipRecord);
 #endif
   if (f) ((p84_handler_t)f)((uint32_t)P84_Arg[type]);
 }
@@ -207,10 +211,16 @@ static void call_h(const uintptr_t *tab, uint32_t type) {
 /* общая часть 00428b69/00429143: mdl — заголовок, modmat — матрица модели (для света), viewm — ViewMat×modmat */
 static void call_ha(const uintptr_t *tab, uint32_t type, uint32_t arg) {
   uintptr_t f = tab ? tab[type] : 0;
+#ifndef RE_HOOK_BUILD
+  re_diag_record(P79_OFF(G2_011F4064), type, !f || f == (uintptr_t)P85_SkipRecord);
+#endif
   if (f) ((p84_handler_t)f)(arg);
 }
 /* var = 0 — 00428b69/00429143; var = 1 — 0042b7cb (аргумент обработчика 2 без света / 3 со светом, свет плоскости = shade(0.01)) */
 static void draw_core(uint8_t *mdl, const float *modmat, const float *viewm, const float *pos, const uintptr_t *tab, int var) {
+#ifndef RE_HOOK_BUILD
+  re_diag_model(P79_OFF(mdl));
+#endif
   uint16_t flags = *(uint16_t *)(mdl + 2), nrec = *(uint16_t *)(mdl + 0x16), nnrm = *(uint16_t *)(mdl + 0x18);
   float lx = 0, ly = 0, lz = 0;
   static float local[16];   /* зеркальная копия матрицы остаётся в P44_MatPtr после возврата (в оригинале — стек) */
@@ -260,7 +270,12 @@ static void draw_core(uint8_t *mdl, const float *modmat, const float *viewm, con
     uint8_t *vis = &P84_Vis[pi];
     int step = G2_TABLE_00550ACC[type];
     if (!(rec[1] & 8)) {
-      if (!*vis) G2_011F4064 = rec + step;
+      if (!*vis) {
+#ifndef RE_HOOK_BUILD
+        re_diag_record(P79_OFF(rec), type, 2);
+#endif
+        G2_011F4064 = rec + step;
+      }
       else if (var) call_ha(tab, type, lit ? 3u : 2u);
       else call_h(tab, type);
     } else {
@@ -268,7 +283,12 @@ static void draw_core(uint8_t *mdl, const float *modmat, const float *viewm, con
       a += (ld)ny * (ld)pl[1];
       a += (ld)nz * (ld)pl[2];
       a -= (ld)pl[3];
-      if (!neg((float)a)) { *vis = 0; G2_011F4064 = rec + step; }
+      if (!neg((float)a)) {
+#ifndef RE_HOOK_BUILD
+        re_diag_record(P79_OFF(rec), type, 2);
+#endif
+        *vis = 0; G2_011F4064 = rec + step;
+      }
       else {
         *vis = 1;
         if (lit && P84_Lit[type]) P84_LightIn[pi] = var ? shade(0.01f) : shade(dot3(pl, lx, ly, lz));
@@ -277,6 +297,9 @@ static void draw_core(uint8_t *mdl, const float *modmat, const float *viewm, con
     }
   }
   P44_XformTag++;
+#ifndef RE_HOOK_BUILD
+  re_diag_model(UINT32_MAX);
+#endif
 }
 
 static const uintptr_t *pick_tab(int32_t mode) {

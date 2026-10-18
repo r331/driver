@@ -19,6 +19,7 @@ extern P33_CountArr P33_Count; extern P33_VBufArr P33_VBuf; extern void *P33_Dev
 #pragma pop_macro("P33_GlideOk") /*gvi*/
 #pragma pop_macro("P33_Count") /*gvi*/
 #endif
+int     P33_EnsureRoom(int32_t slot, int32_t vertices); /* reserve a complete primitive, flushing full batches first */
 void    P33_FlushBatches(void);   /* 00422ae7: нарисовать и обнулить все непустые буферы слотов, состояние текстуры/COLOROP восстановить */
 int32_t P33_LoadGlideProcs(void); /* 00424c40: 119 функций glide2x.dll по именам → указатели игры; возвращает P33_GlideOk != 0 */
 void   *P33_GlideProc(int index); /* native: указатель из таблицы по номеру (в hook — читает ячейку Game.exe); NULL вне диапазона */

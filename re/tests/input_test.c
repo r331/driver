@@ -46,6 +46,16 @@ int re_input_test(void) {
     memset(k, 0, sizeof k); plat_input_fill_keys(k); CHK(k[0x1c] == 0);
     push_key(SDL_SCANCODE_RETURN, 1, 0); plat_pump_messages();
     memset(k, 0, sizeof k); plat_input_fill_keys(k); CHK(k[0x1c] == 0x80);
+    /* Diagnostic capture chords must not reach the game's D key (DIK 0x20). */
+    push_key(SDL_SCANCODE_D, 1, KMOD_GUI | KMOD_SHIFT);
+    push_key(SDL_SCANCODE_D, 0, KMOD_GUI | KMOD_SHIFT);
+    push_key(SDL_SCANCODE_D, 1, KMOD_CTRL | KMOD_SHIFT);
+    push_key(SDL_SCANCODE_D, 0, KMOD_CTRL | KMOD_SHIFT);
+    plat_pump_messages();
+    memset(k, 0, sizeof k); plat_input_fill_keys(k); CHK(k[0x20] == 0);
+    push_key(SDL_SCANCODE_D, 1, 0); push_key(SDL_SCANCODE_D, 0, 0);
+    plat_pump_messages();
+    memset(k, 0, sizeof k); plat_input_fill_keys(k); CHK(k[0x20] == 0x80);
     /* (4) биты езды */
     uint32_t m = 0;
     memset(P34_Keys, 0, 256); memset(P36_KeyCfg, 0, 20);

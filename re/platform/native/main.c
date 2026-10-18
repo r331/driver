@@ -3,6 +3,7 @@
    v2.00: без --selftest запускается игра — WinMain 00521f10 (P151_WinMain) с рабочим каталогом Data_Files.
    --idle — прежний режим (пустое окно, --frames N). Кадры/снимок: RE_MAX_FRAMES, RE_SHOT_PNG (platform/sdl/plat_sys.c). */
 #include <SDL.h>
+#include "diagnostics.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -65,6 +66,7 @@ int main(int argc, char **argv) {
     }
     if (!idle) {
         if (chdir(data) != 0) { fprintf(stderr, "Не удалось перейти в %s\n", data); return 1; }
+        re_diag_start();
         if (frames > 0) { char b[16]; snprintf(b, sizeof b, "%d", frames); setenv("RE_MAX_FRAMES", b, 0); }
         if (getenv("RE_WATCHDOG")) { signal(SIGALRM, watchdog); alarm((unsigned)atoi(getenv("RE_WATCHDOG"))); }
         { re_ptr_set_image(re_data_image_base, re_data_image, re_data_image_size);   /* v2.02: таблицы/строки .data по адресам */

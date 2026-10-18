@@ -3344,7 +3344,38 @@ static int test_p76(void) {
     P76_TriB2((int32_t *)va, (int32_t *)vb, (int32_t *)vc); P23_ConvVertexB((int32_t *)vc, &ref);
     CK(P33_Count[3] == 6 && memcmp(&v[5], &ref, sizeof ref) == 0);
     P22_DevReady = 0; P76_TriA2((int32_t *)va, (int32_t *)vb, (int32_t *)vc); P76_TriB1((int32_t *)va, (int32_t *)vb, (int32_t *)vc); CK(P33_Count[3] == 6);
-    P22_DevReady = 1; P33_Count[3] = 0x1000; P76_TriA2((int32_t *)va, (int32_t *)vb, (int32_t *)vc); CK(P33_Count[3] == 0x1000); P33_Count[3] = 0; }
+    /* A full batch must draw and roll over before another complete triangle.
+       The marina regression used to stop at 4096, silently losing nearby road. */
+    P22_DevReady = 1; memset(P33_Count, 0, sizeof P33_Count);
+    P33_Count[3] = 4092;
+    int calls = plat_draw_prim_last(NULL, NULL);
+    P76_TriA2((int32_t *)va, (int32_t *)vb, (int32_t *)vc);
+    CK(P33_Count[3] == 4095 && plat_draw_prim_last(NULL, NULL) == calls);
+    int texture; plat_set_texture(0, &texture);
+    P32_CurSlot = 7; G6_0054EF2C = 13; P32_CurHandle = &texture;
+    plat_set_tex_stage(0, 1, 4);
+    P76_TriB1((int32_t *)va, (int32_t *)vb, (int32_t *)vc);
+    int prim, count;
+    CK(plat_draw_prim_last(&prim, &count) == calls + 1 && prim == 4 && count == 4095);
+    CK(P33_Count[3] == 3 && v[0].x == 10 && v[1].x == 30 && v[2].x == 50);
+    P23_ConvVertexB((int32_t *)vc, &ref); CK(memcmp(&v[2], &ref, sizeof ref) == 0);
+    CK(plat_stub_last_texture(NULL) == &texture && plat_get_tex_stage(0, 1) == 4);
+    CK(P32_CurSlot == 7 && G6_0054EF2C == 13 && P32_CurHandle == &texture);
+    /* Invalid/misaligned counts are rejected atomically, without writing a prefix. */
+    P33_Count[3] = 4094; P76_TriA1((int32_t *)va, (int32_t *)vb, (int32_t *)vc); CK(P33_Count[3] == 4094);
+    P33_Count[3] = 0x1000; P76_TriA2((int32_t *)va, (int32_t *)vb, (int32_t *)vc); CK(P33_Count[3] == 0x1000);
+    P33_Count[3] = 0;
+    /* The quad producer shares the same buffer and must reserve all six vertices. */
+    float quad[60] = {0};
+    for (int i = 0; i < 4; i++) { memcpy(quad + 15*i, va, sizeof va); quad[15*i] = (float)(10 + 20*i); }
+    for (int variant = 0; variant < 2; variant++) {
+      P33_Count[3] = 4092; calls = plat_draw_prim_last(NULL, NULL);
+      if (variant) P98_QuadB(0, (uint8_t *)quad); else P98_QuadA(0, (uint8_t *)quad);
+      CK(plat_draw_prim_last(&prim, &count) == calls + 1 && count == 4092);
+      CK(P33_Count[3] == 6 && v[0].x == 10 && v[1].x == 30 && v[2].x == 50 && v[5].x == 70);
+    }
+    P33_Count[3] = 0; plat_set_texture(0, NULL); P32_CurHandle = NULL;
+  }
   /* 0048a525 */
   { memset(P12_01145a60, 0, sizeof P12_01145a60); memset(P12_01146f20, 0, sizeof P12_01146f20); P12_00b1c3dc = 0; P76_NumSlots = 4;
     P11_0125f420[1 * 0x46 + 0] = 5; P11_0125f420[1 * 0x46 + 1] = 6; P11_0125f420[1 * 0x46 + 2] = 0xff;
