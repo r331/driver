@@ -379,6 +379,10 @@ static void clip_poly(uint32_t arg, int tex, int nv) {
     for (int j = 0; j < 3; j++) {
       int32_t i = f[j];
       P85_RV[j].x = xs[i]; P85_RV[j].y = ys[i]; P85_RV[j].oow = ow[i];
+#ifndef RE_HOOK_BUILD
+      const float *camera = &P121_ClipBuf[i * 12];
+      P85_NoteCameraPoint(j, camera[0], camera[1], camera[2]);
+#endif
       if (tex) { const float *o = &P121_ClipBuf[i * 12]; P85_RV[j].tmu[0] = o[4] * ow[i]; P85_RV[j].tmu[1] = o[5] * ow[i]; }
     }
     raster_b(&P85_RV[0], &P85_RV[1], &P85_RV[2]);

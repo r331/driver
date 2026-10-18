@@ -246,12 +246,13 @@ void re_detail_tri(const void *pa, const void *pb, const void *pc) {
     if (page < 0 || page > 255 || !g_pagemask[page]) return;
     const p85_rv *v[3] = { (const p85_rv *)pa, (const p85_rv *)pb, (const p85_rv *)pc };
     double uu[3], vv[3], P[3][3];
-    const double K = RE_OOW(1), S = P43_ScaleA, ox = (double)P43_OffX - P43_Half, oy = (double)P43_OffY - P43_Half;
     for (int i = 0; i < 3; i++) {
         double w = v[i]->oow;
         if (!(w > 0)) return;
         uu[i] = v[i]->tmu[0] / w; vv[i] = v[i]->tmu[1] / w;
-        P[i][2] = K / w; P[i][0] = (v[i]->x - ox) / (w * S); P[i][1] = (v[i]->y - oy) / (w * S);
+        /* Rounded TL screen positions and table-quantized reciprocal depth cannot
+           provide a stable 3D anchor. Keep the pre-projection camera position. */
+        if (!P85_GetCameraPoint(v[i], P[i])) return;
     }
     int pal = P12_01252b74;
     if (g_log >= 2) {   /* DRIVER_DETAIL_LOG=2: все треугольники страниц записей — UV/палитра (поиск полигонов) */

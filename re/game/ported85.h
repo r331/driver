@@ -131,6 +131,9 @@ void P85_CallRaster(void);                     /* три вершины P85_RV �
 int  P85_EdgeReject(const p85_vtx *const *vs, int n); /* 1 — все вершины за краем экрана */
 void P85_PutVtx(p85_rv *r, const p85_vtx *v);  /* x, y, oow вершины → вершина растеризатора */
 #ifndef RE_HOOK_BUILD
+/* Exact camera coordinates for native facade placement, before screen/depth rounding. */
+void P85_NoteCameraPoint(int i, float x, float y, float z);
+int P85_GetCameraPoint(const p85_rv *r, double out[3]);
 void P85_NoteCam(int i, const p85_vtx *v);     /* v2.23: координаты камеры вершины RV[i] для отсечения по z = 1 */
 void P85_CallRasterWith(p85_raster_fn fa, p85_raster_fn fb);   /* v2.23: P85_CallRaster со своим растеризатором */
 #endif

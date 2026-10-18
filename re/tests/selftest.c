@@ -6961,7 +6961,18 @@ static int test_p92s(void) {
 
 int png_write_rgba(const char *path, const uint32_t *px, int w, int h);
 static int p85_calls; static p85_rv p85_cap[8][3];
-static void p85_capture(const p85_rv *a, const p85_rv *b, const p85_rv *c) { if (p85_calls < 8) { p85_cap[p85_calls][0] = *a; p85_cap[p85_calls][1] = *b; p85_cap[p85_calls][2] = *c; } p85_calls++; }
+static int p85_check_camera, p85_camera_valid[8][3];
+static double p85_camera_cap[8][3][3];
+static void p85_capture(const p85_rv *a, const p85_rv *b, const p85_rv *c) {
+  if (p85_calls < 8) {
+    const p85_rv *v[3] = { a, b, c };
+    for (int j = 0; j < 3; j++) {
+      p85_cap[p85_calls][j] = *v[j];
+      if (p85_check_camera) p85_camera_valid[p85_calls][j] = P85_GetCameraPoint(v[j], p85_camera_cap[p85_calls][j]);
+    }
+  }
+  p85_calls++;
+}
 static int p85_blend_calls, p85_blend_a;
 static void p85_blend_cap(int32_t a, int32_t b, int32_t c, int32_t d) { (void)b; (void)c; (void)d; p85_blend_calls++; p85_blend_a = a; }
 static void p85_state_cap(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e) { (void)a; (void)b; (void)c; (void)d; (void)e; }
@@ -7199,8 +7210,11 @@ static int test_v220(void) {
   { int32_t ix[3] = { 3, 4, 5 }; memcpy(rec + 8, ix, 12); }
   P85_MaxX = 639.0f; P85_MaxY = 479.0f; P44_MatPtr = P44_ViewMat;
   P44_XformTag = 79; G2_011F4064 = rec; P85_RasterA = P85_RasterB = p85_capture; p85_calls = 0;
+  p85_check_camera = 1;
   P121_ClipTexTri(0);
+  p85_check_camera = 0;
   CK(G2_011F4064 == rec + 0x38 && p85_calls == 1);
+  for (int j = 0; j < 3; j++) CK(p85_camera_valid[0][j] && p85_camera_cap[0][j][2] == 100.0);
   { int k4 = -1, k5 = -1;   /* буфер отсечения начинается со второй вершины первого ребра — порядок (0,1,2) по кругу */
     for (int j = 0; j < 3; j++) { if (fabsf(p85_cap[0][j].x - 420.0f) <= 0.2f) k4 = j; if (fabsf(p85_cap[0][j].y - 340.0f) <= 0.2f) k5 = j; }
     CK(k4 >= 0 && k5 == (k4 + 1) % 3 && fabsf(p85_cap[0][(k4 + 2) % 3].x - 320.0f) <= 0.2f && fabsf(p85_cap[0][(k4 + 2) % 3].y - 240.0f) <= 0.2f);
@@ -7209,8 +7223,14 @@ static int test_v220(void) {
   CK(P85_VCache[3].pad8 == P85_FMT_BIAS);
   vert[12 + 8 + 2] = 0.0f;   /* v5: z = 0 — за ближней плоскостью */
   P44_XformTag = 80; G2_011F4064 = rec; p85_calls = 0;
+  p85_check_camera = 1;
   P121_ClipTexTri(0);
+  p85_check_camera = 0;
   CK(G2_011F4064 == rec + 0x38 && p85_calls == 2);
+  for (int k = 0; k < p85_calls && k < 8; k++) for (int j = 0; j < 3; j++) {
+    CK(p85_camera_valid[k][j]);
+    CK(p85_camera_cap[k][j][2] == 50.0 || p85_camera_cap[k][j][2] == 100.0);
+  }
   CK(p85_cap[0][0].x == p85_cap[1][0].x && p85_cap[0][1].x == p85_cap[1][1].x);   /* веер (0,2,1),(0,2,3) */
   P85_RasterA = P85_RasterB = NULL;
   /* 6) 004ef3cd: модель неба по смещению 0 арены (ссылка 0 в native) тоже масштабируется ×1.7 (до v2.20 — пропуск: полоса неба) */
@@ -7259,6 +7279,32 @@ static int test_v220(void) {
    на дальней плоскости от левого верхнего угла — серый полигон поверх неба); пересекающий z = 1 — отсечён, целиком за — пропуск */
 static int v223_bad(int n) { for (int k = 0; k < n && k < 8; k++) for (int j = 0; j < 3; j++) { const p85_rv *r = &p85_cap[k][j];
     if (!(r->oow > 0.0f) || r->oow == P85_OOW_NEAR || !isfinite(r->x) || !isfinite(r->y) || r->x < 319.0f || r->y < 239.0f) return 1; } return 0; }
+static int test_facade_camera(void) {
+  int failed = 0;
+  uint32_t tag = P44_XformTag;
+  p85_rv saved = P85_RV[0], other = {0};
+  p85_vtx v = {0};
+  double camera[3];
+  for (int frame = 0; frame < 32; frame++) {
+    P44_XformTag = 9000 + frame;
+    /* Pixel positions and reciprocal depth have already been rounded, while
+       the camera moves by fractions of a world unit at the same facade. */
+    v.x = 400.125f; v.y = 123.25f; v.vx = 617.125f; v.vy = -300.0625f;
+    v.z = 2010.0625f - frame * .25f; v.oow = 1.0f / roundf(v.z);
+    P85_PutVtx(&P85_RV[0], &v);
+    if (!P85_GetCameraPoint(&P85_RV[0], camera) || camera[0] != v.vx || camera[1] != v.vy || camera[2] != v.z) failed++;
+    if (camera[2] == 1.0 / v.oow) failed++;
+    if (P85_GetCameraPoint(&other, camera)) failed++;
+    P85_RV[0].y += .125f;
+    if (P85_GetCameraPoint(&P85_RV[0], camera)) failed++;
+    P85_PutVtx(&P85_RV[0], &v); P44_XformTag++;
+    if (P85_GetCameraPoint(&P85_RV[0], camera)) failed++;
+  }
+  P85_RV[0] = saved; P44_XformTag = tag;
+  if (failed) fprintf(stderr, "facade camera failures: %d\n", failed);
+  return failed != 0;
+}
+
 static int test_v223(void) {
   int f = 0;
 #undef CK
@@ -7296,8 +7342,16 @@ static int test_v223(void) {
   /* 1) квадрат через ближнюю плоскость: метка P85_OOW_NEAR у вершин за камерой, в растеризатор — только отсечённые треугольники */
   memset(rec, 0, 0x80); { int32_t ix[4] = { 0, 1, 2, 3 }; memcpy(rec + 8, ix, 16); } memcpy(rec + 0x18, &col, 4);
   P44_XformTag = 501; G2_011F4064 = rec; p85_calls = 0;
+  p85_check_camera = 1;
   P115_FlatQuadC(0);
+  p85_check_camera = 0;
   CK(G2_011F4064 == rec + 0x24);
+  for (int k = 0; k < p85_calls && k < 8; k++) for (int j = 0; j < 3; j++) {
+    const double *c = p85_camera_cap[k][j];
+    CK(p85_camera_valid[k][j]);
+    CK(c[0] >= -1e-4 && c[0] <= 100.0001 && c[1] >= -1e-4 && c[1] <= 66.0001);
+    CK(fabs(c[2] - 1.0) < 1e-4 || fabs(c[2] - 100.0) < 1e-4);
+  }
   CK(P85_VCache[2].oow == P85_OOW_NEAR && P85_VCache[2].x == 0.0f && P85_VCache[2].y == 0.0f && P85_VCache[2].pad8 == P85_FMT_PROJ);
   CK(fabsf(P85_VCache[1].x - 420.0f) <= 0.2f && fabsf(P85_VCache[1].oow - 0.01f) < 1e-6f);
   CK(p85_calls >= 2 && !v223_bad(p85_calls));
@@ -7716,7 +7770,7 @@ int re_selftest_on;   /* v2.00: 1 — идёт selftest (шпионы), 0 — и
 int re_selftest(void) {
   re_selftest_on = 1;
   if (getenv("RE_ONLY_REAL")) { re_init_consts(); return test_real_level(); }   /* только проверка настоящего уровня */
-    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_p110) | RUN_T(test_p111) | RUN_T(test_p112) | RUN_T(test_p113) | RUN_T(test_p114) | RUN_T(test_p115) | RUN_T(test_p116) | RUN_T(test_p117) | RUN_T(test_p118) | RUN_T(test_p119) | RUN_T(test_p120) | RUN_T(test_p121) | RUN_T(test_p122) | RUN_T(test_p123) | RUN_T(test_p124) | RUN_T(test_p125) | RUN_T(test_p126) | RUN_T(test_p127) | RUN_T(test_p128) | RUN_T(test_p129) | RUN_T(test_p130) | RUN_T(test_p131) | RUN_T(test_p132) | RUN_T(test_p133) | RUN_T(test_p134) | RUN_T(test_p135) | RUN_T(test_p136) | RUN_T(test_p137) | RUN_T(test_p138) | RUN_T(test_p139) | RUN_T(test_p140) | RUN_T(test_p141) | RUN_T(test_p142) | RUN_T(test_p143) | RUN_T(test_p144) | RUN_T(test_p145) | RUN_T(test_p146) | RUN_T(test_p147) | RUN_T(test_p148) | RUN_T(test_p149) | RUN_T(test_p150) | RUN_T(test_p151) | RUN_T(test_p152) | RUN_T(test_v204) | RUN_T(test_v220) | RUN_T(test_v221) | RUN_T(test_v223) | RUN_T(test_v225) | RUN_T(test_v226) | RUN_T(test_real_level) | RUN_T(test_snd) | RUN_T(test_v229) | RUN_T(test_v222) | RUN_T(test_aspect) | RUN_T(test_drawdist) | RUN_T(test_gfx) | RUN_T(test_texpack) | RUN_T(test_texpack8) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
+    int f = RUN_T(test_director) | RUN_T(test_director2) | RUN_T(test_storage) | RUN_T(test_read) | RUN_T(test_nodes) | RUN_T(test_menu) | RUN_T(test_menu2) | RUN_T(test_menu3) | RUN_T(test_menu4) | RUN_T(test_menu5) | RUN_T(test_ui) | RUN_T(test_ui3) | RUN_T(test_ui4) | RUN_T(test_p4) | RUN_T(test_p5) | RUN_T(test_p6) | RUN_T(test_p7) | RUN_T(test_p8) | RUN_T(test_p9) | RUN_T(test_p11) | RUN_T(test_p12) | RUN_T(test_p13) | RUN_T(test_p14) | RUN_T(test_ported15) | RUN_T(test_ported16) | RUN_T(test_ported17) | RUN_T(test_ported18) | RUN_T(test_ported19) | RUN_T(test_p21) | RUN_T(test_p22) | RUN_T(test_p23) | RUN_T(test_p24) | RUN_T(test_p25) | RUN_T(test_p26) | RUN_T(test_p27) | RUN_T(test_p28) | RUN_T(test_p29) | RUN_T(test_p30) | RUN_T(test_p31) | RUN_T(test_p32) | RUN_T(test_p33) | RUN_T(test_p34) | RUN_T(test_p35) | RUN_T(test_p36) | RUN_T(test_p37) | RUN_T(test_p38) | RUN_T(test_p39) | RUN_T(test_p40) | RUN_T(test_p41) | RUN_T(test_p42) | RUN_T(test_p43) | RUN_T(test_p44) | RUN_T(test_p45) | RUN_T(test_p46) | RUN_T(test_p47) | RUN_T(test_p48) | RUN_T(test_p49) | RUN_T(test_p50) | RUN_T(test_p51) | RUN_T(test_p52) | RUN_T(test_p53) | RUN_T(test_p54) | RUN_T(test_p55) | RUN_T(test_p56) | RUN_T(test_p57) | RUN_T(test_p58) | RUN_T(test_p59) | RUN_T(test_p60) | RUN_T(test_p61) | RUN_T(test_p62) | RUN_T(test_p63) | RUN_T(test_p64) | RUN_T(test_p65) | RUN_T(test_p66) | RUN_T(test_p67) | RUN_T(test_p68) | RUN_T(test_p69) | RUN_T(test_p70) | RUN_T(test_p71) | RUN_T(test_p73) | RUN_T(test_p74) | RUN_T(test_p75) | RUN_T(test_p76) | RUN_T(test_p77) | RUN_T(test_p78) | RUN_T(test_p79) | RUN_T(test_p80) | RUN_T(test_p81) | RUN_T(test_p82) | RUN_T(test_p83) | RUN_T(test_p84) | RUN_T(test_p85) | RUN_T(test_p86) | RUN_T(test_p87) | RUN_T(test_p88) | RUN_T(test_p89) | RUN_T(test_p90) | RUN_T(test_p91) | RUN_T(test_p92) | RUN_T(test_p92s) | RUN_T(test_p93) | RUN_T(test_p94) | RUN_T(test_p95) | RUN_T(test_p96) | RUN_T(test_p97) | RUN_T(test_p98) | RUN_T(test_p99) | RUN_T(test_p100) | RUN_T(test_p101) | RUN_T(test_p102) | RUN_T(test_p103) | RUN_T(test_p104) | RUN_T(test_p105) | RUN_T(test_p106) | RUN_T(test_p107) | RUN_T(test_p108) | RUN_T(test_p109) | RUN_T(test_p110) | RUN_T(test_p111) | RUN_T(test_p112) | RUN_T(test_p113) | RUN_T(test_p114) | RUN_T(test_p115) | RUN_T(test_p116) | RUN_T(test_p117) | RUN_T(test_p118) | RUN_T(test_p119) | RUN_T(test_p120) | RUN_T(test_p121) | RUN_T(test_p122) | RUN_T(test_p123) | RUN_T(test_p124) | RUN_T(test_p125) | RUN_T(test_p126) | RUN_T(test_p127) | RUN_T(test_p128) | RUN_T(test_p129) | RUN_T(test_p130) | RUN_T(test_p131) | RUN_T(test_p132) | RUN_T(test_p133) | RUN_T(test_p134) | RUN_T(test_p135) | RUN_T(test_p136) | RUN_T(test_p137) | RUN_T(test_p138) | RUN_T(test_p139) | RUN_T(test_p140) | RUN_T(test_p141) | RUN_T(test_p142) | RUN_T(test_p143) | RUN_T(test_p144) | RUN_T(test_p145) | RUN_T(test_p146) | RUN_T(test_p147) | RUN_T(test_p148) | RUN_T(test_p149) | RUN_T(test_p150) | RUN_T(test_p151) | RUN_T(test_p152) | RUN_T(test_v204) | RUN_T(test_v220) | RUN_T(test_v221) | RUN_T(test_v223) | RUN_T(test_facade_camera) | RUN_T(test_v225) | RUN_T(test_v226) | RUN_T(test_real_level) | RUN_T(test_snd) | RUN_T(test_v229) | RUN_T(test_v222) | RUN_T(test_aspect) | RUN_T(test_drawdist) | RUN_T(test_gfx) | RUN_T(test_texpack) | RUN_T(test_texpack8) | test_render(getenv("RE_RENDER_PNG") ? getenv("RE_RENDER_PNG") : "render_test.png");
     printf("selftest: director %s\n", f ? "FAIL" : "OK");
     return f;
 }

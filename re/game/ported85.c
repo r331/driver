@@ -180,10 +180,26 @@ void P85_SetBlend(uint8_t m) {
    пропускался целиком — у камеры пропадали пол и стены (чёрные дыры). P85_PutVtx запоминает координаты камеры вершины;
    новая вершина на z = 1 проецируется как в P85_Project, u/v (хранятся как u·oow) — с учётом перспективы, цвет — линейно. */
 static struct { float vx, vy, z, oow, x; int ok; } s_cam[3];
+static struct { float camera[3], x, y, oow; uint32_t tag; int valid; } s_exact_cam[3];
+void P85_NoteCameraPoint(int i, float x, float y, float z) {
+  if (i < 0 || i >= 3) return;
+  s_exact_cam[i].camera[0] = x; s_exact_cam[i].camera[1] = y; s_exact_cam[i].camera[2] = z;
+  s_exact_cam[i].x = P85_RV[i].x; s_exact_cam[i].y = P85_RV[i].y; s_exact_cam[i].oow = P85_RV[i].oow;
+  s_exact_cam[i].tag = P44_XformTag; s_exact_cam[i].valid = 1;
+}
+int P85_GetCameraPoint(const p85_rv *r, double out[3]) {
+  for (int i = 0; i < 3; i++) if (r == &P85_RV[i] && s_exact_cam[i].valid && s_exact_cam[i].tag == P44_XformTag &&
+      r->x == s_exact_cam[i].x && r->y == s_exact_cam[i].y && r->oow == s_exact_cam[i].oow) {
+    for (int j = 0; j < 3; j++) out[j] = s_exact_cam[i].camera[j];
+    return 1;
+  }
+  return 0;
+}
 static float near_oow(void) { return RE_OOW(1); }
-static void near_vtx(p85_rv *o, const p85_rv *a, const p85_rv *b, int ia, int ib) {
+static void near_vtx(p85_rv *o, const p85_rv *a, const p85_rv *b, int ia, int ib, float camera[3]) {
   float za = s_cam[ia].z, zb = s_cam[ib].z, t = (1.0f - za) / (zb - za);
   float vx = s_cam[ia].vx + t * (s_cam[ib].vx - s_cam[ia].vx), vy = s_cam[ia].vy + t * (s_cam[ib].vy - s_cam[ia].vy);
+  camera[0] = vx; camera[1] = vy; camera[2] = 1.0f;
   float w = near_oow(), kk = w * P43_ScaleA;
   *o = *a;
   o->r = a->r + t * (b->r - a->r); o->g = a->g + t * (b->g - a->g); o->b = a->b + t * (b->b - a->b);
@@ -198,6 +214,7 @@ static void near_vtx(p85_rv *o, const p85_rv *a, const p85_rv *b, int ia, int ib
 }
 static int near_clip_raster_fn(p85_raster_fn fa, p85_raster_fn fb) {
   p85_rv in[3], out[4];
+  float camera[4][3];
   int n = 0, inside[3], cnt = 0;
   for (int i = 0; i < 3; i++) {
     if (!(s_cam[i].ok && s_cam[i].oow == P85_RV[i].oow && s_cam[i].x == P85_RV[i].x)) {
@@ -209,22 +226,33 @@ static int near_clip_raster_fn(p85_raster_fn fa, p85_raster_fn fb) {
   memcpy(in, P85_RV, sizeof in);
   for (int i = 0; i < 3; i++) {
     int j = (i + 1) % 3;
-    if (inside[i]) out[n++] = in[i];
-    if (inside[i] != inside[j]) near_vtx(&out[n++], inside[i] ? &in[i] : &in[j], inside[i] ? &in[j] : &in[i], inside[i] ? i : j, inside[i] ? j : i);
+    if (inside[i]) {
+      camera[n][0] = s_cam[i].vx; camera[n][1] = s_cam[i].vy; camera[n][2] = s_cam[i].z;
+      out[n++] = in[i];
+    }
+    if (inside[i] != inside[j]) {
+      near_vtx(&out[n], inside[i] ? &in[i] : &in[j], inside[i] ? &in[j] : &in[i], inside[i] ? i : j, inside[i] ? j : i, camera[n]);
+      n++;
+    }
   }
   for (int k = 1; k + 1 < n; k++) {
     P85_RV[0] = out[0]; P85_RV[1] = out[k]; P85_RV[2] = out[k + 1];
+    const int ci[3] = { 0, k, k + 1 };
+    for (int j = 0; j < 3; j++) P85_NoteCameraPoint(j, camera[ci[j]][0], camera[ci[j]][1], camera[ci[j]][2]);
     p85_raster_fn f = (uint8_t)P82_Edge == 0 ? fa : fb;
     if (f) f(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
     if (f) re_diag_count(RE_DIAG_CLIP_EMITTED);
   }
-  memcpy(P85_RV, in, sizeof in);   /* обработчик четырёхугольника использует RV[0], RV[1] повторно */
+  memcpy(P85_RV, in, sizeof in);
+  for (int i = 0; i < 3; i++) P85_NoteCameraPoint(i, s_cam[i].vx, s_cam[i].vy, s_cam[i].z);
+  /* обработчик четырёхугольника использует RV[0], RV[1] повторно */
   return 1;
 }
 static int near_clip_raster(void) { return near_clip_raster_fn(P85_RasterA, P85_RasterB); }
 /* v2.23: то же для обработчиков со своим растеризатором (P115_*C: 01270e30/01270d9c) — вершина ближе z = 1 или за дальней
    плоскостью растеризатору напрямую не отдаётся (см. P85_CallRasterWith) */
 void P85_NoteCam(int i, const p85_vtx *v) {
+  P85_NoteCameraPoint(i, v->vx, v->vy, v->z);
   if (i >= 0 && i < 3) { s_cam[i].vx = v->vx; s_cam[i].vy = v->vy; s_cam[i].z = v->z; s_cam[i].oow = v->oow; s_cam[i].x = v->x; s_cam[i].ok = 1; }
 }
 void P85_CallRasterWith(p85_raster_fn fa, p85_raster_fn fb) {
@@ -286,7 +314,7 @@ int P85_EdgeReject(const p85_vtx *const *vs, int n) {
 void P85_PutVtx(p85_rv *r, const p85_vtx *v) {
   r->x = v->x; r->y = v->y; r->oow = v->oow;
 #ifndef RE_HOOK_BUILD
-  { ptrdiff_t i = r - &P85_RV[0]; if (i >= 0 && i < 3) { s_cam[i].vx = v->vx; s_cam[i].vy = v->vy; s_cam[i].z = v->z; s_cam[i].oow = v->oow; s_cam[i].x = v->x; s_cam[i].ok = 1; } }
+  for (int i = 0; i < 3; i++) if (r == &P85_RV[i]) { P85_NoteCam(i, v); break; }
 #endif
 }
 /* цвет записи → r,g,b трёх вершин; lit: умножается на освещённость плоскости (P84_LightIn[номер], как fmul → fstp во float) */

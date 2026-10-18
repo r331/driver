@@ -48,7 +48,11 @@ submitted to GL, their model/record context, texture handles, depth and alpha
 test settings, blend state, UVs, reciprocal depth, and colors. Draws outside a
 model handler use `ffffffff` for an unset model/record context; offset zero is
 valid. A deferred renderer can also
-submit vertices after its originating handler has returned.
+submit vertices after its originating handler has returned. The added glTF facade
+meshes use a separate indexed draw path: they appear in screenshots, but their
+vertices and instance matrices are not currently included in `draws.csv`.
+Use `DRIVER_DETAIL_LOG=1` to include facade matching and instance summaries in
+the session log.
 
 Clipping counters distinguish vertices behind the camera or beyond the
 reciprocal-depth range, stale/missing camera data during fallback clipping,
@@ -97,3 +101,18 @@ invalid counts, and restoration of state.
 Local before/after evidence is in `work/road-repro/marina-before.png` and
 `work/road-repro/marina-after.png`. The temporary fixed-camera reproduction
 code was removed from the game after verification.
+
+## Facade motion regression (2026-10-17)
+
+The capture near `(9508, 162, 393711)` showed the new facade overlays on the
+right-hand building. Their placement was reconstructed each frame from rounded
+screen positions and table-quantized reciprocal depth. Those small errors
+changed the fitted mesh origin, scale, and grouping as the camera moved.
+
+Native facade matching now uses the exact camera-space vertex coordinates
+before projection, including vertices created by either near-clipping path.
+The source must match the current vertex slot and transform tag; unmatched
+vertices cannot reuse an earlier model's position. The existing wall projection
+and UVs stay unchanged. An isolated replay of the captured camera movement
+verified stable facade scales; selftests cover fractional depth, stale/mutated
+vertices, and clipped-triangle coordinate propagation.
