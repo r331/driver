@@ -742,6 +742,31 @@ void P142_CarsStep(void) {
     if (on && (int32_t)P62_Frame >= from && P99_Cars[0].pos[0] | P99_Cars[0].pos[2]) {
       uint8_t *c = (uint8_t *)&P99_Cars[0], *t = (uint8_t *)&P99_Cars[0x41];
       int32_t tx = P99_Cars[0x41].pos[0], tz = P99_Cars[0x41].pos[2];
+      { /* v2.31: цель — как 004f5012 (P98_ScriptRange): объект скрипта k (флаги 1|8, порог 00b87e60[k]) → узел списка 00d12408
+           (32-битный адрес в ячейке образа G00D12408 — его пишет 0x7a/ported122; native P15_ListHead — расщеплённый псевдоним, пуст; флаг 8, +6 = объект+0xc) → +0x1c — позиция цели (float x, z); слот 0x41 — запасной вариант (RE_AUTORAM_SLOT=1 — только слот) */
+        static int slot = -1; if (slot < 0) { const char *sl = getenv("RE_AUTORAM_SLOT"); slot = sl ? atoi(sl) : 0; }
+        int found = 0;
+        for (int32_t pass = 0, k = 0; !slot && !found && P97_ScrObjOn && pass < 2; k = (k + 1) % 10, pass += k == 0) {
+          /* проход 0 — как 004f5012 (порог, флаги 1|8); проход 1 — любой включённый объект (флаг 1) с узлом в списке (цель-событие) */
+          const uint8_t *o = P58_Objs[k]; uint32_t f = (uint32_t)rd32(o + 0x10);
+          if (pass == 0 ? (P98_Range[k] == 0 || (f & 1) == 0 || (f & 8) == 0) : (f & 1) == 0) continue;
+          for (uint8_t *nd = (uint8_t *)re_ptr((uint32_t)G00D12408); nd != NULL; nd = (uint8_t *)re_rd_ptr(nd + 0x20)) {
+            if ((rd16(nd) & 8) != 0 && (uint32_t)rd16(nd + 6) == (uint32_t)rd32(o + 0xc)) {
+              const uint8_t *tc = (const uint8_t *)re_rd_ptr(nd + 0x1c);
+              if (tc != NULL) { float fx, fz; memcpy(&fx, tc, 4); memcpy(&fz, tc + 8, 4); tx = (int32_t)lrintf(fx); tz = (int32_t)lrintf(fz); found = 1;
+                if (((int32_t)P62_Frame % 100) == 0) fprintf(stderr, "[autoram] кадр %d: цель по списку 00d12408 — объект %d (проход %d, флаги %x), порог %d, (%d, %d)\n", (int)P62_Frame, (int)k, (int)pass, (unsigned)f, (int)P98_Range[k], (int)tx, (int)tz); }
+              break;
+            }
+          }
+        }
+        if (found && !chase) chase = 1;
+        if (!found && !slot && ((int32_t)P62_Frame % 500) == 0) {
+          int nn = 0; for (uint8_t *nd = (uint8_t *)re_ptr((uint32_t)G00D12408); nd != NULL && nn < 1000; nd = (uint8_t *)re_rd_ptr(nd + 0x20)) nn++;
+          fprintf(stderr, "[autoram] кадр %d: по списку 00d12408 цели нет (объекты скрипта %d, узлов %d; пороги", (int)P62_Frame, (int)P97_ScrObjOn, nn);
+          for (int k = 0; k < 10; k++) fprintf(stderr, " %d/%x", (int)P98_Range[k], (unsigned)rd32(P58_Objs[k] + 0x10));
+          fprintf(stderr, ") — слот 0x41\n");
+        }
+      }
       double dx = (double)tx - P99_Cars[0].pos[0], dz = (double)tz - P99_Cars[0].pos[2], d = sqrt(dx * dx + dz * dz);
       if (((int32_t)P62_Frame % 100) == 0)
         fprintf(stderr, "[autoram] кадр %d: погоня %d (eb0 %d eac %d), цель 0x41 (%d, %d) скорость %d, до цели %.0f, урон цели %d\n", (int)P62_Frame,
