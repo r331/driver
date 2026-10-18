@@ -116,3 +116,23 @@ vertices cannot reuse an earlier model's position. The existing wall projection
 and UVs stay unchanged. An isolated replay of the captured camera movement
 verified stable facade scales; selftests cover fractional depth, stale/mutated
 vertices, and clipped-triangle coordinate propagation.
+
+## macOS fullscreen presentation (2026-10-17)
+
+A fullscreen test with FBO enabled showed a black display even though the
+framebuffer readback and the existing selfcheck contained a valid image.
+The renderer restored the scene FBO after composition and left it bound while
+calling `SDL_GL_SwapWindow`. SDL requires the default draw framebuffer (0)
+at the swap boundary on macOS; otherwise the rendered frame is not presented.
+
+`plat_flip` now binds framebuffer 0 immediately before the swap and restores
+the current scene target and viewport afterward, including after a resize or
+fullscreen transition. FBO/MSAA settings remain available. A screenshot or
+pre-swap pixel readback alone cannot verify presentation; check the actual
+window during repeated fullscreen/windowed transitions.
+
+Validation: reproduced a black fullscreen display before the change while GL
+readback/selfcheck showed a valid image. After the change, verified the actual
+fullscreen display, four scheduled window/fullscreen switches, and a second
+launch with the enhanced preset and 4x MSAA. The user also confirmed fullscreen
+works. Both automated tests pass.

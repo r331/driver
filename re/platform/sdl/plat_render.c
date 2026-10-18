@@ -777,7 +777,18 @@ void plat_flip(void) {
     if (g_swap) { g_chk_flips++; if (g_fbo && ((!g_chk_ok && g_chk_flips <= 6000 && (g_chk_flips == 3 || g_chk_flips % 30 == 0)) || (plat_gfx_dbg() && g_chk_flips % 600 == 0))) plat_render_selfcheck(NULL, NULL); }
     else if (g_chk_flips < 4) glerr("кадр");
     glFinish();
-    if (g_swap) { plat_frame_tick("flip"); g_swap(); clear_bars(); }
+    if (g_swap) {
+        plat_frame_tick("flip");
+        /* Cocoa presents only when the window's draw framebuffer is bound.
+           compose(), diagnostics and the selfcheck restore the scene FBO, so
+           unbind it at the swap boundary, then resume rendering into the scene.
+           https://wiki.libsdl.org/SDL2/SDL_GL_SwapWindow */
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        g_swap();
+        glBindFramebuffer(GL_FRAMEBUFFER, target_fbo());
+        glViewport(g_cx, g_cy, g_cw, g_ch);
+        clear_bars();
+    }
 }
 int plat_render_uploads(int *pixels) { if (pixels) *pixels = g_up_px; return g_up_n; }   /* v2.16: счётчик загрузок текстур (статистика) */
 void plat_blit2d(int tex, int sx, int sy, int sw, int sh, int dx, int dy) {
