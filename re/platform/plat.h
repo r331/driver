@@ -50,6 +50,10 @@ void plat_set_zbuffer(int test, int write);
 void plat_draw_tris(const plat_vertex *v, int count);
 void plat_clear(uint32_t color, int clear_z);
 void plat_draw_lines(const plat_vertex *v, int count);     /* список линий, count чётный */
+/* v2.31: детальные 3D-меши фасадов (SDL/GL; platform/sdl/plat_detail.c). См. plat_render.c */
+int  plat_mesh_create(const float *pos, const float *nrm, const float *uv, int nv, const uint32_t *idx, int ni, const uint32_t *rgba, int tw, int th);
+void plat_mesh_free(int mesh);
+void plat_mesh_draw(int mesh, const float *m16, const float *proj, const float *zp, const float *tint, const float *clip, float zoff, float poly_ofs);
 void plat_set_current_viewport(void);                      /* D3D SetCurrentViewport (SDL: no-op) */
 void plat_clear_depth(void *viewport, int x, int y, int w, int h, float z); /* очистка Z в прямоугольнике */
 int plat_get_render_state(int state);                      /* последнее установленное значение (для тестов; hook: 0) */

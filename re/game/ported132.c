@@ -21,6 +21,9 @@
 #include "ported140.h"
 #include "ported142.h"
 #include "ported132.h"
+#ifndef RE_HOOK_BUILD
+#include "../platform/sdl/plat_detail.h"
+#endif
 #include "ported133.h"
 #include <string.h>
 #include <stdio.h>
@@ -345,7 +348,13 @@ void P132_GameDraw(void) {
     if (P98_MrkOff != 0) P76_AngleColor();
     if (P13_00575ef4 == 1) P127_LampLights();
     P109_ScriptMarkers();
+#ifndef RE_HOOK_BUILD
+    re_detail_frame_begin();   /* v2.31: детальные меши фасадов — только основной проход карты */
+#endif
     P89_DrawMap(1);
+#ifndef RE_HOOK_BUILD
+    re_detail_frame_end();
+#endif
     NoopFn004d1a89();
     P109_DropsDraw(0);
     Reset0042D2B0();

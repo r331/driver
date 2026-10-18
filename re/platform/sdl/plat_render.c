@@ -33,7 +33,8 @@ enum {
     GL_SAMPLE_ALPHA_TO_COVERAGE = 0x809E, GL_LINEAR_MIPMAP_LINEAR = 0x2703, GL_LINEAR_MIPMAP_NEAREST = 0x2701, GL_NEAREST_MIPMAP_NEAREST = 0x2700,
     GL_TEXTURE_MAX_LEVEL = 0x813D, GL_NUM_EXTENSIONS = 0x821D, GL_EXTENSIONS = 0x1F03, GL_MAX_TEXTURE_SIZE = 0x0D33, GL_MAX_RENDERBUFFER_SIZE = 0x84E8,
     GL_TEXTURE_MAX_ANISOTROPY = 0x84FE, GL_MAX_TEXTURE_MAX_ANISOTROPY = 0x84FF, GL_RENDERER = 0x1F01,
-    GL_VENDOR = 0x1F00, GL_MAX_VIEWPORT_DIMS = 0x0D3A, GL_SHADING_LANGUAGE_VERSION = 0x8B8C   /* v2.24 */
+    GL_VENDOR = 0x1F00, GL_MAX_VIEWPORT_DIMS = 0x0D3A, GL_SHADING_LANGUAGE_VERSION = 0x8B8C,   /* v2.24 */
+    GL_ELEMENT_ARRAY_BUFFER = 0x8893, GL_STATIC_DRAW = 0x88E4, GL_UNSIGNED_INT = 0x1405, GL_POLYGON_OFFSET_FILL = 0x8037   /* v2.31: детальные меши */
 };
 #define GLFUNCS(X) \
  X(void, Enable, (GLenum)) X(void, Disable, (GLenum)) X(void, BlendFunc, (GLenum, GLenum)) X(void, DepthFunc, (GLenum)) \
@@ -62,7 +63,11 @@ enum {
  X(void, GetIntegerv, (GLenum, GLint *)) X(void, GetFloatv, (GLenum, GLfloat *)) X(const unsigned char *, GetStringi, (GLenum, GLuint)) \
  X(void, GenSamplers, (GLsizei, GLuint *)) X(void, DeleteSamplers, (GLsizei, const GLuint *)) X(void, BindSampler, (GLuint, GLuint)) \
  X(void, SamplerParameteri, (GLuint, GLenum, GLint)) X(void, SamplerParameterf, (GLuint, GLenum, GLfloat)) \
- X(GLenum, GetError, (void))
+ X(GLenum, GetError, (void)) \
+ X(void, DrawElements, (GLenum, GLsizei, GLenum, const void *)) X(void, UniformMatrix4fv, (GLint, GLsizei, GLboolean, const GLfloat *)) \
+ X(void, Uniform4f, (GLint, GLfloat, GLfloat, GLfloat, GLfloat)) X(void, Uniform3f, (GLint, GLfloat, GLfloat, GLfloat)) \
+ X(void, PolygonOffset, (GLfloat, GLfloat)) X(void, GenerateMipmap, (GLenum)) X(void, DeleteBuffers, (GLsizei, const GLuint *)) \
+ X(void, DeleteVertexArrays, (GLsizei, const GLuint *))
 #define DECL(r, n, a) static r (*gl##n) a;
 GLFUNCS(DECL)
 /* v2.24: журнал графики (plat_sys.c): всегда — заголовок (GL_VENDOR/RENDERER/VERSION, окно/буфер, FBO), ошибки GL/FBO/шейдеров
@@ -371,6 +376,113 @@ const char *plat_render_gfx_info(char *b, int n) {   /* v2.16: что реаль
              g_a2c, g_aniso, g_aniso_hw, g_fbo ? "да" : g_fbo_off ? "нет (прямо в окно)" : "нет");
     return b;
 }
+/* ===== v2.31: детальные 3D-меши фасадов (platform/sdl/plat_detail.c). Меш в своём пространстве (метры), матрица uM —
+   меш → пространство камеры игры (vx, vy, z); проекция как P85_Project: oow = K/z, экран = v·oow·ScaleA + Off − Half, глубина —
+   как P23_ConvVertexA (формат A), так что меш делит z-буфер с миром. Отсечение по ближней плоскости — средствами GL (w = z/K). ===== */
+static const char *DVS =
+ "#version 330 core\n"
+ "layout(location=0) in vec3 aPos; layout(location=1) in vec3 aNrm; layout(location=2) in vec2 aUV;\n"
+ "uniform mat4 uM; uniform vec4 uP; uniform vec4 uZ; uniform vec2 uView; uniform float uShift; uniform float uZOff; uniform vec3 uL;\n"
+ "out vec2 vUV; out float vShade; out vec2 vM;\n"
+ "void main(){ vM = aPos.xy; vec4 c = uM * vec4(aPos.xy, aPos.z + uZOff, 1.0); float z = c.z; float w = z / uP.x;\n"
+ /* экран без деления: sx·w = c.x·ScaleA + (OffX − Half)·w */
+ "  float sxw = c.x * uP.y + uP.z * w, syw = c.y * uP.y + uP.w * w;\n"
+ "  float dw; if (uZ.x == 0.0) dw = w - uZ.y; else { float oow = uP.x / max(z, 1e-3); dw = (1.0 - uZ.z / (uZ.w / oow + uZ.y)) * w; }\n"
+ "  gl_Position = vec4((sxw + uShift * w) / uView.x * 2.0 - w, w - syw / uView.y * 2.0, dw * 2.0 - w, w);\n"
+ "  vUV = aUV; float k = dot(normalize(aNrm), uL) / max(uL.z, 0.05); vShade = clamp(0.6 + 0.4 * k, 0.45, 1.15); }\n";
+static const char *DFS =
+ "#version 330 core\n"
+ "in vec2 vUV; in float vShade; in vec2 vM; uniform sampler2D uTex; uniform vec3 uTint; uniform float uCut; uniform vec4 uClip; out vec4 oCol;\n"
+ "void main(){ if (vM.x < uClip.x || vM.y < uClip.y || vM.x > uClip.z || vM.y > uClip.w) discard; vec4 t = texture(uTex, vUV); if (t.a < uCut) discard; oCol = vec4(clamp(t.rgb * uTint * vShade, 0.0, 1.0), 1.0); }\n";
+#define MAX_DMESH 256
+typedef struct { unsigned vao, vbo, ibo, tex; int ni; } dmesh_t;
+static dmesh_t g_dm[MAX_DMESH];
+static unsigned g_dprog; static int g_du[11];
+static void detail_forget(void) { memset(g_dm, 0, sizeof g_dm); g_dprog = 0; }
+static void detail_init(void) {
+    static const char *un[11] = { "uM", "uP", "uZ", "uView", "uShift", "uZOff", "uL", "uTex", "uTint", "uCut", "uClip" };
+    memset(g_dm, 0, sizeof g_dm);
+    g_dprog = link_prog(DVS, DFS);
+    if (!g_dprog) { plat_gfx_logf("[detail] шейдер детальных мешей не собран\n"); return; }
+    for (int i = 0; i < 11; i++) g_du[i] = glGetUniformLocation(g_dprog, un[i]);
+}
+/* pos/nrm — по 3 float, uv — 2 float на вершину; rgba — A<<24|B<<16|G<<8|R; возвращает номер меша (1..) или 0 */
+int plat_mesh_create(const float *pos, const float *nrm, const float *uv, int nv, const uint32_t *idx, int ni, const uint32_t *rgba, int tw, int th) {
+    if (!g_ok || !g_dprog || nv <= 0 || ni < 3 || !pos || !uv || !idx) return 0;
+    int m = 0; for (int i = 1; i < MAX_DMESH && !m; i++) if (!g_dm[i].vao) m = i;
+    if (!m) return 0;
+    float *buf = (float *)malloc((size_t)nv * 8 * sizeof(float));
+    if (!buf) return 0;
+    for (int i = 0; i < nv; i++) {
+        float *o = buf + i * 8;
+        o[0] = pos[i * 3]; o[1] = pos[i * 3 + 1]; o[2] = pos[i * 3 + 2];
+        if (nrm) { o[3] = nrm[i * 3]; o[4] = nrm[i * 3 + 1]; o[5] = nrm[i * 3 + 2]; } else { o[3] = 0; o[4] = 0; o[5] = 1; }
+        o[6] = uv[i * 2]; o[7] = uv[i * 2 + 1];
+    }
+    dmesh_t *d = &g_dm[m];
+    glGenVertexArrays(1, &d->vao); glBindVertexArray(d->vao);
+    glGenBuffers(1, &d->vbo); glBindBuffer(GL_ARRAY_BUFFER, d->vbo);
+    glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)nv * 8 * sizeof(float), buf, GL_STATIC_DRAW);
+    glGenBuffers(1, &d->ibo); glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, d->ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)ni * sizeof(uint32_t), idx, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, 0, 32, (void *)0); glVertexAttribPointer(1, 3, GL_FLOAT, 0, 32, (void *)12);
+    glVertexAttribPointer(2, 2, GL_FLOAT, 0, 32, (void *)24);
+    for (int i = 0; i < 3; i++) glEnableVertexAttribArray(i);
+    free(buf);
+    d->ni = ni;
+    glGenTextures(1, &d->tex); glBindTexture(GL_TEXTURE_2D, d->tex);
+    if (rgba && tw > 0 && th > 0) {
+        /* края альфа-маски: цвет прозрачных текселей = соседний непрозрачный (как dilation страниц), иначе мипмапы темнеют по краям перил */
+        uint32_t *px = (uint32_t *)malloc((size_t)tw * th * 4);
+        if (px) {
+            memcpy(px, rgba, (size_t)tw * th * 4);
+            for (int pass = 0; pass < 4; pass++) for (int y = 0; y < th; y++) for (int x = 0; x < tw; x++) {
+                uint32_t *p = &px[y * tw + x]; if ((*p >> 24) >= 128) continue;
+                static const int dx[4] = { 1, -1, 0, 0 }, dy[4] = { 0, 0, 1, -1 };
+                for (int k = 0; k < 4; k++) { int xx = x + dx[k], yy = y + dy[k]; if (xx < 0 || yy < 0 || xx >= tw || yy >= th) continue;
+                    uint32_t q = px[yy * tw + xx]; if ((q >> 24) >= 128) { *p = (*p & 0xFF000000u) | (q & 0x00FFFFFFu); break; } }
+            }
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA, GL_UNSIGNED_BYTE, px); free(px);
+        } else glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+    } else { uint32_t one = 0xFFFFFFFFu; glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &one); }
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1000);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindVertexArray(g_vao); glBindBuffer(GL_ARRAY_BUFFER, g_vbo);
+    glerr("detail mesh");
+    return m;
+}
+void plat_mesh_free(int m) {
+    if (!g_ok || m <= 0 || m >= MAX_DMESH || !g_dm[m].vao) return;
+    glDeleteBuffers(1, &g_dm[m].vbo); glDeleteBuffers(1, &g_dm[m].ibo); glDeleteVertexArrays(1, &g_dm[m].vao); glDeleteTextures(1, &g_dm[m].tex);
+    memset(&g_dm[m], 0, sizeof g_dm[m]);
+}
+/* одна копия меша: m16 — матрица меш → камера (по столбцам, как GL), proj — K, ScaleA, OffX − Half, OffY − Half;
+   zp — режим глубины (0: 1 − oow·ZScaleA; 1: 1 − ZNum/(ZDenA/oow + ZBias)), ZBias|ZScaleA, ZNum, ZDenA; tint 0..1; zoff — сдвиг из стены (м);
+   clip — xmin, ymin, xmax, ymax в пространстве меша (часть прямоугольника, покрытая полигонами) или NULL */
+void plat_mesh_draw(int m, const float *m16, const float *proj, const float *zp, const float *tint, const float *clip, float zoff, float poly_ofs) {
+    if (!g_ok || !g_dprog || m <= 0 || m >= MAX_DMESH || !g_dm[m].vao) return;
+    int zt = g_zt, zw = g_zw, zf = g_zf, bl = g_blend;
+    g_zt = 1; g_zw = 1; g_zf = 4; g_blend = 0;
+    apply_state();
+    g_zt = zt; g_zw = zw; g_zf = zf; g_blend = bl;
+    glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    if (poly_ofs != 0.0f) { glEnable(GL_POLYGON_OFFSET_FILL); glPolygonOffset(-1.0f, -poly_ofs); }
+    glUseProgram(g_dprog);
+    glUniformMatrix4fv(g_du[0], 1, 0, m16);
+    glUniform4f(g_du[1], proj[0], proj[1], proj[2], proj[3]);
+    glUniform4f(g_du[2], zp[0], zp[1], zp[2], zp[3]);
+    glUniform2f(g_du[3], (float)g_ew, (float)g_h); glUniform1f(g_du[4], (float)g_shift); glUniform1f(g_du[5], zoff);
+    { float l[3] = { 0.35f, 0.75f, 0.55f }, n = sqrtf(l[0] * l[0] + l[1] * l[1] + l[2] * l[2]); glUniform3f(g_du[6], l[0] / n, l[1] / n, l[2] / n); }
+    glUniform1i(g_du[7], 0); glUniform3f(g_du[8], tint[0], tint[1], tint[2]); glUniform1f(g_du[9], 0.5f);
+    if (clip) glUniform4f(g_du[10], clip[0], clip[1], clip[2], clip[3]); else glUniform4f(g_du[10], -1e9f, -1e9f, 1e9f, 1e9f);
+    glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, g_dm[m].tex); glBindSampler(0, 0);
+    glBindVertexArray(g_dm[m].vao);
+    glDrawElements(GL_TRIANGLES, g_dm[m].ni, GL_UNSIGNED_INT, (void *)0);
+    if (poly_ofs != 0.0f) glDisable(GL_POLYGON_OFFSET_FILL);
+    glBindVertexArray(g_vao); glBindBuffer(GL_ARRAY_BUFFER, g_vbo);
+}
 int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int w, int h) {
 #define LOAD(r, n, a) if (!(gl##n = (r (*) a)get_proc("gl" #n))) { plat_gfx_logf("[gfx] GL: нет функции gl" #n "\n"); return -1; }
     GLFUNCS(LOAD)
@@ -416,11 +528,12 @@ int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int 
       plat_log("GL %s (%s)\n", vv ? vv : "?", re ? re : "?");
       plat_gfx_logf("[gfx] GL_VENDOR %s | GL_RENDERER %s | GL_VERSION %s | GLSL %s | MAX_TEXTURE %d MAX_RENDERBUFFER %d MAX_VIEWPORT %dx%d MAX_SAMPLES %d\n",
                     ve ? ve : "?", re ? re : "?", vv ? vv : "?", sl ? sl : "?", mt, mr, vp[0], vp[1], g_maxs); }
+    detail_init();
     glerr("инициализация");
     { char b[512], b2[256]; plat_gfx_logf("[gfx] %s\n[gfx] %s\n", re_gfx_describe(re_gfx(), b, sizeof b), plat_render_gfx_info(b2, sizeof b2)); }
     return 0;
 }
-void plat_render_shutdown(void) { g_ok = 0; for (int i = 0; i < MAX_TEX; i++) free(g_tex[i].src); memset(g_tex, 0, sizeof g_tex); g_swap = NULL; g_fbo = g_fbo_ms = g_ctex = g_drb = g_crb_ms = g_drb_ms = 0; g_tw = g_th = 0; }
+void plat_render_shutdown(void) { g_ok = 0; detail_forget(); for (int i = 0; i < MAX_TEX; i++) free(g_tex[i].src); memset(g_tex, 0, sizeof g_tex); g_swap = NULL; g_fbo = g_fbo_ms = g_ctex = g_drb = g_crb_ms = g_drb_ms = 0; g_tw = g_th = 0; }
 
 int png_write_rgba(const char *path, const uint32_t *px, int w, int h);
 static void tex_dump(int i, int w, int h, const uint32_t *rgba) {   /* v2.06: RE_TEXDUMP=каталог — каждая загрузка текстуры в PNG */

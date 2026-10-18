@@ -2,6 +2,9 @@
 #include "ported76.h"
 #include "ported89.h"
 #include <string.h>
+#ifndef RE_HOOK_BUILD
+#include "../platform/sdl/plat_detail.h"
+#endif
 #ifdef RE_HOOK_BUILD
 #  define P76_STD __attribute__((stdcall))
 #else
@@ -82,6 +85,9 @@ static void tri(const int32_t *v0, const int32_t *v1, const int32_t *v2, int var
   if (P22_DevReady == 0) return;
   int32_t slot = P22_TexVarA;
   if (!P33_EnsureRoom(slot, 3)) return;
+#ifndef RE_HOOK_BUILD
+  if (re_detail_capture) re_detail_tri(v0, v1, v2);   /* v2.31: детальные меши фасадов — совпадение страницы/UV */
+#endif
   for (int i = 0; i < 3; i++) {
     int32_t n = P33_Count[slot];
     plat_vertex *dst = (plat_vertex *)(P33_VBuf[slot] + (size_t)n * 0x20);
