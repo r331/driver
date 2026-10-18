@@ -33,7 +33,7 @@
 
 int re_detail_capture;
 
-#define DMAX_ENT 128
+#define DMAX_ENT 512
 #define DMAX_INST 1024
 typedef struct {
     char level[64];
