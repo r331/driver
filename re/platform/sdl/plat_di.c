@@ -143,6 +143,17 @@ static void script_load(void) {
     }
     fprintf(stderr, "[keys] сценарий RE_KEYS: %d нажатий, удержание %d кадр.\n", g_nscr, g_hold);
 }
+/* v2.30: отладка — нажатие через rel кадров от текущего (RE_AUTOCONT: выбор Continue после итога миссии); 0 — принято */
+int plat_keys_push(int rel, const char *name) {
+    if (g_nscr < 0) script_load();
+    int d = plat_key_dik(name);
+    if (d < 0 || g_nscr >= MAX_SCRIPT) return -1;
+    g_scr[g_nscr].frame = plat_frame_no() + rel; g_scr[g_nscr].hold = 0; g_scr[g_nscr].dik = (uint8_t)d; g_scr[g_nscr].logged = 0; g_nscr++;
+    return 0;
+}
+/* v2.30: отладочный автопилот (RE_AUTORAM) — клавиша нажата на ближайшие 2 опроса */
+static uint8_t g_auto[256];
+void plat_auto_key(int dik) { if (dik > 0 && dik < 256) g_auto[dik] = 2; }
 static SDL_GameController *g_pad;
 static uint8_t g_latch[256];
 void plat_input_key_event(int scancode, int down, int repeat) {
@@ -154,6 +165,7 @@ void plat_input_fill_keys(uint8_t *k) {
     if (!g_in_on) return;
     if (g_nscr < 0) script_load();
     int fr = plat_frame_no();
+    for (int i = 0; i < 256; i++) if (g_auto[i]) { k[i] = 0x80; g_auto[i]--; }
     for (int i = 0; i < g_nscr; i++)
         if (fr >= g_scr[i].frame && fr < g_scr[i].frame + (g_scr[i].hold > 0 ? g_scr[i].hold : g_hold)) {
             k[g_scr[i].dik] = 0x80;

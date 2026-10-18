@@ -229,11 +229,18 @@ void P132_GameLogic(void) {
       else {
         SetLatchValue0050E940(1);
 #ifndef RE_HOOK_BUILD
-        { /* v2.29: RE_MISSDBG — итог миссии (00c810e8 = 2 — провал, иначе — успех); RE_END_EXIT=N — выход через N кадров окна (снимок итога) */
+        { /* v2.29: RE_MISSDBG — итог миссии (00c810e8: 0 — успех, 2 — провал, 3 — цель потеряна (004f5012/004d4f5c)); RE_END_EXIT=N — выход через N кадров окна (снимок итога) */
           extern void plat_exit_after(int n); const char *e = getenv("RE_END_EXIT");
           if (getenv("RE_MISSDBG")) fprintf(stderr, "[end] w=%d f=%d итог миссии: %s (e8=%d c4=%x)\n", plat_frame_no(), (int)P62_Frame,
-                                            P14_00c810e8 == 2 ? "ПРОВАЛ" : "успех", (int)P14_00c810e8, (unsigned)P14_00c810c4);
-          if (e) plat_exit_after(atoi(e)); }
+                                            P14_00c810e8 == 0 ? "успех" : P14_00c810e8 == 3 ? "ПРОВАЛ (цель потеряна)" : "ПРОВАЛ", (int)P14_00c810e8, (unsigned)P14_00c810c4);
+          /* v2.30: RE_AUTOCONT="кадр:клавиша,…" — после успеха нажать (кадры от итога; Continue → следующая подмиссия/мотель),
+             RE_CHAIN=N — так пройти N итогов подряд; RE_END_EXIT срабатывает на провале или на N-м итоге */
+          static int nres = 0, lastw = -1; const char *ac = getenv("RE_AUTOCONT"), *ch = getenv("RE_CHAIN"); if (plat_frame_no() != lastw) nres++; lastw = plat_frame_no();
+          if (ac && P14_00c810e8 == 0 && nres < (ch ? atoi(ch) : 1)) {
+            extern int plat_keys_push(int rel, const char *name); char b[512]; snprintf(b, sizeof b, "%s", ac);
+            for (char *t = strtok(b, ","); t; t = strtok(NULL, ",")) { char *c = strchr(t, ':'); if (c) { *c = 0; plat_keys_push(atoi(t), c + 1); } }
+            fprintf(stderr, "[end] итог %d — RE_AUTOCONT\n", nres);
+          } else if (e) plat_exit_after(atoi(e)); }
 #endif
       }
     }

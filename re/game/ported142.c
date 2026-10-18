@@ -39,6 +39,7 @@
 #include "ported56.h"
 #include "ported58.h"
 #include "ported59.h"
+#include "ported100.h"
 #include "ported62.h"
 #include "ported74.h"
 #include "ported76.h"
@@ -702,7 +703,8 @@ void P142_CarsStep(void) {
        (P115_TargetTick/скрипт), перенос только заменяет езду; цели-события (машина) не трогаются — только журнал. */
     static int on = -1; static int32_t from = 0, delay = 150, seen[10], since[10];
     if (on < 0) { const char *e = getenv("RE_AUTOTARGET"); on = e != NULL; if (e) { from = atoi(e); const char *c = strchr(e, ':'); if (c) delay = atoi(c + 1); } }
-    if (on && (int32_t)P62_Frame >= from && P99_Cars[0].pos[0] | P99_Cars[0].pos[2]) {
+    if (on && (int32_t)P62_Frame >= from && P99_Cars[0].pos[0] | P99_Cars[0].pos[2] &&
+        !(getenv("RE_AUTORAM") && (P58_SB87EB0 | G6_00B87EB0 | G6_00B87EAC) != 0)) {   /* v2.30: в погоне — RE_AUTORAM */
       uint8_t *c = (uint8_t *)&P99_Cars[0];
       for (int i = 0; i < 10; i++) {
         const uint8_t *o = P58_Objs[i];
@@ -720,6 +722,76 @@ void P142_CarsStep(void) {
         P88_TeleportReload = 1;
         fprintf(stderr, "[autotarget] w=%d кадр %d → цель %d (%d, %d), было в %.0f\n", plat_frame_no(), (int)P62_Frame, i, (int)x, (int)z, sqrt(dx * dx + dz * dz));
         break;
+      }
+    }
+  }
+  { /* v2.30: RE_AUTORAM=N[:P[:B]] — отладка кампании, погоня/таран: в режиме погони (00b87eb0/00b87eac — цель в слоте 0x41,
+       «You lost your target» по удалению, 004d4f5c) с кадра N каждые P кадров (по умолчанию 60) машина игрока ставится в B единиц
+       (по умолчанию 900) позади цели по её скорости/курсу, с её ориентацией и скоростью цели + разгон к ней — удар засчитывает
+       физика и скрипт игры; без режима погони — ничего (журнал раз в 100 кадров). Только native, только при переменной. */
+    static int on = -1; static int32_t from = 0, per = 60, back = 900, ptx, ptz, pfr = -9, ppx, ppz, sgn = 1, tpf = -1, lpx, lpz; static double vk = 8192.0, close = 8.0; static int ycopy = 1; static double far = 3000.0;
+    static double svx, svz;   /* скорость цели по смещению (ед. позиции/кадр), сглаженная */
+    if (on < 0) { const char *e = getenv("RE_AUTORAM"); on = e != NULL;
+      if (e) { from = atoi(e); const char *c = strchr(e, ':'); if (c) { per = atoi(c + 1); c = strchr(c + 1, ':'); if (c) back = atoi(c + 1); } }
+      if (per < 1) per = 60;
+      const char *g = getenv("RE_AUTORAM_SIGN"); if (g) sgn = atoi(g); const char *fz = getenv("RE_AUTORAM_FAR"); if (fz) far = atof(fz);
+      const char *vz = getenv("RE_AUTORAM_VK"); if (vz) vk = atof(vz);
+      const char *cl = getenv("RE_AUTORAM_CLOSE"); if (cl) close = atof(cl);
+      const char *yc = getenv("RE_AUTORAM_Y"); if (yc) ycopy = atoi(yc); }
+    int32_t chase = (P58_SB87EB0 | G6_00B87EB0 | G6_00B87EAC) != 0;
+    if (on && (int32_t)P62_Frame >= from && P99_Cars[0].pos[0] | P99_Cars[0].pos[2]) {
+      uint8_t *c = (uint8_t *)&P99_Cars[0], *t = (uint8_t *)&P99_Cars[0x41];
+      int32_t tx = P99_Cars[0x41].pos[0], tz = P99_Cars[0x41].pos[2];
+      double dx = (double)tx - P99_Cars[0].pos[0], dz = (double)tz - P99_Cars[0].pos[2], d = sqrt(dx * dx + dz * dz);
+      if (((int32_t)P62_Frame % 100) == 0)
+        fprintf(stderr, "[autoram] кадр %d: погоня %d (eb0 %d eac %d), цель 0x41 (%d, %d) скорость %d, до цели %.0f, урон цели %d\n", (int)P62_Frame,
+                (int)chase, (int)(P58_SB87EB0 | G6_00B87EB0), (int)G6_00B87EAC, (int)tx, (int)tz, (int)P99_Cars[0x41].speed, d, (int)P99_Cars[0x41].f13c);
+      (void)t;
+      if ((int32_t)P62_Frame == pfr + 1) { svx = svx * 0.8 + 0.2 * (tx - ptx); svz = svz * 0.8 + 0.2 * (tz - ptz); }
+      else { svx = 0; svz = 0; }
+      ptx = tx; ptz = tz; pfr = (int32_t)P62_Frame;
+      if (chase && (tx | tz)) {   /* руление штатными клавишами: к цели, газ; ближе 1500 и не в лоб — полный газ */
+        extern void plat_auto_key(int dik);
+        double want = atan2(dx, dz) * 4096.0 / 6.283185307179586; int32_t h = P99_Cars[0].heading & 0xfff;
+        int32_t diff = ((int32_t)want - h) & 0xfff; if (diff > 0x800) diff -= 0x1000;
+        if (sgn < 0) diff = -diff;
+        if (diff > 60) plat_auto_key(0xcd); else if (diff < -60) plat_auto_key(0xcb);   /* RIGHT / LEFT */
+        if ((diff > 0x600 || diff < -0x600) && d < 2000.0) plat_auto_key(0xd0); else plat_auto_key(0xc8);   /* задний / газ */
+        if (tpf > 0 && (int32_t)P62_Frame - tpf <= 6) {   /* калибровка: смещение игрока после переноса */
+          fprintf(stderr, "[autoram] +%d: игрок шаг (%d, %d), цель шаг (%.0f, %.0f)\n", (int)P62_Frame - tpf, (int)(P99_Cars[0].pos[0] - lpx),
+                  (int)(P99_Cars[0].pos[2] - lpz), svx, svz); }
+        lpx = P99_Cars[0].pos[0]; lpz = P99_Cars[0].pos[2];
+        if (((int32_t)P62_Frame % 50) == 0) {
+          double pvx = P99_Cars[0].pos[0] - ppx, pvz = P99_Cars[0].pos[2] - ppz;
+          fprintf(stderr, "[autoram] кадр %d: курс %d, к цели %d, разн %d, движение игрока %.0f° (%.0f, %.0f)/50к\n", (int)P62_Frame, (int)h,
+                  (int)want & 0xfff, (int)diff, atan2(pvx, pvz) * 4096.0 / 6.283185307179586, pvx, pvz);
+          ppx = P99_Cars[0].pos[0]; ppz = P99_Cars[0].pos[2];
+        }
+      }
+      if (chase && (tx | tz) && ((int32_t)P62_Frame - from) % per == 0 && d > far) {
+        double vx = svx, vz = svz, v = sqrt(vx * vx + vz * vz);
+        if (v < 1.0) { int32_t h = P99_Cars[0x41].heading & 0xfff; vx = P59_Sin[h]; vz = P59_Sin[(h + 0x400) & 0xfff]; v = sqrt(vx * vx + vz * vz); }
+        if (v > 0.0) {
+          double ux = vx / v, uz = vz / v;
+          int32_t nx = tx - (int32_t)(ux * back), nz = tz - (int32_t)(uz * back);
+          P99_Cars[0].pos[0] = nx; P99_Cars[0].pos[2] = nz;
+          if (ycopy) {   /* высота: дорога под новым местом − смещение модели (как 004b9b1b для машин трафика) */
+            uint32_t mi = P99_Cars[0].f00[2]; int32_t off = 0;
+            if ((mi + 1) * 0x16c <= sizeof S_00D0CC60) off = (int16_t)(S_00D0CC60[mi * 0x16c + 0xe2] | (S_00D0CC60[mi * 0x16c + 0xe3] << 8));
+            P99_Cars[0].pos[1] = P100_RoadHeight(P99_Cars[0].pos) - off;
+          }
+          for (int m = 0x40; m < 0x78; m += 4) wr32(c + m, 0);
+          /* курс по направлению движения цели; 004daac7 (P59_ObjDir): позиция 1/16, кватернион из курса, матрица */
+          P99_Cars[0].heading = (int32_t)(atan2(ux, uz) * 4096.0 / 6.283185307179586) & 0xfff;
+          P99_Cars[0].ang[1] = (int16_t)P99_Cars[0].heading;
+          P59_ObjDir(c, 1);
+          wr32(c + 0x18, nx); wr32(c + 0x1c, P99_Cars[0].pos[1]); wr32(c + 0x20, nz);
+          /* скорость: смещение/кадр → +0x40 (x16 << 9 = 8192 на ед./кадр), +15 ед./кадр сближения */
+          wr32(c + 0x40, (int32_t)((svx + ux * close) * vk)); wr32(c + 0x48, (int32_t)((svz + uz * close) * vk));
+          P88_TeleportReload = 1; tpf = (int32_t)P62_Frame;
+          fprintf(stderr, "[autoram] w=%d кадр %d → позади цели (%d, %d), было до цели %.0f; y игрока %d/%d, y цели %d/%d\n", plat_frame_no(), (int)P62_Frame,
+                  (int)nx, (int)nz, d, (int)P99_Cars[0].pos[1], (int)rd32(c + 0x1c), (int)P99_Cars[0x41].pos[1], (int)rd32(t + 0x1c));
+        }
       }
     }
   }
