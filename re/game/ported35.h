@@ -1,4 +1,7 @@
 #pragma once
+#ifndef RE_HOOK_BUILD
+void P35_DamageRumble(const unsigned char *car, int damage);
+#endif
 #include "gvar.h"
 #include "../platform/plat.h"
 #include "ported34.h"

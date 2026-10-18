@@ -316,6 +316,7 @@ void *plat_game_window_create(void *hinst,int32_t show,const char *title,int w,i
 }
 int plat_cd_take_notify(void **hwnd, uint32_t *wp, int32_t *lp);   /* v2.22: plat_cdaudio.c */
 void plat_input_dbg_event(const void *ev);   /* v2.14: plat_di.c, RE_INPUTDBG=1 */
+void plat_input_pad_event(const void *event);
 void plat_input_key_event(int scancode, int down, int repeat);   /* v2.14: plat_di.c — защёлка коротких нажатий */
 /* v2.14: разбор очереди событий SDL — только из главного потока (на macOS события Cocoa приходят только туда).
    Зовётся из цикла сообщений игры (plat_pump_messages) и из plat_flip, если с прошлого кадра цикла сообщений не было
@@ -333,6 +334,7 @@ static void drain_events(void) {
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
         plat_input_dbg_event(&e);
+        plat_input_pad_event(&e);
         if (e.type == SDL_QUIT) {
             g_wquit = 1;
             if (!g_wtrap) { fprintf(stderr, "[window] закрытие окна — выход\n"); fflush(NULL); exit(0); }   /* v2.14: Cmd+Q / закрытие окна */

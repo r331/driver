@@ -160,3 +160,58 @@ The enhanced preset also passed with FBO, 4x MSAA, and the texture pack enabled.
 Regression tests cover both conversion paths, zero/nonzero bias, preserved
 UV/rhw/color, and restored ordinary depth. The temporary fixed-camera controls
 were removed before the final build.
+
+
+## Gamepad input (2026-10-18)
+
+`RE_INPUTDBG=1` records the opened controller name/mapping and changes to its
+buttons, left stick, and triggers, alongside the DIK keys delivered to the game.
+On macOS this log is `~/Library/Logs/driver_input.log`; share it together with
+the diagnostic session when reporting controller problems. `RE_DIAG=1` records
+connection/disconnection and controller-related environment settings in
+`session.log`. No controller serial numbers are collected by the game.
+
+For Steam Controller (2026), configure `RE_SDL3_COMPAT=ON` to build pinned SDL3
+3.4.18 and SDL2-compat 2.32.74. USB/Puck detection was checked on this Mac: the
+old SDL2 2.32.8 reported zero controllers, while the modern runtime opened a
+Steam Controller Puck and delivered real stick and trigger values to the game.
+The game now initializes controller support lazily after video startup; before
+this change it could skip initialization because WinMain had not opened SDL yet.
+
+The input test uses SDL virtual controllers through the real event loop to
+check menu/gameplay mapping, configured keys, pedal and steering deadzones,
+short button presses, held buttons across menu transitions, keyboard coexistence,
+focus loss, disconnect, and reconnect. Driving uses digital game actions;
+analog steering/pressure, gyro, and touchpad gestures are not implemented.
+
+The user confirmed steering, throttle, brake, handbrake, camera, and pause work
+on the connected controller in the rebuilt game. Selftest and inputtest pass
+with the modern runtime and with the installed SDL2 Classic 2.32.8 override.
+
+
+## Damage vibration (2026-10-18)
+
+Native damage hooks cover both `P103_CarDamage` (car collisions) and
+`P100_CarHit` (scenery collisions), after damage is applied. Only the controlled
+player's car produces vibration; traffic, menus, demo playback, and replays do
+not. The original hook build keeps its existing force feedback implementation.
+
+SDL rumble uses damage-scaled motor intensity and an 80–220 ms duration. A
+weaker hit cannot replace an ongoing stronger pulse. Pause, focus loss, disabled
+controller input, and disconnect stop vibration. `RE_RUMBLE=0` disables it;
+unsupported controllers keep normal input and report the rumble error once per
+connection. Diagnostic/session and input logs include requested motor strengths,
+duration, and damage, or the driver's failure message.
+
+Virtual-controller tests exercise the actual SDL rumble callback from both
+damage paths, player/NPC and invulnerability filtering, stronger/weaker hits,
+pause/focus cancellation, replay suppression, and the disable option. The
+pinned SDL2-compat 2.32.74 has an incorrect int-to-bool conversion in its virtual
+rumble callback adapter; the test callback compensates for that exact runtime.
+The real hardware rumble API does not use this virtual-device adapter.
+
+A real USB/Puck run accepted damage-triggered SDL rumble calls without errors,
+including a damage value of 1944 (60000/45000 motor levels for 220 ms) and lighter
+hits producing shorter/weaker pulses. Both automated suites pass with SDL3-compat
+and the installed SDL2 Classic runtime. Physical vibration feedback is awaiting
+user confirmation.

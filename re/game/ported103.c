@@ -903,6 +903,9 @@ int32_t P103_CarDamage(uint8_t *car, const int32_t *dir, int32_t force) {
   default: break;
   }
   if (mis) { P69_Bonus = P69_Bonus + rd32(acc); P69_AddScore(0xff00); }
+#ifndef RE_HOOK_BUILD
+  P35_DamageRumble(car, v);
+#endif
   return 1;
 }
 

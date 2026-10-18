@@ -182,6 +182,31 @@ fullscreen   = 1
 windowed_res = 1600x900
 ```
 
+**Gamepads / Steam Controller (2026):** native controls work in menus and while driving. On this Mac, the 2026 controller is detected over USB/Puck with SDL3 3.4.18 through SDL2-compat 2.32.74. Build with the pinned modern runtime (the first configure downloads the upstream archives):
+
+```sh
+cmake -S re -B build-native -DCMAKE_BUILD_TYPE=Release -DRE_MACOS_BUNDLE=ON -DRE_SDL3_COMPAT=ON
+cmake --build build-native -j8
+```
+
+The modern SDL libraries are built into `Driver.app/Contents/Frameworks`; the system SDL installation stays unchanged. `RE_SDL3_COMPAT=OFF` uses the existing system SDL2. The older SDL2 Classic driver does not support the 2026 controller's native USB/Puck protocol. Controller discovery starts after SDL creates the window, and supports connecting or reconnecting while the game is running.
+
+| Controller | Driving | Menus |
+|---|---|---|
+| Left stick / D-pad left/right | Steer | Navigate |
+| RT / LT | Throttle / brake and reverse | — |
+| D-pad up/down | Throttle / brake and reverse | Navigate |
+| A / B | Handbrake | Confirm / back |
+| X | Burnout | — |
+| Y | Change camera | — |
+| Left stick click | Horn | — |
+| LB / RB | Look back / hard turn | — |
+| Menu / View | Pause | Confirm / back |
+
+Driving buttons follow the game's keyboard bindings, including changes made in its options. Steering and pedals currently use the game's digital action path, with stick/trigger deadzones. Keyboard input remains available. Held buttons are suppressed when crossing between menus and gameplay until released. `RE_GAMEPAD=0` disables native controller handling, useful with a Steam Input keyboard layout to avoid duplicate input. Damage vibration sends short pulses for crashes into cars and scenery, scaled to the damage received. Vibration stops on pause, focus loss, or disconnect; `RE_RUMBLE=0` disables it. Gyro and trackpad gestures are not mapped by this implementation.
+
+Use `RE_INPUTDBG=1` to log detection, mapping, axes, buttons, and delivered game keys (`~/Library/Logs/driver_input.log` on macOS). `RE_DIAG=1` also records device connection/disconnection in the diagnostic session. For Steam Input, choose a conventional gamepad layout; use the disable option above if choosing a keyboard layout instead.
+
 **Дальность прорисовки (v2.19, `draw_distance`, env `RE_DRAW_DIST`):** множитель к дальности из опций игры (Gfx Details, 15 000–45 000
 единиц; клетка карты — 3000): 1.0 — оригинал, до 4.0; `enhanced` — 2.0, `original` — 1.0. В оригинале дальность ограничивают: окно обхода
 клеток 31×31 по таблице FRUSTRUM.DAT (радиус 15 клеток = 45 000) и PVS того же размера, дальняя плоскость (опция) и её копия для отсечения

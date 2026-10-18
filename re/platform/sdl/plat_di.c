@@ -1,11 +1,16 @@
 /* SDL-вариант DirectInput: учёт вызовов без устройства (клавиатуру из SDL подключим вместе с главным циклом). */
 #include "../plat.h"
+#include "../../game/ported36.h"
+#include "../../game/ported98.h"
+#include "../native/diagnostics.h"
 #include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 static void dbg_keys(const uint8_t *k);   /* v2.14: RE_INPUTDBG */
+void plat_input_dbg(const char *fmt, ...);
+static void gamepad_close(void);
 static int32_t g_jx, g_jy, g_poll;
 static int g_rel, g_unacq, g_evt, g_kind = -1, g_fail;
 void plat_di_release(void *o) { if (o) g_rel++; }
@@ -71,14 +76,14 @@ void *plat_event_create(void) { return FAIL(9) ? NULL : tok(); }
 
 /* ===== v2.03: ввод SDL → DirectInput-клавиатура (только игра, plat_input_enable(1) из platform/native/main.c) =====
    GetDeviceState(0x100): 256 байт DIK, 0x80 — нажата. Источники: SDL_GetKeyboardState (таблица SDL_Scancode → DIK),
-   первый SDL_GameController (крестовина/левый стик → стрелки, A/Start → RETURN, B/Back → ESCAPE, X → SPACE),
+   SDL_GameController: меню и настроенные действия езды (Steam Controller 2026 через SDL3-compat),
    сценарий RE_KEYS="кадр:клавиша[,…]" — клавиша нажата с кадра N (plat_frame_no) RE_KEYS_HOLD кадров (по умолчанию 2).
    Клавиша: имя (UP DOWN LEFT RIGHT RETURN ENTER ESC ESCAPE SPACE TAB BACK F1..F12 A..Z 0..9 LSHIFT RSHIFT LCTRL RCTRL LALT)
    или номер DIK (0x1c / 28). Буферизованный ввод (GetDeviceData) игра не использует (перенос 004e417f — только GetDeviceState). */
 static int g_in_on;
 void plat_input_enable(int on) {
     g_in_on = on;
-    if (on && SDL_WasInit(SDL_INIT_VIDEO) && !SDL_WasInit(SDL_INIT_GAMECONTROLLER)) SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
+    if (!on) gamepad_close();
 }
 static const struct { const char *n; uint8_t dik; } k_names[] = {
     {"ESC",0x01},{"ESCAPE",0x01},{"1",0x02},{"2",0x03},{"3",0x04},{"4",0x05},{"5",0x06},{"6",0x07},{"7",0x08},{"8",0x09},{"9",0x0a},{"0",0x0b},
@@ -155,6 +160,135 @@ int plat_keys_push(int rel, const char *name) {
 static uint8_t g_auto[256];
 void plat_auto_key(int dik) { if (dik > 0 && dik < 256) g_auto[dik] = 2; }
 static SDL_GameController *g_pad;
+static Uint32 g_pad_latch, g_pad_blocked;
+static int g_pad_focus = 1, g_pad_menu = -1;
+static int g_pad_init_failed;
+static Uint32 g_rumble_until;
+static int g_rumble_strength, g_rumble_failed;
+static void gamepad_stop_rumble(void) {
+    if (g_pad && g_rumble_until) SDL_GameControllerRumble(g_pad, 0, 0, 0);
+    g_rumble_until = 0; g_rumble_strength = 0;
+}
+static void gamepad_close(void) {
+    if (g_pad) {
+        gamepad_stop_rumble();
+        re_diag_log("Gamepad disconnected: %s\n", SDL_GameControllerName(g_pad));
+        fprintf(stderr, "[gamepad] disconnected: %s\n", SDL_GameControllerName(g_pad));
+        SDL_GameControllerClose(g_pad); g_pad = NULL;
+    }
+    g_pad_latch = g_pad_blocked = 0; g_pad_menu = -1; g_rumble_failed = 0;
+}
+void plat_input_pad_event(const void *event) {
+    const SDL_Event *e = event;
+    if (e->type == SDL_WINDOWEVENT) {
+        if (e->window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
+            g_pad_focus = 0; g_pad_latch = 0; gamepad_stop_rumble();
+        }
+        if (e->window.event == SDL_WINDOWEVENT_FOCUS_GAINED) g_pad_focus = 1;
+    }
+    if (g_in_on && g_pad_focus && g_pad && e->type == SDL_CONTROLLERBUTTONDOWN &&
+        e->cbutton.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(g_pad)) && e->cbutton.button < 32)
+        g_pad_latch |= 1u << e->cbutton.button;
+}
+static int gamepad_ready(void) {
+    const char *enabled = getenv("RE_GAMEPAD");
+    if (!g_in_on || (enabled && !strcmp(enabled, "0"))) { gamepad_close(); return 0; }
+    /* WinMain creates the SDL window after plat_input_enable: initialize lazily. */
+    if (!SDL_WasInit(SDL_INIT_GAMECONTROLLER)) {
+        if (g_pad_init_failed) return 0;
+        SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_STEAM, "1");
+        if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) != 0) {
+            g_pad_init_failed = 1;
+            fprintf(stderr, "[gamepad] initialization failed: %s\n", SDL_GetError()); return 0;
+        }
+    }
+    SDL_GameControllerUpdate();
+    if (g_pad && !SDL_GameControllerGetAttached(g_pad)) gamepad_close();
+    if (!g_pad) for (int j = 0; j < SDL_NumJoysticks(); j++) {
+        if (!SDL_IsGameController(j) || !(g_pad = SDL_GameControllerOpen(j))) continue;
+        fprintf(stderr, "[gamepad] connected: %s (%04x:%04x)\n", SDL_GameControllerName(g_pad),
+                SDL_GameControllerGetVendor(g_pad), SDL_GameControllerGetProduct(g_pad));
+        re_diag_log("Gamepad connected: %s vendor=%04x product=%04x\n", SDL_GameControllerName(g_pad),
+                    SDL_GameControllerGetVendor(g_pad), SDL_GameControllerGetProduct(g_pad));
+        char *mapping = SDL_GameControllerMapping(g_pad);
+        plat_input_dbg("gamepad %s mapping=%s", SDL_GameControllerName(g_pad), mapping ? mapping : "-");
+        SDL_free(mapping); break;
+    }
+    return g_pad != NULL && g_pad_focus;
+}
+int plat_gamepad_damage(int damage) {
+    const char *enabled = getenv("RE_RUMBLE");
+    if (enabled && !strcmp(enabled, "0")) { gamepad_stop_rumble(); return 0; }
+    if (damage <= 0 || !gamepad_ready()) return 0;
+    if (g_rumble_failed) return -1;
+    /* Damage units are shared by the car and scenery collision paths. Keep
+       pulses bounded and do not replace an active hard hit with a lighter one. */
+    int strength = damage > 1024 ? 1024 : damage;
+    Uint32 now = SDL_GetTicks();
+    if (g_rumble_until && (Sint32)(now - g_rumble_until) < 0 && strength <= g_rumble_strength) return 0;
+    Uint16 low = (Uint16)(12000 + strength * 48000 / 1024);
+    Uint16 high = (Uint16)(low * 3 / 4);
+    Uint32 duration = (Uint32)(80 + strength * 140 / 1024);
+    if (SDL_GameControllerRumble(g_pad, low, high, duration) != 0) {
+        g_rumble_failed = 1;
+        re_diag_log("Gamepad rumble unavailable: %s (%s)\n", SDL_GameControllerName(g_pad), SDL_GetError());
+        plat_input_dbg("gamepad rumble unavailable: %s", SDL_GetError());
+        return -1;
+    }
+    g_rumble_until = now + duration; g_rumble_strength = strength;
+    re_diag_log("Gamepad damage rumble: damage=%d low=%u high=%u duration_ms=%u\n", damage, low, high, duration);
+    plat_input_dbg("damage rumble: damage=%d low=%u high=%u duration_ms=%u", damage, low, high, duration);
+    return 1;
+}
+static void pad_action(uint8_t *k, int action) {
+    uint8_t dik = P36_KeyCfg[action];
+    if (dik) k[dik] |= 0x80;
+}
+static void gamepad_keys(uint8_t *k) {
+    if (!gamepad_ready()) return;
+    Uint32 down = 0;
+    for (int b = 0; b < SDL_CONTROLLER_BUTTON_MAX && b < 32; b++)
+        if (SDL_GameControllerGetButton(g_pad, (SDL_GameControllerButton)b)) down |= 1u << b;
+    int menu = G6_00B87EFC != 0 || P36_KeyCfg[6] == 0;
+    const char *rumble = getenv("RE_RUMBLE");
+    if (menu || (rumble && !strcmp(rumble, "0"))) gamepad_stop_rumble();
+    if (g_pad_menu >= 0 && menu != g_pad_menu) g_pad_blocked |= down;
+    g_pad_menu = menu;
+    g_pad_blocked &= down;
+    Uint32 buttons = (down | g_pad_latch) & ~g_pad_blocked; g_pad_latch = 0;
+#define PAD(b) ((buttons & (1u << SDL_CONTROLLER_BUTTON_##b)) != 0)
+    int ax = SDL_GameControllerGetAxis(g_pad, SDL_CONTROLLER_AXIS_LEFTX);
+    int ay = SDL_GameControllerGetAxis(g_pad, SDL_CONTROLLER_AXIS_LEFTY);
+    int rt = SDL_GameControllerGetAxis(g_pad, SDL_CONTROLLER_AXIS_TRIGGERRIGHT);
+    int lt = SDL_GameControllerGetAxis(g_pad, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
+    const int deadzone = menu ? 16000 : 8000;
+    if (menu) {
+        if (PAD(DPAD_UP) || ay < -deadzone) k[0xc8] |= 0x80;
+        if (PAD(DPAD_DOWN) || ay > deadzone) k[0xd0] |= 0x80;
+        if (PAD(DPAD_LEFT) || ax < -deadzone) k[0xcb] |= 0x80;
+        if (PAD(DPAD_RIGHT) || ax > deadzone) k[0xcd] |= 0x80;
+        if (PAD(A) || PAD(START)) k[0x1c] |= 0x80;
+        if (PAD(B) || PAD(BACK)) k[0x01] |= 0x80;
+    } else {
+        if (PAD(DPAD_LEFT) || ax < -deadzone) pad_action(k, 4);
+        if (PAD(DPAD_RIGHT) || ax > deadzone) pad_action(k, 5);
+        if (rt > 4000 || PAD(DPAD_UP)) pad_action(k, 6);
+        if (lt > 4000 || PAD(DPAD_DOWN)) pad_action(k, 7);
+        if (PAD(RIGHTSHOULDER)) pad_action(k, 8);  /* hard turn */
+        if (PAD(A) || PAD(B)) pad_action(k, 9);   /* handbrake */
+        if (PAD(X)) pad_action(k, 10);             /* burnout */
+        if (PAD(LEFTSTICK)) pad_action(k, 15);     /* horn */
+        if (PAD(LEFTSHOULDER)) pad_action(k, 13);  /* look back */
+        if (PAD(Y) && P98_KeyMode) k[P98_KeyMode] |= 0x80;
+        if (PAD(START) || PAD(BACK)) k[0x01] |= 0x80;
+    }
+    { static Uint32 old_buttons; static int old_ax, old_rt, old_lt;
+      if (buttons != old_buttons || abs(ax - old_ax) > 2048 || abs(rt - old_rt) > 2048 || abs(lt - old_lt) > 2048) {
+          plat_input_dbg("gamepad menu=%d buttons=%08x leftx=%d lefty=%d LT=%d RT=%d", menu, buttons, ax, ay, lt, rt);
+          old_buttons = buttons; old_ax = ax; old_rt = rt; old_lt = lt;
+      } }
+#undef PAD
+}
 static uint8_t g_latch[256];
 void plat_input_key_event(int scancode, int down, int repeat) {
     if (!g_in_on || !down || repeat) return;
@@ -179,19 +313,7 @@ void plat_input_fill_keys(uint8_t *k) {
     int n = 0; const Uint8 *st = SDL_GetKeyboardState(&n);
     for (int sc = 0; st && sc < n; sc++) if (st[sc]) { uint8_t d = sc_to_dik((SDL_Scancode)sc); if (d) k[d] = 0x80; }
     if (SDL_GetModState() & (KMOD_GUI | KMOD_ALT)) { k[0x1c] = 0; k[0x9c] = 0; }   /* Cmd/Alt+Enter — полный экран, не игре */
-    if (!SDL_WasInit(SDL_INIT_GAMECONTROLLER)) return;
-    if (g_pad && !SDL_GameControllerGetAttached(g_pad)) { SDL_GameControllerClose(g_pad); g_pad = NULL; }
-    if (!g_pad) for (int j = 0; j < SDL_NumJoysticks(); j++) if (SDL_IsGameController(j) && (g_pad = SDL_GameControllerOpen(j))) break;
-    if (!g_pad) return;
-    SDL_GameControllerUpdate();
-    int ax = SDL_GameControllerGetAxis(g_pad, SDL_CONTROLLER_AXIS_LEFTX), ay = SDL_GameControllerGetAxis(g_pad, SDL_CONTROLLER_AXIS_LEFTY);
-    if (SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_DPAD_UP) || ay < -16000) k[0xc8] = 0x80;
-    if (SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_DPAD_DOWN) || ay > 16000) k[0xd0] = 0x80;
-    if (SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_DPAD_LEFT) || ax < -16000) k[0xcb] = 0x80;
-    if (SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_DPAD_RIGHT) || ax > 16000) k[0xcd] = 0x80;
-    if (SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_A) || SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_START)) k[0x1c] = 0x80;
-    if (SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_B) || SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_BACK)) k[0x01] = 0x80;
-    if (SDL_GameControllerGetButton(g_pad, SDL_CONTROLLER_BUTTON_X)) k[0x39] = 0x80;
+    gamepad_keys(k);
 }
 
 /* ===== v2.14: RE_INPUTDBG=1 — журнал ввода driver_input.log (macOS: ~/Library/Logs/driver_input.log, иначе рядом с бинарником,

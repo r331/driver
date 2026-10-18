@@ -9,6 +9,9 @@
 #include "../platform/plat.h"
 #include "../game/ported34.h"
 #include "../game/ported36.h"
+#include "../game/ported98.h"
+#include "../game/ported100.h"
+#include "../game/ported103.h"
 #include "../game/aspect.h"
 #include <SDL.h>
 #include <stdio.h>
@@ -21,6 +24,137 @@ static void push_key(SDL_Scancode sc, int down, Uint16 mod) {
     e.type = down ? SDL_KEYDOWN : SDL_KEYUP; e.key.state = down ? SDL_PRESSED : SDL_RELEASED;
     e.key.keysym.scancode = sc; e.key.keysym.sym = SDL_GetKeyFromScancode(sc); e.key.keysym.mod = mod;
     SDL_PushEvent(&e);
+}
+static void pad_sample(uint8_t *k) {
+    SDL_JoystickUpdate(); plat_pump_messages();
+    memset(k, 0, 256); plat_input_fill_keys(k);
+}
+static int rumble_calls;
+static Uint16 rumble_low, rumble_high;
+static int SDLCALL record_rumble(void *unused, Uint16 low, Uint16 high) {
+    (void)unused; rumble_calls++; rumble_low = low; rumble_high = high;
+    /* SDL2-compat 2.32.74's VirtualJoystick_Rumble forwards SDL2's int result
+       as an SDL3 bool without conversion. Compensate only in this test callback;
+       real hardware rumble does not use that virtual-device adapter. */
+    SDL_version version; SDL_GetVersion(&version);
+    return version.major == 2 && version.minor == 32 && version.patch == 74 ? 1 : 0;
+}
+static int test_damage_rumble(uint8_t *k) {
+    p99_car_t saved = P99_Cars[0];
+    int active = P31_Active, demo = G6_00B87EA0, alternate = G6_00B87EAC;
+    int pct = P103_DmgPct, invulnerable = MenuOptBDFA4C, strong = MenuOptBDFA58;
+    P31_Active = 1; G6_00B87EA0 = G6_00B87EAC = 0;
+    P103_DmgPct = 100; MenuOptBDFA4C = MenuOptBDFA58 = 0;
+    memset(&P99_Cars[0], 0, sizeof P99_Cars[0]);
+    int32_t direction[3] = {0, 0, 4096};
+    int count = rumble_calls;
+    CHK(P103_CarDamage((uint8_t *)&P99_Cars[0], direction, 0x800) == 0);
+    CHK(rumble_calls == count);
+    uint8_t npc[0x148]; memset(npc, 0, sizeof npc); npc[0] = 1;
+    CHK(P103_CarDamage(npc, direction, 0x10000) == 1); CHK(rumble_calls == count);
+    MenuOptBDFA4C = 1;
+    CHK(P103_CarDamage((uint8_t *)&P99_Cars[0], direction, 0x10000) == 0);
+    CHK(rumble_calls == count); MenuOptBDFA4C = 0;
+    CHK(P103_CarDamage((uint8_t *)&P99_Cars[0], direction, 0x10000) == 1);
+    CHK(rumble_calls == count + 1 && rumble_low > 0 && rumble_high > 0);
+    Uint16 medium = rumble_low;
+    P103_CarDamage((uint8_t *)&P99_Cars[0], direction, 0x1000);
+    CHK(rumble_calls == count + 1 && rumble_low == medium);
+    P103_CarDamage((uint8_t *)&P99_Cars[0], direction, 0x40000);
+    CHK(rumble_calls == count + 2 && rumble_low > medium && rumble_low <= 60000);
+    /* Pause cancels an ongoing pulse, then the scenery damage path can rumble. */
+    G6_00B87EFC = 1; pad_sample(k); CHK(rumble_low == 0 && rumble_high == 0);
+    count = rumble_calls;
+    P35_DamageRumble((uint8_t *)&P99_Cars[0], 100); CHK(rumble_calls == count);
+    G6_00B87EFC = 0; pad_sample(k);
+    int32_t a[11] = {0}, b[3] = {0, 0, 4096};
+    P100_CarHit((uint8_t *)&P99_Cars[0], a, b, 0x20000);
+    CHK(rumble_calls == count + 1 && rumble_low > 0);
+    SDL_Event e; memset(&e, 0, sizeof e); e.type = SDL_WINDOWEVENT;
+    e.window.event = SDL_WINDOWEVENT_FOCUS_LOST; SDL_PushEvent(&e); pad_sample(k);
+    CHK(rumble_low == 0 && rumble_high == 0);
+    count = rumble_calls;
+    P35_DamageRumble((uint8_t *)&P99_Cars[0], 100); CHK(rumble_calls == count);
+    e.window.event = SDL_WINDOWEVENT_FOCUS_GAINED; SDL_PushEvent(&e); pad_sample(k);
+    P36_PadMode = 2; P35_DamageRumble((uint8_t *)&P99_Cars[0], 100);
+    CHK(rumble_calls == count); P36_PadMode = 0;
+    SDL_setenv("RE_RUMBLE", "0", 1); P35_DamageRumble((uint8_t *)&P99_Cars[0], 100);
+    CHK(rumble_calls == count); SDL_setenv("RE_RUMBLE", "1", 1);
+    P99_Cars[0] = saved; P31_Active = active; G6_00B87EA0 = demo; G6_00B87EAC = alternate;
+    P103_DmgPct = pct; MenuOptBDFA4C = invulnerable; MenuOptBDFA58 = strong;
+    return 0;
+}
+static int test_gamepad(void) {
+    uint8_t k[256]; uint32_t mask;
+    SDL_VirtualJoystickDesc descriptor; memset(&descriptor, 0, sizeof descriptor);
+    descriptor.version = SDL_VIRTUAL_JOYSTICK_DESC_VERSION;
+    descriptor.type = SDL_JOYSTICK_TYPE_GAMECONTROLLER;
+    descriptor.naxes = SDL_CONTROLLER_AXIS_MAX; descriptor.nbuttons = SDL_CONTROLLER_BUTTON_MAX;
+    descriptor.axis_mask = (1u << SDL_CONTROLLER_AXIS_MAX) - 1;
+    descriptor.button_mask = (1u << SDL_CONTROLLER_BUTTON_MAX) - 1;
+    descriptor.name = "Driver rumble test controller"; descriptor.Rumble = record_rumble;
+    int index = SDL_JoystickAttachVirtualEx(&descriptor);
+    CHK(index >= 0 && SDL_IsGameController(index));
+    SDL_Joystick *joy = SDL_JoystickOpen(index); CHK(joy != NULL);
+    SDL_JoystickSetVirtualAxis(joy, SDL_CONTROLLER_AXIS_TRIGGERLEFT, -32768);
+    SDL_JoystickSetVirtualAxis(joy, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, -32768);
+    G6_00B87EFC = 1;
+    pad_sample(k); CHK(k[0xc8] == 0 && k[0x1c] == 0);
+    SDL_JoystickSetVirtualAxis(joy, SDL_CONTROLLER_AXIS_LEFTX, 22000);
+    pad_sample(k); CHK(k[0xcd] == 0x80 && k[0xcb] == 0);
+    SDL_JoystickSetVirtualAxis(joy, SDL_CONTROLLER_AXIS_LEFTX, 0);
+    SDL_JoystickSetVirtualButton(joy, SDL_CONTROLLER_BUTTON_A, 1);
+    pad_sample(k); CHK(k[0x1c] == 0x80 && k[0x01] == 0);
+    /* Entering gameplay with A still held must not apply the handbrake. */
+    memset(P36_KeyCfg, 0, sizeof P36_KeyCfg);
+    P36_KeyCfg[4] = 0x2c; P36_KeyCfg[5] = 0x2d;
+    P36_KeyCfg[6] = 0x28; P36_KeyCfg[7] = 0x35;
+    P36_KeyCfg[8] = 0x1f; P36_KeyCfg[9] = 0x1c;
+    P36_KeyCfg[10] = 0x11; P36_KeyCfg[13] = 0x20; P36_KeyCfg[15] = 0x23;
+    P98_KeyMode = 0x02; G6_00B87EFC = 0;
+    pad_sample(k); CHK(k[0x1c] == 0);
+    SDL_JoystickSetVirtualButton(joy, SDL_CONTROLLER_BUTTON_A, 0); pad_sample(k);
+    SDL_JoystickSetVirtualAxis(joy, SDL_CONTROLLER_AXIS_LEFTX, -24000);
+    SDL_JoystickSetVirtualAxis(joy, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, 32767);
+    pad_sample(k);
+    memcpy(P34_Keys, k, 256); P36_PadMode = 0; P36_GetPadButtons(&mask);
+    CHK(mask == (8 | 2));
+    CHK(test_damage_rumble(k) == 0);
+    SDL_JoystickSetVirtualAxis(joy, SDL_CONTROLLER_AXIS_LEFTX, 3000);
+    SDL_JoystickSetVirtualAxis(joy, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, -32768);
+    SDL_JoystickSetVirtualAxis(joy, SDL_CONTROLLER_AXIS_TRIGGERLEFT, 32767);
+    SDL_JoystickSetVirtualButton(joy, SDL_CONTROLLER_BUTTON_A, 1);
+    SDL_JoystickSetVirtualButton(joy, SDL_CONTROLLER_BUTTON_X, 1);
+    SDL_JoystickSetVirtualButton(joy, SDL_CONTROLLER_BUTTON_LEFTSTICK, 1);
+    pad_sample(k); memcpy(P34_Keys, k, 256); P36_GetPadButtons(&mask);
+    CHK(mask == (1 | 0x20 | 0x40 | 0x100));
+    /* Respect changed keyboard bindings, preserve simultaneous keyboard input. */
+    P36_KeyCfg[9] = 0x24; pad_sample(k); CHK(k[0x24] == 0x80 && k[0x1c] == 0);
+    SDL_JoystickSetVirtualButton(joy, SDL_CONTROLLER_BUTTON_Y, 1);
+    SDL_JoystickSetVirtualButton(joy, SDL_CONTROLLER_BUTTON_START, 1);
+    pad_sample(k); CHK(k[0x02] == 0x80 && k[0x01] == 0x80 && k[0x1c] == 0);
+    k[0x21] = 0x80; plat_input_fill_keys(k); CHK(k[0x21] == 0x80);
+    SDL_JoystickClose(joy); CHK(SDL_JoystickDetachVirtual(index) == 0);
+    pad_sample(k); CHK(k[0x24] == 0 && k[0x35] == 0 && k[0x02] == 0 && k[0x01] == 0);
+    /* Reconnection and a complete short press between game polls. */
+    index = SDL_JoystickAttachVirtual(SDL_JOYSTICK_TYPE_GAMECONTROLLER,
+                                      SDL_CONTROLLER_AXIS_MAX, SDL_CONTROLLER_BUTTON_MAX, 0);
+    CHK(index >= 0); joy = SDL_JoystickOpen(index); CHK(joy != NULL);
+    G6_00B87EFC = 1; pad_sample(k);
+    SDL_JoystickSetVirtualButton(joy, SDL_CONTROLLER_BUTTON_A, 1);
+    SDL_JoystickUpdate(); plat_pump_messages();
+    SDL_JoystickSetVirtualButton(joy, SDL_CONTROLLER_BUTTON_A, 0);
+    pad_sample(k); CHK(k[0x1c] == 0x80);
+    pad_sample(k); CHK(k[0x1c] == 0);
+    SDL_JoystickSetVirtualButton(joy, SDL_CONTROLLER_BUTTON_A, 1); pad_sample(k);
+    SDL_Event event; memset(&event, 0, sizeof event); event.type = SDL_WINDOWEVENT;
+    event.window.event = SDL_WINDOWEVENT_FOCUS_LOST; SDL_PushEvent(&event);
+    pad_sample(k); CHK(k[0x1c] == 0);
+    SDL_JoystickSetVirtualButton(joy, SDL_CONTROLLER_BUTTON_A, 0);
+    event.window.event = SDL_WINDOWEVENT_FOCUS_GAINED; SDL_PushEvent(&event); pad_sample(k);
+    SDL_JoystickClose(joy); CHK(SDL_JoystickDetachVirtual(index) == 0); pad_sample(k);
+    G6_00B87EFC = 0; memset(P34_Keys, 0, 256); memset(P36_KeyCfg, 0, sizeof P36_KeyCfg);
+    return 0;
 }
 int re_input_test(void) {
     int mt = plat_is_main_thread();
@@ -64,6 +198,7 @@ int re_input_test(void) {
     P34_Keys[0xd0] = 0; P34_Keys[0xcb] = 0x80; P34_Keys[0x39] = 0x80; P36_GetPadButtons(&m); CHK(m == (8 | 0x20));
     P34_Keys[0xcb] = 0; P34_Keys[0x39] = 0; P34_Keys[0xcd] = 0x80; P36_GetPadButtons(&m); CHK(m == 4);
     memset(P34_Keys, 0, 256);
+    CHK(test_gamepad() == 0);
     /* (5) вписывание кадра (без GL: только арифметика) */
     int lx, ly;
     plat_render_set_aspect("4:3");                                                      /* v2.14: оригинал, полосы */
@@ -89,6 +224,7 @@ int re_input_test(void) {
     plat_render_set_aspect("21:9"); plat_render_set_drawable(1920, 1080); CHK(plat_view_extra() == 240);   /* 1120×480 в 16:9 — letterbox */
     CHK(!plat_render_to_logical(960.0, 10.0, &lx, &ly));
     plat_render_set_aspect(NULL);
+    plat_input_enable(0);
     SDL_Quit();
     printf("inputtest: OK\n");
     return 0;

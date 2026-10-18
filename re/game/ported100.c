@@ -834,6 +834,9 @@ void P100_CarHit(uint8_t *car, const int32_t *a, const int32_t *b, int32_t force
   case 4: if (rd32(car + 0x128) < h) wr32(car + 0x128, h); break;
   }
   if (hit_scored(car)) { P69_Bonus += rd32(z); P69_AddScore(0xff00); }
+#ifndef RE_HOOK_BUILD
+  P35_DamageRumble(car, force / 2);
+#endif
 }
 
 /* ---- 004078d0: формат LFB (LfbLock(1)): шаг строки и байты формата +0x14..+0x1a, функция пикселя по глубине ---- */

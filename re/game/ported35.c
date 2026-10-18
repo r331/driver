@@ -2,6 +2,16 @@
 #include "ported35.h"
 #include "noop.h"
 #include <math.h>
+#ifndef RE_HOOK_BUILD
+#include "ported36.h"
+#include "cartab.h"
+void P35_DamageRumble(const unsigned char *car, int damage) {
+  int player = G6_00B87EAC != 0 ? 0x41 : 0;
+  if (car == (const unsigned char *)&P99_Cars[player] && P31_Active != 0 &&
+      G6_00B87EFC == 0 && G6_00B87EA0 == 0 && P36_PadMode != 2)
+    plat_gamepad_damage(damage);
+}
+#endif
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P35_PadX")
 #undef P35_PadX

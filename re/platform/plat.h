@@ -183,6 +183,9 @@ int32_t plat_di_acquire(void *dev);                    /* Acquire; 0 — усп�
 int32_t plat_di_get_state(void *dev, uint32_t size, void *buf); /* GetDeviceState; 0 — успех */
 void    plat_input_enable(int on);                 /* v2.03 (SDL): GetDeviceState клавиатуры — SDL/геймпад/RE_KEYS (только игра) */
 void    plat_input_fill_keys(uint8_t *keys256);    /* v2.03 (SDL): добавить нажатые клавиши (DIK, 0x80) */
+#ifndef RE_HOOK_BUILD
+int     plat_gamepad_damage(int damage);          /* native: short damage rumble; 1 sent, 0 skipped, -1 unsupported */
+#endif
 int     plat_key_dik(const char *name);            /* v2.03 (SDL): имя клавиши/номер → DIK, -1 — неизвестно */
 int     plat_frame_no(void);                       /* v2.03 (SDL): номер последнего показанного кадра (plat_flip) */
 int32_t plat_di_poll(void *dev);                       /* IDirectInputDevice2::Poll; 0 или 1 (DI_NOEFFECT) — успех */
