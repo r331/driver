@@ -112,6 +112,15 @@ static uint32_t pack_rgb(const int32_t *in) {
   /* fistp: округление к ближайшему чётному (режим FPU по умолчанию) */
   return ((uint32_t)lrintf(f32(in[3])) << 16) | (uint32_t)lrintf(f32(in[5])) | ((uint32_t)lrintf(f32(in[4])) << 8);
 }
+#ifndef RE_HOOK_BUILD
+static int sky_depth;
+int P23_SetSkyDepth(int enabled) {
+  int previous = sky_depth;
+  sky_depth = enabled != 0;
+  return previous;
+}
+#endif
+
 static void conv(const int32_t *in, plat_vertex *out, float uvscale, int variant_b) {
   float w = f32(in[8]);
   float k = uvscale / w;
@@ -119,6 +128,10 @@ static void conv(const int32_t *in, plat_vertex *out, float uvscale, int variant
   out->rhw = w;
   out->color = pack_rgb(in);
   out->specular = 0;
+#ifndef RE_HOOK_BUILD
+  if (sky_depth) out->z = 1.0f;
+  else
+#endif
   if (P23_ZBias == 0.0f) out->z = 1.0f - w * (variant_b ? P23_ZScale_B : P23_ZScale_A);
   else if (variant_b) out->z = 1.0f - P23_ZNum / (w + P23_ZBias);
   else { float t = P23_ZDenA / w + P23_ZBias; out->z = 1.0f - P23_ZNum / t; }

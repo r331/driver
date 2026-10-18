@@ -656,6 +656,26 @@ static int test_p23(void) {
   P23_ZBias = 2.f;
   P23_ConvVertexA(in, &v); if (fabsf(v.z - (1.f - 1.f / (8.f / 4.f + 2.f))) > 1e-6f) f++;
   P23_ConvVertexB(in, &v); if (fabsf(v.z - (1.f - 1.f / (4.f + 2.f))) > 1e-6f) f++;
+  /* The sky must remain behind extended-distance scenery in both conversion
+     paths, with and without bias; restoring the pass restores ordinary depth. */
+  {
+    plat_vertex ordinary, sky;
+    for (int bias = 0; bias < 2; bias++) {
+      P23_ZBias = bias ? 32767.0f : 0.0f;
+      for (int b = 0; b < 2; b++) {
+        void (*convert)(const int32_t *, plat_vertex *) = b ? P23_ConvVertexB : P23_ConvVertexA;
+        convert(in, &ordinary);
+        int previous = P23_SetSkyDepth(1);
+        convert(in, &sky);
+        if (sky.z != 1.0f || sky.rhw != ordinary.rhw || sky.u != ordinary.u || sky.v != ordinary.v ||
+            sky.x != ordinary.x || sky.y != ordinary.y || sky.color != ordinary.color) f++;
+        P23_SetSkyDepth(previous);
+        convert(in, &sky);
+        if (sky.z != ordinary.z) f++;
+      }
+    }
+    P23_ZBias = 2.0f;
+  }
   (void)f32t;
   /* режимы смешивания: SRC=19 DEST=20 ALPHABLEND=27 */
   P23_DevCaps = 0xffffffffu; P23_AlphaMode = 0; P22_AlphaFunc = 2;

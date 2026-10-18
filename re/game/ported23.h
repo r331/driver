@@ -4,6 +4,11 @@
 #include <stdint.h>
 /* Рендер, шаг C: конвертация вершин игры -> TLVERTEX (plat_vertex), линии, режимы смешивания, начальные render-state, очистка Z.
    Вход вершины игры — 11 dword (44 байта): [0]x [1]y [3]R [4]G [5]B (float 0..255) [8]w [9]u [10]v. */
+#ifndef RE_HOOK_BUILD
+/* Sky vertices use the far depth while retaining their original rhw and UVs.
+   Returns the previous setting so the sky pass can restore it. */
+int P23_SetSkyDepth(int enabled);
+#endif
 #define P23_ScaleUV_A   GAME_VAR(float, P23_ScaleUV_A, 0x0054ef60)
 #define P23_ScaleUV_B   GAME_VAR(float, P23_ScaleUV_B, 0x0054ef6c)
 #define P23_ZScale_A    GAME_VAR(float, P23_ZScale_A, 0x0054ef64)

@@ -455,7 +455,17 @@ void P106_SkyModels(void) {
   P62_B25F400 = 0;
   int32_t mode = DrvSetMode0042655A(0);
   depth_bias(0x7fff);
+#ifndef RE_HOOK_BUILD
+  /* A finite 32767 bias puts the sky in front of scenery beyond the original
+     draw distance. Only its depth belongs at the far plane; changing rhw would
+     also change texture coordinates and perspective interpolation. Vertices
+     receive this depth before batching, so later passes keep their own depth. */
+  int sky_depth = P23_SetSkyDepth(1);
+#endif
   for (int i = 0; i < 4; i++) P84_DrawModel(P79_ModelTab[i], mat, pos, 1);
+#ifndef RE_HOOK_BUILD
+  P23_SetSkyDepth(sky_depth);
+#endif
   depth_bias(0);
   DrvSetMode0042655A(mode);
 }

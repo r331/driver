@@ -136,3 +136,27 @@ readback/selfcheck showed a valid image. After the change, verified the actual
 fullscreen display, four scheduled window/fullscreen switches, and a second
 launch with the enhanced preset and 4x MSAA. The user also confirmed fullscreen
 works. Both automated tests pass.
+
+
+## Draw distance hidden by the sky (2026-10-18)
+
+Increasing `RE_DRAW_DIST` loaded and rendered more map cells, but the sky pass
+then covered the distant scenery. The original sky used a finite depth bias
+of 32767; that bias does not place it behind scenery at an extended draw range.
+Disabling only the sky revealed the missing buildings and streetlights at the
+same camera position, identifying the occlusion independently of map culling.
+
+Native `P106_SkyModels` now scopes a far-depth override around its four sky
+models. `P23_ConvVertexA/B` assign depth 1.0 for these vertices before batching,
+retaining their screen position, reciprocal depth, UVs, and color. The previous
+override is restored before subsequent passes. The hook build is unchanged.
+
+Validation: identical-camera Miami runs at `(17760, -450, 400019)`, heading 3072,
+show progressively farther buildings, palms, and streetlights at 1x, 2x, and 4x.
+Before/after images are local in `work/road-repro/distance-4.png` and
+`work/road-repro/distance-fixed-4.png`. Only 90 sky vertices changed in the 4x capture, all in their depth field
+(from approximately 0.99805 to 1.0); the world geometry was identical.
+The enhanced preset also passed with FBO, 4x MSAA, and the texture pack enabled.
+Regression tests cover both conversion paths, zero/nonzero bias, preserved
+UV/rhw/color, and restored ordinary depth. The temporary fixed-camera controls
+were removed before the final build.
