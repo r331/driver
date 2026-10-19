@@ -54,7 +54,8 @@ static int gs_alloc(dd_obj *o) {
     o->page8 = -1; o->dirty = 1; return 1;
 }
 static uint8_t mask8(uint32_t v, uint32_t m) {
-    if (!m) return 0; int sh = 0; while (!((m >> sh) & 1)) sh++; uint32_t mm = m >> sh, x = (v & m) >> sh;
+    if (!m) return 0;
+    int sh = 0; while (!((m >> sh) & 1)) sh++; uint32_t mm = m >> sh, x = (v & m) >> sh;
     return (uint8_t)(mm ? (x * 255u + mm / 2) / mm : 0);
 }
 static uint32_t gs_raw(const dd_obj *o, const uint8_t *p) {
@@ -176,7 +177,10 @@ int32_t plat_dd_fill_rect(void *s, int x0, int y0, int x1, int y1, uint32_t px) 
             uint32_t c = (uint32_t)mask8(px, o->pf[4]) << 16 | (uint32_t)mask8(px, o->pf[5]) << 8 | mask8(px, o->pf[6]);
             plat_clear_rect(c, x0, y0, x1 - x0, y1 - y0);
         } else if (o->px) {
-            if (x0 < 0) x0 = 0; if (y0 < 0) y0 = 0; if (x1 > o->w) x1 = o->w; if (y1 > o->h) y1 = o->h;
+            if (x0 < 0) x0 = 0;
+            if (y0 < 0) y0 = 0;
+            if (x1 > o->w) x1 = o->w;
+            if (y1 > o->h) y1 = o->h;
             int bp = o->bpp / 8;
             for (int y = y0; y < y1; y++) for (int x = x0; x < x1; x++) memcpy(o->px + (size_t)y * o->pitch + x * bp, &px, (size_t)bp);
             o->dirty = 1;
@@ -198,7 +202,8 @@ void *plat_dd_create_palette(void *dd, uint32_t flags, const void *e) {
     (void)flags; if (!dd || !e) return NULL;
     dd_obj *o = (dd_obj *)mk(5); if (o) memcpy(o->pal_rgba, e, sizeof o->pal_rgba); return o; }
 int32_t plat_dd_surface_set_palette(void *s, void *p) {
-    if (!s || !p) return -1; if (g_game_present) { ((dd_obj *)s)->pal = (dd_obj *)p; ((dd_obj *)s)->dirty = 1; } return 0; }
+    if (!s || !p) return -1;
+    if (g_game_present) { ((dd_obj *)s)->pal = (dd_obj *)p; ((dd_obj *)s)->dirty = 1; } return 0; }
 int32_t plat_dd_palette_set_entries(void *p, uint32_t f, uint32_t first, uint32_t n, const void *e) {
     (void)f; if (!p) return -1; g_pal_entries++;
     if (e && first < 256) { if (n > 256 - first) n = 256 - first; memcpy(((dd_obj *)p)->pal_rgba + first * 4, e, (size_t)n * 4); }
@@ -261,7 +266,8 @@ void plat_window_client_rect(void *h, int32_t *rc) { (void)h; rc[0] = 0; rc[1] =
 void plat_client_to_screen(void *h, int32_t *pt) { (void)h; pt[0] += 100; pt[1] += 50; }
 int32_t plat_dd_clipper_set_hwnd(void *c, void *h) { (void)h; if (!c) return -1; g_clip_sets++; return 0; }
 int32_t plat_dd_blt_rect(void *d, const int32_t *dr, void *s, const int32_t *sr) {
-    if (!d || !s) return -1; memcpy(g_drc, dr, sizeof g_drc); memcpy(g_src_rc, sr, sizeof g_src_rc); g_blts_rc++;
+    if (!d || !s) return -1;
+    memcpy(g_drc, dr, sizeof g_drc); memcpy(g_src_rc, sr, sizeof g_src_rc); g_blts_rc++;
     if (g_game_present && d == (void *)g_gs_primary && s == (void *)g_gs_back) gs_present();   /* v2.01: оконный режим — Blt front←back */
     return 0; }
 int32_t plat_dd_flip(void *s, uint32_t fl) { if (!s) return -1; g_flips++; g_flip_flags = fl; if (g_game_present) { gs_present(); return 0; } return g_flip_hr; }
@@ -272,7 +278,8 @@ int plat_dd_stub_surface_stats(int *lk, int *ul, int *fl, uint32_t *ff, int *bl,
 /* --- DirectSound 3D: учётные записи (последний вызов) --- */
 static int g_ds3_op; static float g_ds3_v[6]; static uint32_t g_ds3_u;
 static int32_t ds3_rec(void *o, int op, float a, float b, float c, uint32_t u) {
-    if (!o) return -1; g_ds3_op = op; g_ds3_v[0] = a; g_ds3_v[1] = b; g_ds3_v[2] = c; g_ds3_u = u; return 0; }
+    if (!o) return -1;
+    g_ds3_op = op; g_ds3_v[0] = a; g_ds3_v[1] = b; g_ds3_v[2] = c; g_ds3_u = u; return 0; }
 int32_t plat_ds_listener_set_position(void *l, float x, float y, float z) { if (DSG(l)) dsm_listener_pos(x, y, z); return ds3_rec(l, 1, x, y, z, 0); }
 int32_t plat_ds_listener_set_orientation(void *l, const float *s) {
     if (DSG(l)) dsm_listener_orient(s);
@@ -305,7 +312,8 @@ int32_t plat_com_query_interface(void *obj, const void *iid, void **out) {
         dd_obj *t = (dd_obj *)mk(6); if (t) t->surf = (dd_obj *)obj; *out = t; return t ? 0 : -1; }
     *out = plat_dd_create(NULL); return 0; }
 int32_t plat_ds_prop_set(void *ps, const void *g, uint32_t id, const void *d, uint32_t len) {
-    if (!ps) return -1; memcpy(g_dsx_pg, g, 16); g_dsx_pid = id; g_dsx_plen = len; g_dsx_pd0 = 0; memcpy(&g_dsx_pd0, d, len < 4 ? len : 4); g_dsx_pn++; return 0; }
+    if (!ps) return -1;
+    memcpy(g_dsx_pg, g, 16); g_dsx_pid = id; g_dsx_plen = len; g_dsx_pd0 = 0; memcpy(&g_dsx_pd0, d, len < 4 ? len : 4); g_dsx_pn++; return 0; }
 int32_t plat_ds_prop_support(void *ps, const void *g, uint32_t id, uint32_t *sup) {
     (void)g; (void)id; if (!ps || (g_dsx_fail & 4)) return -1; *sup = g_game_present ? 0 : g_dsx_support; return 0; }   /* v2.09: в игре EAX нет */
 /* --- v1.93: DirectSound — создание/перечисление/дубликат/Lock (заглушки для тестов; память Lock — буфер 64 КБ) --- */
@@ -313,7 +321,8 @@ static int g_dsd_n = 1; static uint8_t g_dsd_g[8][16]; static const char *g_dsd_
 static uint32_t g_dsd_caps, g_dsd_fail, g_dsd_split; static int g_dsd_cr, g_dsd_coop, g_dsd_dup, g_dsd_lk, g_dsd_ul, g_dsd_rs;
 static uint8_t g_dsd_mem[0x10000];
 void plat_ds_stub_drivers(int n, const uint8_t (*g)[16], const char *const *nm, uint32_t caps) {
-    if (n > 8) n = 8; g_dsd_n = n; g_dsd_caps = caps;
+    if (n > 8) n = 8;
+    g_dsd_n = n; g_dsd_caps = caps;
     for (int i = 0; i < n; i++) { g_dsd_null[i] = g == NULL || i == 0; if (g) memcpy(g_dsd_g[i], g[i], 16); g_dsd_name[i] = nm[i]; } }
 void plat_ds_stub_dsfail(uint32_t m, uint32_t sp) { g_dsd_fail = m; g_dsd_split = sp; }
 int plat_ds_stub_dsstats(int *c, int *co, int *d, int *l, int *u, int *r, uint8_t *m64) {
@@ -334,7 +343,8 @@ int32_t plat_ds_duplicate(void *ds, void *src, void **out) {
     *out = plat_dd_create(NULL); return 0; }
 int32_t plat_ds_buf_lock(void *b, uint32_t bytes, void **p1, uint32_t *n1, void **p2, uint32_t *n2) {
     if (DSG(b)) { g_dsd_lk++; return dsm_lock(b, bytes, p1, n1, p2, n2); }
-    if (!b || (g_dsd_fail & 0x10) || bytes > sizeof g_dsd_mem) return -1; g_dsd_lk++;
+    if (!b || (g_dsd_fail & 0x10) || bytes > sizeof g_dsd_mem) return -1;
+    g_dsd_lk++;
     uint32_t s = g_dsd_split && g_dsd_split < bytes ? g_dsd_split : bytes;
     *p1 = g_dsd_mem; *n1 = s; *p2 = s < bytes ? g_dsd_mem + s : NULL; *n2 = bytes - s; return 0; }
 int32_t plat_ds_buf_unlock(void *b, void *p1, uint32_t n1, void *p2, uint32_t n2) { (void)p1; (void)n1; (void)p2; (void)n2; if (!b) return -1; g_dsd_ul++; return 0; }
@@ -393,11 +403,13 @@ int32_t plat_mms_open_file(void *m, const char *p, uint32_t f) {
     (void)f; if (!m || FO_FAIL(5)) return -1; snprintf(g_fo_path, sizeof g_fo_path, "%s", p ? p : ""); g_fo_open++; return 0; }
 int32_t plat_mms_get_stream(void *m, const void *pur, void **out) { (void)pur; *out = NULL; if (!m || FO_FAIL(6)) return -1; *out = mk(21); return 0; }
 int32_t plat_ddms_get_format(void *s, void *d) {
-    if (!s || FO_FAIL(7)) return -1; uint32_t *u = (uint32_t *)d; u[1] = 0x1006; u[2] = (uint32_t)g_fo_h; u[3] = (uint32_t)g_fo_w; return 0; }
+    if (!s || FO_FAIL(7)) return -1;
+    uint32_t *u = (uint32_t *)d; u[1] = 0x1006; u[2] = (uint32_t)g_fo_h; u[3] = (uint32_t)g_fo_w; return 0; }
 int32_t plat_ddms_create_sample(void *s, void *surf, const int32_t *rc, uint32_t f, void **out) {
     (void)f; *out = NULL; if (!s || !surf || FO_FAIL(9)) return -1; if (rc) memcpy(g_fo_rc, rc, sizeof g_fo_rc); *out = mk(22); g_fo_smp++; return 0; }
 int32_t plat_dd_get_surface_desc(void *s, void *d) {
-    if (!s || FO_FAIL(8)) return -1; uint32_t *u = (uint32_t *)d; u[1] = 0x1007; u[2] = 480; u[3] = 640;
+    if (!s || FO_FAIL(8)) return -1;
+    uint32_t *u = (uint32_t *)d; u[1] = 0x1007; u[2] = 480; u[3] = 640;
     u[0x48 / 4] = 0x20; u[0x48 / 4 + 1] = 0x40; u[0x48 / 4 + 3] = 16; u[0x48 / 4 + 4] = 0xf800; u[0x48 / 4 + 5] = 0x7e0; u[0x48 / 4 + 6] = 0x1f; return 0; }
 int32_t plat_media_get_duration(void *p, double *sec) { if (!p || FO_FAIL(10)) return -1; *sec = g_fo_dur; return 0; }
 void plat_window_update(void *h) { (void)h; g_fo_upd++; }

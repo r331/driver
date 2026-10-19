@@ -87,7 +87,8 @@ int re_gfx_set(re_gfx_cfg *c, const char *k, const char *v) {
     if (ieq(k, "fullscreen")) {   /* v2.24: + desktop / exclusive */
         if (ieq(v, "desktop")) { c->fullscreen = 1; return 0; }
         if (ieq(v, "exclusive")) { c->fullscreen = 2; return 0; }
-        if (pbool(v, &b)) return -2; c->fullscreen = b; return 0;
+        if (pbool(v, &b)) return -2;
+        c->fullscreen = b; return 0;
     }
     if (ieq(k, "windowed_res")) {
         int w = 0, h = 0; char x = 0;

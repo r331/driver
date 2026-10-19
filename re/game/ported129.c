@@ -390,8 +390,10 @@ void P129_MapCars(int32_t *rec) {
     P11_00ba52d0 = fround(-900.0f * co + 180.0f * s);  pz[3] = z1c - P11_00ba52d0;
     int32_t lx = px[0], hx = px[0], lz = pz[0], hz = pz[0];
     for (int32_t i = 1; i < 4; i++) {
-      if (px[i] < lx) lx = px[i]; if (hx < px[i]) hx = px[i];
-      if (pz[i] < lz) lz = pz[i]; if (hz < pz[i]) hz = pz[i];
+      if (px[i] < lx) lx = px[i];
+      if (hx < px[i]) hx = px[i];
+      if (pz[i] < lz) lz = pz[i];
+      if (hz < pz[i]) hz = pz[i];
     }
     P11_00ba52d0 = fround((float)lx * P63_Scale); int32_t i1 = P11_00ba52d0 - 1;
     P11_00ba52d0 = fround((float)hx * P63_Scale); int32_t xe = P11_00ba52d0;

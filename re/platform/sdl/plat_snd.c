@@ -68,7 +68,8 @@ static void wav_hdr(void){ if(!g_wav) return; uint32_t data=(uint32_t)(g_wav_fra
   long cur=ftell(g_wav); fseek(g_wav,0,SEEK_SET); fwrite(h,1,44,g_wav); fseek(g_wav,cur,SEEK_SET); fflush(g_wav); }
 static void wav_close(void){ if(g_wav){ wav_hdr(); fclose(g_wav); g_wav=NULL; } }
 void plat_snd_open_game(void){
-  if(g_snd_game) return; g_snd_game=1;
+  if(g_snd_game) return;
+  g_snd_game=1;
   const char *w=getenv("RE_WAV_OUT");
   if(w&&*w){ g_wav=fopen(w,"wb"); if(g_wav){ uint8_t z[44]={0}; fwrite(z,1,44,g_wav); g_wav_on=1; g_wav_ms0=plat_time_ms(); atexit(wav_close);
       fprintf(stderr,"[snd] RE_WAV_OUT %s\n",w); } return; }

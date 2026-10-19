@@ -287,7 +287,8 @@ static void crash_sig(int sig, siginfo_t *si, void *uc){
 #else
     (void)si; (void)uc;
 #endif
-    if(g_crash) g_crash(); _Exit(1);
+    if(g_crash) g_crash();
+    _Exit(1);
 }
 void plat_set_crash_handler(void (*fn)(void)){
     g_crash=fn;
