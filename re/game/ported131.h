@@ -53,6 +53,9 @@ extern p131_camang_t P131_CamAng; extern uint16_t P131_AngD;
 #pragma pop_macro("P131_CamAng") /*gvi*/
 #endif
 void     P131_CamShake(void);           /* 0049e7a8: углы, подтяжка к столкновению, дрожание камеры */
+#ifndef RE_HOOK_BUILD
+void P131_MusicHint(void);   /* v2.33: признаки динамической музыки → plat_music_hint */
+#endif
 /* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
 #if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
 #undef P131_Skip

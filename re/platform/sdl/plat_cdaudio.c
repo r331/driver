@@ -16,7 +16,9 @@
    P25_CdPlaying, и кадр меню/игры снова зовёт PlayCDTrack — так в оригинале дорожка повторяется. MCI_STOP (CDStop) снимает
    ожидание уведомления и сохраняет позицию; MCI_PLAY без FROM (CDResume) — с этой позиции, без уведомления.
    Громкость — auxSetVolume устройства CD (aux 0): L/R 0..0xffff, линейно (RE_MUSIC_VOL — множитель 0..4).
-   Смешивание — cda_mix() из dsm_mix (plat_dsmix.c) до мягкого ограничителя, 44100 Гц стерео. */
+   Смешивание — cda_mix() из dsm_mix (plat_dsmix.c) до мягкого ограничителя, 44100 Гц стерео.
+   v2.33: динамическая музыка (PS-стиль) для дорожек 4..7 — набор <каталог>/dynamic/ (16 файлов: город × день/ночь × Drive/Chase),
+   см. раздел «динамическая музыка» ниже и README «CD-музыка». */
 #include "../plat.h"
 #include "plat_cdaudio.h"
 #include "plat_gfx.h"
@@ -335,6 +337,7 @@ static uint32_t add_msf(uint32_t a, uint32_t b) {   /* = P21_AddMsf (005250cb) �
   return (uint32_t)(m & 0xff) | ((uint32_t)(s & 0xffff) << 8) | ((uint32_t)(f & 0xff) << 16);
 }
 static const char *kname(int k) { static const char *n[] = { "заглушка", "wav", "ogg", "flac", "mp3", "cue" }; return k >= 0 && k <= 5 ? n[k] : "?"; }
+static void dyn_scan(const char *dir);   /* v2.33 */
 static void scan(void) {
   memset(g_trk, 0, sizeof g_trk); g_maxfound = 0; g_cue[0] = 0;
   const char *sl = envs("RE_MUSIC_STUB_LEN"); g_stub_len = sl ? atof(sl) : 60.0; if (!(g_stub_len >= 1.0)) g_stub_len = 1.0; if (g_stub_len > 3600) g_stub_len = 3600;
@@ -345,6 +348,7 @@ static void scan(void) {
     while ((e = readdir(d))) {
       char lo[256]; lower(lo, e->d_name, sizeof lo);
       if (ends(lo, ".cue")) { char p[1024]; join(p, sizeof p, dir, e->d_name); if (!g_cue[0] || strcmp(p, g_cue) < 0) snprintf(g_cue, sizeof g_cue, "%s", p); continue; }
+      if (cda_dyn_classify(e->d_name, 0) >= 0) continue;   /* v2.33: «01. Miami At Day Drive.mp3» — набор, не дорожка 1 */
       int n = name_track(lo), k = ext_kind(lo);
       if (n < 1 || !k) continue;
       trk_t *t = &g_trk[n];
@@ -396,6 +400,7 @@ static void scan(void) {
   if (g_ntracks < 1) g_ntracks = 1;
   if (g_ntracks > 99) g_ntracks = 99;
   for (int n = 1; n < MAXT; n++) if (!g_trk[n].kind) { g_trk[n].frames44 = g_trk[n].frames = (int64_t)(g_stub_len * OUT_RATE); g_trk[n].rate = OUT_RATE; g_trk[n].ch = 2; }
+  dyn_scan(dir);   /* v2.33 */
   g_scanned = 1;
   char sum[1024]; int o = 0;
   for (int n = 2; n <= g_ntracks && o < (int)sizeof sum - 32; n++)
@@ -412,6 +417,134 @@ int cda_track_source(int track, const char **path, int64_t *frames44) {
   return g_trk[track].kind;
 }
 
+/* ===================== v2.33: динамическая музыка в стиле PlayStation (дополнение, не оригинал PC) =====================
+   На PlayStation у каждого города 4 композиции: день/ночь × Drive/Chase, во время погони звучит Chase. PC-версия играет одну
+   CD-дорожку на уровень (4 + N). Если в каталоге музыки есть набор (подкаталог dynamic/ или файлы с ключевыми словами в имени),
+   запрос дорожки 4..7 (Майами, SF, LA, NY) играет набор города: день/ночь — по P14_00b87e84 (флаг ночи уровня), Drive/Chase —
+   по признаку погони копов, который игра уже использует для красного радара и целей «оторвись» (felony > 0x2a9 и коп видит
+   игрока или ещё не потерял: P95_SndReady || P95_AmbN > 0). Признаки передаёт игра: plat_music_hint (game/ported131.c,
+   только native). Игровая логика не меняется — эмуляция только выбирает, что смешивать.
+   Слоты набора: город·4 + ночь·2 + погоня (0 Майами Day Drive … 15 New York Night Chase) — порядок 01..16 у пользователя. */
+static const char *const k_dyn_city[4] = { "Майами", "Сан-Франциско", "Лос-Анджелес", "Нью-Йорк" };
+static const char *const k_dyn_kind[4] = { "Day Drive", "Day Chase", "Night Drive", "Night Chase" };
+static trk_t g_dyn[CDA_DYN_N];
+static int g_dyn_nfound;
+static char g_dyn_dir[1024];
+
+/* слот по имени файла (без каталога): ключевые слова (город, day/night, drive/chase) без учёта регистра; numbered — ещё и
+   по номеру 01..16 в начале имени (только в подкаталоге dynamic/, где нет схемы «NN = дорожка CD»). −1 — не из набора. */
+int cda_dyn_classify(const char *name, int numbered) {
+  char lo[256]; lower(lo, name, sizeof lo);
+  if (!ext_kind(lo)) return -1;
+  char *dot = strrchr(lo, '.'); if (dot) *dot = 0;
+  char tok[32][24]; int nt = 0;
+  for (const char *p = lo; *p && nt < 32;) {
+    while (*p && !isalnum((unsigned char)*p)) p++;
+    size_t k = 0; while (isalnum((unsigned char)p[k])) k++;
+    if (!k) break;
+    size_t c = k < 23 ? k : 23; memcpy(tok[nt], p, c); tok[nt][c] = 0; nt++; p += k;
+  }
+  int city = -1, tm = -1, md = -1;
+  for (int i = 0; i < nt; i++) {
+    const char *t = tok[i], *nx = i + 1 < nt ? tok[i + 1] : "";
+    int c = -1;
+    if (!strcmp(t, "miami")) c = 0;
+    else if (!strcmp(t, "frisco") || !strcmp(t, "sf") || !strcmp(t, "sanfrancisco") || (!strcmp(t, "san") && !strcmp(nx, "francisco"))) c = 1;
+    else if (!strcmp(t, "la") || !strcmp(t, "losangeles") || (!strcmp(t, "los") && !strcmp(nx, "angeles"))) c = 2;
+    else if (!strcmp(t, "ny") || !strcmp(t, "nyc") || !strcmp(t, "newyork") || (!strcmp(t, "new") && !strcmp(nx, "york"))) c = 3;
+    if (c >= 0 && city < 0) city = c;
+    if (tm < 0 && (!strcmp(t, "day") || !strcmp(t, "daytime"))) tm = 0;
+    if (tm < 0 && (!strcmp(t, "night") || !strcmp(t, "nighttime"))) tm = 1;
+    if (md < 0 && !strcmp(t, "drive")) md = 0;
+    if (md < 0 && !strcmp(t, "chase")) md = 1;
+  }
+  if (city >= 0 && tm >= 0 && md >= 0) return city * 4 + tm * 2 + md;
+  if (numbered) {
+    const char *p = lo; int n = 0, d = 0;
+    while (isdigit((unsigned char)*p) && d < 3) { n = n * 10 + (*p - '0'); p++; d++; }
+    if (d >= 1 && d <= 2 && !isalpha((unsigned char)*p) && n >= 1 && n <= CDA_DYN_N) return n - 1;
+  }
+  return -1;
+}
+/* какой файл играть для (город, ночь, погоня), have[16] — есть ли слот: нужный → Drive того же времени суток → Drive другого →
+   Chase того же → Chase другого; −1 — у города нет ни одного файла */
+int cda_dyn_pick(const int *have, int city, int night, int chase) {
+  if (city < 0 || city > 3) return -1;
+  int b = city * 4, on = 1 - (night != 0); night = night != 0; chase = chase != 0;
+  int ord[5] = { b + night * 2 + chase, b + night * 2, b + on * 2, b + night * 2 + 1, b + on * 2 + 1 };
+  for (int i = 0; i < 5; i++) if (have[ord[i]]) return ord[i];
+  return -1;
+}
+/* гистерезис Drive↔Chase: chase_raw — признак погони в этом блоке; Chase включается сразу (если файл погони есть), обратно —
+   после hold44 кадров подряд без погони. Возврат 1 — состояние сменилось. */
+int cda_dyn_ctl_step(cda_dyn_ctl *c, int chase_raw, int frames) {
+  if (chase_raw) { c->calm44 = 0; if (!c->chase_on) { c->chase_on = 1; return 1; } return 0; }
+  if (!c->chase_on) return 0;
+  c->calm44 += frames;
+  if (c->calm44 >= c->hold44) { c->chase_on = 0; c->calm44 = 0; return 1; }
+  return 0;
+}
+static int is_dir_ci(const char *dir, const char *name, char *out, size_t n) {
+  DIR *d = opendir(dir); if (!d) return 0;
+  struct dirent *e; int ok = 0;
+  while ((e = readdir(d))) {
+    char lo[256]; lower(lo, e->d_name, sizeof lo);
+    if (strcmp(lo, name)) continue;
+    join(out, n, dir, e->d_name);
+    if (out[0] && isdir(out)) { ok = 1; break; }
+  }
+  closedir(d); return ok;
+}
+/* добавить файл в набор (если слот пуст или новый формат лучше) */
+static void dyn_add(int slot, const char *dir, const char *fname, int kind, int prio) {
+  static int g_prio[CDA_DYN_N];
+  trk_t *t = &g_dyn[slot];
+  if (t->kind && (g_prio[slot] < prio || (g_prio[slot] == prio && kind_rank(t->kind) <= kind_rank(kind)))) return;
+  join(t->path, sizeof t->path, dir, fname); if (!t->path[0]) return;
+  t->kind = kind; g_prio[slot] = prio;
+}
+/* сканирование набора: 1) <каталог>/dynamic/ — ключевые слова или номер 01..16; 2) сам каталог — только ключевые слова
+   (файлы с ними исключаются из схемы «NN *.ext» = дорожка CD, см. scan) */
+static void dyn_scan(const char *dir) {
+  memset(g_dyn, 0, sizeof g_dyn); g_dyn_nfound = 0; g_dyn_dir[0] = 0;
+  char sub[1024];
+  if (is_dir_ci(dir, "dynamic", sub, sizeof sub)) {
+    snprintf(g_dyn_dir, sizeof g_dyn_dir, "%s", sub);
+    DIR *d = opendir(sub); struct dirent *e;
+    if (d) { while ((e = readdir(d))) { char lo[256]; lower(lo, e->d_name, sizeof lo); int s = cda_dyn_classify(e->d_name, 1), k = ext_kind(lo); if (s >= 0 && k) dyn_add(s, sub, e->d_name, k, 0); } closedir(d); }
+  }
+  DIR *d = opendir(dir); struct dirent *e;
+  if (d) { while ((e = readdir(d))) { char lo[256]; lower(lo, e->d_name, sizeof lo); int s = cda_dyn_classify(e->d_name, 0), k = ext_kind(lo); if (s >= 0 && k) dyn_add(s, dir, e->d_name, k, 1); } closedir(d); }
+  for (int i = 0; i < CDA_DYN_N; i++) {
+    trk_t *t = &g_dyn[i]; if (!t->kind) continue;
+    src_t s; if (src_open(&s, t, 0) || s.frames <= 0) { fprintf(stderr, "[music] %s: не читается (%s) — пропущен\n", t->path, kname(t->kind)); if (!src_open(&s, t, 0)) src_close(&s); t->kind = 0; continue; }
+    t->frames = s.frames; t->rate = s.rate; t->ch = s.ch; src_close(&s);
+    t->frames44 = (int64_t)((double)t->frames * OUT_RATE / t->rate);
+    g_dyn_nfound++;
+  }
+  if (!g_dyn_nfound) return;
+  fprintf(stderr, "[music] динамический набор: %d из 16 (%s%s%s)\n", g_dyn_nfound, g_dyn_dir[0] ? g_dyn_dir : dir, g_dyn_dir[0] ? "" : ", по именам", "");
+  for (int c = 0; c < 4; c++) {
+    char b[1200]; int o = snprintf(b, sizeof b, "[music]   %s:", k_dyn_city[c]);
+    for (int k = 0; k < 4; k++) { const trk_t *t = &g_dyn[c * 4 + k]; const char *bn = t->kind ? strrchr(t->path, '/') : NULL;
+      o += snprintf(b + o, sizeof b - (size_t)(o < (int)sizeof b ? o : (int)sizeof b - 1), " %s=%s%s", k_dyn_kind[k], t->kind ? "" : "—", t->kind ? (bn ? bn + 1 : t->path) : "");
+      if (o >= (int)sizeof b) break; }
+    fprintf(stderr, "%s\n", b);
+  }
+}
+int cda_dyn_source(int slot, const char **path, int64_t *frames44) {
+  if (!g_scanned) scan();
+  if (slot < 0 || slot >= CDA_DYN_N) return -1;
+  if (path) *path = g_dyn[slot].kind ? g_dyn[slot].path : NULL;
+  if (frames44) *frames44 = g_dyn[slot].frames44;
+  return g_dyn[slot].kind;
+}
+static int dyn_enabled(void) {
+  const char *e = envs("RE_MUSIC_DYNAMIC");
+  if (e) return !(e[0] == '0' || !strcmp(e, "off") || !strcmp(e, "no"));
+  return re_gfx()->music_dynamic != 0;
+}
+
 /* ===================== устройство (состояние воспроизведения — под блокировкой звука) ===================== */
 static struct {
   int on, track; src_t s; int64_t pos44, end44; float f0[2], f1[2]; double frac, step; int notify; void *hwnd;
@@ -421,7 +554,170 @@ static uint32_t g_cdvol = 0xffffffffu;
 /* учётный режим selftest (test_p25): прежняя заглушка v0.72 */
 static int g_cdn, g_cdaux = -1, g_tplay; static uint32_t g_cdfrom, g_cdto;
 
+/* ===================== v2.33: воспроизведение динамического набора =====================
+   Голоса 0 (Drive) и 1 (Chase) — текущая пара времени суток, 2/3 — уходящая пара при смене дня/ночи. Синхронно (длины Drive и
+   Chase отличаются не больше чем на max(1 с, 2 %)): оба голоса идут всё время с одной позиции, зацикливаются по меньшей длине,
+   переключается только громкость (линейный кроссфейд). Иначе неслышный голос стоит, при включении начинается с начала
+   (кроссфейд равной мощности). Каждый голос зациклен сам; уведомления MM_MCINOTIFY нет — игра считает, что дорожка играет. */
+typedef struct {
+  int used, slot, run; src_t s; float f0[2], f1[2]; double frac, step; int64_t pos44, loop44; float g, tgt;
+} dvoice_t;
+static struct {
+  int on, city, night, sync, chase_raw, ev, ev_shown, ev_state;
+  int pend_night; int64_t pend_since;
+  cda_dyn_ctl ctl; int64_t fade44, clock44;
+  dvoice_t v[4];
+} g_d;
+static int g_hint_night, g_hint_chase, g_hint_seen;
+
+static double envd(const char *n, double def, double lo, double hi) {
+  const char *e = envs(n); double v = e ? atof(e) : def; if (!(v >= lo)) v = lo; if (v > hi) v = hi; return v;
+}
+static int dv_open(dvoice_t *v, int slot) {
+  memset(v, 0, sizeof *v);
+  if (src_open(&v->s, &g_dyn[slot], 0)) { fprintf(stderr, "[music] '%s' не открылся\n", g_dyn[slot].path); return -1; }
+  v->used = 1; v->slot = slot; v->step = (double)v->s.rate / OUT_RATE; v->loop44 = g_dyn[slot].frames44;
+  src_next(&v->s, v->f0); src_next(&v->s, v->f1);
+  return 0;
+}
+static void dv_restart(dvoice_t *v) {
+  src_seek(&v->s, 0); v->pos44 = 0; v->frac = 0; src_next(&v->s, v->f0); src_next(&v->s, v->f1);
+}
+static void dv_close(dvoice_t *v) { if (v->used) src_close(&v->s); memset(v, 0, sizeof *v); }
+/* открыть пару голосов для (город, ночь) → v[0], v[1] (вне блокировки); 0 — ок */
+static int dyn_open_pair(int city, int night, dvoice_t *out, int *sync) {
+  int have[CDA_DYN_N]; for (int i = 0; i < CDA_DYN_N; i++) have[i] = g_dyn[i].kind != 0;
+  int sd = cda_dyn_pick(have, city, night, 0), sc = cda_dyn_pick(have, city, night, 1);
+  memset(out, 0, 2 * sizeof *out); *sync = 0;
+  if (sd < 0) return -1;
+  if (dv_open(&out[0], sd)) return -1;
+  if (sc != sd && dv_open(&out[1], sc)) sc = sd;
+  if (out[1].used) {
+    int64_t a = out[0].loop44, b = out[1].loop44, d = a > b ? a - b : b - a, mx = a > b ? a : b;
+    int64_t tol = (int64_t)(mx * 0.02); if (tol < OUT_RATE) tol = OUT_RATE;
+    *sync = envs("RE_MUSIC_SYNC") && envs("RE_MUSIC_SYNC")[0] == '0' ? 0 : d <= tol;
+    if (*sync) out[0].loop44 = out[1].loop44 = a < b ? a : b;
+  }
+  const char *bd = strrchr(g_dyn[sd].path, '/'), *bc = out[1].used ? strrchr(g_dyn[sc].path, '/') : NULL;
+  fprintf(stderr, "[music] %s, %s: Drive = %s (%s)%s, Chase = %s%s%s\n", k_dyn_city[city], night ? "ночь" : "день",
+          bd ? bd + 1 : g_dyn[sd].path, k_dyn_kind[sd & 3], (sd & 3) != (night ? 2 : 0) ? " — замена" : "",
+          out[1].used ? (bc ? bc + 1 : g_dyn[sc].path) : "нет (играет Drive)",
+          out[1].used && (sc & 3) != (night ? 3 : 1) ? " — замена" : "",
+          out[1].used ? (*sync ? "; синхронно, переключение громкостью" : "; длины разные — кроссфейд с начала") : "");
+  return 0;
+}
+static void dyn_stop_all(void) {   /* под блокировкой нельзя закрывать файлы: вынимаем и закрываем после */
+  dvoice_t old[4];
+  plat_snd_lockdev(1); memcpy(old, g_d.v, sizeof old); memset(g_d.v, 0, sizeof g_d.v); g_d.on = 0; plat_snd_lockdev(0);
+  for (int i = 0; i < 4; i++) dv_close(&old[i]);
+}
+/* начать набор города для дорожки 4..7; 0 — набора для города нет (играть обычную дорожку) */
+static int dyn_start(void *hwnd, int track) {
+  int city = track - 4, night = g_hint_night != 0;
+  dvoice_t nv[2]; int sync;
+  if (dyn_open_pair(city, night, nv, &sync)) return 0;
+  /* обычное воспроизведение (если было) остановить */
+  plat_snd_lockdev(1); src_t olds = g_p.s; memset(&g_p.s, 0, sizeof g_p.s); plat_snd_lockdev(0);
+  src_close(&olds);
+  dyn_stop_all();
+  plat_snd_lockdev(1);
+  g_d.city = city; g_d.night = night; g_d.sync = sync; g_d.pend_night = -1;
+  g_d.fade44 = (int64_t)(envd("RE_MUSIC_FADE", 1.5, 0.005, 10.0) * OUT_RATE);
+  g_d.ctl.hold44 = (int64_t)(envd("RE_MUSIC_CHASE_HOLD", 4.0, 0.0, 60.0) * OUT_RATE);
+  g_d.ctl.calm44 = 0; g_d.ctl.chase_on = g_hint_chase && nv[1].used;
+  g_d.chase_raw = g_hint_chase;
+  g_d.v[0] = nv[0]; g_d.v[1] = nv[1];
+  g_d.v[0].g = g_d.v[0].tgt = g_d.ctl.chase_on ? 0.0f : 1.0f;
+  g_d.v[1].g = g_d.v[1].tgt = g_d.ctl.chase_on ? 1.0f : 0.0f;
+  g_d.v[0].run = sync || g_d.v[0].tgt > 0; g_d.v[1].run = g_d.v[1].used && (sync || g_d.v[1].tgt > 0);
+  g_d.ev_state = g_d.ctl.chase_on; g_d.ev = g_d.ev_shown = 0;
+  g_d.on = 1;
+  g_p.track = track; g_p.pos44 = 0; g_p.end44 = INT64_MAX / 2; g_p.notify = 0; g_p.hwnd = hwnd; g_p.on = 1;
+  plat_snd_lockdev(0);
+  fprintf(stderr, "[cd] MCI_PLAY: дорожка %d → динамический набор (%s), старт — %s\n", track, k_dyn_city[city], g_d.ctl.chase_on ? "Chase" : "Drive");
+  return 1;
+}
+/* смена дня/ночи во время уровня (рассвет/закат миссии): новая пара с нуля, старая уходит кроссфейдом */
+static void dyn_swap_night(int night) {
+  dvoice_t nv[2]; int sync;
+  if (dyn_open_pair(g_d.city, night, nv, &sync)) return;
+  dvoice_t old[2];
+  plat_snd_lockdev(1);
+  old[0] = g_d.v[2]; old[1] = g_d.v[3];
+  g_d.v[2] = g_d.v[0]; g_d.v[3] = g_d.v[1]; g_d.v[2].tgt = g_d.v[3].tgt = 0.0f;
+  g_d.v[0] = nv[0]; g_d.v[1] = nv[1];
+  int ch = g_d.ctl.chase_on && nv[1].used; g_d.ctl.chase_on = ch;
+  g_d.v[0].tgt = ch ? 0.0f : 1.0f; g_d.v[1].tgt = ch ? 1.0f : 0.0f;
+  g_d.v[0].run = 1; g_d.v[1].run = nv[1].used && (sync || ch);
+  g_d.night = night; g_d.sync = sync;
+  plat_snd_lockdev(0);
+  dv_close(&old[0]); dv_close(&old[1]);
+  fprintf(stderr, "[music] смена времени суток → %s (кроссфейд %.2g с)\n", night ? "ночь" : "день", (double)g_d.fade44 / OUT_RATE);
+}
+/* смешивание набора (под блокировкой устройства, из cda_mix) */
+static void dyn_mix(float *acc, int frames, float gl, float gr) {
+  if (cda_dyn_ctl_step(&g_d.ctl, g_d.chase_raw, frames) || (g_d.ctl.chase_on && !g_d.v[1].used)) {
+    if (!g_d.v[1].used) g_d.ctl.chase_on = 0;
+    if (g_d.ctl.chase_on != g_d.ev_state) { g_d.ev_state = g_d.ctl.chase_on; g_d.ev++; }
+  }
+  g_d.v[0].tgt = g_d.ctl.chase_on ? 0.0f : 1.0f;
+  if (g_d.v[1].used) g_d.v[1].tgt = g_d.ctl.chase_on ? 1.0f : 0.0f;
+  float dg = g_d.fade44 > 0 ? 1.0f / (float)g_d.fade44 : 1.0f;
+  for (int k = 0; k < 4; k++) {
+    dvoice_t *v = &g_d.v[k]; if (!v->used) continue;
+    int sync = k < 2 ? g_d.sync : 0;
+    if (!v->run && v->tgt > 0) { if (!sync) dv_restart(v); v->run = 1; }   /* неслышный голос: с начала (не синхронно) */
+    if (!v->run) continue;
+    for (int i = 0; i < frames; i++) {
+      if (v->g < v->tgt) { v->g += dg; if (v->g > v->tgt) v->g = v->tgt; }
+      else if (v->g > v->tgt) { v->g -= dg; if (v->g < v->tgt) v->g = v->tgt; }
+      float a = sync ? v->g : sinf(v->g * 1.5707963f);
+      float fr = (float)v->frac;
+      if (a > 0) {
+        acc[2 * i] += (v->f0[0] * (1 - fr) + v->f1[0] * fr) * a * gl;
+        acc[2 * i + 1] += (v->f0[1] * (1 - fr) + v->f1[1] * fr) * a * gr;
+      }
+      v->frac += v->step;
+      while (v->frac >= 1.0) { v->f0[0] = v->f1[0]; v->f0[1] = v->f1[1]; src_next(&v->s, v->f1); v->frac -= 1.0; }
+      if (++v->pos44 >= v->loop44) dv_restart(v);
+      if (!sync && v->g <= 0 && v->tgt <= 0) { v->run = 0; break; }   /* затих — стоит */
+    }
+  }
+  g_d.clock44 += frames; g_p.pos44 += frames;
+}
+/* признаки игры (каждый кадр игры и перед PlayCDTrack уровня): ночь, погоня; заодно — журнал переходов и смена дня/ночи */
+void plat_music_hint(int night, int chase) {
+  g_hint_night = night != 0; g_hint_chase = chase != 0; g_hint_seen = 1;
+  if (!g_d.on) return;
+  plat_snd_lockdev(1);
+  g_d.chase_raw = g_hint_chase;
+  int ev = g_d.ev, st = g_d.ev_state; int64_t clk = g_d.clock44;
+  plat_snd_lockdev(0);
+  if (ev != g_d.ev_shown) {
+    g_d.ev_shown = ev;
+    if (st) fprintf(stderr, "[music] → Chase (погоня), кроссфейд %.2g с; звук набора %.1f с\n", (double)g_d.fade44 / OUT_RATE, (double)clk / OUT_RATE);
+    else fprintf(stderr, "[music] → Drive (погони нет %.1f с), кроссфейд %.2g с; звук набора %.1f с\n", (double)g_d.ctl.hold44 / OUT_RATE, (double)g_d.fade44 / OUT_RATE, (double)clk / OUT_RATE);
+  }
+  if (g_hint_night != g_d.night) {   /* смена дня/ночи — если держится 3 с звука */
+    if (g_d.pend_night != g_hint_night) { g_d.pend_night = g_hint_night; g_d.pend_since = clk; }
+    else if (clk - g_d.pend_since >= 3 * OUT_RATE) { g_d.pend_night = -1; dyn_swap_night(g_hint_night); }
+  } else g_d.pend_night = -1;
+}
+int cda_dyn_state(int *city, int *night, int *chase_on, float *g_drive, float *g_chase, int *sync) {
+  plat_snd_lockdev(1);
+  int on = g_d.on;
+  if (city) *city = g_d.city;
+  if (night) *night = g_d.night;
+  if (chase_on) *chase_on = g_d.ctl.chase_on;
+  if (g_drive) *g_drive = g_d.v[0].used ? g_d.v[0].g : 0.0f;
+  if (g_chase) *g_chase = g_d.v[1].used ? g_d.v[1].g : 0.0f;
+  if (sync) *sync = g_d.sync;
+  plat_snd_lockdev(0);
+  return on;
+}
+
 void cda_reset(const char *dir) {
+  dyn_stop_all();
   plat_snd_lockdev(1); src_t old = g_p.s; memset(&g_p, 0, sizeof g_p); g_npend = 0; plat_snd_lockdev(0);
   src_close(&old);
   g_test = 0; g_open = 0; g_cdvol = 0xffffffffu;
@@ -438,6 +734,7 @@ void cda_mix(float *acc, int frames) {
   if (!g_p.on) return;
   double vm = 1.0; const char *e = getenv("RE_MUSIC_VOL"); if (e && *e) { vm = atof(e); if (!(vm >= 0)) vm = 0; if (vm > 4) vm = 4; }
   float gl = (float)((g_cdvol & 0xffff) / 65535.0 * vm), gr = (float)((g_cdvol >> 16) / 65535.0 * vm);
+  if (g_d.on) { dyn_mix(acc, frames, gl, gr); return; }   /* v2.33 */
   for (int i = 0; i < frames; i++) {
     if (g_p.pos44 >= g_p.end44) {
       g_p.on = 0;
@@ -480,6 +777,7 @@ int plat_cd_open(void *hwnd) {
   return 1;
 }
 static void stop_play(void) {
+  dyn_stop_all();
   plat_snd_lockdev(1); src_t old = g_p.s; memset(&g_p.s, 0, sizeof g_p.s); g_p.on = 0; g_p.notify = 0; plat_snd_lockdev(0);
   src_close(&old);
 }
@@ -517,6 +815,7 @@ static int64_t end_of(int track, uint32_t to) {
   return len;
 }
 static int start_at(void *hwnd, int track, int64_t at44, int64_t end44, int notify, const char *why) {
+  if (g_d.on) dyn_stop_all();   /* v2.33 */
   src_t ns;
   if (src_open(&ns, &g_trk[track], track)) {
     fprintf(stderr, "[cd] дорожка %d: '%s' не открылась — заглушка\n", track, g_trk[track].path);
@@ -542,6 +841,7 @@ int plat_cd_play_range(void *hwnd, uint32_t from, uint32_t to) {
   int track = (int)(from & 0xff);
   if (track < 1 || track > g_ntracks) return 0;   /* MCIERR_OUTOFRANGE */
   g_cdfrom = from; g_cdto = to;
+  if (track >= 4 && track <= 7 && g_dyn_nfound && dyn_enabled() && dyn_start(hwnd, track)) return 1;   /* v2.33 */
   int64_t at = ((int64_t)((from >> 8) & 0xff) * 60 * 75 + (int64_t)((from >> 16) & 0xff) * 75 + (int64_t)(from >> 24)) * FR_PER_SECTOR;
   int64_t end = end_of(track, to);
   if (at > end) at = end;
@@ -551,6 +851,11 @@ int plat_cd_play_to(uint32_t to) {
   if (g_test) { if (!g_open) return 0; g_cdto = to; g_tplay = 1; return 1; }
   if (!g_open) return 0;
   g_cdto = to;
+  if (g_d.on) {   /* v2.33: набор — продолжить с того же места */
+    plat_snd_lockdev(1); g_p.on = 1; plat_snd_lockdev(0);
+    fprintf(stderr, "[cd] MCI_PLAY (продолжить): дорожка %d — динамический набор\n", g_p.track);
+    return 1;
+  }
   if (!g_p.track || !g_p.s.frames) {   /* ещё ничего не играло — с начала первой звуковой (2) */
     int tr = g_p.track ? g_p.track : 2; if (tr > g_ntracks) return 0;
     return start_at(NULL, tr, 0, end_of(tr, to), 0, "MCI_PLAY (без FROM)");

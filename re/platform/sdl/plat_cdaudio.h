@@ -39,4 +39,14 @@ void cda_mix(float *acc, int frames);
 int  plat_cd_take_notify(void **hwnd, uint32_t *wp, int32_t *lp);
 /* состояние для тестов/лога: 1 — играет; дорожка, позиция и конец в кадрах 44100 Гц от начала дорожки */
 int  cda_state(int *track, int64_t *pos44, int64_t *end44);
+
+/* v2.33: динамическая музыка (PS-стиль): слот = город·4 + ночь·2 + погоня (0 Майами Day Drive … 15 New York Night Chase) */
+#define CDA_DYN_N 16
+typedef struct { int chase_on; int64_t calm44, hold44; } cda_dyn_ctl;
+int  cda_dyn_classify(const char *name, int numbered);           /* слот по имени файла или −1 (numbered — ещё и номер 01..16) */
+int  cda_dyn_pick(const int *have, int city, int night, int chase);   /* слот с запасными вариантами или −1 */
+int  cda_dyn_ctl_step(cda_dyn_ctl *c, int chase_raw, int frames); /* гистерезис Drive↔Chase; 1 — сменилось */
+int  cda_dyn_source(int slot, const char **path, int64_t *frames44);  /* что найдено для слота: CDA_SRC_* */
+/* состояние набора: 1 — играет набор; город, ночь, погоня (после гистерезиса), громкости голосов Drive/Chase 0..1, синхронно */
+int  cda_dyn_state(int *city, int *night, int *chase_on, float *g_drive, float *g_chase, int *sync);
 #endif

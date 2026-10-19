@@ -445,6 +445,9 @@ int32_t P145_LevelLoad(void) {
     int32_t *m = (int32_t *)re_ptr(P113_MrkRec);
     if (m != NULL) ScriptSetWait004F5C72(m, P74_C4D668);
   }
+#ifndef RE_HOOK_BUILD
+  P131_MusicHint();   /* v2.33: ночь/погоня — до запроса дорожки уровня */
+#endif
   if (Q00B87E90 != 0) { P25_InitCDAudio(); P25_PlayCDTrack(P15_State + 4); }
   P48_FadeEnd();
   P116_SndLevelStart();

@@ -199,6 +199,19 @@ void P131_FlybyStart(void) {
   P99_CamMax = P19_ScrH;
 }
 
+#ifndef RE_HOOK_BUILD
+/* v2.33 (только native, дополнение — в оригинале нет): признаки для динамической музыки (platform/sdl/plat_cdaudio.c).
+   Ночь — P14_00b87e84 (флаг ночи уровня: им выбирается небо ночь/день в P101_SkyInit, фонари P103 lamps; пишут Take A Ride
+   Day/Night через скрипт/настройку P138, команды скрипта миссии 0x1f/0x20/0x28/0x5f, P145_LevelLoad для LA/интервью).
+   Погоня — тот же признак, что у игры для красного радара (P108_RadarCar), целей «оторвись от копов» (P97_GoalCops, P99_GoalCheck):
+   розыск 00d11a5c > 0x2a9 и коп видит игрока (P95_SndReady) или ещё не потерял его (P95_AmbN > 0; P102_CopsTick сбрасывает
+   его через 0x200 тактов без видимости). Только чтение — логика игры не меняется. */
+void P131_MusicHint(void) {
+  int chase = (0x2a9 < G2_00D11A5C && (P95_SndReady != 0 || 0 < P95_AmbN)) ? 1 : 0;
+  plat_music_hint(P14_00b87e84 != 0, chase);
+}
+#endif
+
 /* ---- 004d4a63 ---- */
 void P131_GameFrame(void) {
   RE_DBG(0);
@@ -230,6 +243,9 @@ void P131_GameFrame(void) {
     P132_GameLogic();
     if (G6_00B87E20 == 0) return;
   }
+#ifndef RE_HOOK_BUILD
+  P131_MusicHint();   /* v2.33 */
+#endif
   if (Q00B87E90 != 0 && G6_00B5A778 == 0 && P25_CdPlaying == 0) {
     P25_InitCDAudio();
     P25_PlayCDTrack(D_00b87e30 + 4);

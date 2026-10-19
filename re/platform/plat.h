@@ -121,6 +121,7 @@ int      plat_cd_track_info(int track, uint32_t *pos, uint32_t *len); /* 0 ок,
 int      plat_cd_play_range(void *hwnd, uint32_t from, uint32_t to);  /* 1 = ок */
 int      plat_cd_play_to(uint32_t to);                /* продолжить с текущей позиции до to; 1 = ок */
 void     plat_cd_pause(void);                         /* MCI_STOP */
+void     plat_music_hint(int night, int chase);       /* v2.33, только native: признаки для динамической музыки (ночь уровня, погоня копов) */
 int      plat_aux_find_cd(void);                      /* индекс aux-устройства CD или -1 */
 void     plat_aux_set_volume(int dev, uint32_t lr);   /* (R<<16)|L, 0..0xffff */
 int      plat_timer_period_begin(unsigned ms);        /* 0 = ок */
