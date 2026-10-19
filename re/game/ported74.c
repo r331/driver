@@ -1,6 +1,11 @@
+/* ported74.c — assorted small functions (English overview): freeing a traffic record, cycling animated
+   palette/texture rows, HUD reset, 8-bit to 16-bit texture conversion, render device selection, the fast
+   octagonal distance P74_Dist, text-file number parsing, skid mark init and text-entry key scan.  All cdecl. */
 #include "ported151.h"
 #include "ported74.h"
 #include <string.h>
+/* DirectInput scan codes used by P74_KeyScan. */
+enum { DIK_ESCAPE = 0x01, DIK_BACK = 0x0e, DIK_RETURN = 0x1c, DIK_LSHIFT = 0x2a, DIK_RSHIFT = 0x36, DIK_CAPITAL = 0x3a };
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P74_DistTab")
@@ -195,6 +200,8 @@ p74_rowtab_t P74_RowTab;
 
 #ifndef RE_HOOK_BUILD
 #include "p74_data.h"
+/* Native only: copies the initial values of the constant tables (distance factors, key maps) into their
+   data-image variables. */
 void P74_InitConsts(void) {
   memcpy(P74_DistTab, P74_DistInit, sizeof P74_DistTab);
   memcpy(P74_KeyA, P74_KeyAInit, sizeof P74_KeyA);
@@ -202,6 +209,9 @@ void P74_InitConsts(void) {
 }
 #endif
 
+/* P74_FreeTraffic — Game.exe 00493ece.  Releases traffic record i: clears its cop slot (first dword of the
+   0xcd8-byte cop AI record, cop count G0112B284 - 1), calls GlobalSet004964E2 for state 9, clears state and
+   flags (+1, +8, +0x15) and pushes i on the free-record stack (G2_ARR_01145940, count G2_01143600). */
 /* 00493ece: запись трафика (0x54 байта): +1 состояние (9 — особое), +5 номер слота машины (1-based), +8, +0x15 — флаги.
    Свободные записи лежат стеком в 01145940, счётчик 01143600. */
 void P74_FreeTraffic(int32_t i) {
@@ -218,6 +228,10 @@ void P74_FreeTraffic(int32_t i) {
   if ((uint32_t)G2_01143600 < 0x1000) G2_ARR_01145940[G2_01143600] = i;
 }
 
+/* P74_ShiftRows — Game.exe 004ffad8.  Colour cycling: for each of 16 entries {first a, last b, frame mask m}
+   of P74_RowTab, when (frame & m) == 0 the values P74_Rows[a..b] rotate by one (the last becomes the first).
+   Disabled while G6_00B5A778 != 0 or P13_00b201dc == 0.  Native skips entries with b < a (endless loop in
+   the original). */
 /* 004ffad8: для каждой из 16 записей (начало a, конец b, маска m) при (кадр & m) == 0 значения a..b сдвигаются на одну позицию вверх,
    последнее становится первым (в оригинале при b < a цикл бесконечен — тут запись пропускается). */
 void P74_ShiftRows(void) {
@@ -235,6 +249,8 @@ void P74_ShiftRows(void) {
 }
 
 /* 005186ce */
+/* P74_ResetHud — Game.exe 005186ce.  Clears HUD/input state at level start: five 5-entry tables, counters,
+   joystick axis values and the replay record counter.  TODO(RE): meaning of the individual P74_* tables. */
 void P74_ResetHud(void) {
   P74_C4DA58 = P62_Frame + 1;
   for (int i = 0; i < 5; i++) { P74_B5A858[i] = 0; P74_B5A86C[i] = 0; P74_B5A880[i] = 0; P74_C4D7A0[i] = 0; }
@@ -250,6 +266,8 @@ void P74_ResetHud(void) {
   P74_B5A894 = 1;
 }
 
+/* P74_Conv8to16 — Game.exe 004229fa.  Converts a 256x256 8-bit texture page to 16 bits through the 4-byte
+   palette (B, G, R, x) using the surface channel shifts P24_[RGB]Shift[RL]; pitch = destination row bytes. */
 /* 004229fa: палитра — 4 байта на цвет (B,G,R,x); байт альфы 0xff в оригинале никогда не совпадает (индекс байтовый, сравнение с -1) */
 void P74_Conv8to16(const uint8_t *src, const uint8_t *pal, uint16_t *dst, int32_t pitch) {
   for (int row = 0; row < 256; row++) {
@@ -266,6 +284,9 @@ void P74_Conv8to16(const uint8_t *src, const uint8_t *pal, uint16_t *dst, int32_
   }
 }
 
+/* P74_DevSelect — Game.exe 00424530.  Selects render device idx (enumerating devices on first use):
+   device kind 0 = 3Dfx Glide (load the Glide exports), 1 = Direct3D (P151_InstallD3D(idx, a, b)), else none.
+   Result in G00B1C0D4 (success) and G00B1C0D8 (1 = Direct3D).  Out-of-range idx -> 0. */
 /* 00424530 (метка __thiscall ложная: первый аргумент — номер устройства) */
 void P74_DevSelect(int32_t idx, int32_t a, int32_t b) {
   if (P69_DevOn == 0) {
@@ -287,6 +308,9 @@ void P74_DevSelect(int32_t idx, int32_t a, int32_t b) {
   }
 }
 
+/* P74_Dist — Game.exe 004a7f0e.  Approximate distance from the player (P59_PosX/Z) to (x + ox/256, z + oz/256):
+   big * P74_DistTab[small * 64 / big] / 128, where big/small are the larger/smaller of |dx|, |dz| — i.e.
+   sqrt(1 + t^2) from a 65-entry table.  Divisions round toward zero (MSVC idiom kept). */
 /* 004a7f0e: dx, dz — разности с положением игрока (в клетках; p3/p4 — дробная часть /256), результат ≈ max + min*k/128 по таблице */
 int32_t P74_Dist(int32_t x, int32_t z, int32_t ox, int32_t oz) {
   int32_t dx = x - (P59_PosX + ((ox + ((ox >> 31) & 0xff)) >> 8));
@@ -302,6 +326,8 @@ int32_t P74_Dist(int32_t x, int32_t z, int32_t ox, int32_t oz) {
   return (t + ((t >> 31) & 0x7f)) >> 7;
 }
 
+/* P74_ParseFloat — Game.exe 004a4f7d.  Parses "[-]float" from a text file line into camera float word idx
+   (P68_CamF[3 - idx], idx 0..3).  Returns 1, or 0 with an "Expecting floating point value!" box. */
 /* 004a4f7d: число "[-]%f" -> слово камеры (0x0113425c - idx*4: idx 0..3) */
 int32_t P74_ParseFloat(char *s, int32_t idx) {
   int32_t neg = 0;
@@ -315,6 +341,8 @@ int32_t P74_ParseFloat(char *s, int32_t idx) {
   return 1;
 }
 
+/* P74_ParseShorts — Game.exe 004a5afb.  Parses n comma-separated numbers into out (u16 each), then skips to the
+   next line.  Returns the new position, or NULL after a "Comma Expected!" box. */
 /* 004a5afb: n коротких чисел, разделитель запятая; после последнего — продолжение разбора (004a59c6) */
 char *P74_ParseShorts(char *s, uint16_t *out, int32_t n) {
   for (;;) {
@@ -335,6 +363,9 @@ char *P74_ParseShorts(char *s, uint16_t *out, int32_t n) {
 }
 
 /* 0051d440 */
+/* P74_SkidInit — Game.exe 0051d440.  Clears the four skid mark tables and finds the SKID icon; without it skid
+   marks are disabled (P13_00575ebc = 0).  Shrinks the icon's texture rectangle by one texel at the top/bottom
+   (TODO(RE): the +0xb / +0xc adjustment turns the rectangle into origin + size? unsure). */
 void P74_SkidInit(void) {
   for (int i = 0; i < 4; i++) { P74_SkidA[i] = 0; P74_SkidB[i] = 0; P74_SkidC[i] = 0; P74_SkidD[i] = 0; }
   P74_Skid = P56_FindIcon("SKID");
@@ -346,12 +377,14 @@ void P74_SkidInit(void) {
 }
 
 /* 0040efd5 */
+/* P74_KeyScan — Game.exe 0040efd5.  Key scan for text entry: -3 = Escape, -2 = Enter, -1 = Backspace, else the
+   character of the first pressed key from P74_KeyA (P74_KeyB with Caps Lock or Shift), 0 = none. */
 int32_t P74_KeyScan(void) {
   const uint8_t *tab = P74_KeyA;
-  if (IsKeyDown(1) != 0) return -3;
-  if (IsKeyDown(0x1c) != 0) return -2;
-  if (IsKeyDown(0xe) != 0) return -1;
-  if (A_00D04B00[0x3a] != 0 || A_00D04B00[0x2a] != 0 || A_00D04B00[0x36] != 0) tab = P74_KeyB;
+  if (IsKeyDown(DIK_ESCAPE) != 0) return -3;
+  if (IsKeyDown(DIK_RETURN) != 0) return -2;
+  if (IsKeyDown(DIK_BACK) != 0) return -1;
+  if (A_00D04B00[DIK_CAPITAL] != 0 || A_00D04B00[DIK_LSHIFT] != 0 || A_00D04B00[DIK_RSHIFT] != 0) tab = P74_KeyB;
   for (int32_t i = 0; i < 0x100; i++)
     if (tab[i] != 0 && IsKeyDown(i) != 0) return tab[i];
   return 0;
