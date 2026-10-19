@@ -1,3 +1,7 @@
+/* ported125.c — assorted gameplay helpers (English overview; detailed Russian notes follow).  All cdecl.
+   Level loading screen and setup, replay-director node actions, dashboard messages, particle bursts (smoke,
+   debris, sparks), control-menu values, near-plane edge clipping, hitting a movable object, model name lists
+   from text files, the 16-bit palette / blend table, and the route pickup check. */
 /* v1.70: ported125 — восстановлено из Game.exe. Все функции cdecl (work/rets.py: ret без операнда).
    004d35b2 — загрузка уровня: DATA\(US)LOADING.BMP, сброс состояния, LEVELS\FLAT.D3D (004efafd, не перенесена), srand(0x3039),
      окно отрисовки 65/640·W … 575/640·W × 430/480·H … 460/480·H (Ghidra путает аргументы 004d9539 — восстановлено по ассемблеру).
@@ -224,6 +228,9 @@ static const uint8_t k_553630[32] = { 0x6f,0x73,0x91,0, 0xb8,0xcf,0xda,0, 0xe2,0
 static const int32_t k_575558[16] = { 2, 1, 2, 6, 7, 8, 7, 0xe8, 2, 5, 7, 5, 10, 0xe2, 0xe8, 0xe3 };
 
 /* ---- 004d35b2 ---- */
+/* P125_LevelLoad — Game.exe 004d35b2.  Shows DATA\(US)LOADING.BMP, resets the level state, seeds rand with
+   0x3039 (12345, so every level starts deterministically), sets the loading bar rectangle
+   (65..575 / 640 x 430..460 / 480 of the screen) and loads the level.  Returns 1 on success, 0 on failure. */
 int32_t P125_LevelLoad(void) {
   uint8_t keep = P52_NoTrail;
   P52_NoTrail = 0;
@@ -272,6 +279,8 @@ int32_t P125_LevelLoad(void) {
 }
 
 /* ---- 004c43b6 ---- */
+/* P125_ReplayNodeAction — Game.exe 004c43b6 (found through thunk 00401e8d).  Performs the action of replay
+   director menu node id, dispatching on the id of the node's root (+0x18 chain). */
 void P125_ReplayNodeAction(int32_t id) {
   DIR_NODE *n = FindNodeById(id);
   if (n == NULL) return;                       /* native: в оригинале чтение по нулю */
@@ -306,6 +315,8 @@ void P125_ReplayNodeAction(int32_t id) {
 }
 
 /* ---- 004f5e55: AddDashMessage ---- */
+/* P125_AddDashMessage — Game.exe 004f5e55 (script ADDDASHMESSAGE).  Adds msg to the dashboard message list for
+   `lim` (TODO(RE): frames or count); native keeps native pointers in the list. */
 int32_t P125_AddDashMessage(const char *msg, int32_t lim) {
   int32_t n = P58_CntC814E8;
   void **ptrs = (void **)DebugMalloc((int)((size_t)(n + 1) * sizeof(void *)), "D:\\Driver\\Game\\MScript.c", 0x61b);
@@ -332,6 +343,8 @@ int32_t P125_AddDashMessage(const char *msg, int32_t lim) {
 }
 
 /* ---- 004b8d49: клубы в пуле 0110b260 (записи 0x3c) ---- */
+/* P125_SmokePuffs — Game.exe 004b8d49.  Emits n smoke puffs of kind `kind` at pos with velocity vel into the pool
+   0110b260 (0x3c-byte records); blue != 0 selects the bluish colour (colours from .data 00553630). */
 void P125_SmokePuffs(const int32_t *pos, const int32_t *vel, int32_t n, uint32_t kind, int32_t blue) {
   if (G6_00B5A778 != 0 || P69_OvlOn == 0) return;
   for (int32_t k = 0; k < n; k++) {
@@ -373,6 +386,8 @@ void P125_SmokePuffs(const int32_t *pos, const int32_t *vel, int32_t n, uint32_t
 }
 
 /* ---- 0050fbf4: значения меню управления ---- */
+/* P125_CtrlMenuValues — Game.exe 0050fbf4.  Fills the value strings of the controls menu (string indices from
+   .data 00575558 into P117_MenuB fields +0x30 + 0x28 * k). */
 void P125_CtrlMenuValues(void) {
   int32_t c = P13_00575ef4 == 0 ? 0 : (P13_00b87e74 == 0 ? 1 : 2);
   int32_t b = P13_00575ec0 == 0 ? 0 : (P13_00575ebc == 0 ? 1 : 2);
@@ -403,6 +418,9 @@ void P125_CtrlMenuValues(void) {
 }
 
 /* ---- 0042d554: ребро a→b по ближней плоскости (z = +0x14), вывод x,y,z в P100_ClipOut ---- */
+/* P125_ClipNearXY — Game.exe 0042d554.  Clips edge a -> b against the near plane (z = +0x14 of each vertex) and
+   appends x, y, z of the kept/intersection points to P100_ClipOut (like P100_ClipNear without UVs; the divisor
+   of the second branch uses fabs as in the original). */
 static void clip_put(float x, float y, float z) { P100_ClipOut[0] = x; P100_ClipOut[1] = y; P100_ClipOut[2] = z; P100_ClipOut += 0xc; }
 void P125_ClipNearXY(const uint8_t *a, const uint8_t *b) {
   float N = P95_Near, za = rdf(a + 0x14), zb = rdf(b + 0x14);
@@ -425,6 +443,11 @@ void P125_ClipNearXY(const uint8_t *a, const uint8_t *b) {
 }
 
 /* ---- 00522f4f: удар по объекту (+4 модель, +8 x, +0x10 z) ---- */
+/* P125_DropHit — Game.exe 00522f4f.  A car with velocity vel hits knockable object obj (+4 model, +8 x, +0x10 z;
+   street furniture — P99_ChairHit is called): if obj is already flying, bumps its record's counter and returns 1;
+   otherwise adds the score (when enabled) and the model's time bonus (P125_DropTime), takes the next of the 6
+   fly records (P101_Drops, 0x1c bytes, +0x18 = object address) with a knock velocity from vel (>> 10) and a
+   random spin direction, moves the static object far away (x = -2e7) and returns 0. */
 int32_t P125_DropHit(uint8_t *obj, const int32_t *vel) {
   uint32_t oa = re_addr(obj);
   for (int32_t k = 0; k < 6; k++) {
@@ -463,6 +486,8 @@ int32_t P125_DropHit(uint8_t *obj, const int32_t *vel) {
 }
 
 /* ---- 004a5634: «ИМЯ = N» ---- */
+/* P125_ModelName — Game.exe 004a5634.  Parses "NAME = N" from a text line and appends NAME (upper-cased; 'z' is
+   left as is, as in the original) with u16 num to the name list ("NAME\0" + u16, terminated by two zeros). */
 void P125_ModelName(const char *line, uint16_t num) {
   char name[0x108];
   int32_t L = 0;
@@ -501,6 +526,10 @@ void P125_ModelName(const char *line, uint16_t num) {
 }
 
 /* ---- 004079aa: палитра (B,G,R,X) → 16 бит; P65_Blend[a][b] — ближайший к среднему цвет ---- */
+/* P125_BlendTable — Game.exe 004079aa.  Converts the 256-colour palette (B, G, R, x) to 16-bit colours (out) with
+   the surface channel shifts, and fills P65_Blend[a][b] = palette index nearest (sum of |channel| differences,
+   search stops below 100) to the average of colours a and b; blending with the transparent index `key` keeps a.
+   Stores key in P65_ColorKey and clears the 640x480 screen buffer P65_Screen to index `fill`. */
 void P125_BlendTable(const uint8_t *pal, uint32_t *out, uint8_t key, uint8_t fill) {
   for (int32_t i = 0; i < 0x100; i++)
     out[i] = (uint32_t)((pal[i * 4 + 2] >> (P125_ShrR & 0x1f)) << (P125_ShlR & 0x1f) |
@@ -530,6 +559,8 @@ void P125_BlendTable(const uint8_t *pal, uint32_t *out, uint8_t key, uint8_t fil
 }
 
 /* ---- 004afa4c: обломки в P97_Debris (100 записей 0x3c) ---- */
+/* P125_DebrisBurst — Game.exe 004afa4c.  Emits n debris pieces of kind `kind` at pos into P97_Debris (100 records
+   of 0x3c bytes). */
 void P125_DebrisBurst(const float *pos, int32_t n, int32_t kind) {
   if (MenuVar553850 == 0 || P69_OvlOn == 0) return;
   for (int32_t k = 0; k < n; k++) {
@@ -569,6 +600,8 @@ void P125_DebrisBurst(const float *pos, int32_t n, int32_t kind) {
 }
 
 /* ---- 004b955c: объекты A (0x78) — искры/дым ---- */
+/* P125_ObjABurst — Game.exe 004b955c.  Emits n spark/smoke objects of kind `kind` (pool 010f5160, 0x78 bytes) at
+   pos with velocity vel. */
 void P125_ObjABurst(const int32_t *pos, const int32_t *vel, int32_t n, int32_t kind) {
   if (G6_00B5A778 != 0 || P111_SparkIcon == 0) return;
   for (int32_t k = 0; k < n; k++) {
@@ -602,6 +635,9 @@ void P125_ObjABurst(const int32_t *pos, const int32_t *vel, int32_t n, int32_t k
 }
 
 /* ---- 004fc0d9: подбор точек маршрута (записи 0x14: +4 x, +8 y, +0xc z) ---- */
+/* P125_PickupTick — Game.exe 004fc0d9.  Checks the player against the pickup points of table tab (0x14-byte
+   records: +4 x, +8 y, +0xc z; pick_dist = distance helper) and collects the ones reached (writes 00c810c4 to all
+   its native aliases).  TODO(RE): what the pickups are (script trail points?) unsure. */
 static int32_t pick_dist(const uint8_t *p) {
   int32_t dx = iabs(PlayerPosX - rd32(p + 4)), dz = iabs(PlayerPosZ - rd32(p + 0xc));
   return dx < dz ? dz + dx / 2 : dx + dz / 2;
