@@ -1,3 +1,6 @@
+/* ported59 — assorted leaf functions (Game.exe, cdecl): fly camera setup, MScript string variables, traffic
+   conflict checks, MODEL_NAMES parsing, nearby-car list, interview task scoring, car orientation reset, replay file
+   check, menu keys and frontend block reader.  The Russian line above each function gives its address. */
 #include "ported59.h"
 #include "sintab_data.h"
 #include <string.h>
@@ -247,10 +250,22 @@ char *P59_VarStr[77];
 _Static_assert(sizeof(p42_var_t) == 0x30, "p42_var_t");
 #endif
 
+#include "carfields.h"
+#define DIK_ESCAPE 0x01
+#define DIK_RETURN 0x1c
+#define DIK_LEFT   0xcb
+#define DIK_RIGHT  0xcd
+#define MSVAR_STRING 1      /* p42_var_t.type: string (initial value address in lo) */
+#define MSVAR_NUMBER 3      /* number (initial value in hi) */
+#define MSVAR_NONE   4      /* no initial value */
+#define MSVAR_END    0x7f   /* table terminator */
+#define REPLAY_MAGIC 0x38910457u
+
 static uint32_t rd32(const uint8_t *p, uint32_t o) { uint32_t v; memcpy(&v, p + o, 4); return v; }
 static int16_t  rd16s(const uint8_t *p, uint32_t o) { int16_t v; memcpy(&v, p + o, 2); return v; }
 static void     wr32(uint8_t *p, uint32_t o, uint32_t v) { memcpy(p + o, &v, 4); }
 
+/* P59_InitConsts — native only.  Sine table and two float constants (2000, 1.0) from Game.exe .data. */
 void P59_InitConsts(void) {
 #ifndef RE_HOOK_BUILD
   memcpy(P59_Sin, P59_SinInit, sizeof P59_Sin);
@@ -259,6 +274,8 @@ void P59_InitConsts(void) {
 }
 
 /* 0049c910: камера — положение из объекта, высота над землёй не больше 28672. */
+/* P59_SetupCamera — Game.exe 0049c910.  Top-down camera above P59_Pos: height = min(28672, P59_CamF1 - 2000) above it
+   (y is negated: up is -y), angles (0x400 = 90 deg pitch, 0, 0); camera mode 6 (TODO(RE): unsure — map / overview?). */
 void P59_SetupCamera(void) {
   float lim = 28672.0f;
   float d = P59_CamF1 - P59_CamLim;
@@ -272,8 +289,9 @@ void P59_SetupCamera(void) {
 }
 
 /* 004f8a2d: строковая переменная скрипта (тип 1): новая копия строки, старая освобождается. */
+/* P59_VarSetString — Game.exe 004f8a2d.  Sets string variable idx (type 1) to a fresh copy of s, freeing the old one. */
 void P59_VarSetString(int32_t idx, const char *s) {
-  if (P42_Vars[idx].type != 1) return;
+  if (P42_Vars[idx].type != MSVAR_STRING) return;
   size_t n = strlen(s);
   char *buf = (char *)DebugMalloc((int)(n + 1), "D:\\Driver\\Game\\MScript.c", 0xc38);
   if (buf == NULL) return;
@@ -290,22 +308,27 @@ void P59_VarSetString(int32_t idx, const char *s) {
 
 /* 004f892a: начальные значения переменных: тип 1 — строка (lo), 3 — число (hi), 4 — без действия.
    Оригинал идёт до записи с типом 0x7f; в native таблица пока пуста, поэтому цикл ограничен 76 записями. */
+/* P59_VarsInit — Game.exe 004f892a.  Gives every MScript variable its initial value (see the note above). */
 void P59_VarsInit(void) {
-  for (int32_t i = 0; i < 76 && P42_Vars[i].type != 0x7f; i++) {
+  for (int32_t i = 0; i < 76 && P42_Vars[i].type != MSVAR_END; i++) {
     switch (P42_Vars[i].type) {
-    case 1:
+    case MSVAR_STRING:
 #ifdef RE_HOOK_BUILD
       P59_VarSetString(i, (const char *)(uintptr_t)(uint32_t)P42_Vars[i].lo);
 #endif
       break;
-    case 3: SetTableValue_004F89B7(i, (uint32_t)P42_Vars[i].hi); break;
-    case 4: NoopFn004F89EB(); break;
+    case MSVAR_NUMBER: SetTableValue_004F89B7(i, (uint32_t)P42_Vars[i].hi); break;
+    case MSVAR_NONE: NoopFn004F89EB(); break;
     default: break;
     }
   }
 }
 
 /* 0048eca3: есть ли в трафике чужая запись с тем же узлом (+0x28), направлением (+0x24) и малым расстоянием/задержкой. */
+/* P59_TrafficFind — Game.exe 0048eca3.  1 if another moving traffic record (state byte +1 not 0/1) is on road segment a
+   (+0x28) in direction b (+0x24) with +0x1c below 3000 (6000 when self's +0x34 is set) and +0x38 below 0x1e.
+   TODO(RE): unsure — +0x1c looks like the distance along the segment (see rd_store in ported103.c) and +0x38 the
+   speed. */
 int32_t P59_TrafficFind(uint32_t self, int32_t a, uint32_t b) {
   const uint8_t *e = P12_011443e0;
   int32_t lim = (rd32(P12_011443e0, (self & 63) * 0x54 + 0x34) == 0) ? 3000 : 6000;
@@ -317,6 +340,8 @@ int32_t P59_TrafficFind(uint32_t self, int32_t a, uint32_t b) {
 }
 
 /* 0048ed6f: r — запись трафика (машина r[0], узел +0x2c, направление r[0x30], поле +0x20). */
+/* P59_TrafficCheck — Game.exe 0048ed6f.  Is the next segment of traffic record r blocked?  With flag and Ret1() == 0:
+   always 1.  Short segments (length < 4 at P59_BF1C48) also check P51_TrafficConflict; then P59_TrafficFind. */
 int32_t P59_TrafficCheck(const uint8_t *r, int32_t flag) {
   uint32_t node = rd32(r, 0x2c);
   if (flag != 0 && Ret1() == 0) return 1;
@@ -326,6 +351,10 @@ int32_t P59_TrafficCheck(const uint8_t *r, int32_t flag) {
 }
 
 /* 00491650: сколько клеток осталось до границы участка (по направлению k) для записи r. */
+/* P59_CellLeft — Game.exe 00491650.  Cells (0x5dc units) left until the end of the current road segment in the
+   record's direction k (0..3), from the car position and the segment bounds (+4 / +0x10 / +0x14 / +0x20 of the
+   0x24-byte segment record).  A segment of length 1 gives k & 0xffffff00 (= 0); a junction / invalid segment
+   gives the record address with its low byte cleared (leftover register value in the original) — reproduced. */
 uint32_t P59_CellLeft(const uint8_t *r) {
   const uint8_t *car = P59_CarsTab + r[0] * 0x148;
   uint32_t v28 = rd32(r, 0x28);
@@ -335,10 +364,10 @@ uint32_t P59_CellLeft(const uint8_t *r) {
     if (rec[k] == 1) return k & 0xffffff00u;
     int32_t c = 0;
     switch (k) {
-    case 0: c = (((int32_t)rd32(car, 200) + 0x2ee) - (int32_t)rd32(rec, 4)) / 0x5dc; break;
-    case 1: c = ((int32_t)rd32(rec, 0x10) - ((int32_t)rd32(car, 0xd0) - 0x2ee)) / 0x5dc; break;
-    case 2: c = ((int32_t)rd32(rec, 0x14) - ((int32_t)rd32(car, 200) - 0x2ee)) / 0x5dc; break;
-    case 3: c = (((int32_t)rd32(car, 0xd0) + 0x2ee) - (int32_t)rd32(rec, 0x20)) / 0x5dc; break;
+    case 0: c = (((int32_t)rd32(car, CAR_POS_X) + 0x2ee) - (int32_t)rd32(rec, 4)) / 0x5dc; break;
+    case 1: c = ((int32_t)rd32(rec, 0x10) - ((int32_t)rd32(car, CAR_POS_Z) - 0x2ee)) / 0x5dc; break;
+    case 2: c = ((int32_t)rd32(rec, 0x14) - ((int32_t)rd32(car, CAR_POS_X) - 0x2ee)) / 0x5dc; break;
+    case 3: c = (((int32_t)rd32(car, CAR_POS_Z) + 0x2ee) - (int32_t)rd32(rec, 0x20)) / 0x5dc; break;
     default: break;                                          /* в оригинале переменная не задана */
     }
     return (uint32_t)(((int32_t)rec[k] - c) - 1);
@@ -347,6 +376,8 @@ uint32_t P59_CellLeft(const uint8_t *r) {
 }
 
 /* 004a3f06: раздел MODEL_NAMES: каждое имя (до CHUNK_END) передаётся разборщику 004a5634 с номером. */
+/* P59_ModelNames — Game.exe 004a3f06.  Registers each name of the MODEL_NAMES section (up to CHUNK_END) by index;
+   returns the position after the section. */
 const char *P59_ModelNames(const char *text) {
   P59_ModelCount = 0;
   int32_t idx = 0;
@@ -362,6 +393,8 @@ const char *P59_ModelNames(const char *text) {
 }
 
 /* 004a6dcd: машины полиции/трафика рядом с self (4a6a57), индексы кладёт в список. */
+/* P59_NearCars — Game.exe 004a6dcd.  Collects the active traffic cars that are near record self (004a6a57) and are not
+   its target into P59_NearList; returns 1 if there is any. */
 int32_t P59_NearCars(const int32_t *self) {
   const uint8_t *rec = P12_011443e0;
   const uint8_t *car = P59_CarRecs;
@@ -376,6 +409,9 @@ int32_t P59_NearCars(const int32_t *self) {
 }
 
 /* 004e5ea2: подобрать предмет i (9 штук): подпись, звук; после девятого — режим 2. */
+/* P59_PickUp — Game.exe 004e5ea2.  Scores task i of the 9 driving tasks of the Undercover garage interview (once each):
+   shows its caption (P59_PickTab[i * 2]) for 0x96 ticks and plays its sound; after the ninth sets P59_S4654 = 2
+   (interview passed).  Clears three per-attempt counters.  Returns 1 if newly scored.  RE_IVDBG logs it. */
 int32_t P59_PickUp(int32_t i) {
   if (P59_Flags9[i] != 0) return 0;
 #ifndef RE_HOOK_BUILD
@@ -391,19 +427,24 @@ int32_t P59_PickUp(int32_t i) {
 }
 
 /* 004daac7: положение в 1/16 (mode 1), скорость 0, направление из таблицы синусов (угол +0x100), затем 004da8d9. */
+/* P59_ObjDir — Game.exe 004daac7.  Resets the body orientation of car record o to its heading: quaternion
+   (0, sin(h/2), 0, cos(h/2)) — a pure rotation about y; with mode 1 also copies the position into the extended
+   position (x 16).  Then syncs the derived fields (P56_ObjSync). */
 void P59_ObjDir(uint8_t *o, int32_t mode) {
   if (mode == 1) {
-    wr32(o, 0x24, rd32(o, 200) << 4); wr32(o, 0x28, rd32(o, 0xcc) << 4); wr32(o, 0x2c, rd32(o, 0xd0) << 4);
+    wr32(o, CAR_POS_HI, rd32(o, CAR_POS_X) << 4); wr32(o, CAR_POS_HI + 4, rd32(o, CAR_POS_Y) << 4); wr32(o, CAR_POS_HI + 8, rd32(o, CAR_POS_Z) << 4);
   }
-  uint32_t ix = (uint32_t)((int32_t)rd32(o, 0x100) / 2) & 0xfff;
-  wr32(o, 0x30, 0);
-  wr32(o, 0x34, (uint32_t)(int32_t)P59_Sin[ix]);
-  wr32(o, 0x38, 0);
-  wr32(o, 0x3c, (uint32_t)(int32_t)P59_Sin[(ix + 0x400) & 0xfff]);
-  P56_ObjSync((int32_t *)(void *)(o + 0x24), o);
+  uint32_t ix = (uint32_t)((int32_t)rd32(o, CAR_HEADING) / 2) & 0xfff;   /* half angle */
+  wr32(o, CAR_QUAT, 0);
+  wr32(o, CAR_QUAT + 4, (uint32_t)(int32_t)P59_Sin[ix]);
+  wr32(o, CAR_QUAT + 8, 0);
+  wr32(o, CAR_QUAT + 12, (uint32_t)(int32_t)P59_Sin[(ix + 0x400) & 0xfff]);
+  P56_ObjSync((int32_t *)(void *)(o + CAR_BODY), o);
 }
 
 /* 00405fdb: SAVES\REPLAYn.BIN — подпись 0x38910457 и сумма 0x38 байт; при успехе копия заголовка в out. */
+/* P59_ReplayCheck — Game.exe 00405fdb.  Validates SAVES\REPLAY<slot+1>.BIN (magic and byte sum of the name block, see
+   P64_SaveReplay); on success copies the 0x38-byte name block to out.  1 / 0. */
 int32_t P59_ReplayCheck(int32_t slot, void *out) {
   char name[32];
   snprintf(name, sizeof name, "SAVES\\REPLAY%d.BIN", slot + 1);
@@ -412,7 +453,7 @@ int32_t P59_ReplayCheck(int32_t slot, void *out) {
   g_fread(P59_Hdr, 1, 8, f);
   g_fread(P59_Rep57B6B8, 1, 0x38, f);
   g_fclose(f);
-  if (P59_Hdr[0] == 0x38910457u && P56_Fn40682D(P59_Rep57B6B8, 0x38) == (int32_t)P59_Hdr[1]) {
+  if (P59_Hdr[0] == REPLAY_MAGIC && P56_Fn40682D(P59_Rep57B6B8, 0x38) == (int32_t)P59_Hdr[1]) {
     if (out != NULL) memcpy(out, P59_Rep57B6B8, 0x38);
     return 1;
   }
@@ -420,11 +461,13 @@ int32_t P59_ReplayCheck(int32_t slot, void *out) {
 }
 
 /* 00417d56: Esc / стрелки / Enter в меню. Возвращает -1, если выбор сделан (00417970 вернула 1). */
+/* P59_MenuKeys — Game.exe 00417d56.  Frontend menu keys: Esc (when allowed) asks 00417970 and returns -1 if the menu is
+   left; Left / Right change page; Enter activates the item.  Otherwise 0. */
 int32_t P59_MenuKeys(void) {
-  if (IsKeyDown(1) == 0 || P59_NoKeyFlag != 0 || P58_MenuFn != 0) {
-    if (IsKeyDown(0xcb) == 0) {
-      if (IsKeyDown(0xcd) == 0) {
-        if (IsKeyDown(0x1c) != 0) { Ui00418886(); P59_MenuLock = 0; P58_MenuSwitch(); }
+  if (IsKeyDown(DIK_ESCAPE) == 0 || P59_NoKeyFlag != 0 || P58_MenuFn != 0) {
+    if (IsKeyDown(DIK_LEFT) == 0) {
+      if (IsKeyDown(DIK_RIGHT) == 0) {
+        if (IsKeyDown(DIK_RETURN) != 0) { Ui00418886(); P59_MenuLock = 0; P58_MenuSwitch(); }
       } else { P58_MenuFn = 0; Ui00418886(); MenuPageNext00417F59(); }
     } else { P58_MenuFn = 0; Ui00418886(); MenuPagePrev00417FAC(); }
   } else {
@@ -436,6 +479,8 @@ int32_t P59_MenuKeys(void) {
 }
 
 /* 0040d4b3: блок из файла: [2 байта пропуска при scale > 1] + заголовок 0x14 байт (размеры минус 0x14) + данные. */
+/* P59_ReadBlock — Game.exe 0040d4b3.  Reads one frontend image block (see the note above) into a new buffer; on
+   allocation failure closes file and returns NULL. */
 void *P59_ReadBlock(void *file, float scale, int32_t *hdr) {
   if (P59_One < scale) { uint8_t skip[4]; g_fread(skip, 1, 2, file); }
   g_fread(hdr, 1, 0x14, file);
