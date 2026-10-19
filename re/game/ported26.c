@@ -1,7 +1,7 @@
 /* Мелкие обёртки над plat_* (сообщения, UTC-время, громкость wave, тики) — восстановлено из Game.exe. */
 /* ported26.c — small wrappers around WinAPI calls, now plat_* (English overview): message boxes, UTC time
-   in the debug log, waveOut volume, looking up wheel models in the level data, a random choice of level
-   atmosphere flags from timeGetTime, and finding the CD drive.  All __cdecl. */
+   in the debug log, waveOut volume, looking up wheel models in the level data, a random choice of the level's
+   weather flags from timeGetTime, and finding the CD drive.  All __cdecl. */
 #include "ported26.h"
 #include "ported5.h"
 #include "ported6.h"
@@ -123,12 +123,11 @@ void P26_FindWheelModels(void) {
   P26_ModelDam = find_model("DAMWHEEL", "Could not find damaged wheel model.\nThis is NOT a code bug.  Change name in LEV file.");
 }
 /* Таблица 0056ebd0: 4 строки по 16 байт — {int a, int b, int c, byte d (+3 байта)}; только чтение. */
-/* P26_RandomFx atmosphere flags.  TODO(RE): exact meanings unconfirmed.  Usage elsewhere:
-   P26_FxA picks the sky variant together with the night flag P14_00b87e84 and disables skid marks
-   (ported101/106/117) — presumably rain / wet roads; P26_FxB can only be set together with FxA;
-   P26_FxC only by day, P26_FxD only at night (lamps in ported101). */
+/* P26_RandomFx weather flags — the same flags the mission-script keywords RAINING (P26_FxA), LIGHTNING (FxB),
+   SNOWING (FxC) and FOGGY (FxD) set (ported147.c, mscript_ops.h).  Lightning only together with rain, snow only
+   by day, fog only at night (P14_00b87e84). */
 static const int32_t k_fx[4][4] = { {1,1,0,0}, {1,1,0,1}, {1,1,0,0}, {1,1,1,1} };
-/* P26_RandomFx — Game.exe 004fc5e1.  Picks the atmosphere flags P26_FxA..FxD for a level from the low bits of
+/* P26_RandomFx — Game.exe 004fc5e1 (script keyword RANDOMWEATHER).  Picks the weather flags P26_FxA..FxD for a level from the low bits of
    timeGetTime (bit 0 -> FxA, bit 1 -> FxB, bit 2 -> FxC, bit 3 -> FxD), each allowed only if row `set`
    (0..3, out of range -> 0) of the table k_fx enables it and the exclusions above hold. */
 void P26_RandomFx(int32_t set) {
