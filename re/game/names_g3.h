@@ -49,3 +49,22 @@
 #define MDL_RECS        0x2c   /* link: variable-size polygon records; byte 0 = type (size from 00550acc) */
 #define MDL_SUB         0x30   /* link: sub-block with links at +0xc, +0x10, +0x14, +0x18 (relative to itself) */
 #define MDL_L34         0x34   /* link: table {int32 n; n * 0x14 bytes} or 0 */
+
+/* ---- DirectInput keyboard scan codes (DIK_*, dinput.h) used by the input code ---- */
+#define DIK_ESCAPE      0x01
+#define DIK_RETURN      0x1c
+#define DIK_SPACE       0x39
+#define DIK_NUMPADENTER 0x9c
+#define DIK_UP          0xc8
+#define DIK_LEFT        0xcb
+#define DIK_RIGHT       0xcd
+#define DIK_DOWN        0xd0
+
+/* ---- Indices into the key configuration P36_KeyCfg (DIK code per action) ----
+   4..7 follow the v2.14 native arrow-key block in P36_GetPadButtons; 8..15 the native gamepad
+   mapping in plat_di.c (gamepad_keys). */
+enum {
+  KEYCFG_LEFT = 4, KEYCFG_RIGHT = 5, KEYCFG_GAS = 6, KEYCFG_BRAKE = 7,
+  KEYCFG_HARDTURN = 8, KEYCFG_HANDBRAKE = 9, KEYCFG_BURNOUT = 10,
+  KEYCFG_LOOKBACK = 13, KEYCFG_HORN = 15
+};
