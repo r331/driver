@@ -1,3 +1,8 @@
+/* smallfuncs.c — tiny Game.exe functions, one or two lines each (English overview).  The function name carries
+   the Game.exe address and a descriptive name, so the comments are per group: empty stubs, single-field
+   setters, index pools (free-index stacks), vector helpers, opcodes of the 004d1xxx bytecode interpreter
+   (see ported10.c) and menu highlight setters.  The globals S_<address> are named by Game.exe address.
+   U32/I32/U16(p, o) read/write a field at byte offset o of p.  All cdecl. */
 #include "smallfuncs.h"
 #include <stdint.h>
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -448,6 +453,7 @@ uint32_t S_0127104C;
 #define I32(p,o)  (*(int32_t*)U8P(p,o))
 #define U16(p,o)  (*(uint16_t*)U8P(p,o))
 /* --- пустые --- */
+/* Empty functions and constant returns of the original. */
 void NoopFn0041F81E(void) {}
 void NoopFn0041FA49(void) {}
 void NoopFn0041FA50(void) {}
@@ -460,6 +466,9 @@ int32_t ReturnZero004D03FD(void) { return 0; }
 int32_t ReturnZero004E3B19(void) { return 0; }
 int32_t ReturnOne00519D22(void) { return 1; }
 /* --- сеттеры полей структур --- */
+/* Single-field setters / tests.  ScriptSetWait*: a script wait record {time, type 12}; the X50 variant
+   multiplies by 50 (TODO(RE): presumably seconds -> frames at 50 Hz).  SlotSetOn/Off: voice slot i (0..19)
+   active byte of the 0x34-byte sound slot table.  SetRGB00516EB4: current text colour (see P70_FadeColor). */
 void SetField24_00502779(uint8_t* p, int32_t v) { I32(p, 0x24) = v; }
 void ClearField2C_00502680(uint8_t* p) { I32(p, 0x2c) = 0; }
 void AddToCounter00519D09(int32_t v) { S_01136C74 += v; }
@@ -476,6 +485,9 @@ void SetRGB00516EB4(uint8_t r, uint8_t g, uint8_t b) { S_00B5A834 = r; S_00B5A83
 void SlotSetOn0052432A(int32_t i) { if (-1 < i && i < 0x14) S_00BDC2A1[i * 0x34] = 1; }
 void SlotSetOff0052434A(int32_t i) { if (-1 < i && i < 0x14) S_00BDC2A1[i * 0x34] = 0; }
 /* --- стеки индексов (пулы) --- */
+/* Index pools: Push stores a free index below the stack pointer, Pop takes one (-1 when the pool is full:
+   100 / 200 entries).  CounterDecrement: decrements to 0, returns 1 if it was positive.  AllocSlot: next of
+   8 slots numbered 0x14.., -1 when exhausted. */
 void PoolPush004AC6AC(uint16_t v) { S_011173C8 -= 1; ((uint16_t*)S_010FAF40)[S_011173C8] = v; }
 void PoolPush004AC702(uint16_t v) { S_0110E144 -= 1; ((uint16_t*)S_010EA8A0)[S_0110E144] = v; }
 void PoolPush004AC755(uint16_t v) { S_010FFA24 -= 1; ((uint16_t*)S_010FB0E0)[S_010FFA24] = v; }
@@ -507,18 +519,25 @@ void InitFlags004946DA(uint8_t* p) { I32(p, 0x3c) = 0; I32(p, 0x38) = 0; p[0x11]
 void WrapCounter004A3A80(uint8_t* p) {
     if (0x1d < I32(p, 0xc)) { U32(p, 0x10) &= 0xfffffeffu; I32(p, 0xc) = 0; }
 }
+/* Vector helpers: copies into fixed globals (00ba5280.. = TODO(RE), 00b93e6c..74 = translation used by
+   RotVec_005279CB), negation, reset to (0, 0, 0, ?, 1.0). */
 void CopyVec3_005265BC(uint32_t* v) { S_00BA5280 = v[0]; S_00BA52D4 = v[1]; S_00BA5380 = v[2]; }
 void CopyVec3_0052797A(uint32_t* v) { S_00B93E6C = v[0]; S_00B93E70 = v[1]; S_00B93E74 = v[2]; }
 void NegateVec3_00526FB6(float* v) { v[0] = -v[0]; v[1] = -v[1]; v[2] = -v[2]; }
 void NegateVec3_005270F6(float* v) { v[0] = -v[0]; v[1] = -v[1]; v[2] = -v[2]; }
 void NegateVec3To_00526FE3(float* d, float* s) { d[0] = -s[0]; d[1] = -s[1]; d[2] = -s[2]; }
 void ResetVec_005272C6(uint32_t* v) { v[4] = 0x3f800000u; v[2] = 0; v[1] = 0; v[0] = 0; }
+/* CopySlotTemplate004A1010: copies the 0x16c-byte per-model car parameter record of the player car model
+   (S_00560A88 + model * 0x16c) to the active record S_00D0CC60. */
 void CopySlotTemplate004A1010(void) {
     uint32_t* s = (uint32_t*)(S_00560A88 + (size_t)S_00D1192C * 0x16c);
     uint32_t* d = (uint32_t*)S_00D0CC60;
     for (int i = 0; i < 0x5b; i++) d[i] = s[i];
 }
 /* --- опкоды скрипта (смещение указателя + флаги) --- */
+/* Opcodes of the 004d1xxx bytecode interpreter: ip S_00D12414 advances past the opcode (2 bytes, or 4 with an
+   operand) and flags in the context record S_00D1240C (+0x44, u16 +0x48) are set/cleared.  Return 1 = continue
+   with the next opcode, 0 = stop for this frame (TODO(RE): inferred from the loop opcode in ported10.c). */
 int32_t ScriptOpSkipClear004D1111(void) { S_00D12414 += 2; I32(S_00D1240C, 0x44) = 0; return 1; }
 int32_t ScriptOpSetBit4_004D13D8(void) { S_00D12414 += 2; U16(S_00D1240C, 0x48) |= 4; return 0; }
 int32_t ScriptOpClearBit2_004D1402(void) { S_00D12414 += 2; *S_00D12410 &= 0xfffd; return 0; }
@@ -528,6 +547,8 @@ int32_t ScriptOpToggle10_004D1737(void) { S_00D12414 += 2; U16(S_00D1240C, 0x48)
 int32_t ScriptOpSkip4_004D1601(void) { S_00D12414 += 4; return 1; }
 void RingAdvance004D7B36(void) { S_00D11878++; if (S_00D11878 == S_00D0DDE0) S_00D11878 = 0; }
 /* --- подсветка пунктов меню (значения 2/3 в таблицах) --- */
+/* Menu highlight setters: write state 2 / 3 or colour red (0xff, 0, 0) / white to the two 0x10-byte entries of
+   the selected menu row. */
 void MenuRowsTo3_00404E52(void) { S_00549B04[(S_0057B658 * 2 + 1) * 0x10] = 3; S_00549B04[(S_0057B658 * 2 + 2) * 0x10] = 3; }
 void MenuRowsIf0To2_00404E7E(int32_t f) {
     if (f == 0) { S_00549B04[(S_0057B65C * 2 + 1) * 0x10] = 2; S_00549B04[(S_0057B65C * 2 + 2) * 0x10] = 2; }
