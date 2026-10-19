@@ -1,3 +1,7 @@
+/* ported129 — car collisions with static map objects (Game.exe, cdecl): object collision boxes, merging of adjacent
+   boxes, the car-vs-box impulse response with breakable objects, and marking traffic cars on the radar grid.
+   Collision box (int32[8], P129_Boxes): [0..2] centre x, y, z; [4] half-size x; [5] half-size z; [6] angle 0..0xfff
+   (+ flag 0x400 after a merge swap); [7] height.  Original note: */
 /* v1.74: ported129 — столкновения машин со статическими объектами (см. ported129.h).
    005001bb — слияние двух отложенных коробок (обе без поворота &0x3ff, по высоте рядом с машиной): при первом слиянии
      полуоси X/Z меняются местами и флаг = 0x400; соседство по X (сторона машины одна, края ближе 0x32, по Z перекрытие)
@@ -99,20 +103,25 @@ static uint8_t *s_box_obj[60];
 static const int32_t k_lift[8] = { 735, 580, 0, 1190, 0, 0, 0, 0 };
 
 #include "memrw.h"
+#include "carfields.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static uint16_t rdu16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
+/* 32-bit helpers: M = wrapping imul, add32 = wrapping add in memory, f12 = round 20.12 to integer. */
 static int32_t M(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b); }   /* imul с переполнением */
 static void add32(uint8_t *p, int32_t d) { wr32(p, (int32_t)((uint32_t)rd32(p) + (uint32_t)d)); }
 static int32_t f12(int32_t v) { return (int32_t)((uint32_t)v + 0x800u) >> 12; }
+/* Map model mi (or NULL) and its flags (+8: 0x400 breakable, 0x1000 / 0x2000 hit effects) / flags2 (+2: 8 = silent). */
 static const uint8_t *model(int32_t mi) {
   if ((uint32_t)mi >= 1126u) return NULL;                                              /* защита */
   return P79_ModelTab[mi] ? (const uint8_t *)P79_PTR(P79_ModelTab[mi]) : NULL;   /* v2.07: ссылка арены карты (в hook — адрес) */
 }
 static uint32_t mflags(int32_t mi) { const uint8_t *m = model(mi); return m ? (uint32_t)rd32(m + 8) : 0; }
 static uint16_t mflags2(int32_t mi) { const uint8_t *m = model(mi); return m ? rdu16(m + 2) : 0; }
+/* -1 when c <= v, else +1 (which side of a box centre the car is on). */
 static int le_side(int32_t c, int32_t v) { return (c == v || (int32_t)((uint32_t)c - (uint32_t)v) < 0) ? -1 : 1; }
 
 /* ---- 005001bb ---- */
+/* Grows box a to the bounding box of a and b (x / z extents, y by half heights) and disables b (half x = 0). */
 static int32_t merge_into(int32_t *a, int32_t *b) {
   int32_t hx = (b[0] + b[4] < a[0] + a[4]) ? a[0] + a[4] : b[0] + b[4];
   int32_t hz = (b[2] + b[5] < a[2] + a[5]) ? a[2] + a[5] : b[2] + b[5];
@@ -125,18 +134,23 @@ static int32_t merge_into(int32_t *a, int32_t *b) {
   b[4] = 0;
   return 1;
 }
+/* P129_BoxMerge — Game.exe 005001bb.  Merges deferred boxes i and j when both are axis-aligned, both are at the car's
+   height (within height + 0x7d), the car is on the same side of both, and their facing edges are within 0x32 with
+   overlap along the other axis — so a car sliding along a row of objects hits one wall instead of the seams.
+   Only for the player (car 0) and cars above 0x40.  On first merge the half sizes x/z are swapped and the box
+   marked 0x400 (TODO(RE): unsure why the swap).  Returns 1 if merged. */
 int32_t P129_BoxMerge(int32_t i, int32_t j, int32_t car) {
   if (car != 0 && car <= 0x40) return 0;
   if ((uint32_t)i >= 60u || (uint32_t)j >= 60u || (uint32_t)car >= (uint32_t)P99_CARS_N) return 0;   /* защита */
   int32_t *a = P129_Boxes[i], *b = P129_Boxes[j];
   const uint8_t *c = (const uint8_t *)&P99_Cars[car];
   if ((a[6] & 0x3ff) != 0 || (b[6] & 0x3ff) != 0) return 0;
-  int32_t cy = rd32(c + 0x1c);
+  int32_t cy = rd32(c + CAR_POS2 + 4);
   if (iabs(cy - a[1]) > a[7] + 0x7d) return 0;
   if (iabs(cy - b[1]) > b[7] + 0x7d) return 0;
   if ((a[6] & 0x400) == 0) { int32_t t = a[4]; a[4] = a[5]; a[5] = t; a[6] = 0x400; }
   if ((b[6] & 0x400) == 0) { int32_t t = b[4]; b[4] = b[5]; b[5] = t; b[6] = 0x400; }
-  int32_t cx = rd32(c + 0x18), cz = rd32(c + 0x20), s, d;
+  int32_t cx = rd32(c + CAR_POS2), cz = rd32(c + CAR_POS2 + 8), s, d;
   s = le_side(cx, a[0]);
   if (s == le_side(cx, b[0])) {
     d = a[0] + s * a[4] - b[0] - s * b[4];
@@ -151,7 +165,18 @@ int32_t P129_BoxMerge(int32_t i, int32_t j, int32_t car) {
 }
 
 /* ---- 0049b14d ---- */
+/* 3D sound smp on voice at integer point o. */
 static void snd_at(uint32_t smp, int32_t voice, const int32_t *o) { P97_SndStart(smp, voice, (float)o[0], (float)o[1], (float)o[2]); }
+/* P129_ObjHit — Game.exe 0049b14d.  Collision of car record c with collision box box of map object obj.
+   The car is moved one velocity step ahead and tested as an oriented box (length 3/4 or 11/12 of the model
+   length when AI-driven / not) against the object box (P100_BoxOverlap); no overlap -> step undone, 0.
+   On contact: separation along the normal, contact point velocity (linear + angular x lever), impulse
+   imp = -(v . n).  If closing (imp > 0): crash sounds, breakable objects (model flag 0x400) are knocked over with
+   their own sound / particles and the car keeps its position; hard hits (> 0xa000) spawn sparks or debris
+   (model flag 0x2000) and smoke; the car takes damage (P100_CarHit, subject to menu options); then the impulse is
+   divided by the effective mass term and applied to the linear velocity and the angular accumulator, with
+   time-of-impact correction tt.  Returns 1 when the boxes touched.  TODO(RE): unsure — +0x68..0x70 receives the
+   angular impulse (CAR_TORQUE_OUT in carfields.h). */
 int32_t P129_ObjHit(uint8_t *c, int32_t *box, uint8_t *obj) {
   if (c == NULL || box == NULL || obj == NULL) return 0;                               /* защита */
   int32_t mi = rd32(obj + 4);
@@ -159,35 +184,36 @@ int32_t P129_ObjHit(uint8_t *c, int32_t *box, uint8_t *obj) {
   int32_t brk = 0;
   if ((fl & 0x400) != 0) { brk = 1; if (P129_C81130 == 1 && c[0] == 0x41) return 0; }
   if ((uint32_t)mi >= 0x1000u || S_00BDCD00[mi] == 0) return 0;
-  if (box[7] + 0x7d < iabs(rd32(c + 0x1c) - box[1])) return 0;
-  int32_t x0 = rd32(c + 0x18), z0 = rd32(c + 0x20);
+  if (box[7] + 0x7d < iabs(rd32(c + CAR_POS2 + 4) - box[1])) return 0;
+  int32_t x0 = rd32(c + CAR_POS2), z0 = rd32(c + CAR_POS2 + 8);
   uint32_t ty = c[2] < 0x20 ? c[2] : 0;                                                /* защита */
   int16_t len = rd16(&P100_CarDim[ty * 0x16c]), wid = rd16(&P100_CarDim[ty * 0x16c + 4]);
   int32_t b[64]; memset(b, 0, sizeof b);              /* local_f0: две записи по 0x18 слов; b + 49 — точка контакта */
-  int32_t vx = f12(rd32(c + 0x40)), vz = f12(rd32(c + 0x48));
-  add32(c + 0x18, vx); add32(c + 0x20, vz);
-  b[0] = rd32(c + 0x18); b[2] = rd32(c + 0x20); b[12] = vx; b[14] = vz;
-  b[16] = rd32(c + 0x100); b[17] = wid;
-  b[18] = (c[0x13e] == 1) ? (len * 3) / 4 : (len * 0xb) / 0xc;
-  b[23] = (f12(rd32(c + 0x50)) * 0x28) >> 8;
+  int32_t vx = f12(rd32(c + CAR_VEL)), vz = f12(rd32(c + CAR_VEL + 8));
+  add32(c + CAR_POS2, vx); add32(c + CAR_POS2 + 8, vz);
+  b[0] = rd32(c + CAR_POS2); b[2] = rd32(c + CAR_POS2 + 8); b[12] = vx; b[14] = vz;
+  b[16] = rd32(c + CAR_HEADING); b[17] = wid;
+  b[18] = (c[CAR_AI_DRIVEN] == 1) ? (len * 3) / 4 : (len * 0xb) / 0xc;
+  b[23] = (f12(rd32(c + CAR_ANGVEL + 4)) * 0x28) >> 8;
   b[24] = box[0]; b[26] = box[2]; b[40] = box[6]; b[41] = box[4]; b[42] = box[5];
   if (P100_BoxOverlap(b) == 0) {
-    add32(c + 0x18, -f12(rd32(c + 0x40))); add32(c + 0x20, -f12(rd32(c + 0x48)));
+    add32(c + CAR_POS2, -f12(rd32(c + CAR_VEL))); add32(c + CAR_POS2 + 8, -f12(rd32(c + CAR_VEL + 8)));
     return 0;
   }
   int32_t *o = b + 49;                                /* {x, y, z, -, nx, ny, nz, -, глубина} */
   int32_t tt = P103_BoxContactTime(b, (uint8_t *)o);
   P102_BoxContact(b, o);
-  o[1] = rd32(c + 0x1c) + 0x3c;
+  o[1] = rd32(c + CAR_POS2 + 4) + 0x3c;
   o[4] = -o[4]; o[5] = 0; o[6] = -o[6];
-  add32(c + 0x18, (M(o[8], o[4]) + 0x800) >> 12);
-  add32(c + 0x20, (M(o[8], o[6]) + 0x800) >> 12);
-  int32_t rx = o[0] - rd32(c + 0x18), ry = o[1] - rd32(c + 0x1c), rz = o[2] - rd32(c + 0x20);
-  int32_t c40 = rd32(c + 0x40), c44 = rd32(c + 0x44), c48 = rd32(c + 0x48), c4c = rd32(c + 0x4c), c50 = rd32(c + 0x50), c54 = rd32(c + 0x54);
+  add32(c + CAR_POS2, (M(o[8], o[4]) + 0x800) >> 12);
+  add32(c + CAR_POS2 + 8, (M(o[8], o[6]) + 0x800) >> 12);
+  int32_t rx = o[0] - rd32(c + CAR_POS2), ry = o[1] - rd32(c + CAR_POS2 + 4), rz = o[2] - rd32(c + CAR_POS2 + 8);
+  int32_t c40 = rd32(c + CAR_VEL), c44 = rd32(c + CAR_VEL + 4), c48 = rd32(c + CAR_VEL + 8), c4c = rd32(c + CAR_ANGVEL), c50 = rd32(c + CAR_ANGVEL + 4), c54 = rd32(c + CAR_ANGVEL + 8);
   int32_t wx = ((M(c50, rz) - M(c54, ry) + 0x800) >> 12) + c40;
   int32_t wz = ((M(c4c, ry) - M(c50, rx) + 0x800) >> 12) + c48;
   (void)c44;
-  int32_t imp = -(M(wx / 256, o[4] / 16) + M(wz / 256, o[6] / 16));
+  /* wx / wz: velocity of the contact point = v + w x r (x and z only) */
+  int32_t imp = -(M(wx / 256, o[4] / 16) + M(wz / 256, o[6] / 16));   /* closing speed along the normal */
   if (0 < imp) {
     if (c[0] == 0) {
       int32_t ch = 6;
@@ -207,7 +233,7 @@ int32_t P129_ObjHit(uint8_t *c, int32_t *box, uint8_t *obj) {
         int32_t v = P97_SndStart(r[2], -1, (float)o[0], (float)o[1], (float)o[2]);
         if (v != -1) { SoundSetPos00523F8A(v, (int32_t)r[4]); P48_SetVoiceVolume(v, (int32_t)r[3]); }
       } else snd_at(3, 3, o);
-      wr32(c + 0x18, x0); wr32(c + 0x20, z0);
+      wr32(c + CAR_POS2, x0); wr32(c + CAR_POS2 + 8, z0);
       o[1] += 0x1e;
       P125_ObjABurst(o, dv, 10, 0);
       o[1] = -0x1e;
@@ -253,27 +279,31 @@ int32_t P129_ObjHit(uint8_t *c, int32_t *box, uint8_t *obj) {
     if (imp < 0x7f001) imp = M(imp, 0x1000) / den; else imp = M(imp / den, 0x1000);
     int32_t q = M(imp, 9) / 16 / 64;
     int32_t ix = M(q, o[4] / 64), iy = M(q, o[5] / 64), iz = M(q, o[6] / 64);
-    add32(c + 0x18, -((M(0x1000 - tt, f12(rd32(c + 0x40))) + 0x800) >> 12));
-    add32(c + 0x20, -((M(0x1000 - tt, f12(rd32(c + 0x48))) + 0x800) >> 12));
-    add32(c + 0x68, (M(ry, iz) + 0x800) >> 12); add32(c + 0x68, -((M(rz, iy) + 0x800) >> 12));
-    add32(c + 0x6c, (M(rz, ix) + 0x800) >> 12); add32(c + 0x6c, -((M(rx, iz) + 0x800) >> 12));
-    add32(c + 0x70, (M(rx, iy) + 0x800) >> 12); add32(c + 0x70, -((M(ry, ix) + 0x800) >> 12));
-    add32(c + 0x40, ix); add32(c + 0x44, iy); add32(c + 0x48, iz);
-    add32(c + 0x18, (M(0x1000 - tt, f12(rd32(c + 0x40))) + 0x800) >> 12);
-    add32(c + 0x20, (M(0x1000 - tt, f12(rd32(c + 0x48))) + 0x800) >> 12);
+    add32(c + CAR_POS2, -((M(0x1000 - tt, f12(rd32(c + CAR_VEL))) + 0x800) >> 12));
+    add32(c + CAR_POS2 + 8, -((M(0x1000 - tt, f12(rd32(c + CAR_VEL + 8))) + 0x800) >> 12));
+    add32(c + CAR_TORQUE_OUT, (M(ry, iz) + 0x800) >> 12); add32(c + CAR_TORQUE_OUT, -((M(rz, iy) + 0x800) >> 12));
+    add32(c + CAR_TORQUE_OUT + 4, (M(rz, ix) + 0x800) >> 12); add32(c + CAR_TORQUE_OUT + 4, -((M(rx, iz) + 0x800) >> 12));
+    add32(c + CAR_TORQUE_OUT + 8, (M(rx, iy) + 0x800) >> 12); add32(c + CAR_TORQUE_OUT + 8, -((M(ry, ix) + 0x800) >> 12));
+    add32(c + CAR_VEL, ix); add32(c + CAR_VEL + 4, iy); add32(c + CAR_VEL + 8, iz);
+    add32(c + CAR_POS2, (M(0x1000 - tt, f12(rd32(c + CAR_VEL))) + 0x800) >> 12);
+    add32(c + CAR_POS2 + 8, (M(0x1000 - tt, f12(rd32(c + CAR_VEL + 8))) + 0x800) >> 12);
   }
-  add32(c + 0x18, -f12(rd32(c + 0x40))); add32(c + 0x20, -f12(rd32(c + 0x48)));
+  add32(c + CAR_POS2, -f12(rd32(c + CAR_VEL))); add32(c + CAR_POS2 + 8, -f12(rd32(c + CAR_VEL + 8)));
   return 1;
 }
 
 /* ---- 00500937 ---- */
+/* P129_ObjBoxes — Game.exe 00500937.  Builds the world-space collision boxes of object obj (model mdl, list at model
+   +0x34: count, then 10-int16 entries of kind 0 = rotated box / 1 = square box) when the car (radius + model radius +
+   0x488) is near, and tests them at once (P129_ObjHit, idx = car index for the damage queue) or appends them to the
+   deferred list (at most 60; breakable objects are never deferred). */
 void P129_ObjBoxes(uint8_t *obj, const float *pos, uint8_t *car, int32_t idx, uint32_t mdl, int32_t defer) {
   const uint8_t *m = mdl ? (const uint8_t *)P79_PTR(mdl) : NULL;                       /* v2.07: P79_PTR, не re_ptr */
   if (m == NULL || obj == NULL || pos == NULL || car == NULL) return;                  /* защита */
   const uint8_t *L = rd32(m + 0x34) ? (const uint8_t *)P79_PTR((uint32_t)rd32(m + 0x34)) : NULL;
   if (L == NULL) return;
   P11_00ba52d0 = fround(rdf(m + 0x10));
-  int32_t r = P11_00ba52d0 + 0x488 + rd32(car + 0x110);
+  int32_t r = P11_00ba52d0 + 0x488 + rd32(car + CAR_SPEED);
   int32_t dx = (int32_t)fabs((double)(rdf(obj + 8) - pos[0]));
   int32_t dz = (int32_t)fabs((double)(rdf(obj + 0x10) - pos[2]));
 #ifndef RE_HOOK_BUILD
@@ -307,11 +337,15 @@ void P129_ObjBoxes(uint8_t *obj, const float *pos, uint8_t *car, int32_t idx, ui
 }
 
 /* ---- 00500e1d ---- */
+/* P129_CarObjects — Game.exe 00500e1d.  Static-object collisions of car: (far cars skipped in some modes) finds the
+   map cell of the car in the 4-quadrant object grid, runs script / state callbacks, collects the boxes of all
+   objects in the cell (deferred), merges adjacent boxes and resolves each remaining hit; a hit queues the car's
+   damage-model update (AddUnique_004C1F9B).  RE_COLDBG=n prints a debug line every n calls for the player. */
 void P129_CarObjects(int32_t car) {
   if (P95_B87E14 != 0) return;
   if ((uint32_t)car >= (uint32_t)P99_CARS_N) return;                                    /* защита */
   uint8_t *c = (uint8_t *)&P99_Cars[car];
-  float pos[3] = { (float)rd32(c + 0xc8), (float)rd32(c + 0xcc), (float)rd32(c + 0xd0) };
+  float pos[3] = { (float)rd32(c + CAR_POS_X), (float)rd32(c + CAR_POS_Y), (float)rd32(c + CAR_POS_Z) };
   if (P58_SB87EB0 != 0 && 0x13 < car) {
     float a = (float)fabs((double)(pos[0] - P44_CamX)), d = (float)fabs((double)(pos[2] - P44_CamZ));
     if (2024999936.0f < d * d + a * a) return;                                          /* .data 00546128 */
@@ -365,6 +399,10 @@ void P129_CarObjects(int32_t car) {
 }
 
 /* ---- 0050b088 ---- */
+/* P129_MapCars — Game.exe 0050b088.  Marks the cars near traffic record rec (except its own target car) on the
+   55 x 55 radar / route grid P77_C5FE00: each car is a rectangle 360 wide reaching ahead by speed * 20 + 0x1c2 and
+   900 behind; every quarter cell (0x2ee units) it covers by more than 50000 square units gets bit 0x20 plus a
+   quarter bit 2 << quarter (2, 4, 8, 0x10; quarter = (y & 1) * 2 + (x & 1)).  TODO(RE): unsure what consumes these bits. */
 void P129_MapCars(int32_t *rec) {
   if (rec == NULL) return;                                                              /* защита */
   for (int32_t k = 0; k < P59_NearN && k < 64; k++) {
@@ -373,11 +411,11 @@ void P129_MapCars(int32_t *rec) {
     const uint8_t *c = (const uint8_t *)&P99_Cars[n + 1];
     const uint8_t *tr = (const uint8_t *)TrafficRecs + n * 0x54;
     if (tr[1] == 0 || (uint32_t)tr[5] == (uint32_t)rec[0] + 1u) continue;
-    int32_t x8 = rd32(c + 0xc8) + 0x2ee + P62_MapC64;
-    int32_t z1c = P62_Map2C40 - (rd32(c + 0xd0) - 0x2ee);
-    uint32_t a = (uint32_t)(-rd32(c + 0x100)) & 0xfff;
+    int32_t x8 = rd32(c + CAR_POS_X) + 0x2ee + P62_MapC64;
+    int32_t z1c = P62_Map2C40 - (rd32(c + CAR_POS_Z) - 0x2ee);
+    uint32_t a = (uint32_t)(-rd32(c + CAR_HEADING)) & 0xfff;
     float s = P43_Sin[a], co = P43_Sin[(a + 0x400) & 0xfff];
-    int32_t sp = rd32(c + 0x110) * 0x10;
+    int32_t sp = rd32(c + CAR_SPEED) * 0x10;
     float L = (float)(sp + (sp >> 2) + 0x1c2);
     int32_t px[4], pz[4];
     P11_00ba52d0 = fround(-180.0f * co - L * s);       px[0] = P11_00ba52d0 + x8;   /* .data 005460d8 = −180 */
