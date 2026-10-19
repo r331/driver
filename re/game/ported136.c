@@ -288,6 +288,21 @@ static void opt_restore(const int32_t *s) {
   MenuOptBDFA54 = s[5]; G00BDFA54 = s[5];
   MenuOptBDFA58 = s[6]; P14_00bdfa58 = s[6]; P62_BusyE = s[6]; G00BDFA58 = s[6]; P16_FlagC = s[6];
 }
+/* How a level ended: G005F7E54 (005f7e54), set by the pause/result menus. */
+enum {
+  LEVEL_END_QUIT     = 2,   /* back to the front end */
+  LEVEL_END_RESTART  = 3,   /* play the level again */
+  LEVEL_END_REPLAY   = 4,   /* 4 / 5: save the TEMP replay and watch it (GameMode 4 / 5) */
+  LEVEL_END_REPLAY2  = 5,
+  LEVEL_END_TRAINING = 6    /* start the training script number G0054AA44 */
+};
+
+/* P136_GameLoop — Game.exe 0040c20b, cdecl.  Runs levels until the player leaves the game screen.
+   In:  replay — non-zero to start in replay mode (GameMode 4) instead of normal play (GameMode 0).
+   Saves the 7 option words of 00bdfa40 and restores them at the end,
+   loads a level (P145_LevelLoad), runs P131_GameFrame until the level ends (G6_00B87E20 == 0),
+   then acts on the end code (enum above).  Afterwards clears HUD/effect flags, deletes
+   Scripts\Waypoint.tmp, reloads and saves config.dat.  Errors are written to debug.log. */
 void P136_GameLoop(int32_t replay) {
   int32_t sv[7], done = 0;
   opt_save(sv);
@@ -309,13 +324,13 @@ void P136_GameLoop(int32_t replay) {
     P137_LevelEnd();
     GameMode = G005F7E54;
     switch (G005F7E54) {
-    case 2: done = 1; break;
-    case 3: GameMode = 0; break;
-    case 4: case 5:
+    case LEVEL_END_QUIT: done = 1; break;
+    case LEVEL_END_RESTART: GameMode = 0; break;
+    case LEVEL_END_REPLAY: case LEVEL_END_REPLAY2:
       if (P64_ReplayStart(8, "TEMP") == 0) { P124_DebugLog("ERROR: Can't save replay"); done = 1; }
       else if (P47_PrepareTemp(8) == 0) { P124_DebugLog("ERROR: Can't load replay"); done = 1; }
       break;
-    case 6:
+    case LEVEL_END_TRAINING:
       if (G0054AA44 == -1) { P124_DebugLog("ERROR: Missing training script number"); done = 1; }
       else { GameMode = 0; set_e38(G0054AA44); }
       break;

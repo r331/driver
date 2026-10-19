@@ -206,6 +206,10 @@ void P131_FlybyStart(void) {
    Погоня — тот же признак, что у игры для красного радара (P108_RadarCar), целей «оторвись от копов» (P97_GoalCops, P99_GoalCheck):
    розыск 00d11a5c > 0x2a9 и коп видит игрока (P95_SndReady) или ещё не потерял его (P95_AmbN > 0; P102_CopsTick сбрасывает
    его через 0x200 тактов без видимости). Только чтение — логика игры не меняется. */
+/* P131_MusicHint — native only (v2.33), no Game.exe address; read-only.
+   Tells the platform music layer whether it is night (level flag P14_00b87e84) and whether a cop chase
+   is on, using the same test as the red radar: felony (00d11a5c) above 0x2a9 and a siren channel
+   ready or ambient cop sounds playing.  Drives the optional dynamic Drive/Chase music. */
 void P131_MusicHint(void) {
   int chase = (0x2a9 < G2_00D11A5C && (P95_SndReady != 0 || 0 < P95_AmbN)) ? 1 : 0;
   plat_music_hint(P14_00b87e84 != 0, chase);
@@ -213,6 +217,15 @@ void P131_MusicHint(void) {
 #endif
 
 /* ---- 004d4a63 ---- */
+/* P131_GameFrame — Game.exe 004d4a63, cdecl, no arguments.  One displayed frame of the in-game loop
+   (called by P136_GameLoop while G6_00B87E20 != 0).
+   Logic runs at a fixed 50 Hz: P21_FrameTicks() returns how many 20 ms ticks passed since the last
+   frame (1..10; always 1 with RE_FIXED_DT), and P132_GameLogic runs once per tick; the scene is drawn
+   once (P132_GameDraw) if the window is active.  Frame 0 is special: two logic+draw passes are run
+   back to back with P131_Skip set, to prime cameras, the map cache and the replay.
+   Side effects: everything the logic/draw passes touch; restarts the level CD track when music is
+   enabled (00b87e90) and nothing is playing; P62_Frame / G8_00D118C0 / P67_Cur frame counters.
+   Leaves early as soon as a logic tick ends the level (G6_00B87E20 == 0). */
 void P131_GameFrame(void) {
   RE_DBG(0);
   P12_Fn0050E963();
@@ -230,13 +243,13 @@ void P131_GameFrame(void) {
     G6_00B5A778 = keep;
     return;
   }
-  if (P31_Active == 0 && G6_00B5A778 == 0) SetLatchValue0050E940(1);
+  if (P31_Active == 0 && G6_00B5A778 == 0) SetLatchValue0050E940(1);   /* window inactive and not paused: set latch 0050e940 (appears to pause the game) */
   P12_Fn0050E963();
   GlobalSet004AADDF();
-  P132_GameLogic();
+  P132_GameLogic();                       /* first tick of this frame */
   if (G6_00B87E20 == 0) return;
-  int32_t n = (int32_t)P21_FrameTicks();
-  if (P29_Mode == 6) n *= 5;
+  int32_t n = (int32_t)P21_FrameTicks();  /* 20 ms ticks elapsed, 1..10 */
+  if (P29_Mode == 6) n *= 5;              /* replay director mode 6: 5x speed (presumably fast-forward) */
   for (; n > 1; n--) {
     if (G6_00B87E20 == 0) return;
     GlobalSet004AADDF();
@@ -248,11 +261,11 @@ void P131_GameFrame(void) {
 #endif
   if (Q00B87E90 != 0 && G6_00B5A778 == 0 && P25_CdPlaying == 0) {
     P25_InitCDAudio();
-    P25_PlayCDTrack(D_00b87e30 + 4);
+    P25_PlayCDTrack(D_00b87e30 + 4);      /* level music: CD track 4 + city index (00b87e30) */
   }
   InitSoundVolumes_00523C56();
-  if (P31_Active != 0) { P132_GameDraw(); P67_Cur++; }
-  if (P99_CamDone != 0) P14_00b87ee4 = 0;
+  if (P31_Active != 0) { P132_GameDraw(); P67_Cur++; }   /* draw only while the window is active */
+  if (P99_CamDone != 0) P14_00b87ee4 = 0;                 /* scripted camera finished: back to live play */
 }
 
 /* ---- 004cc1a2 ---- */
