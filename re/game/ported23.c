@@ -1,3 +1,8 @@
+/* ported23.c — Direct3D render helpers (English overview): converting the game's vertex records to
+   D3DTLVERTEX (plat_vertex), drawing lines, blend modes, the initial render states and Z clearing.
+   Game vertex record: 11 dwords — [0] x, [1] y, [3] R, [4] G, [5] B (floats 0..255), [8] w (= 1/z),
+   [9] u, [10] v (texture coordinates before the 1/w scale).  Render-state and blend numbers are the
+   Direct3D 5 enum values. */
 #include "ported23.h"
 #include "ported22.h"
 #include "unported.h"
@@ -106,8 +111,11 @@ int32_t P23_AlphaMode;
 
 enum { RS_ZENABLE = 7, RS_ALPHATEST_EN = 15, RS_SRCBLEND = 19, RS_DESTBLEND = 20, RS_ALPHABLEND_EN = 27, RS_ALPHAFUNC = 25 };
 enum { TSS_COLOROP = 1, TSS_COLORARG1 = 2, TSS_COLORARG2 = 3, TSS_ALPHAOP = 4, TSS_ALPHAARG1 = 5 };
+/* D3DBLEND factors. */
+enum { BLEND_ZERO = 1, BLEND_ONE = 2, BLEND_INVSRCCOLOR = 4, BLEND_SRCALPHA = 5, BLEND_DESTCOLOR = 9 };
 
 static float f32(int32_t bits) { float f; memcpy(&f, &bits, 4); return f; }
+/* D3DCOLOR 0x00RRGGBB from the float colour fields, rounded like fistp. */
 static uint32_t pack_rgb(const int32_t *in) {
   /* fistp: округление к ближайшему чётному (режим FPU по умолчанию) */
   return ((uint32_t)lrintf(f32(in[3])) << 16) | (uint32_t)lrintf(f32(in[5])) | ((uint32_t)lrintf(f32(in[4])) << 8);
@@ -121,6 +129,10 @@ int P23_SetSkyDepth(int enabled) {
 }
 #endif
 
+/* Converts game vertex `in` to a TLVERTEX.  rhw = w; u, v are scaled by uvscale / w; depth z = 1 - w * scale
+   when P23_ZBias == 0, else a biased hyperbolic mapping (variant A: 1 - ZNum / (ZDenA / w + ZBias),
+   variant B: 1 - ZNum / (w + ZBias)).  Native: while the sky pass is active (P23_SetSkyDepth) z = 1 (far).
+   TODO(RE): why the game keeps two variants (A/B with separate scales) is not established. */
 static void conv(const int32_t *in, plat_vertex *out, float uvscale, int variant_b) {
   float w = f32(in[8]);
   float k = uvscale / w;
@@ -138,9 +150,12 @@ static void conv(const int32_t *in, plat_vertex *out, float uvscale, int variant
   out->u = f32(in[9]) * k;
   out->v = f32(in[10]) * k;
 }
+/* P23_ConvVertexA — Game.exe 00421cfe; P23_ConvVertexB — Game.exe 00421db8 (see conv above). */
 void P23_ConvVertexA(const int32_t *in, plat_vertex *out) { conv(in, out, P23_ScaleUV_A, 0); }
 void P23_ConvVertexB(const int32_t *in, plat_vertex *out) { conv(in, out, P23_ScaleUV_B, 1); }
 
+/* P23_DrawLineA — Game.exe 0041e462; P23_DrawLineB — Game.exe 0041e4b9: a 2-point line from two game
+   vertices (variant A / B conversion), skipped while the device is not ready. */
 void P23_DrawLineA(const int32_t *a, const int32_t *b) {
   plat_vertex v[2];
   if (P22_DevReady == 0) return;
@@ -154,6 +169,16 @@ void P23_DrawLineB(const int32_t *a, const int32_t *b) {
   plat_draw_lines(v, 2);
 }
 
+/* P23_SetBlendMode — Game.exe 0041d9d2.  Sets the alpha-blend render states for (mode, sub); repeated calls
+   with the same pair do nothing.  Flushes queued geometry first (G6Call00422AE7) and undoes the
+   texture-alpha trick of a previous call (P23_AlphaMode).
+     mode 2           — (src DESTCOLOR, dst ONE); falls back to mode 4 without device cap 0x20;
+     mode 4, sub 0    — blending off; sub 4 — (ONE, ONE) if cap 4, else off;
+     mode 0, sub 5    — (ZERO, SRCALPHA) without cap 8; with cap 8 colour arg = diffuse, alpha function 2
+                        and (ZERO, INVSRCCOLOR); blending off without cap 1;
+     mode 0, other    — (ZERO, ONE) without cap 2, else (ZERO, INVSRCCOLOR).
+   TODO(RE): the P23_DevCaps bits (1, 2, 4, 8, 0x20) are the game's own blend-support flags; how they are
+   derived from the D3D device caps is not established, and the "mode/sub" meanings are unconfirmed. */
 void P23_SetBlendMode(int32_t mode, int32_t sub) {
   if (mode == P23_BlendCur && sub == P23_BlendCur2) return;
   P23_BlendCur = mode; P23_BlendCur2 = sub;
@@ -166,7 +191,7 @@ void P23_SetBlendMode(int32_t mode, int32_t sub) {
   if (mode == 2) {
     if ((P23_DevCaps & 0x20) == 0) mode = 4;
     else {
-      plat_set_render_state(RS_SRCBLEND, 9); plat_set_render_state(RS_DESTBLEND, 2);
+      plat_set_render_state(RS_SRCBLEND, BLEND_DESTCOLOR); plat_set_render_state(RS_DESTBLEND, BLEND_ONE);
       plat_set_render_state(RS_ALPHABLEND_EN, 1); plat_set_render_state(RS_ALPHATEST_EN, 1);
     }
   }
@@ -175,7 +200,7 @@ void P23_SetBlendMode(int32_t mode, int32_t sub) {
     else if (sub == 4) {
       if ((P23_DevCaps & 4) == 0) plat_set_render_state(RS_ALPHABLEND_EN, 0);
       else {
-        plat_set_render_state(RS_SRCBLEND, 2); plat_set_render_state(RS_DESTBLEND, 2);
+        plat_set_render_state(RS_SRCBLEND, BLEND_ONE); plat_set_render_state(RS_DESTBLEND, BLEND_ONE);
         plat_set_render_state(RS_ALPHABLEND_EN, 1); plat_set_render_state(RS_ALPHATEST_EN, 1);
       }
     }
@@ -183,25 +208,29 @@ void P23_SetBlendMode(int32_t mode, int32_t sub) {
     if (sub == 5) {
       if ((P23_DevCaps & 1) == 0) plat_set_render_state(RS_ALPHABLEND_EN, 0);
       else {
-        if ((P23_DevCaps & 8) == 0) { plat_set_render_state(RS_SRCBLEND, 1); plat_set_render_state(RS_DESTBLEND, 5); }
+        if ((P23_DevCaps & 8) == 0) { plat_set_render_state(RS_SRCBLEND, BLEND_ZERO); plat_set_render_state(RS_DESTBLEND, BLEND_SRCALPHA); }
         else {
           plat_set_tex_stage(0, TSS_COLORARG1, 0);
           plat_set_render_state(RS_ALPHAFUNC, 2);
           P23_AlphaMode = 1;
-          plat_set_render_state(RS_SRCBLEND, 1); plat_set_render_state(RS_DESTBLEND, 4);
+          plat_set_render_state(RS_SRCBLEND, BLEND_ZERO); plat_set_render_state(RS_DESTBLEND, BLEND_INVSRCCOLOR);
         }
         plat_set_render_state(RS_ALPHABLEND_EN, 1); plat_set_render_state(RS_ALPHATEST_EN, 1);
       }
     } else if ((P23_DevCaps & 2) == 0) {
-      plat_set_render_state(RS_SRCBLEND, 1); plat_set_render_state(RS_DESTBLEND, 2);
+      plat_set_render_state(RS_SRCBLEND, BLEND_ZERO); plat_set_render_state(RS_DESTBLEND, BLEND_ONE);
       plat_set_render_state(RS_ALPHABLEND_EN, 1); plat_set_render_state(RS_ALPHATEST_EN, 1);
     } else {
-      plat_set_render_state(RS_SRCBLEND, 1); plat_set_render_state(RS_DESTBLEND, 4);
+      plat_set_render_state(RS_SRCBLEND, BLEND_ZERO); plat_set_render_state(RS_DESTBLEND, BLEND_INVSRCCOLOR);
       plat_set_render_state(RS_ALPHABLEND_EN, 1); plat_set_render_state(RS_ALPHATEST_EN, 1);
     }
   }
 }
 
+/* P23_InitRenderStates — Game.exe 00421521.  Begins the scene, selects the viewport and sets the initial
+   render states: ZENABLE 1, ZWRITEENABLE 1, ZFUNC LESSEQUAL, SHADEMODE GOURAUD, TEXTUREMAG/MIN NEAREST,
+   ALPHABLEND off, FILLMODE SOLID, DITHER on, SPECULAR off, ANTIALIAS off, CULLMODE NONE, ALPHAREF 0,
+   SUBPIXEL on; stage 0 = texture * diffuse colour, texture alpha; stage 1 disabled. */
 void P23_InitRenderStates(void) {
   P22_BeginScene();
   plat_set_current_viewport();
@@ -215,6 +244,8 @@ void P23_InitRenderStates(void) {
   plat_set_tex_stage(1, TSS_COLOROP, 1);
 }
 
+/* P23_ClearZ — Game.exe 00420e93.  Clears the depth of the viewport rectangle to the float whose bits are
+   zbits.  Returns 0 when there is no viewport, else 1. */
 int32_t P23_ClearZ(void *viewport, uint32_t zbits) {
   float z; memcpy(&z, &zbits, 4);
   if (viewport == NULL) return 0;
