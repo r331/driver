@@ -72,7 +72,8 @@ static const float K_NEAR = 0.3f;      /* .rdata 00546164 */
 #define CTX_MOVING   0x40    /* keep moving along the heading (see P111_ScriptTick) */
 #define CTX_ARRIVED  0x80    /* reached the target of the last move */
 #define CTX_CURVE    0x100   /* curve move started: +0x5c holds 1 / initial distance */
-#define WANTED_MAX   0xfff   /* wanted level G2_00D11A5C is 0..0xfff */
+#define WANTED_MAX   0xfff
+#include "names_g5.h"   /* wanted level G2_00D11A5C is 0..0xfff */
 
 /* Glide export by decorated name, or NULL. */
 static void *glide_proc(const char *name) {
@@ -361,7 +362,7 @@ void P112_IconBar(const uint8_t *ic, float x, float y, int32_t num, int32_t den)
 /* ---- 004c68a7: шкала камер режиссёра (окно ±304 кадра вокруг frame) — полосы по типу камеры, рамка, засечки ---- */
 /* P112_DirTimeline — Game.exe 004c68a7.  Replay director timeline at the bottom of the screen (x 16..624, y 432..464):
    one gradient bar per camera over its frame range, clipped to +-304 frames around frame, coloured by camera type
-   (0 red, 2 green, 0x10 yellow, 0x11 cyan; TODO(RE): unsure of the type names), a centre line at x = 320, a frame and
+   (chase red, in-car green, static yellow, watch-car cyan, flying none), a centre line at x = 320, a frame and
    tick marks every 50 frames.  Only when P29_FlagB0 is set. */
 void P112_DirTimeline(int32_t frame) {
   if (P29_FlagB0 == 0) return;
@@ -379,10 +380,10 @@ void P112_DirTimeline(int32_t frame) {
     if (f + 304.0f < b) b = f + 304.0f;
     uint32_t c30 = 0, c34 = 0, c24 = 0, c28 = 0;
     switch (cam->unk00) {
-    case 0:    c30 = 0xff0000; c34 = 0x7f0000; c24 = 0x3f0000; c28 = 0x7f0000; break;
-    case 2:    c30 = 0xff00;   c34 = 0x7f00;   c24 = 0x3f00;   c28 = 0x7f00;   break;
-    case 0x10: c30 = 0xffff00; c34 = 0x7f7f00; c24 = 0x3f3f00; c28 = 0x7f7f00; break;
-    case 0x11: c30 = 0x46ffff; c34 = 0x237f7f; c24 = 0x113f3f; c28 = 0x237f7f; break;
+    case DIRCAM_CHASE:    c30 = 0xff0000; c34 = 0x7f0000; c24 = 0x3f0000; c28 = 0x7f0000; break;
+    case DIRCAM_INCAR:    c30 = 0xff00;   c34 = 0x7f00;   c24 = 0x3f00;   c28 = 0x7f00;   break;
+    case DIRCAM_STATIC:   c30 = 0xffff00; c34 = 0x7f7f00; c24 = 0x3f3f00; c28 = 0x7f7f00; break;
+    case DIRCAM_WATCHCAR: c30 = 0x46ffff; c34 = 0x237f7f; c24 = 0x113f3f; c28 = 0x237f7f; break;
     default: break;
     }
     float x0 = (a - (f - 304.0f)) + 16.0f;
