@@ -262,13 +262,12 @@ uint32_t ReadDirectorKeys(void) {
 
 /* ClampCameraHeight — Game.exe 004c356d.  Keeps a director camera between 100 and 1600 units above the
    ground under it (y grows downward, so "above" = smaller y; ground = -GetGroundHeight(pos)).
-   cam (int32 words): [0] mode (0 = TODO(RE): unsure, free camera?), [4] index of the followed car
-   (-1 -> 0), [0x13..0x16] position (y = [0x14]), [0x17..0x1a] a second position copy,
-   [0x1c] y + the followed car's y.  CPT(idx * 0x52) is int32 0x52*idx of the table at 00d0788c:
+   cam is a director camera record (names_g1.h DCAM_*) walked as int32 words: [0] DCAM_MODE,
+   [4] DCAM_CAR (-1 -> 0), [0x13..0x16] DCAM_POS (y = [0x14]), [0x17..0x1a] DCAM_TARGET,
+   [0x1c] DCAM_OFFSET y = camera y + the followed car's y.  CPT(idx * 0x52) is int32 0x52*idx of the table at 00d0788c:
    0x52 words = 0x148 = one car record, and 00d0788c = car table 00d077c0 + 0xcc (CAR_POS_Y), so it is
-   car[idx]'s world y.  Mode 0 copies the position to [0x17..] only when the clamp changed it; other
-   modes clamp at the top and reset to 1700 (0x6a4) above ground when more than 1600 above.
-   TODO(RE): unsure what [0x17..0x1a] and [0x1c] are used for (look-at target?). */
+   car[idx]'s world y.  Mode 0 copies the position to the target only when the clamp changed it; other
+   modes clamp at the top and reset to 1700 (0x6a4) above ground when more than 1600 above. */
 void ClampCameraHeight(int32_t *p) {
     if (p[4] == -1) p[4] = 0;
     int idx = p[4];
