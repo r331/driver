@@ -3,7 +3,7 @@
 Короткая карта для человека, который впервые открывает проект. Подробности — в ссылках:
 правила переноса и история версий — [re/README.md](../re/README.md), разрывы native и переключатели отладки —
 [NATIVE_GAPS.md](NATIVE_GAPS.md), журнал шагов — [PLATFORM_PLAN.md](PLATFORM_PLAN.md),
-указатель модулей `re/game/` — [MODULES.md](MODULES.md).
+указатель модулей `re/game/` — [MODULES.md](MODULES.md), что похоже на мёртвый код, но оставлено — [DEAD_CODE_AUDIT.md](DEAD_CODE_AUDIT.md).
 
 ## Идея
 
