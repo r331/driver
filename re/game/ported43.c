@@ -322,7 +322,8 @@ void P43_QuatToMat(const float *q, float *m) {
 }
 /* P43_ProjectGrid — Game.exe 0052647d.  Projects a cached vertex p in place: 1/z from the reciprocal table by
    rounded z (+0x14) into +4, keeps camera x/y in +0x18/+0x1c, screen x/y = x/y * (oow * P43_ScaleA) + Off - P43_Half.
-   TODO(RE): unsure why P43_Half is 2^20 (float snapping trick or an offset folded into OffX/OffY?). */
+   P110_ViewSetup adds P43_Half (2^20) into OffX/OffY, so it cancels here; adding and removing 2^20 rounds the
+   float to 1/8 pixel (the usual Glide vertex-snapping trick) — likely the purpose, not verified. */
 void P43_ProjectGrid(uint8_t *p) {
   int32_t zi = (int32_t)lrintf(rdf(p, 0x14));
   wrf(p, 4, RE_OOW(zi));
