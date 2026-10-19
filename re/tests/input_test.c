@@ -33,11 +33,13 @@ static int rumble_calls;
 static Uint16 rumble_low, rumble_high;
 static int SDLCALL record_rumble(void *unused, Uint16 low, Uint16 high) {
     (void)unused; rumble_calls++; rumble_low = low; rumble_high = high;
-    /* SDL2-compat 2.32.74's VirtualJoystick_Rumble forwards SDL2's int result
+    /* SDL2-compat 2.32.70 and 2.32.74's VirtualJoystick_Rumble forward SDL2's int result
        as an SDL3 bool without conversion. Compensate only in this test callback;
-       real hardware rumble does not use that virtual-device adapter. */
+       real hardware rumble does not use that virtual-device adapter. Keep this
+       limited to verified versions so a future upstream fix uses SDL2's normal 0. */
     SDL_version version; SDL_GetVersion(&version);
-    return version.major == 2 && version.minor == 32 && version.patch == 74 ? 1 : 0;
+    return version.major == 2 && version.minor == 32 &&
+           (version.patch == 70 || version.patch == 74) ? 1 : 0;
 }
 static int test_damage_rumble(uint8_t *k) {
     p99_car_t saved = P99_Cars[0];
@@ -158,7 +160,9 @@ static int test_gamepad(void) {
 }
 int re_input_test(void) {
     int mt = plat_is_main_thread();
-    printf("inputtest: главный поток %d (SDL %s)\n", mt, SDL_GetPlatform());
+    SDL_version version; SDL_GetVersion(&version);
+    printf("inputtest: главный поток %d (SDL %s %u.%u.%u, %s)\n", mt, SDL_GetPlatform(),
+           version.major, version.minor, version.patch, SDL_GetRevision());
 #if defined(__APPLE__) || defined(__linux__)
     CHK(mt == 1);
 #endif
