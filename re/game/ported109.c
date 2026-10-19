@@ -352,10 +352,10 @@ void P109_IconDraw(float x, float y, float sx, float sy, float u, float vv, floa
 
 /* ---- 00522a50: модели капель (6 записей 00bde680 по 0x1c, +0x18 — адрес объекта): mode 0 — модели без флага 8, 1 — с флагом 8,
    другое — все; матрица — EulerTab[-курс] с поворотами X/Z по фазе; флаг модели 0x1000 — alpha-combine/alpha-test на время ---- */
-/* P109_DropsDraw — Game.exe 00522a50.  Draws the models of the 6 records at 00bde680 (0x1c bytes, +0x18 object
+/* P109_DropsDraw — Game.exe 00522a50.  Draws the knocked-over objects: the models of the 6 records at 00bde680 (0x1c bytes, +0x18 object
    address): mode 0 = models without flag 8, 1 = with flag 8, other = all; orientation = EulerTab[-heading] with
    X/Z rotations by a phase; model flag 0x1000 enables alpha combine / alpha test while drawing.
-   TODO(RE): the Russian note calls them "drop" models — what they are in game is unconfirmed. */
+   00bde680 is P101_Drops, the fly records of street objects knocked over by cars (see P125_DropHit). */
 void P109_DropsDraw(int32_t mode32) {
   int8_t mode = (int8_t)mode32;
   if (mode != 0) P85_BlendForce = 2;
