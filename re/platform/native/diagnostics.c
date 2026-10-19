@@ -1,3 +1,5 @@
+/* diagnostics.c (native): диагностика рендера по запросу (счётчики проекции/отсечения, снимок состояния кадра,
+   копии журналов) — см. docs/DIAGNOSTICS.md. Состояние игры не меняет. */
 #include "diagnostics.h"
 #include "../sdl/plat_gfx.h"
 #include "../../game/ported11.h"

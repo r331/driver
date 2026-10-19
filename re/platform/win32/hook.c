@@ -1,3 +1,5 @@
+/* hook.c (hook-сборка, DINPUT.dll): журнал re_driver.log, установка перехватов JMP rel32 поверх функций Game.exe
+   (re_hook), переходники для stdcall-функций (stdcall_tbl.h), отключение функций через re_driver.ini [disable]. */
 #include "hook.h"
 #include <stdio.h>
 #include <stdarg.h>

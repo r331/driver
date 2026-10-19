@@ -1,15 +1,17 @@
+/* plat_snd.c (native, SDL2): буферы звука и программный микшер plat_snd_* (вывод SDL_audio, пустое устройство
+   или запись WAV RE_WAV_OUT); таймеры timeSetEvent на SDL. DirectSound поверх него — plat_dsmix.c, CD-audio — plat_cdaudio.c. */
 #include "../plat.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <SDL.h>
 /* Таблица звуковых буферов + программный микшер (44100 Гц, стерео, S16). volume и pan — как в DirectSound:
-   сотые доли дБ (0 = максимум, -10000 = тишина; pan -10000 лево .. +10000 право). Положение 3D пока хранится, но не используется. */
+   сотые доли дБ (0 = максимум, -10000 = тишина; pan -10000 лево .. +10000 право). 3D-звук — в plat_dsmix.c. */
 static SDL_AudioDeviceID g_dev;
 #define LOCK() do{ if(g_dev) SDL_LockAudioDevice(g_dev); }while(0)
 #define UNLOCK() do{ if(g_dev) SDL_UnlockAudioDevice(g_dev); }while(0)
 #define SND_MAX 256
-typedef struct { void *pcm; int bytes, rate, ch, bits, playing, loop, vol, pitch, pan; double pos; float x, y, z; } snd_t;
+typedef struct { void *pcm; int bytes, rate, ch, bits, playing, loop, vol, pitch, pan; double pos; } snd_t;
 static snd_t snds[SND_MAX];
 int plat_snd_create(const void*p,int b,int r,int c,int bits){
   if(!p||b<=0) return 0;

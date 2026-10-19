@@ -1,3 +1,6 @@
+/* plat_sys.c (native, SDL2): системная часть plat.h — время (в т. ч. виртуальные часы RE_FIXED_DT), файлы и пути
+   данных игры, окно и полный экран, цикл событий/сообщений вместо WinAPI, MessageBox, выход, обработчик аварий,
+   журнал driver_gfx.log. */
 #if defined(__linux__) && !defined(_GNU_SOURCE)
 #define _GNU_SOURCE   /* v2.10: dladdr, ucontext (RE_CRASH_BT) */
 #endif

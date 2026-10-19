@@ -4,9 +4,14 @@ set(CMAKE_C_STANDARD 11)
 file(GLOB GAME_SRC game/*.c)
 
 if(RE_HOOK_BUILD)
-  # Win32-DLL для оригинального Game.exe (i686). См. build.sh
-  add_library(DINPUT SHARED ${GAME_SRC} platform/win32/hook.c platform/win32/dinput_proxy.c platform/win32/install.c)
+  # Win32-DLL для оригинального Game.exe (i686): те же исходники, библиотеки и флаги компоновки, что `build.sh hook`
+  # (эталон — build.sh, его собирает CI; до этой правки ветка CMake не компоновалась — не хватало platform/win32/plat_*.c):
+  #   cmake -S re -B build-hook -DRE_HOOK_BUILD=ON -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc
+  file(GLOB HOOK_SRC platform/win32/*.c)
+  add_library(DINPUT SHARED ${GAME_SRC} ${HOOK_SRC})
   target_compile_definitions(DINPUT PRIVATE RE_HOOK_BUILD)
+  target_link_options(DINPUT PRIVATE -static-libgcc -Wl,--kill-at -Wl,--enable-stdcall-fixup)
+  target_link_libraries(DINPUT PRIVATE winmm gdi32 user32 ddraw ole32)
   set_target_properties(DINPUT PROPERTIES PREFIX "")
 else()
   # Нативная сборка: macOS (Apple Silicon), Linux, Windows x64.
