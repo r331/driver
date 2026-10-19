@@ -1,3 +1,5 @@
+/* ported111 — sprite icons for effects, debris and light-flare drawing (Glide-style vertices through
+   P85_RasterB) and the per-tick runner of the ambient event scripts (Game.exe, cdecl).  Original note: */
 /* v1.56 (см. ported111.h). */
 #include "ported111.h"
 #include "p111_data.h"
@@ -90,10 +92,12 @@ uint32_t P111_CopFlare;
 #  define P111_STD
 #endif
 #include "memrw.h"
+#include "carfields.h"
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static const float SNAP = 1048576.0f;   /* .rdata 0054607c */
+static const float SNAP = 1048576.0f;   /* .rdata 0054607c: 2^20, Glide vertex snap bias (P43_OffX/Y presumably include +2^20) */
 static const float Z_FAR = 45000.0f;    /* .rdata 00546030 */
 
+/* Glide export by decorated name, or NULL. */
 static void *glide_proc(const char *name) {
   for (int i = 0; i < P33_GlideCount(); i++)
     if (strcmp(P33_GlideName(i), name) == 0) return P33_GlideProc(i);
@@ -103,13 +107,16 @@ static void depth_bias(int32_t v) {   /* 01270e20 */
   void (P111_STD *f)(int32_t) = (void (P111_STD *)(int32_t))glide_proc("_grDepthBiasLevel@4");
   if (f != NULL) f(v);
 }
+/* Draws one triangle with the current rasteriser, if any. */
 static void raster(const p85_rv *a, const p85_rv *b, const p85_rv *c) { if (P85_RasterB) P85_RasterB(a, b, c); }
+/* Selects texture page tex (slot table g_01145a60, 0x10 bytes each) unless it is already current. */
 static void tex_page(uint32_t tex) {
   if (tex != (uint32_t)P86_CurTex) {
     P86_CurTex = (int32_t)tex;
     if (P86_TexSrc) P86_TexSrc(0, (uint32_t)rd32(&g_01145a60[tex * 0x10 + 8]), 3, (uint32_t)rd32(&g_01145a60[tex * 0x10 + 0xc]));
   }
 }
+/* 1/w for view depth z from the precomputed table RE_OOW (indexed by the rounded depth; native: 0 when out of range). */
 static float oow_at(float z) {
   long zi = lrintf(z);
 #ifndef RE_HOOK_BUILD
@@ -119,6 +126,8 @@ static float oow_at(float z) {
 }
 
 /* ---- 004abd69: значок по имени (P93_FindIcon); +9/+10 += 1, +0xb/+0xc — правый/нижний край (ширина/высота + левый/верхний − 1) ---- */
+/* Finds icon name and converts its record in place from (left, top, width, height) to (left + 1, top + 1, right, bottom):
+   bytes +9/+10 += 1, +0xb = +9 + width - 1, +0xc = +10 + height - 1.  Returns its 32-bit address (0 if missing). */
 static uint32_t icon_load(const char *name) {
   uint8_t *r = P93_FindIcon(name);
   if (r != NULL) {
@@ -127,6 +136,8 @@ static uint32_t icon_load(const char *name) {
   }
   return re_addr(r);
 }
+/* P111_IconsInit — Game.exe 004abd69.  Looks up all effect icons (debris, spark, smoke, birds, litter, lights, flares,
+   sun, leaf, ...) into their globals; some globals named "...On" in other modules actually hold icon addresses. */
 void P111_IconsInit(void) {
   P69_OvlOn = (int32_t)icon_load("DEBRIS");
   P111_SparkIcon = icon_load("SPARK");
@@ -153,15 +164,22 @@ void P111_IconsInit(void) {
 
 /* ---- 004b05ea: обломок o (+0 позиция, +0x26 индекс треугольника, +0x2c..0x2e цвет, +0x3a значок) — четырёхугольник значка по
    трём вершинам треугольника (4-я — достроенная); shadow ≠ 0 — серый (96) треугольник на высоте дороги − 10 (при P13_00d11880) ---- */
+/* Projects a view-space point to a rasteriser vertex: screen = view * ScaleA * oow + offset - snap bias. */
 static void proj(p85_rv *v, float x, float y, float oow) {
   float f = P43_ScaleA * oow;
   v->x = (x * f + P43_OffX) - SNAP; v->y = (y * f + P43_OffY) - SNAP; v->oow = oow;
 }
+/* P111_DebrisIcon — Game.exe 004b05ea.  Draws debris piece o (+0 world position, +0x26 rotation index into the debris
+   shape tables, +0x2c..0x2e colour, +0x3a icon kind: 1 = leaf).  shadow == 0: textured quad from the three rotated
+   shape vertices plus a fourth one completing the parallelogram, rejected unless all three lie between the near
+   plane and 45000.  shadow != 0 (and shadows enabled, P13_00d11880): a flat grey (96) triangle 10 units above the
+   road surface (TODO(RE): unsure — y is up-negative in this engine) with no UVs, as the original.
+   Nothing when MenuVar553850 (effects option) is 0. */
 void P111_DebrisIcon(const float *o, int32_t shadow) {
   if (MenuVar553850 == 0) return;
   const uint8_t *ob = (const uint8_t *)o;
-  uint32_t k = rd16(ob + 0x26), ia;
-  const float *t;
+  uint32_t k = rd16(ob + 0x26), ia;   /* k = rotation index, ia = icon address */
+  const float *t;                      /* rotated shape: 3 vertices of float[4] */
 #ifndef RE_HOOK_BUILD
   if (k >= 0x100) return;
 #endif
@@ -220,6 +238,7 @@ void P111_DebrisIcon(const float *o, int32_t shadow) {
 #ifndef RE_HOOK_BUILD
 static const int32_t k_flare[P111_FLARE_N][7] = P111_FLARE_INIT;
 #endif
+/* Colour channel j of flare type typ (.data 00553870, 0x1c bytes per type) scaled by brightness k / 256, truncated. */
 static float flare_c(uint32_t typ, int j, uint32_t k) {
 #ifdef RE_HOOK_BUILD
   int32_t c = *(const int32_t *)(uintptr_t)(0x00553870u + typ * 0x1c + (uint32_t)j * 4);
@@ -228,12 +247,15 @@ static float flare_c(uint32_t typ, int j, uint32_t k) {
 #endif
   return (float)((int32_t)((uint32_t)c * k) / 256);
 }
+/* P111_Flare — Game.exe 004b6deb.  Draws light flare p (view-space x, y, z at +0/+4/+8, +0x64 type, +0x66 brightness,
+   +0x6e half size / 4) as a square of the SMALLFLR icon with depth bias -250.  Skipped outside near..P62_I270C44 or
+   when its screen width exceeds 320 pixels. */
 void P111_Flare(const float *p) {
   float z = p[2];
   if (!(P95_Near <= z && z < (float)P62_I270C44)) return;
   const uint8_t *pb = (const uint8_t *)p;
-  uint32_t typ = rd16(pb + 0x64), k = rd16(pb + 0x66);
-  float s = (float)((uint32_t)rd16(pb + 0x6e) << 2);
+  uint32_t typ = rd16(pb + 0x64), k = rd16(pb + 0x66);   /* k = brightness 0..256 */
+  float s = (float)((uint32_t)rd16(pb + 0x6e) << 2);    /* half size */
   float xl = p[0] - s, xr = p[0] + s, yt = p[1] - s, yb = p[1] + s;
   if (P84_Mirror != 0) { xl = -xl; xr = -xr; }
   float oow = oow_at(z);
@@ -270,6 +292,8 @@ const uint32_t P111_OpAddr[P111_OPS_N] = {
   0x004d09fdu, 0x004d107eu, 0x004d1111u, 0x004d1135u, 0x004d116cu, 0x004d121bu, 0x004d133cu, 0x004d13d8u,
   0x004d1402u, 0x004d142cu, 0x004d14d8u, 0x004d03fdu, 0x004d1635u, 0x004d1672u, 0x004d1529u, 0x004d1601u,
   0x004d12cau, 0x004d03fdu, 0x004d1737u, 0x004d1765u, 0x004d156au, 0x004d0d7cu, 0x004d0734u, 0x004d0f28u, 0x004d03d0u };
+/* Runs event-script opcode op through the handler table (.data 0055fcac; native: re_fn of P111_OpAddr).
+   The handler returns non-zero to continue with the next opcode in the same tick. */
 static int32_t run_op(uint16_t op) {
 #ifdef RE_HOOK_BUILD
   return ((int32_t (*)(void))(*(uint32_t *)(uintptr_t)(0x0055fcacu + (uint32_t)op * 4)))();
@@ -288,6 +312,12 @@ static int32_t car_rd(uint32_t off) {   /* поле записи игрока S_
 }
 static void set_ctx(uint8_t *c) { P10_ScriptCtx = c; S_00D1240C = c; }
 static void set_sp(uint8_t *p) { P10_ScriptPtr = p; S_00D12414 = (int32_t)re_addr(p); }
+/* P111_ScriptTick — Game.exe 004cf2cf.  One tick of the current event-script record S_00D12410 (not during replays,
+   G6_00B5A778).  The record runs only while the player is in its map cell (flag 0x4) or within its circle (no flag
+   0x8: centre +0x14/+0x18, squared radius +0x10); otherwise its "active" flag 0x2 is cleared.  For each context in
+   its list (+0x1c, next +0x58) that is not stopped (flag 0x4 in +0x48): run opcodes from the saved stream pointer
+   (+0x54) until a handler yields; then optionally turn towards the target (+0x18.., flags 0x10 without 0x80) and
+   move along the heading (+0x12) by the speed (+0x44, flag 0x40); save the stream pointer. */
 void P111_ScriptTick(void) {
   if (G6_00B5A778 != 0) return;
   uint16_t *rec = S_00D12410;
@@ -296,12 +326,12 @@ void P111_ScriptTick(void) {
 #endif
   uint8_t *rb = (uint8_t *)rec;
   if ((rec[0] & 4) != 0) {
-    int32_t px = car_rd(0xc8), pz = car_rd(0xd0);
+    int32_t px = car_rd(CAR_POS_X), pz = car_rd(CAR_POS_Z);
     int32_t cx = px / P80_Cell + P80_HalfW, cz = pz / P80_Cell + P80_HalfH;
     if (rd32(rb + 0xc) != cz * P21_GridDiv + cx) { rec[0] &= 0xfffd; return; }
   } else if ((rec[0] & 8) == 0) {
-    int32_t dx = car_rd(0xc8) - (int32_t)lrintf(rdf(rb + 0x14));
-    int32_t dz = car_rd(0xd0) - (int32_t)lrintf(rdf(rb + 0x18));
+    int32_t dx = car_rd(CAR_POS_X) - (int32_t)lrintf(rdf(rb + 0x14));
+    int32_t dz = car_rd(CAR_POS_Z) - (int32_t)lrintf(rdf(rb + 0x18));
     P11_00ba52d0 = (int32_t)lrintf(rdf(rb + 0x18));
     if (dx < 0) dx = -dx;
     if (dz < 0) dz = -dz;
@@ -331,7 +361,7 @@ void P111_ScriptTick(void) {
 #ifndef RE_HOOK_BUILD
       if (a < 0 || a + 0x400 >= 5120) a &= 0xfff;
 #endif
-      float x = P43_Sin[0x400 + a] * sp + rdf(c), z = P43_Sin[a] * sp + rdf(c + 8);
+      float x = P43_Sin[0x400 + a] * sp + rdf(c), z = P43_Sin[a] * sp + rdf(c + 8);   /* cos / sin of the heading */
       memcpy(c, &x, 4); memcpy(c + 8, &z, 4);
     }
     wr32(c + 0x54, re_addr(P10_ScriptPtr));
