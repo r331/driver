@@ -1,3 +1,5 @@
+/* Offscreen OpenGL 3.3 core context via OSMesa, for render tests without a display (native only;
+   built when OSMesa is found). */
 /* Offscreen-контекст через OSMesa (тесты рендера без дисплея). Собирается, если найден OSMesa. */
 #include "../plat.h"
 #include <GL/osmesa.h>
@@ -6,6 +8,11 @@
 static OSMesaContext g_ctx; static void *g_buf;
 static const char *ge(const char *n) { return getenv(n); }
 static void *getproc(const char *n) { return (void *)OSMesaGetProcAddress(n); }
+/* plat_render_offscreen — Create a w x h RGBA offscreen OSMesa context (24-bit depth) and attach the
+   GL renderer to it.  On first call applies the "original" graphics preset (pixels as in v2.15)
+   unless RE_PRESET is set, then RE_* overrides.  Returns plat_render_attach()'s result,
+   -10 if the context cannot be created, -11 if the buffer cannot be allocated/made current.
+   The buffer is never freed (one context per process). */
 int plat_render_offscreen(int w, int h) {
     const int attr[] = { OSMESA_FORMAT, OSMESA_RGBA, OSMESA_DEPTH_BITS, 24, OSMESA_PROFILE, OSMESA_CORE_PROFILE,
                          OSMESA_CONTEXT_MAJOR_VERSION, 3, OSMESA_CONTEXT_MINOR_VERSION, 3, 0 };
