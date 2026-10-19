@@ -1,3 +1,8 @@
+/* ported97.c — functions whose tables, lists or records hold 32-bit Game.exe pointers (English overview):
+   high-score tables, sample playback, car/cop reset, map icons, the DirectSound driver table, frame snapshot,
+   map cell marks, the mission-script object list, front-end menu tables, mission goals, the cop line-of-sight
+   test, director keys, menu icon blinking, smoke/debris particles and the fade icon.  Pointer fields are read
+   through re_ptr / re_rd_ptr so the same code works on native pointers and Game.exe addresses.  All cdecl. */
 /* Функции с 32-битными указателями в таблицах/списках/записях — восстановлено из Game.exe по стандарту v1.42
    (0051c900, 00523cda, 004a681a, 005074e5, 0048bbd5, 004d9ad4, 0050bc2b, 004f4f10, 004cff7e, 004cf6b2, 004cf772, 004d156a,
    00500090, 0050f7b2, 0040fc9a, 00410e89, 0040ea70, 00419b35, 0040c8a0, 004185d2, 004f58c6, 004f57d7, 004f5c89, 004d2c95,
@@ -421,6 +426,7 @@ p97_i2_t P97_BlinkB = { 50, 20 };
 #pragma pop_macro("P97_BlinkB") /*gvi*/
 #endif
 
+/* Native only: initial values of the .data tables used below. */
 void P97_InitConsts(void) {
 #ifndef RE_HOOK_BUILD
   P97_BlinkA[0] = 50; P97_BlinkA[1] = 20; P97_BlinkB[0] = 50; P97_BlinkB[1] = 20;
@@ -435,6 +441,7 @@ static const char *str_at(uint32_t a) { const char *s = (const char *)re_ptr(a);
 static uint8_t *link(const uint8_t *field) { return (uint8_t *)re_rd_ptr(field); }  /* поле-указатель записи */
 
 /* ---- 0051c900: таблица указателей таблиц рекордов (адреса Game.exe) ---- */
+/* P97_HsInit — Game.exe 0051c900.  Fills the table of pointers to the high-score tables (Game.exe addresses). */
 void P97_HsInit(void) {
   memset(P42_HighScores, 0, 0x80);
   memset(P62_Hs1, 0, 0x6e0); memset(P62_Hs2, 0, 0x6e0);
@@ -450,6 +457,8 @@ void P97_HsInit(void) {
 }
 
 /* ---- 00523cda: запуск сэмпла (номер или банк<<12|номер) на голосе; -1 — свободный/вытесняемый по приоритету ---- */
+/* P97_SndStart — Game.exe 00523cda.  Starts sample `sample` (number, or bank << 12 | number) at position (a, b, c) on
+   `voice`, or on a free / lowest-priority voice when voice == -1.  Returns the voice used or -1. */
 int32_t P97_SndStart(uint32_t sample, int32_t voice, float a, float b, float c) {
   if (G6_00B91CF4 == 0 || G00575F40 == 0) return -1;
   int32_t s = (int32_t)sample;
@@ -473,6 +482,8 @@ int32_t P97_SndStart(uint32_t sample, int32_t voice, float a, float b, float c) 
 }
 
 /* ---- 004a681a: сброс машин/трафика (8 записей 0xcd8 по 0112da00) ---- */
+/* P97_ResetCars — Game.exe 004a681a.  Level start reset of the police/traffic state: counters and flags,
+   the 8 cop AI records (0xcd8 bytes from 0112da00, word 0 = own index), thresholds and the siren sound state. */
 void P97_ResetCars(void) {
   P77_ResetTables();
   P14_Fn0048DB65(P97_B2C0, 10000);
@@ -499,6 +510,8 @@ void P97_ResetCars(void) {
 }
 
 /* ---- 005074e5: значок на карте (P56_Sprite) с обводкой: обратный цвет режимом 2, цвет режимом 3 ---- */
+/* P97_MapIcon — Game.exe 005074e5.  Map icon (P56_Sprite) at (x, y) with an outline: inverse colour in blend mode 2,
+   then colour (r, g, b) in blend mode 3, size `scale`. */
 void P97_MapIcon(float x, float y, uint32_t r, uint32_t g, uint32_t b, float scale) {
   if (P56_Sprite == NULL) return;
   float s = 0.0015625f * (float)P19_ScrW * P19_Scale * scale;
@@ -511,6 +524,7 @@ void P97_MapIcon(float x, float y, uint32_t r, uint32_t g, uint32_t b, float sca
 }
 
 /* ---- 0048bbd5: таблица звукового драйвера DirectSound (00bdcb00..00bdcb5c) через re_fn ---- */
+/* P97_SndDrvInit — Game.exe 0048bbd5.  Fills the DirectSound driver function table (00bdcb00..00bdcb5c) via re_fn. */
 void P97_SndDrvInit(void) {
   P48_Drv00 = (P48_F0)re_fn(0x0048bcc0);
   P48_Drv08 = (P48_F0)re_fn(0x0048bd3b);
@@ -539,6 +553,7 @@ void P97_SndDrvInit(void) {
 
 /* ---- 004d9ad4: снимок кадра через grLfbLock: RGB565 → BGR, строки снизу вверх ---- */
 typedef struct { uint32_t size; void *lfb; uint32_t stride; uint32_t mode; uint32_t origin; } p97_lfbinfo_t;
+/* P97_LfbSnap — Game.exe 004d9ad4.  Screenshot through grLfbLock: RGB565 -> BGR bytes, rows bottom-up (BMP order). */
 void P97_LfbSnap(uint8_t *out) {
   p97_lfbinfo_t info; memset(&info, 0, sizeof info);
   info.size = 0x14;
@@ -565,6 +580,8 @@ void P97_LfbSnap(uint8_t *out) {
 }
 
 /* ---- 0050bc2b: +0x20 в клетках 3×3 вокруг 0x5e8 сетки 00c62e60 по шаблону типа записи списка +0x60 ---- */
+/* P97_MarkCells — Game.exe 0050bc2b.  Adds 0x20 to the 3x3 cells around the record's cell of grid 00c62e60 using
+   the pattern of the record type (+0x60).  TODO(RE): what the grid marks mean. */
 void P97_MarkCells(uint8_t *rec) {
   uint8_t *p = rec + 0x60;
   int32_t n = rd32(rec + 0x14) - 1 + P77_C65DA4;
@@ -580,6 +597,8 @@ void P97_MarkCells(uint8_t *rec) {
 
 /* ---- список скрипта 00d12408: узел 0x24 (+0 флаги16, +6 id16, +0x1c первый объект, +0x20 следующий),
         объект 0x60 (+0x50 база, +0x54 указатель в базе, +0x58 следующий) — поля-указатели = адреса Game.exe ---- */
+/* P97_ObjsFromScript — Game.exe 004f4f10.  Walks the script object list 00d12408 (nodes 0x24: flags, id, first
+   object, next; objects 0x60) and updates the objects from it. */
 void P97_ObjsFromScript(void) {
   if (P97_ScrObjOn == 0) return;
   for (int32_t k = 0; k < 10; k++) {
@@ -598,6 +617,9 @@ void P97_ObjsFromScript(void) {
     }
   }
 }
+/* P97_ScriptResetCur — Game.exe 004cff7e: resets the current node of the script object list.
+   P97_ScriptSave — 004cf6b2: serialises the list state into out, returns the bytes written.
+   P97_ScriptLoad — 004cf772: restores it from in. */
 void P97_ScriptResetCur(void) {
   uint8_t *cur = P15_ListCur;
   uint8_t *c = link(cur + 0x1c);
@@ -648,6 +670,8 @@ int32_t P97_ScriptOpNext(void) {
   return 1;
 }
 /* 00500090: обход активных объектов скрипта → 00500937 (модель события из P28_EventModels как адрес) */
+/* P97_ScriptEach — Game.exe 00500090 (and the pointer variant P97_ScriptEachP, native v1.74): calls 00500937 for
+   every active script object, with its event model from P28_EventModels as an address. */
 void P97_ScriptEach(int32_t a, int32_t b, int32_t c) {
   P97_ScriptEachP((const float *)re_ptr((uint32_t)a), (uint8_t *)re_ptr((uint32_t)b), c);
 }
@@ -668,6 +692,9 @@ void P97_ScriptEachP(const float *a, uint8_t *b, int32_t c) {
 }
 
 /* ---- строки меню: в полях +8 пунктов (шаг 0x10/0x20/0x28) лежат адреса строк ---- */
+/* P97_SndMenuInit — Game.exe 0050f7b2; P97_KeyMenuAInit — 0040fc9a; P97_KeyMenuBInit — 00410e89;
+   P97_OptMenuAInit — 0040ea70; P97_OptMenuBInit — 00419b35: put the addresses of the item strings (key names,
+   option values, FPS text) into the +8 fields of the menu item tables (stride 0x10/0x20/0x28). */
 void P97_SndMenuInit(void) {
   uint32_t bits = (uint32_t)(G6_00575F00 != 8), rate = (uint32_t)(G6_00575F04 != 0x5622);
   P48_SetMasterVolume(WF00575F14);
@@ -722,6 +749,9 @@ void P97_OptMenuBInit(void) { opt_menu(P97_OptMenuB, 0x0054e560u, P97_FpsTxtB, P
 
 /* ---- 0040c8a0 / 004185d2: таблица пунктов меню {+0 обработчик, +4 обработчик, +8 ≠0 — есть пункт}, шаг 0x10 ---- */
 typedef void (*p97_menufn_t)(int32_t);
+/* Menu item tables {+0 handler, +4 handler, +8 != 0 = item present}, stride 0x10 (0040c8a0 / 004185d2):
+   P97_MenuCall0 calls the +4 handler of every item with 0, then the +0 handler of item sel with 0;
+   P97_MenuCall2 first resets the colours of the item list `items` to white, then does the same with argument 2. */
 static void menu_call(uint32_t fa, int32_t arg) {
   p97_menufn_t f = (p97_menufn_t)re_fn(fa);
 #ifndef RE_HOOK_BUILD
@@ -749,6 +779,10 @@ void P97_MenuCall2(uint32_t tab, int32_t sel, uint32_t items) {
 }
 
 /* ---- цели миссии: запись цели, +0x1fc — указатель на счётчик (адрес Game.exe) ---- */
+/* Mission goals: goal record +0x1fc = pointer to a counter.  P97_GoalReached (004f58c6) / P97_GoalCops (004f57d7)
+   test goal g at time t and mark object o (+0x10 flags 2 / 4 / 0x200) when the goal condition holds
+   (counter vs +0x1c * 50, cop activity); P97_AddTime (004f5c89) adds delta to the goal's timer.
+   TODO(RE): exact goal record fields. */
 static int32_t goal_count(const uint8_t *g) { const uint8_t *p = link(g + 0x1fc); return p ? rd32(p) : 0; }
 int32_t P97_GoalReached(int32_t t, uint8_t *g, uint8_t *o) {
   if (t < rd32(g + 0x20) && (rd32(g + 0x18) & 1) != 0 && rd32(g + 0x1c) * 0x32 <= goal_count(g)) {
@@ -790,6 +824,10 @@ void P97_AddTime(uint8_t *g, int32_t d) {
 }
 
 /* ---- 004d2c95: видит ли коп игрока (view: радиус близко, дальность, угол обзора) ---- */
+/* P97_CopsSee — Game.exe 004d2c95.  Can the cop of car record `car` (object at +0xcd0) see the player?
+   view = {near radius, far range, field-of-view angle}: yes when within the near radius (P56_CopsA = 1), or within
+   the far range and half the view angle of the cop's heading (+0xc) (P56_CopsB = 1).  Returns 1 / 0.
+   Note: d2 is plain int32 arithmetic as in the original (may wrap for far distances). */
 int32_t P97_CopsSee(const int16_t *view, uint8_t *car) {
   const uint8_t *o = link(car + 0xcd0);
   if (o == NULL) return 0;
@@ -805,6 +843,7 @@ int32_t P97_CopsSee(const int16_t *view, uint8_t *car) {
 }
 
 /* ---- 004c2ab0: клавиши режиссёра — удалить/добавить камеру перед текущей ---- */
+/* P97_DirKeys — Game.exe 004c2ab0.  Replay director keys: delete / add a camera before the current one. */
 void P97_DirKeys(uint32_t keys) {
   if ((keys & 0x10) == 0) P29_Flag94 = 0;
   else if (P29_Flag94 == 0) { SetDirectorMode(0xc, DirectorUnk7C, 0); return; }
@@ -819,6 +858,8 @@ void P97_DirKeys(uint32_t keys) {
 }
 
 /* ---- 00417479 / 00417fff: мигание значков меню (яркость 0..255 туда-обратно) ---- */
+/* Menu icon blinking (00417479 / 00417fff): brightness ping-pongs 0..255; P97_BlinkAStep / P97_BlinkBStep step the
+   two blinkers. */
 static uint32_t blink(int32_t *st) {
   st[0] += st[1];
   if (0xff < st[0]) { st[0] = 0xff; st[1] = -st[1]; }
@@ -843,6 +884,8 @@ void P97_BlinkBStep(void) {
 }
 
 /* ---- 004afcf7: частица дыма в пуле 0110b260 (записи 0x3c) ---- */
+/* P97_SpawnSmoke — Game.exe 004afcf7.  One smoke particle (pool 0110b260, 0x3c-byte records) at pos with velocity
+   vel, colour rgb, kind and arg. */
 void P97_SpawnSmoke(const float *pos, const float *vel, const uint8_t *rgb, int16_t kind, int32_t arg) {
   int32_t i = PoolNext004AC671();
   if (i < 0) return;
@@ -861,6 +904,8 @@ void P97_SpawnSmoke(const float *pos, const float *vel, const uint8_t *rgb, int1
 }
 
 /* ---- 004ad128: подбросить обломки (100 записей 0x3c, 010fb220) в квадрате ±0xb4 от точки ---- */
+/* P97_KickDebris — Game.exe 004ad128.  Throws up the debris pieces (100 records of 0x3c at 010fb220) lying within
+   +-0xb4 of pos. */
 void P97_KickDebris(const int32_t *pos) {
   if (P16_FlagA != 0) return;
   for (int32_t k = 0; k < 100; k++) {
@@ -879,6 +924,8 @@ void P97_KickDebris(const int32_t *pos) {
 }
 
 /* ---- 004e5a1a: значок затемнения + стрелка по фазе P94_FadePos ---- */
+/* P97_FadeIconDraw — Game.exe 004e5a1a.  Draws the fade icon and an arrow at phase P94_FadePos.
+   TODO(RE): which screen effect this is. */
 void P97_FadeIconDraw(void) {
   if (P97_FadeIcon != NULL) {
     if (P62_I252B78 != 1) {
