@@ -182,12 +182,9 @@ float P126_SideW;
 #endif
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
-static int32_t fround(float v) { return (int32_t)lrintf(v); }   /* fistp */
 #define P126_BLK(off) (*(int32_t *)&P56_Blk84[((off) - 0x00c810c0) / 4])   /* поля внутри P56_Blk84 */
 #define P126_CAR(i)   ((uint8_t *)&P99_Cars[(i)])
 

@@ -115,8 +115,7 @@ int32_t P122_Blink = 10;                     /* .data 0054e9d8 */
 #pragma pop_macro("P122_Blink") /*gvi*/
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
 

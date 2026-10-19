@@ -209,9 +209,7 @@ int32_t P107_NavRep = 10;        /* .data 005755c4 */
 #pragma pop_macro("P107_NavRep") /*gvi*/
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static const float OOW_LO = 0.015625f;   /* 0x3c800000 */
 

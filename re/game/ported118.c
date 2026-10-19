@@ -72,13 +72,10 @@ int32_t P118_RouteMax;
 #pragma pop_macro("P118_RouteMax")
 #endif
 
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static int16_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
-static float rdf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
 static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
-static int32_t iabs(int32_t v) { return v < 0 ? -v : v; }
 
 /* запись i таблицы tab (шаг st); в native вне таблицы — нули */
 static const uint8_t *rec(const uint8_t *tab, uint32_t sz, int32_t i, uint32_t st) {

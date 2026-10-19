@@ -150,10 +150,8 @@ int32_t P120_HudB;
 #define P120_HudC   (*(int32_t *)&P56_Blk84[(0x00c8110c - 0x00c810c0) / 4])    /* 00c8110c — внутри P56_Blk84 */
 #define P120_HudPtr (*(uint32_t *)&P56_Blk84[(0x00c812b8 - 0x00c810c0) / 4])   /* 00c812b8 — uint32-адрес пары int32 */
 
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
-static float rdf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
 static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 
 static uint8_t *carp(int32_t i) {

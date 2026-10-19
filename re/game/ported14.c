@@ -291,8 +291,7 @@ p14_00b20360_t P14_00b20360;
 #pragma pop_macro("P14_00b20360")
 #endif
 
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 
 void P14_Fn004CAC86(void) {
   g_00d14ee4++;

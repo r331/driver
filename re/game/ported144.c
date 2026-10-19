@@ -74,8 +74,7 @@ static const int32_t k_553870[P111_FLARE_N][7] = P111_FLARE_INIT;   /* .data 005
 #endif
 
 static float u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
-static float rdf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static int32_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static uint32_t rdu16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static uint32_t rdu32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }

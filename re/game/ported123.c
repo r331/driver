@@ -145,11 +145,9 @@ uint8_t P123_SideB;
 #pragma pop_macro("P123_SideB")
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static float camf(int i) { float v; memcpy(&v, &P68_CamF[i], 4); return v; }
 static void set_camf(int i, float v) { memcpy(&P68_CamF[i], &v, 4); }

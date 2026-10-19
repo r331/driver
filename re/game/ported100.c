@@ -412,15 +412,11 @@ GAME_VAR_DEF(uint8_t *, P100_Mirror, 0x00b31f00)
 #define K_099  0.99f      /* 00546088 */
 #define K_4096 4096.0f    /* 005461ec */
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
-static int32_t iabs(int32_t v) { return v < 0 ? -v : v; }
-static int32_t fround(float v) { return (int32_t)lrintf(v); }   /* fistp */
 static uint8_t *texpage(uint32_t slot) { return (uint8_t *)re_ptr((uint32_t)rd32(&g_01145a60[slot * 0x10 + 4])); }
 
 /* ---- 00416605: меню повтора — значки FFWD/PLAY/ACCEPT8B, число видимых пунктов, скорость по пункту с флагом 8 ---- */

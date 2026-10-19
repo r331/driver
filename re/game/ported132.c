@@ -121,9 +121,7 @@
 #include "redbg.h"
 
 static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
-static float rdf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static void wr16(uint8_t *p, uint16_t v) { memcpy(p, &v, 2); }
 static uint16_t rd16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 

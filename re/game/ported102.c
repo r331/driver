@@ -425,15 +425,12 @@ int32_t P102_ObjBKey;
 #pragma pop_macro("P102_ObjBKey")
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static float rdf_(const void *p) { float v; memcpy(&v, p, 4); return v; }
 static uint32_t fbits(float v) { uint32_t u; memcpy(&u, &v, 4); return u; }
-static int32_t iabs(int32_t v) { return v < 0 ? -v : v; }
-static int32_t fround(float v) { return (int32_t)lrintf(v); }   /* fistp */
 static int32_t mul(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b); }   /* imul с переполнением */
 static uint8_t *carp(int32_t i) { return (uint8_t *)&P99_Cars[i]; }
 /* запись модели машины m (00d0cc60 + m*0x16c); в native — в пределах S_00D0CC60 (0x4000 байт), иначе нули */

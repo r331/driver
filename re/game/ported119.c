@@ -111,13 +111,9 @@ int32_t P119_SelIdx;
 #  define P119_STD
 #endif
 
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
-static float rdf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
 static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
-static int32_t iabs(int32_t v) { return v < 0 ? -v : v; }
-static int32_t fround(float v) { return (int32_t)lrintf(v); }   /* fistp */
 
 static uint8_t *carp(int32_t i) {
 #ifndef RE_HOOK_BUILD

@@ -491,8 +491,7 @@ p12_00576688_t P12_00576688;
 #pragma pop_macro("P12_00576688")
 #endif
 
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 
 uint32_t P12_Fn00404F70(void) {
   MenuAction40CD17(); g_00b87e38 = 0x105; g_01271060 = 8;

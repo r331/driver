@@ -205,8 +205,7 @@ int32_t P94_WobC = 5;    /* 00553a1c */
 /* умножение и сдвиг как у 32-битного imul/sar (с переполнением по модулю 2^32) */
 static int32_t mul(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b); }
 static int32_t fx(int32_t a, int32_t b) { return (int32_t)((uint32_t)mul(a, b) + 0x800u) >> 12; }
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static int16_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wrf(uint32_t *p, float v) { memcpy(p, &v, 4); }
 
