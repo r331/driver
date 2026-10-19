@@ -1,3 +1,6 @@
+/* ported54 — assorted leaf functions (Game.exe, cdecl unless noted): menu icon selection, Glide texture / clear /
+   swap wrappers, road-bit and map buffer allocation, default key setup, two traffic-record steps, the
+   IDirect3DTexture2 query and map.c chunk readers. */
 #include "ported128.h"
 #include "ported54.h"
 #include "ported33.h"
@@ -141,12 +144,16 @@ int32_t P54_G44;
 #pragma pop_macro("P54_G44")
 #endif
 
+/* Entry point of a Glide export by its decorated name (from the loaded glide2x.dll export list), or NULL. */
 static void *glide_proc(const char *name) {
   for (int i = 0; i < P33_GlideCount(); i++)
     if (strcmp(P33_GlideName(i), name) == 0) return P33_GlideProc(i);
   return NULL;
 }
 
+/* P54_MenuTexSel — Game.exe 0040500d.  Sets the icon of each menu row from P54_SelTab (terminated by -1):
+   kinds 0..6 pick the icon of the current value of one menu option (MenuOpt*), kinds 7..9 fixed icons at
+   0057b664/68/6c; the icon goes into word (i * 2 + 2) * 4 of P54_Out.  TODO(RE): unsure which options 0..6 are. */
 void P54_MenuTexSel(void) {
   /* Ограничение i < 12 (v1.58: размер 0057b578..0057b5a8) — защита от таблицы без конца (в оригинале конец всегда -1). */
   for (int32_t i = 0; i < (int32_t)(sizeof(p54_i16_t) / 4); i++) {
@@ -169,6 +176,8 @@ void P54_MenuTexSel(void) {
   }
 }
 
+/* P54_TexSource — Game.exe 004248c6.  Texture download for the active renderer: nothing if no device
+   (D_00b1c0d4 == 0); renderer 0 = Glide: grTexDownloadMipMap(a, b, c, d); renderer 1 = D3D: P46_TexCall2. */
 void P54_TexSource(int32_t a, int32_t b, int32_t c, const uint8_t *d, int32_t e) {
   if (D_00b1c0d4 == 0) return;
   if (D_00b1c0d8 == 0) {
@@ -180,6 +189,9 @@ void P54_TexSource(int32_t a, int32_t b, int32_t c, const uint8_t *d, int32_t e)
   }
 }
 
+/* P54_ClearBuffers — Game.exe 0041de46 (stdcall, ret 0xc).  D3D clear: fills the back buffer with color (unless
+   S_00A421D8) and clears the Z buffer to 1.0f (zsel 0 or -1) or 0 (other), unless Z writes are off.
+   b is unused. */
 void P54_ClearBuffers(int32_t color, int32_t b, int16_t zsel) {
   (void)b;
   if (P22_DevReady == 0) return;
@@ -190,6 +202,8 @@ void P54_ClearBuffers(int32_t color, int32_t b, int16_t zsel) {
   }
 }
 
+/* P54_ClearSwap — Game.exe 0040c5be.  Glide: clip window = whole screen, then n times clear to black (depth
+   0xffff) and swap — flushes all n buffers of the swap chain. */
 void P54_ClearSwap(int32_t n) {
   void (P54_STD *clip)(int32_t, int32_t, int32_t, int32_t) =
       (void (P54_STD *)(int32_t, int32_t, int32_t, int32_t))glide_proc("_grClipWindow@16");
@@ -203,6 +217,7 @@ void P54_ClearSwap(int32_t n) {
   }
 }
 
+/* P54_FreeTab4 — Game.exe 004f3c16.  Frees the four buffers of P54_Tab4 (TODO(RE): unsure what they hold). */
 void P54_FreeTab4(void) {
   for (int i = 0; i < 4; i++) {
     if (P54_Tab4[i] != NULL) {
@@ -213,6 +228,7 @@ void P54_FreeTab4(void) {
   }
 }
 
+/* P54_FreeRoadbits — Game.exe 0051aacd.  Frees the four road-bit buffer pairs (see P54_AllocRoadbits). */
 void P54_FreeRoadbits(void) {
   for (int i = 0; i < 4; i++) {
     DebugFree(P54_RoadA[i]); P54_RoadA[i] = NULL;
@@ -220,6 +236,8 @@ void P54_FreeRoadbits(void) {
   }
 }
 
+/* P54_AllocRoadbits — Game.exe 0051aa5b.  Allocates four road-bit cache slots: id -1 (empty), buffer A 0x7080
+   bytes and buffer B 0xe100 bytes (road.c tags 0xc9 / 0xca).  0x7080 = 120 x 240; TODO(RE): unsure of the layout. */
 void P54_AllocRoadbits(void) {
   for (int i = 0; i < 4; i++) {
     P54_RoadId[i] = -1;
@@ -228,12 +246,18 @@ void P54_AllocRoadbits(void) {
   }
 }
 
+/* P54_AllocMapBufs — Game.exe 004ecda8.  Allocates the level map buffers: G6_00D01268 = GridN^2 cells of 0x10
+   bytes, G6_00D00208 = (P54_Cnt1E0 + 0x8000) entries of 0x20 bytes, G6_00CE0F20 = 0xa0000 bytes (map.c tags
+   0x562..0x564).  TODO(RE): unsure what the latter two hold. */
 void P54_AllocMapBufs(void) {
   G6_00D01268 = DebugMalloc(P54_GridN * P54_GridN * 0x10, P54_MAP_C, 0x562);
   G6_00D00208 = DebugMalloc((P54_Cnt1E0 + 0x8000) * 0x20, P54_MAP_C, 0x563);
   G6_00CE0F20 = DebugMalloc(0xa0000, P54_MAP_C, 0x564);
 }
 
+/* P54_DefaultKeys — Game.exe 0040748a.  Restores the default key bindings: the first 20 bytes of P54_KeySrc go to
+   the active key config; keyboard mode (Q0057B72C == 0) also resets the second set (P54_KeySrc[6..]), a joystick
+   mode only the three P54_Keys3 entries (from P54_KeySrc[12..14]).  Then 004072BE applies them.  Returns 0. */
 int32_t P54_DefaultKeys(void) {
   if (Q0057B72C == 0) {
     memcpy(P36_KeyCfg, &P54_KeySrc[0], 20);
@@ -248,6 +272,9 @@ int32_t P54_DefaultKeys(void) {
   return 0;
 }
 
+/* P54_InitInputMode — Game.exe 0040724c.  Q0057B72C = 0 for keyboard (P35_InputMode == 0) or joystick number + 1
+   (GetB31E18() + 1); copies six default values from P54_Src6 into P54_Dst[0, 4, 12, 16, 20, 24] and applies the
+   bindings (004072BE).  TODO(RE): unsure what the six values are. */
 void P54_InitInputMode(void) {
   if (P35_InputMode == 0) Q0057B72C = 0;
   else Q0057B72C = GetB31E18() + 1;
@@ -260,6 +287,9 @@ void P54_InitInputMode(void) {
   Call004072BE();
 }
 
+/* P54_ObjTick — Game.exe 00493f9a.  Idle tick of a traffic record (0x54 bytes): clears byte +8; while the
+   cool-down byte +0xb is non-zero it counts down; otherwise, when the record has a road link (+0x28 != -1),
+   on average once per 32 ticks (random & 0x1f == record id) picks a new road node (P128_TrafficNode). */
 void P54_ObjTick(uint8_t *o) {
   o[8] = 0;
   if (o[0xb] == 0) {
@@ -271,6 +301,9 @@ void P54_ObjTick(uint8_t *o) {
   }
 }
 
+/* P54_ObjInit — Game.exe 00493e3d.  Re-initialises a traffic record at its stored position (+0x2c/+0x30/+0x34)
+   via 004913CC(x, y, z, 2, byte +9), clears flag 0x04 of byte +0x13, copies P54_G40/P54_G44 into +0x40/+0x44,
+   sets state byte +1 = 3 and clears byte +0x10.  TODO(RE): unsure what state 3 and the arguments mean. */
 void P54_ObjInit(uint8_t *o) {
   int32_t x, y, z;
   memcpy(&x, o + 0x2c, 4); memcpy(&y, o + 0x30, 4); memcpy(&z, o + 0x34, 4);
@@ -282,7 +315,10 @@ void P54_ObjInit(uint8_t *o) {
   o[0x10] = 0;
 }
 
+/* P54_GetTexture2 — Game.exe 0042200c.  QueryInterface(IID_IDirect3DTexture2) on a DirectDraw surface; returns
+   the interface or NULL (also for a NULL surface). */
 void *P54_GetTexture2(void *tex) {
+  /* IID_IDirect3DTexture2 {93281502-8CF8-11D0-89AB-00A0C9054129} */
   static const uint8_t iid_tex2[16] = { 0x02,0x15,0x28,0x93,0xf8,0x8c,0xd0,0x11,0x89,0xab,0x00,0xa0,0xc9,0x05,0x41,0x29 };
   void *out = NULL;
   NoopFn0042243f();   /* «GetDirect3DTexture2Interface» (в релизе — пусто) */
@@ -294,6 +330,8 @@ void *P54_GetTexture2(void *tex) {
   return out;
 }
 
+/* P54_ReadNames — Game.exe 004ec7ac.  Reads the level's name table chunk (size bytes) into a new buffer, which
+   becomes P20_Names.  Allocation failure: the chunk is not read. */
 void P54_ReadNames(void *file, int32_t size) {
   void *buf = DebugMalloc(size, P54_MAP_C, 0x415);
   if (buf == NULL) return;
@@ -301,6 +339,8 @@ void P54_ReadNames(void *file, int32_t size) {
   P20_Names = (char *)buf;
 }
 
+/* P54_ReadMapA — Game.exe 004ec280.  Chunk = [int32 count P54_MapA][data]; data goes to a new buffer
+   P54_MapAPtr (count reset to 0 when the allocation fails). */
 void P54_ReadMapA(void *file, int32_t size) {
   P27_ReadChunked(&P54_MapA, 4, 1, file);
   size -= 4;
@@ -309,6 +349,8 @@ void P54_ReadMapA(void *file, int32_t size) {
   else P27_ReadChunked(P54_MapAPtr, size, 1, file);
 }
 
+/* P54_ReadMapB — Game.exe 004ec3fd.  Chunk = [int32 P54_MapB1][int32 P54_MapB2][data] -> P54_MapBPtr (no NULL
+   check, as the original). */
 void P54_ReadMapB(void *file, int32_t size) {
   P27_ReadChunked(&P54_MapB1, 4, 1, file);
   P27_ReadChunked(&P54_MapB2, 4, 1, file);

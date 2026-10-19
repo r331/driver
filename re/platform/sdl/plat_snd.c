@@ -1,3 +1,7 @@
+/* plat_snd.c (native only, SDL2) — sound buffer table and software mixer behind plat_snd_* (44100 Hz stereo S16
+   output via SDL_audio, a "null" device clocked by plat_time_ms, or WAV capture with RE_WAV_OUT), plus the
+   timeSetEvent-style timers on SDL timers or, with RE_FIXED_DT, on the virtual clock.  The DirectSound layer on
+   top is plat_dsmix.c, CD audio is plat_cdaudio.c.  No Game.exe addresses here.  Original note: */
 /* plat_snd.c (native, SDL2): буферы звука и программный микшер plat_snd_* (вывод SDL_audio, пустое устройство
    или запись WAV RE_WAV_OUT); таймеры timeSetEvent на SDL. DirectSound поверх него — plat_dsmix.c, CD-audio — plat_cdaudio.c. */
 #include "../plat.h"
@@ -13,6 +17,8 @@ static SDL_AudioDeviceID g_dev;
 #define SND_MAX 256
 typedef struct { void *pcm; int bytes, rate, ch, bits, playing, loop, vol, pitch, pan; double pos; } snd_t;
 static snd_t snds[SND_MAX];
+/* Copies PCM data (b bytes, rate r, c channels, 8/16 bits) into a free buffer slot 1..255; returns the handle,
+   0 on failure.  Pitch starts at the native rate. */
 int plat_snd_create(const void*p,int b,int r,int c,int bits){
   if(!p||b<=0) return 0;
   for(int i=1;i<SND_MAX;i++) if(!snds[i].pcm){
@@ -21,6 +27,7 @@ int plat_snd_create(const void*p,int b,int r,int c,int bits){
     memcpy(s->pcm,p,(size_t)b); s->bytes=b; s->rate=r; s->ch=c; s->bits=bits; s->pitch=r;
     return i; }
   return 0; }
+/* Handle -> live buffer or NULL.  destroy/play/stop/set lock the audio device around the change. */
 static snd_t*S(int h){return (h>0&&h<SND_MAX&&snds[h].pcm)?&snds[h]:NULL;}
 void plat_snd_destroy(int h){snd_t*s=S(h); if(s){LOCK(); free(s->pcm); memset(s,0,sizeof *s); UNLOCK();}}
 void plat_snd_play(int h,int l){snd_t*s=S(h); if(s){LOCK(); if(!s->playing) s->pos=0; s->playing=1;s->loop=l; UNLOCK();}}
@@ -30,11 +37,16 @@ void plat_snd_set(int h,int v,int p,int n){snd_t*s=S(h); if(s){LOCK(); s->vol=v;
 #define SND_OUT_RATE 44100
 void dsm_mix(int16_t *out, int frames); int dsm_active(void);
 void plat_snd_lockdev(int on){ if(on) LOCK(); else UNLOCK(); }
+/* Sample of frame fr, channel c (mono sources return channel 0), as -1..1. */
 static float smp(const snd_t*s,int64_t fr,int c){ /* выборка кадра fr, канал c → -1..1 */
   int ch=s->ch>1?2:1; int i=(int)(fr*ch+(c<ch?c:0));
   if(s->bits==8) return (((const uint8_t*)s->pcm)[i]-128)/128.0f;
   return ((const int16_t*)s->pcm)[i]/32768.0f; }
+/* DirectSound attenuation in 1/100 dB -> linear gain: 10^(v / 2000); >= 0 -> 1, <= -10000 -> silence. */
 static float db_gain(int hundredths){ if(hundredths>=0) return 1.0f; if(hundredths<=-10000) return 0.0f; return powf(10.0f,(float)hundredths/2000.0f); }
+/* Mixes all playing buffers into out (frames x stereo S16): linear-interpolated resampling at pitch / 44100,
+   DirectSound-style volume and pan (pan attenuates the opposite side), saturating add; looping buffers wrap,
+   others stop at the end.  Then the DirectSound mixer (dsm_mix) adds its voices. */
 void plat_snd_mix(int16_t *out,int frames){
   memset(out,0,(size_t)frames*2*sizeof *out);
   for(int h=1;h<SND_MAX;h++){ snd_t*s=&snds[h]; if(!s->pcm||!s->playing) continue;
@@ -50,7 +62,9 @@ void plat_snd_mix(int16_t *out,int frames){
       s->pos+=step;
       if(s->pos>=(double)total){ if(s->loop) s->pos-=(double)total; else { s->playing=0; break; } } } }
   dsm_mix(out,frames); }
+/* SDL audio callback: len bytes = len / 4 stereo S16 frames. */
 static void SDLCALL audio_cb(void*u,Uint8*st,int len){ (void)u; plat_snd_mix((int16_t*)st,len/4); }
+/* Opens the default SDL audio device (44100 Hz, S16, stereo, 1024-frame buffer) once; 1 on success. */
 static int plat_snd_open(void){
   if(g_dev) return 1;
   if(SDL_InitSubSystem(SDL_INIT_AUDIO)<0) return 0;
@@ -62,11 +76,13 @@ static int plat_snd_open(void){
 #include <stdio.h>
 uint32_t plat_time_ms(void);
 static FILE *g_wav; static uint64_t g_wav_frames, g_wav_ms0; static int g_wav_on, g_snd_game, g_pump_n;
+/* (Re)writes the 44-byte RIFF/WAVE PCM header for the frames captured so far, keeping the file position. */
 static void wav_hdr(void){ if(!g_wav) return; uint32_t data=(uint32_t)(g_wav_frames*4); uint8_t h[44]; memcpy(h,"RIFF",4);
   uint32_t v=36+data; memcpy(h+4,&v,4); memcpy(h+8,"WAVEfmt ",8); v=16; memcpy(h+16,&v,4); uint16_t t=1; memcpy(h+20,&t,2); t=2; memcpy(h+22,&t,2);
   v=SND_OUT_RATE; memcpy(h+24,&v,4); v=SND_OUT_RATE*4; memcpy(h+28,&v,4); t=4; memcpy(h+32,&t,2); t=16; memcpy(h+34,&t,2); memcpy(h+36,"data",4); memcpy(h+40,&data,4);
   long cur=ftell(g_wav); fseek(g_wav,0,SEEK_SET); fwrite(h,1,44,g_wav); fseek(g_wav,cur,SEEK_SET); fflush(g_wav); }
 static void wav_close(void){ if(g_wav){ wav_hdr(); fclose(g_wav); g_wav=NULL; } }
+/* Opens game audio once: WAV capture when RE_WAV_OUT is set, otherwise SDL_audio, otherwise the null device. */
 void plat_snd_open_game(void){
   if(g_snd_game) return;
   g_snd_game=1;
@@ -80,6 +96,8 @@ void plat_snd_open_game(void){
     fprintf(stderr,"[snd] SDL_audio: нет устройства (%s) — без звука (пустое устройство по часам игры)\n",SDL_GetError());
     g_wav_ms0=plat_time_ms(); g_wav_on=1; }
 }
+/* Called per presented frame: mixes (and writes to the WAV, if any) as many frames as plat_time_ms advanced.
+   RE_SND_LOG prints a status line every 50 calls; the WAV header is refreshed every 200 calls. */
 /* на каждом показанном кадре: дописать в WAV столько кадров, сколько прошло по plat_time_ms */
 void plat_snd_pump(void){
   if(!g_wav_on) return;   /* v2.29: g_wav == NULL — пустое устройство (микс без вывода) */
@@ -94,9 +112,11 @@ void plat_snd_null_for_test(int ms){ if(ms<0){ g_wav_on=0; g_wav_frames=0; retur
 
 /* --- CD-аудио: v2.22 — эмуляция в plat_cdaudio.c; таймеры на SDL_AddTimer --- */
 #include <stdlib.h>
+/* timeBeginPeriod / timeEndPeriod: no-ops on SDL. */
 int plat_timer_period_begin(unsigned ms) { (void)ms; return 0; }
 void plat_timer_period_end(unsigned ms) { (void)ms; }
 typedef struct { void (*cb)(unsigned); unsigned flags; unsigned id; } TmrCtx;
+/* SDL timer trampoline: calls the game callback with the timer id; flag bit 0 = periodic (TIME_PERIODIC). */
 static Uint32 tmr_cb(Uint32 interval, void *p) {
   TmrCtx *c = (TmrCtx *)p;
   c->cb((unsigned)c->id);
@@ -107,6 +127,8 @@ static TmrCtx g_tc[64]; static int g_tcn;
 int plat_fixed_dt(void); uint32_t plat_time_ms(void);
 typedef struct { void (*cb)(unsigned); unsigned flags, delay, on; uint32_t due; } VtTmr;
 static VtTmr g_vtt[64]; static int g_vt_in;
+/* Fires due virtual timers (RE_FIXED_DT) on the main thread; at most 100 catch-up calls per timer per call,
+   not re-entrant. */
 void plat_vt_timers(uint32_t now) {
   if (g_vt_in) return;
   g_vt_in = 1;
@@ -119,6 +141,8 @@ void plat_vt_timers(uint32_t now) {
   }
   g_vt_in = 0;
 }
+/* timeSetEvent equivalent: returns a timer id (0 on failure).  RE_FIXED_DT: a virtual timer, id 0x10000 + slot;
+   otherwise an SDL timer (64 contexts reused round-robin — TODO(RE): a 65th live timer would overwrite one). */
 unsigned plat_timer_start(unsigned delay, unsigned flags, void (*cb)(unsigned)) {
   if (plat_fixed_dt()) {
     for (int i = 0; i < 64; i++) if (!g_vtt[i].on) {
@@ -134,6 +158,7 @@ unsigned plat_timer_start(unsigned delay, unsigned flags, void (*cb)(unsigned)) 
   c->id = (unsigned)id;
   return (unsigned)id;
 }
+/* timeKillEvent equivalent for both kinds of timer. */
 void plat_timer_kill(unsigned id) {
   if (id >= 0x10000u && id < 0x10040u) { g_vtt[id - 0x10000u].on = 0; return; }
   SDL_RemoveTimer((SDL_TimerID)id);
