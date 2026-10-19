@@ -1,3 +1,4 @@
+# v2.32: + job native-sdl3 — RE_SDL3_COMPAT=ON (SDL3 3.4.18 + sdl2-compat 2.32.74 из исходников), ctest, проверка переносимости driver+sdl-runtime ($ORIGIN).
 # v2.13: нативная сборка Linux x86_64 (arm64-раннеры GitHub только для публичных репозиториев; arm64 проверяется локально) + DINPUT.dll (mingw i686). Файлов игры в CI нет: ctest -L nodata.
 name: linux
 on:
@@ -20,6 +21,51 @@ jobs:
         with:
           name: driver-linux-x86_64
           path: re/build-native/driver
+  native-sdl3:
+    # Steam Controller (2026): SDL2 Classic его не знает. Пакеты — те же, что в README «Gamepads → Linux».
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Зависимости SDL3 (как в README)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libosmesa6-dev \
+            libx11-dev libxext-dev libxcursor-dev libxi-dev libxrandr-dev libxtst-dev \
+            libudev-dev libasound2-dev libpulse-dev libdbus-1-dev \
+            libwayland-dev libxkbcommon-dev libdecor-0-dev libxss-dev libxfixes-dev libusb-1.0-0-dev
+          # системный SDL2 Classic (только библиотека): проверяем, что вложенный sdl-runtime важнее
+          sudo apt-get install -y libsdl2-2.0-0
+      - name: Configure/Build (RE_SDL3_COMPAT=ON)
+        run: |
+          cmake -S re -B re/build-sdl3 -DCMAKE_BUILD_TYPE=Release -DRE_SDL3_COMPAT=ON 2>&1 | tee cfg.log
+          grep -E "Joystick drivers|Video drivers|Audio drivers|SDL_LIBUDEV|SDL_HIDAPI " cfg.log || true
+          cmake --build re/build-sdl3 -j4
+      - name: ctest (selftest, inputtest)
+        run: cd re/build-sdl3 && ctest --output-on-failure -L nodata
+      - name: Переносимость (driver + sdl-runtime в другом каталоге)
+        run: |
+          set -e
+          readelf -d re/build-sdl3/driver | grep RUNPATH
+          readelf -d re/build-sdl3/driver | grep -q 'RUNPATH.*\[\$ORIGIN/sdl-runtime\]'
+          readelf -d re/build-sdl3/sdl-runtime/libSDL2-2.0.so.0 | grep -q 'RUNPATH.*\[\$ORIGIN\]'
+          D=$RUNNER_TEMP/driver-linux; rm -rf $D; mkdir -p $D
+          cp -a re/build-sdl3/driver re/build-sdl3/sdl-runtime $D/
+          mv re/build-sdl3 re/build-sdl3.moved          # абсолютных путей сборки больше нет
+          ldd $D/driver | tee ldd.txt
+          grep -q "libSDL2-2.0.so.0 => $D/sdl-runtime/" ldd.txt
+          cd $RUNNER_TEMP
+          SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy LD_DEBUG=files timeout 60 $D/driver --inputtest > it.log 2>&1 || { tail -30 it.log; exit 1; }
+          grep -E "file=libSDL|\[gamepad\] SDL|зонд|inputtest: OK" it.log
+          grep -q "file=libSDL3.so.0 .*dynamically loaded by $D/sdl-runtime/libSDL2" it.log
+          grep -q "\[gamepad\] SDL 2.32.74 (sdl2-compat" it.log
+          grep -q "inputtest: OK" it.log
+          mv $GITHUB_WORKSPACE/re/build-sdl3.moved $GITHUB_WORKSPACE/re/build-sdl3
+          tar -C $RUNNER_TEMP -czf $GITHUB_WORKSPACE/driver-linux-x86_64-sdl3.tar.gz driver-linux
+      - uses: actions/upload-artifact@v4
+        with:
+          name: driver-linux-x86_64-sdl3
+          path: driver-linux-x86_64-sdl3.tar.gz
   hook:
     runs-on: ubuntu-24.04
     steps:

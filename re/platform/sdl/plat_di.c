@@ -201,6 +201,14 @@ static int gamepad_ready(void) {
             g_pad_init_failed = 1;
             fprintf(stderr, "[gamepad] initialization failed: %s\n", SDL_GetError()); return 0;
         }
+        /* v2.32: какая библиотека SDL реально загружена (sdl2-compat нумеруется с 2.32.50) —
+           на Linux вне каталога сборки легко подхватить системный SDL2 Classic без драйвера Steam Controller. */
+        SDL_version v; SDL_GetVersion(&v);
+        int compat = v.major == 2 && (v.minor > 32 || (v.minor == 32 && v.patch >= 50));
+        fprintf(stderr, "[gamepad] SDL %d.%d.%d (%s, %s)\n", v.major, v.minor, v.patch,
+                compat ? "sdl2-compat/SDL3" : "SDL2 Classic", SDL_GetRevision());
+        re_diag_log("Gamepad SDL library: %d.%d.%d %s (%s)\n", v.major, v.minor, v.patch,
+                    compat ? "sdl2-compat" : "classic", SDL_GetRevision());
     }
     SDL_GameControllerUpdate();
     if (g_pad && !SDL_GameControllerGetAttached(g_pad)) gamepad_close();

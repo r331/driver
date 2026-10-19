@@ -33,5 +33,10 @@ set_target_properties(SDL2 SDL3-shared PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${driver_sdl_runtime}"
   RUNTIME_OUTPUT_DIRECTORY "${driver_sdl_runtime}")
 if(UNIX AND NOT APPLE)
-  set_property(TARGET SDL2 APPEND PROPERTY BUILD_RPATH "$ORIGIN")
+  # v2.32: only $ORIGIN (no absolute build path). sdl2-compat dlopen()s
+  # libSDL3.so.0, and glibc applies the caller's RUNPATH, so libSDL2 finds the
+  # pinned libSDL3 next to itself even after driver + sdl-runtime/ are moved.
+  # The executable itself uses $ORIGIN/sdl-runtime (re/CMakeLists.txt).
+  set_target_properties(SDL2 SDL3-shared PROPERTIES
+    BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "$ORIGIN")
 endif()

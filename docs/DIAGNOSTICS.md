@@ -188,6 +188,12 @@ The user confirmed steering, throttle, brake, handbrake, camera, and pause work
 on the connected controller in the rebuilt game. Selftest and inputtest pass
 with the modern runtime and with the installed SDL2 Classic 2.32.8 override.
 
+Linux (v2.32): when controller support starts, stderr and the `RE_DIAG`
+session record the SDL library actually loaded, e.g.
+`[gamepad] SDL 2.32.74 (sdl2-compat/SDL3, SDL-2.32.74-…)`. `SDL2 Classic` there
+means the bundled `sdl-runtime/` next to the binary was not used. The
+`RE_INPUTDBG=1` log on Linux is `driver_input.log` next to the binary.
+
 
 ## Damage vibration (2026-10-18)
 

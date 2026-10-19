@@ -24,7 +24,7 @@
 python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv')) if x['module']!='CRT']; print(sum(x['status']=='ported' for x in r), 'из', len(r))"
 ```
 
-**Native как игра — v2.31** (проверено сценариями `RE_KEYS` и настоящей клавиатурой X11 (xdotool) под Xvfb, Linux arm64; сборка, selftest и inputtest — на macOS arm64 в CI):
+**Native как игра — v2.32** (проверено сценариями `RE_KEYS` и настоящей клавиатурой X11 (xdotool) под Xvfb, Linux arm64; сборка, selftest и inputtest — на macOS arm64 в CI):
 - работает: заставки и главное меню, режим **Take A Ride** в Майами — езда по городу (стриминг блоков карты), трафик, столкновения, HUD (Damage/Felony, радар, спидометр);
 - управление машиной: газ, тормоз/задний ход, ручник, резкий руль, смена камеры (вид с капота), пауза по Esc с меню (Continue / Restart / Sound Setup / Gfx Details / Film Director / Quick Replay / Show Map / Exit) — см. «Управление»;
 - звук: DirectSound эмулируется собственным микшером (SDL_audio или запись в WAV), двигатель и шумы слышны, мягкий ограничитель — без клиппинга; музыка — эмуляция CD-audio (v2.22, дорожки из файлов вашего диска — см. «CD-музыка»);
@@ -80,6 +80,7 @@ cmake --build build-native -j
 
 Результат — `build-native/driver`. `libosmesa6-dev` нужен только для offscreen-теста рендера в selftest: если OSMesa не найден,
 CMake подключает `plat_render_nogl.c` и тест рендера пропускается. С libGL программа не линкуется — GL-функции берутся через `SDL_GL_GetProcAddress`.
+Steam Controller (2026) системный SDL2 Classic не видит — для него сборка с `-DRE_SDL3_COMPAT=ON`, пакеты и udev-правила: раздел «Gamepads on Linux» ниже.
 
 ### macOS (Apple Silicon)
 
@@ -120,7 +121,7 @@ cmake -S . -B build-app -DCMAKE_BUILD_TYPE=Release -DRE_MACOS_BUNDLE=ON && cmake
 `pthread_main_np`, событие клавиши через `SDL_PushEvent` → разбор событий игры → DIK, Cmd+Enter, биты езды стрелками, вписывание кадра)
 и `driver --selftest`, модульные проверки перенесённых функций
 на синтетических данных (тест настоящего уровня `RE_REAL_LEVEL` и рендер-снимок OSMesa на macOS пропускаются); Linux x86_64 —
-то же плюс hook-сборка `DINPUT.dll` ([.github/workflows/linux.yml](.github/workflows/linux.yml)).
+то же плюс hook-сборка `DINPUT.dll` и (v2.32) job `native-sdl3`: сборка с `RE_SDL3_COMPAT=ON`, ctest и проверка переносимости `driver` + `sdl-runtime/` ([.github/workflows/linux.yml](.github/workflows/linux.yml)).
 
 ## Разрешение и соотношение сторон
 
@@ -206,6 +207,26 @@ The modern SDL libraries are built into `Driver.app/Contents/Frameworks`; the sy
 Driving buttons follow the game's keyboard bindings, including changes made in its options. Steering and pedals currently use the game's digital action path, with stick/trigger deadzones. Keyboard input remains available. Held buttons are suppressed when crossing between menus and gameplay until released. `RE_GAMEPAD=0` disables native controller handling, useful with a Steam Input keyboard layout to avoid duplicate input. Damage vibration sends short pulses for crashes into cars and scenery, scaled to the damage received. Vibration stops on pause, focus loss, or disconnect; `RE_RUMBLE=0` disables it. Gyro and trackpad gestures are not mapped by this implementation.
 
 Use `RE_INPUTDBG=1` to log detection, mapping, axes, buttons, and delivered game keys (`~/Library/Logs/driver_input.log` on macOS). `RE_DIAG=1` also records device connection/disconnection in the diagnostic session. For Steam Input, choose a conventional gamepad layout; use the disable option above if choosing a keyboard layout instead.
+
+**Gamepads on Linux (v2.32).** The input code is the same as on macOS, but distribution SDL2 packages are SDL2 Classic (Ubuntu 24.04 — 2.30, Debian 13 — 2.32.4) and do not know the 2026 controller either, so build the same pinned runtime with `RE_SDL3_COMPAT=ON`. Ubuntu/Debian packages (checked on Debian 13 arm64 and in CI on Ubuntu 24.04 x86_64):
+
+```sh
+sudo apt-get install -y build-essential cmake \
+  libx11-dev libxext-dev libxcursor-dev libxi-dev libxrandr-dev libxtst-dev \
+  libudev-dev libasound2-dev libpulse-dev libdbus-1-dev
+# recommended: Wayland and extra X11 features
+sudo apt-get install -y libwayland-dev libxkbcommon-dev libdecor-0-dev libxss-dev libxfixes-dev libusb-1.0-0-dev
+# optional: libosmesa6-dev (offscreen render test in selftest)
+
+cmake -S re -B build-sdl3 -DCMAKE_BUILD_TYPE=Release -DRE_SDL3_COMPAT=ON
+cmake --build build-sdl3 -j
+(cd build-sdl3 && ctest --output-on-failure -L nodata)
+```
+
+- The first line (`libx11-dev` … `libxtst-dev`) is the minimum for SDL3 to configure: without X11/Xext it stops with "could not find X11 or Wayland", and without `libxcursor-dev`, `libxi-dev`, `libxrandr-dev` or `libxtst-dev` with "Couldn't find dependency package for XCURSOR/XINPUT/XRANDR/XTEST". It builds without the rest, but then has **no sound** (`libasound2-dev`/`libpulse-dev`, or `libpipewire-0.3-dev`) and **no udev** (`libudev-dev`: device discovery and hotplug for HIDAPI/evdev). `libsdl2-dev` is not needed for this build. SDL3 picks optional backends silently, so check the configure summary: `Joystick drivers: hidapi linux virtual`, `SDL_LIBUDEV ON`, `Audio drivers: … alsa pulseaudio`.
+- The result is `build-sdl3/driver` plus `build-sdl3/sdl-runtime/` (`libSDL2-2.0.so.0` = sdl2-compat 2.32.74, `libSDL3.so.0` = SDL3 3.4.18). The binary's RUNPATH is `$ORIGIN/sdl-runtime` and sdl2-compat's is `$ORIGIN` (it loads SDL3 with `dlopen`), so copy **`driver` and `sdl-runtime/` together**; the folder can live anywhere. Check with `ldd driver | grep SDL` — it must point to `…/sdl-runtime/`. At startup the game logs `[gamepad] SDL 2.32.74 (sdl2-compat/SDL3, …)`; `SDL Classic` there means the system SDL2 was picked up (the bundled folder is missing, or `LD_LIBRARY_PATH` overrides it). The CI artifact `driver-linux-x86_64-sdl3` (tar.gz with `driver` + `sdl-runtime/`) is built this way.
+- **Device access.** SDL talks to the controller through `/dev/hidraw*` (HIDAPI). By default only root can open it, so install Valve's udev rules: `sudo apt-get install steam-devices` (Ubuntu: multiverse; Debian: contrib), or copy [60-steam-input.rules](https://github.com/ValveSoftware/steam-devices/blob/master/60-steam-input.rules) to `/etc/udev/rules.d/` and run `sudo udevadm control --reload-rules && sudo udevadm trigger`, then reconnect the controller/Puck. Without access the controller is not opened (or only appears through the kernel's generic evdev driver with a different mapping); `RE_INPUTDBG=1` (log `driver_input.log` next to the binary) shows what SDL opened.
+- **Steam Input.** If Steam is running, it may hold the controller and present a virtual pad. Choose a conventional gamepad layout, or with a Steam Input keyboard layout run the game with `RE_GAMEPAD=0` to avoid duplicate input — same as on macOS.
 
 **Дальность прорисовки (v2.19, `draw_distance`, env `RE_DRAW_DIST`):** множитель к дальности из опций игры (Gfx Details, 15 000–45 000
 единиц; клетка карты — 3000): 1.0 — оригинал, до 4.0; `enhanced` — 2.0, `original` — 1.0. В оригинале дальность ограничивают: окно обхода

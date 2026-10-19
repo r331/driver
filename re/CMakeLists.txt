@@ -78,6 +78,11 @@ else()
     if(APPLE AND RE_MACOS_BUNDLE)
       set_target_properties(driver PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE
         INSTALL_RPATH "@executable_path/../Frameworks")
+    elseif(UNIX AND NOT APPLE)
+      # v2.32: RUNPATH относительно бинарника — driver + sdl-runtime/ можно переносить вместе;
+      # абсолютный <build>/sdl-runtime вне каталога сборки молча давал системный SDL2 Classic.
+      set_target_properties(driver PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE
+        INSTALL_RPATH "$ORIGIN/sdl-runtime")
     endif()
   endif()
   if(NOT WIN32)

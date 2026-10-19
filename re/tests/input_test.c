@@ -31,15 +31,28 @@ static void pad_sample(uint8_t *k) {
 }
 static int rumble_calls;
 static Uint16 rumble_low, rumble_high;
+/* v2.32: какое значение должен вернуть колбэк Rumble виртуального джойстика, чтобы SDL_JoystickRumble вернул 0.
+   SDL2 Classic: 0 = успех. sdl2-compat (по крайней мере 2.32.70 и 2.32.74, VirtualJoystick_Rumble) передаёт
+   int-результат колбэка в SDL3 как bool без преобразования, т.е. «успех» = 1. Вместо списка версий —
+   однократный зонд на том же виртуальном джойстике до того, как его увидит игра (реальное железо этот
+   адаптер не использует). Отдельный пробный джойстик не годится: в sdl2-compat после его отключения
+   индексы устройств расходятся с игрой. */
+static int rumble_ok = -1, rumble_probe = -1;
 static int SDLCALL record_rumble(void *unused, Uint16 low, Uint16 high) {
-    (void)unused; rumble_calls++; rumble_low = low; rumble_high = high;
-    /* SDL2-compat 2.32.70 and 2.32.74's VirtualJoystick_Rumble forward SDL2's int result
-       as an SDL3 bool without conversion. Compensate only in this test callback;
-       real hardware rumble does not use that virtual-device adapter. Keep this
-       limited to verified versions so a future upstream fix uses SDL2's normal 0. */
-    SDL_version version; SDL_GetVersion(&version);
-    return version.major == 2 && version.minor == 32 &&
-           (version.patch == 70 || version.patch == 74) ? 1 : 0;
+    (void)unused;
+    if (rumble_probe >= 0) return rumble_probe;   /* зонд: не считается вызовом игры */
+    rumble_calls++; rumble_low = low; rumble_high = high;
+    return rumble_ok > 0 ? 1 : 0;
+}
+static void probe_rumble_result(SDL_Joystick *joy) {
+    /* разные силы: SDL пропускает вызов драйвера при повторе тех же значений */
+    int r0, r1 = -2;
+    rumble_probe = 0; r0 = SDL_JoystickRumble(joy, 1000, 1000, 50);
+    if (r0 == 0) rumble_ok = 0;
+    else { rumble_probe = 1; r1 = SDL_JoystickRumble(joy, 2000, 2000, 50); rumble_ok = r1 == 0 ? 1 : -1; }
+    rumble_probe = rumble_ok > 0; SDL_JoystickRumble(joy, 0, 0, 0); rumble_probe = -1;
+    printf("inputtest: зонд вибрации: колбэк 0 -> %d, 1 -> %d; успех колбэка = %d%s\n", r0, r1, rumble_ok,
+           rumble_ok == 1 ? " (инверсия sdl2-compat)" : rumble_ok < 0 ? " (зонд не удался)" : "");
 }
 static int test_damage_rumble(uint8_t *k) {
     p99_car_t saved = P99_Cars[0];
@@ -98,6 +111,7 @@ static int test_gamepad(void) {
     int index = SDL_JoystickAttachVirtualEx(&descriptor);
     CHK(index >= 0 && SDL_IsGameController(index));
     SDL_Joystick *joy = SDL_JoystickOpen(index); CHK(joy != NULL);
+    probe_rumble_result(joy); CHK(rumble_ok >= 0);
     SDL_JoystickSetVirtualAxis(joy, SDL_CONTROLLER_AXIS_TRIGGERLEFT, -32768);
     SDL_JoystickSetVirtualAxis(joy, SDL_CONTROLLER_AXIS_TRIGGERRIGHT, -32768);
     G6_00B87EFC = 1;
