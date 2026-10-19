@@ -226,11 +226,12 @@ int32_t P63_NearestRec(void) {
   return P63_Near;
 }
 
-/* P63_CanEnter — Game.exe 0048f1c6, cdecl.  May traffic car `rec` enter the next node?  Always 1 when the current node's slot entry has
-   byte 3 set.  Otherwise looks at the neighbour node in the car's direction: blocked (0) by an
+/* P63_CanEnter — Game.exe 0048f1c6, cdecl.  May traffic car `rec` enter the next node?  Always 1 when the current node is not a junction
+   (slot byte 3).  Otherwise looks at the neighbour node in the car's direction: blocked (0) by an
    unlisted-distance car (id | 0x80), or by a car closer than 15000 whose TREC_F34 is 0, or
    closer than 9000 unless TREC_F34 is -1.  Finally the P59_TrafficCheck(rec, 1) test must
-   pass.  TODO(RE): unsure what slot byte 3 means (likely "no junction"). */
+   pass.  Slot byte 3 is set by P14_Fn0051BED5 for nodes with exactly two connections (plain road,
+   no junction). */
 int32_t P63_CanEnter(const uint8_t *rec) {
   int32_t node = rd32(rec, TREC_ROAD_NODE);
   const uint8_t *tab = (const uint8_t *)P14_00c1ed80 + (uint32_t)node * 0x2c;
