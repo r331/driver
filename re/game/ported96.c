@@ -1,3 +1,7 @@
+/* ported96 — batch of leaf functions (Game.exe, cdecl): on-screen debug log queue, pedestrian chairs, MScript word /
+   string parsing, sphere and rotation tables, FPS and load-bar text, HUD icons and text placement, spark / dust /
+   effect spawning, mission clock, director reset, option clamping, replay script step, particle dispatch and the
+   car shadow icon.  English summaries precede the original Russian note of each function.  Original note: */
 /* Пачка простых/листовых функций — восстановлено из Game.exe (004d90f4, 004a2c98, 004a32e9, 004f652e, 004f6612, 004e8440,
    0048db8e, 004d7a21, 004d9663, 004e71dc, 004e72f8, 004b9464, 004b04c0, 004ad5d2, 004fba23, 005199bc, 00516ed3, 0051718a,
    005172bb, 005222cf, 0050fab0, 0050e9ab, 00513cc7, 00513ce0, 0052008e). */
@@ -263,6 +267,7 @@ static void wrf(uint8_t *p, int o, float v) { memcpy(p + o, &v, 4); }
 static void wr16(uint8_t *p, int o, int16_t v) { memcpy(p + o, &v, 2); }
 static int32_t f2i(float f) { int32_t v; memcpy(&v, &f, 4); return v; }   /* 0040ab59/0040ab6f принимают float в int-слоте */
 
+/* P96_InitConsts — native only: initial .data values (575f0c, 575d84). */
 void P96_InitConsts(void) {
 #ifndef RE_HOOK_BUILD
   P96_RefreshHz = 50;
@@ -270,6 +275,7 @@ void P96_InitConsts(void) {
 #endif
 }
 
+/* Text of a debug-log queue entry (stored as a 32-bit id / address). */
 const char *P96_LogText(uint32_t id) {
 #ifdef RE_HOOK_BUILD
   return (const char *)(uintptr_t)id;
@@ -279,6 +285,8 @@ const char *P96_LogText(uint32_t id) {
 #endif
 }
 
+/* Queues a line for the on-screen debug log (max 128 entries): string, colour, column, row; newline and wrap at
+   screen width / 8 move to the next row. */
 /* 004d90f4: в очередь P55_PopTab — {адрес строки, цвет WH00B2C3A8, столбец, строка}; перевод строки и ширина экрана/8 сдвигают строку */
 void P96_LogLine(const char *s) {
   if (P55_PopCnt >= 0x80) return;
@@ -312,6 +320,7 @@ void P96_LogLine(const char *s) {
 /* 004bf485 (Call004BF485) без обрезки указателя в native: при G00B87E7C == 0 — в журнал */
 static void p96_print(const char *s) { if (G00B87E7C == 0) P96_LogLine(s); }
 
+/* Frees the seated pedestrians whose chair cell is not one of the 4 cells around the player. */
 /* 004a2c98: записи 0x18 по 01134540 {слот, клетка, номер кресла, x, z, флаги (+0x14 — D_01134554)} */
 void P96_DropFarChairs(void) {
   if (P58_Grid == NULL) return;
@@ -328,6 +337,7 @@ void P96_DropFarChairs(void) {
   }
 }
 
+/* Random free chair of map cell cell, or NULL. */
 /* 004a32e9 */
 uint8_t *P96_PickChair(int32_t cell) {
   if (P58_Grid == NULL) return NULL;
@@ -339,6 +349,8 @@ uint8_t *P96_PickChair(int32_t cell) {
   return it;
 }
 
+/* Splits the first word (printable 0x21..0x7f, up to ',' or blank) off line into out, shifting the rest to the
+   front.  Returns 0 or 0xc (TODO(RE): unsure — script error code "missing word"). */
 /* 004f652e: первое слово (печатные 0x21..0x7f) до ',' или пробела после слова; остаток сдвигается в начало строки */
 int32_t P96_ParseWord(char *line, char *out) {
   int32_t len = (int32_t)strlen(line), n = 0, i;
@@ -354,6 +366,7 @@ int32_t P96_ParseWord(char *line, char *out) {
   return 0;
 }
 
+/* Parses a "quoted string" (0x20..0x7f) at the start of line into out, shifting the rest to the front; 0 / 0xc. */
 /* 004f6612: пропустить пробелы/табуляции, затем "строка" (символы 0x20..0x7f); хвост после кавычки — в начало (strcpy) */
 int32_t P96_ParseQuoted(char *line, char *out) {
   int32_t len = (int32_t)strlen(line), n = 0, i = 0;
@@ -378,6 +391,7 @@ int32_t P96_ParseQuoted(char *line, char *out) {
   }
 }
 
+/* Unit-sphere point table: 7 rings of 32 points, y = +-0.25 * k, ring radius sqrt(1 - y^2). */
 /* 004e8440: 7 колец по 32 точки, y = ±0.25·k, радиус sqrt(1 − y²) (CRT sqrt 0052dfd4) */
 void P96_InitSphere(void) {
   for (int32_t k = 0; k < 4; k++) {
@@ -395,6 +409,7 @@ void P96_InitSphere(void) {
   }
 }
 
+/* Rotation table of the 4 corners of a 360 x 900 rectangle (+-180, +-450) for 1024 angles (step 4). */
 /* 0048db8e: 4 угла прямоугольника (±180, ±450), повёрнутые на угол i·4; fstp во float, затем fistp */
 static int32_t rnd2(double v) { return (int32_t)lrintf((float)v); }
 void P96_InitRotTab(void) {
@@ -409,6 +424,7 @@ void P96_InitRotTab(void) {
   }
 }
 
+/* Every 15 frames prints "<n> Hz, <m> FPS." to the debug log. */
 /* 004d7a21: раз в 15 кадров — частота кадров по счётчику P62_Frame; строка «%d Hz, %d FPS.» в журнал */
 void P96_FpsText(void) {
   char buf[80];
@@ -426,6 +442,7 @@ void P96_FpsText(void) {
   Call004BF476();
 }
 
+/* Loading bar: advances by bytes read so far; next refresh after another 0x20000 bytes. */
 /* 004d9663: полоса загрузки по прочитанным байтам P27_ReadBytes из P8_00d0fe1c; следующий порог +0x20000 */
 void P96_LoadBar(void) {
   if (P27_ReadBytes >= P8_00d0fe1c) return;
@@ -442,6 +459,7 @@ void P96_LoadBar(void) {
   P47_GlideSwap();
 }
 
+/* 640x480 virtual coordinates -> screen with zoom about the centre; icon record +8 page, +9..+0xc u0 v0 u1 v1. */
 /* 004e71dc / 004e72f8: виртуальные 640×480 → экран с масштабом от центра; значок {+8 страница, +9..+12 u0 v0 u1 v1} */
 static float vx(float x) { return (float)((((double)x / 640.0 - 0.5) * P19_Scale + 0.5) * (double)(float)P19_ScrW); }
 static float vy(float y) { return (float)((((double)y / 480.0 - 0.5) * P19_Scale + 0.5) * (double)(float)P19_ScrH); }
@@ -459,6 +477,7 @@ void P96_IconRect(float x, float y, float w, float h, const uint8_t *icon, uint3
   icon_draw(vx(x), vy(y), (float)(k * w * P19_Scale), (float)(k * h * P19_Scale), icon, rgb);
 }
 
+/* Spawns a spark (0x78-byte record) at pos from the free pool. */
 /* 004b9464: искра — запись 0x78 массива A (010f5160) из пула 004ac6d0 */
 void P96_SpawnSpark(const float *pos, int32_t a, int32_t b, int16_t c) {
   if (G6_00B5A778 != 0 || (P62_Frame & 1) != 0) return;
@@ -478,6 +497,7 @@ void P96_SpawnSpark(const float *pos, int32_t a, int32_t b, int16_t c) {
   wr32(r, 0x60, 2); wr32(r, 0x58, 0x50); wr32(r, 0x5c, 2);
 }
 
+/* Spawns n dust particles (0x24-byte records) at pos if the first slot is free. */
 /* 004b04c0: пыль — n записей 0x24 по 0110e160, если первая запись не живая (+0x20 == 0) */
 void P96_SpawnDust(const float *pos, int32_t n) {
   if (P96_SparkOn == 0 || P96_DustOn == 0 || rd32(P96_Dust, 0x20) != 0) return;
@@ -498,6 +518,7 @@ void P96_SpawnDust(const float *pos, int32_t n) {
   }
 }
 
+/* Adds an effect object to list B (position, UVs, sizes, flags) and counts it. */
 /* 004ad5d2: запись массива B по указателю 01105d60 (адрес Game.exe → P95_ObjPtr), счётчик G010FFD04 */
 void P96_AddObjB(const float *pos, const int32_t *uv, int16_t a, int16_t b, uint32_t flags, int32_t mark, int32_t c, int32_t d) {
   if (P96_ObjBOn == 0 || P13_00b201dc == 0) return;
@@ -514,6 +535,7 @@ void P96_AddObjB(const float *pos, const int32_t *uv, int16_t a, int16_t b, uint
   G010FFD04++;
 }
 
+/* Mission stopwatch text from a timer record (+0xc hundredths, +0x10 seconds, +0x14 minutes). */
 /* 004fba23 */
 void P96_ClockText(const uint8_t *t) {
   char buf[20];
@@ -541,6 +563,7 @@ void P96_ClockText(const uint8_t *t) {
   }
 }
 
+/* Replay indicator "R": green while playing back, red while recording. */
 /* 005199bc: метка «R» в журнал — зелёная (b5a850) или красная (b5a894) */
 void P96_ReplayTag(void) {
   char tag[4] = {P96_RTag[0], P96_RTag[1], P96_RTag[2], 0};
@@ -552,6 +575,7 @@ void P96_ReplayTag(void) {
   Pack565Bytes004BF452(0xf0, 0xf0, 0xa0);
 }
 
+/* Draws text txt at screen (x, y), scaled about the centre (alignment flags 4). */
 /* 00516ed3: x, y — экранные, масштаб P19_Scale от центра; флаги 4 */
 void P96_TextCenter(float x, float y, float sx, float sy, uint32_t txt) {
   int32_t cx = P19_ScrW >> 1, cy = P19_ScrH >> 1;
@@ -566,6 +590,7 @@ void P96_TextCenter(float x, float y, float sx, float sy, uint32_t txt) {
 
 static uint8_t align_flags(int32_t align, uint8_t base) { return (uint8_t)(align == -1 ? base | 0x10 : align == 1 ? base | 4 : base); }
 
+/* Draws text at 640x480 virtual (x, y); align -1 / 1 / other -> flags 0x10 / 4 / 0. */
 /* 0051718a: виртуальные 640×480; align −1/1/иначе → флаги 0x10/4/0 */
 void P96_TextAt(float x, float y, uint32_t txt, uint8_t a, int32_t align) {
   float sw = (float)P19_ScrW, sh = (float)P19_ScrH, s = P19_Scale;
@@ -579,6 +604,7 @@ void P96_TextAt(float x, float y, uint32_t txt, uint8_t a, int32_t align) {
   P67_Fn40ABAC(txt);
 }
 
+/* Draws text horizontally centred at virtual y; flags 0x11 / 5 / 1 by align. */
 /* 005172bb: по центру экрана по x; флаги 0x11/5/1 */
 void P96_TextMid(float y, uint32_t txt, uint8_t a, int32_t align) {
   float sw = (float)P19_ScrW, sh = (float)P19_ScrH, s = P19_Scale;
@@ -592,6 +618,7 @@ void P96_TextMid(float y, uint32_t txt, uint8_t a, int32_t align) {
   P67_Fn40ABAC(txt);
 }
 
+/* Resets the replay director: deletes the waypoint and temporary camera files, clears its 400-byte state. */
 /* 005222cf: удалить waypoint-файл и временный файл камер, обнулить 400 байт состояния режиссёра (00d17b60..00d17cf0) */
 void P96_ResetDirector(void) {
   DeleteWaypointFile();
@@ -610,6 +637,7 @@ void P96_ResetDirector(void) {
   SetDirectorMode(0, 0, 0);
 }
 
+/* Clamps the two view distances to 15000..42000 and the minimum frame step to 1..10. */
 /* 0050fab0: дальности видимости в [15000, 42000], минимальный шаг кадров в [1, 10] */
 static float clampf(float v) {
   float a = (v <= 42000.0f) ? v : 42000.0f;          /* .rdata 00546028 / 0054602c */
@@ -623,6 +651,7 @@ void P96_ClampOptions(void) {
   Call0050FBF4();
 }
 
+/* Steps the replay script cursor; at the end returns to the saved cursor or the default pair. */
 /* 0050e9ab: шаг сценария повтора (P17_PtrA/ValA); по концу — возврат к сохранённому (PtrB/ValB) или к паре 738/73c */
 void P96_ReplayScript(void) {
   if (P17_PtrA == 0 || P29_Mode != 0) return;
@@ -648,6 +677,7 @@ void P96_ReplayScript(void) {
   }
 }
 
+/* Particle step by type (+0x1c) through the handler table 005759c4 (two identical entry points). */
 /* 00513cc7 / 00513ce0: обработчик по типу частицы (+0x1c) из таблицы 005759c4 */
 #ifndef RE_HOOK_BUILD
 static void part_step(uint8_t *p) { P67_ObjStep(p); }
@@ -665,6 +695,7 @@ static void part_run(uint8_t *p) {
 void P96_PartRunA(uint8_t *p) { part_run(p); }
 void P96_PartRunB(uint8_t *p) { part_run(p); }
 
+/* Prepares the CARSHAD shadow icon: page, corner UVs inset by 1.5 / 0.5 texels, size, white colour. */
 /* 0052008e: значок CARSHAD → индексы 0..3, страница, uv углов (+1.5 / −0.5 от краёв), размеры, цвет 255 */
 void P96_ShadowInit(void) {
   P96_ShadIcon = P93_FindIcon("CARSHAD");
