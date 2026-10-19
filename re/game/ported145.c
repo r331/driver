@@ -1,3 +1,7 @@
+/* Level loading: P145_LevelLoad (Game.exe 004d38b7) prepares everything for one level —
+   demo/replay setup, director mode, mission script, sound banks, map palettes and the .lev file,
+   all subsystems, player start position, lamp colour and CD track.  English summary; the detailed
+   Russian notes below list every call. */
 /* v1.90: ported145 — см. ported145.h. Восстановлено из Game.exe (Ghidra out/Game_decomp.c + ассемблер), cdecl (ret без операнда).
    004d38b7 — загрузка уровня. Демо 00b87e38 = 200/0xfa/0xfb/0xfc → 00d11934 = 1, 00b87ea0 = 1, 005f7e50 = 4 и конфиг повтора
      I_TRAINDEMO0/DESERTDEMO1..3 (00517d58, 0 — выход 0); режим режиссёра 004c875d по 005f7e5c/005f7e50/00d11934/00d17b90/00b87ef8;
@@ -208,10 +212,16 @@ p145_splash_t P145_Splash;
 #  define P145_STD
 #endif
 
+/* City / level index P15_State (names from the LEVELS\*.D3D palette file each one loads). */
+enum { CITY_MIAMI = 0, CITY_FRISCO = 1, CITY_LA = 2, CITY_NEWYORK = 3, CITY_IVIEW = 4, CITY_TRAIN = 5, CITY_NEWCASTLE = 6 };
+#define FAR_27000 0x46d2f000u   /* 27000.0f: default far distance when no detail preset is applied */
+
+/* u2f — Reinterpret a uint32 as float bits. */
 static float u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
 #include "memrw.h"
 
 /* (*01270d6c)(0,1,1) = grTexFilterMode — по имени из таблицы Glide (как ported124) */
+/* tex_filter — grTexFilterMode(a, b, c) through the Glide function table, looked up by export name. */
 static void tex_filter(int32_t a, int32_t b, int32_t c) {
   for (int i = 0; i < P33_GlideCount(); i++)
     if (strcmp(P33_GlideName(i), "_grTexFilterMode@12") == 0) {
@@ -221,19 +231,34 @@ static void tex_filter(int32_t a, int32_t b, int32_t c) {
     }
 }
 
+/* set_ea0 — Write 00b87ea0 (training/interview flag) and its alias P62_HudOff1. */
 static void set_ea0(int32_t v) { G6_00B87EA0 = v; P62_HudOff1 = v; }
+/* set_frame0 — Reset the frame counter (P62_Frame) and the fixed random seed 00d118c0. */
 static void set_frame0(void) { P62_Frame = 0; G8_00D118C0 = 0; }
+/* set_d11934 — Write the demo flag 00d11934 and its alias P17_Cond1. */
 static void set_d11934(int32_t v) { P11_00d11934 = v; P17_Cond1 = v; }
+/* set_c8198c — Write 00c8198c and all its native aliases. */
 static void set_c8198c(int32_t v) {
   G00C8198C = v; P43_AnimTab[0] = v;
   memcpy((uint8_t *)A_00C8198C, &v, 4);
 }
 
 /* ---- 004d38b7 ---- */
+/* P145_LevelLoad — Game.exe 004d38b7, cdecl.  Load and initialise the current level (city P15_State, mission 00b87e38).
+   Demo missions 200 / 0xfa..0xfc load their replay config (I_TRAINDEMO0, DESERTDEMO1..3) and run
+   in replay mode 4.  Chooses the director mode, loads the mission (keeping three values in the
+   interview city), the master.dss / cops.dss sound banks, LEVELS\<city>.D3D palettes, shows the
+   loading picture, seeds the RNG (srand(0x3039)), applies default effect flags and far distance
+   27000 when no detail preset is active, sets the HUD strip rectangle with a per-city seed, then
+   loads FRUSTRUM.DAT and the .lev file and initialises cars, traffic, particles, sky, scripts,
+   lamp colour, the player start (shifted, or reused from the previous mission's end) and replay
+   recording, and starts CD track city + 4.  Logs "Interview .., Training .." to debug.log.
+   Returns 1, or 0 if a replay config or the level file cannot be loaded.
+   Native: v2.33 dynamic-music hint before the CD track request. */
 int32_t P145_LevelLoad(void) {
   const char *demo = NULL;
   if (GameMode == 0) DeleteWaypointFile();
-  if (G6_00B87EAC != 0 && (P15_State == 4 || P15_State == 5)) set_ea0(1);
+  if (G6_00B87EAC != 0 && (P15_State == CITY_IVIEW || P15_State == CITY_TRAIN)) set_ea0(1);
   P110_FullClip = 1;
   P21_FpsLast = 0; P21_FpsVal = 0; P21_FpsCnt = 0;
   set_frame0();
@@ -275,21 +300,21 @@ int32_t P145_LevelLoad(void) {
   if (P145_B20308 != 0 && P138_ReplayCfg(P145_CfgName) == 0) return 0;
   int32_t sv14 = G00C8198C, svc = P17_Src, sv18 = G00C81988;
   P138_LoadMission(P11_00b87e38);
-  if (G6_00B87EAC != 0 && (P15_State == 4 || P15_State == 5)) set_ea0(1);
-  if (P15_State == 4) { set_c8198c(sv14); P17_Src = svc; G00C81988 = sv18; }
-  if (P15_State == 2 || P15_State == 4) P14_00b87e84 = 1;
+  if (G6_00B87EAC != 0 && (P15_State == CITY_IVIEW || P15_State == CITY_TRAIN)) set_ea0(1);
+  if (P15_State == CITY_IVIEW) { set_c8198c(sv14); P17_Src = svc; G00C81988 = sv18; }
+  if (P15_State == CITY_LA || P15_State == CITY_IVIEW) P14_00b87e84 = 1;
   P145_BankMain = P77_LoadBank("master.dss", 0);
   P145_BankCops = P77_LoadBank("cops.dss", 0x8000);
   SoundSetVolB0052360D(1);
   P58_FreeRecs();
   switch (P15_State) {
-  case 0: P126_ReadMapPals("LEVELS\\MIAMI.D3D"); break;
-  case 1: P126_ReadMapPals("LEVELS\\FRISCO.D3D"); break;
-  case 2: P126_ReadMapPals("LEVELS\\LA.D3D"); break;
-  case 3: P126_ReadMapPals("LEVELS\\NEWYORK.D3D"); break;
-  case 4: P126_ReadMapPals("LEVELS\\IVIEW.D3D"); break;
-  case 5: P126_ReadMapPals("LEVELS\\TRAIN.D3D"); break;
-  case 6: P126_ReadMapPals("LEVELS\\NC_01.D3D"); break;
+  case CITY_MIAMI:     P126_ReadMapPals("LEVELS\\MIAMI.D3D"); break;
+  case CITY_FRISCO:    P126_ReadMapPals("LEVELS\\FRISCO.D3D"); break;
+  case CITY_LA:        P126_ReadMapPals("LEVELS\\LA.D3D"); break;
+  case CITY_NEWYORK:   P126_ReadMapPals("LEVELS\\NEWYORK.D3D"); break;
+  case CITY_IVIEW:     P126_ReadMapPals("LEVELS\\IVIEW.D3D"); break;
+  case CITY_TRAIN:     P126_ReadMapPals("LEVELS\\TRAIN.D3D"); break;
+  case CITY_NEWCASTLE: P126_ReadMapPals("LEVELS\\NC_01.D3D"); break;
   default: break;
   }
   P124_ShowBmp(P55_Lang == 5 ? "DATA\\USLOADING.BMP" : "DATA\\LOADING.BMP", 0);
@@ -313,7 +338,7 @@ int32_t P145_LevelLoad(void) {
   Mask004D9028(0xd431, 0x350b1);
   if (P95_C818B8 != 0) S_00D1192C = 1;
   P58_FreeList();
-  if (P55_B87EB8 == 0) {
+  if (P55_B87EB8 == 0) {                     /* no detail preset: all effects on, far distance 27000 */
     P13_00575ebc = 1; G6_00575EBC = 1;
     P13_00575ec0 = 1; G6_00575EC0 = 1;
     MenuVar55384C = 1; P13_0055384c = 1; G0055384C = 1;
@@ -322,23 +347,24 @@ int32_t P145_LevelLoad(void) {
     P13_00d11880 = 1; G6_00D11880 = 1;
     MenuVar575EE8 = 1; P13_00575ee8 = 1; G00575EE8 = 1;
     MenuVar553850 = 1; P13_00553850 = 1; G00553850 = 1;
-    P11_01270c24 = u2f(0x46d2f000u); P13_01270c24 = (int32_t)0x46d2f000; Q01270C24 = u2f(0x46d2f000u); P59_CamF1 = u2f(0x46d2f000u);
-    P11_0125f3f8 = u2f(0x46d2f000u); P13_0125f3f8 = (int32_t)0x46d2f000; Q0125F3F8 = u2f(0x46d2f000u);
+    P11_01270c24 = u2f(FAR_27000); P13_01270c24 = (int32_t)FAR_27000; Q01270C24 = u2f(FAR_27000); P59_CamF1 = u2f(FAR_27000);
+    P11_0125f3f8 = u2f(FAR_27000); P13_0125f3f8 = (int32_t)FAR_27000; Q0125F3F8 = u2f(FAR_27000);
     P11_0125f3e0 = 1.0f; P19_Scale = 1.0f;
   }
   P110_ViewSetup(0, 0, 0);
+  /* Bottom HUD strip, 65..575 x 430..460 on a 640x480 screen, scaled to the current mode. */
   float x0 = (65.0f * (float)P19_ScrW) / P19_DivW;    /* .rdata 005468c4 */
   float y0 = (430.0f * (float)P19_ScrH) / P19_DivH;   /* 005468c0 */
   float x1 = (575.0f * (float)P19_ScrW) / P19_DivW;   /* 005468bc */
   float y1 = (460.0f * (float)P19_ScrH) / P19_DivH;   /* 005468b8 */
   int32_t seed;
   switch (P15_State) {
-  case 1: seed = 0x1b31c4c; break;
-  case 2: seed = 0x160d04a; break;
-  case 3: seed = 0x19b16a9; break;
-  case 4: seed = 0x9f3750; break;
-  case 5: seed = 0xc68f60; break;
-  case 6: seed = 0x528fb4; break;
+  case CITY_FRISCO:    seed = 0x1b31c4c; break;
+  case CITY_LA:        seed = 0x160d04a; break;
+  case CITY_NEWYORK:   seed = 0x19b16a9; break;
+  case CITY_IVIEW:     seed = 0x9f3750; break;
+  case CITY_TRAIN:     seed = 0xc68f60; break;
+  case CITY_NEWCASTLE: seed = 0x528fb4; break;
   default: seed = 0x161712a; break;
   }
   int32_t iy = fround(y0);
@@ -380,7 +406,7 @@ int32_t P145_LevelLoad(void) {
   P75_ResetObjs();
   P103_TrafficReset();
   P102_ResetCars();
-  if (P15_State == 4 || P15_State == 5) P104_MissionInit();
+  if (P15_State == CITY_IVIEW || P15_State == CITY_TRAIN) P104_MissionInit();
   P69_SetupMsgs();
   if (P56_B87EA8 != 0) Set0D044C8();
   if (P14_00b87e84 != 0) P14_Fn004CAD47();
@@ -406,7 +432,7 @@ int32_t P145_LevelLoad(void) {
   else if (P14_00b87e84 != 0) P98_LampColor(P130_LampRGB[0], P130_LampRGB[1], P130_LampRGB[2]);
   else if (P26_FxA != 0) P98_LampColor(0x9a, 0x9a, 0x9a);
   P99_MarkerReset();
-  if (P95_BDFA60 != 0) {
+  if (P95_BDFA60 != 0) {                     /* shift six player-record fields by 00bdfa60 / 6 each */
     int32_t d = P95_BDFA60 / 6;
     P145_D078DC += d; P145_D078E0 += d; P145_D078E4 += d;
     P145_D078E8 += d; P145_D078EC += d; P145_D078F0 += d;
