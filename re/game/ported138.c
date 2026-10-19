@@ -1,3 +1,5 @@
+/* ported138.c — car shadows, mission loading, replay config / pads loading and the trail recorder end
+   (English overview; original notes follow). */
 /* v1.83: ported138 — см. ported138.h.
    00520278 — тень машины car: нет значка CARSHAD/00d11880 = 0 или машина над дорогой с флагом 0x80 — выход (метка 01270c20 + 1);
      в повторе (00b87ea0) машина 1 не рисуется, цвет 255 (при 00b20300 — 128). При 00575f20 = 0 (или ровной машине-трафике: |Δy| углов
@@ -188,7 +190,15 @@ p138_s40_t P138_CamsPath;
 #include "memrw.h"
 static const char k_rep_c[] = "D:\\Driver\\Game\\replays.c";
 
+#include "carfields.h"
+/* Replay config kind (word 0 of the .CFG, see P138_ReplayCfg). */
+enum { REPLAY_FREE = 0, REPLAY_MISSION = 1, REPLAY_CHASE = 2 };
+#define CAR_LEADER 0x41          /* car record used for the recorded chase leader (spare record) */
+
 /* ---- 00520278 ---- */
+/* shad_rec / shad_idx / shad_uv / shad_state / shad_vtx — local helpers of the car shadow: the 0x44-byte quad
+   record at 00b5c7e0 (native: built here from P96_ShadPage / P96_ShadRGB), its vertex indices and UVs, the
+   blend state, and a cache vertex at a ground point (10 units above the ground, camera-relative). */
 static uint8_t *shad_rec(void) {
 #ifdef RE_HOOK_BUILD
   return (uint8_t *)&P96_ShadIdx[0] - 8;                    /* запись 0x44 по адресу 00b5c7e0 */
@@ -205,6 +215,7 @@ static void shad_idx(uint8_t *rec, int32_t a, int32_t b, int32_t c, int32_t d) {
   for (int k = 0; k < 4; k++) { wr32(rec + 8 + 4 * k, v[k]); P96_ShadIdx[k] = v[k]; }
 }
 static void shad_uv(uint8_t *rec, int k, float u, float v) { memcpy(rec + 0x18 + 8 * k, &u, 4); memcpy(rec + 0x1c + 8 * k, &v, 4); }
+/* depth_bias — native helper: grDepthBiasLevel(v) through the loaded Glide DLL (01270e20). */
 static void depth_bias(int32_t v) {   /* 01270e20 grDepthBiasLevel */
   for (int i = 0; i < P33_GlideCount(); i++)
     if (strcmp(P33_GlideName(i), "_grDepthBiasLevel@4") == 0) {
@@ -227,12 +238,19 @@ static void shad_vtx(p85_vtx *v, const int32_t *c) {
   v->stamp = P44_XformTag;
   P85_VC_FMT(v, 0);
 }
+/* P138_CarShadow — Game.exe 00520278.  Draws the shadow of car `car` (CARSHAD texture, shadows on 00d11880).
+   Skipped on road pieces with model flag 0x80, and car 1 in replays.  A single quad over the 4 ground points
+   (CAR_GROUND_PT) when detailed shadows are off (00575f20 == 0) or a traffic car stands level (corner
+   heights within 10); otherwise a grid (5x6 for traffic, 8x10 for the player/replays) following the road
+   height, drawn with depth bias -0x300.  Gives up beyond the far limit 00546030; quads crossing the near
+   plane go through the clipping path.  Mirror view uses a mirrored copy of the view matrix.
+   Ends with P44_XformTag++ (the vertex cache was overwritten). */
 void P138_CarShadow(int32_t car) {
   float m[16];
   if (P13_00d11880 == 0 || P96_ShadIcon == NULL) { P44_XformTag++; return; }
   if (car < 0 || car >= P99_CARS_N) { P44_XformTag++; return; }
-  const uint8_t *c = (const uint8_t *)&P99_Cars[car];
-  if (P72_RoadLookup(rd32(c + 0xc8), rd32(c + 0xd0)) != 0) {
+  const uint8_t *carrec = (const uint8_t *)&P99_Cars[car];
+  if (P72_RoadLookup(rd32(carrec + CAR_POS_X), rd32(carrec + CAR_POS_Z)) != 0) {
     uint32_t w = P79_ModelTab[(int16_t)P72_Id];
     if (w != 0 && (*(const uint16_t *)((const uint8_t *)P79_PTR(w) + 2) & 0x80) != 0) { P44_XformTag++; return; }
   }
@@ -241,12 +259,13 @@ void P138_CarShadow(int32_t car) {
     P96_ShadRGB[2] = 255.0f; P96_ShadRGB[1] = 255.0f; P96_ShadRGB[0] = 255.0f;
   }
   if (P26_FxD != 0) { P96_ShadRGB[0] = 128.0f; P96_ShadRGB[1] = 128.0f; P96_ShadRGB[2] = 128.0f; }
-  int32_t q[4][3];
-  static const int32_t k_off[4] = { 0x88, 0x98, 0xb8, 0xa8 };
-  for (int k = 0; k < 4; k++) for (int j = 0; j < 3; j++) q[k][j] = rd32(c + k_off[k] + 4 * j);
+  int32_t corner[4][3];
+  static const int32_t k_off[4] = { CAR_GROUND_PT + 0 * CAR_GROUND_PT_SIZE, CAR_GROUND_PT + 1 * CAR_GROUND_PT_SIZE,
+                                     CAR_GROUND_PT + 3 * CAR_GROUND_PT_SIZE, CAR_GROUND_PT + 2 * CAR_GROUND_PT_SIZE };   /* corners in quad order */
+  for (int k = 0; k < 4; k++) for (int j = 0; j < 3; j++) corner[k][j] = rd32(carrec + k_off[k] + 4 * j);
   int flat = (P13_00575f20 == 0);
-  if (!flat && car != 0 && G6_00B87EA0 == 0 && c[2] != 1) {
-    int32_t y0 = rd32(c + 0x8c), y1 = rd32(c + 0x9c), y2 = rd32(c + 0xac), y3 = rd32(c + 0xbc);
+  if (!flat && car != 0 && G6_00B87EA0 == 0 && carrec[CAR_MODEL] != 1) {
+    int32_t y0 = rd32(carrec + CAR_GROUND_PT + 4), y1 = rd32(carrec + CAR_GROUND_PT + 0x14), y2 = rd32(carrec + CAR_GROUND_PT + 0x24), y3 = rd32(carrec + CAR_GROUND_PT + 0x34);   /* ground y of the 4 corners */
     int32_t d1 = y0 - y1, d2 = y1 - y2, d3 = y2 - y3;
     if ((d1 < 0 ? -d1 : d1) < 10 && (d2 < 0 ? -d2 : d2) < 10 && (d3 < 0 ? -d3 : d3) < 10) flat = 1;
   }
@@ -260,7 +279,7 @@ void P138_CarShadow(int32_t car) {
     const float *uv = P96_ShadUV;
     shad_uv(rec, 0, uv[0], uv[1]); shad_uv(rec, 1, uv[4], uv[5]); shad_uv(rec, 2, uv[10], uv[11]); shad_uv(rec, 3, uv[2], uv[3]);
     shad_idx(rec, 0, 1, 2, 3);
-    for (int k = 0; k < 4; k++) shad_vtx(&v[k], q[k]);
+    for (int k = 0; k < 4; k++) shad_vtx(&v[k], corner[k]);
     P44_MatPtr = P84_Mirror == 0 ? (float *)P44_ViewMatT : m;
     for (int k = 0; k < 4; k++) {
       P44_Xform(&v[k].x);
@@ -279,23 +298,23 @@ void P138_CarShadow(int32_t car) {
     DrvSetMode0042655A(mode);
     if (P26_FxD != 0 && P98_GrD40) P98_GrD40(2);
   } else {
-    int32_t nc, nr, st;
-    if (G6_00B87EA0 == 0 && car != 0) { nc = 5; nr = 6; st = 6; } else { nc = 8; nr = 10; st = 9; }
-    float x0 = (float)q[0][0], z0 = (float)q[0][2];
-    float dxa = (float)q[1][0] - x0, dza = (float)q[1][2] - z0;   /* к углу +0x98 */
-    float dxb = (float)q[3][0] - x0, dzb = (float)q[3][2] - z0;   /* к углу +0xa8 */
-    float du = 1.0f / (float)nc, dv = 1.0f / (float)nr;
+    int32_t grid_cols, grid_rows, row_stride;
+    if (G6_00B87EA0 == 0 && car != 0) { grid_cols = 5; grid_rows = 6; row_stride = 6; } else { grid_cols = 8; grid_rows = 10; row_stride = 9; }
+    float x0 = (float)corner[0][0], z0 = (float)corner[0][2];
+    float edge_u_x = (float)corner[1][0] - x0, edge_u_z = (float)corner[1][2] - z0;   /* к углу +0x98 */
+    float edge_v_x = (float)corner[3][0] - x0, edge_v_z = (float)corner[3][2] - z0;   /* к углу +0xa8 */
+    float du = 1.0f / (float)grid_cols, dv = 1.0f / (float)grid_rows;
     float fv = 0.0f;
     P103_HCellX = 0x7fffff; P103_HCellZ = 0x7fffff;
     P44_MatPtr = P84_Mirror == 0 ? (float *)P44_ViewMatT : m;
     p85_vtx *v = P85_VCache;
-    for (int r = 0; r <= nr; r++) {
+    for (int r = 0; r <= grid_rows; r++) {
       float fu = 0.0f;
-      for (int col = 0; col <= nc; col++) {
+      for (int col = 0; col <= grid_cols; col++) {
         float pos[3];
-        pos[0] = dxb * fv + dxa * fu + x0;
+        pos[0] = edge_v_x * fv + edge_u_x * fu + x0;
         pos[1] = 0.0f;
-        pos[2] = dzb * fv + dza * fu + z0;
+        pos[2] = edge_v_z * fv + edge_u_z * fu + z0;
         pos[1] = P103_RoadHeight(pos);
         v->x = pos[0] - P44_CamX;
         v->y = (-10.0f - P44_CamY) - pos[1];
@@ -309,31 +328,31 @@ void P138_CarShadow(int32_t car) {
       }
       fv += dv;
     }
-    float su = P96_ShadW * du, sv = P96_ShadH * dv;
+    float cell_u = P96_ShadW * du, cell_v = P96_ShadH * dv;
     const float *uv = P96_ShadUV;
-    float u0, v0 = uv[1], v1 = uv[1] + sv;
+    float u0, v0 = uv[1], v1 = uv[1] + cell_v;
     shad_state();
     if (P26_FxD != 0 && P98_GrD40) P98_GrD40(0);
     depth_bias(-0x300);
     int32_t mode = DrvSetMode0042655A(0);
     P82_Edge = 1;
-    int32_t ix = 0;
+    int32_t vi = 0;
     v = P85_VCache;
-    for (int r = 0; r < nr; r++) {
+    for (int r = 0; r < grid_rows; r++) {
       u0 = uv[0];
-      for (int col = 0; col < nc; col++) {
-        shad_idx(rec, ix, ix + 1, ix + 1 + st, ix + st);
-        shad_uv(rec, 0, u0, v0); shad_uv(rec, 1, u0 + su, v0); shad_uv(rec, 2, u0 + su, v1); shad_uv(rec, 3, u0, v1);
-        const p85_vtx *a = v, *b = v + 1, *cc = v + st + 1, *d = v + st;
+      for (int col = 0; col < grid_cols; col++) {
+        shad_idx(rec, vi, vi + 1, vi + 1 + row_stride, vi + row_stride);
+        shad_uv(rec, 0, u0, v0); shad_uv(rec, 1, u0 + cell_u, v0); shad_uv(rec, 2, u0 + cell_u, v1); shad_uv(rec, 3, u0, v1);
+        const p85_vtx *a = v, *b = v + 1, *cc = v + row_stride + 1, *d = v + row_stride;
         if (P95_Near < a->z && P95_Near < b->z && P95_Near < cc->z && P95_Near < d->z) {
           G2_011F4064 = rec;
           P121_TexQuadFlat(2);
         }
-        u0 += su;
-        v++; ix++;
+        u0 += cell_u;
+        v++; vi++;
       }
-      ix++; v++;
-      v0 += sv; v1 += sv;
+      vi++; v++;
+      v0 += cell_v; v1 += cell_v;
     }
     depth_bias(0);
     DrvSetMode0042655A(mode);
@@ -345,11 +364,17 @@ void P138_CarShadow(int32_t car) {
 /* ---- 004f4180 ---- */
 static const char *const k_lev[7] = { "MIAMI_01.LEV", "FRISCO_01.LEV", "LA_01.LEV", "NY_01.LEV", "IVIEW.LEV", "TRAIN.LEV", "NC_01.LEV" };
 static const char *const k_des[7] = { "MIAMI_01.DES", "FRISCO_01.DES", "LA_01.DES", "NY_01.DES", "LEVEL4.DES", "LEVEL5.DES", "NEWCASTLE.DES" };
+/* P138_Blk84Clear — native helper (shared with 004f4596): memset(00c810c0, 0, 0x210) plus the native aliases of
+   variables inside that block. */
 void P138_Blk84Clear(void) {   /* memset(00c810c0, 0, 0x210) + native-псевдонимы внутри */
   memset(P56_Blk84, 0, sizeof(p56_blk84_t) < 0x210 ? sizeof(p56_blk84_t) : 0x210);
   P14_00c810c4 = 0; P47_Limit = 0; P99_CamDelay = 0; P14_00c810e8 = 0; P14_00c81100 = 0; G6_00C81108 = 0;
   P98_ScrModel = 0; P77_LevelName = NULL; P109_C81268 = 0; P97_ScrObjOn = 0; P120_DbgOn = 0; P113_MrkRec = 0;
 }
+/* P138_LoadMission — Game.exe 004f4180.  Resets mission state and loads mission n: n == 0 is plain driving
+   (level file and the city's event script .DES set by city index 00b87e30); otherwise compiles
+   Scripts\Missions\Mission<n>.dms (results 0, 4 and 10 count as success, 3 = out of memory) and plays the
+   mission's intro FMV.  Returns 1 on success, 0 on failure (reason in debug.log). */
 int32_t P138_LoadMission(int32_t n) {
   P88_Mode575 = G6_00B87EAC == 0 ? 2 : 1;
   P98_ScrFirst = 0; P120_ConeN = 0;
@@ -376,35 +401,41 @@ int32_t P138_LoadMission(int32_t n) {
   P77_ListN = 0; P77_List = NULL; G6_00B31F40 = 0;
   P129_C81680 = n;
   if (n == 0) {
-    int32_t lv = D_00b87e30;
-    snprintf(P138_LevBuf, sizeof(p138_s100_t), "%s", (lv >= 0 && lv < 7) ? k_lev[lv] : "");
+    int32_t city = D_00b87e30;
+    snprintf(P138_LevBuf, sizeof(p138_s100_t), "%s", (city >= 0 && city < 7) ? k_lev[city] : "");
     P77_LevelName = P138_LevBuf;
     P14_00c810c4 = 0; P14_00c810e8 = 0;
     int32_t i = P42_FindVar("EVENTSCRIPT");
     if (i == -1) { P124_DebugLog("FAILED: Could not find variable for event script filename."); return 0; }
-    P99_VarSetStr((uint8_t *)&P42_Vars[i], (lv >= 0 && lv < 7) ? k_des[lv] : "");
+    P99_VarSetStr((uint8_t *)&P42_Vars[i], (city >= 0 && city < 7) ? k_des[city] : "");
     P124_DebugLog(">> LoadMission Complete - No Mission Required, Standard Level Initialised - Routine Terminated <<");
     return 1;
   }
   snprintf(P65_Tok, sizeof(p65_tok_t), "Attempting to load: Scripts\\Missions\\Mission%d.dms", n);
   P124_DebugLog(P65_Tok);
   snprintf(P65_Tok, sizeof(p65_tok_t), "Scripts\\Missions\\Mission%d.dms", n);
-  int32_t r = P139_CompileScript(P65_Tok);
-  if (r == 0 || r == 10 || r == 4) {
+  int32_t res = P139_CompileScript(P65_Tok);
+  if (res == 0 || res == 10 || res == 4) {
     P150_PlayFmv(G6_00BDF9C0, P125_C814E0, P125_C814E4);
     P97_ScrObjOn = 1;
     P124_DebugLog(">> LoadMission Complete - Routine Terminated <<");
     return 1;
   }
-  if (r == 3) { P124_DebugLog("FAILED: CompileMissionScript - OutOfMemory"); return 0; }
-  const char *e = P13_Fn004F8735(r);
-  snprintf(P65_Tok, sizeof(p65_tok_t), "FAILED: CompileMissionScript - %s, Line: %d", e ? e : "(null)", P65_Ints[0x15]);
+  if (res == 3) { P124_DebugLog("FAILED: CompileMissionScript - OutOfMemory"); return 0; }
+  const char *err = P13_Fn004F8735(res);
+  snprintf(P65_Tok, sizeof(p65_tok_t), "FAILED: CompileMissionScript - %s, Line: %d", err ? err : "(null)", P65_Ints[0x15]);
   P124_DebugLog(P65_Tok);
   return 0;
 }
 
 /* ---- 00517d58 ---- */
+/* cfg32 — local helper: int32 at offset o of the loaded replay config (00c54ee0, 0x88 bytes). */
 static int32_t cfg32(int o) { return rd32(P103_C54EE0 + o); }
+/* P138_ReplayCfg — Game.exe 00517d58.  Loads ReplayData\User\<name>.CFG (or Demo\, which marks a demo) and applies
+   it: game options 00bdfa40.., night / weather flags, traffic density, goals, felony settings, then the PADS /
+   CAMS paths and the director data.  Kind (word 0): REPLAY_FREE (city or interview), REPLAY_MISSION (mission
+   arg), REPLAY_CHASE (with the chase leader, 00b87eb0 = 1).  Returns 1, or 0 if the file or its director data
+   is missing. */
 int32_t P138_ReplayCfg(const char *name) {
   char path[64];
   P101_RecSaved = 0; P109_C54B00 = 0; P100_RecEnd = 0;
@@ -452,7 +483,7 @@ int32_t P138_ReplayCfg(const char *name) {
   P62_HudOff2 = P103_C54EE0[0x28];
   int32_t kind = cfg32(0), arg = cfg32(4);
 #define SET_E38(x) do { int32_t v_ = (x); P11_00b87e38 = v_; P17_Cond2 = v_; P19_Cond = v_; P45_Mode = v_; UiVar00B87E38 = v_; } while (0)
-  if (kind == 0) {
+  if (kind == REPLAY_FREE) {
     if (P11_00d11934 == 0) {
       SET_E38(0);
       D_00b87e30 = P62_HudOff2 == 0 ? arg : 4;
@@ -468,8 +499,8 @@ int32_t P138_ReplayCfg(const char *name) {
     P36_PadMode = 2;
     return 1;
   }
-  if (kind == 1) { SET_E38(arg); P36_PadMode = 2; return 1; }
-  if (kind == 2) {
+  if (kind == REPLAY_MISSION) { SET_E38(arg); P36_PadMode = 2; return 1; }
+  if (kind == REPLAY_CHASE) {
     SET_E38(arg);
     if (P109_C54B00 != 0) { P138_B5A8CC = cfg32(8); G00B5A8CD = (uint8_t)(cfg32(8) >> 8); }
     P36_PadMode = 3;
@@ -481,25 +512,28 @@ int32_t P138_ReplayCfg(const char *name) {
 }
 
 /* ---- 005181da / 0051879f / 00518bbc ---- */
-static int32_t read_pads(const char *path, int32_t p, int32_t big, int32_t line, int32_t *first) {
+/* read_pads — local helper: reads a .PADS file (first word, total count, recorded pad data) into recording
+   buffer p (0x40000 bytes when big).  The top bit of the count sets 00c4d9a4.  Returns 0 if missing. */
+static int32_t read_pads(const char *path, int32_t buf_idx, int32_t big, int32_t line, int32_t *first) {
   void *f = g_fopen(path, "rb");
   if (f == NULL) return 0;
-  int32_t n = P51_FileSize(f);
-  int32_t sz = big ? 0x40000 : n - 4;
-  uint8_t *b = (uint8_t *)P98_DebugMalloc(sz, k_rep_c, line);
-  P100_RecPtr[p] = b != NULL ? re_ptr_register_dyn(b, (uint32_t)(sz > 0 ? sz : 1)) : 0;
+  int32_t file_size = P51_FileSize(f);
+  int32_t buf_size = big ? 0x40000 : file_size - 4;
+  uint8_t *buf = (uint8_t *)P98_DebugMalloc(buf_size, k_rep_c, line);
+  P100_RecPtr[buf_idx] = buf != NULL ? re_ptr_register_dyn(buf, (uint32_t)(buf_size > 0 ? buf_size : 1)) : 0;
   g_fread(first, 1, 4, f);
-  g_fread(&P100_RecTot[p], 1, 4, f);
+  g_fread(&P100_RecTot[buf_idx], 1, 4, f);
 #ifndef RE_HOOK_BUILD
-  if (b != NULL && n - 4 > 0 && n - 4 <= sz) g_fread(b, 1, (size_t)(n - 4), f);
-  else if (b != NULL && sz > 0) g_fread(b, 1, (size_t)sz, f);
+  if (buf != NULL && file_size - 4 > 0 && file_size - 4 <= buf_size) g_fread(buf, 1, (size_t)(file_size - 4), f);
+  else if (buf != NULL && buf_size > 0) g_fread(buf, 1, (size_t)buf_size, f);
 #else
-  g_fread(b, 1, (size_t)(n - 4), f);
+  g_fread(buf, 1, (size_t)(file_size - 4), f);
 #endif
   g_fclose(f);
-  if (((uint32_t)P100_RecTot[p] & 0x80000000u) != 0) { P100_RecTot[p] &= 0x7fffffff; P103_C4D9A4 = 1; }
+  if (((uint32_t)P100_RecTot[buf_idx] & 0x80000000u) != 0) { P100_RecTot[buf_idx] &= 0x7fffffff; P103_C4D9A4 = 1; }
   return 1;
 }
+/* read_car — local helper: reads a whole car record (0x148 bytes) from a file into car `car`. */
 static int read_car(const char *path, int32_t car) {
   void *f = g_fopen(path, "rb");
   if (f == NULL) return 0;
@@ -507,16 +541,21 @@ static int read_car(const char *path, int32_t car) {
   g_fclose(f);
   return 1;
 }
+/* leader_flags — local helper: marks the leader record 0x41 (id, model from 00bdf9d4) and its traffic record
+   type `kind`. */
 static void leader_flags(uint8_t kind) {
-  p99_car_t *c = &P99_Cars[0x41];
+  p99_car_t *c = &P99_Cars[CAR_LEADER];
   c->f00[2] = (uint8_t)P95_BDF9D4; c->f00[0] = 0x41;
   P98_TrafX[1] = kind; P98_TrafX[2] = 0; P98_TrafX[0xc] = (uint8_t)P95_BDF9D4; P98_TrafX[0xd] = (uint8_t)P95_BDF9D0;
 }
+/* P138_ReplayLoad — Game.exe 005181da.  Loads a chase: leader PADS into buffer 1, the LEADER car record, the
+   PINGS snapshots (0x1a4-byte records, see P55_SaveRec); then the player's PADS and car when the config has
+   them (00c54b00), else starts recording (P138_ReplayInit).  Native: counts clamped, missing files skipped. */
 void P138_ReplayLoad(void) {
   P95_B87EC4 = 1;
   if (read_pads(P56_PathPads, 1, G6_00B87EA0 != 0, G6_00B87EA0 != 0 ? 0x251 : 0x253, &P74_C4D668)) {
-    if (G6_00B87EA0 == 0 || P88_Mode575 != 2) read_car(P56_PathLeader, 0x41);
-    p99_car_t *c = &P99_Cars[0x41];
+    if (G6_00B87EA0 == 0 || P88_Mode575 != 2) read_car(P56_PathLeader, CAR_LEADER);
+    p99_car_t *c = &P99_Cars[CAR_LEADER];
     c->vel[0] = 0; c->vel[1] = 0; c->vel[2] = 0; c->f128 = 0; c->f12c = 0; c->f130 = 0; c->f134 = 0;
     leader_flags(7);
     P100_RecRep[1] = 0; P100_RecOff[1] = 0; P100_RecCnt[1] = 0; P55_RecCnt = 0; P36_JoyX = 0; P74_B5A86C[1] = 0;
@@ -553,6 +592,8 @@ void P138_ReplayLoad(void) {
     P96_ReplayB++;
   }
 }
+/* P138_ReplayInit — Game.exe 0051879f.  Allocates the 0x40000-byte recording buffer; in a chase (00b87eac) also
+   the PINGS buffer and the LEADER car.  Resets the HUD and records the first camera. */
 void P138_ReplayInit(void) {
   if (P96_ReplayB != 0) return;
   P100_RecBuf = (uint8_t *)P98_DebugMalloc(0x40000, k_rep_c, 0x31b);
@@ -564,7 +605,7 @@ void P138_ReplayInit(void) {
     if (G6_00B87EAC != 0) {
       char path[0x80];
       snprintf(path, sizeof path, "ReplayData\\Chase\\%s.LEADER", P56_PathName);
-      read_car(path, 0x41);
+      read_car(path, CAR_LEADER);
       leader_flags(8);
       P99_CarModelClean(0x40);
     }
@@ -573,6 +614,8 @@ void P138_ReplayInit(void) {
   P100_RecKeys = 0x20;
   P98_CamRecAdd(0);
 }
+/* P138_LoadPads — Game.exe 00518bbc.  Outside a chase replay, loads the player's PADS into buffer 0 and resets
+   the player's velocity/damage and the replay counters. */
 void P138_LoadPads(void) {
   if (G6_00B87EB0 != 0) return;
   if (!read_pads(P138_PadsPath, 0, 0, 0x3ed, &P74_C4D668)) return;
@@ -586,6 +629,8 @@ void P138_LoadPads(void) {
 #ifndef RE_HOOK_BUILD
 static void *p138_trail;   /* native: TRAIL.DAT, открытый последним вызовом (00c812f0 — int32) */
 #endif
+/* P138_TrailEnd — Game.exe 004fbfad.  Ends trail recording: writes the end marker 0x7fffffff, closes and re-reads
+   TRAIL.DAT and logs the last cone position (or "Trail Not Recorded").  Native: the file is never open. */
 void P138_TrailEnd(void) {
   int32_t mark = 0x7fffffff, hdr, t[3];
 #ifdef RE_HOOK_BUILD
