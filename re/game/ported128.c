@@ -1,3 +1,7 @@
+/* ported128 — cop navigation (map position, A* route search on the 55 x 55 window, path building and replanning),
+   the free camera, model-zone hit test, car damage deformation, traffic node selection, traffic drawing and the
+   clipped-polygon area used by the route grid (Game.exe, cdecl).  The Russian note below describes each function by
+   address; English headers precede the functions.  Original note: */
 /* v1.73: ported128 — восстановлено из Game.exe. Все функции cdecl (work/rets.py: ret без операнда).
    004a706a — позиция копа (запись P12_0112da00) в клетках карты: тип клетки P54_RoadB → P110_CellTab, при mode = 0
      точка цели 0112b260/264 и P99_CopTarget; затем P127_MapWindow(x, z, адрес записи); +0xcc0 = 1; выход — смещение
@@ -134,6 +138,7 @@ static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static uint16_t rdu16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
 #define P128_CAR(i)  ((uint8_t *)&P99_Cars[(i)])
+/* Car record of traffic id i (index into the car table). */
 static uint8_t *tcar(int32_t i) {
 #ifndef RE_HOOK_BUILD
   if (P59_CarsTab == NULL) return (i + 1 >= 0 && i + 1 < P99_CARS_N) ? P128_CAR(i + 1) : P128_CAR(P99_CARS_N - 1);
@@ -142,6 +147,7 @@ static uint8_t *tcar(int32_t i) {
 }
 
 /* ---- 004a706a ---- */
+/* Road-cell type of map position (x, z) (P54_RoadB -> P110_CellTab). */
 static int32_t cell_type(int32_t x, int32_t z) {
   int32_t N = P62_MapN;
   if (N <= 0) return 0;                                     /* защита деления: в оригинале нет */
@@ -153,6 +159,9 @@ static int32_t cell_type(int32_t x, int32_t z) {
   uint16_t v0 = rdu16(p), v1 = rdu16(p + 2);
   return P110_CellTab[(int32_t)(v0 & 0x3c00) >> 9 | (v1 & 1)];
 }
+/* P128_CopMapPos — Game.exe 004a706a.  Places cop slot rec on the route map: classifies its cell, with mode 0 also sets
+   the chase target point and P99_CopTarget, recentres the 55 x 55 route window (P127_MapWindow) and marks the slot
+   (+0xcc0 = 1).  Out: *dx / *dz = offset to the window point (+0xc64 / +0xc6c). */
 void P128_CopMapPos(uint32_t *rec, int32_t *dx, int32_t *dz, int32_t mode) {
   uint8_t *r = (uint8_t *)rec;
   P11_00ba52d0 = fround((float)(PlayerPosX + 0x2ee + P62_MapC64) * P63_Scale);
@@ -188,6 +197,9 @@ void P128_CopMapPos(uint32_t *rec, int32_t *dx, int32_t *dz, int32_t mode) {
 }
 
 /* ---- 0049dc73 ---- */
+/* P128_FreeCam — Game.exe 0049dc73.  Free (debug / director) camera around car: pad directions move the offset by 32
+   units per tick, the camera eases 1/10 of the way per tick, angles from atan2 of the view vector (scaled down by 4
+   while longer than 64000 to stay in range). */
 void P128_FreeCam(int32_t car) {
   const float step = 32.0f;                                  /* .data 00546100 */
   if (P36_Pad3 != 0) P61_OffZ += step;
@@ -229,6 +241,8 @@ void P128_FreeCam(int32_t car) {
 }
 
 /* ---- 004cd3fb ---- */
+/* P128_ModelHit — Game.exe 004cd3fb.  1 if point (x, z) lies inside a kind-4 part rectangle of a zone model (model flag
+   0x100, part list +0x34) in its map cell (used for ambience zones, see P121_CamSounds); y and w are unused. */
 int32_t P128_ModelHit(float x, float y, float z, uint32_t w) {
   (void)y; (void)w;
   P11_00ba52d0 = fround((x + (float)P42_CellX) * P42_CellScale);
@@ -282,6 +296,9 @@ int32_t P128_ModelHit(float x, float y, float z, uint32_t w) {
 }
 
 /* ---- 004c032a ---- */
+/* P128_CarDeform — Game.exe 004c032a.  Applies the damage of car idx + 1 to its mesh: per-zone damage weights each
+   vertex's dent offset (clean -> damaged delta, P28_CarDelta) to build the deformed vertices, recomputes face
+   normals, updates dents / damaged faces (P104_CarDents) and sets a refresh timer 50 - max / 64 (>= 0). */
 void P128_CarDeform(int32_t idx) {
   int32_t car = idx + 1, mx = 0;
 #ifndef RE_HOOK_BUILD
@@ -353,6 +370,9 @@ void P128_CarDeform(int32_t idx) {
 }
 
 /* ---- 004949f0 ---- */
+/* P128_TrafficNode — Game.exe 004949f0.  Picks the road node in front of traffic record t (0x28a ahead along its
+   direction); gives up when another traffic record is already within 5 cells of it; otherwise stores it as the
+   target, looks up the road position and starts the turn (P118_TrafficTurn). */
 void P128_TrafficNode(uint8_t *t) {
   uint8_t *car = tcar(t[0]);
   int32_t x = rd32(car + 200), z = rd32(car + 0xd0);
@@ -398,6 +418,7 @@ void P128_TrafficNode(uint8_t *t) {
 
 /* ---- 0050c087 / 0050d4a2 ---- */
 #define P128_PATH_MAX ((0xcb4 - 0x60) / 0x20)               /* записей пути до P74_Cars (+0xcb4) */
+/* Path record links (32-bit addresses at +0 next / +4 prev), route-window road and node accessors. */
 static uint8_t *nxp(const uint8_t *e) { return (uint8_t *)re_rd_ptr(e); }
 static uint8_t *prp(const uint8_t *e) { return (uint8_t *)re_rd_ptr(e + 4); }
 static void setn(uint8_t *e, const uint8_t *q) { re_wr_ptr(e, q); }
@@ -405,6 +426,7 @@ static void setp(uint8_t *e, const uint8_t *q) { re_wr_ptr(e + 4, q); }
 static int32_t road(int32_t n) { return (n >= 0 && n < 0xbd1) ? rd32(P77_C7D8C0 + n * 4) : 0; }   /* защита индекса */
 static uint8_t *node(int32_t n) { return P77_C65DC0 + (uint32_t)n * 0x20; }
 static int32_t ndv(int32_t n, int32_t off) { return (n >= 0 && n < 0xbd1) ? rd32(node(n) + off) : -1; }
+/* Inserts a corner-cut path record between p and nx (see P128_CopPath). */
 static int32_t path_ins(uint8_t *base, uint8_t *p, uint8_t *nx, int32_t ds, int32_t dy, int32_t ax, int32_t az) {
   if (P77_C7D8A8 < 0 || P77_C7D8A8 >= P128_PATH_MAX) return 0;   /* защита: в оригинале нет */
   uint8_t *q = base + P77_C7D8A8 * 0x20;
@@ -418,6 +440,10 @@ static int32_t path_ins(uint8_t *base, uint8_t *p, uint8_t *nx, int32_t ds, int3
   wr32(q + 8, rd32(q + 8) + ax); wr32(q + 0xc, rd32(q + 0xc) + az);
   return 1;
 }
+/* P128_CopPath — Game.exe 0050c087.  Builds the cop's path from the A* parent chain into its path records (0x20 bytes
+   from rec + 0x60: next, prev, x, z, node, sx / sy, type, flags, angle): inserts corner cuts, merges segments,
+   shifts type-9 records, removes duplicates and computes segment angles.  Returns 1 if no turn of 90 degrees or
+   more remains.  The record counter P77_C7D8A8 is not reset (as in the original). */
 int32_t P128_CopPath(uint8_t *rec) {
   int32_t c = P77_S574570;
   uint8_t *base = rec + 0x60;
@@ -584,9 +610,14 @@ int32_t P128_CopPath(uint8_t *rec) {
   }
 }
 
+/* Binary heap {key, node} of the A* open list (P77_B590E0). */
 static int32_t hkey(int32_t i) { return rd32(P77_B590E0 + i * 8); }
 static int32_t hval(int32_t i) { return rd32(P77_B590E0 + i * 8 + 4); }
 static void hset(int32_t i, int32_t k, int32_t v) { wr32(P77_B590E0 + i * 8, k); wr32(P77_B590E0 + i * 8 + 4, v); }
+/* P128_CopRoute — Game.exe 0050d4a2.  A* search for cop rec on the 55 x 55 route window (node records 0x20 bytes,
+   heap of {key, node}, 8 neighbour offsets, per-cell cost, road connectivity masks); node marks are
+   frame * 0x20 + cop id so the arrays need no clearing.  On reaching the goal builds the path (P128_CopPath).
+   The sift-down comparison "i < n" is kept as in the original. */
 int32_t P128_CopRoute(int32_t *rec, int32_t dx, int32_t dz, int32_t start) {
   if (iabs(dx) >= 0x1c || iabs(dz) >= 0x1c) return 0;
 #ifndef RE_HOOK_BUILD
@@ -685,6 +716,8 @@ int32_t P128_CopRoute(int32_t *rec, int32_t dx, int32_t dz, int32_t start) {
 }
 
 /* ---- 004a742a ---- */
+/* P128_CopReplan — Game.exe 004a742a.  Re-plans cop rec: updates nearby cars and its map position, then either continues
+   the old path (+0xcb8) or searches anew from the window centre node 0x5e8. */
 void P128_CopReplan(uint8_t *rec) {
   int32_t near = P59_NearCars((const int32_t *)(const void *)rec);
   int32_t go = 0, cx = 0, cz = 0, res = 0;
@@ -735,10 +768,13 @@ void P128_CopReplan(uint8_t *rec) {
 }
 
 /* ---- 00490bcb ---- */
+/* Draws traffic car i (004a1037, not ported: V-line P128_Fn4A1037). */
 static void draw_one(uint32_t i) {
   P137_DrawCar((int32_t)i + 1, (int32_t)i);
   P107_TrafficLights((int32_t)i + 1, TrafficRecs + i * 0x54);
 }
+/* P128_TrafficDraw — Game.exe 00490bcb.  Draws the traffic cars within draw range of the camera (octagonal distance)
+   with the palette chosen by record byte +0xd (4 / 0x19, or the raw value with option 00575f44), then traffic lights. */
 void P128_TrafficDraw(void) {
   uint8_t list[68];
   uint8_t n = 0;
@@ -777,6 +813,7 @@ void P128_TrafficDraw(void) {
 /* ---- 0050a15b ---- */
 typedef struct { int32_t v[2]; } p128_pt_t;
 /* один проход отсечения: in[0..n) — цикл (последняя точка замыкается на первую), out — результат */
+/* One Sutherland-Hodgman pass against the line axis ax = c (hi: keep <= c, else >= c). */
 static int32_t clip_pass(const p128_pt_t *in, int32_t n, p128_pt_t *out, int32_t ax, int32_t c, int32_t hi) {
   int32_t m = 0, flag = 0, i = 0;
   p128_pt_t last = { { 0, 0 } };
@@ -800,6 +837,7 @@ static int32_t clip_pass(const p128_pt_t *in, int32_t n, p128_pt_t *out, int32_t
   }
   return m;
 }
+/* |area| of polygon a (n points) clipped to rect {x0, y0, x1, y1} (shoelace / 2). */
 static int32_t clip_area(p128_pt_t *a, p128_pt_t *b, int32_t n, const int32_t *rect) {
   if (n == 0) return 0;
   if ((n = clip_pass(a, n, b, 0, rect[0], 0)) == 0) return 0;
@@ -811,6 +849,7 @@ static int32_t clip_area(p128_pt_t *a, p128_pt_t *b, int32_t n, const int32_t *r
   s = (s + (a[n - 1].v[0] * a[0].v[1] - a[0].v[0] * a[n - 1].v[1])) / 2;
   return s < 0 ? -s : s;
 }
+/* P128_ClipArea — Game.exe 0050a15b.  Area of the linked-list polygon poly ({x, y, next address}) inside rect. */
 int32_t P128_ClipArea(const int32_t *poly, const int32_t *rect) {
   p128_pt_t a[48], b[48];
   int32_t n = 0;
@@ -820,6 +859,7 @@ int32_t P128_ClipArea(const int32_t *poly, const int32_t *rect) {
   return clip_area(a, b, n, rect);
 }
 /* v1.74: вариант с родным массивом точек {x, y} × n (вызов из P129_MapCars вместо списка 00c7d820) */
+/* P128_ClipAreaN — native helper: same for an array of n (x, y) points (used by P129_MapCars). */
 int32_t P128_ClipAreaN(const int32_t *xy, int32_t n, const int32_t *rect) {
   p128_pt_t a[48], b[48];
   if (n > 48) n = 48;
