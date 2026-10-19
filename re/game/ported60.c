@@ -50,7 +50,7 @@ static void    wr16(uint8_t *p, uint32_t o, uint16_t v) { memcpy(p + o, &v, 2); 
 static uint8_t *Cam(void) { return (uint8_t *)&DirectorCam; }
 
 /* P60_NextTrafficCar — Game.exe 004c5c5d.  Despite the name, returns the first car after `from` whose traffic
-   record is a cop (record [5] != 0, state [1] == 4 = cop AI, [0xc] == 1 — TODO(RE): [0xc] meaning) and is
+   record is a cop (record [5] != 0, state [1] == 4 = cop AI, car model kind [0xc] == 1 — the police model?) and is
    within 30000 units of the player (x/z, squared, 32-bit wrapping as in the original); 0 = none. */
 int32_t P60_NextTrafficCar(int32_t from) {
   int32_t arg = from + 1;
