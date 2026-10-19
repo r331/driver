@@ -270,7 +270,8 @@ void P143_SunFlare(void) {
 /* ---- 004b73f3 ---- */
 /* P143_LampGlow — Game.exe 004b73f3, cdecl.  Red glow sprite (40x40 units around the lamp, colour (255k, 10k, 10k),
    depth bias -90) for light object o when it faces the camera (both angle offsets < 0x400, brightness
-   k = cos(off_v) * cos(off_h)); in rain at night also PushEntry_004CC784.  At night (not in the mirror) the
+   k = cos(off_v) * cos(off_h)); in rain at night also queues a wet-road
+   reflection (PushEntry_004CC784 -> P116_Reflections).  At night (not in the mirror) the
    trail: the lamp's screen centre goes into its history ring; if it was updated last frame and the camera did
    not cut, a streak (half the sprite width, colour (160k, 6k, 6k), far end x 0.25) is drawn from the position
    two frames ago when the movement is 5..199 px; otherwise the ring is reset to the current centre. */

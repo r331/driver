@@ -59,7 +59,7 @@
 #define LO_X      0x00    /* float camera-space x, y, z */
 #define LO_Y      0x04
 #define LO_Z      0x08
-#define LO_EMIT   0x10    /* 3 dwords passed to PushEntry_004CC784 (TODO(RE): world position of the light?) */
+#define LO_EMIT   0x10    /* 3 dwords passed to PushEntry_004CC784 (reflection queue; presumably the world position) */
 #define LO_CAR    0x50    /* int16 car index (row of P143_LampHist, 0x140 bytes = 8 lamps) */
 #define LO_LAMP   0x54    /* int16 lamp index, -1 = no trail */
 #define LO_TYPE   0x64    /* uint16: & 0x7f flare type (row of 00553870), 0x80 = directional (fades off-axis) */
@@ -132,8 +132,8 @@ static void icon_tex(const uint8_t *ic) {
    Directional lights: invisible from behind (off_v >= 0x400 or off_h >= 0x496); beyond z 10240 the size is
    the near size and brightness falls linearly to 0 at 45000 (or 15000); closer, brightness and size grow as
    the light points at the camera (cube of the cosines, or linearly in off_v + off_h); rot spins the sprite
-   with the angles and depth.  When P26_FxA (rain) and night: also PushEntry_004CC784 with the brightness
-   (TODO(RE): presumably a road reflection).  Sprite: CARLYT with depth bias -200, or COPFLARE with -2500
+   with the angles and depth.  When P26_FxA (rain) and night: also queues a wet-road reflection
+   (PushEntry_004CC784, drawn by P116_Reflections).  Sprite: CARLYT with depth bias -200, or COPFLARE with -2500
    for cop types 9..12.  Trail (night, flag 0xe00000, not in the mirror, lamp != -1): if the history was
    updated last frame and the camera did not cut, a quad from the current centre to the centre two frames
    ago, width 0.35 * half_px, end colour / 4, drawn when the movement is 5..199 px; otherwise the history is
