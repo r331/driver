@@ -616,14 +616,15 @@ static int32_t keymenu(const keymenu_t *m) {
     else { if (m->b) MenuHiliteRed00411A31(); else MenuHiliteRed004106E1(); P66_ScreenFrame(m->items, 0); }
   }
 }
-/* P139_KeyMenuA — Game.exe 0040fa60.  Key-binding menu A (table 0054c1e0).  TODO(RE): unsure which device A / B are. */
+/* P139_KeyMenuA — Game.exe 0040fa60.  Key-binding menu A (table 0054c1e0): joystick bindings (opened by
+   P12_Fn00407563 when the input mode Q0057B72C != 0). */
 int32_t P139_KeyMenuA(void) {
   const keymenu_t m = { 0x0054c1e0u, 0x0054c018u, 0x0054c030u, 0x0054c030u, &P139_KeyStA, &P139_KeyPrA, &P139_BlinkA, 0 };
   P97_KeyMenuAInit();
   P139_KeyStA = 0; MenuI005FE770 = 1; MenuI005FE774 = 2;
   return keymenu(&m);
 }
-/* P139_KeyMenuB — Game.exe 00410c30.  Key-binding menu B (table 0054c530). */
+/* P139_KeyMenuB — Game.exe 00410c30.  Key-binding menu B (table 0054c530): keyboard bindings (input mode 0). */
 int32_t P139_KeyMenuB(void) {
   const keymenu_t m = { 0x0054c530u, 0x0054c338u, 0x0054c350u, 0x0054c350u, &P139_KeyStB, &P139_KeyPrB, &P139_BlinkB, 1 };
   P97_KeyMenuBInit();
