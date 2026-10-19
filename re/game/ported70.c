@@ -184,7 +184,7 @@ static int32_t nearest_obj(void) {
   return best;
 }
 
-/* P70_RadarNearest — Game.exe 005062cc: nearest target -> P70_Fn5063A4.  TODO(RE): what 005063a4 does with it. */
+/* P70_RadarNearest — Game.exe 005062cc: radar arrow (005063a4 = P135_RadarLine) toward the nearest target. */
 void P70_RadarNearest(void) { int32_t i = nearest_obj(); if (i != -1) P70_Fn5063A4(i); }
 /* P70_RadarNearestB — Game.exe 0050784d: nearest target -> P70_Fn507925.  TODO(RE): what 00507925 does with it. */
 void P70_RadarNearestB(void) { int32_t i = nearest_obj(); if (i != -1) P70_Fn507925(i); }

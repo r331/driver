@@ -1,3 +1,10 @@
+/* ported135.c — small 3-D effects drawn as screen-space triangles (English overview; detailed Russian notes
+   follow): debris triangles (P135_DebrisTri 004b33d8), spark streaks (P135_SparkQuad 004b23f8), smoke puffs
+   (P135_SmokeObj 004b10ce), a fan of light beams in the sky (P135_SixBeam 004ba81f), a quad-strip trail
+   (P135_GhostTrail 004e6310) and the radar arrow toward a mission target (P135_RadarLine 005063a4).
+   Common helpers: raster = P85_RasterB, blend = cached blend mode, tex_select = bind an icon's texture page,
+   zw = 1/z from the table (0 when out of range), scr = project camera-space x/y with 1/z, uv = icon texel
+   coordinates premultiplied by 1/z (Glide convention). */
 /* v1.80: ported135 — см. ported135.h.
    004b33d8 — P100_RoadHeight(rec) (результат не используется); вершины таблицы (rec[0xb] & 1 ? 010ffd20 : 01102d20) + idx(+0x26)·0x30
      (смещения 0/0x10/0x20) + позиция rec[0..2] − камера, P44_Xform текущей матрицей; z ≤ 224 или ≥ 01270c24/2 — +0x20 (short) = 1 и выход.
@@ -141,6 +148,10 @@ static void rgb(p85_rv *v, float r, float g, float b) { v->r = r; v->g = g; v->b
 static void uv(p85_rv *v, uint8_t s, uint8_t t) { v->tmu[0] = (float)s * v->oow; v->tmu[1] = (float)t * v->oow; }
 
 /* ---- 004b33d8 ---- */
+/* P135_DebrisTri — Game.exe 004b33d8.  Draws one debris piece rec as a single DEBRIS-textured triangle: its three
+   corners from the debris shape table (two tables by rec[0xb] & 1, shape index u16 +0x26) around the position
+   rec[0..2], colour bytes +0x34..+0x36.  A corner nearer than 224 or beyond half the far plane marks the piece
+   (+0x20 = 1) and skips it.  Calls P100_RoadHeight(rec) first (result unused, as in the original). */
 void P135_DebrisTri(int32_t *rec) {
   uint8_t *r = (uint8_t *)rec;
   uint16_t idx; memcpy(&idx, r + 0x26, 2);
@@ -177,6 +188,10 @@ void P135_DebrisTri(int32_t *rec) {
 }
 
 /* ---- 004b23f8 ---- */
+/* P135_SparkQuad — Game.exe 004b23f8.  Spark streak of object o: a quad from its screen point (+0x10/+0x14,
+   depth +0x18, 5 px wide) to its world point +0x40 projected now (10 px wide), skipped when longer than 320 px.
+   Colour by mode +0x50: 0 = reddish (c + 30, c, c), 1 = grey c, 2 = blue-white with blend mode 2 (two hues by
+   flag +0x6c & 1); c = +0x58.  The mirror is not applied (as in the original). */
 void P135_SparkQuad(uint8_t *o) {
   if (P111_SparkIcon == 0) return;
   float z = rdf(o + 0x18);
@@ -214,6 +229,9 @@ void P135_SparkQuad(uint8_t *o) {
 }
 
 /* ---- 004b10ce ---- */
+/* P135_SmokeObj — Game.exe 004b10ce.  Smoke puff of object o as a SMOKE-textured square (size +0x50) at its
+   screen point, brightness +0x58 or, in fog (P26_FxD), faded with distance and randomly culled; colour and blend
+   mode from the flags +0x68 (see the Russian notes). */
 void P135_SmokeObj(uint8_t *o) {
   float z = rdf(o + 0x18);
   if (!(P52_Ones0 != 0 && 300.0f < z && z < (float)P62_I270C44 && P108_SmokeIcon != 0)) return;
@@ -262,6 +280,11 @@ void P135_SmokeObj(uint8_t *o) {
 }
 
 /* ---- 004ba81f ---- */
+/* P135_SixBeam — Game.exe 004ba81f.  A fan of light beams in the sky (5 vertices, oow 1e-6 = at infinity) in
+   direction (rec[0] heading, rec[1] pitch), drawn only when within +-90 degrees of the camera heading; spread
+   and length swing with two sine waves (period rec[3], phases rec[4]/rec[8], amplitudes rec[5]/rec[9]);
+   brightness rec[0xb] fades beyond 100000 units from (-43000, 170000).  Stamps P102_SixFlag = frame.
+   TODO(RE): presumably the searchlights of one level; which level is not established. */
 void P135_SixBeam(const uint32_t *rec) {
   P102_SixFlag = P62_Frame;
   int32_t d = ((int32_t)(rec[0] - (uint32_t)P59_AngB + 0x800) & 0xfff) - 0x800;
@@ -321,6 +344,10 @@ void P135_SixBeam(const uint32_t *rec) {
 }
 
 /* ---- 004e6310 ---- */
+/* P135_GhostTrail — Game.exe 004e6310.  Draws the 40-entry ring P56_GhostBuf (0x48-byte records: two world
+   points +0/+0x10 -> projected +0x20/+0x30, flag byte +0x47) backwards from the newest entry as a strip of quads
+   while consecutive entries are flagged, with blend mode 3 and texture 00d04488.  Return value as in the
+   original (an entry's flag or (count + 1) / 40).  TODO(RE): which effect (tyre smoke trail?) unsure. */
 static float g_mirror_mat[16];
 #define GREC(i) (P56_GhostBuf + (i) * 0x48)
 int32_t P135_GhostTrail(void) {
@@ -394,6 +421,10 @@ int32_t P135_GhostTrail(void) {
 #undef GREC
 
 /* ---- 005063a4 ---- */
+/* P135_RadarLine — Game.exe 005063a4.  Radar arrow from the player toward mission target i (P58_Objs[i]): a
+   triangle when the target is closer than 0x2a7b1 (squared, in radar units), else a shortened arrow capped at
+   15 * 1500; transformed with P99_RadarXform and drawn as three lines (no 3-D mode) or triangles (blend 2).
+   approx(a, b) = octagonal distance max + min / 2. */
 static int32_t approx(int32_t a, int32_t b) { a = iabs(a); b = iabs(b); return a < b ? b + a / 2 : a + b / 2; }
 void P135_RadarLine(int32_t i) {
 #ifndef RE_HOOK_BUILD
