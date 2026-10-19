@@ -1,4 +1,6 @@
 /* Чтение кусками, палитры, отчёт об утечках, текстуры вмятин — восстановлено из Game.exe. */
+/* ported27.c — level loading helpers (English overview): chunked fread with a progress counter, loading the
+   level's 256-colour palettes, the DebugMalloc leak report and the car damage ("dent") textures.  All __cdecl. */
 #include "ported27.h"
 #include "ported4.h"
 #include "ported6.h"
@@ -75,13 +77,26 @@ p27_dent_t P27_DentTex;
 #endif
 #define MAIN_HWND ((void *)(intptr_t)G6_00BDF9C0)
 
+enum {
+  READ_CHUNK      = 0xffff,   /* single-record reads are split into chunks of at most 64 KB - 1 */
+  PAL_SLOTS       = 0x32,     /* 50 palette slots in P14_01252be0 */
+  PAL_BYTES       = 0x400,    /* 256 entries x 4 bytes */
+  MEMTAB_ENTRIES  = 0x1000,   /* DebugMalloc tracking table: {address, size, log string} x 4096 */
+  DENT_PANELS     = 11,       /* TODO(RE): outer loop index i (name suffix 1..11) — meaning unsure */
+  DENT_LEVELS     = 6         /* TODO(RE): inner index j (name prefix 0..5) — damage stage? unsure */
+};
+
+/* P27_ReadChunked — Game.exe 004d9596.  fread(dst, size, count, file); with count == 1 the read is split into
+   0xffff-byte pieces.  Adds the bytes to P27_ReadBytes and, when loading progress is on (P27_ProgressOn) and
+   the counter passed P27_ReadLimit, updates the loading screen (Call004D9663).  Always returns 1
+   (read errors are not checked, as in the original). */
 int32_t P27_ReadChunked(void *dst, int32_t size, int32_t count, void *file) {
   uint8_t *p = (uint8_t *)dst;
   if (count == 1) {
-    for (; size > 0xffff; size -= 0xffff) {
-      g_fread(p, 0xffff, 1, file);
-      p += 0xffff;
-      P27_ReadBytes += 0xffff;
+    for (; size > READ_CHUNK; size -= READ_CHUNK) {
+      g_fread(p, READ_CHUNK, 1, file);
+      p += READ_CHUNK;
+      P27_ReadBytes += READ_CHUNK;
     }
     g_fread(p, (size_t)size, 1, file);
     P27_ReadBytes += size;
@@ -93,10 +108,13 @@ int32_t P27_ReadChunked(void *dst, int32_t size, int32_t count, void *file) {
   return 1;
 }
 
+/* P27_LoadPalettes — Game.exe 004ec154.  Reads the palette block of a level file: s16 count, then per palette
+   s16 slot + 0x400 bytes.  Valid slots (0..49) go to P14_01252be0[slot * 0x400] and are marked in
+   P12_01252aa0; an invalid slot is logged, reported in a message box and its data skipped. */
 void P27_LoadPalettes(void *file) {
   char msg[256];
   int16_t n, slot;
-  for (int i = 0; i < 0x32; i++) P12_01252aa0[i] = 0;
+  for (int i = 0; i < PAL_SLOTS; i++) P12_01252aa0[i] = 0;
   P27_ReadChunked(&n, 2, 1, file);
   int cnt = n;
   while (cnt != 0) {
@@ -107,18 +125,21 @@ void P27_LoadPalettes(void *file) {
       DebugLog(msg);
       snprintf(msg, sizeof msg, "Tried to store palette to slot %d", (int)slot);
       plat_message_box(MAIN_HWND, msg, "Error", 0);
-      g_fseek(file, 0x400, 1);
+      g_fseek(file, PAL_BYTES, 1);   /* SEEK_CUR: skip this palette */
     } else {
-      P27_ReadChunked(&P14_01252be0[slot * 0x400], 0x400, 1, file);
+      P27_ReadChunked(&P14_01252be0[slot * PAL_BYTES], PAL_BYTES, 1, file);
       P12_01252aa0[slot] = 1;
     }
   }
 }
 
+/* P27_MemLeakReport — Game.exe 004d8c80.  When the DebugMalloc counters P27_MemAllocated / P27_MemFreed differ,
+   shows a "MEMORY FAULT" message box for every block still in P27_MemTab (with its log string, if any) and
+   frees the block and the string. */
 void P27_MemLeakReport(void) {
   char msg[256];
   if (P27_MemAllocated == P27_MemFreed) return;
-  for (int i = 0; i < 0x1000; i++) {
+  for (int i = 0; i < MEMTAB_ENTRIES; i++) {
     uint32_t *e = &P27_MemTab[i * 3];
     if (e[0] == 0) continue;
     if (e[2] == 0) {
@@ -134,13 +155,20 @@ void P27_MemLeakReport(void) {
   }
 }
 
+/* Dent texture name formats, indexed by the player car model S_00D1192C (0..17; out of range -> "BD").
+   The middle part is the car's texture code (POL = police, TAX = taxi; the rest are model abbreviations). */
+
 static const char *const k_dent_fmt[18] = {
   "%iBD%i", "%iTRUCK%i", "%iRED%i", "%iFAR%i", "%iCAM%i", "%iMER%i", "%iNOV%i", "%iCAD%i", "%iPON%i",
   "%iCHE%i", "%iPOL%i", "%iGP%i", "%iTLT%i", "%iTAX%i", "%iCA%i", "%iJAG%i", "%iFER%i", "%iTHU%i" };
+/* P27_LoadDentTextures — Game.exe 004c17ae.  Loads 11 x 6 damage texture pages named "<j><CAR><i+1>" for the
+   current car model into P27_DentTex[i * 6 + j], allocates the 128 KB scratch texture page D_00d17ec8
+   used to compose the damaged texture (freeing an old one), then calls Call004C1B6C(0).
+   TODO(RE): Call004C1B6C — presumably resets the damage state of the texture; unsure. */
 void P27_LoadDentTextures(void) {
   char name[32];
-  for (int i = 0; i < 11; i++) {
-    for (int j = 0; j < 6; j++) {
+  for (int i = 0; i < DENT_PANELS; i++) {
+    for (int j = 0; j < DENT_LEVELS; j++) {
       int32_t car = S_00D1192C;
       const char *fmt = (car >= 0 && car < 18) ? k_dent_fmt[car] : "%iBD%i";
       snprintf(name, sizeof name, fmt, j, i + 1);
