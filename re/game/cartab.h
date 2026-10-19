@@ -14,7 +14,8 @@ typedef struct {
   uint8_t  f16[2];
   int32_t  pos2[3];       /* +0x18 позиция (x, y, z) — копия для коллизий */
   uint8_t  f24[0x1c];
-  int32_t  f40[0xe];      /* +0x40..+0x74 скорости/силы (сбрасываются при старте) */
+  int32_t  f40[0xe];      /* +0x40..+0x74 скорости/силы (сбрасываются при старте); +0x40 velocity, +0x4c angular velocity,
+                             +0x58 force, +0x68 torque — see carfields.h */
   uint8_t  f78[4][4];     /* +0x78 колёса: 4 × 4 байта (+0 — контакт) */
   uint8_t  f88[0x40];
   int32_t  pos[3];        /* +0xc8 позиция x, y, z (00d07888 для игрока) */
@@ -31,7 +32,9 @@ typedef struct {
   int32_t  f10c;          /* +0x10c обороты/скорость (fixed <<12) */
   int32_t  speed;         /* +0x110 скорость */
   int32_t  f114, f118;
-  int32_t  vel[3];        /* +0x11c..+0x124 */
+  int32_t  vel[3];        /* +0x11c..+0x124 — NOT a velocity: first three of the six damage zones +0x11c..+0x130
+                             (P142_CopDrive sums them, ported106.c reads vel[side] as damage); see carfields.h CAR_DAMAGE.
+                             Name kept to avoid touching every user. */
   int32_t  f128, f12c, f130, f134, f138;
   uint16_t f13c;
   uint8_t  f13e[2];
