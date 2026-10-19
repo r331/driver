@@ -1,3 +1,7 @@
+/* ported24.c — DirectDraw / Direct3D initialisation wrappers (English overview).  Thin cdecl wrappers over
+   plat_dd_* / plat_d3d_*: surfaces, device, viewport, display mode, clipper, lost-surface recovery and the
+   back-buffer clear.  COM objects are kept as void* (32-bit Game.exe pointers in the hook build).
+   Wrappers that return int32_t return 1 on success (DD_OK) and 0 on failure. */
 #include "ported24.h"
 #include "ported22.h"
 #include "unported.h"
@@ -109,6 +113,12 @@ int32_t P24_ModeH;
 
 enum { DDERR_SURFACELOST = (int32_t)0x887601C2, DDERR_WRONGMODE_ = (int32_t)0x8876024B };   /* -0x7789fe3e, -0x7789fdb5 в оригинале */
 
+/* P24_CreateSurface — 00420c10: IDirectDraw::CreateSurface(desc) -> surface or NULL.
+   P24_CreateDevice — 00420cfe: IDirect3D2::CreateDevice(iid, surf) -> device or NULL (NULL d3d -> NULL).
+   P24_CreateViewport — 00420d5d: IDirect3D2::CreateViewport -> viewport or NULL.
+   P24_AddViewport — 00420dad: adds vp to dev and sets its rectangle to w x h.
+   P24_SetDisplayMode — 0042101b: w x h at P24_Bpp bits per pixel.
+   P24_CreateClipper — 00421250, P24_SetClipper — 00421298, P24_AttachSurface — 004214dd: as named. */
 void *P24_CreateSurface(void *dd, const void *desc) { return plat_dd_create_surface(dd, desc); }
 void *P24_CreateDevice(void *d3d, const void *iid, void *surf) {
   if (d3d == NULL) return NULL;
@@ -128,6 +138,9 @@ void *P24_CreateClipper(void *dd) { return plat_dd_create_clipper(dd); }
 int32_t P24_SetClipper(void *surf, void *clipper) { return plat_dd_set_clipper(surf, clipper) == 0; }
 int32_t P24_AttachSurface(void *surf, void *attached) { return plat_dd_attach_surface(surf, attached) == 0; }
 
+/* P24_RestoreSurfaces — Game.exe 004212dc.  Restores the primary, back and Z surfaces if they were lost
+   (e.g. after Alt+Tab); DDERR_WRONGMODE from Restore means the display mode changed, so it is set again
+   (P24_RestoreDisplay). */
 void P24_RestoreSurfaces(void) {
   void *s[3] = { P24_Primary, P24_Back, P24_ZSurf };
   for (int i = 0; i < 3; i++) {
@@ -135,11 +148,17 @@ void P24_RestoreSurfaces(void) {
     if (plat_dd_is_lost(s[i]) != 0 && plat_dd_restore(s[i]) == DDERR_WRONGMODE_) P24_RestoreDisplay();
   }
 }
+/* P24_RestoreDisplay — Game.exe 004213a4.  When P24_RestoreMode is set (TODO(RE): presumably fullscreen), maximises the window
+   and sets the display mode P24_ModeW x P24_ModeH again. */
 void P24_RestoreDisplay(void) {
   if (P24_RestoreMode == 0) return;
   plat_window_maximize(P24_Hwnd);
   P24_SetDisplayMode(P24_DD, P24_ModeW, P24_ModeH);
 }
+/* P24_FillBackbuffer — Game.exe 00420ef6.  Clears the viewport rectangle (P22_Vp*) of surf to colour rgb
+   (0xRRGGBB), packed into the surface pixel format with the per-channel shifts P24_[RGB]Shift[RL]
+   (shift right drops the low bits, shift left places the channel).  Retries up to 100 times, restoring
+   surfaces on DDERR_SURFACELOST.  Always returns 1. */
 int32_t P24_FillBackbuffer(void *surf, uint32_t rgb) {
   uint32_t r = ((rgb & 0xff0000) >> 16) >> (P24_RShiftR & 0x1f);
   uint32_t g = ((rgb & 0xff00) >> 8) >> (P24_GShiftR & 0x1f);
@@ -152,6 +171,9 @@ int32_t P24_FillBackbuffer(void *surf, uint32_t rgb) {
   }
   return 1;
 }
+/* P24_CreatePrimarySurface — Game.exe 0042106d.  Creates the flipping primary surface with 1 back buffer
+   (2 in fullscreen; TODO(RE): the condition reads "P24_Fullscreen == 0 -> 1", so check the flag's sense) and
+   gets the attached back buffer P24_Back.  Returns 1 on success, 0 on failure (primary released). */
 int32_t P24_CreatePrimarySurface(void) {
   uint32_t d[31]; memset(d, 0, sizeof d);
   d[0] = 0x7c; d[1] = 0x21;                 /* dwSize, DDSD_CAPS|DDSD_BACKBUFFERCOUNT */
