@@ -774,6 +774,9 @@ void NoopFn00528455(void) { }
 void InitSubsys004BA443(void) { G6Call004BA457(); G6Call004BA57A(); G6Call004BA64D(); }
 void Fwd004D2D9F(int32_t a, int32_t b, int32_t c, int32_t d) { if (G00575F08 != 0) G6Call004D614A(a, b, c, d); }
 void Reset004D600B(void) { G6Call004D5FFC(); G6Call00523628(); G6_00B20368 = 0; G6_00B20364 = 0; }
+/* 004dc8b0 — despite the historical name this is not a menu function: it appends a car record to the
+   active physics list G6_00B2F30C[G6_00D0DDC0++] (walked by P142_CarsStep) and sets item[3] = flag != 0.
+   The name is kept because hook/native tables refer to it. */
 void MenuAddItem004DC8B0(uint8_t *item, int32_t flag) {
     item[3] = (flag == 0) ? 0 : 1; G6_00B2F30C[G6_00D0DDC0] = item; G6_00D0DDC0 = G6_00D0DDC0 + 1;
 }

@@ -1,4 +1,10 @@
-/* v1.79: ported134 — см. ported134.h.
+/* ported134.c — cameras (English overview; the original Russian notes follow):
+   0049cad4 P134_CamCollide (push the camera out of buildings), 0049d84a P134_CamChase (chase camera),
+   0049e16c P134_CamTarget (fixed camera aimed at a car), 004f0f90 P134_CamCine (cutscene camera),
+   00494620 P134_TrafficHold (traffic state handler).  Camera angles use 4096 = 360 degrees; camera
+   coordinates are floats with Y negated relative to the car table (camera Y = -car Y).
+
+   v1.79: ported134 — см. ported134.h.
    0049cad4 — при 00b5a778 ≠ 0 и 00d17bbc = 0 — 0. Иначе 004c6091(ftol x, ftol z) (всегда 1), клетка сетки по камере
      (00ce0f2c/00ce0f30 × 0125f3e8, блоки 2×2 по 00c98ecc), при дистанции 01137368 > 0 — обход списка узлов клетки:
      модели с коробками (+0x34) и 004c60b2 (нет флага 0x400, радиус +0x10 ≥ 200) ближе радиуса по XZ; записи типа 0
@@ -21,6 +27,7 @@
      00b1c280 — без обхода; индекс машины вне 0..65 — без действия; деление на 00c823dc = 0 — t = 4096, слагаемое высоты 0;
      псевдонимы 00b1c270.. (P59_V*) и 00b1c268 (P11_00b1c268) обновляются вместе с P44_Cam* и P59_AngA. */
 #include "ported134.h"
+#include "carfields.h"
 #include <string.h>
 #include <math.h>
 #include "crt.h"
@@ -166,11 +173,22 @@ static int car_ok(int32_t car) {
 static int32_t far_enough(const uint8_t *m) { return (rd32(m + 8) & 0x400) == 0 && 200.0f <= rdf(m + 0x10); }
 
 /* ---- 0049cad4 ---- */
+/* P134_CamCollide — Game.exe 0049cad4, cdecl.
+   Keeps the camera (P44_CamX/Y/Z, float world coordinates; Y is negated: up = -Y) out of buildings.
+   Looks up the map-grid cell under the camera (blocks of 2x2 cell slots, see ported89.c), walks the
+   cell's object list and, for every model with collision boxes (+0x34) whose bounding circle contains
+   the camera, transforms the camera into each box's frame (object rotation + optional box rotation).
+   If the camera is inside a box (half-sizes + P95_Near margin), it is pushed out through the nearest
+   vertical face, and the chase distance P61_Dist8 is shortened to the new camera-player distance.
+   With no contact the distance grows back by P62_F136C54 per call, up to P61_DistC.
+   In:  ground — non-zero: also keep the camera at least 250 units above the road.
+   Out: 1 if the camera was pushed, else 0 (0 while paused outside the replay director).
+   Quirk kept: boxes of type 1 are skipped (the original computes a distance for them and ignores it). */
 int32_t P134_CamCollide(int32_t ground) {
   if (G6_00B5A778 != 0 && P29_Mode == 0) return 0;
-  int32_t far = P47_Call51B111((int32_t)P44_CamX, (int32_t)P44_CamZ);      /* __ftol */
-  int32_t clear = 1;
-  int32_t gx = rnd((P44_CamX + (float)P42_CellX) * P42_CellScale);
+  int32_t far = P47_Call51B111((int32_t)P44_CamX, (int32_t)P44_CamZ);      /* __ftol; always 1 in practice (004c6091) */
+  int32_t clear = 1;   /* stays 1 when no box touched the camera */
+  int32_t gx = rnd((P44_CamX + (float)P42_CellX) * P42_CellScale);   /* map-grid cell of the camera */
   int32_t gz = rnd((P44_CamZ + (float)P42_CellY) * P42_CellScale);
   int32_t N = P54_GridN;
   int ok = 1;
@@ -179,6 +197,7 @@ int32_t P134_CamCollide(int32_t ground) {
 #endif
   int32_t node = -1;
   if (ok) {
+    /* the cell table holds 4 slots of N x N cells; the slot is picked by the parity of the N x N block */
     int32_t bx = gx / N, bz = gz / N;
     int32_t cell = ((bx & 1) + (bz & 1) * 2) * N * N + (gx - bx * N) + (gz - bz * N) * N;
 #ifndef RE_HOOK_BUILD
@@ -220,18 +239,20 @@ int32_t P134_CamCollide(int32_t ground) {
               uu = v * mt[6] + u * mt[0];
               v = v * mt[8] + u * mt[2];
             }
+            /* box record (0x14 bytes): +0 type, +2/+4/+6 centre, +10 extra rotation, +14/+16/+18 size */
             float hx = (float)((int32_t)rd16(e + 14) >> 1) + P95_Near;
             float hy = (float)((int32_t)rd16(e + 16) >> 1) + P95_Near;
             float hz = (float)((int32_t)rd16(e + 18) >> 1) + P95_Near;
             if (hx < 300.0f && hz < 300.0f) continue;                                           /* .data 005460ec */
             if (!(-hx < uu && uu < hx && -hy < y && y < hy && -hz < v && v < hz)) continue;
+            /* distances to the four vertical faces; push out through the nearest one */
             float f1 = (float)fabs((double)(uu + hx)), f2 = (float)fabs((double)(uu - hx));
             float f3 = (float)fabs((double)(v + hz)), f4 = (float)fabs((double)(v - hz));
-            int sel; float mn;
-            if (f1 < f2) { sel = 0; mn = f1; } else { sel = 1; mn = f2; }
-            if (f3 < f4) { if (f3 < mn) sel = 2; } else if (f4 < mn) sel = 3;
-            float px = 0.0f, pz = 0.0f;
-            switch (sel) {
+            int face; float mn;
+            if (f1 < f2) { face = 0; mn = f1; } else { face = 1; mn = f2; }
+            if (f3 < f4) { if (f3 < mn) face = 2; } else if (f4 < mn) face = 3;
+            float px = 0.0f, pz = 0.0f;   /* push in box space, rotated back to world below */
+            switch (face) {
             case 0: px = -f1; break;
             case 1: px = f2; break;
             case 2: pz = -f3; break;
@@ -264,7 +285,9 @@ int32_t P134_CamCollide(int32_t ground) {
   return clear == 0;
 }
 
-/* углы камеры на точку: A = ±(atan2(len, y) − 0x400), B = −atan2(x, z) */
+/* углы камеры на точку: A = ±(atan2(len, y) − 0x400), B = −atan2(x, z)
+   Camera angles towards a direction (fx, fy, fz): pitch P59_AngA = +-(atan2(horizontal length, y) - 90 deg),
+   yaw P59_AngB = -atan2(x, z), roll P59_AngC = 0 (4096 = 360 deg). */
 static void look_xz(float fx, float fy, float fz, int neg) {
   float d = (float)sqrt((double)(fz * fz + fx * fx));
   int32_t len = rnd(d), ix = rnd(fx), iy = rnd(fy), iz = rnd(fz);
@@ -275,6 +298,13 @@ static void look_xz(float fx, float fy, float fz, int neg) {
 }
 
 /* ---- 0049d84a ---- */
+/* P134_CamChase — Game.exe 0049d84a, cdecl.  The default chase camera behind car `car` (0 = player).
+   Keys (when not paused): zoom P61_Dist8 -+40 (minimum 1), orbit P61_V18 -+0x16 per tick.
+   The camera heading P61_V1C follows car heading + orbit with 1/8 smoothing per tick (immediately in
+   the replay director), the pitch P61_V20 follows -car pitch the same way.  The offset
+   (0, P61_OffY, P61_Dist8) is rotated by pitch (skipped during the marker effect) and heading (minus
+   the shake offset P133_1137320 >> 16), added to the car position, pushed out of buildings
+   (P134_CamCollide(1)) and finally aimed at the car. */
 void P134_CamChase(int32_t car) {
   if (!car_ok(car)) return;                                    /* защита индекса: в оригинале нет */
   const p99_car_t *c = &P99_Cars[car];
@@ -284,6 +314,7 @@ void P134_CamChase(int32_t car) {
     if (P36_Pad4 != 0) P61_V18 = (P61_V18 - 0x16) & 0xfff;
     if (P36_Pad5 != 0) P61_V18 = (P61_V18 + 0x16) & 0xfff;
   }
+  /* signed angle difference wrapped to [-180, 180) degrees: ((a - b + 0x800) & 0xfff) - 0x800 */
   int32_t dh = ((c->heading + P61_V18 - P61_V1C + 0x800) & 0xfff) - 0x800;
   int live = (G6_00B5A778 == 0 || P29_Mode != 0) && P128_FreeCamLock == 0;
   if (live) {
@@ -310,6 +341,12 @@ void P134_CamChase(int32_t car) {
 }
 
 /* ---- 0049e16c ---- */
+/* P134_CamTarget — Game.exe 0049e16c, cdecl.  Fixed-position camera at P61_TgtX/Y/Z.
+   car == -1: use the stored angles P61_AngB8/BA/BC; otherwise aim at car `car`.  The projection scale
+   P43_ScaleA (focal length: larger = narrower view) is 384 normally; with the zoom flag 011373c0 it is
+   1152 for the fixed angles, or 0.2 * distance clamped to 384..2112 when tracking a car.
+   The direction vector is scaled by 256 and then reduced by 4 until its length is <= 64000 so the
+   integer atan2 keeps its precision. */
 void P134_CamTarget(int32_t car) {
   rnd(P44_CamZ);
   P44_CamX = P61_TgtX; P44_CamY = P61_TgtY; P44_CamZ = P61_TgtZ;
@@ -340,6 +377,11 @@ void P134_CamTarget(int32_t car) {
 }
 
 /* ---- 004f0f90 ---- */
+/* P134_CamCine — Game.exe 004f0f90, cdecl.  Cinematic camera of a cutscene (active while 00c824a0 is set).
+   t = elapsed (00c82430) / duration (00c823dc) in 0..4096.  Mode 2 (00c82504): linear move from 00c82420
+   to 00c824f0 with the scale going from 00c82520 to 00c824dc.  Otherwise the camera height is kept
+   relative to the road and the camera eases towards its goal by 1/8 per tick; finally it is aimed at
+   the point 00c82448 (P126_Spawn + 8) and the angles are copied to the chase-camera state. */
 void P134_CamCine(void) {
   if (P98_C824A0 == 0) return;
   if (P123_TgtMode == 0) P123_SideDist();
@@ -377,6 +419,10 @@ void P134_CamCine(void) {
 }
 
 /* ---- 00494620 ---- */
+/* P134_TrafficHold — Game.exe 00494620, cdecl; reached only through the handler table at .data 00551308.
+   Traffic-record state handler: while the countdown rec[0xb] runs, hold the car's steering at -575
+   (0xfffffdc1); when it reaches 0 switch the record to state rec[1] = 2, rec[2] = 1.
+   TODO(RE): unsure which traffic manoeuvre this is (a turn-in at a junction?). */
 void P134_TrafficHold(uint8_t *rec) {
   uint8_t *c;
 #ifndef RE_HOOK_BUILD
@@ -385,7 +431,7 @@ void P134_TrafficHold(uint8_t *rec) {
 #endif
   c = P59_CarsTab + (uint32_t)rec[0] * 0x148;
   if (rec[0xb] != 0) {
-    if (c != NULL) { uint32_t v = 0xfffffdc1u; memcpy(c + 0xfc, &v, 4); }
+    if (c != NULL) { uint32_t v = 0xfffffdc1u; memcpy(c + CAR_STEER, &v, 4); }   /* -575 */
     rec[0xb] = (uint8_t)(rec[0xb] - 1);
   } else { rec[1] = 2; rec[2] = 1; }
 }
