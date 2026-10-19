@@ -494,14 +494,6 @@ p12_00576688_t P12_00576688;
 static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
 
-int32_t P12_Fn004046C8(void) {
-  int32_t r;
-  g_00bdfa40 = g_0057b56c + 1;
-  MenuAction40CD17();
-  if (g_00b87e38 == 0x30) { UiCall0040C455(1, 0); r = 1; }
-  else { r = R12_4082A0(); if (r == 0) M12(0x549a30, 0x549a58); }
-  return r;
-}
 uint32_t P12_Fn00404F70(void) {
   MenuAction40CD17(); g_00b87e38 = 0x105; g_01271060 = 8;
   UiCall0040C455(1, 0); M12(0x549ae8, 0x549b00); return 0;

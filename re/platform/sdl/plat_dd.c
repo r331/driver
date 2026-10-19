@@ -94,7 +94,6 @@ void plat_dd_attach_hd(void *v, uint32_t *rgba, int w, int page, int pal) {
     if (!rgba) { if (o->hd) { free(o->hd); o->hd = NULL; o->dirty = 1; } return; }   /* снять (в слоте другая страница) */
     free(o->hd); o->hd = rgba; o->hdw = w; o->hd_page = page; o->hd_pal = pal; o->dirty = 1; g_hd_att++;
 }
-int plat_dd_hd_page(void *v, int *pal) { dd_obj *o = (dd_obj *)v; if (!is_surf(v) || !o->hd) return -1; if (pal) *pal = o->hd_pal; return o->hd_page; }
 void plat_dd_tag_page8(void *v, int page, uint64_t key) { dd_obj *o = (dd_obj *)v; if (!is_surf(v) || o->bpp != 8) return; o->page8 = page; o->page8_key = key; }
 void plat_dd_hd_stats(int *att, int *up, int *rej, int *pal8) { if (att) *att = g_hd_att; if (up) *up = g_hd_up; if (rej) *rej = g_hd_rej; if (pal8) *pal8 = g_pal8_bind; }
 static void gs_upload(dd_obj *o, int overlay) {

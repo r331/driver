@@ -86,7 +86,6 @@ int32_t P99_TrafficAhead(void);                                        /* 004a1b
 int32_t P99_CopTarget(int32_t *cop);                                   /* 004a6e84 */
 void    P99_CarModelClean(int32_t car);                                /* 004c0218: копия вершин/операций целой модели машины */
 void    P99_CarOpsReset(int32_t car);                                  /* 004c1b6c */
-void    P99_InitConsts(void);
 
 /* ---- прочие (v1.44) ---- */
 typedef uint8_t  p99_camkeys_t[0x34 * 0x40];

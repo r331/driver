@@ -24,7 +24,6 @@ void plat_snd_destroy(int h){snd_t*s=S(h); if(s){LOCK(); free(s->pcm); memset(s,
 void plat_snd_play(int h,int l){snd_t*s=S(h); if(s){LOCK(); if(!s->playing) s->pos=0; s->playing=1;s->loop=l; UNLOCK();}}
 void plat_snd_stop(int h){snd_t*s=S(h); if(s){LOCK(); s->playing=0; UNLOCK();}}
 void plat_snd_set(int h,int v,int p,int n){snd_t*s=S(h); if(s){LOCK(); s->vol=v;s->pitch=p>0?p:s->rate;s->pan=n; UNLOCK();}}
-void plat_snd_pos3d(int h,float x,float y,float z){snd_t*s=S(h); if(s){s->x=x;s->y=y;s->z=z;}}
 
 #define SND_OUT_RATE 44100
 void dsm_mix(int16_t *out, int frames); int dsm_active(void);
@@ -50,7 +49,7 @@ void plat_snd_mix(int16_t *out,int frames){
       if(s->pos>=(double)total){ if(s->loop) s->pos-=(double)total; else { s->playing=0; break; } } } }
   dsm_mix(out,frames); }
 static void SDLCALL audio_cb(void*u,Uint8*st,int len){ (void)u; plat_snd_mix((int16_t*)st,len/4); }
-int plat_snd_open(void){
+static int plat_snd_open(void){
   if(g_dev) return 1;
   if(SDL_InitSubSystem(SDL_INIT_AUDIO)<0) return 0;
   SDL_AudioSpec want; SDL_zero(want); want.freq=SND_OUT_RATE; want.format=AUDIO_S16SYS; want.channels=2; want.samples=1024; want.callback=audio_cb;
@@ -89,11 +88,6 @@ void plat_snd_pump(void){
 }
 /* v2.29: для selftest — включить пустое устройство с часами, отстающими на ms (ms < 0 — выключить) */
 void plat_snd_null_for_test(int ms){ if(ms<0){ g_wav_on=0; g_wav_frames=0; return; } g_wav=NULL; g_wav_frames=0; g_wav_ms0=(uint64_t)plat_time_ms()-(uint64_t)ms; g_wav_on=1; }
-void plat_snd_close(void){ if(g_dev){ SDL_CloseAudioDevice(g_dev); g_dev=0; } }
-static int g_cd_track=0;
-int plat_cd_play(int t){ if(t<1||t>99) return 0; g_cd_track=t; return 1;}
-void plat_cd_stop(void){ g_cd_track=0; }
-int plat_cd_current(void){ return g_cd_track; }
 
 /* --- CD-аудио: v2.22 — эмуляция в plat_cdaudio.c; таймеры на SDL_AddTimer --- */
 #include <stdlib.h>

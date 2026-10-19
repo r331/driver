@@ -33,8 +33,6 @@ static dsm_buf *nb(int kind) {
   plat_snd_lockdev(0);
   return b;
 }
-static int g_stat_create, g_stat_play, g_stat_dup;
-int dsm_stats(int *cr, int *pl, int *dup) { *cr = g_stat_create; *pl = g_stat_play; *dup = g_stat_dup; return 1; }
 int32_t dsm_create_buffer(uint32_t fl, uint32_t bytes, const void *wfx, void **out) {
   dsm_buf *b = nb((fl & 1) ? K_PRIMARY : K_SEC); *out = b; if (!b) return -1;
   if (b->kind == K_SEC) {
@@ -47,7 +45,6 @@ int32_t dsm_create_buffer(uint32_t fl, uint32_t bytes, const void *wfx, void **o
     b->pcm = (dsm_pcm *)calloc(1, sizeof *b->pcm);
     if (b->pcm) { b->pcm->bytes = bytes; b->pcm->refs = 1; b->pcm->data = (uint8_t *)calloc(bytes ? bytes : 1, 1); }
     if (!b->pcm || !b->pcm->data) return -1;
-    g_stat_create++;
   }
   return 0;
 }
@@ -56,7 +53,7 @@ int32_t dsm_duplicate(void *src, void **out) {
   if (!dsm_is(s) || s->kind != K_SEC || !s->pcm) return -1;
   dsm_buf *b = nb(K_SEC); if (!b) return -1;
   b->pcm = s->pcm; s->pcm->refs++; b->rate = s->rate; b->ch = s->ch; b->bits = s->bits;
-  *out = b; g_stat_dup++; return 0;
+  *out = b; return 0;
 }
 /* QI: ksprop → 0 (вызывающий отдаёт учётную заглушку); первичный → слушатель; вторичный → 3D-буфер */
 void *dsm_qi(void *o) {
@@ -84,7 +81,7 @@ static dsm_buf *sec(void *o) { dsm_buf *b = (dsm_buf *)o; return b->kind == K_SE
 static dsm_buf *b3(void *o) { dsm_buf *b = (dsm_buf *)o; return b->kind == K_3D ? b : NULL; }
 int32_t dsm_play(void *o, uint32_t fl) {
   dsm_buf *b = sec(o); if (!b) return 0;      /* первичный — без действия */
-  plat_snd_lockdev(1); b->playing = 1; b->loop = (fl & 1) != 0; plat_snd_lockdev(0); g_stat_play++;
+  plat_snd_lockdev(1); b->playing = 1; b->loop = (fl & 1) != 0; plat_snd_lockdev(0);
   if (getenv("RE_SND_LOG")) fprintf(stderr, "[ds] play %p pcm %u B %d Hz %dch %db loop %d vol %d freq %u 3d %d pos %.0f\n", (void *)b, b->pcm ? b->pcm->bytes : 0, b->rate, b->ch, b->bits,
       b->loop, b->vol, b->freq, b->b3d ? b->b3d->mode3d : -1, b->pos);
   return 0;
@@ -112,7 +109,6 @@ int32_t dsm_3d_pos(void *o, float x, float y, float z) { dsm_buf *b = b3(o); if 
 void dsm_listener_pos(float x, float y, float z) { g_lp[0] = x; g_lp[1] = y; g_lp[2] = z; }
 void dsm_listener_orient(const float *s) { memcpy(g_lf, s, 12); memcpy(g_lt, s + 3, 12); }
 void dsm_listener_factors(int which, float v) { if (which == 0) g_distf = v; else if (which == 1) g_dopf = v; else g_roll = v; }
-float dsm_listener_rolloff(void) { return g_roll; }
 
 static float db_gain(int32_t h) { if (h >= 0) return 1.0f; if (h <= -10000) return 0.0f; return powf(10.0f, (float)h / 2000.0f); }
 static float smp(const dsm_buf *b, int64_t fr, int c) {

@@ -93,9 +93,7 @@
     V(P56_Fn4E5284, 0x004e5284, (void *a0), (a0)) \
     V(P56_Fn4E5011, 0x004e5011, (int32_t a0, void *a1), ()) \
     V(P56_Fn4E53B5, 0x004e53b5, (int32_t a0, void *a1), (a0, a1)) \
-    V(P87_Fn42982E, 0x0042982e, (uint32_t m, int32_t idx, float *pos, int32_t mode), (m, idx, pos, mode)) \
     V(P87_Fn42A423, 0x0042a423, (uint32_t m, int32_t idx, float *pos, int32_t mode), (m, idx, pos, mode)) \
-    V(P87_Fn42A5DE, 0x0042a5de, (uint32_t m, int32_t idx, float *pos, int32_t mode), (m, idx, pos, mode)) \
     V(P55_Fn4ED5F8, 0x004ed5f8, (int32_t a0, int32_t a1), (a0, a1)) \
     V(P55_Fn4EDAA2, 0x004edaa2, (void), ()) \
     R(int32_t, P55_Fn405E79, 0x00405e79, (int32_t a0, void *a1), (a0, a1)) \
@@ -139,7 +137,6 @@
     V(N14_Fn5259C8, 0x005259c8, (int32_t a0), (a0)) \
     V(N14_Fn4D2ADE, 0x004d2ade, (int32_t a0), (a0)) \
     V(N14_Fn4A7EE9, 0x004a7ee9, (int32_t a0), (a0)) \
-    V(N14_Fn48A627, 0x0048a627, (void), ()) \
     R(uint32_t, N14_Fn503ECC, 0x00503ecc, (const uint8_t* a0), (a0)) \
     V(Call0040CCB4, 0x0040ccb4, (uint32_t a0, uint32_t a1), (a0, a1)) \
     R(int32_t, R12_4082A0, 0x004082a0, (void), ()) \
@@ -187,11 +184,9 @@
     V(Call0050F289, 0x0050f289, (void), ()) \
     R(int32_t, R12_40A8B0, 0x0040a8b0, (uint32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4), (a0, a1, a2, a3, a4)) \
     V(Call004DAA36, 0x004daa36, (uint32_t a0, uint32_t a1), (a0, a1)) \
-    V(Call00527885, 0x00527885, (int32_t a0, int32_t a1, int32_t a2, uint32_t a3), (a0, a1, a2, a3)) \
     V(Call004D6190, 0x004d6190, (int32_t a0), (a0)) \
     V(Call0048DB65, 0x0048db65, (uint32_t a0, int32_t a1), (a0, a1)) \
     V(Call00493ECE, 0x00493ece, (int32_t a0), (a0)) \
-    V(Call0051200F, 0x0051200f, (uint32_t a0), (a0)) \
     V(Call005186CE, 0x005186ce, (void), ()) \
     V(Call004E3391, 0x004e3391, (void), ()) \
     V(Call0052A910, 0x0052a910, (uint32_t a0, uint32_t a1, int32_t a2), (a0, a1, a2)) \
@@ -313,7 +308,6 @@
     R(int32_t, G6Call00523CDA, 0x00523cda, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4), (a0, a1, a2, a3, a4)) \
     V(Call004BF910, 0x004bf910, (uint32_t a0, uint32_t a1, uint32_t a2), (a0, a1, a2)) \
     V(Call0052B650, 0x0052b650, (uint32_t a0, uint32_t a1, uint32_t a2), (a0, a1, a2)) \
-    V(Call004D9596, 0x004d9596, (uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3), (a0, a1, a2, a3)) \
     V(Call004D94B7, 0x004d94b7, (uint32_t a0, uint32_t a1), (a0, a1)) \
     R(int32_t, Call00524473, 0x00524473, (int32_t a0), (a0)) \
     V(Call004A9F45, 0x004a9f45, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, uint32_t a4), (a0, a1, a2, a3, a4)) \
@@ -358,7 +352,6 @@
     V(P58_Fn51763A, 0x0051763a, (const char *a0, int32_t a1), (a0, a1)) \
     V(P58_Fn4AA4EA, 0x004aa4ea, (int32_t a0, int32_t a1, int32_t a2, int32_t a3, void *a4, int32_t a5), (a0, a1, a2, a3, a4, a5)) \
     V(P58_Fn40CFDF, 0x0040cfdf, (int32_t x, int32_t y, uint32_t tbl, const char *name, int32_t a4), (x, y, tbl, name, a4)) \
-    V(P58_Fn406875, 0x00406875, (void *a0), (a0)) \
     V(P58_Fn413E37, 0x00413e37, (void), ()) \
     V(P74_Fn41CE90, 0x0041ce90, (void), ()) \
     V(P74_Fn424B70, 0x00424b70, (void), ()) \

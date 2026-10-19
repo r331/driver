@@ -194,8 +194,6 @@ static int32_t iabs(int32_t v) { return v < 0 ? -v : v; }
 static int32_t fround(float v) { return (int32_t)lrintf(v); }                   /* fistp */
 #define CAR(i) (&P99_Cars[(i)])
 
-void P99_InitConsts(void) { }
-
 /* ---- 00506a07: точки мира (int x, y, z, —) → координаты радара (x, —, z), поворот на курс машины S_00D11878 ---- */
 void P99_RadarXform(const int32_t *src, int32_t *dst, int32_t n) {
   uint32_t a = (uint32_t)(-CAR(S_00D11878)->heading) & 0xfff;

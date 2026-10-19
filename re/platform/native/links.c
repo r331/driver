@@ -214,9 +214,7 @@ int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); 
 void P56_Fn4E5011 (int32_t a0, void *a1) { P103_GhostState(); }
 void P56_Fn4E5284 (void *a0) { (void)a0; P94_FadeStep(); }   /* v2.25: секундомер интервью (конец по времени) */
 void P56_Fn4E53B5 (int32_t a0, void *a1) { P105_StuntHints(a0, a1); }
-void P87_Fn42982E (uint32_t m, int32_t idx, float *pos, int32_t mode) { P92_DrawAxis(m, idx, pos, mode); }
 void P87_Fn42A423 (uint32_t m, int32_t idx, float *pos, int32_t mode) { P90_DrawSingle(m, idx, pos, mode); }
-void P87_Fn42A5DE (uint32_t m, int32_t idx, float *pos, int32_t mode) { P92_DrawSpin(m, idx, pos, mode); }
 void P55_Fn4ED5F8 (int32_t a0, int32_t a1) { P87_LoadTile(a0, a1); }
 void P55_Fn4EDAA2 (void) { P88_StreamTiles(); }
 int32_t P55_Fn405E79 (int32_t a0, void *a1) { return (int32_t)P58_SaveSlot(a0, a1); }
@@ -256,7 +254,6 @@ void N14_Fn4D6EF2 (void) { P95_AmbientTick(); }
 void N14_Fn5259C8 (int32_t a0) { P102_CopTalk(a0); }
 void N14_Fn4D2ADE (int32_t a0) { AddClamp4095_004D2ADE(a0); }
 void N14_Fn4A7EE9 (int32_t a0) { SetVarD1193C(a0); }
-void N14_Fn48A627 (void) { P12_Fn0048A627(); }
 uint32_t N14_Fn503ECC (const uint8_t* a0) { return (uint32_t)PackRGB00503ECC(a0); }
 void Call0040CCB4 (uint32_t a0, uint32_t a1) { P45_Wait(a0, a1); }
 int32_t R12_4082A0 (void) { return (int32_t)P57_Menu4082A0(); }
@@ -430,7 +427,6 @@ void P46_Fn51BE3C (void) { P58_BuildBlockIndex(); }
 void P58_Fn4185D2 (uint32_t tbl, int32_t a1, uint32_t tbl2) { P97_MenuCall2(tbl, a1, tbl2); }
 void P58_Fn416605 (void) { P100_ReplayMenuInit(); }
 void P58_Fn51763A (const char *a0, int32_t a1) { P98_LoadLang(a0, a1); }
-void P58_Fn406875 (void *a0) { P102_ConfigSnap(a0); }
 void P58_Fn413E37 (void) { P100_PadMenuInit(); }
 
 static void link_miss0(const char *fn, uint32_t a, uint32_t b) { char m[96]; snprintf(m, sizeof m, "%s: no native object %08x/%08x", fn, (unsigned)a, (unsigned)b); DebugLog(m); }
