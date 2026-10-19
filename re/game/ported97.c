@@ -483,7 +483,7 @@ int32_t P97_SndStart(uint32_t sample, int32_t voice, float a, float b, float c) 
 
 /* ---- 004a681a: сброс машин/трафика (8 записей 0xcd8 по 0112da00) ---- */
 /* P97_ResetCars — Game.exe 004a681a.  Level start reset of the police/traffic state: counters and flags,
-   the 8 cop AI records (0xcd8 bytes from 0112da00, word 0 = own index), thresholds and the siren sound state. */
+   the 8 cop AI records (0xcd8 bytes from 0112da00, word 0 = own index), thresholds and the cop sound state (P95_SndInit). */
 void P97_ResetCars(void) {
   P77_ResetTables();
   P14_Fn0048DB65(P97_B2C0, 10000);
