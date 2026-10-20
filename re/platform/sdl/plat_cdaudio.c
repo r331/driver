@@ -2,7 +2,7 @@
    Игра (game/ported25.c: InitCDAudio 00524611, GetCDTOC 00524f97, PlayCDTrack 0052479e, CDStop 00524873, CDClose 00524763,
    CDResume 005248cd, CDSetVolume 00524917) зовёт только
    plat_cd_* / plat_aux_* (plat.h). Здесь вместо привода — файлы дорожек:
-     каталог: RE_MUSIC_DIR → music_dir в driver.cfg → ./Music (music, MUSIC) в текущем каталоге (каталог данных игры);
+     каталог: RE_MUSIC_DIR → music_dir в driver.cfg → ./Music (music, MUSIC) в текущем каталоге (каталог данных игры) → <texpack>/Music (v2.34);
      дорожка N: TrackNN.wav | trackNN.cdda.wav (cdparanoia) | «NN *.wav» (EAC), затем .flac, .ogg, .mp3 (dr_flac / stb_vorbis /
      dr_mp3 — vendored, public domain); иначе — первый по имени *.cue каталога (FILE BINARY/MOTOROLA/WAVE, TRACK NN AUDIO,
      INDEX 01: сырой PCM 44100 Гц стерео 16 бит, 2352 байта на сектор); иначе — «заглушка»: дорожка есть, длина
@@ -22,6 +22,7 @@
 #include "../plat.h"
 #include "plat_cdaudio.h"
 #include "plat_gfx.h"
+#include "plat_texpack.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -148,6 +149,12 @@ const char *cda_music_dir(void) {
   if (c && *c) { snprintf(g_dir, sizeof g_dir, "%s", c); snprintf(g_dir_why, sizeof g_dir_why, "driver.cfg music_dir"); return g_dir; }
   static const char *def[] = { "Music", "music", "MUSIC" };
   for (int i = 0; i < 3; i++) if (isdir(def[i])) { snprintf(g_dir, sizeof g_dir, "%s", def[i]); snprintf(g_dir_why, sizeof g_dir_why, "./%s", def[i]); return g_dir; }
+  /* v2.34: музыка из HD-пака — <texpack>/Music (r331/driver-texpack кладёт её туда), если в каталоге данных её нет */
+  const char *tp = re_texpack_dir();
+  if (tp && *tp) for (int i = 0; i < 3; i++) {
+    char p[1024]; snprintf(p, sizeof p, "%s/%s", tp, def[i]);
+    if (isdir(p)) { snprintf(g_dir, sizeof g_dir, "%s", p); snprintf(g_dir_why, sizeof g_dir_why, "texpack/%s", def[i]); return g_dir; }
+  }
   snprintf(g_dir, sizeof g_dir, "Music"); snprintf(g_dir_why, sizeof g_dir_why, "каталога нет");
   return g_dir;
 }
