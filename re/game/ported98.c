@@ -1,3 +1,8 @@
+/* ported98.c — 30+ assorted Game.exe functions under the v1.42 pointer convention (English overview; original
+   notes follow): DebugMalloc/DebugFree, script list freeing, credits, icon flushing, quads for the D3D path,
+   mission / car state resets, traffic wheel spin, splash icons, camera splines, language files, lamp
+   colours, replay camera records, the target marker, replay-director cameras and keys, voice positions,
+   menu items, RIFF parsing, the 1555 pixel table, script range checks and pedestrian/particle hits. */
 /* v1.43: 30 функций — восстановлено из Game.exe по стандарту указателей v1.42 (см. ported98.h). */
 #include "ported98.h"
 #include "ported135.h"
@@ -744,6 +749,8 @@ p98_b148_t P98_M4900;
 #endif
 
 #include "memrw.h"
+/* rd16 / wr16 / wrf / fbits / link / dist8 / cam_set — local helpers: unaligned access, float bits, a 32-bit link
+   field followed through re_rd_ptr, octagonal distance max + min/2, and setting the camera position. */
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
@@ -756,9 +763,11 @@ static void cam_set(float x, float y, float z) { P44_CamX = x; P44_CamY = y; P44
 #endif
 }
 /* освобождение блока игры: в native ещё и снять его адрес из реестра */
+/* dfree — local helper: DebugFree of a game block, also removing it from the native address registry. */
 static void dfree(void *p) { if (p == NULL) return; re_ptr_unregister(p); DebugFree(p); }
 
 /* ---- 004d8db4 / 004d8f30: DebugMalloc / DebugFree с таблицей выделений 00b203a0 {адрес, размер, адрес строки журнала} ---- */
+/* reg_block — local helper: registers a native allocation with re_ptr and returns its Game.exe-style address. */
 static uint32_t reg_block(void *p, uint32_t n) {
 #ifdef RE_HOOK_BUILD
   (void)n; return (uint32_t)(uintptr_t)p;
@@ -766,6 +775,8 @@ static uint32_t reg_block(void *p, uint32_t n) {
   return re_ptr_register_dyn(p, n ? n : 1);
 #endif
 }
+/* P98_DebugMalloc / P98_DebugFree — Game.exe 004d8db4 / 004d8f30.  malloc / free with the allocation table 00b203a0
+   {address, size, log string address} used by the game's leak log; `file` / `line` identify the caller. */
 void *P98_DebugMalloc(int32_t size, const char *file, int32_t line) {
   char msg[128];
   snprintf(msg, sizeof msg, "File: %s (Line: %d)", file, line);
@@ -807,6 +818,8 @@ void P98_DebugFree(void *p) {
 }
 
 /* ---- 004d0102: освободить список скрипта 00d12408 (узлы 0x24, объекты 0x60, база +0x50) и модели событий ---- */
+/* P98_ScriptFreeAll — Game.exe 004d0102.  Frees the script list 00d12408 (nodes 0x24, objects 0x60, base +0x50) and
+   the event models. */
 void P98_ScriptFreeAll(void) {
   uint8_t *n = P15_ListHead;
   P15_ListHead = NULL;
@@ -829,6 +842,8 @@ void P98_ScriptFreeAll(void) {
 }
 
 /* ---- 004a9850 / 004a9cd0: титры — y строк по высоте вида, лица PERSON1..3 ---- */
+/* P98_CreditsInit / P98_CreditsFace — Game.exe 004a9850 / 004a9cd0.  Credits: line positions by view height, and the
+   PERSON1..3 face pictures for a credits record. */
 void P98_CreditsInit(void) {
   int32_t y = 0x1e0;
   for (int32_t i = 0; P98_Credits[i].kind != 8; i++) {
@@ -865,6 +880,7 @@ int32_t P98_CreditsFace(uint8_t *rec) {
 }
 
 /* ---- 004b4095: вывести накопленные значки (00c56804 + i*0xb4 → 004accf0) ---- */
+/* P98_IconFlush — Game.exe 004b4095.  Draws the queued icons (00c56804 + i * 0xb4 via 004accf0). */
 void P98_IconFlush(void) {
   if (P94_IconRec == 0) { P98_IconN = 0; return; }
   float c = (float)((0xff - P14_00d17b18) * 0xff >> 8);
@@ -883,6 +899,8 @@ void P98_IconFlush(void) {
 }
 
 /* ---- 004ba720: шесть записей 0x30 (010ff900) текстурой значка *01123260 ---- */
+/* P98_DrawSix — Game.exe 004ba720.  Draws the six 0x30-byte records at 010ff900 with icon *01123260.
+   TODO(RE): unsure what these six objects are. */
 void P98_DrawSix(void) {
   if (D_00b87e30 != 2) return;
   if (P85_StateDirty != 4) { if (P85_StateFn) P85_StateFn(3, 1, 0, 1, 0); P85_StateDirty = 4; }
@@ -900,11 +918,14 @@ void P98_DrawSix(void) {
 }
 
 /* ---- 0041e52c / 0041e729: четырёхугольник (4 вершины по 0x3c) как два треугольника 0-1-2, 0-2-3 в буфер слота ---- */
+/* vslot — local helper: room for 6 vertices in the current texture slot's batch. */
 static plat_vertex *vslot(void) {
   int32_t s = P22_TexVarA;
   int32_t n = P33_Count[s]++;
   return (plat_vertex *)&P33_VBuf[s][n * 0x20];
 }
+/* P98_QuadA / P98_QuadB — Game.exe 0041e52c / 0041e729.  A quad (4 vertices of 0x3c bytes) as two triangles 0-1-2,
+   0-2-3 into the slot's vertex batch (vertex conversion A / B).  The first argument is unused. */
 void P98_QuadA(int32_t unused, const uint8_t *v) {
   (void)unused;
   if (P22_DevReady == 0 || !P33_EnsureRoom(P22_TexVarA, 6)) return;
@@ -919,6 +940,7 @@ void P98_QuadB(int32_t unused, const uint8_t *v) {
 }
 
 /* ---- 004e49c0: сброс состояния миссии ---- */
+/* P98_ResetMission — Game.exe 004e49c0.  Resets the mission state variables. */
 void P98_ResetMission(void) {
   P98_M4658 = 0; P98_M38F7 = 0;
   P56_G4538 = 0; P98_M4A60 = 0; P98_M478C = 0; P98_M4A4C = 0; P98_M447C = 0; P56_D4470 = 0; P12_00d044d0 = 0;
@@ -940,7 +962,10 @@ void P98_ResetMission(void) {
 }
 
 /* ---- 004911d9: поворот колёс/мигалок трафика (поле +0x16 записей 0x54); при 00b87eac/00b87eb0 — 0x41 запись ---- */
+/* trec — local helper: traffic record i (0x54 bytes), or the extra record for 0x40. */
 static uint8_t *trec(int32_t i) { return i < 0x40 ? &TrafficRecs[i * 0x54] : P98_TrafX; }
+/* P98_TrafficSpin — Game.exe 004911d9.  Advances the wheel / light spin of traffic cars (field +0x16 of the traffic
+   records); with 00b87eac / 00b87eb0 also the extra record 0x41. */
 void P98_TrafficSpin(void) {
   uint8_t idx[0x44];
   uint32_t n = 0;
@@ -963,6 +988,7 @@ void P98_TrafficSpin(void) {
 }
 
 /* ---- 004cb857: порядок 100 записей таблицы, значки SPLASH/RFLECT ---- */
+/* P98_InitSplash — Game.exe 004cb857.  Initialises the order of the 100-entry table and looks up the SPLASH / RFLECT icons. */
 void P98_InitSplash(uint8_t *tab) {
   for (int32_t i = 0; i < 100; i++) { wr32(tab + 4 + i * 4, i); wr16(tab + i * 0x34 + 0x1c6, (uint16_t)i); }
   wr32(tab, 0);
@@ -983,6 +1009,7 @@ void P98_InitSplash(uint8_t *tab) {
 }
 
 /* ---- 004c2042: обнулить данные машин игрока/трафика ---- */
+/* P98_ClearCarData — Game.exe 004c2042.  Zeroes the player's and traffic cars' data. */
 void P98_ClearCarData(void) {
   P14_Fn0048DB65(P28_CarDelta, 0xc300);
   P14_Fn0048DB65(P98_CarOpsA, 0x45100);
@@ -1008,6 +1035,8 @@ void P98_ClearCarData(void) {
 }
 
 /* ---- 0049ec01: камера по ключам (записи 0x34): время — Hermite, позиция — Catmull-Rom, поворот — кватернион, масштаб ---- */
+/* P98_CamSpline — Game.exe 0049ec01.  Camera from keys (0x34-byte records) at time t: Hermite timing, Catmull-Rom
+   position, quaternion rotation, and scale. */
 void P98_CamSpline(int32_t t, const uint8_t *k) {
   float tt = 0.0f, pos[4] = { 0, 0, 0, 0 }, q[5] = { 0, 0, 0, 0, 0 }, sc = 0.0f;
   P63_Hermite(t, &tt, rd32(k - 8), rd32(k + 0x2c), rd32(k + 0x60), rd32(k + 0x94));
@@ -1028,6 +1057,8 @@ void P98_CamSpline(int32_t t, const uint8_t *k) {
 /* ---- 0051763a: файл языка/миссии → таблица 0x15e адресов строк (00c55820 / 00c55280) ---- */
 static const char k_lang_missing[] = "Lang.? missing!";
 static const char k_mis_missing[] = "Mission.? missing!";
+/* P98_LoadLang — Game.exe 0051763a.  Loads a language (mission == 0) or mission string file and fills the table of
+   0x15e string addresses (00c55820 / 00c55280); a missing file leaves "Lang.? missing!" / "Mission.? missing!". */
 void P98_LoadLang(const char *name, int32_t mission) {
   int32_t size = 0;
   uint8_t *p = (uint8_t *)P55_LoadFileSize(name, &size);
@@ -1051,6 +1082,7 @@ void P98_LoadLang(const char *name, int32_t mission) {
 }
 
 /* ---- 004cb4ff: цвет фонарей (типы 4 и 5) в первых 4 моделях ---- */
+/* P98_LampColor — Game.exe 004cb4ff.  Sets the colour of lamp records (types 4 and 5) in the first 4 models. */
 void P98_LampColor(uint8_t r, uint8_t g, uint8_t b) {
   for (int32_t k = 0; k < 4; k++) {
     if (P79_ModelTab[k] == 0) continue;
@@ -1065,7 +1097,9 @@ void P98_LampColor(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 /* ---- 00519a45: добавить запись камеры повтора (0x28 байт, 00c4daa0) ---- */
+/* camrec — local helper: replay camera record i (0x28 bytes at 00c4daa0). */
 static uint8_t *camrec(int32_t i) { return &P98_CamRecs[i * 0x28]; }
+/* P98_CamRecAdd — Game.exe 00519a45.  Adds a replay camera record (at the end when at_end, else at the current position). */
 void P98_CamRecAdd(int8_t at_end) {
   if (G6_00B5A8A0 == 0x200) return;
 #ifndef RE_HOOK_BUILD
@@ -1100,6 +1134,7 @@ void P98_CamRecAdd(int8_t at_end) {
 }
 
 /* ---- 004ea346: маркер цели — модель P79_ModelTab[00d02638] в точке 00d02720 относительно игрока ---- */
+/* P98_DrawMarker — Game.exe 004ea346.  Draws the target marker model P79_ModelTab[00d02638] at 00d02720 relative to the player. */
 void P98_DrawMarker(void) {
   if (P98_MrkOff != 0) return;
   float v[4] = { P98_MrkSrc[0], P98_MrkSrc[1] - 100.0f, P98_MrkSrc[2], 0.0f };
@@ -1116,6 +1151,7 @@ void P98_DrawMarker(void) {
 }
 
 /* ---- 004c32c1: камера режиссёра дальше 15000 от игрока — подтянуть ---- */
+/* P98_CamClamp — Game.exe 004c32c1.  Pulls a replay-director camera back when it is more than 15000 units from the player. */
 int32_t P98_CamClamp(int32_t *cam) {
   int32_t dx = iabs(P59_PosX - cam[0x13]), dz = iabs(P59_PosZ - cam[0x15]);
   if ((int32_t)((uint32_t)dx * (uint32_t)dx + (uint32_t)dz * (uint32_t)dz) > 225000000) {
@@ -1133,6 +1169,7 @@ int32_t P98_CamClamp(int32_t *cam) {
 }
 
 /* ---- 004c6740: следующая камера режиссёра (по id, иначе новая автокамера) ---- */
+/* P98_DirCamNext — Game.exe 004c6740.  Next replay-director camera (by id, otherwise a new automatic camera) -> *out. */
 int32_t P98_DirCamNext(void **out) {
   DIRECTOR_CAMERA tmp;
   if (P98_C824A0 != 0) return 0;
@@ -1158,6 +1195,7 @@ int32_t P98_DirCamNext(void **out) {
 }
 
 /* ---- 00514a47: направление частицы на игрока (+0x50 угол, +0x4c сила) ---- */
+/* P98_PartAim — Game.exe 00514a47.  Points pedestrian/particle p at the player (+0x50 angle, +0x4c strength). */
 void P98_PartAim(int16_t *p) {
   uint8_t *b = (uint8_t *)p;
   int32_t lc = 0;
@@ -1182,6 +1220,7 @@ void P98_PartAim(int16_t *p) {
 }
 
 /* ---- 004fc3f4: модели меток скрипта (до 5 записей 0x14 с 00c80cc0) ---- */
+/* P98_DrawScriptModels — Game.exe 004fc3f4.  Draws the script marker models (up to 5 records of 0x14 from 00c80cc0). */
 void P98_DrawScriptModels(const uint8_t *recs) {
   if (!((P14_00c810c4 == 7 || P95_B87EDC != 0) && recs != NULL)) return;
   uint32_t m = P95_B87EDC == 0 ? P79_ModelTab[P98_ScrModel] : P79_ModelTab[0x1aa];   /* 00cfee48 */
@@ -1200,6 +1239,7 @@ void P98_DrawScriptModels(const uint8_t *recs) {
 }
 
 /* ---- 004d7766: клавиши свободной камеры повтора ---- */
+/* P98_FreeCamKeys — Game.exe 004d7766.  Keyboard control of the replay free camera. */
 void P98_FreeCamKeys(void) {
   if (P29_Mode != 0) return;
   int32_t chg = 0;
@@ -1225,6 +1265,7 @@ void P98_FreeCamKeys(void) {
 }
 
 /* ---- 005240d0: позиция/громкость голоса (слоты 0x34, 00bdc2a0) ---- */
+/* P98_VoicePos — Game.exe 005240d0.  Sets the 3D position and volume of voice `voice` (0x34-byte slots at 00bdc2a0). */
 void P98_VoicePos(int32_t voice, const int32_t *pos, int32_t a, int32_t vol) {
   if (G6_00B91CF4 == 0 || G00575F40 == 0) return;
   P48_Slot *s = &P48_Snd[voice];
@@ -1245,6 +1286,8 @@ void P98_VoicePos(int32_t voice, const int32_t *pos, int32_t a, int32_t vol) {
 }
 
 /* ---- 0040cd6f: пункты текущего меню (записи 20 байт, конец — бит 4): текст 00407d56 или значок 0040cfdf ---- */
+/* P98_ItemsDraw — Game.exe 0040cd6f.  Draws the current menu's items (20-byte records, bit 4 ends the list): text via
+   00407d56 or an icon via 0040cfdf. */
 void P98_ItemsDraw(void) {
   int16_t *it = P58_ItemList;
   if (it == NULL) return;
@@ -1260,6 +1303,7 @@ void P98_ItemsDraw(void) {
 }
 
 /* ---- 0048c5b7: найти в образе RIFF/WAVE блоки "fmt " и "data" ---- */
+/* P98_RiffFind — Game.exe 0048c5b7.  Finds the "fmt " and "data" chunks in an in-memory RIFF/WAVE image. */
 int32_t P98_RiffFind(const void *riff, const void **fmt, const void **data, uint32_t *size) {
   const uint8_t *b = (const uint8_t *)riff;
   if (fmt) *fmt = NULL;
@@ -1289,6 +1333,8 @@ int32_t P98_RiffFind(const void *riff, const void **fmt, const void **data, uint
 }
 
 /* ---- 00421a80: таблица 0x10000 пикселей 1555 → формат поверхности (маски DevInfo +0x538..+0x544) ---- */
+/* P98_PixTabInit — Game.exe 00421a80.  Builds the 0x10000-entry table ARGB1555 -> surface pixel format (masks from
+   the device info +0x538..+0x544). */
 void P98_PixTabInit(void) {
   const uint8_t *d = P32_DevInfo;
   if (d == NULL) return;
@@ -1307,6 +1353,9 @@ void P98_PixTabInit(void) {
 }
 
 /* ---- 004f5012: объекты скрипта дальше порога 00b87e60[k] — тревога (00c810c4=0xff0) ---- */
+/* P98_ScriptRange — Game.exe 004f5012.  For each active mission object with a range limit (P98_Range[k], flags 1 and 8),
+   ends the mission (result 3 in 00c810e8 — likely "failed", TODO(RE); 00c810c4 = 0xff0, countdown 0x5a) when
+   the player gets farther than the limit from the object's event position. */
 void P98_ScriptRange(void) {
   if (P97_ScrObjOn == 0) return;
   for (int32_t k = 0; k < 10; k++) {
@@ -1330,7 +1379,9 @@ void P98_ScriptRange(void) {
 }
 
 /* ---- 0051564f: частица задела игрока — запуск эффекта и звука ---- */
+/* part_hit — local helper: starts the hit effect and sound for particle block b. */
 static void part_hit(uint8_t *b) { P62_ParticleInit(b, P56_Objs); P95_SndTrigger(P97_D11980, 1, 0x1000); }
+/* P98_PartCheck — Game.exe 0051564f.  When pedestrian/particle p touches the player, starts the effect and sound. */
 void P98_PartCheck(int16_t *p) {
   uint8_t *b = (uint8_t *)p;
   uint32_t f = (uint32_t)rd32(b + 0xc);
@@ -1351,6 +1402,8 @@ void P98_PartCheck(int16_t *p) {
 }
 
 /* ---- 004c2b9a: клавиши камеры режиссёра (поворот DirectorCam+0x7c, высота +0x60) ---- */
+/* P98_DirCamKeys — Game.exe 004c2b9a.  Keyboard control of the replay-director camera (rotation DirectorCam+0x7c,
+   height +0x60) from key bits k. */
 void P98_DirCamKeys(uint32_t k) {
   uint8_t *c = (uint8_t *)&DirectorCam;
   if ((k & 0x10) == 0) P29_Flag94 = 0;
