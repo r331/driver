@@ -487,7 +487,7 @@ enum {
   ST_VEL = 8,        /* int32[3] linear velocity (CAR_VEL) */
   ST_FORCE = 12,     /* int32[3] accumulated force; starts as marker push + gravity */
   ST_ANGVEL = 16,    /* int32[3] angular velocity (CAR_ANGVEL) */
-  ST_TORQUE = 20,    /* int32[3] accumulated torque (starts from CAR_TORQUE_OUT) */
+  ST_TORQUE = 20,    /* int32[3] accumulated torque (starts from CAR_DANGVEL_PEND) */
   ST_LIFTED = 24,    /* 1 = the body was lifted out of the ground this step */
   ST_INTS = 25
 };
@@ -501,8 +501,8 @@ enum {
    Contact and tyre forces for one car for one physics step.
    In:  obj   — car record (see carfields.h);
         drive — non-zero when the controls may lock the wheels (passed by 004defd1; TODO(RE): exact meaning).
-   Out: force/torque accumulated into the stack state and committed by P94_SpringStep (CAR_FORCE_OUT,
-        CAR_TORQUE_OUT); CAR_SPEED, CAR_FWD_SPEED, CAR_SLIP_FRONT/REAR, CAR_WHEELS_DOWN, per-wheel
+   Out: force/torque accumulated into the stack state and committed by P94_SpringStep (CAR_DVEL_PEND,
+        CAR_DANGVEL_PEND); CAR_SPEED, CAR_FWD_SPEED, CAR_SLIP_FRONT/REAR, CAR_WHEELS_DOWN, per-wheel
         compression/locked/surface bytes, ground points CAR_GROUND_PT, P35_PadX (player force feedback).
    Side effects: smoke/debris bursts and impact sounds on hard body contacts, wheel-bump sound for
         the player, the "marker" push/wreck of 00d02630 (debug/scripted explosion: P98_MrkOff).
@@ -524,7 +524,7 @@ void P142_WheelPhys(uint8_t *obj, int32_t drive) {
     st[ST_VEL + i] = rd32(obj + CAR_VEL + i * 4);
     st[ST_POS + i] = rd32(obj + CAR_POS2 + i * 4);
     st[ST_ANGVEL + i] = rd32(obj + CAR_ANGVEL + i * 4);
-    st[ST_TORQUE + i] = rd32(obj + CAR_TORQUE_OUT + i * 4);
+    st[ST_TORQUE + i] = rd32(obj + CAR_DANGVEL_PEND + i * 4);
   }
   /* Marker (00d02630): a radial push away from point 00d02650/58 (float x, z) for non-player cars within
      10000 units, strength ~ 1 / distance^2; with 00d02644 set the car is also wrecked. */
@@ -629,8 +629,8 @@ void P142_WheelPhys(uint8_t *obj, int32_t drive) {
   if (0xce4 < slip_k) slip_k = 0xce4;
   /* grip_f: front grip (braking/reverse 0x5ad, coasting 0x3a9, accelerating 0x334); rear grip = 0x780 - front. */
   int32_t grip_f = (rd32(obj + CAR_THROTTLE) < 0) ? 0x5ad : (rd32(obj + CAR_THROTTLE) < 1 ? 0x3a9 : 0x334);
-  if (drv_test(obj) && rd32(obj + CAR_F108) == 0 && 0 < rd32(obj + CAR_FWD_SPEED)) {
-    int32_t extra = (int8_t)obj[CAR_F140];
+  if (drv_test(obj) && rd32(obj + CAR_BURNOUT) == 0 && 0 < rd32(obj + CAR_FWD_SPEED)) {
+    int32_t extra = (int8_t)obj[CAR_STEER_HOLD];
     if (0 < extra) { if (0x1a < extra) extra = 0x1a; grip_f += extra * 0x16; }
   }
   {
@@ -640,17 +640,17 @@ void P142_WheelPhys(uint8_t *obj, int32_t drive) {
     obj[CAR_WHEEL + 1 * CAR_WHEEL_SIZE + WHEEL_LOCKED] = v; obj[CAR_WHEEL + 0 * CAR_WHEEL_SIZE + WHEEL_LOCKED] = v;
   }
   if (rd32(obj + CAR_HANDBRAKE) == 0) {
-    if (rd32(obj + CAR_F108) != 0) grip_f += 600;
+    if (rd32(obj + CAR_BURNOUT) != 0) grip_f += 600;
   } else {
     /* handbrake: no positive throttle, rear wheels locked, front grip shifted */
     if (rd32(obj + CAR_THROTTLE) >= 0) wr32(obj + CAR_THROTTLE, 0);
     grip_f += (rd32(obj + CAR_FWD_SPEED) < 1) ? -0x177 : 0x290;
     obj[CAR_WHEEL + 1 * CAR_WHEEL_SIZE + WHEEL_LOCKED] = 1; obj[CAR_WHEEL + 3 * CAR_WHEEL_SIZE + WHEEL_LOCKED] = 1;
-    wr32(obj + CAR_F108, 0);
+    wr32(obj + CAR_BURNOUT, 0);
   }
   if (rd32(obj + CAR_FWD_SPEED) < 0 && rd32(obj + CAR_THROTTLE) >= 0 && rd32(obj + CAR_HANDBRAKE) == 0) grip_f -= 400;
   int32_t grip_r = 0x780 - grip_f;
-  if (rd32(obj + CAR_F108) != 0) {
+  if (rd32(obj + CAR_BURNOUT) != 0) {
     wr32(obj + CAR_THROTTLE, MenuOptBDFA44 == 0 ? 0x1b58 : 0x36b0);
     if (0xf < obj[CAR_MODEL]) wr32(obj + CAR_THROTTLE, (int32_t)((uint32_t)rd32(obj + CAR_THROTTLE) << 1));
     if (obj[CAR_ID] == 0) wr32(obj + CAR_THROTTLE, dv(W(L(rd32(obj + CAR_THROTTLE)) * P107_SteerK), 12));
@@ -754,7 +754,7 @@ void P142_WheelPhys(uint8_t *obj, int32_t drive) {
         lat_f = W(L(grip_r) * lat_f + FX_HALF) >> FX_SHIFT;
         int is_drv = obj[CAR_ID] == 0 || (obj[CAR_ID] == 0x41 && G6_00B87EA0 != 0 && P88_Mode575 == 2);
         if ((obj[CAR_ID] == 0 || obj[CAR_ID] == 0x41) &&
-            ((is_drv && W(L(lat_f) * (int8_t)obj[CAR_F141]) < 0) || 0 < W(L(lat_f) * rd32(obj + CAR_STEER)))) obj[CAR_F140] = 0xff;
+            ((is_drv && W(L(lat_f) * (int8_t)obj[CAR_STEER_DIR]) < 0) || 0 < W(L(lat_f) * rd32(obj + CAR_STEER)))) obj[CAR_STEER_HOLD] = 0xff;
         fx = W(L(-dir_z) * throttle + FX_HALF) >> FX_SHIFT;
         fz = W(L(dir_x) * throttle + FX_HALF) >> FX_SHIFT;
       } else lat_f = W(L(grip_f) * lat_f + 0x2000) >> 14;   /* locked rear wheel: quarter grip (uses grip_f, as in the original) */
@@ -1012,14 +1012,14 @@ void P142_CarsStep(void) {
     uint8_t *o = G6_00B2F30C[i];
     if (o == NULL) continue;
     for (int m = 0; m < 3; m++) {
-      wr32(o + CAR_FORCE_OUT + m * 4, rd32(o + CAR_FORCE_OUT + m * 4) >> 1);
-      add32(o + CAR_VEL + m * 4, rd32(o + CAR_FORCE_OUT + m * 4));
+      wr32(o + CAR_DVEL_PEND + m * 4, rd32(o + CAR_DVEL_PEND + m * 4) >> 1);
+      add32(o + CAR_VEL + m * 4, rd32(o + CAR_DVEL_PEND + m * 4));
     }
     for (int m = 0; m < 3; m++) {
-      wr32(o + CAR_TORQUE_OUT + m * 4, rd32(o + CAR_TORQUE_OUT + m * 4) >> 1);
-      add32(o + CAR_ANGVEL + m * 4, rd32(o + CAR_TORQUE_OUT + m * 4));
+      wr32(o + CAR_DANGVEL_PEND + m * 4, rd32(o + CAR_DANGVEL_PEND + m * 4) >> 1);
+      add32(o + CAR_ANGVEL + m * 4, rd32(o + CAR_DANGVEL_PEND + m * 4));
     }
-    wr32(o + CAR_TORQUE_OUT + 0, 0); wr32(o + CAR_TORQUE_OUT + 4, 0); wr32(o + CAR_TORQUE_OUT + 8, 0);
+    wr32(o + CAR_DANGVEL_PEND + 0, 0); wr32(o + CAR_DANGVEL_PEND + 4, 0); wr32(o + CAR_DANGVEL_PEND + 8, 0);
     if (rd32(o + CAR_SPEED) == 0) {
       /* at rest: drop residual velocity below 1000 (sum of |components|), otherwise wake up */
       int32_t s = W(L(iabs32(rd32(o + CAR_VEL + 0))) + iabs32(rd32(o + CAR_VEL + 4)) + iabs32(rd32(o + CAR_VEL + 8)));

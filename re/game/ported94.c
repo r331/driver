@@ -236,8 +236,8 @@ uint8_t *P94_ReadIdent(uint8_t *src, uint8_t *dst) {
 /* P94_SpringStep — Game.exe 004e0fd4, cdecl.  One damped spring step of a body against a surface: obj int16 normal at +8/+0xe/+0x14 (stride
    6), st int32 vectors +0x30 (position), +0x40 (offset), +0x50 (velocity), +0x60 mode.
    Velocity = vel * 0x6e + (normal * (dot(normal, vel) * 0x1b8) - offset << 7) >> 12; mode 1 also
-   subtracts offset / 8.  Writes the force/position copies to obj +0x68 / +0x58 (CAR_TORQUE_OUT /
-   CAR_FORCE_OUT for car records).  TODO(RE): unsure of the physical meaning of the constants. */
+   subtracts offset / 8.  Writes the force/position copies to obj +0x68 / +0x58 (CAR_DANGVEL_PEND /
+   CAR_DVEL_PEND for car records).  TODO(RE): unsure of the physical meaning of the constants. */
 void P94_SpringStep(uint8_t *obj, uint8_t *st) {
   int32_t dot = mul(rd16(obj + 8), rd32(st + 0x50)) + mul(rd16(obj + 0xe), rd32(st + 0x54)) + mul(rd16(obj + 0x14), rd32(st + 0x58));
   int32_t d = mul((int32_t)((uint32_t)dot + 0x800u) >> 12, 0x1b8);

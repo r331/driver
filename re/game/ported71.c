@@ -162,8 +162,11 @@ int32_t P71_S127108C;
 #endif
 
 /* ported71.c — helpers for the 64-entry pool of walking objects A_00C56780 (0xb4-byte records;
-   ported71.h calls them particles, ported43.h pedestrians — they walk the map grid, so pedestrians is
-   the likelier reading, TODO(RE): confirm), plus the per-mode high-score setup P71_ScoreSetup.
+   pedestrians: the game's own debug line (P120_DebugInfo) prints P43_FreeCnt — the in-use count of this pool — as
+   "Number of pedestrians active = %d/%d" against 005759a4, the "Pedestrian Density" option (0..64); all writers in
+   Game.exe sit in one module 00511e60..0051564f; RE_PROBE "ped": every in-use record has type 1 and the in-use
+   count always equals P43_FreeCnt.  Older "particle" / "dust" names in ported71.h/102/106/114 mean these
+   pedestrians), plus the per-mode high-score setup P71_ScoreSetup.
    The map is a grid of 1500-unit cells (P71_CELL); a walker on an edge stays 350 or 550 units from the
    cell centre line depending on whether the neighbouring cell is walkable. */
 #define PED_COUNT       0x40     /* records in A_00C56780 */
@@ -354,7 +357,8 @@ int32_t P71_CountNear(int32_t x, int32_t z) {
    the high score to beat for the selected game mode P62_Menu1271060 and entry P62_Menu1271064 into
    P71_Tab2A40: modes 1 (also sets P8_012710a0), 2, 3, 7; modes 6 and 11 additionally load table 0xc's
    record into P71_Tab974 and point P71_Ptr2A08 at 01271088.  A zero result leaves the field 0.
-   TODO(RE): unsure which game modes the numbers are (the menu ids of Take a Ride / pursuit / etc.). */
+   Modes = high-score table ids (see P141_HsSetup): 1 Trail Blazer, 2 Cross Town Checkpoint, 3 Survival,
+   7 Carnage, 0xb Dirt Track (0xc its best lap).  TODO(RE): mode 6 (also loads table 0xc) not identified. */
 void P71_ScoreSetup(void) {
   P71_Tab974 = 0; P71_Tab2A40 = 0; P71_Ptr2A08 = 0;
   P71_V2A24 = 0; P71_V2A20 = 0; P71_V2A1C = 0; P71_V2A14 = 0;

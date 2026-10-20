@@ -407,7 +407,8 @@ int32_t P59_NearCars(const int32_t *self) {
 
 /* 004e5ea2: подобрать предмет i (9 штук): подпись, звук; после девятого — режим 2. */
 /* P59_PickUp — Game.exe 004e5ea2.  Scores task i of the 9 driving tasks of the Undercover garage interview (once each):
-   shows its caption (P59_PickTab[i * 2]) for 0x96 ticks and plays its sound; after the ninth sets P59_S4654 = 2
+   shows its caption (P59_PickTab[i * 2] = lang.eng id 273 + i: Burnout, Handbrake, Slalom, 180, 360, Reverse 180,
+   Speed, Brake Test, Lap) for 0x96 ticks and plays its sound; after the ninth sets P59_S4654 = 2
    (interview passed).  Clears three per-attempt counters.  Returns 1 if newly scored.  RE_IVDBG logs it. */
 int32_t P59_PickUp(int32_t i) {
   if (P59_Flags9[i] != 0) return 0;

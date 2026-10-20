@@ -417,7 +417,9 @@ void P120_HudTimes(void) {
 }
 /* P120_HudTimesBody — body of 005032ce.  Draws the counters / times of the current game mode (01271060):
    1 and 2 — count / total and best values, 3 — best time, 6 / 0xb — count, current and best times plus
-   two more records on the left, 7 — money ("$%d") and the best.  TODO(RE): unsure which game modes 1..0xb are. */
+   two more records on the left, 7 — money ("$%d") and the best.
+   Modes: 1 Trail Blazer, 2 Cross Town Checkpoint, 3 Survival, 7 Carnage, 0xb Dirt Track (P141_HsSetup);
+   TODO(RE): mode 6 not identified. */
 static void P120_HudTimesBody(void) {
 #endif
   const uint8_t *ta = tab(P71_Tab2A40);

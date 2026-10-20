@@ -28,8 +28,14 @@
 #define CAR_QUAT        0x30   /* int32[4]: orientation quaternion x, y, z, w (20.12) */
 #define CAR_VEL         0x40   /* int32[3]: linear velocity x, y, z (world units << 8 per step, see P74_Dist) */
 #define CAR_ANGVEL      0x4c   /* int32[3]: angular velocity (crossed with lever arms in the contact solver) */
-#define CAR_FORCE_OUT   0x58   /* int32[3]: last accumulated force (written by P94_SpringStep) */
-#define CAR_TORQUE_OUT  0x68   /* int32[3]: last accumulated torque (written by P94_SpringStep) */
+#define CAR_DVEL_PEND   0x58   /* int32[3]: pending linear velocity change (impulse / mass, CAR_VEL units).  Each P142_CarsStep
+                                  halves it and adds the half to CAR_VEL, so it decays over a few steps; P94_SpringStep
+                                  (wheel step) rewrites it.  Reset value y = -0x2aaa (ported56/137): a downward kick at
+                                  spawn.  RE_PROBE run: (0, -10922, 0) on the first step.  Named CAR_FORCE_OUT before. */
+#define CAR_DANGVEL_PEND 0x68  /* int32[3]: pending angular velocity change (CAR_ANGVEL units): P94_SpringStep stores the
+                                  wheel-step value, ported129 (car vs static object) adds r x J of a hit.  P142_CarsStep adds
+                                  half of it to CAR_ANGVEL and then clears it.  So it is an angular *impulse* accumulator, not
+                                  a torque.  RE_PROBE run: non-zero only after contacts.  Named CAR_TORQUE_OUT before. */
 
 /* ---- wheels: 4 records of 4 bytes, index 0..3; even = front (steered), odd = rear ---- */
 #define CAR_WHEEL       0x78   /* base of wheel i: car + CAR_WHEEL + i * CAR_WHEEL_SIZE */
@@ -54,22 +60,34 @@
 #define CAR_STEER       0xfc   /* int32: steering angle (4096 = 360 deg), added to the heading for the front wheels */
 #define CAR_HEADING     0x100  /* int32: heading 0..0xfff (4096 = 360 deg) */
 #define CAR_HANDBRAKE   0x104  /* int32: handbrake on: locks the rear wheels and cuts positive throttle */
-#define CAR_F108        0x108  /* int32: TODO(RE): unsure — when set, throttle is forced to a fixed high value
-                                  (0x1b58 / 0x36b0) and wheel spin is drawn faster; looks like a burnout/boost flag */
+#define CAR_BURNOUT     0x108  /* int32: burnout in progress.  Set by P107_CarInput (004ddaca) while the
+                                  Burn Out control (pad bit 0x40, key cfg 10, lang.eng "Burn Out") is held without the
+                                  handbrake; cleared when the forward speed passes 0xa2000 (gas is then forced on) or by the
+                                  handbrake.  While set: throttle forced to 0x1b58 / 0x36b0, +600 front grip, gearbox frozen
+                                  (ported100), wheel spin / skid sound / wheel dust (ported119/121/127).  RE_PROBE run with
+                                  the key held: 0 -> 1 on the press at standstill.  Named CAR_F108 before. */
 #define CAR_FWD_SPEED   0x10c  /* int32: signed forward speed, 20.12 (velocity projected on the heading) */
 #define CAR_SPEED       0x110  /* int32: speed magnitude, octagonal approximation max(|vx|,|vz|) + min/2 */
 #define CAR_SLIP_FRONT  0x114  /* int32: largest lateral slip of the front wheels this step */
 #define CAR_SLIP_REAR   0x118  /* int32: largest lateral slip of the rear wheels this step */
 #define CAR_DAMAGE      0x11c  /* int32[6]: damage per body zone, 0..0xfff each */
 #define CAR_DAMAGE_N    6
-#define CAR_DAMAGE_SUM  0x138  /* int32: total damage (6 * 0xfff = 0x5ffa when fully wrecked) */
+#define CAR_DAMAGE_SUM  0x138  /* int32: accumulated hit damage: P100_CarHit adds force / 2 of every hit (it is NOT the
+                                  sum of the six zones and has no cap).  Readers: Get138/Get138Entry148, P105_StuntHints
+                                  ("damage" >> 3), P75_CarSound (>> 3 changed = new damage).  RE_PROBE run: changes only on
+                                  collisions (never on map-cell changes) and differs from the zone sum. */
 #define CAR_OVERLAP     0x13c  /* int16: set by P103_CarsOverlap when the car's bounding box overlaps another car (or forced
                                   during chases): the car then takes the sub-stepped collision path of P142_CarsStep.
                                   Cleared at the end of every wheel-physics step. */
 #define CAR_DAMAGED     0x13f  /* u8: damaged by a collision this step; queues the damage-model update (004c1f9b) */
 #define CAR_AI_DRIVEN   0x13e  /* u8: 1 while the cop AI steers this car (004a7fec); the wheel physics then drives the
                                   front wheels too and scales grip by difficulty.  TODO(RE): exact original meaning */
-#define CAR_F140        0x140  /* int8: TODO(RE): unsure — positive values add rear grip; set to -1 (0xff) when the
-                                  rear lateral force opposes the steering (counter-steer / drift state?) */
-#define CAR_F141        0x141  /* int8: TODO(RE): unsure — compared with the rear lateral force sign for the player */
+#define CAR_STEER_HOLD  0x140  /* int8: steering-hold counter: +1 per control tick while a steer key / stick is held,
+                                  0 when released, capped at 0x5a (ported107).  P142_WheelPhys adds counter * 0x16 (max 0x1a)
+                                  to the front grip of the driven car and sets it to -1 (0xff) when the rear lateral force
+                                  opposes the steering (counter-steer).  RE_PROBE run: 1 on the first steering tick.
+                                  Named CAR_F140 before. */
+#define CAR_STEER_DIR   0x141  /* int8: steering key direction of this tick: +1 for pad bit 8, -1 (0xff) for pad bit 4,
+                                  0 for none (ported107); P142_WheelPhys compares it with the rear lateral force sign.
+                                  RE_PROBE run: keys 0x6 (gas + bit 4) -> -1 with CAR_STEER > 0.  Named CAR_F141 before. */
 #define CAR_GEAR        0x142  /* u8: gear 0..3 (p99_car_t.gear) */

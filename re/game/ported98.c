@@ -1354,7 +1354,7 @@ void P98_PixTabInit(void) {
 
 /* ---- 004f5012: объекты скрипта дальше порога 00b87e60[k] — тревога (00c810c4=0xff0) ---- */
 /* P98_ScriptRange — Game.exe 004f5012.  For each active mission object with a range limit (P98_Range[k], flags 1 and 8),
-   ends the mission (result 3 in 00c810e8 — likely "failed", TODO(RE); 00c810c4 = 0xff0, countdown 0x5a) when
+   fails the mission with reason MREASON_LOST (3 in 00c810e8 — "target lost"; 00c810c4 = MSTATE_FAILED, countdown 0x5a; missionstate.h) when
    the player gets farther than the limit from the object's event position. */
 void P98_ScriptRange(void) {
   if (P97_ScrObjOn == 0) return;

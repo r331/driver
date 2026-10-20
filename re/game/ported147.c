@@ -220,7 +220,7 @@ int32_t P147_ParseCmd(void *cmdp) {
     r = P96_ParseQuoted(P65_Line, P65_Tok); if (r != 0) return r;
     int32_t len = (int32_t)strlen(P65_Tok) + 1;
     if ((p = rec_add(len + 0xc)) == NULL) return 3;
-    p[0] = id; p[1] = id == MS_MODELBONUS ? P65_Ints[0] : P65_Ints[0] * 0x32; p[2] = len;   /* x 50: TODO(RE): seconds -> frames? */
+    p[0] = id; p[1] = id == MS_MODELBONUS ? P65_Ints[0] : P65_Ints[0] * 0x32; p[2] = len;   /* x 50: seconds -> game ticks (50 per second: P114_Timer shows ticks / 50 as seconds) */
     memcpy(p + 3, P65_Tok, (size_t)len);
     return 0xb;
   }

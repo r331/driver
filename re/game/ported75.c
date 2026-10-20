@@ -268,12 +268,11 @@ void P75_BgSound(void) {
   }
 }
 
-/* P75_CarSound — Game.exe 004d6dac.  When the player's map cell (car field +0x138 >> 3) changes, plays ambient
-   track 1 or 2 (+0xf000) if enough random time (~350+ frames) has passed; when the cell does not change while
-   P62_Spd > 30 for 1000 frames, plays track 0xf000.  TODO(RE): +0x138 is CAR_DAMAGE_SUM in carfields.h —
-   which is right here is unsure (Get138 is not ported). */
-/* 004d6dac: при смене клетки карты под игроком (поле +0x138 первой машины >> 3) запускается звук (1 или 2 + 0xf000)
-   не чаще, чем через случайные ~350+ кадров; стоя на месте (скорость > 30) 1000 кадров подряд — звук 0xf000. */
+/* P75_CarSound — Game.exe 004d6dac.  Speech/ambient cue on the player's hit damage: Get138 = CAR_DAMAGE_SUM
+   (accumulated hit damage, carfields.h).  When it changed by a step of 8 or more (>> 3 differs) and a random
+   pause (~350+ frames) has passed, plays cue 1 or 2 (+0xf000); when it has not changed for 1000 ticks with
+   P62_Spd > 30, plays cue 0xf000.  (Older notes read +0x138 >> 3 as the "map cell"; the RE_PROBE run shows the
+   field changes only on collisions, never on cell changes.)  G2_00B20358 = last damage >> 3. */
 void P75_CarSound(void) {
   int32_t v = Get138(P60_Cars);
   if ((v >> 3) == G2_00B20358) {

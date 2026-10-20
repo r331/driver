@@ -467,13 +467,14 @@ int32_t ReturnZero004E3B19(void) { return 0; }
 int32_t ReturnOne00519D22(void) { return 1; }
 /* --- сеттеры полей структур --- */
 /* Single-field setters / tests.  ScriptSetWait*: a script wait record {time, type 12}; the X50 variant
-   multiplies by 50 (TODO(RE): presumably seconds -> frames at 50 Hz).  SlotSetOn/Off: voice slot i (0..19)
+   multiplies by 50 (seconds -> ticks: 50 game ticks per second, see P114_Timer).  SlotSetOn/Off: voice slot i (0..19)
    active byte of the 0x34-byte sound slot table.  SetRGB00516EB4: current text colour (see P70_FadeColor). */
 void SetField24_00502779(uint8_t* p, int32_t v) { I32(p, 0x24) = v; }
 void ClearField2C_00502680(uint8_t* p) { I32(p, 0x2c) = 0; }
 void AddToCounter00519D09(int32_t v) { S_01136C74 += v; }
 void ClearFlagByte0048FBBA(int32_t n) { S_011443EA[(n - 1) * 0x54] = 0; }
 void ScriptSetWait004F5C72(int32_t* p, int32_t v) { p[0] = v; p[1] = 12; }
+/* seconds -> ticks: the game logic runs 50 ticks per second (P114_Timer: sec = ticks / 50, hundredths = ticks % 50 * 2) */
 void ScriptSetWaitX50_004F5C58(int32_t* p, int32_t v) { p[0] = v * 0x32; p[1] = 12; }
 void ToggleBit0051049E(void) { if (S_00C808A0 != 0) S_00B5A77C ^= 1; }
 int32_t IsFlag80_00514E4C(uint8_t* p) { return (U32(p, 0xc) & 0x80) != 0; }

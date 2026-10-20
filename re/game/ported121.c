@@ -431,13 +431,13 @@ void P121_ClipTexQuad(uint32_t arg) { clip_poly(arg, 1, 4); }
 void P121_ClipTexTri(uint32_t arg) { clip_poly(arg, 1, 3); }
 
 /* ---- 0051dc18 ---- */
-/* P121_WheelDust — Game.exe 0051dc18.  Kicks up dust behind the player's wheels 0 and 2 while CAR_F108 is set (16
+/* P121_WheelDust — Game.exe 0051dc18.  Kicks up dust behind the player's wheels 0 and 2 while CAR_BURNOUT is set (16
    particles each): for a wheel whose neighbour wheel (k - 1) & 3 reports surface 0, only P102_5624A4 = 1;
    otherwise emits from the body corner k (raised by 0x32) with the car's velocity / 4096 and an upward speed
    of 16 * -0x27a.  TODO(RE): unsure — the surface byte indexing (k - 1) & 3 is kept literally. */
 void P121_WheelDust(void) {
   const uint8_t *c = (const uint8_t *)&P99_Cars[0];
-  int32_t n = (rd32(c + CAR_F108) != 0) ? 0x10 : 0;   /* 00d078c8 */
+  int32_t n = (rd32(c + CAR_BURNOUT) != 0) ? 0x10 : 0;   /* 00d078c8 */
   if (n == 0) return;
   for (int32_t k = 0; k < 4; k++) {
     if (k != 0 && k != 2) continue;

@@ -159,8 +159,8 @@ void P114_CreditsDraw(void) {
   P107_Rect(0x140, 0x1c8, 0x140, 0x18, black);
 }
 
-/* ---- 005128b7: частицы A_00C56780 с флагом 0x10 — по текстурам .data 005759a8, высота дороги − 224, P113_PartDraw ---- */
-/* P114_PartModels — Game.exe 005128b7.  Draws every pool object of A_00C56780 with flag 0x10 (walkers)
+/* ---- 005128b7: пешеходы A_00C56780 с флагом 0x10 — по текстурам .data 005759a8, высота дороги − 224, P113_PartDraw ---- */
+/* P114_PartModels — Game.exe 005128b7.  Draws every pool object of A_00C56780 with flag 0x10 (pedestrians, see ported71.c)
    via P113_PartDraw, textures from .data 005759a8, at road height - 224. */
 void P114_PartModels(void) {
   static const int32_t k_tex[5] = { 0x0e, 0x1a, 0x1c, 0x1d, 0x1e };   /* .data 005759a8 */
