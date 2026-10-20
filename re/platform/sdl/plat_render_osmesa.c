@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "plat_gfx.h"
 static OSMesaContext g_ctx; static void *g_buf;
+/* ge — getenv adapter for re_gfx_env; getproc — GL function lookup through OSMesa. */
 static const char *ge(const char *n) { return getenv(n); }
 static void *getproc(const char *n) { return (void *)OSMesaGetProcAddress(n); }
 /* plat_render_offscreen — Create a w x h RGBA offscreen OSMesa context (24-bit depth) and attach the

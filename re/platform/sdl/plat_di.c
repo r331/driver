@@ -17,7 +17,10 @@
 static void dbg_keys(const uint8_t *k);   /* v2.14: RE_INPUTDBG */
 void plat_input_dbg(const char *fmt, ...);
 static void gamepad_close(void);
-/* Stub DirectInput objects (counters and failure injection for inputtest; FAIL(b) = fail call kind b). */
+/* Stub DirectInput objects: the device / effect / event calls below only validate their handle, count the
+   call (plat_di_stub_counts / _effects / _init_stats report the counters to inputtest) and can be made to
+   fail: FAIL(b) = bit b of the mask given to plat_di_stub_setup (0 create, 1 system device, 2 device,
+   3 QueryInterface, 4 cooperative level, 5 event, 6 property, 7 caps, 8 acquire, 9 event create). */
 static int32_t g_jx, g_jy, g_poll;
 static int g_rel, g_unacq, g_evt, g_kind = -1, g_fail;
 void plat_di_release(void *o) { if (o) g_rel++; }

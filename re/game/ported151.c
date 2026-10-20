@@ -195,6 +195,7 @@ static void *glide_proc(const char *name) {
 static uint32_t rd32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }
 /* wr32 — Unaligned uint32 write. */
 static void wr32(uint8_t *p, uint32_t v) { memcpy(p, &v, 4); }
+/* u2f — reinterpret uint32 bits as float. */
 static float __attribute__((unused)) u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
 /* call_i1 — Call a stdcall (hook) Glide function with one int argument; NULL is skipped. */
 static void call_i1(void *f, int32_t a) { if (f) ((void (P151_STD *)(int32_t))f)(a); }
@@ -486,6 +487,7 @@ static void lang_fatal(void) {
   ResetDirector_00522306();
   P30_FatalError(P151_ErrBuf);
 }
+/* set_b87eb8 — write 00b87eb8 (front-end / config mode flag) and its native alias P58_CfgOn. */
 static void set_b87eb8(int32_t v) { P55_B87EB8 = v;
 #ifndef RE_HOOK_BUILD
   P58_CfgOn = v;
