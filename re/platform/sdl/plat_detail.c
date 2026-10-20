@@ -153,6 +153,12 @@ static char *read_file(const char *path, long *len) {
     if (fread(b, 1, (size_t)n, f) != (size_t)n) { free(b); fclose(f); return NULL; }
     b[n] = 0; fclose(f); *len = n; return b;
 }
+/* LAX terminal walls: keep the HD wall texture but omit the unstable
+   generated facade/canopy meshes. The same page numbers in other cities
+   and every other LA material retain their normal 3D details. */
+static int flat_facade_surface(const char *level, int page) {
+    return !strcasecmp(level, "LA_01") && (page == 61 || page == 62);
+}
 static void parse_entry(const char *js, const jsmntok_t *t, int ent, const char *dir, const char *level) {
     if (g_nent >= DMAX_ENT || t[ent].type != JSMN_OBJECT) return;
     dent_t e; memset(&e, 0, sizeof e);
@@ -161,6 +167,10 @@ static void parse_entry(const char *js, const jsmntok_t *t, int ent, const char 
     char pf[128]; tstr(js, t, efind(js, t, ent, "page_file"), pf, sizeof pf);
     e.page = (int)tnum(js, t, efind(js, t, ent, "page_index"), -1);
     if (e.page < 0 && pf[0] == 'p') e.page = atoi(pf + 1);
+    if (flat_facade_surface(level, e.page)) {
+        plat_log("[detail] %s p%03d: LAX terminal facade kept flat; HD texture retained\n", level, e.page);
+        return;
+    }
     e.pal = (int)tnum(js, t, efind(js, t, ent, "palette_slot"), -2);
     if (e.pal == -2) { const char *c = strstr(pf, "_c"); e.pal = c ? atoi(c + 2) : -1; }
     int r = efind(js, t, ent, "uv_rect_256");
@@ -267,6 +277,11 @@ int re_detail_selftest(void) {
         P85_NoteCameraPoint(i, i == 1 ? 800 : 0, i == 2 ? 400 : 0, 1000);
     }
     int failed = 0;
+    if (!flat_facade_surface("LA_01",61) || !flat_facade_surface("la_01",62)) failed++;
+    if (flat_facade_surface("LA_01",60) || flat_facade_surface("LA_01",63)) failed++;
+    if (flat_facade_surface("MIAMI_01",61) || flat_facade_surface("FRISCO_01",62)) failed++;
+    if (flat_facade_surface("NY_01",61) || flat_facade_surface("NC_01",62)) failed++;
+
     P85_StateDirty = 0;
     re_detail_tri(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
     if (g_ninst != 0) failed++;
