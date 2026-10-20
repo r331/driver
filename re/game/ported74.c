@@ -4,8 +4,7 @@
 #include "ported151.h"
 #include "ported74.h"
 #include <string.h>
-/* DirectInput scan codes used by P74_KeyScan. */
-enum { DIK_ESCAPE = 0x01, DIK_BACK = 0x0e, DIK_RETURN = 0x1c, DIK_LSHIFT = 0x2a, DIK_RSHIFT = 0x36, DIK_CAPITAL = 0x3a };
+#include "dik.h"   /* DirectInput scan codes used by P74_KeyScan */
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P74_DistTab")

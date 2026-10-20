@@ -55,19 +55,7 @@
 #include <math.h>
 #include <string.h>
 
-/* Light object record o (camera-space position, built by 004aaf3a for objects with flag 0x20000). */
-#define LO_X      0x00    /* float camera-space x, y, z */
-#define LO_Y      0x04
-#define LO_Z      0x08
-#define LO_EMIT   0x10    /* 3 dwords passed to PushEntry_004CC784 (reflection queue; presumably the world position) */
-#define LO_CAR    0x50    /* int16 car index (row of P143_LampHist, 0x140 bytes = 8 lamps) */
-#define LO_LAMP   0x54    /* int16 lamp index, -1 = no trail */
-#define LO_TYPE   0x64    /* uint16: & 0x7f flare type (row of 00553870), 0x80 = directional (fades off-axis) */
-#define LO_FLAGS  0x68    /* 0xe00000 = has a trail, 0x800000 = trail history per car (P143_LampHist) */
-#define LO_DIR_V  0x6c    /* uint16 facing angle compared with the vertical angle to the camera */
-#define LO_DIR_H  0x6e    /* uint16 facing angle compared with the horizontal angle to the camera */
-/* Trail history record (0x28 bytes): 4 x {int32 sx, int32 sy} ring indexed by frame & 3, +0x20 int16 frame. */
-#define HIST_FRAME 0x20
+#include "lightobj.h"   /* light object record LO_*, trail history HIST_FRAME */
 /* Flare table row (7 dwords): [0..2] int r, g, b; [3] float near half-size; [4] float far/base half-size;
    [5] float minimum brightness; [6] flags: 1 = cosine falloff, 2 = blue uses the dimmer factor,
    4 = extra fade at wide horizontal angles, 8 = short (15000) fade distance when P60_Var1373C0 == 0.

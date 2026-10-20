@@ -105,12 +105,7 @@ int32_t P124_LogOn = 1;                      /* .data 00553bbc */
 
 #include "memrw.h"
 
-/* DirectInput scan codes used here. */
-#define DIK_ESCAPE  0x01
-#define DIK_RETURN  0x1c
-#define DIK_PERIOD  0x34
-#define DIK_LEFT    0xcb
-#define DIK_RIGHT   0xcd
+#include "dik.h"   /* DirectInput scan codes */
 
 /* Motel answering-machine item flags (+0 u16). */
 #define MITEM_MISSION 0x02   /* selecting it starts a mission (P67_Res51C = item) */

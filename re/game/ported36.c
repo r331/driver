@@ -2,7 +2,7 @@
 /* DirectInput: джойстик и геймпад — восстановлено из Game.exe (Input.c). */
 #include <stdlib.h>
 #include "ported36.h"
-#include "names_g3.h"
+#include "dik.h"
 #include <string.h>
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P36_JoyCount")
@@ -176,7 +176,7 @@ uint8_t P36_Pad5;
 #pragma pop_macro("P36_Pad5")
 #endif
 
-/* DIK_* scan codes and KEYCFG_* action indices: names_g3.h. */
+/* DIK_* scan codes and KEYCFG_* action indices: dik.h. */
 /* Driving pad bits returned by P36_GetPadButtons (low four: meaning from the v2.14 native key block). */
 #define PAD_BRAKE     0x01   /* brake / reverse */
 #define PAD_GAS       0x02

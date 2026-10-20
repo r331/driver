@@ -537,8 +537,7 @@ void P110_IconQuad(float x, float y, float sx, float sy, const uint8_t *ic, uint
 
 /* ---- 00418675: выбор пункта меню — пункты по 0x10 (+0 выделить(2), +4 снять(2), +8 выполнить(), +0xc..+0xf соседи влево/вправо/вверх/вниз).
    При 005f7e4c ≠ 0 влево/вправо вызывают обработчик соседа с автоповтором (40, затем 3 кадра). Esc → -1. Обработчики — re_fn. ---- */
-/* DirectInput scan codes (DIK_*) read by the menu selector */
-enum { DIK_ESCAPE = 0x01, DIK_RETURN = 0x1c, DIK_UP = 0xc8, DIK_LEFT = 0xcb, DIK_RIGHT = 0xcd, DIK_DOWN = 0xd0 };
+#include "dik.h"   /* DirectInput scan codes (DIK_*) read by the menu selector */
 /* sel_call — local helper: calls the handler at offset `off` of a menu item table (with argument 2 when arg). */
 static void sel_call(const uint8_t *t, uint32_t off, int arg) {
   re_fn_t f = re_fn((uint32_t)rd32(t + off));

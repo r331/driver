@@ -119,13 +119,7 @@ int32_t P119_SelIdx;
 static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
 static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 
-/* Traffic record fields (TrafficRecs, 0x54 bytes; see the state enum in ported133.c) used by name below. */
-#define TR_NODE_DIST  0x18   /* distance to the next road node (P101_RdDist) */
-#define TR_DIR        0x24   /* travel direction / road side 0..3 */
-#define TR_SPEED      0x38   /* current signed speed */
-#define TR_WANT_SPEED 0x3c   /* target speed (set from the road type, stop lines and obstacles) */
-#define TR_TGT_X      0x40   /* target point (spawn position of the next segment) */
-#define TR_TGT_Z      0x44
+#include "trafficrec.h"   /* traffic record fields (TREC_*) */
 
 /* carp: car record i of the car table; tcar: car driven by traffic record i; trec: traffic record i;
    carmodel: per-model parameter record m (00d0cc60 + m * 0x16c); nodeb: road node table entry. */
@@ -509,43 +503,43 @@ void P119_CarDust(int32_t i, int32_t kind, int32_t dist) {
 
 /* ---- 004943dc: такт поворота записи трафика ---- */
 /* P119_TrafficStep — Game.exe 004943dc (traffic state 3, TRF_STEP).  Turning at a junction: once the car is within
-   TR_SPEED + 0x352 of the target point (along its direction) and its heading is within 0x20 of the new direction
+   TREC_SPEED + 0x352 of the target point (along its direction) and its heading is within 0x20 of the new direction
    (+0x30), switches back to driving (state 2) on the new segment: new road node, P118_TrafficTurn and the next
    target point; while the road word has bit 0x4000 it only aligns the car (P102_TrafficAlign). */
 void P119_TrafficStep(uint8_t *r) {
-  if (r[2] == 1) return;
-  if (rd32(r + TR_SPEED) == 0) return;
-  uint8_t *c = tcar(r[0]);
+  if (r[TREC_SUBSTATE] == 1) return;
+  if (rd32(r + TREC_SPEED) == 0) return;
+  uint8_t *c = tcar(r[TREC_CAR]);
   int16_t s = (int16_t)P72_RoadWord(rd32(c + CAR_POS_X), rd32(c + CAR_POS_Z));
-  wr32(r + 0x28, s);
-  if (r[0x10] == 0) {
-    switch (rd32(r + TR_DIR)) {
+  wr32(r + TREC_NEXT_NODE, s);
+  if (r[TREC_AT_TARGET] == 0) {
+    switch (rd32(r + TREC_ROAD_DIR)) {
       case 0: case 2:
-        if (rd32(r + TR_SPEED) + 0x352 <= iabs(rd32(c + CAR_POS_Z) - rd32(r + TR_TGT_Z))) return;
-        r[0x10] = 1; break;
+        if (rd32(r + TREC_SPEED) + 0x352 <= iabs(rd32(c + CAR_POS_Z) - rd32(r + TREC_TGT_Z))) return;
+        r[TREC_AT_TARGET] = 1; break;
       case 1: case 3:
-        if (rd32(r + TR_SPEED) + 0x352 <= iabs(rd32(c + CAR_POS_X) - rd32(r + TR_TGT_X))) return;
-        r[0x10] = 1; break;
+        if (rd32(r + TREC_SPEED) + 0x352 <= iabs(rd32(c + CAR_POS_X) - rd32(r + TREC_TGT_X))) return;
+        r[TREC_AT_TARGET] = 1; break;
       default: break;
     }
   }
-  if (P62_HeadingDelta(r, (uint32_t)rd32(r + 0x30) << 10) >= 0x20) return;
+  if (P62_HeadingDelta(r, (uint32_t)rd32(r + TREC_DIR2) << 10) >= 0x20) return;
   if (((int32_t)s & 0x4000) == 0) {
-    r[1] = 2;
-    wr32(r + TR_DIR, rd32(r + 0x30));
-    wr32(r + 0x28, rd32(r + 0x2c));
-    P101_RoadNode(rd32(c + CAR_POS_X), rd32(c + CAR_POS_Z), (int8_t)r[0x24]);
-    wr32(r + TR_NODE_DIST, P101_RdDist);
-    wr32(r + 0x1c, P101_RdLeft);
-    wr32(r + 0x20, (int32_t)(int16_t)P101_RdNode);
-    wr16(r + 0xe, P101_RdLane);
+    r[TREC_STATE] = 2;
+    wr32(r + TREC_ROAD_DIR, rd32(r + TREC_DIR2));
+    wr32(r + TREC_NEXT_NODE, rd32(r + TREC_NEXT_NODE2));
+    P101_RoadNode(rd32(c + CAR_POS_X), rd32(c + CAR_POS_Z), (int8_t)r[TREC_ROAD_DIR]);
+    wr32(r + TREC_ROAD_DIST, P101_RdDist);
+    wr32(r + TREC_ROAD_LEFT, P101_RdLeft);
+    wr32(r + TREC_ROAD_NODE, (int32_t)(int16_t)P101_RdNode);
+    wr16(r + TREC_LANE, P101_RdLane);
     P118_TrafficTurn(r);
-    if (r[1] == 2) {
-      P75_TrafficPos(rd32(r + 0x28), rd32(r + TR_DIR), rd32(r + 0x34), 2, r[9]);
-      wr32(r + TR_TGT_Z, P54_G44);
-      wr32(r + TR_TGT_X, P54_G40);
+    if (r[TREC_STATE] == 2) {
+      P75_TrafficPos(rd32(r + TREC_NEXT_NODE), rd32(r + TREC_ROAD_DIR), rd32(r + TREC_F34), 2, r[TREC_CLASS]);
+      wr32(r + TREC_TGT_Z, P54_G44);
+      wr32(r + TREC_TGT_X, P54_G40);
     }
-  } else P102_TrafficAlign(r, 0, 0, (int8_t)r[0x30]);
+  } else P102_TrafficAlign(r, 0, 0, (int8_t)r[TREC_DIR2]);
 }
 
 /* ---- 004de86c: следы шин машины i ---- */
@@ -584,7 +578,7 @@ static void turn_again(uint8_t *r) {
   P101_RoadNode(rd32(c + CAR_POS_X), rd32(c + CAR_POS_Z), (int8_t)r[0x24]);
   P118_TrafficTurn(r);
 }
-static void limit(uint8_t *r, int32_t v) { wr32(r + TR_WANT_SPEED, v); r[3] = 1; }
+static void limit(uint8_t *r, int32_t v) { wr32(r + TREC_TGT_SPEED, v); r[3] = 1; }
 /* P119_TrafficSpeed — Game.exe 0048fbcf.  Speed control of a traffic car: target speed from the road (P63_CarSpeed),
    stop lines / give-way checks near junctions (0x82 / 0x3c = slow speeds), the junction type of the node
    (P51_NodeKind) and an obstacle ahead (checked every 4th frame); converts the speed error to throttle
@@ -593,21 +587,21 @@ static void limit(uint8_t *r, int32_t v) { wr32(r + TR_WANT_SPEED, v); r[3] = 1;
 void P119_TrafficSpeed(uint8_t *r, uint8_t *car) {
   wr32(car + CAR_THROTTLE, 0);
   if (r[2] == 1 || r[1] == 1 || r[1] == 9) { r[0x11] = 0; return; }
-  if (r[3] == 0) wr32(r + TR_WANT_SPEED, P63_CarSpeed(r));
-  if ((r[0x13] & 8) != 0 && rd32(car + CAR_SPEED) == 0 && rd32(r + TR_WANT_SPEED) == 0) {
+  if (r[3] == 0) wr32(r + TREC_TGT_SPEED, P63_CarSpeed(r));
+  if ((r[0x13] & 8) != 0 && rd32(car + CAR_SPEED) == 0 && rd32(r + TREC_TGT_SPEED) == 0) {
     r[0x13] &= 0xf7;
     r[1] = 1; r[8] = 0; r[0xb] = 0xff;
     if ((Rand_004D9078() & 3) != 0) r[7] = 1;
     return;
   }
-  if (rd32(r + TR_NODE_DIST) < 3000 && (r[0x13] & 2) != 0) {
-    wr32(r + TR_TGT_Z, 0x7fffffff); wr32(r + TR_TGT_X, 0x7fffffff);
+  if (rd32(r + TREC_ROAD_DIST) < 3000 && (r[0x13] & 2) != 0) {
+    wr32(r + TREC_TGT_Z, 0x7fffffff); wr32(r + TREC_TGT_X, 0x7fffffff);
     r[0x13] &= 0xfd;
     turn_again(r);
   }
   switch (P51_NodeKind(r)) {
     case 0: case 3:
-      if (r[3] == 0 && rd32(r + TR_NODE_DIST) < 0x28a && (uint32_t)(P62_Frame & 3) == (uint32_t)rd32(r + TR_DIR)) {
+      if (r[3] == 0 && rd32(r + TREC_ROAD_DIST) < 0x28a && (uint32_t)(P62_Frame & 3) == (uint32_t)rd32(r + TREC_ROAD_DIR)) {
         int32_t k = rd32(r + 0x34), stop;
         if (k == -1) stop = P63_CanEnter(r) == 1 ? 0x3c : -1;
         else if (k == 0) stop = P59_TrafficCheck(r, 0) == 0 ? 0x82 : -1;
@@ -618,24 +612,24 @@ void P119_TrafficSpeed(uint8_t *r, uint8_t *car) {
       }
       break;
     case 1:
-      if (r[3] == 0 && rd32(r + TR_NODE_DIST) < 0x28a && P103_TrafficCanGo(r) != 0) {
+      if (r[3] == 0 && rd32(r + TREC_ROAD_DIST) < 0x28a && P103_TrafficCanGo(r) != 0) {
         r[3] = 1;
-        wr32(r + TR_WANT_SPEED, rd32(r + 0x34) == 0 ? 0x82 : 0x3c);
+        wr32(r + TREC_TGT_SPEED, rd32(r + 0x34) == 0 ? 0x82 : 0x3c);
       }
       break;
     case 2:
       if (r[1] != 3 && (rd32(r + 0x34) != 0 || r[3] == 0)) {
         r[3] = 0;
-        if (0x5a < rd32(r + TR_WANT_SPEED)) wr32(r + TR_WANT_SPEED, 0x5a);
-        if (rd32(r + TR_NODE_DIST) < 0x28a) { r[0x13] &= 0xde; wr32(r + TR_WANT_SPEED, 0); }
+        if (0x5a < rd32(r + TREC_TGT_SPEED)) wr32(r + TREC_TGT_SPEED, 0x5a);
+        if (rd32(r + TREC_ROAD_DIST) < 0x28a) { r[0x13] &= 0xde; wr32(r + TREC_TGT_SPEED, 0); }
       }
       break;
     default: break;
   }
-  int32_t want = rd32(r + TR_WANT_SPEED);
+  int32_t want = rd32(r + TREC_TGT_SPEED);
   if ((r[0] & 3) == (uint32_t)(P62_Frame & 3)) r[0x12] = (uint8_t)P118_TrafficBlocked(r);
   if (r[0x12] != 0) want = 0;
-  int32_t d = want - rd32(r + TR_SPEED);
+  int32_t d = want - rd32(r + TREC_SPEED);
   if (rd32(car + CAR_WHEELS_DOWN) < 4 && 0 < d) r[0x11] = 0;
   else if (d < 1) {
     if (d < 0) {

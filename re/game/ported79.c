@@ -1,10 +1,10 @@
 /* Map models: link relocation, record list, bounding radius, axis classification of polygon
-   vectors, duplicate search and disk -> memory conversion.  Header layout: MDL_* in names_g3.h. */
+   vectors, duplicate search and disk -> memory conversion.  Header layout: MDL_* in modelhdr.h. */
 #include "ported79.h"
 #include <math.h>
 #include <string.h>
 #include "p79_data.h"
-#include "names_g3.h"
+#include "modelhdr.h"
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P79_ModelTab")

@@ -161,11 +161,7 @@ int32_t P28_BadGuyFlag;
 #define MAIN_HWND ((void *)(intptr_t)G6_00BDF9C0)
 #define MAP_C "D:\\Driver\\Game\\map.c"
 
-/* Model header fields used here (offsets into a level model record). */
-#define MDL_NVERTS   0x14   /* u16 vertex count */
-#define MDL_NOPS     0x16   /* u16 number of draw records ("ops") */
-#define MDL_VERTS    0x20   /* model pointer: vertices, float[4] each */
-#define MDL_OPS      0x2c   /* model pointer: draw records; each record's size is G2_TABLE_00550ACC[first byte] */
+#include "modelhdr.h"   /* model header fields (MDL_*) */
 
 /* Car model slots of P28_CarClean / P28_CarDam / P28_CarLow. */
 enum { CARMDL_PLAYER = 0, CARMDL_COP = 1, CARMDL_BADGUY = 2, CARMDL_CIV1 = 3, CARMDL_COUNT = 12 };
@@ -278,8 +274,8 @@ void P28_LoadCarModels(void) {
     P28_CarOpsSize[k] = 0;
     if (P28_CarClean[k] != 0) {
       int32_t total = 0;
-      const uint8_t *p = (const uint8_t *)P28_Ptr(*(const int32_t *)(P28_Ptr(P28_CarClean[k]) + MDL_OPS));
-      uint32_t cnt = *(const uint16_t *)(P28_Ptr(P28_CarClean[k]) + MDL_NOPS);
+      const uint8_t *p = (const uint8_t *)P28_Ptr(*(const int32_t *)(P28_Ptr(P28_CarClean[k]) + MDL_RECS));
+      uint32_t cnt = *(const uint16_t *)(P28_Ptr(P28_CarClean[k]) + MDL_NRECS);
       while (cnt != 0) {
         int32_t step = G2_TABLE_00550ACC[*p];
         total += step; p += step; cnt--;

@@ -6,6 +6,7 @@
 #include "ported43.h"   /* v2.09: P43_FreeCnt/P43_FreeList/A_00C56780 — объекты образа данных (пешеходы) */
 #include "ported7.h"
 #include "carfields.h"
+#include "dircam.h"
 #include <math.h>
 #include <string.h>
 
@@ -28,21 +29,7 @@ int32_t P60_PartLimit;
 #pragma pop_macro("P60_PartLimit")
 #endif
 
-/* DirectorCam fields (ported60.h). */
-#define DCAM_MODE    0x00   /* 2 = (TODO(RE): unsure), 0x10 = tripod tracking a car, 0x11 = tripod with fixed view */
-#define DCAM_CAR     0x10   /* car index the camera follows (-1 treated as 0) */
-#define DCAM_ANG     0x18   /* heading (4096 = 360) */
-#define DCAM_ANG_B   0x1c   /* second copy of the heading.  TODO(RE): why two */
-#define DCAM_PITCH   0x20
-#define DCAM_F48     0x48   /* flag toggled by command "toggle" in mode 0x11.  TODO(RE): meaning */
-#define DCAM_POS_X   0x4c   /* camera position x, y, z (+ a 4th word copied with it) */
-#define DCAM_POS_Y   0x50
-#define DCAM_POS_Z   0x54
-#define DCAM_HOLD_X  0x5c   /* copy of the position taken when the tripod is placed.  TODO(RE): exact use */
-#define DCAM_HOLD_Y  0x60
-#define DCAM_HOLD_Z  0x64
-#define DCAM_PITCH16 0x7c   /* int16 copies of pitch / heading */
-#define DCAM_ANG16   0x7e
+/* DirectorCam is a director camera record: DCAM_* / DIRCAM_* in dircam.h. */
 #define COP_FOLLOW_DIST2 0x35a4e900   /* 30000^2: squared distance limit for P60_NextTrafficCar */
 static int32_t rd32(const uint8_t *p, uint32_t o) { int32_t v; memcpy(&v, p + o, 4); return v; }
 static void    wr32(uint8_t *p, uint32_t o, int32_t v) { memcpy(p + o, &v, 4); }
@@ -70,11 +57,11 @@ int32_t P60_NextTrafficCar(int32_t from) {
 
 /* общие части команд «треножной» камеры: режим 0x11 — взгляд зафиксирован, 0x10 — следит за машиной */
 static void tripod_hold(uint8_t *cam) {
-  wr32(cam, DCAM_MODE, 0x11);
+  wr32(cam, DCAM_TYPE, DIRCAM_WATCHCAR);
   wr32(cam, DCAM_HOLD_X, rd32(cam, DCAM_POS_X)); wr32(cam, DCAM_HOLD_Y, rd32(cam, DCAM_POS_Y)); wr32(cam, DCAM_HOLD_Z, rd32(cam, DCAM_POS_Z));
 }
 static void tripod_toggle(uint8_t *cam) {
-  if (rd32(cam, DCAM_MODE) == 0x11) wr32(cam, DCAM_F48, rd32(cam, DCAM_F48) == 0);
+  if (rd32(cam, DCAM_TYPE) == DIRCAM_WATCHCAR) wr32(cam, DCAM_FLAG48, rd32(cam, DCAM_FLAG48) == 0);
 }
 
 /* AddTripodCamera — Game.exe 004c4b3a.  Tripod sub-commands while adding a camera (cmd 0x13..0x16):
@@ -86,19 +73,19 @@ void AddTripodCamera(int32_t cmd) {
   const uint8_t *car = (const uint8_t *)P60_Cars;          /* индекс машины сбрасывается в 0 */
   wr32(cam, DCAM_CAR, 0);
   switch (cmd - 0x13) {
-  case 0: if (rd32(cam, DCAM_MODE) == 0x11 || rd32(cam, DCAM_MODE) == 0x10) SetDirectorMode(8, 0, 0); break;
-  case 1: if (rd32(cam, DCAM_MODE) != 2) tripod_hold(cam); break;
+  case 0: if (rd32(cam, DCAM_TYPE) == DIRCAM_WATCHCAR || rd32(cam, DCAM_TYPE) == DIRCAM_STATIC) SetDirectorMode(8, 0, 0); break;
+  case 1: if (rd32(cam, DCAM_TYPE) != DIRCAM_INCAR) tripod_hold(cam); break;
   case 2:
-    if (rd32(cam, DCAM_MODE) != 2) {
-      if (rd32(cam, DCAM_MODE) == 0x10) { SetDirectorMode(0xa, 0, 0); break; }
+    if (rd32(cam, DCAM_TYPE) != DIRCAM_INCAR) {
+      if (rd32(cam, DCAM_TYPE) == DIRCAM_STATIC) { SetDirectorMode(0xa, 0, 0); break; }
       wr32(cam, DCAM_HOLD_X, rd32(cam, DCAM_POS_X)); wr32(cam, DCAM_HOLD_Y, rd32(cam, DCAM_POS_Y)); wr32(cam, DCAM_HOLD_Z, rd32(cam, DCAM_POS_Z));
       int32_t dx = (int32_t)((uint32_t)rd32(car, CAR_POS_X) - (uint32_t)rd32(cam, DCAM_POS_X));
       int32_t dz = (int32_t)((uint32_t)rd32(car, CAR_POS_Z) - (uint32_t)rd32(cam, DCAM_POS_Z));
       int32_t a = (-P44_Atan2(dx, dz)) & 0xfff;
-      wr32(cam, DCAM_ANG, a); wr32(cam, DCAM_ANG_B, a);
-      wr16(cam, DCAM_ANG16, (uint16_t)a);
+      wr32(cam, DCAM_ANG_REL, a); wr32(cam, DCAM_ANG_ABS, a);
+      wr16(cam, DCAM_YAW16, (uint16_t)a);
       wr32(cam, DCAM_PITCH, 0);
-      wr32(cam, DCAM_MODE, 0x10);
+      wr32(cam, DCAM_TYPE, DIRCAM_STATIC);
     }
     break;
   case 3: tripod_toggle(cam); break;
@@ -112,24 +99,24 @@ void ChangeTripodCamera(int32_t cmd) {
   uint8_t *cam = Cam();
   const uint8_t *car = (const uint8_t *)P60_Cars + (rd32(cam, DCAM_CAR) == -1 ? 0u : (uint32_t)rd32(cam, DCAM_CAR) * 0x148);
   switch (cmd - 0x17) {
-  case 0: if (rd32(cam, DCAM_MODE) == 0x11 || rd32(cam, DCAM_MODE) == 0x10) SetDirectorMode(8, 0, 0); break;
-  case 1: if (rd32(cam, DCAM_MODE) != 2) tripod_hold(cam); break;
+  case 0: if (rd32(cam, DCAM_TYPE) == DIRCAM_WATCHCAR || rd32(cam, DCAM_TYPE) == DIRCAM_STATIC) SetDirectorMode(8, 0, 0); break;
+  case 1: if (rd32(cam, DCAM_TYPE) != DIRCAM_INCAR) tripod_hold(cam); break;
   case 2:
-    if (rd32(cam, DCAM_MODE) != 2) {
-      if (rd32(cam, DCAM_MODE) == 0x10) { SetDirectorMode(0xa, 0, 0); break; }
+    if (rd32(cam, DCAM_TYPE) != DIRCAM_INCAR) {
+      if (rd32(cam, DCAM_TYPE) == DIRCAM_STATIC) { SetDirectorMode(0xa, 0, 0); break; }
       wr32(cam, DCAM_HOLD_X, rd32(cam, DCAM_POS_X)); wr32(cam, DCAM_HOLD_Y, rd32(cam, DCAM_POS_Y)); wr32(cam, DCAM_HOLD_Z, rd32(cam, DCAM_POS_Z));
       int32_t dx = (int32_t)((uint32_t)rd32(car, CAR_POS_X) - (uint32_t)rd32(cam, DCAM_POS_X));
       int32_t dy = (int32_t)((uint32_t)rd32(car, CAR_POS_Y) - (uint32_t)rd32(cam, DCAM_POS_Y));
       int32_t dz = (int32_t)((uint32_t)rd32(car, CAR_POS_Z) - (uint32_t)rd32(cam, DCAM_POS_Z));
       int32_t a = (-P44_Atan2(dx, dz)) & 0xfff;
-      wr32(cam, DCAM_ANG, a); wr32(cam, DCAM_ANG_B, a);
-      wr16(cam, DCAM_ANG16, (uint16_t)a);
+      wr32(cam, DCAM_ANG_REL, a); wr32(cam, DCAM_ANG_ABS, a);
+      wr16(cam, DCAM_YAW16, (uint16_t)a);
       int32_t d = (int32_t)((uint32_t)dx * (uint32_t)dx + (uint32_t)dz * (uint32_t)dz);
       int32_t dist = (int32_t)sqrt((double)d);
       int32_t pitch = P44_Atan2(dy, dist);
       wr32(cam, DCAM_PITCH, pitch);
       wr16(cam, DCAM_PITCH16, (uint16_t)pitch);
-      wr32(cam, DCAM_MODE, 0x10);
+      wr32(cam, DCAM_TYPE, DIRCAM_STATIC);
     }
     break;
   case 3: tripod_toggle(cam); break;
@@ -166,7 +153,7 @@ void AddCamera(int32_t id) {
         P60_SetupCamN(0);
         StoreCameraState(cam);
       } else {
-        wr32(cam, DCAM_MODE, 2);
+        wr32(cam, DCAM_TYPE, DIRCAM_INCAR);
         DirectorUnk7C = node->link1;
       }
     } else {
@@ -195,9 +182,9 @@ void AddCamera(int32_t id) {
     break;
   case 0xb:
     if (node->id == id) {
-      if (rd32(cam, DCAM_MODE) != 0x11 && rd32(cam, DCAM_MODE) != 0x10) {
+      if (rd32(cam, DCAM_TYPE) != DIRCAM_WATCHCAR && rd32(cam, DCAM_TYPE) != DIRCAM_STATIC) {
         wr32(cam, DCAM_CAR, 0);
-        wr32(cam, DCAM_MODE, 0x11);
+        wr32(cam, DCAM_TYPE, DIRCAM_WATCHCAR);
         cam_hold_pos4(cam);
       }
       DirectorUnk7C = node->link1;
@@ -232,7 +219,7 @@ void ChangeCamera(int32_t id) {
         P60_SetupCamN(0);
         StoreCameraState(cam);
       } else {
-        wr32(cam, DCAM_MODE, 2);
+        wr32(cam, DCAM_TYPE, DIRCAM_INCAR);
         DirectorUnk7C = node->link1;
       }
     } else {
@@ -262,8 +249,8 @@ void ChangeCamera(int32_t id) {
     break;
   case 0xf:
     if (node->id == id) {
-      if (rd32(cam, DCAM_MODE) != 0x11 && rd32(cam, DCAM_MODE) != 0x10) {
-        wr32(cam, DCAM_MODE, 0x11);
+      if (rd32(cam, DCAM_TYPE) != DIRCAM_WATCHCAR && rd32(cam, DCAM_TYPE) != DIRCAM_STATIC) {
+        wr32(cam, DCAM_TYPE, DIRCAM_WATCHCAR);
         cam_hold_pos4(cam);
       }
       DirectorUnk7C = node->link1;

@@ -251,10 +251,7 @@ _Static_assert(sizeof(p42_var_t) == 0x30, "p42_var_t");
 #endif
 
 #include "carfields.h"
-#define DIK_ESCAPE 0x01
-#define DIK_RETURN 0x1c
-#define DIK_LEFT   0xcb
-#define DIK_RIGHT  0xcd
+#include "dik.h"
 #define MSVAR_STRING 1      /* p42_var_t.type: string (initial value address in lo) */
 #define MSVAR_NUMBER 3      /* number (initial value in hi) */
 #define MSVAR_NONE   4      /* no initial value */

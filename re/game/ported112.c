@@ -72,8 +72,8 @@ static const float K_NEAR = 0.3f;      /* .rdata 00546164 */
 #define CTX_MOVING   0x40    /* keep moving along the heading (see P111_ScriptTick) */
 #define CTX_ARRIVED  0x80    /* reached the target of the last move */
 #define CTX_CURVE    0x100   /* curve move started: +0x5c holds 1 / initial distance */
-#define WANTED_MAX   0xfff
-#include "names_g5.h"   /* wanted level G2_00D11A5C is 0..0xfff */
+#define WANTED_MAX   0xfff   /* wanted level G2_00D11A5C is 0..0xfff */
+#include "dircam.h"     /* DIRCAM_* camera types (director timeline colours) */
 
 /* Glide export by decorated name, or NULL. */
 static void *glide_proc(const char *name) {

@@ -351,24 +351,11 @@ static void set_c4(int32_t v) {
   P56_Blk84[1] = (uint32_t)v;
 #endif
 }
-/* MLADDER record opcodes (records of 0x10 bytes: {code, a, next, else}). */
-enum {
-  LAD_LEVEL      = 0,   /* remember chapter a, unlock level a + 1 */
-  LAD_PICK       = 1,   /* choice screen with strings a; next record = chosen branch */
-  LAD_PLAY       = 2,   /* play mission a */
-  LAD_FMV        = 3,   /* play cut-scene a */
-  LAD_SETFLAG    = 4,   /* set story flag a (0127104c) */
-  LAD_IFFLAG     = 5,   /* branch: flag a set -> next, else -> else */
-  LAD_IFFAILED   = 6,   /* branch: last mission failed -> else */
-  LAD_GOTO       = 7,
-  LAD_STOPFAILED = 9,   /* stop the ladder if the last mission failed */
-  LAD_INTERVIEW  = 0xb, /* the garage interview (skipped by cheat 00b87e9c) */
-  LAD_CREDITS    = 0xc  /* credits replay, then unlock all cheats */
-};
+#include "ladder.h"   /* MLADDER record codes LAD_* */
 #define C4_FAILED 0xff0   /* 00c810c4 value set on failure (idle timeout, marker shot down) — inferred meaning */
 
 /* P140_LadderRun — Game.exe 0041b3ab, cdecl.  Run the MLADDER campaign script from record P68_IntroCur until it returns to the menu: each
-   record {code, a, next, else} (LAD_* above) unlocks levels, shows choice screens, plays missions
+   record {code, a, next, else} (LAD_* in ladder.h) unlocks levels, shows choice screens, plays missions
    or cut-scenes, tests story flags or the last mission's result, runs the interview or credits.
    Stops on a NULL/unregistered record address, an unknown code, or when GameMode becomes 1
    (quit).  Native: RE_SKIP_INTERVIEW=1 acts like the skip-interview cheat. */
@@ -378,18 +365,18 @@ void P140_LadderRun(void) {
     if (rec == NULL) return;
     uint32_t a = rd32(rec + 4);
     switch (rd32(rec)) {
-    case LAD_LEVEL:
+    case LAD_SETCITY:
       P68_IntroA = (int32_t)a;
       if (P19_Level < P68_IntroA + 1) { set_level(P68_IntroA + 1); P58_SaveConfig(); }
       P68_IntroCur = rd32(rec + 8);
       break;
-    case LAD_PICK:
+    case LAD_ROOM:
       save_state();
       D_00b87e30 = P68_IntroA;
       P68_IntroCur = P131_MenuPick(P139_IntroStr + a * 0x20u);
       if (P68_IntroCur == 0) return;
       break;
-    case LAD_PLAY:
+    case LAD_MISSION:
       save_state();
       D_00b87e30 = P68_IntroA;
       set_e38((int32_t)a);
@@ -400,24 +387,24 @@ void P140_LadderRun(void) {
       if (rec == NULL) return;
       P68_IntroCur = rd32(rec + 8);
       break;
-    case LAD_FMV:
+    case LAD_RENDER:
       P150_PlayFmv(G6_00BDF9C0, (int32_t)a, -1);
       P68_IntroCur = rd32(rec + 8);
       break;
-    case LAD_SETFLAG:
+    case LAD_TRIGGER:
       FlagSet0127104C((uint8_t)a);
       P68_IntroCur = rd32(rec + 8);
       break;
-    case LAD_IFFLAG:
+    case LAD_IF:
       P68_IntroCur = TestBit0041B7AD(a) == 0 ? rd32(rec + 0xc) : rd32(rec + 8);
       break;
-    case LAD_IFFAILED:
+    case LAD_IFOK:
       P68_IntroCur = P14_00c810c4 == C4_FAILED ? rd32(rec + 0xc) : rd32(rec + 8);
       break;
-    case LAD_GOTO:
+    case LAD_ENDIF:
       P68_IntroCur = rd32(rec + 8);
       break;
-    case LAD_STOPFAILED:
+    case LAD_QUITONFAIL:
       if (P14_00c810c4 == C4_FAILED) return;
       P68_IntroCur = rd32(rec + 8);
       break;
@@ -439,7 +426,7 @@ void P140_LadderRun(void) {
       if (rec == NULL) return;
       P68_IntroCur = rd32(rec + 8);
       break;
-    case LAD_CREDITS:
+    case LAD_END:
       P12_00b87ef8 = 1; set_e5c(1);
       P138_ReplayCfg("CREDITS");
       P136_GameLoop(1);

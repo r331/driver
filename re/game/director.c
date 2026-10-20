@@ -9,7 +9,7 @@
 #include "dirnodes.h"
 #include "crt.h"
 #include "directorstorage.h"
-#include "names_g5.h"
+#include "dircam.h"
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -365,7 +365,7 @@ DIRTABLE_T DirTableB;
 #pragma pop_macro("DirTableB")
 #endif
 /* 004c57b7 — название типа камеры */
-/* Display name of a camera type (the source of the DIRCAM_* names in names_g5.h). */
+/* Display name of a camera type (the source of the DIRCAM_* names in dircam.h). */
 const char *GetCameraTypeName(int type) {
     switch (type) {
     case DIRCAM_CHASE:    return "Chase camera";

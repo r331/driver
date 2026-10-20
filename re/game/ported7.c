@@ -420,7 +420,7 @@ int32_t MaskShift_00421C1D(uint32_t m) { int32_t n; if (m == 0) return 8; while 
 void AddEntry_00426ABC(const uint32_t *p, uint32_t w, int32_t a, int32_t c, int32_t d) { if (G8_011EFFE4 != 0x14) { uint8_t *e = &A_012083C0[G8_011EFFE4 * 0x1c]; float fa = (float)a, fc = (float)c, fd = (float)d; G8_011EFFE4++; memcpy(e, p, 12); memcpy(e+12, &w, 4); memcpy(e+16, &fa, 4); memcpy(e+20, &fc, 4); memcpy(e+24, &fd, 4); } }
 /* FindFreeEven_0048A4E6 — Game.exe 0048a4e6, cdecl.  First even index 0..62 of table 01146f20 (0x1c-byte entries) whose low 3 flag bits are clear; -1 if none. */
 int32_t FindFreeEven_0048A4E6(void) { for (int32_t i = 0; i <= 0x3f; i += 2) if ((A_01146F20[i*0x1c] & 7) == 0) return i; return -1; }
-/* CountByOwner_0048F2E7 — Game.exe 0048f2e7, cdecl.  Number of active traffic records (011443e0, see TREC_* in names_g3.h) whose TREC_NEXT_NODE equals owner. */
+/* CountByOwner_0048F2E7 — Game.exe 0048f2e7, cdecl.  Number of active traffic records (011443e0, see TREC_* in trafficrec.h) whose TREC_NEXT_NODE equals owner. */
 int32_t CountByOwner_0048F2E7(int32_t owner) { int32_t cnt = 0; for (int32_t i = 0; i < G8_00575EE4; i++) { int32_t v; memcpy(&v, &A_011443E0[i*0x54 + 0x28], 4); if (A_011443E0[i*0x54 + 1] != 0 && v == owner) cnt++; } return cnt; }
 /* FindSlot_004A2DB5 — Game.exe 004a2db5, cdecl.  1 if table 01134540 (100 entries of 24 bytes) has an entry with flag bit 0 set and (x, y) at +12/+16 == (a, c). */
 int32_t FindSlot_004A2DB5(int32_t a, int32_t c) { for (int32_t i = 0; i < 100; i++) { uint32_t f; int32_t x, y; memcpy(&x, &A_01134540[i*24+12], 4); memcpy(&y, &A_01134540[i*24+16], 4); memcpy(&f, &A_01134540[i*24+20], 4); if ((f & 1) != 0 && x == a && y == c) return 1; } return 0; }

@@ -262,8 +262,8 @@ uint32_t ReadDirectorKeys(void) {
 
 /* ClampCameraHeight — Game.exe 004c356d.  Keeps a director camera between 100 and 1600 units above the
    ground under it (y grows downward, so "above" = smaller y; ground = -GetGroundHeight(pos)).
-   cam is a director camera record (names_g1.h DCAM_*) walked as int32 words: [0] DCAM_MODE,
-   [4] DCAM_CAR (-1 -> 0), [0x13..0x16] DCAM_POS (y = [0x14]), [0x17..0x1a] DCAM_TARGET,
+   cam is a director camera record (dircam.h DCAM_*) walked as int32 words: [0] DCAM_TYPE,
+   [4] DCAM_CAR (-1 -> 0), [0x13..0x16] DCAM_POS (y = [0x14]), [0x17..0x1a] DCAM_HOLD,
    [0x1c] DCAM_OFFSET y = camera y + the followed car's y.  CPT(idx * 0x52) is int32 0x52*idx of the table at 00d0788c:
    0x52 words = 0x148 = one car record, and 00d0788c = car table 00d077c0 + 0xcc (CAR_POS_Y), so it is
    car[idx]'s world y.  Mode 0 copies the position to the target only when the clamp changed it; other

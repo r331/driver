@@ -3,6 +3,7 @@
 #include "ported113.h"
 #include "ported57.h"
 #include "crt.h"
+#include "dik.h"
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -150,8 +151,6 @@ float P57_Div1500;
    TODO(RE): which screen each P57_MenuXXXXXX is has not been mapped yet. */
 #define MENU_BACK        (-1)    /* P57_MenuStep result: leave the screen (Esc) */
 #define MENU_IDLE_FRAMES 6       /* frames run by P57_MenuDone */
-#define DIK_ESCAPE       0x01
-#define DIK_RETURN       0x1c
 #define TEX_SLOTS        0x20    /* texture slots reset by P57_ResetTexNodes */
 
 /* Начальные значения констант из .data Game.exe (нужны только native). */

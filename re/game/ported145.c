@@ -212,8 +212,7 @@ p145_splash_t P145_Splash;
 #  define P145_STD
 #endif
 
-/* City / level index P15_State (names from the LEVELS\*.D3D palette file each one loads). */
-enum { CITY_MIAMI = 0, CITY_FRISCO = 1, CITY_LA = 2, CITY_NEWYORK = 3, CITY_IVIEW = 4, CITY_TRAIN = 5, CITY_NEWCASTLE = 6 };
+#include "city.h"   /* city / level index P15_State (CITY_*) */
 #define FAR_27000 0x46d2f000u   /* 27000.0f: default far distance when no detail preset is applied */
 
 /* u2f — Reinterpret a uint32 as float bits. */

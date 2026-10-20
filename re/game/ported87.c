@@ -61,11 +61,8 @@ p87_lumps_t P87_SlotLumpA;
 #define OBJ_POS          0x08     /* float[3]: world x, y, z */
 #define OBJ_ANGLE        0x18     /* int32: rotation (index into the Euler table) */
 #define OBJ_HIDDEN       0x1c     /* int32: 1 if disk bit 0x8000 was set; such objects are not drawn by P87_DrawCells */
-/* model header fields read here */
-#define MDL_FLAGS        0x02     /* u16 */
-#define MDL_FLAGS2       0x08     /* u32 */
-#define MDL_RADIUS       0x0c     /* float: bounding radius for P83_BoxVis */
-#define MDL_COUNT16      0x16     /* u16: TODO(RE): unsure — must be 1 for the P87_Fn42A423 path */
+#include "modelhdr.h"   /* model header fields (MDL_*); MDL_RADIUS is the bounding radius for P83_BoxVis */
+/* model flag bits (MDL_FLAGS) read here */
 #define MDLF_MISSION     0x0004   /* drawn by P131_MissionObj instead */
 #define MDLF_AXIS_A      0x0010   /* with 0x20: axis-aligned fast path P92_DrawAxis when the angle is a multiple of 90 deg */
 #define MDLF_AXIS_B      0x0020
@@ -197,7 +194,7 @@ static void draw_obj(const uint8_t *obj, int kind) {
   int32_t low = ((int32_t *)P80_Boxes[mi])[7] < 200;           /* 00cf56fc + модель·0x20 */
   if (kind == 0 && (flags & MDLF_SPIN)) {
     P92_DrawSpin(mref, ang, p, vis == 2 ? 1 : 0);   /* 0042a5de */
-  } else if (kind == 1 && (flags & MDLF_LIST_B) == 0 && (flags & (MDLF_42A423 | MDLF_LIST_A)) != 0 && rd16(mdl + MDL_COUNT16) == 1) {
+  } else if (kind == 1 && (flags & MDLF_LIST_B) == 0 && (flags & (MDLF_42A423 | MDLF_LIST_A)) != 0 && rd16(mdl + MDL_NRECS) == 1) {
     P87_Fn42A423(mref, ang, p, vis == 1 ? 0 : vis == 2 ? 1 : 0);
   } else {
     int32_t mode = vis == 1 ? 0 : vis == 2 ? 1 : (low ? 0 : 2);

@@ -94,16 +94,8 @@ static int ci_eq(const char *a, const char *b) {
 }
 
 /* ---------------- 0041b8ac ---------------- */
-/* MLADDER record codes (word 0 of a 16-byte ladder record {code, value, next, else}). */
-enum {
-  LAD_SETCITY = 0, LAD_ROOM = 1, LAD_MISSION = 2, LAD_RENDER = 3, LAD_TRIGGER = 4, LAD_IF = 5, LAD_IFOK = 6,
-  LAD_ENDIF = 7,       /* written for both ELSE and ENDIF */
-  LAD_QUITONFAIL = 9, LAD_INTERVIEW = 0xb, LAD_END = 0xc
-};
-/* Option types inside a ROOM's option list (4 x {u16 type, u16 value, u32 record address}). */
-enum { LAD_OPT_NONE = 1, LAD_OPT_MISSION = 2, LAD_OPT_JOKE = 4, LAD_OPT_CARSELECT = 8 };
-enum { CITY_MIAMI = 0, CITY_SF = 1, CITY_LA = 2, CITY_NY = 3 };
-#define LAD_REC_SIZE 0x10
+#include "ladder.h"   /* MLADDER record codes LAD_*, option types LAD_OPT_* */
+#include "city.h"
 /* lad_put — local helper: writes ladder record {code, a, next, else} at Game.exe address `at`. */
 static void lad_put(uint32_t at, int32_t code, int32_t a, uint32_t next, uint32_t else_rec) {
   uint8_t *rec = (uint8_t *)re_ptr(at);
@@ -152,8 +144,8 @@ int32_t P141_LadderLine(char *line) {
   if (ci_eq(tok, "SETCITY")) {
     int32_t city;
     if (P19_TakeToken(line, tok) == 1) return lad_err("MLADDER: Missing parameter");
-    if (ci_eq(tok, "[MIAMI]")) city = CITY_MIAMI; else if (ci_eq(tok, "[SF]")) city = CITY_SF;
-    else if (ci_eq(tok, "[LA]")) city = CITY_LA; else if (ci_eq(tok, "[NY]")) city = CITY_NY;
+    if (ci_eq(tok, "[MIAMI]")) city = CITY_MIAMI; else if (ci_eq(tok, "[SF]")) city = CITY_FRISCO;
+    else if (ci_eq(tok, "[LA]")) city = CITY_LA; else if (ci_eq(tok, "[NY]")) city = CITY_NEWYORK;
     else return lad_err("MLADDER: Unknown CITY");
     lad_next(LAD_SETCITY, city);
   } else if (ci_eq(tok, "ROOM")) {

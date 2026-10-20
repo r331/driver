@@ -99,16 +99,7 @@ typedef void (P143_STD *p143_vp_fn)(void *);
 typedef int32_t (P143_STD *p143_lock_fn)(int32_t, int32_t, int32_t, int32_t, int32_t, void *);
 typedef int32_t (P143_STD *p143_unlock_fn)(int32_t, int32_t);
 
-/* Light object record o — same layout as in ported144.c. */
-#define LO_X      0x00    /* float camera-space x, y, z */
-#define LO_Y      0x04
-#define LO_Z      0x08
-#define LO_EMIT   0x10    /* passed to PushEntry_004CC784 */
-#define LO_CAR    0x50    /* int16 car index (row of P143_LampHist) */
-#define LO_LAMP   0x54    /* int16 lamp index 0..7 */
-#define LO_DIR_V  0x6c    /* uint16 facing angles */
-#define LO_DIR_H  0x6e
-#define HIST_FRAME 0x20   /* int16 frame of the last history update in a 0x28-byte lamp history record */
+#include "lightobj.h"   /* light object record LO_*, trail history HIST_FRAME */
 static const uint8_t k_553678[8] = { 0x20, 0x60, 0x60, 0x20, 0x80, 0x40, 0x40, 0x60 };  /* .data 00553678: размеры CARLIGHT */
 static const float   k_553848 = 1.0f;     /* .data 00553848: масштаб размеров */
 static const int32_t k_553854 = 1;        /* .data 00553854: 1 — проверка видимости треугольниками, 0 — через LFB */

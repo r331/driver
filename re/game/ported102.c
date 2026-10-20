@@ -463,7 +463,7 @@ static uint8_t *tcar(int32_t i) {
 #endif
   return P59_CarsTab + (uint32_t)i * 0x148;
 }
-/* trec — Traffic record i (TREC_* in names_g3.h).  Native: a zeroed dummy outside 0..0x3f. */
+/* trec — Traffic record i (TREC_* in trafficrec.h).  Native: a zeroed dummy outside 0..0x3f. */
 static uint8_t *trec(int32_t i) {
 #ifndef RE_HOOK_BUILD
   if (i < 0 || i >= 0x40) { static uint8_t dummy[0x54]; memset(dummy, 0, sizeof dummy); return dummy; }

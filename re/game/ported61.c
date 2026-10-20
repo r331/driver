@@ -1,9 +1,9 @@
 /* ported61.c — camera helpers: the per-car view camera setup (P61_SetupCamN), saving / restoring the
-   live camera into a director camera record (names_g1.h DCAM_*), normalising such a record before
+   live camera into a director camera record (dircam.h DCAM_*), normalising such a record before
    playback, and spawning one particle/effect object.  English summary of ported61.h. */
 #include "ported61.h"
 #include "carfields.h"
-#include "names_g1.h"
+#include "dircam.h"
 #include <math.h>
 #include <string.h>
 
@@ -174,9 +174,7 @@ static int32_t rd32(const uint8_t *p, uint32_t o) { int32_t v; memcpy(&v, p + o,
 static void    wr32(uint8_t *p, uint32_t o, int32_t v) { memcpy(p + o, &v, 4); }
 static uint16_t rd16(const uint8_t *p, uint32_t o) { uint16_t v; memcpy(&v, p + o, 2); return v; }
 static void    wr16(uint8_t *p, uint32_t o, uint16_t v) { memcpy(p + o, &v, 2); }
-#define DCAM_MODE_CAR     2      /* DCAM_MODE: camera attached to a car */
-#define DCAM_MODE_KEEP48  0x11   /* DCAM_MODE that keeps DCAM_FLAG48 */
-#define DCAM_MAX_DIST     15000  /* P61_CamPrepare caps the target distance */
+#define DCAM_DIST_LIMIT     15000  /* P61_CamPrepare caps the target distance */
 /* Car record n of the car table P60_Cars (0x148 bytes, field offsets in carfields.h). */
 static const uint8_t *Car(int32_t n) { return (const uint8_t *)P60_Cars + (uint32_t)n * 0x148; }
 
@@ -234,15 +232,15 @@ void P61_SetupCamN(int32_t n) {
    offset, angles, position, distances (floats rounded with x87 round-to-nearest-even), the integer
    state P61_V*, the camera mode, and the P60_Var1373C0 byte (cleared again unless mode 0x11). */
 void P61_StoreCamState(uint8_t *c) {
-  wr32(c, DCAM_TARGET, Round(P61_TgtX)); wr32(c, DCAM_TARGET + 4, Round(P61_TgtY)); wr32(c, DCAM_TARGET + 8, Round(P61_TgtZ));
+  wr32(c, DCAM_HOLD, Round(P61_TgtX)); wr32(c, DCAM_HOLD + 4, Round(P61_TgtY)); wr32(c, DCAM_HOLD + 8, Round(P61_TgtZ));
   wr32(c, DCAM_OFFSET, Round(P61_OffX)); wr32(c, DCAM_OFFSET + 4, Round(P61_OffY)); wr32(c, DCAM_OFFSET + 8, Round(P61_OffZ));
   wr16(c, DCAM_ANGLES, P61_AngB8); wr16(c, DCAM_ANGLES + 2, P61_AngBA); wr16(c, DCAM_ANGLES + 4, P61_AngBC);
   wr32(c, DCAM_POS, Round(P44_CamX)); wr32(c, DCAM_POS + 4, Round(P44_CamY)); wr32(c, DCAM_POS + 8, Round(P44_CamZ));
-  wr32(c, DCAM_DIST, Round(P61_Dist8)); wr32(c, DCAM_DIST_C, Round(P61_DistC));
-  wr32(c, DCAM_ANG_REL, P61_V18); wr32(c, DCAM_ANG_ABS, P61_V1C); wr32(c, DCAM_V20, P61_V20); wr32(c, DCAM_CAR, P61_V10);
-  wr32(c, DCAM_MODE, (int32_t)(uint32_t)P59_Mode1137324);
+  wr32(c, DCAM_DIST, Round(P61_Dist8)); wr32(c, DCAM_MAXDIST, Round(P61_DistC));
+  wr32(c, DCAM_ANG_REL, P61_V18); wr32(c, DCAM_ANG_ABS, P61_V1C); wr32(c, DCAM_PITCH, P61_V20); wr32(c, DCAM_CAR, P61_V10);
+  wr32(c, DCAM_TYPE, (int32_t)(uint32_t)P59_Mode1137324);
   wr32(c, DCAM_FLAG48, (int32_t)(uint32_t)(uint8_t)P60_Var1373C0);
-  if (rd32(c, DCAM_MODE) != DCAM_MODE_KEEP48) wr32(c, DCAM_FLAG48, 0);
+  if (rd32(c, DCAM_TYPE) != DIRCAM_WATCHCAR) wr32(c, DCAM_FLAG48, 0);
 }
 
 /* P61_RestoreCamState — Game.exe 004c536c.  Inverse of P61_StoreCamState: loads the live camera from
@@ -251,14 +249,14 @@ void P61_StoreCamState(uint8_t *c) {
 void P61_RestoreCamState(uint8_t *c) {
   P44_CamX = (float)rd32(c, DCAM_POS); P44_CamY = (float)rd32(c, DCAM_POS + 4); P44_CamZ = (float)rd32(c, DCAM_POS + 8);
   P61_OffX = (float)rd32(c, DCAM_OFFSET); P61_OffY = (float)rd32(c, DCAM_OFFSET + 4); P61_OffZ = (float)rd32(c, DCAM_OFFSET + 8);
-  P61_TgtX = (float)rd32(c, DCAM_TARGET); P61_TgtY = (float)rd32(c, DCAM_TARGET + 4); P61_TgtZ = (float)rd32(c, DCAM_TARGET + 8);
+  P61_TgtX = (float)rd32(c, DCAM_HOLD); P61_TgtY = (float)rd32(c, DCAM_HOLD + 4); P61_TgtZ = (float)rd32(c, DCAM_HOLD + 8);
   P61_AngB8 = rd16(c, DCAM_ANGLES); P61_AngBA = rd16(c, DCAM_ANGLES + 2); P61_AngBC = rd16(c, DCAM_ANGLES + 4);
-  P61_Dist8 = (float)rd32(c, DCAM_DIST); P61_DistC = (float)rd32(c, DCAM_DIST_C);
-  P61_V18 = rd32(c, DCAM_ANG_REL); P61_V1C = rd32(c, DCAM_ANG_ABS); P61_V20 = rd32(c, DCAM_V20); P61_V10 = rd32(c, DCAM_CAR);
-  P59_Mode1137324 = (uint8_t)rd32(c, DCAM_MODE);
-  if (rd32(c, DCAM_MODE) != DCAM_MODE_KEEP48) wr32(c, DCAM_FLAG48, 0);
+  P61_Dist8 = (float)rd32(c, DCAM_DIST); P61_DistC = (float)rd32(c, DCAM_MAXDIST);
+  P61_V18 = rd32(c, DCAM_ANG_REL); P61_V1C = rd32(c, DCAM_ANG_ABS); P61_V20 = rd32(c, DCAM_PITCH); P61_V10 = rd32(c, DCAM_CAR);
+  P59_Mode1137324 = (uint8_t)rd32(c, DCAM_TYPE);
+  if (rd32(c, DCAM_TYPE) != DIRCAM_WATCHCAR) wr32(c, DCAM_FLAG48, 0);
   *(uint8_t *)&P60_Var1373C0 = (uint8_t)rd32(c, DCAM_FLAG48);
-  if (rd32(c, DCAM_MODE) == DCAM_MODE_CAR) {
+  if (rd32(c, DCAM_TYPE) == DIRCAM_INCAR) {
     P61_V10b = rd32(c, DCAM_CAR);
     P61_SetupCamN(rd32(c, DCAM_CAR));
   }
@@ -271,22 +269,22 @@ void P61_RestoreCamState(uint8_t *c) {
        target, offset y = target y + car y, relative angle = atan2 of (target - car) minus the car
        heading, then the height clamp (ClampCameraHeight);
      non-zero modes: absolute angle = car heading + relative angle.
-   Finally DCAM_DIST_C = DCAM_DIST and the mode is reset to 0.  (Mode 0 records only get the last step.) */
+   Finally DCAM_MAXDIST = DCAM_DIST and the mode is reset to 0.  (Mode 0 records only get the last step.) */
 void P61_CamPrepare(uint8_t *c) {
   if (rd32(c, DCAM_CAR) == -1) wr32(c, DCAM_CAR, 0);
   const uint8_t *car = Car(rd32(c, DCAM_CAR));
   wr32(c, DCAM_FLAG48, 0);
-  if (rd32(c, DCAM_MODE) != 0) {
-    if (rd32(c, DCAM_MODE) == DCAM_MODE_CAR) {
+  if (rd32(c, DCAM_TYPE) != 0) {
+    if (rd32(c, DCAM_TYPE) == DIRCAM_INCAR) {
       wr32(c, DCAM_ANG_REL, 0x800); wr32(c, DCAM_DIST, 0x500); wr32(c, DCAM_OFFSET + 4, -0x100);   /* 0x800 = ANG_180 */
     } else {
-      float fx = (float)(rd32(c, DCAM_TARGET) - rd32(car, CAR_POS_X));
-      int32_t y = rd32(c, DCAM_TARGET + 4), carY = rd32(car, CAR_POS_Y);
-      float fz = (float)(rd32(c, DCAM_TARGET + 8) - rd32(car, CAR_POS_Z));
+      float fx = (float)(rd32(c, DCAM_HOLD) - rd32(car, CAR_POS_X));
+      int32_t y = rd32(c, DCAM_HOLD + 4), carY = rd32(car, CAR_POS_Y);
+      float fz = (float)(rd32(c, DCAM_HOLD + 8) - rd32(car, CAR_POS_Z));
       int32_t d = Round((float)sqrt((double)fz * fz + (double)fx * fx));
-      int32_t lim = d > DCAM_MAX_DIST ? DCAM_MAX_DIST : d;
+      int32_t lim = d > DCAM_DIST_LIMIT ? DCAM_DIST_LIMIT : d;
       wr32(c, DCAM_DIST, lim);
-      wr32(c, DCAM_POS, rd32(c, DCAM_TARGET)); wr32(c, DCAM_POS + 4, rd32(c, DCAM_TARGET + 4)); wr32(c, DCAM_POS + 8, rd32(c, DCAM_TARGET + 8)); wr32(c, DCAM_POS + 0xc, rd32(c, DCAM_TARGET + 0xc));
+      wr32(c, DCAM_POS, rd32(c, DCAM_HOLD)); wr32(c, DCAM_POS + 4, rd32(c, DCAM_HOLD + 4)); wr32(c, DCAM_POS + 8, rd32(c, DCAM_HOLD + 8)); wr32(c, DCAM_POS + 0xc, rd32(c, DCAM_HOLD + 0xc));
       wr32(c, DCAM_OFFSET + 4, Round((float)(y + carY)));
       int32_t rz = Round(fz), rx = Round(fx);
       wr32(c, DCAM_ANG_REL, (P44_Atan2(rx, rz) - rd32(car, CAR_HEADING)) & 0xfff);
@@ -294,8 +292,8 @@ void P61_CamPrepare(uint8_t *c) {
     }
     wr32(c, DCAM_ANG_ABS, (rd32(car, CAR_HEADING) + rd32(c, DCAM_ANG_REL)) & 0xfff);
   }
-  wr32(c, DCAM_DIST_C, rd32(c, DCAM_DIST));
-  wr32(c, DCAM_MODE, 0);
+  wr32(c, DCAM_MAXDIST, rd32(c, DCAM_DIST));
+  wr32(c, DCAM_TYPE, 0);
 }
 
 /* P61_SpawnPart — Game.exe 00514261.  Starts the effect object p (pool record of ported43, 0xb4 bytes):

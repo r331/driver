@@ -7,7 +7,7 @@
 #include "../plat.h"
 #include "../../game/ported36.h"
 #include "../../game/ported98.h"
-#include "../../game/names_g3.h"
+#include "../../game/dik.h"
 #include "../native/diagnostics.h"
 #include <SDL.h>
 #include <stdio.h>
