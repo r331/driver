@@ -241,7 +241,59 @@ void re_detail_frame_begin(void) {
 }
 static double dot3(const double *a, const double *b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
 static double len3(const double *a) { return sqrt(dot3(a, a)); }
+
+/* Exercise matching with a synthetic facade, including the stale page/UVs
+   retained by flat and Gouraud streetlight polygons. No GL objects are used. */
+int re_detail_selftest(void) {
+    dent_t entry = g_ent[0]; dinst_t instance = g_inst[0];
+    int nent = g_nent, ninst = g_ninst, log = g_log;
+    unsigned char mask = g_pagemask[6];
+    long tris = g_st_tri, pals = g_st_pal;
+    int page = P86_CurTex, state = P85_StateDirty;
+    p85_rv saved[3]; double camera[3][3]; int valid[3];
+    memcpy(saved, P85_RV, sizeof saved);
+    for (int i = 0; i < 3; i++) valid[i] = P85_GetCameraPoint(&P85_RV[i], camera[i]);
+    memset(&g_ent[0], 0, sizeof g_ent[0]);
+    g_ent[0].page = 6; g_ent[0].pal = -1;
+    g_ent[0].u1 = 128; g_ent[0].v1 = 64; g_ent[0].w = 8; g_ent[0].h = 4;
+    g_nent = 1; g_ninst = 0; g_log = 0; g_pagemask[6] = 1; P86_CurTex = 6;
+    for (int i = 0; i < 3; i++) {
+        p85_rv *v = &P85_RV[i];
+        memset(v, 0, sizeof *v);
+        v->x = i == 1 ? 420 : 320; v->y = i == 2 ? 340 : 240;
+        v->oow = .001f;
+        v->tmu[0] = (i == 1 ? 128 : 0) * v->oow;
+        v->tmu[1] = (i == 2 ? 64 : 0) * v->oow;
+        P85_NoteCameraPoint(i, i == 1 ? 800 : 0, i == 2 ? 400 : 0, 1000);
+    }
+    int failed = 0;
+    P85_StateDirty = 0;
+    re_detail_tri(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
+    if (g_ninst != 0) failed++;
+    P85_StateDirty = 4;
+    re_detail_tri(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
+    if (g_ninst != 1 || g_inst[0].ntri != 1) failed++;
+    P85_StateDirty = 0;
+    re_detail_tri(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
+    if (g_ninst != 1 || g_inst[0].ntri != 1) failed++;
+    for (int i = 0; i < 3; i++) {
+        /* Invalidate the fixture's coordinate association before restoring it. */
+        P85_RV[i].oow = -1;
+        P85_NoteCameraPoint(i, 0, 0, 0);
+        P85_RV[i] = saved[i];
+        if (valid[i]) P85_NoteCameraPoint(i, camera[i][0], camera[i][1], camera[i][2]);
+    }
+    g_ent[0] = entry; g_inst[0] = instance;
+    g_nent = nent; g_ninst = ninst; g_log = log; g_pagemask[6] = mask;
+    g_st_tri = tris; g_st_pal = pals; P86_CurTex = page; P85_StateDirty = state;
+    if (failed) fprintf(stderr, "facade texture-state failures: %d\n", failed);
+    return failed != 0;
+}
+
 void re_detail_tri(const void *pa, const void *pb, const void *pc) {
+    /* Flat/Gouraud polygons retain the last texture page and per-vertex UVs.
+       They cannot identify a facade, even when those stale values match it. */
+    if (P85_StateDirty != 4) return;
     int page = P86_CurTex;
     if (page < 0 || page > 255 || !g_pagemask[page]) return;
     const p85_rv *v[3] = { (const p85_rv *)pa, (const p85_rv *)pb, (const p85_rv *)pc };

@@ -1,6 +1,7 @@
 /* Проверка перенесённых модулей в нативной сборке: ./driver --selftest */
 #include "../game/drawdist.h"
 #include "../platform/sdl/plat_gfx.h"
+#include "../platform/sdl/plat_detail.h"
 #include "../game/uihandlers3.h"
 #include "../game/uihandlers4.h"
 #include "../game/menuselect.h"
@@ -7302,7 +7303,7 @@ static int test_v220(void) {
 static int v223_bad(int n) { for (int k = 0; k < n && k < 8; k++) for (int j = 0; j < 3; j++) { const p85_rv *r = &p85_cap[k][j];
     if (!(r->oow > 0.0f) || r->oow == P85_OOW_NEAR || !isfinite(r->x) || !isfinite(r->y) || r->x < 319.0f || r->y < 239.0f) return 1; } return 0; }
 static int test_facade_camera(void) {
-  int failed = 0;
+  int failed = re_detail_selftest();
   uint32_t tag = P44_XformTag;
   p85_rv saved = P85_RV[0], other = {0};
   p85_vtx v = {0};

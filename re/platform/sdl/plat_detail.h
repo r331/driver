@@ -11,4 +11,5 @@ extern int re_detail_capture;                  /* 1 — внутри основ�
 void re_detail_frame_begin(void);              /* перед P89_DrawMap(1) */
 void re_detail_tri(const void *a, const void *b, const void *c);   /* вершины Glide (p85_rv) треугольника мира — из P76 tri() */
 void re_detail_frame_end(void);                /* после P89_DrawMap(1): сброс пакетов и рисование копий */
+int re_detail_selftest(void);                  /* matching regression, no graphics context needed */
 #endif

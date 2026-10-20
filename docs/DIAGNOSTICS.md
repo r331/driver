@@ -117,6 +117,24 @@ and UVs stay unchanged. An isolated replay of the captured camera movement
 verified stable facade scales; selftests cover fractional depth, stale/mutated
 vertices, and clipped-triangle coordinate propagation.
 
+## Facade strips on streetlights (2026-10-19)
+
+`session-20261019-212548-1247/capture-03-frame-003571` showed extra gray
+strips alongside a streetlight. These extensions were absent from the saved
+world triangles; facade meshes use a separate indexed draw path.
+
+The facade matcher received untextured flat/Gouraud polygons as well as
+textured walls. Untextured polygons retain the previous texture page and UVs,
+which could match a facade entry and attach a stretched mesh to a pole.
+`re_detail_tri` now requires the textured rendering state before matching.
+
+The headless regression exercises the actual matcher: stale page/UVs on an
+untextured triangle cannot create or extend an instance, while the same data
+on a textured wall still matches. It fails before the fix and passes afterward.
+The rebuilt native app passes selftest, inputtest, and bundletest. An in-game
+visual recheck was unavailable because this session denied graphics access.
+
+
 ## macOS fullscreen presentation (2026-10-17)
 
 A fullscreen test with FBO enabled showed a black display even though the
