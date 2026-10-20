@@ -503,13 +503,10 @@ p103_b88_t P103_C54EE0;
 #endif
 
 static int32_t mul(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b); }   /* imul с переполнением */
-static int32_t iabs(int32_t v) { return v < 0 ? -v : v; }
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 /* uint32 ячейки .data по адресу Game.exe (в native — зарегистрированные таблицы; вне них — 0 / пропуск) */
 static int32_t gd32(uint32_t a) { const void *p = re_ptr(a); return p ? rd32(p) : 0; }

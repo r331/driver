@@ -98,7 +98,7 @@ static void alpha_test(int32_t a) {
   if (f) f(a);
 }
 
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static int16_t rd16s(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 
 /* разложить объект o по классам (общая часть обоих ветвей 004ee8f4) */

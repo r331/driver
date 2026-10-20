@@ -549,7 +549,6 @@ extern uint32_t P101_Hud[12];
 #define P12_00c808d0 (*(float *)((uint8_t *)re_gvar(0x00c808c0u, 12 * 4, (void *)P101_Hud) + 0x10))   /* v2.11: через образ данных (re_gvar), иначе — отдельный native-объект */
 #endif
 #define M12(a,b) Call0040CCB4(a,b)
-int32_t P12_Wrap004046C8(void);
 uint32_t P12_Fn00404F70(void);
 uint32_t P12_Fn00404FAE(void);
 uint32_t P12_Fn004152A7(void);

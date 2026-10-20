@@ -79,9 +79,7 @@ p146_gosub_t P146_GoSub;
 #endif
 
 #define B84(a)   (*(int32_t *)&P56_Blk84[((a) - 0x00c810c0u) / 4])   /* поля внутри P56_Blk84 */
-static int32_t fround(float v) { return (int32_t)lrintf(v); }   /* fistp */
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void    wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static void    wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 static float   i2f(int32_t v) { float f; memcpy(&f, &v, 4); return f; }
 static int32_t f2i(float f) { int32_t v; memcpy(&v, &f, 4); return v; }

@@ -155,9 +155,8 @@ int32_t P106_PartOn;
 #pragma pop_macro("P106_PartOn")
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
 static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 

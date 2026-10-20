@@ -140,8 +140,7 @@ float P134_ScaleE;
 #endif
 #endif
 
-static float rdf(const uint8_t *p) { float f; memcpy(&f, p, 4); return f; }
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static int16_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static int32_t rnd(float f) { P11_00ba52d0 = (int32_t)lrintf(f); return P11_00ba52d0; }   /* fistp → 00ba52d0 */
 static void sync_cam(void) {

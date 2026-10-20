@@ -77,10 +77,9 @@ uint32_t P121_CamW;
 #pragma pop_macro("P121_CamW")
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
 static uint32_t bits(float f) { uint32_t u; memcpy(&u, &f, 4); return u; }
 
 static float oow_at(float z) {

@@ -100,7 +100,7 @@ int32_t P124_LogOn = 1;                      /* .data 00553bbc */
 #pragma pop_macro("P124_LogOn") /*gvi*/
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 
 /* запись пункта меню мотеля (шаг 8): +0 флаги uint16, +2 номер uint16 */
 static uint8_t *motel_item(void) {

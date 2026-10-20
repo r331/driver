@@ -77,8 +77,7 @@ int32_t P141_LadVal;
 #endif
 _Static_assert(sizeof(p141_hsmenu_t) == P141_HSMENU_SIZE && sizeof(p141_hsstr_t) == P141_HSSTR_SIZE, "HS");
 
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
 static int ci_eq(const char *a, const char *b) {
   for (; *a && *b; a++, b++) if (toupper((unsigned char)*a) != toupper((unsigned char)*b)) return 0;

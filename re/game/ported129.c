@@ -98,13 +98,9 @@ static uint8_t *s_box_obj[60];
 /* .data 00551438: высота подъёма частиц по городу (D_00b87e30) */
 static const int32_t k_lift[8] = { 735, 580, 0, 1190, 0, 0, 0, 0 };
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static uint16_t rdu16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
-static int32_t fround(float v) { return (int32_t)lrintf(v); }   /* fistp */
-static int32_t iabs(int32_t v) { return v < 0 ? -v : v; }
 static int32_t M(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b); }   /* imul с переполнением */
 static void add32(uint8_t *p, int32_t d) { wr32(p, (int32_t)((uint32_t)rd32(p) + (uint32_t)d)); }
 static int32_t f12(int32_t v) { return (int32_t)((uint32_t)v + 0x800u) >> 12; }
@@ -394,8 +390,10 @@ void P129_MapCars(int32_t *rec) {
     P11_00ba52d0 = fround(-900.0f * co + 180.0f * s);  pz[3] = z1c - P11_00ba52d0;
     int32_t lx = px[0], hx = px[0], lz = pz[0], hz = pz[0];
     for (int32_t i = 1; i < 4; i++) {
-      if (px[i] < lx) lx = px[i]; if (hx < px[i]) hx = px[i];
-      if (pz[i] < lz) lz = pz[i]; if (hz < pz[i]) hz = pz[i];
+      if (px[i] < lx) lx = px[i];
+      if (hx < px[i]) hx = px[i];
+      if (pz[i] < lz) lz = pz[i];
+      if (hz < pz[i]) hz = pz[i];
     }
     P11_00ba52d0 = fround((float)lx * P63_Scale); int32_t i1 = P11_00ba52d0 - 1;
     P11_00ba52d0 = fround((float)hx * P63_Scale); int32_t xe = P11_00ba52d0;

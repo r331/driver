@@ -208,13 +208,10 @@ int32_t P125_ModelNamesSize;
 #endif
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
-static int32_t fround(float v) { return (int32_t)lrintf(v); }   /* fistp */
 
 #define P125_BLK(off) (*(int32_t *)&P56_Blk84[((off) - 0x00c810c0) / 4])   /* поля внутри P56_Blk84 */
 #define P125_Car0X CARTAB_VAR(int32_t, P125_Car0X, 0x00d07800)
@@ -504,7 +501,6 @@ void P125_ModelName(const char *line, uint16_t num) {
 }
 
 /* ---- 004079aa: палитра (B,G,R,X) → 16 бит; P65_Blend[a][b] — ближайший к среднему цвет ---- */
-static int32_t iabs(int32_t v) { return v < 0 ? -v : v; }
 void P125_BlendTable(const uint8_t *pal, uint32_t *out, uint8_t key, uint8_t fill) {
   for (int32_t i = 0; i < 0x100; i++)
     out[i] = (uint32_t)((pal[i * 4 + 2] >> (P125_ShrR & 0x1f)) << (P125_ShlR & 0x1f) |

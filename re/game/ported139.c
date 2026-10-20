@@ -286,8 +286,7 @@ _Static_assert(sizeof(p139_u6_t) == 0x18, "00c818a0");
 _Static_assert(sizeof(p139_b1000_t) == 0x1000 && sizeof(p139_b400_t) == 0x400 && sizeof(p139_u4_t) == 0x10, "MLADDER");
 
 static const char k_ms_c[] = "D:\\Driver\\Game\\MScript.c";
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 
 /* адрес Game.exe области модуля (в native — один раз в реестр re_ptr) */
 static uint32_t area(uint32_t addr, void *p, uint32_t size, int *done) {

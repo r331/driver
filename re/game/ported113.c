@@ -26,9 +26,7 @@
 #include <string.h>
 #include <math.h>
 
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static const float K_ONE  = 1.0f;      /* .rdata 00546020 */
 static const float K_FIVE = 5.0f;      /* .rdata 00546188 */

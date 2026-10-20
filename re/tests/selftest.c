@@ -6768,7 +6768,8 @@ static int test_real_level(void) {
       uint32_t mi; memcpy(&mi, ent + 4, 4); if (mi < 1126 && P79_ModelTab[mi]) { uint16_t f; memcpy(&f, (uint8_t *)P79_PTR(P79_ModelTab[mi]) + 2, 2); for (int b = 0; b < 16; b++) if (f >> b & 1) fl[b]++; }
     }
     fprintf(stderr, "objects %d pos %g %g %g .. %g %g %g\n", (int)P54_Cnt1E0, mn[0], mn[1], mn[2], mx[0], mx[1], mx[2]);
-    for (int b = 0; b < 16; b++) fprintf(stderr, " f%d:%d", b, fl[b]); fprintf(stderr, "\n");
+    for (int b = 0; b < 16; b++) fprintf(stderr, " f%d:%d", b, fl[b]);
+    fprintf(stderr, "\n");
     ent = (uint8_t *)G6_00D00208; for (int i = 0; i < 5; i++, ent += 0x20) { uint32_t w[8]; memcpy(w, ent, 32); fprintf(stderr, "ent%d: %u %u %g %g %g %g %u %u\n", i, w[0], w[1], *(float*)&w[2], *(float*)&w[3], *(float*)&w[4], *(float*)&w[5], w[6], w[7]); }
   }
   if (P20_Count > 0) { float *b = P80_Boxes[0]; fprintf(stderr, "model0 box: %g %g %g .. %g %g %g\n", b[0], b[1], b[2], b[3], b[4], b[5]); }

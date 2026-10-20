@@ -1,3 +1,6 @@
+/* plat_sys.c (native, SDL2): системная часть plat.h — время (в т. ч. виртуальные часы RE_FIXED_DT), файлы и пути
+   данных игры, окно и полный экран, цикл событий/сообщений вместо WinAPI, MessageBox, выход, обработчик аварий,
+   журнал driver_gfx.log. */
 #if defined(__linux__) && !defined(_GNU_SOURCE)
 #define _GNU_SOURCE   /* v2.10: dladdr, ucontext (RE_CRASH_BT) */
 #endif
@@ -216,9 +219,6 @@ int plat_window_open(const char *t,int w,int h,int fs){
     if (r != 0) plat_gfx_logf("[gfx] рендер не запущен (код %d) — см. строки выше\n", r);
     return r;
 }
-int plat_poll_events(void){ SDL_Event e; while (SDL_PollEvent(&e)) if (e.type==SDL_QUIT) return 0; return 1; }
-int plat_key_down(int sc){ const Uint8 *k = SDL_GetKeyboardState(NULL); return k ? k[sc] : 0; }
-void plat_window_close(void){ plat_render_shutdown(); if (g_gl) SDL_GL_DeleteContext(g_gl); g_gl=0; if (g_win) SDL_DestroyWindow(g_win); g_win=0; SDL_Quit(); }
 #include <time.h>
 void plat_local_hms(int *h,int *m,int *s){ time_t t=time(0); struct tm *l=localtime(&t); *h=l->tm_hour; *m=l->tm_min; *s=l->tm_sec; }
 
@@ -287,7 +287,8 @@ static void crash_sig(int sig, siginfo_t *si, void *uc){
 #else
     (void)si; (void)uc;
 #endif
-    if(g_crash) g_crash(); _Exit(1);
+    if(g_crash) g_crash();
+    _Exit(1);
 }
 void plat_set_crash_handler(void (*fn)(void)){
     g_crash=fn;

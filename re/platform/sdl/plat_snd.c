@@ -1,15 +1,17 @@
+/* plat_snd.c (native, SDL2): буферы звука и программный микшер plat_snd_* (вывод SDL_audio, пустое устройство
+   или запись WAV RE_WAV_OUT); таймеры timeSetEvent на SDL. DirectSound поверх него — plat_dsmix.c, CD-audio — plat_cdaudio.c. */
 #include "../plat.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <SDL.h>
 /* Таблица звуковых буферов + программный микшер (44100 Гц, стерео, S16). volume и pan — как в DirectSound:
-   сотые доли дБ (0 = максимум, -10000 = тишина; pan -10000 лево .. +10000 право). Положение 3D пока хранится, но не используется. */
+   сотые доли дБ (0 = максимум, -10000 = тишина; pan -10000 лево .. +10000 право). 3D-звук — в plat_dsmix.c. */
 static SDL_AudioDeviceID g_dev;
 #define LOCK() do{ if(g_dev) SDL_LockAudioDevice(g_dev); }while(0)
 #define UNLOCK() do{ if(g_dev) SDL_UnlockAudioDevice(g_dev); }while(0)
 #define SND_MAX 256
-typedef struct { void *pcm; int bytes, rate, ch, bits, playing, loop, vol, pitch, pan; double pos; float x, y, z; } snd_t;
+typedef struct { void *pcm; int bytes, rate, ch, bits, playing, loop, vol, pitch, pan; double pos; } snd_t;
 static snd_t snds[SND_MAX];
 int plat_snd_create(const void*p,int b,int r,int c,int bits){
   if(!p||b<=0) return 0;
@@ -24,7 +26,6 @@ void plat_snd_destroy(int h){snd_t*s=S(h); if(s){LOCK(); free(s->pcm); memset(s,
 void plat_snd_play(int h,int l){snd_t*s=S(h); if(s){LOCK(); if(!s->playing) s->pos=0; s->playing=1;s->loop=l; UNLOCK();}}
 void plat_snd_stop(int h){snd_t*s=S(h); if(s){LOCK(); s->playing=0; UNLOCK();}}
 void plat_snd_set(int h,int v,int p,int n){snd_t*s=S(h); if(s){LOCK(); s->vol=v;s->pitch=p>0?p:s->rate;s->pan=n; UNLOCK();}}
-void plat_snd_pos3d(int h,float x,float y,float z){snd_t*s=S(h); if(s){s->x=x;s->y=y;s->z=z;}}
 
 #define SND_OUT_RATE 44100
 void dsm_mix(int16_t *out, int frames); int dsm_active(void);
@@ -50,7 +51,7 @@ void plat_snd_mix(int16_t *out,int frames){
       if(s->pos>=(double)total){ if(s->loop) s->pos-=(double)total; else { s->playing=0; break; } } } }
   dsm_mix(out,frames); }
 static void SDLCALL audio_cb(void*u,Uint8*st,int len){ (void)u; plat_snd_mix((int16_t*)st,len/4); }
-int plat_snd_open(void){
+static int plat_snd_open(void){
   if(g_dev) return 1;
   if(SDL_InitSubSystem(SDL_INIT_AUDIO)<0) return 0;
   SDL_AudioSpec want; SDL_zero(want); want.freq=SND_OUT_RATE; want.format=AUDIO_S16SYS; want.channels=2; want.samples=1024; want.callback=audio_cb;
@@ -67,7 +68,8 @@ static void wav_hdr(void){ if(!g_wav) return; uint32_t data=(uint32_t)(g_wav_fra
   long cur=ftell(g_wav); fseek(g_wav,0,SEEK_SET); fwrite(h,1,44,g_wav); fseek(g_wav,cur,SEEK_SET); fflush(g_wav); }
 static void wav_close(void){ if(g_wav){ wav_hdr(); fclose(g_wav); g_wav=NULL; } }
 void plat_snd_open_game(void){
-  if(g_snd_game) return; g_snd_game=1;
+  if(g_snd_game) return;
+  g_snd_game=1;
   const char *w=getenv("RE_WAV_OUT");
   if(w&&*w){ g_wav=fopen(w,"wb"); if(g_wav){ uint8_t z[44]={0}; fwrite(z,1,44,g_wav); g_wav_on=1; g_wav_ms0=plat_time_ms(); atexit(wav_close);
       fprintf(stderr,"[snd] RE_WAV_OUT %s\n",w); } return; }
@@ -89,11 +91,6 @@ void plat_snd_pump(void){
 }
 /* v2.29: для selftest — включить пустое устройство с часами, отстающими на ms (ms < 0 — выключить) */
 void plat_snd_null_for_test(int ms){ if(ms<0){ g_wav_on=0; g_wav_frames=0; return; } g_wav=NULL; g_wav_frames=0; g_wav_ms0=(uint64_t)plat_time_ms()-(uint64_t)ms; g_wav_on=1; }
-void plat_snd_close(void){ if(g_dev){ SDL_CloseAudioDevice(g_dev); g_dev=0; } }
-static int g_cd_track=0;
-int plat_cd_play(int t){ if(t<1||t>99) return 0; g_cd_track=t; return 1;}
-void plat_cd_stop(void){ g_cd_track=0; }
-int plat_cd_current(void){ return g_cd_track; }
 
 /* --- CD-аудио: v2.22 — эмуляция в plat_cdaudio.c; таймеры на SDL_AddTimer --- */
 #include <stdlib.h>

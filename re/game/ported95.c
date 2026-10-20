@@ -487,9 +487,7 @@ p95_i6_t P95_CrossTab = { -2, -3, 2, 3, 2, -3 };                     /* 00573f50
 #pragma pop_macro("P95_CrossTab") /*gvi*/
 #endif
 
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
-static float rdf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 static void wrfu(uint32_t *p, float v) { memcpy(p, &v, 4); }
 static int32_t ftol(double v) { return (int32_t)v; }   /* __ftol: усечение к нулю */

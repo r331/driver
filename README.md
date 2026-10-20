@@ -48,6 +48,8 @@ python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv'))
 
 ## Структура каталогов
 
+Как устроен код и как связаны две цели сборки — [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md); указатель модулей `re/game/` — [docs/MODULES.md](docs/MODULES.md).
+
 | Каталог | Что внутри |
 |---|---|
 | `re/game/` | перенесённые модули игры на C (`ported*.c`, меню, Director, сгенерированные таблицы `.data` Game.exe); без WinAPI |
@@ -55,7 +57,7 @@ python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv'))
 | `re/platform/win32/` | hook-сборка: прокси `DINPUT.dll`, перехват функций Game.exe (JMP rel32), `install.c` — список подменённых функций |
 | `re/platform/native/` | точка входа native (`main.c`), заглушки неперенесённого, связки, замены MSVC CRT |
 | `re/tests/` | самопроверка перенесённых модулей (`driver --selftest`, запускается через ctest), тест рендера и звука |
-| `docs/` | `functions.csv` (все функции, имена, модули, статус), `binary-info.md`, планы и журнал переноса |
+| `docs/` | `ARCHITECTURE.md` (карта кода), `MODULES.md` (указатель модулей), `DEAD_CODE_AUDIT.md` (подозрительное, оставленное на месте), `functions.csv` (все функции, имена, модули, статус), `binary-info.md`, планы и журнал переноса |
 | `tools/` | Python-генераторы: таблицы данных из Game.exe (`gen_*.py`), разметка thunk-ов, разбиение на модули, `pedump.py` |
 | `scripts/` | скрипты Ghidra (экспорт функций и псевдо-C, применение имён, перекрёстные ссылки строк) и их запуск |
 | `src/` | псевдо-C из Ghidra, разложенный по модулям оригинала (`Director.c`, `MScript.c`, `frontend/` …) — справочный материал, в сборку не входит |

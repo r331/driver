@@ -427,13 +427,10 @@ void P97_InitConsts(void) {
 #endif
 }
 
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static uint16_t rd16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(uint8_t *p, uint16_t v) { memcpy(p, &v, 2); }
-static float rdf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
 static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
-static int32_t fround(float v) { return (int32_t)lrintf(v); }                   /* fistp (округление к ближайшему) */
 static const char *str_at(uint32_t a) { const char *s = (const char *)re_ptr(a); return s ? s : ""; }
 static uint8_t *link(const uint8_t *field) { return (uint8_t *)re_rd_ptr(field); }  /* поле-указатель записи */
 

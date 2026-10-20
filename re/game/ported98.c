@@ -743,15 +743,11 @@ p98_b148_t P98_M4900;
 #pragma pop_macro("P98_M4900")
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static uint32_t fbits(float f) { uint32_t v; memcpy(&v, &f, 4); return v; }
-static int32_t fround(float v) { return (int32_t)lrintf(v); }                   /* fistp */
-static int32_t iabs(int32_t v) { return v < 0 ? -v : v; }
 static uint8_t *link(const uint8_t *field) { return (uint8_t *)re_rd_ptr(field); }
 static int32_t dist8(int32_t dx, int32_t dz) { dx = iabs(dx); dz = iabs(dz); return dx < dz ? dz + dx / 2 : dx + dz / 2; }
 static void cam_set(float x, float y, float z) { P44_CamX = x; P44_CamY = y; P44_CamZ = z;

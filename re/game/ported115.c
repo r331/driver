@@ -59,8 +59,7 @@ p115_i4_t P115_Tgt;
 #pragma pop_macro("P115_Tgt")
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static float f_of(int32_t i) { float f; memcpy(&f, &i, 4); return f; }
 static int32_t i_of(float f) { int32_t i; memcpy(&i, &f, 4); return i; }

@@ -165,8 +165,7 @@ int32_t P105_MusLimit;
 #pragma pop_macro("P105_MusLimit")
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 
 /* ---- 00407c4c: LfbLock(1); экран меню 0057b740 → LFB функцией пикселя 0057b73c; пункты меню; Unlock ---- */
 int32_t P105_LfbToMenu(void) {

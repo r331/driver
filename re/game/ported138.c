@@ -185,8 +185,7 @@ p138_s40_t P138_CamsPath;
 #  define P138_STD
 #endif
 
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void    wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static const char k_rep_c[] = "D:\\Driver\\Game\\replays.c";
 
 /* ---- 00520278 ---- */

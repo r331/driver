@@ -111,10 +111,8 @@ int32_t P116_SndB2035C;
 #pragma pop_macro("P116_SndB2035C")
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static int32_t f2b(float f) { int32_t v; memcpy(&v, &f, 4); return v; }
 static const float SNAP = 1048576.0f;     /* .rdata 0054607c */

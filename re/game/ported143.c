@@ -97,10 +97,8 @@ static const float   k_553848 = 1.0f;     /* .data 00553848: масштаб ра
 static const int32_t k_553854 = 1;        /* .data 00553854: 1 — проверка видимости треугольниками, 0 — через LFB */
 
 static float u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
-static float rdf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
 static int32_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static uint32_t rdu16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(uint8_t *p, int32_t v) { int16_t s = (int16_t)v; memcpy(p, &s, 2); }

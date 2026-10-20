@@ -187,14 +187,9 @@ int16_t P99_RoadPick;
 #pragma pop_macro("P99_RoadPick")
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static int32_t iabs(int32_t v) { return v < 0 ? -v : v; }
-static int32_t fround(float v) { return (int32_t)lrintf(v); }                   /* fistp */
 #define CAR(i) (&P99_Cars[(i)])
-
-void P99_InitConsts(void) { }
 
 /* ---- 00506a07: точки мира (int x, y, z, —) → координаты радара (x, —, z), поворот на курс машины S_00D11878 ---- */
 void P99_RadarXform(const int32_t *src, int32_t *dst, int32_t n) {
@@ -716,7 +711,6 @@ p99_rgb_t P99_Rgb8;
 #pragma pop_macro("P99_Rgb8")
 #endif
 
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }

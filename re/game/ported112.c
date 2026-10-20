@@ -58,11 +58,10 @@ int32_t P112_Wanted;
 #else
 #  define P112_STD
 #endif
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 static const float K_ZERO = 0.0f;      /* .rdata 00546024 */
 static const float K_NEAR = 0.3f;      /* .rdata 00546164 */
 

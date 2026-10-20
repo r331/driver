@@ -161,8 +161,7 @@ double P108_FmvLen;
 #pragma pop_macro("P108_FmvLen")
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static const float OOW_LO = 0.015625f;   /* 0x3c800000 */
 static const float SNAP = 1048576.0f;    /* .rdata 0054607c */
 

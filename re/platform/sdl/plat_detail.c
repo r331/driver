@@ -298,8 +298,10 @@ void re_detail_tri(const void *pa, const void *pb, const void *pc) {
             in2->umin = in2->vmin = 1e9; in2->umax = in2->vmax = -1e9;
         }
         for (int i = 0; i < 3; i++) {
-            if (uu[i] < in2->umin) in2->umin = uu[i]; if (uu[i] > in2->umax) in2->umax = uu[i];
-            if (vv[i] < in2->vmin) in2->vmin = vv[i]; if (vv[i] > in2->vmax) in2->vmax = vv[i];
+            if (uu[i] < in2->umin) in2->umin = uu[i];
+            if (uu[i] > in2->umax) in2->umax = uu[i];
+            if (vv[i] < in2->vmin) in2->vmin = vv[i];
+            if (vv[i] > in2->vmax) in2->vmax = vv[i];
             in2->col[0] += v[i]->r; in2->col[1] += v[i]->g; in2->col[2] += v[i]->b; in2->ncol++;
         }
         in2->ntri++;

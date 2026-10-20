@@ -89,7 +89,7 @@ int32_t P131_Skip;
 #endif
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static const float SNAP = 1048576.0f;     /* .rdata 0054607c */
 static const float NEAR_Z = 50.0f;        /* .rdata 0054609c */
 static const float SPL_FAR = 1536.0f;     /* .rdata 00546888 */
@@ -333,7 +333,6 @@ void P131_RainDraw(void) {
 /* ---- 004fef26: модель с объектами миссии — записи 0x24 таблицы города (адреса групп .data 005734ac, число P103_MObjN):
    +0 тип, +4 модель, +0xc..+0x14 сдвиг (float), +0x1c/+0x1e/+0x20 int16. __ftol(x + z) — фаза качания. ---- */
 static int16_t rd16s(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
 static int32_t gd32(uint32_t a) { const void *p = re_ptr(a); return p ? rd32(p) : 0; }
 static float sway(float x, float z) {
   int32_t t = (int32_t)(x + z);

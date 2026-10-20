@@ -109,9 +109,7 @@
 #include "ported52.h"
 #include "ported134.h"
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
 #define NZ ((int32_t)(RE_OOW_N))
 
@@ -264,7 +262,6 @@ void P135_SmokeObj(uint8_t *o) {
 }
 
 /* ---- 004ba81f ---- */
-static int32_t iabs(int32_t v) { return v < 0 ? -v : v; }
 void P135_SixBeam(const uint32_t *rec) {
   P102_SixFlag = P62_Frame;
   int32_t d = ((int32_t)(rec[0] - (uint32_t)P59_AngB + 0x800) & 0xfff) - 0x800;

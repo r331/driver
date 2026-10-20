@@ -209,7 +209,7 @@ p145_splash_t P145_Splash;
 #endif
 
 static float u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
-static int32_t fround(float v) { return (int32_t)lrintf(v); }   /* fistp */
+#include "memrw.h"
 
 /* (*01270d6c)(0,1,1) = grTexFilterMode — по имени из таблицы Glide (как ported124) */
 static void tex_filter(int32_t a, int32_t b, int32_t c) {

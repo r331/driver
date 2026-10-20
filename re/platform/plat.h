@@ -35,9 +35,6 @@ int plat_path_native(const char *path, char *out, int size);   /* 1 — все �
 void plat_frame_tick(const char *where);
 /* --- window & input --- */
 int plat_window_open(const char *title, int w, int h, int fullscreen);
-int plat_poll_events(void); /* returns 0 on quit request */
-int plat_key_down(int scancode);
-void plat_window_close(void);
 /* --- render (declared; SDL/OpenGL impl in sdl/plat_render.c) --- */
 typedef struct { float x, y, z, rhw; uint32_t color, specular; float u, v; } plat_vertex;
 int plat_tex_create(int w, int h, const uint32_t *rgba);
@@ -104,14 +101,8 @@ void plat_snd_destroy(int h);
 void plat_snd_play(int h, int loop);
 void plat_snd_stop(int h);
 void plat_snd_set(int h, int volume, int pitch_hz, int pan);
-void plat_snd_pos3d(int h, float x, float y, float z);
 /* volume/pan как в DirectSound (сотые дБ). Микшер: 44100 Гц, стерео S16; plat_snd_mix пригоден для тестов без устройства. */
 void plat_snd_mix(int16_t *out_stereo, int frames);
-int  plat_snd_open(void);                                /* SDL_audio, 1 = ок */
-void plat_snd_close(void);
-int  plat_cd_play(int track);
-void plat_cd_stop(void);
-int  plat_cd_current(void);
 /* --- CD-аудио (MCI cdaudio, формат времени TMSF) и aux-громкость; таймеры (timeSetEvent). Время/позиции — упакованные TMSF как у MCI.
    SDL: учётная заглушка (plat_cd_stub_*), hook: winmm. --- */
 int      plat_cd_open(void *hwnd);                    /* 1 = ок, 0 = не открылся, -1 = формат времени не принят (устройство закрыто) */
@@ -274,7 +265,6 @@ int32_t plat_dd_unlock(void *surf);                                       /* Unl
    (записи r,g,b,flags) или 0 — обычная загрузка. Unlock снимает и картинку, и пометку. */
 typedef int (*plat_pal8_provider)(int page, uint64_t key, const uint8_t *pal_rgba);
 void    plat_dd_attach_hd(void *surf, uint32_t *rgba, int w, int page, int pal);
-int     plat_dd_hd_page(void *surf, int *pal);
 void    plat_dd_tag_page8(void *surf, int page, uint64_t key);
 void    plat_dd_set_pal8_provider(plat_pal8_provider fn);
 void    plat_dd_hd_stats(int *attached, int *uploaded, int *rejected, int *pal8_binds);

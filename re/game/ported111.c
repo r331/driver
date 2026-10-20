@@ -89,10 +89,8 @@ uint32_t P111_CopFlare;
 #else
 #  define P111_STD
 #endif
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, uint32_t v) { memcpy(p, &v, 4); }
 static const float SNAP = 1048576.0f;   /* .rdata 0054607c */
 static const float Z_FAR = 45000.0f;    /* .rdata 00546030 */
 

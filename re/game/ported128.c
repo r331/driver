@@ -129,14 +129,10 @@ int32_t P128_FreeCamLock;
 #endif
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static uint16_t rdu16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
 static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
-static int32_t fround(float v) { return (int32_t)lrintf(v); }   /* fistp */
-static int32_t iabs(int32_t v) { return v < 0 ? -v : v; }
 #define P128_CAR(i)  ((uint8_t *)&P99_Cars[(i)])
 static uint8_t *tcar(int32_t i) {
 #ifndef RE_HOOK_BUILD

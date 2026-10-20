@@ -65,9 +65,8 @@ p114_rgb_t P114_Black;
 #pragma pop_macro("P114_Black")
 #endif
 
-static int32_t rd32(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
+#include "memrw.h"
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static float rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 
 /* ---- 0041d53c: загрузка мип-уровня (режим D3D 1): 8-битная текстура при включённых списках — привязать узел палитры к слоту ---- */

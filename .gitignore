@@ -1,0 +1,15 @@
+# Каталоги сборки (README, re/build.sh, CI)
+/build/
+/build-*/
+/re/build/
+/re/build-*/
+
+# Что пишут игра и selftest в рабочий каталог при запуске
+debug.log
+driver_gfx.log
+render_test.png
+render_*.png
+
+# Python
+__pycache__/
+*.pyc

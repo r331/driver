@@ -169,8 +169,7 @@ int32_t P142_B2F304;
 #define W(x)  ((int32_t)(uint32_t)(int64_t)(x))
 #define L(x)  ((int64_t)(x))
 static int32_t dv(int32_t v, int sh) { return (int32_t)((uint32_t)v + ((uint32_t)(v >> 31) & ((1u << sh) - 1u))) >> sh; }  /* v / 2^sh к нулю */
-static int32_t rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static void wr32(uint8_t *p, int32_t v) { memcpy(p, &v, 4); }
+#include "memrw.h"
 static void add32(uint8_t *p, int32_t v) { wr32(p, W(L(rd32(p)) + v)); }
 static int32_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(uint8_t *p, int32_t v) { int16_t s = (int16_t)v; memcpy(p, &s, 2); }
