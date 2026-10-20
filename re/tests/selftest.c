@@ -2519,7 +2519,7 @@ static int test_p62(void) {
   { uint8_t p[0x100]; memset(p, 0, sizeof p); P62_ParticleSet(p, 3, 9, 0x400, 1);
     CK(rd_i32(p, 0x24) == 9 && rd_i32(p, 0x40) == 1 && rd_i32(p, 0xc) == 0x480 && p[4] == 3);
     memset(p, 0, sizeof p); P62_Alt = 0; int32_t fl = 0xfffff7ff; memcpy(p + 0xc, &fl, 4); P62_ParticleInit(p, t62_car);
-    CK(p[0] == 1 && rd_i32(p, 0xc) == (int32_t)(0xfffff7ffu & 0xfffffbffu | 0x80) && p[4] == 3 && rd_i32(p, 0x40) == 1);
+    CK(p[0] == 1 && rd_i32(p, 0xc) == (int32_t)((0xfffff7ffu & 0xfffffbffu) | 0x80) && p[4] == 3 && rd_i32(p, 0x40) == 1);
     memset(p, 0, sizeof p); P62_Alt = 1; P62_ParticleInit(p, t62_car);
     float fa, fb; memcpy(&fa, p + 0x74, 4); memcpy(&fb, p + 0x7c, 4);
     CK((rd_i32(p, 0xc) & 0x800) && fa == (float)(P59_Sin[0x400] >> 7) && fb == (float)(P59_Sin[0x800] >> 7) && rd_i32(p, 0x78) == (int32_t)0xc25c0000); }
@@ -2529,6 +2529,7 @@ static int test_p62(void) {
 /* ported65 */
 static int test_p65(void) {
   int f = 0;
+#undef CK
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p65 fail line %d\n",__LINE__); } } while (0)
   /* токены */
   char line[64] = "  foo, 12;bar\n";
@@ -4337,7 +4338,7 @@ static int test_p97(void) {
   { P48_F0 d0 = P48_Drv00, d8 = P48_Drv08, dc = P48_Drv0C; P48_F1 d2c = P48_Drv2C, d40 = P48_Drv40; P48_F3 d38 = P48_Drv38; P48_F4 d54 = P48_Drv54;   /* 0048bbd5 */
     FnV2 g14 = G6_00BDCB14; FnV1 g18 = G6_00BDCB18, g20 = G6_00BDCB20; P68_FLoad dl = P68_DrvLoad;
     P97_SndDrvInit();
-    CK(P48_Drv00 == (P48_F0)P50_SoundShutdown && P48_Drv54 == (P48_F4)P49_SetVel3D && P97_DrvL == (re_fn_t)P49_GetStatus && P68_DrvLoad == NULL);
+    CK(P48_Drv00 == (P48_F0)P50_SoundShutdown && P48_Drv54 == (P48_F4)(void (*)(void))P49_SetVel3D && P97_DrvL == (re_fn_t)P49_GetStatus && P68_DrvLoad == NULL);
     P48_Drv00 = d0; P48_Drv08 = d8; P48_Drv0C = dc; P48_Drv2C = d2c; P48_Drv40 = d40; P48_Drv38 = d38; P48_Drv54 = d54;
     G6_00BDCB14 = g14; G6_00BDCB18 = g18; G6_00BDCB20 = g20; P68_DrvLoad = dl; }
   { static uint8_t nodes[2][0x24], objs[3][0x60]; uint8_t *sh = P15_ListHead, *sc = P15_ListCur;   /* список скрипта */
@@ -4781,6 +4782,7 @@ static int test_p109(void) {
 
 static int test_p110(void) {
   int f = 0;
+#undef CK
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p110 fail line %d\n",__LINE__); } } while (0)
   CK(P110_CellTab[0] == 7 && P110_CellTab[30] == 0x1000 && P110_SelRep == 10 && P110_IconKX == 1.0f);
   P110_RadarGrid();
@@ -4975,6 +4977,7 @@ static int t111_n;
 static void t111_r(const p85_rv *a, const p85_rv *b, const p85_rv *c) { (void)a; (void)b; (void)c; t111_n++; }
 static int test_p117(void) {
   int f = 0;
+#undef CK
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p117 fail line %d\n",__LINE__); } } while (0)
   /* .data меню паузы зарегистрирована: P97_SndMenu внутри P117_MenuA, пункт 0 меню звука — строка 156 */
   CK(re_ptr(0x00574f38u) == (void *)P97_SndMenu && re_ptr(0x00575370u) == (void *)&P117_MenuC[0] && re_addr(&P117_MenuB[0x14]) == 0x0057509cu);
@@ -6094,7 +6097,7 @@ static int test_p142(void) {
     c[0x331] = 0; P142_CopNoDmg = 0; for (int i = 0; i < 6; i++) { int32_t d = 2000; memcpy(car + 0x11c + i * 4, &d, 4); }
     v = 77; memcpy(car + 0xf8, &v, 4); P142_CopDrive(rec);
     memcpy(&v, car + 0xf8, 4); CK(v == 0 && c[0x331] == 1 && c[0x10] == 12000);
-    P142_CopDrive(NULL == rec ? rec : (rec[5] = 9, rec)); /* rec[5] вне 1..8 — выход */
+    rec[5] = 9; P142_CopDrive(rec); /* rec[5] вне 1..8 — выход */
     memcpy(car, save, 0x148); memcpy(c, csave, sizeof csave); P56_B268 = b268; P98_C824A0 = c824; P142_CopNoDmg = nd; }
   /* 004dacee: без объектов — только счётчик 00d0dd7c */
   { int32_t n = G6_00D0DDC0, k = P102_D0DD7C; uint8_t e14 = P95_B87E14;
@@ -6486,7 +6489,7 @@ static int test_p151(void) {
     if (strcmp(P33_GlideName(i), "_grSstWinOpen@28") == 0) wo = P33_GlideProc(i);
     if (strcmp(P33_GlideName(i), "_grSstSelect@4") == 0) sel = P33_GlideProc(i); }
   CK151(clr == (void *)P54_ClearBuffers && wo == (void *)P151_WinOpen && sel == (void *)NoopFn0041ed7c);
-  CK151(P85_BlendFn == (p85_blend_fn)P23_SetBlendMode && P86_TexSrc == (p86_texsrc_fn)P53_SetTexSource && P115_RasterD == (p85_raster_fn)P76_TriB2);
+  CK151(P85_BlendFn == (p85_blend_fn)(void (*)(void))P23_SetBlendMode && P86_TexSrc == (p86_texsrc_fn)(void (*)(void))P53_SetTexSource && P115_RasterD == (p85_raster_fn)P76_TriB2);
   CK151(FnPtr01270E80 == NULL);                            /* метка 0041e3b0 — не функция, в native не зарегистрирована */
   t151_restore(&z);
   /* 00420038: устройство HAL, все проверки проходят; объекты освобождены */
@@ -6766,7 +6769,7 @@ static int test_real_level(void) {
     fprintf(stderr, "objects %d pos %g %g %g .. %g %g %g\n", (int)P54_Cnt1E0, mn[0], mn[1], mn[2], mx[0], mx[1], mx[2]);
     for (int b = 0; b < 16; b++) fprintf(stderr, " f%d:%d", b, fl[b]);
     fprintf(stderr, "\n");
-    ent = (uint8_t *)G6_00D00208; for (int i = 0; i < 5; i++, ent += 0x20) { uint32_t w[8]; memcpy(w, ent, 32); fprintf(stderr, "ent%d: %u %u %g %g %g %g %u %u\n", i, w[0], w[1], *(float*)&w[2], *(float*)&w[3], *(float*)&w[4], *(float*)&w[5], w[6], w[7]); }
+    ent = (uint8_t *)G6_00D00208; for (int i = 0; i < 5; i++, ent += 0x20) { uint32_t w[8]; float wf[4]; memcpy(w, ent, 32); memcpy(wf, ent + 8, 16); fprintf(stderr, "ent%d: %u %u %g %g %g %g %u %u\n", i, w[0], w[1], wf[0], wf[1], wf[2], wf[3], w[6], w[7]); }
   }
   if (P20_Count > 0) { float *b = P80_Boxes[0]; fprintf(stderr, "model0 box: %g %g %g .. %g %g %g\n", b[0], b[1], b[2], b[3], b[4], b[5]); }
   return r == 1 && bad == 0 && P20_Count > 0 ? 0 : 1;

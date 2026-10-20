@@ -512,7 +512,7 @@ int32_t AllocSlot00492508(void) {
     if (S_01139A34 == 8) r = -1; else { r = S_01139A34 + 0x14; S_01139A34++; }
     return r;
 }
-uint32_t PackRGB00503ECC(uint8_t* p) { return (uint32_t)I32(p, 0x14) << 16 | (uint32_t)I32(p, 0x10) << 8 | U32(p, 0xc); }
+uint32_t PackRGB00503ECC(const uint8_t* p) { return (uint32_t)I32(p, 0x14) << 16 | (uint32_t)I32(p, 0x10) << 8 | U32(p, 0xc); }
 int32_t IsKeyOnly004E38B4(void) { return !(S_00B31E42 == 0 || S_00B31E40 != 0); }
 int32_t IsKeyOnly004E38D9(void) { return !(S_00B31E43 == 0 || S_00B31E41 != 0); }
 int32_t ExchangeTable00522F2A(int32_t i, int32_t v) { int32_t o = S_00BDCD00[i]; S_00BDCD00[i] = v; return o; }

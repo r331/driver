@@ -21,6 +21,11 @@
      машина вне 0..65 — выход; 005181da/0051879f/00518bbc/00517d58 — отсутствующий файл не читается, число PINGS ≤ 0x800, буферы — адреса
      re_ptr_register_dyn в P100_RecPtr; 004fbfad — файл 00c812f0 в native не открыт (как P120), прочитанный TRAIL.DAT хранится в модуле;
      004f4180 — P77_LevelName — родной указатель на P138_LevBuf, обнуление 00c810c0..00c812d0 обновляет и native-псевдонимы внутри. */
+#if defined(__GNUC__) && !defined(__clang__)
+/* Paths here are built with bounded snprintf into fixed buffers (Game.exe used unbounded sprintf); an over-long
+   name is truncated on purpose.  The warning is silenced rather than the buffers resized, so the code is unchanged. */
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
 #include "ported150.h"
 #include "ported139.h"
 #include "ported138.h"

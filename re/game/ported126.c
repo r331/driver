@@ -18,6 +18,11 @@
 /* ported126.c (English overview of the notes above) — FLAT.D3D palette-list loading, the player start
    position (incl. CHASE replays), water drops near cell objects, BMP screenshots, debug keys, spawn
    points, a fading full-screen bitmap, wheel smoke when a wheel leaves the ground, and kerb debris. */
+#if defined(__GNUC__) && !defined(__clang__)
+/* Paths here are built with bounded snprintf into fixed buffers (Game.exe used unbounded sprintf); an over-long
+   name is truncated on purpose.  The warning is silenced rather than the buffers resized, so the code is unchanged. */
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
 #include "ported126.h"
 #include "unported.h"
 #include "engine.h"
