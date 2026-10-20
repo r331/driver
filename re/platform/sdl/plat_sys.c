@@ -11,6 +11,7 @@
 #include "../plat.h"
 #include "plat_gfx.h"
 #include "../native/diagnostics.h"
+#include "../native/reprobe.h"
 #include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -581,6 +582,11 @@ void plat_frame_tick(const char *where) {
               uint32_t *px = (w > 0 && h > 0) ? malloc((size_t)w * h * 4) : NULL;
               if (px) { if (plat_render_readback(px) == 0) png_write_rgba(nm, px, w, h); free(px); }
           } }
+        { /* RE_PROBE (platform/native/reprobe.h): per-frame probe; a returned path asks for a screenshot */
+          const char *pp = re_probe_frame(g_frames);
+          if (pp && g_win) { int w = 0, h = 0; SDL_GL_GetDrawableSize(g_win, &w, &h);
+            uint32_t *px = (w > 0 && h > 0) ? malloc((size_t)w * h * 4) : NULL;
+            if (px) { if (plat_render_readback(px) == 0) png_write_rgba(pp, px, w, h); free(px); } } }
         const char *sf = getenv("RE_SHOT_FIRST");
         if (!g_shot_done && sf && *sf == '1') frame_shot();
         if ((maxf > 0 && g_frames >= maxf) || (g_exit_at > 0 && g_frames >= g_exit_at)) {

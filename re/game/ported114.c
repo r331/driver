@@ -71,6 +71,9 @@ p114_rgb_t P114_Black;
 #endif
 
 #include "memrw.h"
+#ifndef RE_HOOK_BUILD
+#include "../platform/native/reprobe.h"
+#endif
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 
@@ -490,6 +493,7 @@ int32_t P114_MenuStep(uint32_t tbl, int32_t *cur) {
     static int nc = 0; if (tr && ((nc++ % 30) == 0 || was != (uint32_t)*cur || ret != 0 || P34_Keys[0xcd] || P34_Keys[0x1c]))
       fprintf(stderr, "[menu] MenuStep %08x: пункт %u → %d, ret=%d, 7e4c=%d keys cd=%02x/%02x 1c=%02x/%02x\n", tbl, was, *cur, ret,
               (int)D_005f7e4c, P34_Keys[0xcd], P34_KeysPrev[0xcd], P34_Keys[0x1c], P34_KeysPrev[0x1c]); }
+  re_probe_menu(tbl, *cur);   /* RE_PROBE (reprobe.h): read-only, returns at once when unset */
 #endif
   return ret;
 }
