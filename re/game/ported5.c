@@ -624,16 +624,12 @@ void StartTimer004086B4(void) {
     MenuCounter5D577C = 0;
     D_0054a144 = Call00528221(1000, 1, 0x408710);
 }
-/* Remaining one-liners: Call3_0040C455 (three menu calls, a == 0 clears 00b87e38), Chain0048AC0D (FMV
-   stop + release = P50_FmvStopRelease), Chain004D5FFC (stop all sound + 0052436a), PlayTrack004D7B60
+/* Remaining one-liners: Call3_0040C455 (three menu calls, a == 0 clears 00b87e38), Chain004D5FFC (stop all sound + 0052436a), PlayTrack004D7B60
    (replay the current CD track), Pack565Bytes, Fwd* (forwarders), Copy400 (copy 0x400 bytes from a to
    01271a80), LoadTrail* (load TRAIL.DAT). */
 void Call3_0040C455(int32_t a, int32_t b) {
     Call0040C165(); if (a == 0) UiVar00B87E38 = 0;
     Call0040C20B(b); Call0040BF50();
-}
-void Chain0048AC0D(void) {
-    Call0048B65D(); Call0048B568();
 }
 void Chain004D5FFC(void) {
     Call005237B1(); Call0052436A();
@@ -646,9 +642,6 @@ void Pack565Bytes004BF452(uint8_t r, uint8_t g, uint8_t b) {
 }
 void Fwd004D262C(int32_t a) {
     Call004D28A3(a);
-}
-void Fwd004EAFCF(int32_t a) {
-    Call004EAFE0(a);
 }
 void Fwd00513CF9(int32_t a) {
     Call00514A47(a);

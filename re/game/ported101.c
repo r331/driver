@@ -1170,14 +1170,7 @@ void P101_Proj(float *v) {
   v[4] = py + P43_OffY - P43_Half;
 }
 
-/* Fills rows of a 640-byte-pitch buffer with colour c. */
-/* ---- 005291ed: заливка rows строк (шаг 640 байт) по w байт блоками 32 байтом c ---- */
-void P101_FillRows(uint8_t *dst, int32_t w, int32_t rows, uint8_t c) {
-  uint32_t v = (uint32_t)c * 0x01010101u;
-  for (; rows > 0; rows--, dst += 0x280)
-    for (int32_t x = 0; x < w; x += 0x20)
-      for (int32_t j = 0; j < 8; j++) memcpy(dst + x + j * 4, &v, 4);
-}
+/* 005291ed (row fill) is ported once, as P152_FillRows (ported152.c). */
 
 /* Converts rows of 640 palette indices to 16-bit pixels. */
 /* ---- 00529253: строки 640 индексов → 16-битные пиксели по P101_PalLfb (шаг строки P100_LfbPitch) ---- */

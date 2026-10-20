@@ -102,7 +102,7 @@ void P16_StepParticles(void) {
 #include "missionstate.h"
 #define MISSION_FAILED  MSTATE_FAILED
 
-/* P16_IdleTimer — Game.exe 004e12e4 (same function as P14_Fn004E12E4).  Flipped-car check: P16_Level is in fact
+/* P16_IdleTimer — Game.exe 004e12e4 (single port; the ported14.c copy was removed).  Flipped-car check: P16_Level is in fact
    the player's CAR_WHEELS_DOWN (00d078b0 = car 0 + 0xf0, the name is historical).  While fewer than 3 wheels touch
    the ground and neither P16_FlagA (00b5a778) nor P16_FlagB (00b87ee4) is set, P16_IdleCounter counts ticks; with
    3+ wheels down it is reset.  Past 300 ticks (6 s at 50 ticks/s; 600 when the cheat options 00bdfa58 / 00bdfa44

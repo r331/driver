@@ -20,7 +20,7 @@
 #define MREASON_TIME_OUT   1   /* a script timer reached 0 (P114_Timer), the chase marker was shot down (P140_MrkFly),
                                   or the script referenced a missing chunk (P58_FindChunk) */
 #define MREASON_FAILED     2   /* the car stayed with fewer than 3 wheels on the ground for 300 ticks (600 with the
-                                  cheat options 00bdfa44 / 00bdfa58) — P14_Fn004E12E4 / P16_IdleTimer, i.e. flipped or
+                                  cheat options 00bdfa44 / 00bdfa58) — P16_IdleTimer, i.e. flipped or
                                   stuck — and the script's own fail command (P127 set_fail) */
 #define MREASON_LOST       3   /* the target got away: too far from the target car (P133_TrafficTick, > 0x16b) or a script
                                   object left its range (P98_ScriptRange) */

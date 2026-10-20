@@ -32,32 +32,23 @@ void CallIf424A02(void);
 void CallIfD14EE4(void);
 void CameraDump(void);
 void CameraFrameDistance(void);
-void Chain0048AC0D(void);
 void Chain004D5FFC(void);
 void ChangeCamera(void);
 void ChangeTripodCamera(void);
 void ClampCameraHeight(void);
 void Clear110E180(void);
 void Clear2C3B8(void);
-void Clear54A8EC_IfZero(void);
-void Clear54A8FC_IfZero(void);
-void Clear54A90C_IfZero(void);
-void Clear54A91C_IfZero(void);
-void Clear54A92C_IfZero(void);
-void Clear54A94C_IfZero(void);
 void ClearDirectorTable(void);
 void ClearDirectorTables(void);
 void ClearEntry_004BF8A1(void);
 void ClearField2C_00502680(void);
 void ClearFlagByte0048FBBA(void);
-void ClearHandles005223BE(void);
 void ClearPair004D6D68(void);
 void ClearPairs004D6C20(void);
 void ClearSlots004D61CF(void);
 void ClearSlots004D8C23(void);
 void ClearTables_004AB780(void);
 void Copy400_00407C27(void);
-void Copy54A0C0(void);
 void Copy54A838(void);
 void CopyBDF984(void);
 void CopyShort9_005278FB(void);
@@ -82,8 +73,6 @@ void CycleDec0040F364(void);
 void CycleInc0040E918(void);
 void CycleInc0040F3AD(void);
 void Dec145934(void);
-void Dec5759A4Min0(void);
-void DecB87E4CMin0(void);
 void DeleteCamera(void);
 void DeleteWaypointFile(void);
 void Dev00424633(void);
@@ -110,7 +99,6 @@ void DrvCall004246D1(void);
 void DrvSetMode0042655A(void);
 void DumpWaypoints(void);
 void ExchangeTable00522F2A(void);
-void FillOnes4EF997(void);
 void FillRange004D2B16(void);
 void FillTable8_0041D954(void);
 void FillThresholds_004A6370(void);
@@ -142,7 +130,6 @@ void FreeMapBufs004ECE1A(void);
 void Fwd0042482B(void);
 void Fwd004D262C(void);
 void Fwd004D2D9F(void);
-void Fwd004EAFCF(void);
 void Fwd004FC0C7(void);
 void Fwd00513CF9(void);
 void GameCall00424661(void);
@@ -192,8 +179,6 @@ void GlobalSet00519DE7(void);
 void GlobalSet0051BD78(void);
 void GlobalSet0051D811(void);
 void Inc0B1FFBC(void);
-void Inc5759A4Max40(void);
-void IncB87E4CMax3(void);
 void InitChannels_0052436A(void);
 void InitFlags004946DA(void);
 void InitFpuCw_005283E2(void);
@@ -235,7 +220,6 @@ void MenuAction_004164B2(void);
 void MenuAddItem004DC8B0(void);
 void MenuAllRowsTo2_00412280(void);
 void MenuAllRowsTo2_0041269B(void);
-void MenuAnyFlag00413DF3(void);
 void MenuBack005103EC(void);
 void MenuBits0041556C(void);
 void MenuBits0050F8F2(void);
@@ -245,7 +229,17 @@ void MenuBtn00414488(void);
 void MenuBtn0041459A(void);
 void MenuCallAction40CD17(void);
 void MenuClick004F8ACC(void);
+void MenuCopyPos(void);
 void MenuCounter5D577CInc(void);
+void MenuDecVar5759A4(void);
+void MenuDecVarB87E4C(void);
+void MenuEnterMode1(void);
+void MenuEnterMode2(void);
+void MenuEnterMode3(void);
+void MenuEnterMode4(void);
+void MenuEnterMode5(void);
+void MenuEnterMode6(void);
+void MenuEnterMode7(void);
 void MenuFlag54A0BCClear(void);
 void MenuFlag54A0BCSet(void);
 void MenuFlagSet(void);
@@ -254,6 +248,8 @@ void MenuHiliteRed004106E1(void);
 void MenuHiliteRed00411A31(void);
 void MenuHiliteWhite0041074D(void);
 void MenuHiliteWhite00411A9D(void);
+void MenuIncVar5759A4(void);
+void MenuIncVarB87E4C(void);
 void MenuLeave0040E8FF(void);
 void MenuLeave0040E957(void);
 void MenuLeave0040E99C(void);
@@ -278,7 +274,13 @@ void MenuLeave0041613C(void);
 void MenuLeave004161A1(void);
 void MenuLeave00416449(void);
 void MenuLeave004164A0(void);
+void MenuLeaveMode1(void);
+void MenuLeaveMode2(void);
+void MenuLeaveMode3(void);
+void MenuLeaveMode4(void);
+void MenuLeaveMode5(void);
 void MenuLeaveMode6(void);
+void MenuLeaveMode7(void);
 void MenuMark00412228(void);
 void MenuMusic0050F8A2(void);
 void MenuMusic0050F8CC(void);
@@ -304,6 +306,11 @@ void MenuRed0040766D(void);
 void MenuRed00409C85(void);
 void MenuRed00415904(void);
 void MenuRed00419D3E(void);
+void MenuRedraw409231(void);
+void MenuRedraw4092D8(void);
+void MenuRedraw40937F(void);
+void MenuRedraw409426(void);
+void MenuRedraw4094CD(void);
 void MenuReturnOne(void);
 void MenuRowsIf0To2_00404E7E(void);
 void MenuRowsTo2_00412254(void);
@@ -370,6 +377,10 @@ void MenuSelect004155AC(void);
 void MenuSelect00415666(void);
 void MenuSelect00415718(void);
 void MenuSelect004157B0(void);
+void MenuSet54A844Off(void);
+void MenuSet54A844On(void);
+void MenuSet54A854Off(void);
+void MenuSet54A854On(void);
 void MenuSet54ACD4To3(void);
 void MenuSet54ACF4To3(void);
 void MenuSet54AD14To3(void);
@@ -451,6 +462,10 @@ void MenuToggle00409142(void);
 void MenuToggle0050FE26(void);
 void MenuToggle0050FEE5(void);
 void MenuToggle00510028(void);
+void MenuToggle55384CRedraw(void);
+void MenuToggle553850Redraw(void);
+void MenuToggle55C974Redraw(void);
+void MenuToggle575EE8Redraw(void);
 void MenuToggle575F24Call40EA70(void);
 void MenuToggle575F24Call419B35(void);
 void MenuToggle575F30Redraw(void);
@@ -459,6 +474,9 @@ void MenuToggle575F40Call414D1F(void);
 void MenuToggle575F44Redraw(void);
 void MenuToggle575F48Call40EA70(void);
 void MenuToggle575F48Call419B35(void);
+void MenuToggleB201DCRedraw(void);
+void MenuToggleB31F04Redraw(void);
+void MenuToggleD118C8Redraw(void);
 void MenuToggleOptB87E9C(void);
 void MenuToggleOptBDFA44(void);
 void MenuToggleOptBDFA48(void);
@@ -546,7 +564,6 @@ void NoopFn0041fab4(void);
 void NoopFn0042243f(void);
 void NoopFn0048a4e1(void);
 void NoopFn0048bd3b(void);
-void NoopFn0048cc5f(void);
 void NoopFn00493f95(void);
 void NoopFn004946d0(void);
 void NoopFn004946d5(void);
@@ -613,7 +630,6 @@ void P101_ClipNearUVW(void);
 void P101_DebrisBounce(void);
 void P101_DebrisFly(void);
 void P101_Drips(void);
-void P101_FillRows(void);
 void P101_GoalTick(void);
 void P101_MirrorMaskR(void);
 void P101_Pal16(void);
@@ -1074,12 +1090,10 @@ void P14_Fn0040F0FB(void);
 void P14_Fn0048DB65(void);
 void P14_Fn004A39F6(void);
 void P14_Fn004A3B80(void);
-void P14_Fn004A6749(void);
 void P14_Fn004A7E6E(void);
 void P14_Fn004CAC86(void);
 void P14_Fn004CAD47(void);
 void P14_Fn004D623B(void);
-void P14_Fn004E12E4(void);
 void P14_Fn00503E83(void);
 void P14_Fn00503EF4(void);
 void P14_Fn00504439(void);
@@ -1097,6 +1111,7 @@ void P151_InstallD3D(void);
 void P151_Reopen(void);
 void P151_WinMain(void);
 void P151_WinOpen(void);
+void P152_FillRows(void);
 void P15_BlitRect16(void);
 void P15_BlitRect8(void);
 void P15_GridCell(void);
@@ -1115,6 +1130,7 @@ void P15_ScaleVertices(void);
 void P15_SetHighlightRange(void);
 void P15_SkipInteger(void);
 void P16_FillHudRect(void);
+void P16_IdleTimer(void);
 void P16_StepParticles(void);
 void P17_ISqrt(void);
 void P17_PushScreenState(void);
@@ -1200,6 +1216,7 @@ void P30_CrashInstall(void);
 void P30_CrashRemove(void);
 void P30_Exit(void);
 void P30_FatalError(void);
+void P30_InitWindowGlobals(void);
 void P31_InitWindow(void);
 void P31_LoadGlide(void);
 void P31_ReleaseDirectDraw(void);
@@ -1349,6 +1366,8 @@ void P50_EaxEnable(void);
 void P50_EaxSetDefault(void);
 void P50_FmvReleaseAll(void);
 void P50_FmvReleaseObjs(void);
+void P50_FmvStopRelease(void);
+void P50_Nop(void);
 void P50_ReleaseBuf(void);
 void P50_ReleaseVoice(void);
 void P50_ResetBuf(void);
@@ -1511,13 +1530,16 @@ void P61_SpawnPart(void);
 void P61_StoreCamState(void);
 void P62_DownloadPage(void);
 void P62_FarFromPlayer(void);
+void P62_FindFreeTrafficSlot(void);
 void P62_HeadingDelta(void);
 void P62_InitCamDefaults(void);
 void P62_InitRenderConsts(void);
 void P62_LoadMapHeader(void);
 void P62_MapRow(void);
+void P62_MenuBusy(void);
 void P62_ModelLookup(void);
 void P62_ParticleInit(void);
+void P62_ParticleSet(void);
 void P62_QueueTri(void);
 void P62_SaveScores(void);
 void P62_ScoreTable(void);
@@ -1646,6 +1668,7 @@ void P77_ResetTables(void);
 void P78_ChairAdd(void);
 void P78_LoadChairs(void);
 void P78_LoadLamps(void);
+void P78_LoadLampsBlock(void);
 void P78_LoadVerts(void);
 void P79_Convert(void);
 void P79_FindSameVerts(void);
@@ -1688,6 +1711,7 @@ void P87_LoadTile(void);
 void P88_CellUpdate(void);
 void P88_StreamTiles(void);
 void P89_DrawMap(void);
+void P89_Fill1(void);
 void P89_VisMask(void);
 void P90_DrawSingle(void);
 void P91_ReleaseTraffic(void);
@@ -1874,11 +1898,6 @@ void ReadTable_004EC49A(void);
 void ReadTable_004EC522(void);
 void ReadTable_004EC556(void);
 void RedMarkers_0041ADA1(void);
-void RefreshMenu00409231(void);
-void RefreshMenu004092D8(void);
-void RefreshMenu0040937F(void);
-void RefreshMenu00409426(void);
-void RefreshMenu004094CD(void);
 void ReleaseSlot4A2C5B(void);
 void RenumberCameras(void);
 void Reset0042D2B0(void);
@@ -1924,13 +1943,6 @@ void ScriptSkipBack_004D1635(void);
 void ScriptStackPop004CB982(void);
 void ScriptStackPop004CB9BA(void);
 void ScriptStackPush004CB9F2(void);
-void Select54A8EC_Mode4(void);
-void Select54A8FC_Mode5(void);
-void Select54A90C_Mode2(void);
-void Select54A91C_Mode1(void);
-void Select54A92C_Mode3(void);
-void Select54A93C_Mode6(void);
-void Select54A94C_Mode7(void);
 void SelectByDifficulty_00416D17(void);
 void SelectNewCamera(void);
 void SelectRow004110C2(void);
@@ -1948,10 +1960,6 @@ void SelectRow00411889(void);
 void SelectRow0041193E(void);
 void SelectRow004119F3(void);
 void Set0D044C8(void);
-void Set54A844_0(void);
-void Set54A844_1(void);
-void Set54A854_0(void);
-void Set54A854_1(void);
 void Set551134(void);
 void Set560388(void);
 void SetB31E00(void);
@@ -1990,7 +1998,6 @@ void SetMode1b_005106D2(void);
 void SetMode2_004E612A(void);
 void SetMode4_00510382(void);
 void SetNodeEnabled(void);
-void SetObjState_00514C72(void);
 void SetPcarName0040479B(void);
 void SetRGB00516EB4(void);
 void SetScale54EF38(void);
@@ -2056,13 +2063,6 @@ void Toggle0050FFC5(void);
 void Toggle0050FFE6(void);
 void Toggle00510007(void);
 void ToggleBit0051049E(void);
-void ToggleEF8_55384C(void);
-void ToggleEF8_553850(void);
-void ToggleEF8_55C974(void);
-void ToggleEF8_575EE8(void);
-void ToggleEF8_B201DC(void);
-void ToggleEF8_B31F04(void);
-void ToggleEF8_D118C8(void);
 void ToggleOpt0041542A(void);
 void ToggleOpt004154CD(void);
 void ToggleVar00407636(void);
@@ -2282,7 +2282,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x00407dbau, (re_fn_t)P58_ItemsDraw },
   { 0x00407e2fu, (re_fn_t)P100_IconLfb2x },
   { 0x004082a0u, (re_fn_t)P57_Menu4082A0 },
-  { 0x0040831cu, (re_fn_t)Copy54A0C0 },
+  { 0x0040831cu, (re_fn_t)MenuCopyPos },
   { 0x00408337u, (re_fn_t)MenuFlag54A0BCSet },
   { 0x00408343u, (re_fn_t)MenuFlag54A0BCClear },
   { 0x0040834fu, (re_fn_t)P45_ModeA },
@@ -2302,13 +2302,13 @@ const re_fnent_t re_fn_table[] = {
   { 0x00408994u, (re_fn_t)MenuToggle00408994 },
   { 0x004089f2u, (re_fn_t)MenuSelect004089F2 },
   { 0x00408a38u, (re_fn_t)MenuSlotHandler00408A38 },
-  { 0x00408a69u, (re_fn_t)ToggleEF8_55384C },
+  { 0x00408a69u, (re_fn_t)MenuToggle55384CRedraw },
   { 0x00408a8cu, (re_fn_t)MenuSelect00408A8C },
   { 0x00408ad2u, (re_fn_t)MenuSlotHandler00408AD2 },
-  { 0x00408b03u, (re_fn_t)ToggleEF8_553850 },
+  { 0x00408b03u, (re_fn_t)MenuToggle553850Redraw },
   { 0x00408b26u, (re_fn_t)MenuSelect00408B26 },
   { 0x00408b6cu, (re_fn_t)MenuSlotHandler00408B6C },
-  { 0x00408b9du, (re_fn_t)ToggleEF8_B31F04 },
+  { 0x00408b9du, (re_fn_t)MenuToggleB31F04Redraw },
   { 0x00408bc0u, (re_fn_t)MenuSelect00408BC0 },
   { 0x00408c06u, (re_fn_t)MenuSlotHandler00408C06 },
   { 0x00408c37u, (re_fn_t)MenuToggle00408C37 },
@@ -2317,78 +2317,78 @@ const re_fnent_t re_fn_table[] = {
   { 0x00408d0cu, (re_fn_t)MenuToggle575F44Redraw },
   { 0x00408d2fu, (re_fn_t)MenuSelect00408D2F },
   { 0x00408d75u, (re_fn_t)MenuSlotHandler00408D75 },
-  { 0x00408da6u, (re_fn_t)ToggleEF8_55C974 },
+  { 0x00408da6u, (re_fn_t)MenuToggle55C974Redraw },
   { 0x00408dc9u, (re_fn_t)MenuSelect00408DC9 },
   { 0x00408e0fu, (re_fn_t)MenuSlotHandler00408E0F },
   { 0x00408e40u, (re_fn_t)MenuToggle575F30Redraw },
   { 0x00408e63u, (re_fn_t)MenuSelect00408E63 },
   { 0x00408ea9u, (re_fn_t)MenuSlotHandler00408EA9 },
-  { 0x00408edau, (re_fn_t)ToggleEF8_B201DC },
+  { 0x00408edau, (re_fn_t)MenuToggleB201DCRedraw },
   { 0x00408efdu, (re_fn_t)MenuSelect00408EFD },
   { 0x00408f43u, (re_fn_t)MenuSlotHandler00408F43 },
-  { 0x00408f74u, (re_fn_t)ToggleEF8_575EE8 },
+  { 0x00408f74u, (re_fn_t)MenuToggle575EE8Redraw },
   { 0x00408f97u, (re_fn_t)MenuSelect00408F97 },
   { 0x00408fddu, (re_fn_t)MenuSlotHandler00408FDD },
   { 0x0040900eu, (re_fn_t)MenuToggle575F3CRedraw },
   { 0x00409031u, (re_fn_t)MenuSelect00409031 },
   { 0x00409077u, (re_fn_t)MenuSlotHandler00409077 },
-  { 0x004090a8u, (re_fn_t)ToggleEF8_D118C8 },
+  { 0x004090a8u, (re_fn_t)MenuToggleD118C8Redraw },
   { 0x004090cbu, (re_fn_t)MenuSelect004090CB },
   { 0x00409111u, (re_fn_t)MenuSlotHandler00409111 },
   { 0x00409142u, (re_fn_t)MenuToggle00409142 },
   { 0x004091a0u, (re_fn_t)MenuSelect004091A0 },
   { 0x004091f3u, (re_fn_t)MenuSlotHandlerReset004091F3 },
-  { 0x00409231u, (re_fn_t)RefreshMenu00409231 },
+  { 0x00409231u, (re_fn_t)MenuRedraw409231 },
   { 0x00409247u, (re_fn_t)MenuSelect00409247 },
   { 0x0040929au, (re_fn_t)MenuSlotHandlerReset0040929A },
-  { 0x004092d8u, (re_fn_t)RefreshMenu004092D8 },
+  { 0x004092d8u, (re_fn_t)MenuRedraw4092D8 },
   { 0x004092eeu, (re_fn_t)MenuSelect004092EE },
   { 0x00409341u, (re_fn_t)MenuSlotHandlerReset00409341 },
-  { 0x0040937fu, (re_fn_t)RefreshMenu0040937F },
+  { 0x0040937fu, (re_fn_t)MenuRedraw40937F },
   { 0x00409395u, (re_fn_t)MenuSelect00409395 },
   { 0x004093e8u, (re_fn_t)MenuSlotHandlerReset004093E8 },
-  { 0x00409426u, (re_fn_t)RefreshMenu00409426 },
+  { 0x00409426u, (re_fn_t)MenuRedraw409426 },
   { 0x0040943cu, (re_fn_t)MenuSelect0040943C },
   { 0x0040948fu, (re_fn_t)MenuSlotHandlerReset0040948F },
-  { 0x004094cdu, (re_fn_t)RefreshMenu004094CD },
+  { 0x004094cdu, (re_fn_t)MenuRedraw4094CD },
   { 0x004094e3u, (re_fn_t)P94_ClampView },
   { 0x00409622u, (re_fn_t)P104_GfxMenuInit },
   { 0x00409a91u, (re_fn_t)FloatStep00409A91 },
   { 0x00409acau, (re_fn_t)FloatStep00409ACA },
   { 0x00409b03u, (re_fn_t)FloatStep00409B03 },
   { 0x00409b3cu, (re_fn_t)FloatStep00409B3C },
-  { 0x00409b75u, (re_fn_t)Inc5759A4Max40 },
-  { 0x00409b9fu, (re_fn_t)Dec5759A4Min0 },
+  { 0x00409b75u, (re_fn_t)MenuIncVar5759A4 },
+  { 0x00409b9fu, (re_fn_t)MenuDecVar5759A4 },
   { 0x00409bc9u, (re_fn_t)VolumeUp00409BC9 },
   { 0x00409bfdu, (re_fn_t)VolumeDown00409BFD },
-  { 0x00409c31u, (re_fn_t)IncB87E4CMax3 },
-  { 0x00409c5bu, (re_fn_t)DecB87E4CMin0 },
+  { 0x00409c31u, (re_fn_t)MenuIncVarB87E4C },
+  { 0x00409c5bu, (re_fn_t)MenuDecVarB87E4C },
   { 0x00409c85u, (re_fn_t)MenuRed00409C85 },
   { 0x00409cfau, (re_fn_t)MenuWhite00409CFA },
   { 0x00409d66u, (re_fn_t)P55_MenuLangCall },
   { 0x0040a3a0u, (re_fn_t)P57_Menu40A3A0 },
   { 0x0040a41cu, (re_fn_t)Copy54A838 },
-  { 0x0040a443u, (re_fn_t)Set54A844_1 },
-  { 0x0040a44fu, (re_fn_t)Set54A844_0 },
+  { 0x0040a443u, (re_fn_t)MenuSet54A844On },
+  { 0x0040a44fu, (re_fn_t)MenuSet54A844Off },
   { 0x0040a45bu, (re_fn_t)P12_Fn0040A45B },
-  { 0x0040a495u, (re_fn_t)Set54A854_1 },
-  { 0x0040a4a1u, (re_fn_t)Set54A854_0 },
+  { 0x0040a495u, (re_fn_t)MenuSet54A854On },
+  { 0x0040a4a1u, (re_fn_t)MenuSet54A854Off },
   { 0x0040a4adu, (re_fn_t)P12_Fn0040A4AD },
   { 0x0040a540u, (re_fn_t)P57_Menu40A540 },
   { 0x0040a5c6u, (re_fn_t)GlobalSet0040A5C6 },
-  { 0x0040a625u, (re_fn_t)Select54A90C_Mode2 },
-  { 0x0040a63bu, (re_fn_t)Clear54A90C_IfZero },
-  { 0x0040a64du, (re_fn_t)Select54A91C_Mode1 },
-  { 0x0040a663u, (re_fn_t)Clear54A91C_IfZero },
-  { 0x0040a675u, (re_fn_t)Select54A8FC_Mode5 },
-  { 0x0040a68bu, (re_fn_t)Clear54A8FC_IfZero },
-  { 0x0040a69du, (re_fn_t)Select54A92C_Mode3 },
-  { 0x0040a6b3u, (re_fn_t)Clear54A92C_IfZero },
-  { 0x0040a6c5u, (re_fn_t)Select54A8EC_Mode4 },
-  { 0x0040a6dbu, (re_fn_t)Clear54A8EC_IfZero },
-  { 0x0040a6edu, (re_fn_t)Select54A94C_Mode7 },
-  { 0x0040a703u, (re_fn_t)Clear54A94C_IfZero },
-  { 0x0040a715u, (re_fn_t)Select54A93C_Mode6 },
+  { 0x0040a625u, (re_fn_t)MenuEnterMode2 },
+  { 0x0040a63bu, (re_fn_t)MenuLeaveMode2 },
+  { 0x0040a64du, (re_fn_t)MenuEnterMode1 },
+  { 0x0040a663u, (re_fn_t)MenuLeaveMode1 },
+  { 0x0040a675u, (re_fn_t)MenuEnterMode5 },
+  { 0x0040a68bu, (re_fn_t)MenuLeaveMode5 },
+  { 0x0040a69du, (re_fn_t)MenuEnterMode3 },
+  { 0x0040a6b3u, (re_fn_t)MenuLeaveMode3 },
+  { 0x0040a6c5u, (re_fn_t)MenuEnterMode4 },
+  { 0x0040a6dbu, (re_fn_t)MenuLeaveMode4 },
+  { 0x0040a6edu, (re_fn_t)MenuEnterMode7 },
+  { 0x0040a703u, (re_fn_t)MenuLeaveMode7 },
+  { 0x0040a715u, (re_fn_t)MenuEnterMode6 },
   { 0x0040a72bu, (re_fn_t)MenuLeaveMode6 },
   { 0x0040a73du, (re_fn_t)P47_TitleDispatch },
   { 0x0040a8b0u, (re_fn_t)P122_FontIcons },
@@ -2676,7 +2676,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x00413cadu, (re_fn_t)MenuLeave00413CAD },
   { 0x00413cbfu, (re_fn_t)P12_Fn00413CBF },
   { 0x00413d70u, (re_fn_t)P58_Menu413D70 },
-  { 0x00413df3u, (re_fn_t)MenuAnyFlag00413DF3 },
+  { 0x00413df3u, (re_fn_t)P62_MenuBusy },
   { 0x00413e37u, (re_fn_t)P100_PadMenuInit },
   { 0x00414264u, (re_fn_t)MenuBtn00414264 },
   { 0x004142a4u, (re_fn_t)P15_MenuMiami },
@@ -3167,7 +3167,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x0048a68eu, (re_fn_t)Dispatch0048A68E },
   { 0x0048a940u, (re_fn_t)P150_PlayFmv },
   { 0x0048abdcu, (re_fn_t)P52_FmvStart },
-  { 0x0048ac0du, (re_fn_t)Chain0048AC0D },
+  { 0x0048ac0du, (re_fn_t)P50_FmvStopRelease },
   { 0x0048ac1cu, (re_fn_t)P150_FmvDDInit },
   { 0x0048ae12u, (re_fn_t)P38_FmvRelease },
   { 0x0048af23u, (re_fn_t)P150_OpenVideo },
@@ -3213,7 +3213,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x0048cad6u, (re_fn_t)P148_KsProps },
   { 0x0048cba4u, (re_fn_t)P50_EaxSetDefault },
   { 0x0048cbd3u, (re_fn_t)P50_EaxEnable },
-  { 0x0048cc5fu, (re_fn_t)NoopFn0048cc5f },
+  { 0x0048cc5fu, (re_fn_t)P50_Nop },
   { 0x0048cc64u, (re_fn_t)P50_CreateKsProps },
   { 0x0048ccafu, (re_fn_t)P49_ReleaseProps },
   { 0x0048ccddu, (re_fn_t)P50_CreateDummyBuf },
@@ -3383,7 +3383,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x004a6403u, (re_fn_t)P102_CopsTick },
   { 0x004a66d8u, (re_fn_t)IsVar112B284Lt8 },
   { 0x004a66efu, (re_fn_t)P91_ReleaseTraffic },
-  { 0x004a6749u, (re_fn_t)P14_Fn004A6749 },
+  { 0x004a6749u, (re_fn_t)P62_FindFreeTrafficSlot },
   { 0x004a67b0u, (re_fn_t)P68_SpawnCar },
   { 0x004a681au, (re_fn_t)P97_ResetCars },
   { 0x004a6a57u, (re_fn_t)P103_CopMeet },
@@ -3799,7 +3799,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x004e0fd4u, (re_fn_t)P94_SpringStep },
   { 0x004e10e3u, (re_fn_t)P126_WheelSmoke },
   { 0x004e122cu, (re_fn_t)AddVelocity004E122C },
-  { 0x004e12e4u, (re_fn_t)P14_Fn004E12E4 },
+  { 0x004e12e4u, (re_fn_t)P16_IdleTimer },
   { 0x004e2ee0u, (re_fn_t)P37_InitInput },
   { 0x004e31d5u, (re_fn_t)P34_ReleaseInput },
   { 0x004e3391u, (re_fn_t)P36_PollInput },
@@ -3868,7 +3868,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x004ea346u, (re_fn_t)P98_DrawMarker },
   { 0x004eac70u, (re_fn_t)P127_LampLights },
   { 0x004eaf8du, (re_fn_t)NegateCamZ004EAF8D },
-  { 0x004eafcfu, (re_fn_t)Fwd004EAFCF },
+  { 0x004eafcfu, (re_fn_t)P78_LoadLampsBlock },
   { 0x004eafe0u, (re_fn_t)P78_LoadLamps },
   { 0x004eb19bu, (re_fn_t)P58_FreeList },
   { 0x004eb3c0u, (re_fn_t)P55_LoadFrustum },
@@ -3918,7 +3918,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x004ef3cdu, (re_fn_t)P101_SkyInit },
   { 0x004ef66au, (re_fn_t)P106_SkyModels },
   { 0x004ef793u, (re_fn_t)P89_VisMask },
-  { 0x004ef997u, (re_fn_t)FillOnes4EF997 },
+  { 0x004ef997u, (re_fn_t)P89_Fill1 },
   { 0x004ef9cdu, (re_fn_t)P131_LoadCosDen },
   { 0x004efafdu, (re_fn_t)P126_ReadMapPals },
   { 0x004efc03u, (re_fn_t)P58_FreeRecs },
@@ -4171,7 +4171,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x00514a47u, (re_fn_t)P98_PartAim },
   { 0x00514bc7u, (re_fn_t)InitObjState_00514BC7 },
   { 0x00514c43u, (re_fn_t)ObjInit00514C43 },
-  { 0x00514c72u, (re_fn_t)SetObjState_00514C72 },
+  { 0x00514c72u, (re_fn_t)P62_ParticleSet },
   { 0x00514c9fu, (re_fn_t)P99_PartAhead },
   { 0x00514e4cu, (re_fn_t)IsFlag80_00514E4C },
   { 0x00514e6au, (re_fn_t)RangeCheck00514E6A },
@@ -4282,7 +4282,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x00522306u, (re_fn_t)ResetDirector_00522306 },
   { 0x00522323u, (re_fn_t)Call00522323 },
   { 0x00522369u, (re_fn_t)P30_FatalError },
-  { 0x005223beu, (re_fn_t)ClearHandles005223BE },
+  { 0x005223beu, (re_fn_t)P30_InitWindowGlobals },
   { 0x005223dcu, (re_fn_t)P31_InitWindow },
   { 0x005224a8u, (re_fn_t)P31_WndProc },
   { 0x005226b5u, (re_fn_t)P55_GlideInit },
@@ -4413,7 +4413,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x00528e12u, (re_fn_t)P17_ISqrt },
   { 0x00529140u, (re_fn_t)P65_BlitKeyed },
   { 0x00529190u, (re_fn_t)P65_BlitBlend },
-  { 0x005291edu, (re_fn_t)P101_FillRows },
+  { 0x005291edu, (re_fn_t)P152_FillRows },
   { 0x00529253u, (re_fn_t)P101_Pal16 },
   { 0x005292d1u, (re_fn_t)P101_Pal32 },
   { 0x0052e400u, (re_fn_t)P30_Exit },

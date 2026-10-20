@@ -4,6 +4,7 @@
 #include "ported52.h"
 #include "ported135.h"
 #include "ported33.h"
+#include "ported50.h"
 #include <string.h>
 #ifdef RE_HOOK_BUILD
 #  define P52_STD __attribute__((stdcall))
@@ -271,13 +272,13 @@ void P52_ResetSlots(void) {
   P52_Ones0 = 1; P52_Ones1 = 1; P52_Ones2 = 1; P52_Ones3 = 1;
 }
 
-/* P52_FmvStart — Game.exe 0048abdc.  Stops any FMV (Chain0048AC0D = P50_FmvStopRelease), opens the movie
+/* P52_FmvStart — Game.exe 0048abdc.  Stops any FMV (P50_FmvStopRelease), opens the movie
    file a (P150_OpenAudio) and starts it (P52_Fn48B5E3).  Returns 1 on success; on failure stops again
    and returns 0. */
 int32_t P52_FmvStart(const char *a) {
-  Chain0048AC0D();
+  P50_FmvStopRelease();
   if (P150_OpenAudio(a) != 0 && P52_Fn48B5E3() != 0) return 1;
-  Chain0048AC0D();
+  P50_FmvStopRelease();
   return 0;
 }
 

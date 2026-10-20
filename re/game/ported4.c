@@ -798,7 +798,6 @@ void FreeBuffer5FED98(void) { if (D_005fed98 != 0) { DebugFree(D_005fed98); D_00
    StopTimer4086EA — stops the menu timer slot D_0054a144 (P25_TimerStop) and clears D_005d577c.
    InitMapState4D3426 — mode 0, allocate the 3 MB buffer, then 0051aa5b and 004ecade (map init).
    DrainStackC200F — pops the pending car deformation stack D_010de120 and applies P128_CarDeform.
-   FillOnes4EF997 — p[0 .. D_00d00204-1] = 1.
    ReleaseSlot4A2C5B — frees slot idx of the 100-slot table reset by ResetSlots_004A2B70 (clears its
      first word, pushes idx back on the free list D_01134ec0).
    TickTimer4F5D67 — counts D_00c81494 down; at 0 also clears D_00c80ca0. */
@@ -809,6 +808,5 @@ void LoadShort3FromPtr(const int16_t* p) { D_00b93e48 = p[0]; D_00b93e4c = p[1];
 void StopTimer4086EA(void) { if (D_0054a144 != -1) P4Call00528293(D_0054a144); D_005d577c = 0; }
 void InitMapState4D3426(void) { D_00b87e30 = 0; AllocMapBuffer300000(); P4Call0051AA5B(); P4Call004ECADE(); }
 void DrainStackC200F(void) { while (D_00dbb450 != 0) { D_00dbb450--; P128_CarDeform(D_010de120[D_00dbb450]); } }
-void FillOnes4EF997(uint8_t* p) { for (int32_t i = 0; i < D_00d00204; i++) *p++ = 1; }
 void ReleaseSlot4A2C5B(int32_t idx) { if (0 < D_01134528) { D_01134554[idx * 6] = 0; D_01134528--; D_01134ec0[D_01134528] = idx; } }
 void TickTimer4F5D67(void) { if (D_00c81494 < 1) { D_00c81494 = 0; D_00c80ca0 = 0; } else D_00c81494--; }

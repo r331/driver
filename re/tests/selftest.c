@@ -369,11 +369,12 @@ static int test_ui3(void) {
     return 0;
 }
 static int test_ui4(void) {
-    G005759A4 = 0x3f;
-    Inc5759A4Max40(); CHECK(G005759A4 == 0x40); Inc5759A4Max40(); CHECK(G005759A4 == 0x40);
-    G005759A4 = 1; Dec5759A4Min0(); Dec5759A4Min0(); CHECK(G005759A4 == 0);
-    G0054A90C = 5; Clear54A90C_IfZero(1); CHECK(G0054A90C == 5); Clear54A90C_IfZero(0); CHECK(G0054A90C == 0);
-    Select54A94C_Mode7(); CHECK(G0054A94C == 1 && G01271060 == 7);
+    /* 0040a625.. handlers: one implementation in menustate.c (the uihandlers4.c copies were removed) */
+    MenuVar5759A4 = 0x3f;
+    MenuIncVar5759A4(); CHECK(MenuVar5759A4 == 0x40); MenuIncVar5759A4(); CHECK(MenuVar5759A4 == 0x40);
+    MenuVar5759A4 = 1; MenuDecVar5759A4(); MenuDecVar5759A4(); CHECK(MenuVar5759A4 == 0);
+    MenuFlag54A90C = 5; MenuLeaveMode2(1); CHECK(MenuFlag54A90C == 5); MenuLeaveMode2(0); CHECK(MenuFlag54A90C == 0);
+    MenuEnterMode7(); CHECK(MenuFlag54A94C == 1 && MenuMode1271060 == 7);
     return 0;
 }
 static int test_ui(void) {
@@ -4602,8 +4603,7 @@ static int test_p101(void) {
     P101_ClipNearRGB((const uint8_t *)vb, (const uint8_t *)va, 1.0f, 2.0f, 3.0f, 0.0f, 0.0f, 0.0f);
     CK(P100_ClipN == 1 && buf[7] == 0.5f && buf[8] == 1.0f && buf[9] == 1.5f && buf[2] == 50.0f);
     P100_ClipOut = so; P100_ClipN = sn; P95_Near = sf; }
-  { static uint8_t px[0x280 * 2]; memset(px, 0, sizeof px);   /* 005291ed */
-    P101_FillRows(px, 0x40, 2, 0xab); CK(px[0] == 0xab && px[0x3f] == 0xab && px[0x40] == 0 && px[0x280 + 0x3f] == 0xab); }
+  /* 005291ed (row fill): single port P152_FillRows, covered by test_p152 */
   { static uint8_t src[640], dst[0x500]; memset(src, 0, sizeof src);   /* 00529253 */
     uint32_t p1 = P101_PalLfb[1], p2 = P101_PalLfb[2]; int32_t pitch = P100_LfbPitch;
     P101_PalLfb[1] = 0x1234; P101_PalLfb[2] = 0x5678; P100_LfbPitch = 0x500; src[0] = 1; src[1] = 2;
@@ -5179,7 +5179,7 @@ static int test_p113(void) {
     CK(P54_SelTab[0] == 1 && P54_SelTab[1] == 7 && P54_SelTab[2] == -1);
     CK(P57_OPT_NAV(0, 2) == 1 && P57_OPT_NAV(0, 3) == 1 && P57_OPT_NAV(1, 2) == 0 && P57_OPT_NAV(1, 3) == 0);
     CK(P54_Out[4] == P97_StrAddr[0xf2] && P54_Out[12] == P97_StrAddr[0x64] && P54_Out[20] == 0);
-    CK(re_fn(P57_OPT_FN(1, 2)) == (re_fn_t)Set575EF0_4Ret0);
+    CK(re_fn(P57_OPT_FN(1, 2)) == (re_fn_t)MenuStateSetFour);
     P102_BDF9E0[1] = 0; P102_BDF9E0[6] = 0; P113_MenuOpts();
     CK(P57_OPT_FN(0, 2) == 0x00404ffeu && P54_SelTab[0] == -1 && P57_OPT_FN(1, 2) == 0);
     for (int i = 0; i < 11; i++) P102_BDF9E0[i] = sv[i]; }

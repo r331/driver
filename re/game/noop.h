@@ -59,7 +59,6 @@ void NoopFn0041fab4(void);
 void NoopFn0042243f(void);
 void NoopFn0048a4e1(void);
 void NoopFn0048bd3b(void);
-void NoopFn0048cc5f(void);
 void NoopFn00493f95(void);
 void NoopFn004946d0(void);
 void NoopFn004946d5(void);

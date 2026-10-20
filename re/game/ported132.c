@@ -74,6 +74,7 @@
 #include "ported130.h"
 #include "ported131.h"
 #include "ported14.h"
+#include "ported16.h"
 #include "ported15.h"
 #include "ported18.h"
 #include "ported19.h"
@@ -300,7 +301,7 @@ void P132_GameLogic(void) {
   if ((G6_00B87EAC | G8_00B87EAC) != 0 || (P58_SB87EB0 | G6_00B87EB0 | G8_00B87EB0) != 0) P119_CarSkids(0x41);
   RE_DBG_SET(11, P100_RecKeys); RE_DBG_SET(12, P36_PadMode); RE_DBG_SET(13, P36_KeyCfg[6] | P36_KeyCfg[4] << 8 | P36_KeyCfg[5] << 16); RE_DBG_SET(14, (P14_00d118a8 | G2_00D118A8) * 1000 + hud1 * 10 + (P100_143720 != 0) + (P100_1426FC != 0) * 2 + (P75_E4 != 0) * 4);
   if (live) { RE_DBG(10); P142_CarsStep(); } else P35_PadX = 0;
-  P14_Fn004E12E4();
+  P16_IdleTimer();
   DrainStackC200F();
   CopyBDF984();
   P74_ShiftRows();

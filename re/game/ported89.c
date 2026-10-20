@@ -120,7 +120,7 @@ enum {
   OBJ_CLASS_LIST_A   = 2,   /* queued in P55_TabA, drawn by the caller later */
   OBJ_CLASS_SHADOW   = 3,   /* queued; drawn last, alpha-blended, lifted 4 units, by day only */
   OBJ_CLASS_ALPHA    = 4,   /* queued; drawn with alpha test (cut-out textures) */
-  OBJ_CLASS_OPTIONAL = 5,   /* drawn at once only when 00575ee8 is set (Detail menu 0054a470 entry 13 "Transparent Water", ToggleEF8_575EE8; label by text order, inferred) */
+  OBJ_CLASS_OPTIONAL = 5,   /* drawn at once only when 00575ee8 is set (Detail menu 0054a470 entry 13 "Transparent Water", MenuToggle575EE8Redraw; label by text order, inferred) */
   OBJ_CLASS_LIST_B   = 6,   /* queued in P55_TabB */
   OBJ_CLASS_SEVEN    = 7    /* queued; drawn first with render state 0x13.  TODO(RE): unsure what they are */
 };

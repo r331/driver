@@ -238,7 +238,7 @@ void P150_PlayFmv(int32_t hwnd_i, int32_t n, int32_t ans) {
         if (P38_TimerFlag != 0 || G00551134 != 0) break;                     /* 00551134 (два имени) */
         if (key_pressed()) break;
       }
-      Chain0048AC0D();
+      P50_FmvStopRelease();
     }
   }
   P38_FmvRelease();
