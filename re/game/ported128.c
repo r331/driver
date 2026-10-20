@@ -732,6 +732,10 @@ void P128_CopReplan(uint8_t *rec) {
   if (go != 1) return;
   P128_CopMapPos((uint32_t *)(void *)rec, &cx, &cz, 0);
   P77_C7D8A8 = 0;
+#ifndef RE_HOOK_BUILD
+  { static int tr = -1; if (tr < 0) tr = getenv("RE_COPTRACE") != NULL;
+    if (tr && rd32(P77_C62E60 + 0x5e8 * 4) == 0x1000) fprintf(stderr, "[copplan] f=%d id %d cell %d %d — центр окна непроходим\n", (int)P62_Frame, rd32(rec), cx, cz); }
+#endif
   if (rd32(P77_C62E60 + 0x5e8 * 4) == 0x1000) return;
   if (rd32(rec + 0x1c) - 2 < rd32(rec + 0x14)) wr32(rec + 0xcb8, 0);
   if (rd32(rec + 0xcb8) == 1) {
@@ -764,6 +768,11 @@ void P128_CopReplan(uint8_t *rec) {
     wr32(rec + 0x2c, 0x78); wr32(rec + 0x14, 1); wr32(rec + 0x18, 1);
     wr32(rec + 0x1c, P77_C7D8A8); wr32(rec + 0xcb8, 1);
   } else wr32(rec + 0xcb8, 0);
+#ifndef RE_HOOK_BUILD
+  { static int tr = -1; if (tr < 0) tr = getenv("RE_COPTRACE") != NULL;
+    if (tr) fprintf(stderr, "[copplan] f=%d id %d near %d cell %d %d c5e8 %d res %d n %d cb8 %d b28c %d b288 %d\n", (int)P62_Frame, rd32(rec),
+                    near, cx, cz, rd32(P77_C62E60 + 0x5e8 * 4), res, P77_C7D8A8, rd32(rec + 0xcb8), P97_B28C, P97_B288); }
+#endif
   wr32(rec + 4, P97_B28C); wr32(rec + 8, P97_B288);
 }
 
