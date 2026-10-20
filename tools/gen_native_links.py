@@ -6,8 +6,9 @@
 cleanup/round2: регенерация воспроизводит links.c байт в байт.
 - Имена из tools/native_links_skip.txt не связываются (перенос есть, но связь меняет поведение native или счётчики
   selftest — каждое решать отдельно с прогоном); --skip добавляет имена к этому списку.
-- Имена, уже строго определённые в re/game/*.c или re/platform/native/*.c (кроме links.c/stubs.c), пропускаются
-  (иначе — повторное определение при компоновке).
+- Имена, уже строго определённые в re/game/*.c, re/platform/native/*.c (кроме links.c/stubs.c) или re/tests/*.c,
+  пропускаются (иначе — повторное определение при компоновке).  tests/*.c входят в native-сборку: шпионы selftest
+  (tests/selftest.c, «if (!re_selftest_on) return <перенос>(...)») в игре и есть связь с переносом — как game_fwd.c.
 - Всё после строки MANUAL_MARK в links.c — ручная часть: переносится как есть, её имена не генерируются."""
 import re,sys,os,subprocess,tempfile
 root=sys.argv[1]
@@ -25,7 +26,7 @@ if os.path.exists(lpath):
     if MANUAL_MARK in old: manual=old[old.index(MANUAL_MARK):]
 import glob
 defined=set()
-for f in glob.glob(root+'/game/*.c')+glob.glob(root+'/platform/native/*.c'):
+for f in glob.glob(root+'/game/*.c')+glob.glob(root+'/platform/native/*.c')+glob.glob(root+'/tests/*.c'):
     if os.path.basename(f) in ('links.c','stubs.c'): continue
     t=open(f,encoding='utf-8',errors='replace').read()
     if f==lpath: continue
