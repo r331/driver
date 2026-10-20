@@ -60,7 +60,7 @@ p87_lumps_t P87_SlotLumpA;
 #define OBJ_MODEL        0x04     /* int32: model index (disk u16 & 0x7fff) */
 #define OBJ_POS          0x08     /* float[3]: world x, y, z */
 #define OBJ_ANGLE        0x18     /* int32: rotation (index into the Euler table) */
-#define OBJ_HIDDEN       0x1c     /* int32: 1 if disk bit 0x8000 was set; such objects are not drawn by P87_DrawCells */
+#define OBJ_HIDDEN       0x1c     /* int32: 1 if disk bit 0x8000 was set; such objects are not drawn */
 #include "modelhdr.h"   /* model header fields (MDL_*); MDL_RADIUS is the bounding radius for P83_BoxVis */
 /* model flag bits (MDL_FLAGS) read here */
 #define MDLF_MISSION     0x0004   /* drawn by P131_MissionObj instead */
@@ -208,41 +208,3 @@ static void draw_obj(const uint8_t *obj, int kind) {
 void P87_DrawObjA(const uint8_t *obj) { draw_obj(obj, 0); }   /* 004ee18b */
 void P87_DrawObjB(const uint8_t *obj) { draw_obj(obj, 1); }   /* 004ee4b7 */
 
-/* P87_DrawCells — no Game.exe address (native helper).  Not dead: its callers are the native self-test
-   (tests/selftest.c — CK(P87_DrawCells(0, 0, 1) == 0) and the RE_REAL_CITY render check); the game never calls
-   it (no caller in re/game or re/platform).  Draws the map
-   objects of the (2r+1)^2 grid cells around cell (cx, cy): for each cell whose lump is resident in its
-   slot, walks the cell's object list and draws each visible object once per frame (stamp vs
-   P47_SwapCnt; hidden objects skipped) — class 1 / 7 as kind B, class 4 as kind A (P80_Class).
-   Returns the number of objects drawn.  Native guards against corrupt lists are marked below. */
-int32_t P87_DrawCells(int32_t cx, int32_t cy, int32_t r) {
-  int32_t N = P54_GridN, W = P21_GridDiv, H = P80_GridH, drawn = 0;
-  if (N <= 0) return 0;
-  P44_MatPtr = (float *)P44_ViewMatT;
-  for (int32_t y = cy - r; y <= cy + r; y++) {
-    for (int32_t x = cx - r; x <= cx + r; x++) {
-      if (x < 0 || y < 0 || x >= W || y >= H) continue;
-      int32_t slot = ((x / N) & 1) + ((y / N) & 1) * 2;
-      int32_t lump = (y / N) * P80_Cols + x / N;
-      if (P87_SlotLump[slot] != lump) continue;
-      int32_t node = ((int32_t *)G6_00D01268)[slot * N * N + (x % N) + (y % N) * N];
-      for (int32_t guard = 0; node != OBJ_NONE && node >= 0 && node < TILE_SLOTS * SLOT_NODES && guard < SLOT_NODES; guard++) {   /* охранные проверки — в оригинале их нет */
-        const int32_t *nd = (const int32_t *)((uint8_t *)G6_00CE0F20 + (size_t)node * 8);
-        if (nd[0] < 0 || nd[0] >= P54_Cnt1E0 + TILE_SLOTS * SLOT_OBJS) break;
-        uint8_t *o = (uint8_t *)G6_00D00208 + (size_t)nd[0] * MAP_OBJ_SIZE;
-        uint32_t stamp = (uint32_t)rd32(o + OBJ_STAMP);
-        if (stamp != (uint32_t)P47_SwapCnt && rd32(o + OBJ_HIDDEN) == 0) {
-          int32_t mi = rd32(o + OBJ_MODEL);
-          if (mi >= 0 && mi < MAX_MODELS) {
-            uint8_t cls = P80_Class[mi];
-            if (cls == 1 || cls == 7) { draw_obj(o, 1); drawn++; }
-            else if (cls == 4) { draw_obj(o, 0); drawn++; }
-          }
-          { uint32_t sc = (uint32_t)P47_SwapCnt; memcpy(o, &sc, 4); }
-        }
-        node = nd[1];
-      }
-    }
-  }
-  return drawn;
-}

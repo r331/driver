@@ -609,7 +609,7 @@ static int test_p21(void) {
   if (P21_MatchPrefix((const uint8_t*)"abc1", (const uint8_t*)"abc") != 3) f++;
   if (P21_MatchPrefix((const uint8_t*)"abcD", (const uint8_t*)"abc") != 0) f++;
   if (P21_MatchPrefix((const uint8_t*)"abx", (const uint8_t*)"abc") != 0) f++;
-  P21_EntryCount = 2; memset(P21_Entries, 0, sizeof P21_Entries);
+  P21_EntryCount = 2; memset(P21_Entries, 0, 0x40 * 0x54);   /* whole table (P21_Entries is a pointer macro) */
   P21_Entries[1] = 1; int32_t o = 9; memcpy(P21_Entries + 0x28, &o, 4);
   P21_Entries[0x54 + 0x13] = 8; memcpy(P21_Entries + 0x54 + 0x28, &o, 4);
   if (P21_CountActiveEntries(9) != 2 || P21_CountActiveEntries(1) != 0) f++;
@@ -3955,10 +3955,9 @@ static int test_p87(void) {
     memcpy(&st, o, 4); memcpy(&m, o + 4, 4); memcpy(&x, o + 8, 4); memcpy(&y, o + 12, 4); memcpy(&z, o + 16, 4); memcpy(&ang, o + 0x18, 4); memcpy(&fl, o + 0x1c, 4);
     CK(st == 77 && m == 5 && x == 10 && y == -20 && z == 30 && ang == -3 && fl == 1); }
   CK(P87_SlotLump[2] == 0 && P87_SlotLumpA[2] == 0);
-  /* плитка вне диапазона не трогает слот; DrawCells без модели ничего не рисует */
+  /* плитка вне диапазона не трогает слот; объект без модели ничего не рисует */
   P87_LoadTile(5, 1); CK(P87_SlotLumpA[1] != 5);
   { uint8_t obj[0x20]; memset(obj, 0, sizeof obj); int32_t mi = 5; memcpy(obj + 4, &mi, 4); P79_ModelTab[5] = 0; P87_DrawObjA(obj); P87_DrawObjB(obj); }
-  CK(P87_DrawCells(0, 0, 1) == 0);
   free(G6_00CE0F20); free(G6_00D01268); free(G6_00D00208);
   G6_00CE0F20 = s_nodes; G6_00D01268 = s_heads; G6_00D00208 = s_objs; P54_GridN = s_n; P54_Cnt1E0 = s_c; P76_NumSlots = s_ns; P80_Cols = s_cols; P72_Rows = s_rows; P80_LumpTab[0] = s_lump;
   P54_RoadA[2] = s_ra; P54_RoadB[2] = s_rb;
@@ -6645,8 +6644,10 @@ static int test_real_level(void) {
     for (int t = 0; t < 64; t++) if (hist[t]) fprintf(stderr, " %d:%ld", t, hist[t]);
     fprintf(stderr, "\n");
   }
-  int real_map = getenv("RE_REAL_MAP") != NULL;   /* v1.35: город через P89_DrawMap (004ee8f4) — обход клеток вокруг камеры по FRUSTRUM.DAT */
-  if ((getenv("RE_REAL_CITY") || real_map) && getenv("RE_REAL_PNG") && gl_ok) {   /* город: плитки карты вокруг выбранной клетки → P87_DrawCells / P89_DrawMap → PNG */
+  /* v1.35: город через P89_DrawMap (004ee8f4) — обход клеток вокруг камеры по FRUSTRUM.DAT.  cleanup/round2: RE_REAL_CITY
+     (раньше — упрощённый обход P87_DrawCells без адреса в Game.exe) теперь синоним RE_REAL_MAP. */
+  int real_map = getenv("RE_REAL_MAP") != NULL || getenv("RE_REAL_CITY") != NULL;
+  if (real_map && getenv("RE_REAL_PNG") && gl_ok) {   /* город: блок карты вокруг выбранной клетки → P89_DrawMap → PNG */
     static uint32_t px[640 * 480];
     int32_t N = P54_GridN, cols = P80_Cols, bestl = -1, bestc = -1;
     for (int32_t l = 0; l < P76_NumSlots && l < 1024; l++) {
@@ -6658,11 +6659,6 @@ static int test_real_level(void) {
     int32_t tx = bestl % cols, ty = bestl / cols;
     fprintf(stderr, "city: N=%d cols=%d rows=%d lump %d (tile %d,%d) instances %d\n", (int)N, (int)cols, (int)P72_Rows, (int)bestl, (int)tx, (int)ty, (int)bestc);
     int32_t ccx = tx * N + N / 2, ccy = ty * N + N / 2;              /* клетка в середине плитки */
-    if (!real_map) for (int dy = -1; dy <= 1; dy++) for (int dx = -1; dx <= 1; dx++) {
-      int32_t ax = tx + dx, ay = ty + dy; if (ax < 0 || ay < 0 || ax >= cols || ay >= P72_Rows) continue;
-      if (dx > 0 || dy > 0) { if (dx > 0 && dy > 0) continue; }
-      P87_LoadTile(ay * cols + ax, (ax & 1) + (ay & 1) * 2);
-    }
     { uint8_t *ob = (uint8_t *)G6_00D00208 + (size_t)(P54_Cnt1E0 + ((tx & 1) + (ty & 1) * 2) * 0x2000) * 0x20; float mn[3] = { 1e30f, 1e30f, 1e30f }, mx[3] = { -1e30f, -1e30f, -1e30f };
       for (int i = 0; i < bestc; i++, ob += 0x20) { float v[3]; memcpy(v, ob + 8, 12); for (int k = 0; k < 3; k++) { if (v[k] < mn[k]) mn[k] = v[k]; if (v[k] > mx[k]) mx[k] = v[k]; } }
       fprintf(stderr, "city: tile instances x %g..%g y %g..%g z %g..%g; CellX=%d CellY=%d Cell=%d\n", mn[0], mx[0], mn[1], mx[1], mn[2], mx[2], (int)P42_CellX, (int)P42_CellY, (int)P80_Cell); }
@@ -6695,7 +6691,7 @@ static int test_real_level(void) {
     int32_t ex = (int32_t)floorf((camx + (float)P42_CellX) / (float)P80_Cell), ey = (int32_t)floorf((camz + (float)P42_CellY) / (float)P80_Cell);
     fprintf(stderr, "city: cam %g %g %g -> cell %d,%d (tile centre cell %d,%d)\n", camx, camy, camz, (int)ex, (int)ey, (int)ccx, (int)ccy);
     int32_t drawn = 0;
-    if (real_map) {
+    {
       /* как в игре: клетка камеры (004edd08) → её блок карты в слот → 004ee8f4(0) подгружает соседей у границы и считает маску
          видимости → 004ee8f4(1) обходит клетки сектора FRUSTRUM.DAT по курсу P59_AngB → таблицы A/B (004ef309/004ef364) */
       int32_t fr = P55_LoadFrustum();
@@ -6723,11 +6719,11 @@ static int test_real_level(void) {
       fprintf(stderr, "map: DrawMap triangles %d, tables A %d B %d -> +%d, four %d seven %d shadow %d\n", (int)(t1 - t0), (int)na, (int)nb, (int)(P85_Tris - t1), (int)P89_CntFour, (int)P89_CntSeven, (int)P89_CntShadow);
       drawn = t1 - t0 + na + nb;
       if (re_dd_on) { re_dd_on = 0; re_oow_n = 0xdbba; P11_01270c24 = dd_far0; Q01270C24 = dd_q0; re_gfx()->draw_distance = 1.0; }
-    } else drawn = P87_DrawCells(ex, ey, getenv("RE_REAL_R") ? atoi(getenv("RE_REAL_R")) : 4);
+    }
     fprintf(stderr, "city: objects drawn %d, triangles %d (blend 0/1/2/3: %d/%d/%d/%d)\n", (int)drawn, (int)P85_Tris, (int)P85_TrisBy[0], (int)P85_TrisBy[1], (int)P85_TrisBy[2], (int)P85_TrisBy[3]);
     if (plat_render_readback(px) == 0) png_write_rgba(getenv("RE_REAL_PNG"), px, 640, 480);
   }
-  if (getenv("RE_REAL_PNG") && !getenv("RE_REAL_CITY") && !real_map && P20_Count > 0) {   /* самая «плотная» модель уровня → P84_DrawModel → текстуры страниц LEV → PNG */
+  if (getenv("RE_REAL_PNG") && !real_map && P20_Count > 0) {   /* самая «плотная» модель уровня → P84_DrawModel → текстуры страниц LEV → PNG */
     int best = -1, bn = 0;
     for (int i = 0; i < P20_Count && i < 1126; i++) {
       uint32_t ref = P79_ModelTab[i]; if (!ref) continue;

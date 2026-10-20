@@ -53,7 +53,6 @@ void P87_DrawObjA(const uint8_t *obj);           /* 004ee18b */
 void P87_DrawObjB(const uint8_t *obj);           /* 004ee4b7 */
 /* Не из оригинала (упрощённый вариант 004ee8f4 без маски видимости): нарисовать объекты клеток квадрата радиуса r вокруг клетки (cx, cy)
    — по спискам плиток, загруженных в слоты; метка кадра = P44_XformTag. Возвращает число нарисованных объектов. */
-int32_t P87_DrawCells(int32_t cx, int32_t cy, int32_t r);
 /* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
 #if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
 #undef P87_CntA
