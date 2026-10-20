@@ -120,7 +120,7 @@ enum {
   OBJ_CLASS_LIST_A   = 2,   /* queued in P55_TabA, drawn by the caller later */
   OBJ_CLASS_SHADOW   = 3,   /* queued; drawn last, alpha-blended, lifted 4 units, by day only */
   OBJ_CLASS_ALPHA    = 4,   /* queued; drawn with alpha test (cut-out textures) */
-  OBJ_CLASS_OPTIONAL = 5,   /* drawn at once only when 00575ee8 is set (Detail menu 0054a470 entry 13 "Transparent Water", ToggleEF8_575EE8; label by text order, inferred) */
+  OBJ_CLASS_OPTIONAL = 5,   /* drawn at once only when 00575ee8 is set (Detail menu 0054a470 entry 13 "Transparent Water", MenuToggle575EE8Redraw; label by text order, inferred) */
   OBJ_CLASS_LIST_B   = 6,   /* queued in P55_TabB */
   OBJ_CLASS_SEVEN    = 7    /* queued; drawn first with render state 0x13.  TODO(RE): unsure what they are */
 };
@@ -128,7 +128,6 @@ enum {
 enum { GR_CMP_GREATER = 4, GR_CMP_ALWAYS = 7 };
 
 /* rd16s — local helper: unaligned int16 read. */
-static int16_t rd16s(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 
 /* разложить объект o по классам (общая часть обоих ветвей 004ee8f4) */
 /* put_obj — local helper (shared by both walks of 004ee8f4): unless object o was already handled this frame
@@ -207,7 +206,7 @@ static int dd_load(dd_blk *b, int32_t lump) {
   int32_t n = rd32(cur); cur += 4;
   if (n < 0 || n > 0x5000) return 0;
   for (int32_t i = 0; i < n; i++) {
-    uint32_t a = (uint32_t)(uint16_t)rd16s(cur + i * 4), nb = (uint32_t)(uint16_t)rd16s(cur + i * 4 + 2);
+    uint32_t a = (uint32_t)(uint16_t)rds16(cur + i * 4), nb = (uint32_t)(uint16_t)rds16(cur + i * 4 + 2);
     int32_t na = (int32_t)a, nx = nb == 0xffff ? -1 : (int32_t)nb;
     memcpy(b->nodes + (size_t)i * 8, &na, 4); memcpy(b->nodes + (size_t)i * 8 + 4, &nx, 4);
   }
@@ -217,16 +216,16 @@ static int dd_load(dd_blk *b, int32_t lump) {
   uint8_t kind = cur[4];
   const uint8_t *cd = cur + 5, *after = cur + 4 + sz;
   if (kind == 1) {
-    for (int32_t i = 0; i < cells; i++) { uint16_t v = (uint16_t)rd16s(cd + i * 2); b->heads[i] = v == 0xffff ? -1 : (int32_t)v; }
+    for (int32_t i = 0; i < cells; i++) { uint16_t v = (uint16_t)rds16(cd + i * 2); b->heads[i] = v == 0xffff ? -1 : (int32_t)v; }
   } else if (kind == 2) {
-    uint32_t bit = 0x8000; int16_t mask = rd16s(cd); cd = cur + 7;
+    uint32_t bit = 0x8000; int16_t mask = rds16(cd); cd = cur + 7;
     for (int32_t i = 0; i < cells; i++) {
       int32_t v;
       if (((int32_t)mask & bit) == 0) v = -1;
-      else { v = (int32_t)(uint16_t)rd16s(cd); cd += 2; }
+      else { v = (int32_t)(uint16_t)rds16(cd); cd += 2; }
       b->heads[i] = v;
       bit = (uint32_t)((int32_t)bit >> 1);
-      if (bit == 0) { bit = 0x8000; mask = rd16s(cd); cd += 2; }
+      if (bit == 0) { bit = 0x8000; mask = rds16(cd); cd += 2; }
     }
   } else {
     for (int32_t i = 0; i < cells; i++) b->heads[i] = -1;
@@ -236,8 +235,8 @@ static int dd_load(dd_blk *b, int32_t lump) {
   if (cnt > 0x2000) cnt = 0x2000;
   for (int32_t i = 0; i < cnt; i++, rec += 0x14) {
     uint8_t *o = b->objs + (size_t)i * 0x20;
-    uint32_t stamp = P44_XformTag; uint16_t m = (uint16_t)rd16s(rec); uint32_t mi = m & 0x7fff;
-    int32_t ang = rd16s(rec + 0x10), flag = (m & 0x8000) ? 1 : 0;
+    uint32_t stamp = P44_XformTag; uint16_t m = (uint16_t)rds16(rec); uint32_t mi = m & 0x7fff;
+    int32_t ang = rds16(rec + 0x10), flag = (m & 0x8000) ? 1 : 0;
     memset(o, 0, 0x20);
     memcpy(o, &stamp, 4); memcpy(o + 4, &mi, 4);
     memcpy(o + 8, rec + 4, 4); memcpy(o + 0xc, rec + 8, 4); memcpy(o + 0x10, rec + 0xc, 4);
@@ -374,12 +373,12 @@ void P89_DrawMap(int32_t mode) {
   int32_t cx = P88_CellA.x;
   const uint8_t *frust_row = (const uint8_t *)P55_Frustum + (size_t)((((int32_t)(int16_t)P59_AngB + (((int32_t)(int16_t)P59_AngB >> 31) & 0xf)) >> 4) * 0x80);
   int32_t x0 = cx - 0xf;
-  int32_t y0 = P88_CellA.y - 0xf + rd16s(frust_row);
+  int32_t y0 = P88_CellA.y - 0xf + rds16(frust_row);
   P89_CntSeven = 0; P55_CntB = 0; P89_CntFour = 0; P55_CntA = 0; P89_CntShadow = 0;
   P88_CellA.py = (uint8_t)(y0 / tile_n);
   int32_t ry = y0 - ((y0 / tile_n) & 0xff) * tile_n;
   int32_t nn = tile_n * tile_n;
-  int32_t first_row = rd16s(frust_row), end_row = first_row + rd16s(frust_row + 2);
+  int32_t first_row = rds16(frust_row), end_row = first_row + rds16(frust_row + 2);
   const uint8_t *light_row = (const uint8_t *)P82_LightGrid + (size_t)first_row * P21_GridStride;
   P44_MatPtr = (float *)P44_ViewMatT;
   int32_t *heads = (int32_t *)G6_00D01268;
@@ -430,10 +429,10 @@ void P89_DrawMap(int32_t mode) {
 #endif
   else {
     for (int32_t row_i = first_row; row_i < end_row; row_i++) {
-      int32_t c = rd16s(frust_row + (size_t)(row_i * 2 + 2) * 2);
+      int32_t c = rds16(frust_row + (size_t)(row_i * 2 + 2) * 2);
       if (c != -1) {
         int32_t x = c + x0;
-        int32_t cend = c + rd16s(frust_row + (size_t)(row_i * 2 + 3) * 2);
+        int32_t cend = c + rds16(frust_row + (size_t)(row_i * 2 + 3) * 2);
         P88_CellA.px = (uint8_t)(x / tile_n);
         int32_t rx = x - ((x / tile_n) & 0xff) * tile_n;
         for (; c < cend; c++) {

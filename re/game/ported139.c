@@ -26,6 +26,11 @@
      004f8b0a — массив/запись/имя — синтетические адреса re_ptr_register_dyn, освобождение снимает регистрацию; 0040fa60/00410c30 — таблицы
      0054c1e0/0054c530 и пункты 0054c030/0054c350 читаются через re_ptr/re_fn (нет области — обработчик/мигание пропускаются);
      00519408 — буферы 00c4d720 — uint32-адреса (re_ptr + re_ptr_unregister). */
+#if defined(__GNUC__) && !defined(__clang__)
+/* Paths here are built with bounded snprintf into fixed buffers (Game.exe used unbounded sprintf); an over-long
+   name is truncated on purpose.  The warning is silenced rather than the buffers resized, so the code is unchanged. */
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
 #include "ported139.h"
 #include "ported141.h"
 #include <string.h>

@@ -214,8 +214,6 @@ int32_t P125_ModelNamesSize;
 
 #include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 
 #define P125_BLK(off) (*(int32_t *)&P56_Blk84[((off) - 0x00c810c0) / 4])   /* поля внутри P56_Blk84 */
 #define P125_Car0X CARTAB_VAR(int32_t, P125_Car0X, 0x00d07800)

@@ -65,7 +65,6 @@ p115_i4_t P115_Tgt;
 #endif
 
 #include "memrw.h"
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static float f_of(int32_t i) { float f; memcpy(&f, &i, 4); return f; }
 static int32_t i_of(float f) { int32_t i; memcpy(&i, &f, 4); return i; }
 #ifdef RE_HOOK_BUILD

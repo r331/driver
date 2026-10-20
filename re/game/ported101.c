@@ -352,9 +352,6 @@ p101_pal_t P101_PalLfb;
 #include "memrw.h"
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
-static uint32_t fbits(float v) { uint32_t u; memcpy(&u, &v, 4); return u; }
 static int32_t fx12(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b + 0x800u) >> 12; }
 static uint8_t *texpage(uint32_t slot) { return (uint8_t *)re_ptr((uint32_t)rd32(&g_01145a60[slot * 0x10 + 4])); }
 /* запись модели машины m (00d0cc60 + m*0x16c); в native — в пределах S_00D0CC60 (0x4000 байт), иначе нули */
@@ -1170,14 +1167,7 @@ void P101_Proj(float *v) {
   v[4] = py + P43_OffY - P43_Half;
 }
 
-/* Fills rows of a 640-byte-pitch buffer with colour c. */
-/* ---- 005291ed: заливка rows строк (шаг 640 байт) по w байт блоками 32 байтом c ---- */
-void P101_FillRows(uint8_t *dst, int32_t w, int32_t rows, uint8_t c) {
-  uint32_t v = (uint32_t)c * 0x01010101u;
-  for (; rows > 0; rows--, dst += 0x280)
-    for (int32_t x = 0; x < w; x += 0x20)
-      for (int32_t j = 0; j < 8; j++) memcpy(dst + x + j * 4, &v, 4);
-}
+/* 005291ed (row fill) is ported once, as P152_FillRows (ported152.c). */
 
 /* Converts rows of 640 palette indices to 16-bit pixels. */
 /* ---- 00529253: строки 640 индексов → 16-битные пиксели по P101_PalLfb (шаг строки P100_LfbPitch) ---- */

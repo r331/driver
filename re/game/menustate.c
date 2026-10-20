@@ -416,8 +416,10 @@ uint8_t MenuFlag54A92C;
 #pragma pop_macro("MenuFlag54A92C") /*gvi*/
 #pragma pop_macro("MenuFlag54A92C")
 #endif
-/* Enter / leave pairs of the menu modes 1..7 in MenuMode1271060: entering sets the mode and its highlight flag,
-   leaving with v == 0 clears the flag.  TODO(RE): unsure which screens the modes are. */
+/* Enter / leave pairs of the menu modes 1..7 in MenuMode1271060: entering sets the mode and its highlight flag
+   (a byte, as Game.exe's movb), leaving with v == 0 clears the flag.  Driving Games menu 0054a968 (RE_PROBE menu
+   walk): mode 4 Pursuit, 5 Getaway, 2 Cross Town Checkpoint, 1 Trail Blazer, 3 Survival, 6 Dirt Track (then
+   Practice 6 / Time Trial 0xb), 7 Carnage. */
 /* MenuEnterMode2 — Game.exe 0040a625 */
 void MenuEnterMode2(void) { MenuFlag54A90C = 1; MenuMode1271060 = 2; }
 /* MenuLeaveMode2 — Game.exe 0040a63b */

@@ -434,9 +434,6 @@ void P97_InitConsts(void) {
 }
 
 #include "memrw.h"
-static uint16_t rd16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(uint8_t *p, uint16_t v) { memcpy(p, &v, 2); }
-static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 static const char *str_at(uint32_t a) { const char *s = (const char *)re_ptr(a); return s ? s : ""; }
 static uint8_t *link(const uint8_t *field) { return (uint8_t *)re_rd_ptr(field); }  /* поле-указатель записи */
 
@@ -565,7 +562,7 @@ void P97_LfbSnap(uint8_t *out) {
   for (int32_t y = 0; y < P19_ScrH; y++) {
     const uint8_t *p = row;
     for (int32_t x = 0; x < P19_ScrW; x++) {
-      uint16_t v = rd16(p); p += 2;
+      uint16_t v = rdu16(p); p += 2;
       out[0] = (uint8_t)((v & 0x1f) << 3);
       out[1] = (uint8_t)((v & 0x7e0) >> 3);
       out[2] = (uint8_t)((v >> 8) & 0xf8);
@@ -606,7 +603,7 @@ void P97_ObjsFromScript(void) {
     uint32_t f = (uint32_t)rd32(o + 0x10);
     if ((f & 1) == 0 || (f & 8) == 0) continue;
     for (uint8_t *n = P15_ListHead; n != NULL; n = link(n + 0x20)) {
-      if ((rd16(n) & 8) != 0 && (uint32_t)rd16(n + 6) == (uint32_t)rd32(o + 0xc)) {
+      if ((rdu16(n) & 8) != 0 && (uint32_t)rdu16(n + 6) == (uint32_t)rd32(o + 0xc)) {
         uint8_t *c = link(n + 0x1c);
         if (c != NULL) {
           P11_00ba52d0 = fround(rdf(c)); wr32(o + 0x14, P11_00ba52d0);
@@ -623,7 +620,7 @@ void P97_ObjsFromScript(void) {
 void P97_ScriptResetCur(void) {
   uint8_t *cur = P15_ListCur;
   uint8_t *c = link(cur + 0x1c);
-  wr16(cur, (uint16_t)(rd16(cur) | 2));
+  wr16(cur, (uint16_t)(rdu16(cur) | 2));
   for (; c != NULL; c = link(c + 0x58)) {
     wr32(c + 8, 0); wr32(c + 4, 0); wr32(c, 0);
     wr32(c + 0x30, 0); wr32(c + 0x2c, 0); wr32(c + 0x28, 0);
@@ -661,10 +658,10 @@ void P97_ScriptLoad(const uint8_t *in) {
 /* 004d156a: операция скрипта — переход к следующему узлу (если он с флагом 0x20 — к id+1 текущего) */
 int32_t P97_ScriptOpNext(void) {
   P10_ScriptPtr += 2;
-  uint16_t c = rd16(P10_ScriptPtr);
+  uint16_t c = rdu16(P10_ScriptPtr);
   P10_ScriptPtr += 2;
   uint8_t *nx = link(P15_ListCur + 0x20);
-  if (nx != NULL && (rd16(nx) & 0x20) != 0) c = (uint16_t)(rd16(P15_ListCur + 6) + 1);
+  if (nx != NULL && (rdu16(nx) & 0x20) != 0) c = (uint16_t)(rdu16(P15_ListCur + 6) + 1);
   else if (c == 0) return 1;
   P65_Fn4CFE69(c);
   return 1;
@@ -678,14 +675,14 @@ void P97_ScriptEach(int32_t a, int32_t b, int32_t c) {
 /* v1.74: вариант с родными указателями — вызов из P129_CarObjects */
 void P97_ScriptEachP(const float *a, uint8_t *b, int32_t c) {
   for (uint8_t *n = P15_ListHead; n != NULL; n = link(n + 0x20)) {
-    if ((rd16(n) & 2) == 0) continue;
+    if ((rdu16(n) & 2) == 0) continue;
     for (uint8_t *o = link(n + 0x1c); o != NULL; o = link(o + 0x58)) {
-      if ((rd16(o + 0x48) & 0x200) != 0) continue;
+      if ((rdu16(o + 0x48) & 0x200) != 0) continue;
       uint8_t tmp[0x1c]; memset(tmp, 0, sizeof tmp);
-      uint16_t m = rd16(o + 0x4a);
+      uint16_t m = rdu16(o + 0x4a);
       wr32(tmp + 4, m);
       memcpy(tmp + 8, o, 16);
-      wr32(tmp + 0x18, (int16_t)rd16(o + 0x12));
+      wr32(tmp + 0x18, (int16_t)rdu16(o + 0x12));
       P129_ObjBoxes(tmp, a, b, c, (uint32_t)P28_EventModels[m], 0);
     }
   }
@@ -773,7 +770,7 @@ void P97_MenuCall2(uint32_t tab, int32_t sel, uint32_t items) {
 #ifndef RE_HOOK_BUILD
   if (t == NULL || it == NULL) return;
 #endif
-  for (int32_t i = 0; (int16_t)rd16(it + i * 0x10) != -1; i++) { it[0xc + i * 0x10] = 0xff; it[0xd + i * 0x10] = 0xff; it[0xe + i * 0x10] = 0xff; }
+  for (int32_t i = 0; (int16_t)rdu16(it + i * 0x10) != -1; i++) { it[0xc + i * 0x10] = 0xff; it[0xd + i * 0x10] = 0xff; it[0xe + i * 0x10] = 0xff; }
   for (int32_t i = 0; rd32(t + 8 + i * 0x10) != 0; i++) menu_call((uint32_t)rd32(t + 4 + i * 0x10), 2);
   menu_call((uint32_t)rd32(t + sel * 0x10), 2);
 }
@@ -910,7 +907,7 @@ void P97_KickDebris(const int32_t *pos) {
   if (P16_FlagA != 0) return;
   for (int32_t k = 0; k < 100; k++) {
     uint8_t *r = P97_Debris + k * 0x3c;
-    if ((rd16(r + 0x22) & 2) == 0 || !(-200.0f < (float)pos[1] + rdf(r + 4))) continue;
+    if ((rdu16(r + 0x22) & 2) == 0 || !(-200.0f < (float)pos[1] + rdf(r + 4))) continue;
     P11_00ba52d0 = fround(rdf(r));
     int32_t dx = pos[0] - P11_00ba52d0;
     P11_00ba52d0 = fround(rdf(r + 8));

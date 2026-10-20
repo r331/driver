@@ -105,6 +105,7 @@ static const float   k_553848 = 1.0f;     /* .data 00553848: масштаб ра
 static const int32_t k_553854 = 1;        /* .data 00553854: 1 — проверка видимости треугольниками, 0 — через LFB */
 
 static float u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
+#define RE_MEMRW_LOCAL16   /* keep the local 16-bit helpers below (hook object identity, see memrw.h) */
 #include "memrw.h"
 static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 static int32_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }

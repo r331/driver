@@ -573,7 +573,7 @@ int32_t P62_ModelLookup(const char *name, uint16_t *out) {
   return 1;
 }
 
-/* P62_FindFreeTrafficSlot — Game.exe 004a6749 (same as P14_Fn004A6749): allocate one of the 8 cop-AI slots (0x112da00,
+/* P62_FindFreeTrafficSlot — Game.exe 004a6749 (single port of this address): allocate one of the 8 cop-AI slots (0x112da00,
    0xcd8 bytes; free when +0xcb4 == 0), clear it and store its index; returns index + 1 or -1. */
 int32_t P62_FindFreeTrafficSlot(void) {
   uint8_t *base = (uint8_t *)P12_0112da00;
@@ -647,7 +647,7 @@ int32_t P62_SaveScores(void *file) {
   return 1;
 }
 
-/* P62_MenuBusy — Same as MenuAnyFlag00413DF3: 1 if any of the option words 00bdfa44..58 is set (00bdfa50 only
+/* P62_MenuBusy — Game.exe 00413df3: 1 if any of the option words 00bdfa44..58 is set (00bdfa50 only
    outside menu mode 7). */
 int32_t P62_MenuBusy(void) {
   if (P62_BusyA == 0 && P62_BusyB == 0 && P62_BusyC == 0 && (P62_BusyD == 0 || P62_Menu1271060 == 7) && P62_BusyE == 0) return 0;
@@ -700,7 +700,7 @@ void P62_LoadMapHeader(void *file, int32_t size) {
   P27_ReadChunked(P62_MapBuf, 1, size - 8, file);
 }
 
-/* P62_ParticleSet — Same as SetObjState_00514C72: object state p +4 = kind, +0x24 = a, +0x40 = b, +0xc = flags | 0x80. */
+/* P62_ParticleSet — Game.exe 00514c72: object state p +4 = kind, +0x24 = a, +0x40 = b, +0xc = flags | 0x80. */
 void P62_ParticleSet(uint8_t *p, int32_t kind, int32_t a, uint32_t flags, int32_t b) {
   wr16(p, 4, (uint16_t)kind);
   wr32(p, 0x24, a);

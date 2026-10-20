@@ -746,11 +746,6 @@ void MenuMusic0050F8A2(void) {
 }
 /* MenuMusic0050F8CC — Game.exe 0050f8cc, cdecl.  Toggle 00b87e94 and pass it to 0052369b.  00b87e94 = "Doppler Effect" option (Sound menu entry 5 calls ToggleOpt004154CD on the same word). */
 void MenuMusic0050F8CC(void) { Q00B87E94 = Q00B87E94 ^ 1; Call0052369B(Q00B87E94); Call0050F7B2(); }
-/* MenuAnyFlag00413DF3 — Game.exe 00413df3, cdecl.  1 if any of the option words 00bdfa44..58 is set (00bdfa50 only outside menu mode 7). */
-int32_t MenuAnyFlag00413DF3(void) {
-    if (G00BDFA44 == 0 && G00BDFA48 == 0 && G00BDFA4C == 0 && (G00BDFA50 == 0 || G01271060 == 7) && G00BDFA58 == 0) return 0;
-    return 1;
-}
 
 /* ---- запись состояния кнопок меню: байт состояния в записи, смещение зависит от режима ---- */
 /* btn_state — Mark a button record byte of 005fe9b8 as 2 when p == 0; the offset depends on mode 005fe9bc (1: off1, 0/2: off2). */
@@ -831,8 +826,6 @@ void SoundMenuSave0051080E(void) { G6_005755C8 = Call0042655A(0); if (FnPtr01270
 int32_t DrvCall004246D1(int32_t a) { return G00B1C0D4 == 0 ? 1 : G6_01270D20(a); }
 /* DrvSetMode0042655A — Game.exe 0042655a, cdecl.  Set render mode a through Glide cell 01270d28; returns the previous mode. */
 int32_t DrvSetMode0042655A(int32_t a) { int32_t old = G6_00B1C224; G6_00B1C224 = a; G6_01270D28(a); return old; }
-/* ClearHandles005223BE — Game.exe 005223be, cdecl.  Clear the window handles 00bdf9c0/00bdf9c4 and reset the slot table. */
-void ClearHandles005223BE(void) { G6_00BDF9C0 = 0; G6_00BDF9C4 = 0; G6Call004A2B70(); }
 /* StartAudio005233A0 — Game.exe 005233a0, cdecl.  Enumerate sound drivers once if sound is not running and none were found yet. */
 void StartAudio005233A0(void) { if (G6_00B91CF4 == 0 && G6_00B91D2C == 0) P148_SndEnum(); }
 /* NoopFn00528455 — Game.exe 00528455, cdecl.  finit; fldcw 0057a0e2 — back to the round-to-nearest x87 control word at

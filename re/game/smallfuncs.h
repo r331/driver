@@ -387,7 +387,7 @@ int32_t PoolPop004AC726(void);
 int32_t PoolPop004AC6D0(void);
 int32_t CounterDecrement004D97B8(void);
 int32_t AllocSlot00492508(void);
-uint32_t PackRGB00503ECC(uint8_t* p);
+uint32_t PackRGB00503ECC(const uint8_t* p);
 int32_t IsKeyOnly004E38B4(void);
 int32_t IsKeyOnly004E38D9(void);
 int32_t ExchangeTable00522F2A(int32_t i, int32_t v);

@@ -216,7 +216,6 @@ static int32_t fx(int32_t a, int32_t b) { return (int32_t)((uint32_t)mul(a, b) +
 /* rd16 — Unaligned int16 read. */
 static int16_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 /* wrf — Store a float into a uint32 slot (bit copy). */
-static void wrf(uint32_t *p, float v) { memcpy(p, &v, 4); }
 
 /* P94_ReadIdent — Game.exe 004a522a, cdecl.  Copy an identifier [A-Z0-9_] from src to dst (NUL-terminated), upper-casing src in place.
    Returns the first character after it; an identifier may not start with a digit (dst = ""). */

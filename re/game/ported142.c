@@ -182,6 +182,7 @@ int32_t P142_B2F304;
 #define W(x)  ((int32_t)(uint32_t)(int64_t)(x))
 #define L(x)  ((int64_t)(x))
 static int32_t dv(int32_t v, int sh) { return (int32_t)((uint32_t)v + ((uint32_t)(v >> 31) & ((1u << sh) - 1u))) >> sh; }  /* v / 2^sh к нулю */
+#define RE_MEMRW_LOCAL16   /* keep the local 16-bit helpers below (hook object identity, see memrw.h) */
 #include "memrw.h"
 static void add32(uint8_t *p, int32_t v) { wr32(p, W(L(rd32(p)) + v)); }
 static int32_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }

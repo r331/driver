@@ -297,7 +297,6 @@ extern p14_00b20360_t P14_00b20360;
 #pragma pop_macro("P14_00b20360") /*gvi*/
 #endif
 void P14_Fn004CAC86(void);
-void P14_Fn004E12E4(void);
 void P14_Fn0051BD9C(void);
 void P14_Fn0048DB65(void *p, uint32_t n);
 void P14_Fn00503EF4(const uint8_t *a, const uint8_t *b, uint8_t *out);
@@ -309,7 +308,6 @@ void P14_Fn004CAD47(void);
 void P14_Fn004A3B80(const uint8_t *p);
 void P14_Fn004A39F6(const uint8_t *p);
 void P14_Fn0050D97A(const uint32_t *a, uint32_t *b, int32_t n);
-int32_t P14_Fn004A6749(void);
 void P14_Fn0051BED5(void);
 void P14_Fn004A7E6E(int32_t a);
 void P14_Fn004D623B(int32_t a);

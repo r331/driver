@@ -101,7 +101,7 @@ static const re_region_t k_regions[] = {
   { 0x00574710u, P127_PauseMenu, sizeof P127_PauseMenu },       /* v1.72: .data меню паузы 00574710..00574f08 (game/p127_data.h) */
   { 0x0054cf80u, P127_NameMenu, sizeof P127_NameMenu },         /* v1.72: .data экрана ввода имени */
   { 0x005fe97cu, P127_Cursor, sizeof P127_Cursor },             /* v1.72: строка курсора (адрес в P127_NameMenu) */
-  { 0x00b5a48cu, P125_FpsStr, sizeof P125_FpsStr },             /* v1.70: строка fps/языка меню управления (адрес в P117_MenuB) */
+  { 0x00b5a48cu, (uint8_t *)P125_FpsStr, sizeof P125_FpsStr },             /* v1.70: строка fps/языка меню управления (адрес в P117_MenuB) */
   { 0x00b5c950u, P116_SkidRecA, sizeof P116_SkidRecA },         /* v1.62: таблицы следов шин (адреса записей в P117_SkidLastA/B) */
   { 0x00b6e950u, P116_SkidRecB, sizeof P116_SkidRecB },
   { 0x010f5160u, P95_ObjA, sizeof P95_ObjA },
@@ -184,10 +184,10 @@ static const re_fnent_t k_fns[] = {
   { 0x0041ed98u, (re_fn_t)P151_WinOpen },
   /* v1.58: обработчики таблицы меню опций 0057b5a8 (004048dd) */
   { 0x00404e52u, (re_fn_t)MenuRowsTo3_00404E52 },  { 0x00404e7eu, (re_fn_t)MenuRowsIf0To2_00404E7E },
-  { 0x00404eb0u, (re_fn_t)ToggleBDFA44_Call40500D }, { 0x00404ec9u, (re_fn_t)ToggleBDFA48_Call40500D },
-  { 0x00404ee2u, (re_fn_t)ToggleBDFA4C_Call40500D }, { 0x00404efbu, (re_fn_t)ToggleBDFA50_Call40500D },
-  { 0x00404f14u, (re_fn_t)ToggleBDFA54_Call40500D }, { 0x00404f2du, (re_fn_t)ToggleB87E9C_Call40500D },
-  { 0x00404f46u, (re_fn_t)ToggleBDFA58_Call40500D }, { 0x00404f5fu, (re_fn_t)Set575EF0_4Ret0 },
+  { 0x00404eb0u, (re_fn_t)MenuToggleOptBDFA44 }, { 0x00404ec9u, (re_fn_t)MenuToggleOptBDFA48 },
+  { 0x00404ee2u, (re_fn_t)MenuToggleOptBDFA4C }, { 0x00404efbu, (re_fn_t)MenuToggleOptBDFA50 },
+  { 0x00404f14u, (re_fn_t)MenuToggleOptBDFA54 }, { 0x00404f2du, (re_fn_t)MenuToggleOptB87E9C },
+  { 0x00404f46u, (re_fn_t)MenuToggleOptBDFA58 }, { 0x00404f5fu, (re_fn_t)MenuStateSetFour },
   { 0x00404f70u, (re_fn_t)P12_Fn00404F70 },        { 0x00404faeu, (re_fn_t)P12_Fn00404FAE },
   { 0x00404ffeu, (re_fn_t)MenuCallAction40CD17 },
   { 0x0048bcc0u, (re_fn_t)P50_SoundShutdown }, { 0x0048bd3bu, (re_fn_t)NoopFn0048bd3b },

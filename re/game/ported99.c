@@ -745,9 +745,7 @@ p99_rgb_t P99_Rgb8;
 #endif
 
 /* wrf / rd16 / wr16 — local helpers: unaligned float / uint16 access. */
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
 
 /* ---- 004a2e14: кресло в точке (x, y) клетки сетки P58_Grid — занять (флаг 1 записи, слот в A_01134540) ---- */
 /* P99_ChairHit — Game.exe 004a2e14.  Occupies the chair at (x, y) in its cell of P58_Grid (flag 1, slot in

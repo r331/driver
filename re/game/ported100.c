@@ -421,8 +421,6 @@ GAME_VAR_DEF(uint8_t *, P100_Mirror, 0x00b31f00)
 #include "carfields.h"
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static uint8_t *texpage(uint32_t slot) { return (uint8_t *)re_ptr((uint32_t)rd32(&g_01145a60[slot * 0x10 + 4])); }
 
 /* Replay menu: FFWD / PLAY / ACCEPT icons, number of visible items, playback speed of the item with flag 8. */

@@ -279,6 +279,7 @@ p127_f16_t P127_GoalPause;
 #endif
 #endif
 
+#define RE_MEMRW_LOCAL16   /* keep the local 16-bit helpers below (hook object identity, see memrw.h) */
 #include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }

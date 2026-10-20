@@ -525,7 +525,7 @@ int32_t P151_WinMain(int32_t hinst, int32_t prev, int32_t cmd, int32_t show) {
   P124_DebugLog("Mucho respectomondo to Driver PC coder(s): ");
   P124_DebugLog("Dirty Wayne, Evil Russ, Gentleman Jim, Guru Naif, Hodgy Hax, Steve Royston, Slurpy Chris.");
   P124_DebugLog((const char *)&P151_Empty14);
-  ClearHandles005223BE();
+  P30_InitWindowGlobals();
   P96_ResetDirector();
   if (P31_InitWindow((void *)(intptr_t)hinst, show) == 0) P30_FatalError("[WinMain] InitWindow failed");
   P55_PopSkip = 1;

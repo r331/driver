@@ -105,7 +105,6 @@ static const int32_t k_lift[8] = { 735, 580, 0, 1190, 0, 0, 0, 0 };
 #include "memrw.h"
 #include "carfields.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static uint16_t rdu16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 /* 32-bit helpers: M = wrapping imul, add32 = wrapping add in memory, f12 = round 20.12 to integer. */
 static int32_t M(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b); }   /* imul с переполнением */
 static void add32(uint8_t *p, int32_t d) { wr32(p, (int32_t)((uint32_t)rd32(p) + (uint32_t)d)); }

@@ -22,6 +22,11 @@
    00503ddf: 6 слов записи re_ptr(00c812bc) → 00b32a10 (режим 6) или 00503ef4(запись, 01271070, 00b32a10) и копия записи
    в 01271070; слово 00b32a14 = 8; 00503e83(*00b32a08, 00b32a10) ≠ 0 → копия в *00b32a08 (+4 = 8), 1. В native адрес
    01271088 (единственное значение 00b32a08 из P71_ScoreSetup) — слова P56_Blk11[10..15] и псевдонимы P71_S1271*. */
+#if defined(__GNUC__) && !defined(__clang__)
+/* Paths here are built with bounded snprintf into fixed buffers (Game.exe used unbounded sprintf); an over-long
+   name is truncated on purpose.  The warning is silenced rather than the buffers resized, so the code is unchanged. */
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
 #include "ported147.h"
 #include "mscript_ops.h"
 #include "unported.h"

@@ -135,8 +135,6 @@ int32_t P128_FreeCamLock;
 
 #include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static uint16_t rdu16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
 #define P128_CAR(i)  ((uint8_t *)&P99_Cars[(i)])
 /* Car record of traffic id i (index into the car table). */
 static uint8_t *tcar(int32_t i) {

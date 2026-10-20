@@ -112,6 +112,7 @@ int32_t P133_1137320;
 #endif
 
 static float u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
+#define RE_MEMRW_LOCAL16   /* keep the local 16-bit helpers below (hook object identity, see memrw.h) */
 #include "memrw.h"
 static int16_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }

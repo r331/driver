@@ -75,7 +75,6 @@ p114_rgb_t P114_Black;
 #include "../platform/native/reprobe.h"
 #endif
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 
 /* ---- 0041d53c: загрузка мип-уровня (режим D3D 1): 8-битная текстура при включённых списках — привязать узел палитры к слоту ---- */
 /* P114_TexDownloadMip — Game.exe 0041d53c.  Mip-level download in D3D mode 1: for an 8-bit page while

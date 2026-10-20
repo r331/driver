@@ -145,7 +145,6 @@ int32_t P122_Blink = 10;                     /* .data 0054e9d8 */
 #define SCRIPT_ERR_SYNTAX 9        /* parser error code returned by P122_SetVar */
 
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
 
 /* Общая часть 004accf0/004ac779: 4 вершины мира → кэш вершин 0..3, проекция, четырёхугольник записи rec. */
 /* Projects four world vertices v[] into vertex-cache entries 0..3 and draws record rec as a textured

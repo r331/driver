@@ -332,58 +332,8 @@ extern int32_t G00C55A04;
 extern int32_t G00D118C8;
 #pragma pop_macro("G00D118C8") /*gvi*/
 #endif
-void Set5F7E4C_1(void); /* 00404687 */
-void Set54A0CC_0(void); /* 0040844c */
-void Set54A0BC_1(void); /* 00408337 */
-void Set54A0BC_0(void); /* 00408343 */
-void Inc5D577C(void); /* 00408710 */
-void Set54A844_1(void); /* 0040a443 */
-void Set54A844_0(void); /* 0040a44f */
-void Set54A854_1(void); /* 0040a495 */
-void Set54A854_0(void); /* 0040a4a1 */
-int32_t Set575EF0_4Ret0(void); /* 00404f5f */
-int32_t ToggleBDFA44_Call40500D(void); /* 00404eb0 */
-int32_t ToggleBDFA48_Call40500D(void); /* 00404ec9 */
-int32_t ToggleBDFA4C_Call40500D(void); /* 00404ee2 */
-int32_t ToggleBDFA50_Call40500D(void); /* 00404efb */
-int32_t ToggleBDFA54_Call40500D(void); /* 00404f14 */
-int32_t ToggleB87E9C_Call40500D(void); /* 00404f2d */
-int32_t ToggleBDFA58_Call40500D(void); /* 00404f46 */
-int32_t ToggleEF8_55384C(void); /* 00408a69 */
-int32_t ToggleEF8_553850(void); /* 00408b03 */
-int32_t ToggleEF8_B31F04(void); /* 00408b9d */
-int32_t ToggleEF8_575F44(void); /* 00408d0c */
-int32_t ToggleEF8_55C974(void); /* 00408da6 */
-int32_t ToggleEF8_575F30(void); /* 00408e40 */
-int32_t ToggleEF8_B201DC(void); /* 00408eda */
-int32_t ToggleEF8_575EE8(void); /* 00408f74 */
-int32_t ToggleEF8_575F3C(void); /* 0040900e */
-int32_t ToggleEF8_D118C8(void); /* 004090a8 */
-int32_t RefreshMenu00409231(void); /* 00409231 */
-int32_t RefreshMenu004092D8(void); /* 004092d8 */
-int32_t RefreshMenu0040937F(void); /* 0040937f */
-int32_t RefreshMenu00409426(void); /* 00409426 */
-int32_t RefreshMenu004094CD(void); /* 004094cd */
-void Inc5759A4Max40(void); /* 00409b75 */
-void Dec5759A4Min0(void); /* 00409b9f */
-void IncB87E4CMax3(void); /* 00409c31 */
-void DecB87E4CMin0(void); /* 00409c5b */
-void Select54A90C_Mode2(void); /* 0040a625 */
-void Select54A91C_Mode1(void); /* 0040a64d */
-void Select54A8FC_Mode5(void); /* 0040a675 */
-void Select54A92C_Mode3(void); /* 0040a69d */
-void Select54A8EC_Mode4(void); /* 0040a6c5 */
-void Select54A94C_Mode7(void); /* 0040a6ed */
-void Select54A93C_Mode6(void); /* 0040a715 */
-void Clear54A90C_IfZero(int32_t a0); /* 0040a63b */
-void Clear54A91C_IfZero(int32_t a0); /* 0040a663 */
-void Clear54A8FC_IfZero(int32_t a0); /* 0040a68b */
-void Clear54A92C_IfZero(int32_t a0); /* 0040a6b3 */
-void Clear54A8EC_IfZero(int32_t a0); /* 0040a6db */
-void Clear54A94C_IfZero(int32_t a0); /* 0040a703 */
 void Menu549FBC(int32_t a0); /* 00407460 */
 void Menu549FCC(int32_t a0); /* 00407539 */
-void Copy54A0C0(void); /* 0040831c */
 void Copy54A838(void); /* 0040a41c */
 /* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
 #if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)

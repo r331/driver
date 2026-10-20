@@ -315,25 +315,6 @@ void P14_Fn004CAC86(void) {
   }
 }
 
-/* P14_Fn004E12E4 — Game.exe 004e12e4, cdecl.  Flipped-car timer: while 00d078b0 (wheels on the ground) < 3 (and not paused / 00b87ee4 clear) counts ticks in
-   00d0778c, otherwise resets it; past 300 ticks (600 when option 00bdfa58 or 00bdfa44 is set)
-   ends the level: 00c810c4 = 0xff0, 00c810e8 = 2, 00c81100 = 0x5a.
-   00d078b0 is the player's CAR_WHEELS_DOWN (car 0 + 0xf0): this is the flipped-car check — see P16_IdleTimer and
-   missionstate.h (MSTATE_FAILED, MREASON_FAILED). */
-void P14_Fn004E12E4(void) {
-  if (g_00c810c4 == 0xff0) return;
-  if (g_00d078b0 < 3) {
-    if (g_00b5a778 == 0 && g_00b87ee4 == 0) g_00d0778c++;
-  } else {
-    g_00d0778c = 0;
-  }
-  int32_t limit = (g_00bdfa58 == 0 && g_00bdfa44 == 0) ? 300 : 600;
-  if (limit < g_00d0778c) {
-    g_00c810c4 = 0xff0;
-    g_00c810e8 = 2;
-    g_00c81100 = 0x5a;
-  }
-}
 
 /* P14_Fn0051BD9C — Game.exe 0051bd9c, cdecl.  Traffic-light phase timer: when 00c4bdc4 runs out, both phase counters 00c29d80/00c29d81
    advance 1..4 (wrapping), the next period is 300 ticks for phases 1 and 3 and 100 otherwise
@@ -469,19 +450,6 @@ void P14_Fn0050D97A(const uint32_t *a, uint32_t *b, int32_t n) {
 }
 
 
-/* P14_Fn004A6749 — Game.exe 004a6749, cdecl.  Allocate one of the 8 entries of 0112da00 (0xcd8 bytes, free when word 0x32d is 0): clears it,
-   stores its index in word 0 and returns index + 1; -1 if all are used. */
-int32_t P14_Fn004A6749(void) {
-  for (int32_t i = 1; i <= 8; i++) {
-    uint32_t *e = &g_0112da00[(i - 1) * 0x336];
-    if (e[0x32d] == 0) {
-      P14_Fn0048DB65(e, 0xcd8);
-      e[0] = (uint32_t)(i - 1);
-      return i;
-    }
-  }
-  return -1;
-}
 
 /* P14_Fn0051BED5 — Game.exe 0051bed5, cdecl.  Mark plain road nodes: for each road slot (00c1ed80, 0x2c bytes, 00b5a8ec entries) byte 3 = 1
    when exactly two of its four neighbour links (int16 at +0xa, +0x12, +0x1a, +0x22) are set

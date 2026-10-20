@@ -18,6 +18,11 @@
 /* ported126.c (English overview of the notes above) — FLAT.D3D palette-list loading, the player start
    position (incl. CHASE replays), water drops near cell objects, BMP screenshots, debug keys, spawn
    points, a fading full-screen bitmap, wheel smoke when a wheel leaves the ground, and kerb debris. */
+#if defined(__GNUC__) && !defined(__clang__)
+/* Paths here are built with bounded snprintf into fixed buffers (Game.exe used unbounded sprintf); an over-long
+   name is truncated on purpose.  The warning is silenced rather than the buffers resized, so the code is unchanged. */
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
 #include "ported126.h"
 #include "unported.h"
 #include "engine.h"
@@ -187,7 +192,6 @@ float P126_SideW;
 
 #include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 #define P126_BLK(off) (*(int32_t *)&P56_Blk84[((off) - 0x00c810c0) / 4])   /* поля внутри P56_Blk84 */
 #define P126_CAR(i)   ((uint8_t *)&P99_Cars[(i)])
 

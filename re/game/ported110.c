@@ -243,7 +243,6 @@ p110_celltab_t P110_CellTab = P110_CELLTAB_INIT;  /* .data 00574574 (tools/gen_p
 #include "memrw.h"
 /* rd16 / wrf — local helpers: unaligned uint16 read / float write. */
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static const float OOW_LO = 0.015625f;   /* 0x3c800000 */
 #ifdef RE_HOOK_BUILD
 #  define P110_STD __attribute__((stdcall))

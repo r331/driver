@@ -81,9 +81,7 @@ p146_gosub_t P146_GoSub;
 
 #define B84(a)   (*(int32_t *)&P56_Blk84[((a) - 0x00c810c0u) / 4])   /* поля внутри P56_Blk84 */
 #include "memrw.h"
-static void    wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 static float   i2f(int32_t v) { float f; memcpy(&f, &v, 4); return f; }
-static int32_t f2i(float f) { int32_t v; memcpy(&v, &f, 4); return v; }
 
 /* ---- 004a37d9 ---- */
 void P146_MsgPos(int32_t a, int32_t b) {

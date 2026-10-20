@@ -116,8 +116,6 @@ int32_t P119_SelIdx;
 #endif
 
 #include "memrw.h"
-static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
-static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 
 #include "trafficrec.h"   /* traffic record fields (TREC_*) */
 
@@ -384,7 +382,7 @@ int32_t P119_TrafficSpawn(int32_t i, int32_t node, int32_t lane, int32_t x, int3
   else r[0xd] = (uint8_t)((int32_t)Rand_004D9078() % 10 + 4);
   r[5] = 0;
   if (P62_I14428C == 1 && !far_) {
-    int32_t k = P14_Fn004A6749();
+    int32_t k = P62_FindFreeTrafficSlot();
     if (k != -1) cop_slot(i, r, c, k);
     P62_I14428C = 0;
   }
@@ -666,7 +664,7 @@ void P119_TrafficParked(int32_t heading, int32_t x, int32_t z) {
   r[0xd] = (uint8_t)((int32_t)Rand_004D9078() % 10 + 4);
   r[0xc] = 1;
   r[5] = 0;
-  int32_t k = P14_Fn004A6749();
+  int32_t k = P62_FindFreeTrafficSlot();
   if (k == -1) return;
   cop_slot(i, r, c, k);
   r[1] = 4;

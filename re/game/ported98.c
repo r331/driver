@@ -752,9 +752,6 @@ p98_b148_t P98_M4900;
 /* rd16 / wr16 / wrf / fbits / link / dist8 / cam_set — local helpers: unaligned access, float bits, a 32-bit link
    field followed through re_rd_ptr, octagonal distance max + min/2, and setting the camera position. */
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
-static uint32_t fbits(float f) { uint32_t v; memcpy(&v, &f, 4); return v; }
 static uint8_t *link(const uint8_t *field) { return (uint8_t *)re_rd_ptr(field); }
 static int32_t dist8(int32_t dx, int32_t dz) { dx = iabs(dx); dz = iabs(dz); return dx < dz ? dz + dx / 2 : dx + dz / 2; }
 static void cam_set(float x, float y, float z) { P44_CamX = x; P44_CamY = y; P44_CamZ = z;

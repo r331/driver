@@ -25,6 +25,11 @@
    0042d384 — при непустой очереди: состояние 3,1,0,1,0 (01270c34 = 4), текстура блеска машины (байт +8 записи
      011b6140) в TMU 0, смешивание 4,4,0,0 (0125f3e4 = 3); записи 0xb8 с 0115a140: тег 0 — 01270e30/01270e08,
      иначе 01270d9c/01270dfc (по 00bdfa18), вершины +4/+0x40/+0x7c. */
+#if defined(__GNUC__) && !defined(__clang__)
+/* Paths here are built with bounded snprintf into fixed buffers (Game.exe used unbounded sprintf); an over-long
+   name is truncated on purpose.  The warning is silenced rather than the buffers resized, so the code is unchanged. */
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
 #include "ported151.h"
 #include "ported150.h"
 #include "ported6.h"
@@ -238,7 +243,7 @@ void P150_PlayFmv(int32_t hwnd_i, int32_t n, int32_t ans) {
         if (P38_TimerFlag != 0 || G00551134 != 0) break;                     /* 00551134 (два имени) */
         if (key_pressed()) break;
       }
-      Chain0048AC0D();
+      P50_FmvStopRelease();
     }
   }
   P38_FmvRelease();

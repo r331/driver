@@ -431,6 +431,7 @@ int32_t P102_ObjBKey;
 #pragma pop_macro("P102_ObjBKey")
 #endif
 
+#define RE_MEMRW_LOCAL16   /* keep the local 16-bit helpers below (hook object identity, see memrw.h) */
 #include "memrw.h"
 /* rd16s — Unaligned int16 read. */
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }

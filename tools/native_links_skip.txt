@@ -1,0 +1,41 @@
+# Имена unported.h, для которых перенос по адресу есть (re_hook), но в links.c связи НЕТ: в native вызов идёт в слабую
+# заглушку stubs.c. Связать = изменить поведение native (или счётчики вызовов selftest) — решать по одному с прогоном.
+# Читает tools/gen_native_links.py (cleanup/round2). Формат: имя [# комментарий].
+Call004EC91E
+P57_MenuStep
+P58_Fn418675
+P61_Fn5139D7
+P63_Fn49521E
+P68_Fn41B1C0
+P75_Fn491A56
+P56_FindIcon
+Call0040BF50
+Call00414D1F
+Call005233BE
+P58_Fn4AA4EA
+P66_Draw5173D7
+P66_Fn427EEA
+P66_Fn4C68A7
+P66_Fn523829
+P67_Fn40ABAC
+P67_Fn514165
+P67_Fn51500C
+P67_Stream
+P68_Fn41B3AB
+P68_Fn514A47
+P69_Fn4AAF3A
+P69_Fn4B2C4B
+P69_Fn4B33D8
+P69_Fn4B3E55
+P69_Fn4BA720
+P70_Fn5063A4
+P70_Fn507925
+P74_Fn41CE90
+P74_Fn424B70
+P75_Fn4958B7
+P75_Fn4EDD08
+P76_Fn40DCE0
+P76_Fn4268EF
+P77_Fn501770
+P77_Fn501C63
+P77_Fn524BD8

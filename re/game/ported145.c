@@ -216,7 +216,6 @@ p145_splash_t P145_Splash;
 #define FAR_27000 0x46d2f000u   /* 27000.0f: default far distance when no detail preset is applied */
 
 /* u2f — Reinterpret a uint32 as float bits. */
-static float u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
 #include "memrw.h"
 
 /* (*01270d6c)(0,1,1) = grTexFilterMode — по имени из таблицы Glide (как ported124) */

@@ -8,6 +8,7 @@
 #include "ported59.h"   /* v2.21: P59_NODES_MAX */
 #include "reptr.h"
 #include <string.h>
+#include "memrw.h"
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P73_Mask")
@@ -74,7 +75,6 @@ void P73_InitConsts(void) {
 #endif
 
 /* Bit pattern of a float, for the menu setters that take floats as raw dwords. */
-static int32_t F2I(float f) { int32_t v; memcpy(&v, &f, 4); return v; }
 
 /* 005173d7: каждое значение, записанное в float, округляется (fstp), цепочки внутри — расширенной точности x87 */
 /* P73_Text — Game.exe 005173d7.  Draws menu string txt at 640x480 design coordinates (x, y), mapped to
@@ -90,9 +90,9 @@ void P73_Text(float x, float y, uint32_t txt, int32_t a, int32_t flags) {
   volatile float py = (float)(((long double)y * fy - cy) * s + cy);
   GlobalSet0040B0A4();
   volatile float sx = (float)((long double)fx * s), sy = (float)((long double)fy * s);
-  MenuSetPos(F2I(sx), F2I(sy));
+  MenuSetPos(f2i(sx), f2i(sy));
   MenuSetColor(S_00B5A834, S_00B5A835, S_00B5A836);
-  MenuSetVals5D77C0(F2I(px), F2I(py), (uint8_t)a, (uint8_t)flags);
+  MenuSetVals5D77C0(f2i(px), f2i(py), (uint8_t)a, (uint8_t)flags);
   P67_Fn40ABAC(txt);
 }
 
