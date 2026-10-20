@@ -343,7 +343,9 @@ int32_t G00D044C8;
 #pragma pop_macro("G00D044C8")
 #endif
 /* MenuToggle* — Game.exe 0040e970, 0040ea57, 00419c50, 00419d25, 0041539a.  Flip option flag 00575f24 / 00575f48
-   / 00575f40 and redraw the screen they belong to (0040ea70, 00419b35, 00414d1f).  Return 0. */
+   / 00575f40 and redraw the screen they belong to (0040ea70, 00419b35, 00414d1f).  Return 0.
+   RE_PROBE menu walk: 00575f24 = "Auto Handbrake", 00575f48 = "FMV" (Gameplay menu 0054ad60, page 0040ea70),
+   00575f40 = sound "Effects" On/Off (Sound menu 0054dd10, page 00414d1f). */
 int32_t MenuToggle575F24Call40EA70(void) {
     G00575F24 ^= 1; Call0040EA70(); return 0;
 }

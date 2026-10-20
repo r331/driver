@@ -530,7 +530,7 @@ void P119_TrafficStep(uint8_t *r) {
     wr32(r + TREC_NEXT_NODE, rd32(r + TREC_NEXT_NODE2));
     P101_RoadNode(rd32(c + CAR_POS_X), rd32(c + CAR_POS_Z), (int8_t)r[TREC_ROAD_DIR]);
     wr32(r + TREC_ROAD_DIST, P101_RdDist);
-    wr32(r + TREC_ROAD_LEFT, P101_RdLeft);
+    wr32(r + TREC_ROAD_DONE, P101_RdLeft);
     wr32(r + TREC_ROAD_NODE, (int32_t)(int16_t)P101_RdNode);
     wr16(r + TREC_LANE, P101_RdLane);
     P118_TrafficTurn(r);
@@ -544,7 +544,7 @@ void P119_TrafficStep(uint8_t *r) {
 
 /* ---- 004de86c: следы шин машины i ---- */
 /* P119_CarSkids — Game.exe 004de86c.  Skid marks of car i (not in rain): front wheels when the front slip exceeds
-   15000, rear wheels when CAR_F108 is set or the rear slip >= 0x3a99, only for wheels on
+   15000, rear wheels when CAR_BURNOUT is set or the rear slip >= 0x3a99, only for wheels on
    the ground; P102_D077A0[w] = -1 ends a mark, 1 continues it. */
 void P119_CarSkids(int32_t i) {
   if (G6_00B5A778 != 0 || P26_FxA != 0) return;
@@ -552,7 +552,7 @@ void P119_CarSkids(int32_t i) {
   const uint8_t *c = carp(i);
   int b = 0;
   if (rd32(c + CAR_WHEELS_DOWN) != 0) {
-    if (rd32(c + CAR_F108) != 0 || iabs(rd32(c + CAR_SLIP_REAR)) >= 0x3a99) b = 1;
+    if (rd32(c + CAR_BURNOUT) != 0 || iabs(rd32(c + CAR_SLIP_REAR)) >= 0x3a99) b = 1;
   }
   int32_t sp = iabs(rd32(c + CAR_SLIP_FRONT));
   P101_WheelsGround(c, P119_Wheels);

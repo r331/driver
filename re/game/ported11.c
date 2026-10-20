@@ -463,7 +463,8 @@ void CopySlots_0040AA82(uint32_t n) {
 }
 
 /* MenuAction_0041645B / MenuAction_004164B2 — Game.exe 0041645b / 004164b2.  Leave the menu, switch to
-   front-end mode 10 with 00b87e38 = 200 / 0xfa and redraw.  Return 1. */
+   front-end mode 10 with 00b87e38 = 200 / 0xfa and redraw.  Return 1.
+   These are the Training menu 0054e1d0 entries "Car park" (00b87e38 = 200) and "Desert" (0xfa); mode 10 = Training. */
 uint32_t MenuAction_0041645B(void) {
   MenuAction40CD17(); P11_01271060 = 10; P11_00b87e38 = 200; UiCall0040C455(1, 0); return 1;
 }

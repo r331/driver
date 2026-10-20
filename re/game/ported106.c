@@ -484,8 +484,8 @@ void P106_SkyModels(void) {
   DrvSetMode0042655A(mode);
 }
 
-/* ---- 00512174: такт 64 частиц A_00C56780 (0xb4): клетки карты вокруг, падение/курс, вращение, путь, дальность от игрока ---- */
-/* P106_PartTick — Game.exe 00512174.  Per-frame step of the 64 walkers A_00C56780 (0xb4 bytes): map
+/* ---- 00512174: такт 64 пешеходов A_00C56780 (0xb4; раньше — «частицы»): клетки карты вокруг, падение/курс, вращение, путь, дальность от игрока ---- */
+/* P106_PartTick — Game.exe 00512174.  Per-frame step of the 64 pedestrians A_00C56780 (see ported71.c) (0xb4 bytes): map
    cells around, falling / course, rotation, path, distance from the player. */
 static float rdf4(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
 static int32_t fr(float v) { return (int32_t)lrintf(v); }   /* fistp */

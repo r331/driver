@@ -267,7 +267,8 @@ static void hs_time(char *dst, const uint8_t *r, int big) {
    005fe6bc: title strings, column headers, and 5 rows (records 0x2c bytes apart: name at +4, time or
    score).  Table 7 shows money ("$%d") instead of a time; table 1 adds a score column; table 0xb shows
    the best of table 0xc as an extra "%s: %s" line with its time.
-   TODO(RE): unsure which game modes tables 1, 2, 3, 7, 0xb are.
+   Tables (title strings 0x1c..0x20, confirmed by the RE_PROBE menu walk): 1 Trail Blazer, 2 Cross Town
+   Checkpoint, 3 Survival, 7 Carnage, 0xb Dirt Track (0xc = its best-lap record).
    Native deviation: other table ids return without changes (the original uses uninitialised locals). */
 void P141_HsSetup(void) {
   int32_t title_str, title2_str, time_col, score_col;

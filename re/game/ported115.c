@@ -370,7 +370,7 @@ typedef void (*p115_fip)(int32_t, uint32_t *);
      fade step: P43_FadeA moves toward the target P43_FadeB (float bits) by P43_FadeStep, snapping on the
        last step, and becomes the master volume;
      listener: orientation from the view matrix (driver E), position = camera (driver D), velocity =
-       position delta (driver 38, only when Q00B87E94 — Doppler on? TODO(RE));
+       position delta (driver 38, only when Q00B87E94 = the "Doppler Effect" entry of the Sound menu, ToggleOpt004154CD);
      for each of the 20 voice slots (flags byte +0): bit 0 playing -> free it if the driver says it
        stopped; 0x20 tracks an object: new position from the int32 xyz at Game.exe address +0x1c (y
        negated), sets bit 1; 4 -> frequency +0x28 (driver I); 8 -> volume +0x2e (driver H);

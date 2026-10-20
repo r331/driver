@@ -391,7 +391,7 @@ void P56_ObjInit(uint8_t *o, const int32_t *q) {
   w32(o + CAR_POS_HI + 4, (uint32_t)q[1] << 4);
   w32(o + CAR_POS_HI + 8, (uint32_t)q[2] << 4);
   P56_ObjSync((int32_t *)(o + CAR_BODY), o);
-  w32(o + CAR_FORCE_OUT, 0); w32(o + CAR_FORCE_OUT + 4, 0xffffd556u); w32(o + CAR_FORCE_OUT + 8, 0);   /* y = -0x2aaa (gravity?) TODO(RE): unsure */
+  w32(o + CAR_DVEL_PEND, 0); w32(o + CAR_DVEL_PEND + 4, 0xffffd556u); w32(o + CAR_DVEL_PEND + 8, 0);   /* y = -0x2aaa (gravity?) TODO(RE): unsure */
   G6_005624A0 = 0xf;
 }
 

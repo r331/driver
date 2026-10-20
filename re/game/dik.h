@@ -20,10 +20,13 @@
 #define DIK_DOWN        0xd0
 
 /* ---- Indices into the key configuration P36_KeyCfg (DIK code per action) ----
-   4..7 follow the v2.14 native arrow-key block in P36_GetPadButtons; 8..15 the native gamepad
-   mapping in plat_di.c (gamepad_keys).  0..3, 11, 12 and 14: TODO(RE). */
+   The actions are the "Key Redefine:" list of lang.eng (ids 67..78), but the slot order is the game's own:
+   4..10 from P36_GetPadButtons / P107_CarInput (14 = Cruise Control: pad bit 0x80 makes P107_CarInput hold
+   the current speed); 13 look behind, 15 horn as before.  11 / 12 are the remaining Look Left / Look Right —
+   inferred (not checked which is which).  0..3: TODO(RE) (not driving controls). */
 enum {
   KEYCFG_LEFT = 4, KEYCFG_RIGHT = 5, KEYCFG_GAS = 6, KEYCFG_BRAKE = 7,
   KEYCFG_HARDTURN = 8, KEYCFG_HANDBRAKE = 9, KEYCFG_BURNOUT = 10,
-  KEYCFG_LOOKBACK = 13, KEYCFG_HORN = 15
+  KEYCFG_LOOKLEFT = 11, KEYCFG_LOOKRIGHT = 12,
+  KEYCFG_LOOKBACK = 13, KEYCFG_CRUISE = 14, KEYCFG_HORN = 15
 };

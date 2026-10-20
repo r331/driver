@@ -182,10 +182,10 @@ uint8_t P36_Pad5;
 #define PAD_GAS       0x02
 #define PAD_RIGHT     0x04
 #define PAD_LEFT      0x08
-#define PAD_HARDTURN  0x10   /* key cfg[8]  — names of 0x10/0x40/0x100 follow the native gamepad mapping (plat_di.c) */
+#define PAD_HARDTURN  0x10   /* key cfg[8]  "Fast Steer" (names of the key cfg slots: lang.eng 67..78, see dik.h) */
 #define PAD_HANDBRAKE 0x20
-#define PAD_BURNOUT   0x40   /* key cfg[10] */
-#define PAD_CFG14     0x80   /* key cfg[14] — TODO(RE): unsure */
+#define PAD_BURNOUT   0x40   /* key cfg[10] "Burn Out" -> CAR_BURNOUT */
+#define PAD_CRUISE    0x80   /* key cfg[14] "Cruise Control" (lang.eng key list; P107_CarInput holds the speed) */
 #define PAD_HORN      0x100  /* key cfg[15] */
 #define JOY_STATE_SIZE 0x50  /* sizeof(DIJOYSTATE) */
 #define JOY_DEADZONE   8     /* |axis| <= 8 counts as centred */
@@ -227,7 +227,7 @@ void P36_GetPadButtons(uint32_t *out) {
   P36_Pad0 = 0; P36_Pad1 = 0; P36_Pad2 = 0; P36_Pad3 = 0; P36_Pad4 = 0; P36_Pad5 = 0;
   if (P36_PadMode == 2) return;
   static const uint8_t cfg[9] = { 4, 5, 6, 7, 8, 9, 10, 14, 15 };      /* индексы в P36_KeyCfg */
-  static const uint32_t bit[9] = { PAD_LEFT, PAD_RIGHT, PAD_GAS, PAD_BRAKE, PAD_HARDTURN, PAD_HANDBRAKE, PAD_BURNOUT, PAD_CFG14, PAD_HORN };
+  static const uint32_t bit[9] = { PAD_LEFT, PAD_RIGHT, PAD_GAS, PAD_BRAKE, PAD_HARDTURN, PAD_HANDBRAKE, PAD_BURNOUT, PAD_CRUISE, PAD_HORN };
   for (int i = 0; i < 9; i++)
     if (P34_Keys[P36_KeyCfg[cfg[i]]] != 0) *out |= bit[i];
 #ifndef RE_HOOK_BUILD

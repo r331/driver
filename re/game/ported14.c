@@ -315,10 +315,11 @@ void P14_Fn004CAC86(void) {
   }
 }
 
-/* P14_Fn004E12E4 — Game.exe 004e12e4, cdecl.  Idle/stall timer: while 00d078b0 < 3 (and not paused / 00b87ee4 clear) counts ticks in
+/* P14_Fn004E12E4 — Game.exe 004e12e4, cdecl.  Flipped-car timer: while 00d078b0 (wheels on the ground) < 3 (and not paused / 00b87ee4 clear) counts ticks in
    00d0778c, otherwise resets it; past 300 ticks (600 when option 00bdfa58 or 00bdfa44 is set)
    ends the level: 00c810c4 = 0xff0, 00c810e8 = 2, 00c81100 = 0x5a.
-   TODO(RE): unsure what 00d078b0 measures (speed?) and what result 0xff0 shows. */
+   00d078b0 is the player's CAR_WHEELS_DOWN (car 0 + 0xf0): this is the flipped-car check — see P16_IdleTimer and
+   missionstate.h (MSTATE_FAILED, MREASON_FAILED). */
 void P14_Fn004E12E4(void) {
   if (g_00c810c4 == 0xff0) return;
   if (g_00d078b0 < 3) {

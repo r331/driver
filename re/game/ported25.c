@@ -122,7 +122,7 @@ void P25_CDClose(void) {
 /* P25_PlayCDTrack — Game.exe 0052479e.  Plays one whole track (from its TOC start to its end; the end
    is remembered in g_curEnd for P25_CDResume).  An invalid track (< 2 or > count) logs and clears
    Q00B87E90; a failed play closes the device and clears Q00B87E90 too.
-   TODO(RE): unsure — Q00B87E90 looks like the "CD music enabled" option. */
+   Q00B87E90 is the "Music" On/Off entry of the Sound menu 0054dd10 (ToggleOpt0041542A, RE_PROBE menu walk). */
 void P25_PlayCDTrack(int32_t track) {
   if (P25_CdOpen == 0) return;
   if (track < CD_FIRST_MUSIC || P25_CdTracks < track) {
@@ -157,7 +157,9 @@ int32_t P25_TimersInit(void) {
   return r == 0;
 }
 /* P25_TimerStop — Game.exe 00528293.  Kills the timer in table slot `slot` (if any), clears the slot
-   and decrements P25_TimerCnt. */
+   and decrements P25_TimerCnt.  Game.exe itself never increments P25_TimerCnt (00b94028): its only accesses are
+   the zeroing in 005281b0 / 005281e1 and this decrement (objdump xref), so the counter is dead in the original
+   too — kept as is. */
 void P25_TimerStop(int32_t slot) {
   if (g_tm[slot].id == 0) return;
   plat_timer_kill(g_tm[slot].id);

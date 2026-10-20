@@ -71,6 +71,9 @@ p114_rgb_t P114_Black;
 #endif
 
 #include "memrw.h"
+#ifndef RE_HOOK_BUILD
+#include "../platform/native/reprobe.h"
+#endif
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 
@@ -159,8 +162,8 @@ void P114_CreditsDraw(void) {
   P107_Rect(0x140, 0x1c8, 0x140, 0x18, black);
 }
 
-/* ---- 005128b7: частицы A_00C56780 с флагом 0x10 — по текстурам .data 005759a8, высота дороги − 224, P113_PartDraw ---- */
-/* P114_PartModels — Game.exe 005128b7.  Draws every pool object of A_00C56780 with flag 0x10 (walkers)
+/* ---- 005128b7: пешеходы A_00C56780 с флагом 0x10 — по текстурам .data 005759a8, высота дороги − 224, P113_PartDraw ---- */
+/* P114_PartModels — Game.exe 005128b7.  Draws every pool object of A_00C56780 with flag 0x10 (pedestrians, see ported71.c)
    via P113_PartDraw, textures from .data 005759a8, at road height - 224. */
 void P114_PartModels(void) {
   static const int32_t k_tex[5] = { 0x0e, 0x1a, 0x1c, 0x1d, 0x1e };   /* .data 005759a8 */
@@ -490,6 +493,7 @@ int32_t P114_MenuStep(uint32_t tbl, int32_t *cur) {
     static int nc = 0; if (tr && ((nc++ % 30) == 0 || was != (uint32_t)*cur || ret != 0 || P34_Keys[0xcd] || P34_Keys[0x1c]))
       fprintf(stderr, "[menu] MenuStep %08x: пункт %u → %d, ret=%d, 7e4c=%d keys cd=%02x/%02x 1c=%02x/%02x\n", tbl, was, *cur, ret,
               (int)D_005f7e4c, P34_Keys[0xcd], P34_KeysPrev[0xcd], P34_Keys[0x1c], P34_KeysPrev[0x1c]); }
+  re_probe_menu(tbl, *cur);   /* RE_PROBE (reprobe.h): read-only, returns at once when unset */
 #endif
   return ret;
 }

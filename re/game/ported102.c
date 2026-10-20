@@ -1097,9 +1097,10 @@ void P102_LampColor(int32_t on) {
   }
 }
 
-/* ---- 0051329b: частицы пыли в точках пустых клеток (P102_DustPts), пока есть свободные слоты (0x40, A_00C56780 по 0xb4) ---- */
-/* P102_SpawnDust — Game.exe 0051329b, cdecl.  Dust particles at the empty-cell points (P102_DustPts) while object slots are free (64 slots of
-   0xb4 bytes at 00c56780). */
+/* P102_SpawnDust — Game.exe 0051329b, cdecl.  Spawns PEDESTRIANS (not dust; see ported71.c) at the spawn points
+   P102_DustPts while fewer than the "Pedestrian Density" option (P60_PartLimit = 005759a4) are active: each new
+   record of the pool A_00C56780 is first offered a chair (P99_PartOnChair — a sitting pedestrian), else becomes a
+   walker (P60_SpawnParticle), else is freed again.  Names kept (address aliases / existing users). */
 void P102_SpawnDust(void) {
   const uint8_t *pt = P102_DustPts;
   for (int32_t k = P102_DustN; k != 0 && G6_00C56764 < P60_PartLimit; k--, pt += 0xc) {

@@ -505,6 +505,7 @@ RE_KEYS="300:LEFT,340:LEFT,380:LEFT,460:RETURN,560:RETURN,660:RETURN,700:APOSTRO
 | `RE_TEXPACK=каталог` | v2.17: HD-пак текстур — см. «HD-текстуры» (важнее ключа `texpack` в `driver.cfg`) |
 | `RE_TEXLOG=файл` | v2.18: статистика пар (страница, палитра): треугольники и площадь на экране — для порядка генерации пака |
 | `RE_ARROWKEYS=0` | v2.14: не добавлять стрелки/пробел к клавишам езды |
+| `RE_PROBE=1\|all\|car,traffic,ped,mission,menu,walk` | отладка RE: журнал полей для открытых вопросов [docs/RE_QUESTIONS.md](docs/RE_QUESTIONS.md) (`RE_PROBE_LOG`, `RE_PROBE_EVERY`, `RE_PROBE_SHOTS`, `RE_PROBE_WALK`); только native, только чтение — см. docs/ARCHITECTURE.md «RE_PROBE» |
 
 Остальные отладочные переключатели (`RE_TRACE*`, `RE_GSTAT`, `RE_CARDBG` …) описаны в [docs/NATIVE_GAPS.md](docs/NATIVE_GAPS.md).
 

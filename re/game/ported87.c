@@ -208,7 +208,9 @@ static void draw_obj(const uint8_t *obj, int kind) {
 void P87_DrawObjA(const uint8_t *obj) { draw_obj(obj, 0); }   /* 004ee18b */
 void P87_DrawObjB(const uint8_t *obj) { draw_obj(obj, 1); }   /* 004ee4b7 */
 
-/* P87_DrawCells — no Game.exe address (native helper; no caller in the tree at 1274c40).  Draws the map
+/* P87_DrawCells — no Game.exe address (native helper).  Not dead: its callers are the native self-test
+   (tests/selftest.c — CK(P87_DrawCells(0, 0, 1) == 0) and the RE_REAL_CITY render check); the game never calls
+   it (no caller in re/game or re/platform).  Draws the map
    objects of the (2r+1)^2 grid cells around cell (cx, cy): for each cell whose lump is resident in its
    slot, walks the cell's object list and draws each visible object once per frame (stamp vs
    P47_SwapCnt; hidden objects skipped) — class 1 / 7 as kind B, class 4 as kind A (P80_Class).

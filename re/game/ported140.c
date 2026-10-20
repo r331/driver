@@ -352,7 +352,8 @@ static void set_c4(int32_t v) {
 #endif
 }
 #include "ladder.h"   /* MLADDER record codes LAD_* */
-#define C4_FAILED 0xff0   /* 00c810c4 value set on failure (idle timeout, marker shot down) — inferred meaning */
+#include "missionstate.h"
+#define C4_FAILED MSTATE_FAILED   /* 00c810c4 "mission failed" (missionstate.h); the marker shot down gives reason 1 */
 
 /* P140_LadderRun — Game.exe 0041b3ab, cdecl.  Run the MLADDER campaign script from record P68_IntroCur until it returns to the menu: each
    record {code, a, next, else} (LAD_* in ladder.h) unlocks levels, shows choice screens, plays missions

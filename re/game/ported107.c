@@ -523,8 +523,10 @@ int32_t P107_MenuNav(uint32_t tab, int32_t pos) {
 }
 
 /* ---- 004ddaca: ввод машины car (биты keys: 1 газ назад, 2 газ, 4/8 руль, 0x10 резкий руль, 0x20 ручник, 0x40 тормоз, 0x80 круиз, 0x100 сигнал) ---- */
-/* P107_CarInput — Game.exe 004ddaca.  Applies input bits `keys` to car `car`: 1 reverse throttle,
-   2 throttle, 4/8 steer, 0x10 sharp steer, 0x20 handbrake, 0x40 brake, 0x80 cruise, 0x100 horn. */
+/* P107_CarInput — Game.exe 004ddaca.  Applies input bits `keys` (PAD_* in ported36.c) to car `car`: 1 brake /
+   reverse, 2 throttle, 4/8 steer, 0x10 fast steer, 0x20 handbrake, 0x40 burn out (sets CAR_BURNOUT — the old
+   "0x40 brake" reading was wrong: the key list in lang.eng and P105_StuntHints task 0 "Burnout" settle it),
+   0x80 cruise control (P102_D0DDEC = speed to hold), 0x100 horn.  Also keeps CAR_STEER_HOLD / CAR_STEER_DIR. */
 static int32_t imul12(int32_t v, int32_t k) { int32_t m = (int32_t)((uint32_t)v * (uint32_t)k); return (m + (int32_t)((uint32_t)(m >> 31) & 0xfffu)) >> 12; }
 void P107_CarInput(int32_t car, uint32_t keys) {
   static const int32_t k_steer[32] = { 0, 0, 0, 0, 16, 16, 32, 32, 48, 48, 64, 64, 96, 96, 128, 128, 160, 160, 192, 192,

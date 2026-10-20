@@ -176,7 +176,7 @@ static void snd_at(uint32_t smp, int32_t voice, const int32_t *o) { P97_SndStart
    (model flag 0x2000) and smoke; the car takes damage (P100_CarHit, subject to menu options); then the impulse is
    divided by the effective mass term and applied to the linear velocity and the angular accumulator, with
    time-of-impact correction tt.  Returns 1 when the boxes touched.  TODO(RE): unsure — +0x68..0x70 receives the
-   angular impulse (CAR_TORQUE_OUT in carfields.h). */
+   angular impulse (CAR_DANGVEL_PEND in carfields.h). */
 int32_t P129_ObjHit(uint8_t *c, int32_t *box, uint8_t *obj) {
   if (c == NULL || box == NULL || obj == NULL) return 0;                               /* защита */
   int32_t mi = rd32(obj + 4);
@@ -281,9 +281,9 @@ int32_t P129_ObjHit(uint8_t *c, int32_t *box, uint8_t *obj) {
     int32_t ix = M(q, o[4] / 64), iy = M(q, o[5] / 64), iz = M(q, o[6] / 64);
     add32(c + CAR_POS2, -((M(0x1000 - tt, f12(rd32(c + CAR_VEL))) + 0x800) >> 12));
     add32(c + CAR_POS2 + 8, -((M(0x1000 - tt, f12(rd32(c + CAR_VEL + 8))) + 0x800) >> 12));
-    add32(c + CAR_TORQUE_OUT, (M(ry, iz) + 0x800) >> 12); add32(c + CAR_TORQUE_OUT, -((M(rz, iy) + 0x800) >> 12));
-    add32(c + CAR_TORQUE_OUT + 4, (M(rz, ix) + 0x800) >> 12); add32(c + CAR_TORQUE_OUT + 4, -((M(rx, iz) + 0x800) >> 12));
-    add32(c + CAR_TORQUE_OUT + 8, (M(rx, iy) + 0x800) >> 12); add32(c + CAR_TORQUE_OUT + 8, -((M(ry, ix) + 0x800) >> 12));
+    add32(c + CAR_DANGVEL_PEND, (M(ry, iz) + 0x800) >> 12); add32(c + CAR_DANGVEL_PEND, -((M(rz, iy) + 0x800) >> 12));
+    add32(c + CAR_DANGVEL_PEND + 4, (M(rz, ix) + 0x800) >> 12); add32(c + CAR_DANGVEL_PEND + 4, -((M(rx, iz) + 0x800) >> 12));
+    add32(c + CAR_DANGVEL_PEND + 8, (M(rx, iy) + 0x800) >> 12); add32(c + CAR_DANGVEL_PEND + 8, -((M(ry, ix) + 0x800) >> 12));
     add32(c + CAR_VEL, ix); add32(c + CAR_VEL + 4, iy); add32(c + CAR_VEL + 8, iz);
     add32(c + CAR_POS2, (M(0x1000 - tt, f12(rd32(c + CAR_VEL))) + 0x800) >> 12);
     add32(c + CAR_POS2 + 8, (M(0x1000 - tt, f12(rd32(c + CAR_VEL + 8))) + 0x800) >> 12);

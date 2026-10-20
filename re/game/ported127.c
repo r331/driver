@@ -303,7 +303,8 @@ static uint8_t *tcar(int32_t i) {
   return P59_CarsTab + (uint32_t)i * 0x148;
 }
 /* Mission state value of 00c810c4 meaning "mission failed" (set_fail; the script loop stops on it). */
-#define MISSION_FAILED 0xff0
+#include "missionstate.h"
+#define MISSION_FAILED MSTATE_FAILED
 /* 00c810c4 — флаги скрипта: несколько native-псевдонимов (P14_00c810c4, P16_IdleMode, P56_Blk84[1]) */
 static void set_c4(int32_t v) {
   P14_00c810c4 = v;
@@ -311,7 +312,7 @@ static void set_c4(int32_t v) {
   P16_IdleMode = v; P127_BLK(0x00c810c4u) = v;
 #endif
 }
-static void set_fail(void) {   /* 0xff0 — провал: 00c810e8 = 2, 00c81100 = 0x5a */
+static void set_fail(void) {   /* MSTATE_FAILED, reason MREASON_FAILED (2), result screen after 0x5a ticks */
   set_c4(MISSION_FAILED);
   P14_00c810e8 = 2; P14_00c81100 = 0x5a;
 #ifndef RE_HOOK_BUILD

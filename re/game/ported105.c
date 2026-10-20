@@ -354,7 +354,9 @@ static const p95_seq_t k_seqs[3] = { { 16, k_seq0 }, { 16, k_seq1 }, { 12, k_seq
    k_seq2 -> task 8), sustained yaw (task 4 after 70 ticks above 300; task 3 after 40 ticks above 250
    started with key 0x20; task 5 after reversing faster than 100 then yawing), top speed held with key 1
    (task 7), hard stop from high speed (task 6), and keys 0x40 / 0x20 above speed 50 (tasks 0 / 1).
-   TODO(RE): map task indices 0..8 to the interview's named manoeuvres; key bit meanings.
+   Task names = the captions P59_PickUp shows (P59_PickTab .data 00562ae0 = text ids 273..281 of lang.eng):
+   0 Burnout (burn out key 0x40), 1 Handbrake (0x20), 2 Slalom, 3 180, 4 360, 5 Reverse 180, 6 Speed,
+   7 Brake Test (key 1 = brake), 8 Lap.  Key bits: PAD_* in ported36.c.
    Native: RE_IVDBG / RE_IVPICK debug hooks (no effect unless set). */
 void P105_StuntHints(int32_t keys, void *carp) {
   uint8_t *car = (uint8_t *)carp;

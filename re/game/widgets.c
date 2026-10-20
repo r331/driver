@@ -274,7 +274,7 @@ int32_t SelectRow004119F3(void) {return SelectRow(0x0054b7d1, 0x16);}
 void VolumeUp00409BC9(void) {WI00575EE4 += 0x10; if (WI00575EE4 > 0x40) WI00575EE4 = 0x40; G00575EF8 = 4; MenuRedraw();}
 void VolumeDown00409BFD(void) {WI00575EE4 -= 0x10; if (WI00575EE4 < 0x10) WI00575EE4 = 0x10; G00575EF8 = 4; MenuRedraw();}
 /* CycleInc0040E918 — Game.exe 0040e918.  Cycles 00b87e2c through 0, 1, 2 and refreshes (0040ea70).
-   TODO(RE): unsure what setting 00b87e2c is (P142 uses it to pick the cop steering mode table — likely difficulty). */
+   00b87e2c = "Cop Difficulty" (Gameplay menu 0054ad60 entry 0; RE_PROBE menu walk); P142 picks the cop grip / steering tables by it. */
 int32_t CycleInc0040E918(void) {WI00B87E2C++; if (WI00B87E2C == 3) WI00B87E2C = 0; Call0040EA70(); return 0;}
 /* CycleDec0040F364 / CycleInc0040F3AD — Game.exe 0040f364 / 0040f3ad.  Previous / next level on the high-score
    screen (wraps over 005fe694 levels) and rebuilds it (P141_HsSetup). */
