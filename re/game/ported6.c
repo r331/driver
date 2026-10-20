@@ -4,6 +4,7 @@
 #include "ported129.h"
 #include "ported43.h"   /* v2.09: P43_FreeCnt/P43_FreeList/A_00C56780 — объекты образа данных (пешеходы) */
 #include "ported7.h"
+#include "fpucw.h"
 #include "ported6.h"
 #include "ported148.h"
 #include "ported137.h"
@@ -834,8 +835,14 @@ int32_t DrvSetMode0042655A(int32_t a) { int32_t old = G6_00B1C224; G6_00B1C224 =
 void ClearHandles005223BE(void) { G6_00BDF9C0 = 0; G6_00BDF9C4 = 0; G6Call004A2B70(); }
 /* StartAudio005233A0 — Game.exe 005233a0, cdecl.  Enumerate sound drivers once if sound is not running and none were found yet. */
 void StartAudio005233A0(void) { if (G6_00B91CF4 == 0 && G6_00B91D2C == 0) P148_SndEnum(); }
-/* NoopFn00528455 — Game.exe 00528455, cdecl.  Empty in Game.exe. */
-void NoopFn00528455(void) { }
+/* NoopFn00528455 — Game.exe 00528455, cdecl.  finit; fldcw 0057a0e2 — back to the round-to-nearest x87 control word at
+   shutdown (004264a7).  The name is kept (fn_table/install.c); v2.34: it was empty, see fpucw.h. */
+void NoopFn00528455(void) {
+#if defined(RE_HOOK_BUILD) && (defined(__i386__) || defined(__x86_64__))
+  __asm__ volatile("fninit\n\tfldcw %0" : : "m"(G8_0057A0E2_u16));
+#endif
+  re_fpu_load_cw(0);
+}
 /* InitSubsys004BA443 — Game.exe 004ba443, cdecl.  Run three initialisers (004ba457, 004ba57a, 004ba64d). */
 void InitSubsys004BA443(void) { G6Call004BA457(); G6Call004BA57A(); G6Call004BA64D(); }
 /* Fwd004D2D9F — Game.exe 004d2d9f, cdecl.  004d614a(a, b, c, d) when 00575f08 is set. */
