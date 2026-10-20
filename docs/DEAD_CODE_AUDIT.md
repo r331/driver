@@ -139,7 +139,7 @@
   сходятся» 17 → 16 — одно из них оказалось шпионом selftest). Каталог `re/` не изменился: все 196 native-объектов
   совпадают с базой (кроме `diagnostics.c.o` — там `__TIME__` сборки), hook-сборка (`./build.sh hook`) — 0 предупреждений.
 - **Прогоны** (Linux arm64, Xvfb; бинарник тот же, что у базы): Take A Ride Miami 1700 кадров `RE_FIXED_DT=1`
-  (и с `RE_FPU_CHOP=0`), Survival 2400 кадров, обход меню RE_PROBE walk — «not ported» в debug.log/stdout: 0 → 0,
+  (и с `RE_FPU_CHOP=0`), Survival 2400 кадров, обход меню RE_PROBE walk (8 запусков, 10 экранов меню; 8-й — таймаут 300 с) — «not ported» в debug.log/stdout: 0 → 0,
   падений и assert нет.
 - **Осталось:** 16 имён `unported.h`, у которых перенос по адресу есть, но генератор не связывает их из-за
   несовпадения типов (`P62_Fn424A02`, `P47_Fn405FDB`, `Fn00416040`, `Call00524496`, `Call004D78F3`, `Call004DAA36`,
