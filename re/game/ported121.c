@@ -22,6 +22,7 @@
 #endif
 #include "cartab.h"
 #include "unported.h"
+#include "ported125.h"   /* P125_ObjABurst (004b955c) */
 #include "smallfuncs.h"
 #include "smallfuncs2.h"
 #include "ported6.h"
@@ -445,7 +446,7 @@ void P121_WheelDust(void) {
     P102_5624A4 = 0;
     int32_t a[4] = { P102_Corners[k * 4], P102_Corners[k * 4 + 1] - 0x32, P102_Corners[k * 4 + 2], P102_Corners[k * 4 + 3] };
     int32_t b[3] = { rd32(c + CAR_VEL) / 0x1000, n * -0x27a, rd32(c + CAR_VEL + 8) / 0x1000 };   /* 00d07800 / 00d07808 */
-    P121_Fn4B955C(a, b, n, 2);
+    P125_ObjABurst(a, b, n, 2);
   }
 }
 
