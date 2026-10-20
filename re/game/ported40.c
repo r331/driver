@@ -110,10 +110,10 @@ void P40_ResetTexMem(void) {
   for (int i = 0; i < 4; i++) P40_00b1c3e0[i] = -1;
 }
 
-/* занять блок b под слот s (одна половина), начальные поля GrTexInfo; format — 0xb (8bpp с альфой?) или 5 */
+/* занять блок b под слот s (одна половина), начальные поля GrTexInfo; format — 0xb (GR_TEXFMT_ARGB_1555, 16 бит) или 5 (GR_TEXFMT_P_8) */
 /* Assigns block b to slot s: unlinks the slot that held it, fills its GrTexInfo (256x256, 1x1, `format`,
    data pointer), marks it used (flag 2) plus `extra` (4 when the slot has flag 2).
-   format: GR_TEXFMT_ARGB_1555 (0xb) or GR_TEXFMT_P_8 (5) — the Russian note's "8bpp" guess for 0xb is wrong. */
+   format: GR_TEXFMT_ARGB_1555 (0xb, 16-bit) or GR_TEXFMT_P_8 (5, 8-bit palettised). */
 static void fill_block(int b, int s, int32_t data, int32_t format, uint8_t extra) {
   P40_Block *t = &P40_Blocks[b];
   if (t->slot != 0xff) P40_Slots[t->slot].block = 0xff;

@@ -529,11 +529,12 @@ void P132_Lights(void) {
   G00D14EF4 = 0;
   int32_t eac = G6_00B87EAC | G8_00B87EAC;
   if (G00D17B08 != 0) {
-    int32_t vx = P99_Cars[0].vel[0], vy = P99_Cars[0].vel[1];
-    if (eac != 0) { vx = 0; vy = 0; }
-    if (vx < 1000 || vy < 1000) {
+    /* player light: brightness by how many of damage zones 0 / 1 are below 1000 (inferred: the two headlights) */
+    int32_t dmg0 = P99_Cars[0].damage[0], dmg1 = P99_Cars[0].damage[1];
+    if (eac != 0) { dmg0 = 0; dmg1 = 0; }
+    if (dmg0 < 1000 || dmg1 < 1000) {
       const p99_car_t *c = eac != 0 ? &P99_Cars[0x41] : &P99_Cars[0];
-      int32_t k = ((vx < 1000) + (vy < 1000)) * 0x80 - 1;
+      int32_t k = ((dmg0 < 1000) + (dmg1 < 1000)) * 0x80 - 1;
       uint32_t h = (uint32_t)c->heading;
       p[1] = (float)-c->pos[1];
       p[0] = (float)c->pos[0] + (float)sin_div(P59_Sin[h & 0xfff]);

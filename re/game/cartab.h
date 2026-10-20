@@ -32,9 +32,9 @@ typedef struct {
   int32_t  f10c;          /* +0x10c обороты/скорость (fixed <<12) */
   int32_t  speed;         /* +0x110 скорость */
   int32_t  f114, f118;
-  int32_t  vel[3];        /* +0x11c..+0x124 — NOT a velocity: first three of the six damage zones +0x11c..+0x130
-                             (P142_CopDrive sums them, ported106.c reads vel[side] as damage); see carfields.h CAR_DAMAGE.
-                             Name kept to avoid touching every user. */
+  int32_t  damage[3];     /* +0x11c..+0x124 — first three of the six damage zones +0x11c..+0x130 (P142_CopDrive sums
+                             them, ported106.c reads damage[side]); see carfields.h CAR_DAMAGE.  Called vel[3] before
+                             2026-10 (it never held a velocity). */
   int32_t  f128, f12c, f130, f134, f138;
   uint16_t f13c;
   uint8_t  f13e[2];
@@ -47,7 +47,7 @@ typedef struct {
 _Static_assert(sizeof(p99_car_t) == 0x148, "p99_car_t");
 _Static_assert(offsetof(p99_car_t, pos) == 0xc8 && offsetof(p99_car_t, heading) == 0x100 && offsetof(p99_car_t, gear) == 0x142, "p99_car_t layout");
 _Static_assert(offsetof(p99_car_t, ang) == 0xe8 && offsetof(p99_car_t, ff8) == 0xf8 && offsetof(p99_car_t, f10c) == 0x10c, "p99_car_t layout2");
-_Static_assert(offsetof(p99_car_t, pos2) == 0x18 && offsetof(p99_car_t, f78) == 0x78 && offsetof(p99_car_t, vel) == 0x11c, "p99_car_t layout3");
+_Static_assert(offsetof(p99_car_t, pos2) == 0x18 && offsetof(p99_car_t, f78) == 0x78 && offsetof(p99_car_t, damage) == 0x11c, "p99_car_t layout3");
 #define P99_CARS_N    66
 #define P99_CARS_ADDR 0x00d077c0u
 typedef p99_car_t p99_cars_t[P99_CARS_N];

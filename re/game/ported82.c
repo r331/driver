@@ -1,8 +1,8 @@
 /* ported82.c — camera view frustum planes, sphere visibility tests and dynamic lights (English overview).
    A plane is float[4] {nx, ny, nz, d}; signed distance = n.p - d (world space).  Planes: P82_PlL / PlR (sides),
-   P82_PlT / PlB (top / bottom), P82_PlF = NEAR plane at z = 50 (forward normal), P77_Plane = FAR plane at
-   P11_01270c24 (backward normal).  Note: the Russian notes in ported82.h call PlF "far" and P77_Plane "near";
-   the code shows the opposite.  Sums are done in x87 extended precision (long double) and rounded to float
+   P82_PlT / PlB (top / bottom), P82_PlF = NEAR plane at z = 50 (view-space normal (0,0,-1)), P77_Plane = FAR
+   plane at z = P11_01270c24 (normal (0,0,+1)).  Normals point out of the frustum: distance > radius = culled
+   (P83_BoxVis).  (Older notes in ported82.h / ported83.c had near and far swapped; corrected there.)  Sums are done in x87 extended precision (long double) and rounded to float
    only where the original stored to memory — keep the casts.  All cdecl. */
 #include "ported82.h"
 #include "aspect.h"

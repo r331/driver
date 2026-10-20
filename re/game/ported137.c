@@ -167,7 +167,7 @@ void P137_LevelEnd(void) {
   if (f != NULL) {
     p99_car_t *c = &P99_Cars[0];
     c->f138 = 0; c->f130 = 0; c->f12c = 0; c->f128 = 0;
-    c->vel[2] = 0; c->vel[1] = 0; c->vel[0] = 0;
+    c->damage[2] = 0; c->damage[1] = 0; c->damage[0] = 0;
     memset(c->f78, 0, sizeof(c->f78));
     c->ff8 = 0; c->ffc = 0; c->f10c = 0; c->f114 = 0; c->f118 = 0; c->speed = 0;
     for (int i = 0; i < 7; i++) c->f40[i] = 0;
@@ -438,7 +438,7 @@ void P137_DrawCar(int32_t car, int32_t rec) {
   float rad = p137_f((uint32_t)p137_rd(mdl + 0xc));
   if (P14_00b87e84 != 0 && car != 0 && car - 1 < 0x40) {
     const uint8_t *r = tr + (car - 1) * 0x54;
-    if (r[1] != 1 && c->vel[0] < 1000 && c->vel[1] < 1000 && P82_SphereVis3D(pos, rad * P56_C54611C) != 0 && P123_GlowN < 65) {
+    if (r[1] != 1 && c->damage[0] < 1000 && c->damage[1] < 1000 && P82_SphereVis3D(pos, rad * P56_C54611C) != 0 && P123_GlowN < 65) {
       P123_GlowCars[P123_GlowN] = car;
       P123_GlowN++;
     }
@@ -486,14 +486,14 @@ void P137_DrawCar(int32_t car, int32_t rec) {
   }
   if (P95_D11920 == 0) {
     sp = c->f10c;
-    int calm = c->vel[0] < 0xfa1 && c->vel[1] < 0xfa1;
+    int calm = c->damage[0] < 0xfa1 && c->damage[1] < 0xfa1;
     if (calm && rk != 0) {
       int32_t ix = rk - 1;
       calm = ix >= 0 && (size_t)(ix + 1) * 0xcd8 + 0x40 <= sizeof(P12_0112da00) &&
              p137_rd((const uint8_t *)P12_0112da00 + 0x40 + ix * 0xcd8) <= P137_DUST_LIM;
     }
     if (calm) {
-      if ((3000 < c->vel[0] || 3000 < c->vel[1]) && sp < 400000 && -200000 < sp) P119_CarDust(car, 0, sp);
+      if ((3000 < c->damage[0] || 3000 < c->damage[1]) && sp < 400000 && -200000 < sp) P119_CarDust(car, 0, sp);
     } else if (sp < 400000 && -200000 < sp) {
       P119_CarDust(car, 1, sp);
       if (sp < 30000 && -30000 < sp) P120_CarSparks(car);

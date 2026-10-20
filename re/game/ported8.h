@@ -373,8 +373,8 @@ void SetDrawParams_004D9539(int32_t a, int32_t b, int32_t c, int32_t d, int32_t 
 void SetMode4_00510382(void);
 void SetMode1_00510448(void);
 void SetMode1b_005106D2(void);
-void Mat3MulT_005284AC(const float *a, const float *b, float *o);
-void Mat3Mul_0052859A(const float *a, const float *b, float *o);
+void Mat3MulT_005284AC(const float *a, const float *b, float *o);  /* o = A * B (row-major 3x3) — despite the T in the name */
+void Mat3Mul_0052859A(const float *a, const float *b, float *o);   /* o = (A * B) transposed — names are backwards; kept (address-carrying) */
 void RotVec_005279CB(int32_t *o);
 void RedMarkers_0041ADA1(void);
 void SetScaled_004CB097(const float *p, float v);

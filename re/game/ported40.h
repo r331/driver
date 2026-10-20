@@ -48,7 +48,7 @@ extern uint32_t P40_ListPtr; extern int32_t P40_ListCount;
 #define P40_Slots  ((P40_Slot *)(void *)P12_01145a60)
 #define P40_Blocks ((P40_Block *)(void *)P12_01146f20)
 void P40_ResetTexMem(void);                       /* 00489d20: сброс таблиц слотов и блоков; границы памяти из grTexMin/MaxAddress */
-void P40_UploadSlot(int32_t slot, int32_t data);  /* 0048a239: загрузить 8bpp текстуру слота в свободную пару блоков (data=0 → данные слота) */
+void P40_UploadSlot(int32_t slot, int32_t data);  /* 0048a239: загрузить 16-битную (ARGB_1555) страницу слота в свободную пару блоков (data=0 → данные слота) */
 void P40_UploadSlotPair(int32_t slot, int32_t data0, int32_t data1); /* 00489f50: то же для пары слотов (двойной) */
 void P40_DownloadPalette(int32_t slot, int32_t palette); /* 004efc7c: отправить палитру в Glide по записи списка палитр слота */
 /* gvar-img v2.03 begin (tools/gen_gvar_img.py) */

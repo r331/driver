@@ -237,7 +237,7 @@ void P106_CarHeadSpots(int32_t car) {
   if (!(d < 0x601 && -0x601 < d)) return;
   uint16_t fl = rd16(m + 0x102);
   for (int32_t side = 0; side < 2; side++) {
-    int32_t dmg = side == 0 ? P99_Cars[car].vel[0] : P99_Cars[car].vel[1];
+    int32_t dmg = side == 0 ? P99_Cars[car].damage[0] : P99_Cars[car].damage[1];
     int32_t mark = side == 0 ? 0 : 2;
     const uint8_t *src = side == 0 ? m + 0x10 : m;
     if (dmg >= 1000) continue;

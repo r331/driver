@@ -556,7 +556,7 @@ void P138_ReplayLoad(void) {
   if (read_pads(P56_PathPads, 1, G6_00B87EA0 != 0, G6_00B87EA0 != 0 ? 0x251 : 0x253, &P74_C4D668)) {
     if (G6_00B87EA0 == 0 || P88_Mode575 != 2) read_car(P56_PathLeader, CAR_LEADER);
     p99_car_t *c = &P99_Cars[CAR_LEADER];
-    c->vel[0] = 0; c->vel[1] = 0; c->vel[2] = 0; c->f128 = 0; c->f12c = 0; c->f130 = 0; c->f134 = 0;
+    c->damage[0] = 0; c->damage[1] = 0; c->damage[2] = 0; c->f128 = 0; c->f12c = 0; c->f130 = 0; c->f134 = 0;
     leader_flags(7);
     P100_RecRep[1] = 0; P100_RecOff[1] = 0; P100_RecCnt[1] = 0; P55_RecCnt = 0; P36_JoyX = 0; P74_B5A86C[1] = 0;
     P14_00b31e20 = 0; P21_AxisValue = 0; P9_00b31e20 = 0; P74_B5A880[1] = 0;
@@ -585,7 +585,7 @@ void P138_ReplayLoad(void) {
   if (read_pads(P138_PadsPath, 0, 0, 0x297, &skip)) {
     if (G6_00B87EA0 == 0 || P88_Mode575 != 2) read_car(P56_PathPlayer, 0);
     p99_car_t *c = &P99_Cars[0];
-    c->vel[0] = 0; c->vel[1] = 0; c->vel[2] = 0; c->f128 = 0; c->f12c = 0; c->f130 = 0; c->f134 = 0;
+    c->damage[0] = 0; c->damage[1] = 0; c->damage[2] = 0; c->f128 = 0; c->f12c = 0; c->f130 = 0; c->f134 = 0;
     c->f00[0] = 0;
     P100_RecRep[0] = 0; P100_RecOff[0] = 0; P100_RecCnt[0] = 0; P74_B5A86C[0] = 0; P74_B5A880[0] = 0;
     P99_CarModelClean(-1);
@@ -620,7 +620,7 @@ void P138_LoadPads(void) {
   if (G6_00B87EB0 != 0) return;
   if (!read_pads(P138_PadsPath, 0, 0, 0x3ed, &P74_C4D668)) return;
   p99_car_t *c = &P99_Cars[0];
-  c->f138 = 0; c->f130 = 0; c->f12c = 0; c->f128 = 0; c->vel[2] = 0; c->vel[1] = 0; c->vel[0] = 0;
+  c->f138 = 0; c->f130 = 0; c->f12c = 0; c->f128 = 0; c->damage[2] = 0; c->damage[1] = 0; c->damage[0] = 0;
   P100_RecRep[0] = 0; P100_RecOff[0] = 0; P100_RecCnt[0] = 0; P55_RecCnt = 0; P36_JoyX = 0; P74_B5A86C[0] = 0;
   P14_00b31e20 = 0; P21_AxisValue = 0; P9_00b31e20 = 0; P74_B5A880[0] = 0;
 }

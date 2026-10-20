@@ -34,10 +34,11 @@ static int touch(float d, float nr) { return neg(d) == 0 || nr < d; }
 
 /* 00428672 */
 /* P83_BoxVis — Game.exe 00428672, cdecl.  Frustum test of a bounding sphere (centre p[0..2], radius r).
-   Plane order: left, right, far, near (only when the far test did not decide), top, bottom.
-   Returns 0 = outside (culled), 1 = inside, 2 = straddles the far plane, 3 = straddles the near plane
-   (res + 1, res = 1 far / 2 near).  TODO(RE): unsure which of P82_PlF / P77_Plane is near and which far —
-   the header comment calls the P77 one "near".
+   Plane order: left, right, near (P82_PlF), far (P77_Plane; only when the near test did not decide), top, bottom.
+   Returns 0 = outside (culled), 1 = inside, 2 = straddles the near plane, 3 = straddles the far plane
+   (res + 1, res = 1 near / 2 far).  P82_PlF is the near plane at z = 50 and P77_Plane the far plane (see
+   P82_FrustumSetup3D in ported82.c; older notes had the two swapped).  Normals point out of the frustum:
+   a positive distance beyond the radius culls.
    Side effect: P82_Edge = 1 when the sphere crosses a side/top/bottom plane (the caller must clip), or always
    when P60_Var1373C0 is set (forced clipping). */
 int32_t P83_BoxVis(const float *p, float r) {

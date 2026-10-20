@@ -623,7 +623,7 @@ void P100_CarSounds(uint8_t *tab) {
     if (P99_JunctionBlock(w) != 0) P95_SndTrigger(tab, 3, 0x1000);
     P99_RoadPick = (int16_t)w;
   }
-  if (P14_00b87e84 != 0 && 1000 < P99_Cars[0].vel[0] && 1000 < P99_Cars[0].vel[1]) P95_SndTrigger(tab, 9, 0x1000);
+  if (P14_00b87e84 != 0 && 1000 < P99_Cars[0].damage[0] && 1000 < P99_Cars[0].damage[1]) P95_SndTrigger(tab, 9, 0x1000);
   if (P99_Cars[0].f104 != 0 || P98_D078C8 != 0) P95_SndTrigger(tab, 10, 0x1000);
   if (200 < P62_Spd) P95_SndTrigger(tab, 2, 0x1000);
 }
