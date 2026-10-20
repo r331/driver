@@ -107,8 +107,8 @@ int32_t P25_InitCDAudio(void) {
   if (dev >= 0) P25_AuxDev = dev;
   return 1;
 }
-/* P25_CDStop — Game.exe 00524873 (identical copy at 005248a0).  Pauses CD playback (MCI pause, so
-   P25_CDResume can continue) and clears P25_CdPlaying. */
+/* P25_CDStop — Game.exe 00524873 (identical copy at 005248a0).  Stops CD playback (MCI_STOP; the
+   position is kept, so P25_CDResume continues from it) and clears P25_CdPlaying. */
 void P25_CDStop(void) {
   if (P25_CdOpen != 0) { plat_cd_pause(); P25_CdPlaying = 0; }
 }

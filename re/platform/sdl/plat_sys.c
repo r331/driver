@@ -1,6 +1,10 @@
 /* plat_sys.c (native, SDL2): системная часть plat.h — время (в т. ч. виртуальные часы RE_FIXED_DT), файлы и пути
    данных игры, окно и полный экран, цикл событий/сообщений вместо WinAPI, MessageBox, выход, обработчик аварий,
    журнал driver_gfx.log. */
+/* plat_sys.c (English overview) — the system part of plat.h for the native SDL2 build: time (including
+   the virtual clock of RE_FIXED_DT), files and case-insensitive game data paths, window / full screen,
+   the event loop standing in for the Win32 message loop, MessageBox, exit, crash handler, and the
+   driver_gfx.log journal. */
 #if defined(__linux__) && !defined(_GNU_SOURCE)
 #define _GNU_SOURCE   /* v2.10: dladdr, ucontext (RE_CRASH_BT) */
 #endif
@@ -247,6 +251,7 @@ int plat_cd_roots(char *buf,int size){   /* macOS: тома в /Volumes; Linux: 
 }
 
 /* --- выход, хранитель экрана, обработчик аварий --- */
+/* --- (en) Exit, screen saver, crash handler. --- */
 #include <stdlib.h>
 #include <signal.h>
 static int g_exit_trap, g_exit_last, g_saver = 1;
@@ -308,6 +313,7 @@ void plat_set_crash_handler(void (*fn)(void)){
 void (*plat_crash_handler(void))(void){ return g_crash; }
 
 /* --- окно игры, цикл сообщений --- */
+/* --- (en) Game window and message loop (SDL events -> the game's window procedure). --- */
 static int g_wtrap, g_wcur=1, g_wprio, g_wquit, g_wclose, g_ww, g_wh; static char g_wtitle[64]; static plat_wndproc g_wproc;
 void plat_win_trap(int on){ g_wtrap=on; }
 void *plat_game_window_create(void *hinst,int32_t show,const char *title,int w,int h,plat_wndproc proc){
@@ -434,6 +440,7 @@ int plat_com_count(void){ return g_com; }
 /* v1.95: WM_CREATE — в SDL оконная процедура получает hInstance прямо в lparam (как и раньше) */
 int32_t plat_wm_create_hinst(int32_t lparam){ return lparam; }
 /* --- v1.96: MoveWindow (размер окна SDL), активное окно, курсор, процесс, ускорители --- */
+/* --- (en) MoveWindow (SDL window size), active window, cursor, process, accelerators. --- */
 static int g_moves; static int32_t g_move[5];
 void plat_window_move(void *h, int x, int y, int w, int hh, int rep) {
     (void)h; g_moves++; g_move[0] = x; g_move[1] = y; g_move[2] = w; g_move[3] = hh; g_move[4] = rep;
@@ -446,6 +453,7 @@ void *plat_current_process(void) { return (void *)(intptr_t)-1; }
 void *plat_load_accelerators(void *hinst, const char *name) { (void)hinst; (void)name; return NULL; }
 
 /* --- v2.00: пути игры (Windows) → native: '\\' → '/', каждый компонент ищется без учёта регистра --- */
+/* --- (en) Windows game paths -> native: '\\' -> '/', each component matched case-insensitively. --- */
 static int ci_component(const char *dir, const char *name, char *out, size_t n) {
     DIR *d = opendir(*dir ? dir : "."); if (!d) return 0;
     struct dirent *e; int ok = 0;
@@ -510,6 +518,7 @@ int plat_remove_game(const char *path) {
 
 /* --- v2.00: кадры запуска игры: RE_MAX_FRAMES=N — после N-го plat_flip выход 0; RE_SHOT_PNG=путь — снимок кадра N
        (или первого, если RE_SHOT_FIRST=1); RE_MAX_PUMPS=N — выход после N циклов сообщений без кадров (защита) --- */
+/* --- (en) Run control for tests: RE_MAX_FRAMES=N exits after the N-th flip; RE_SHOT_PNG saves a screenshot. --- */
 int png_write_rgba(const char *path, const uint32_t *px, int w, int h);   /* tests/render_test.c */
 static int g_frames, g_pumps, g_shot_done;
 int plat_frame_no(void) { return g_frames; }
