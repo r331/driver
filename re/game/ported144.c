@@ -83,12 +83,9 @@ typedef void (P144_STD *p144_v1_fn)(int32_t);
 static const int32_t k_553870[P111_FLARE_N][7] = P111_FLARE_INIT;   /* .data 00553870 */
 #endif
 
-static float u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
 #include "memrw.h"
-static int32_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static uint32_t rdu16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
+static uint32_t rdu16_32(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static uint32_t rdu32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }
-static void wr16(uint8_t *p, int32_t v) { int16_t s = (int16_t)v; memcpy(p, &s, 2); }
 static int32_t ftol(double v) { return (int32_t)v; }                  /* __ftol: усечение к нулю */
 static int32_t fist(float v) { int32_t i = (int32_t)lrintf(v); P11_00ba52d0 = i; return i; }  /* fistp → 00ba52d0 */
 #ifdef RE_HOOK_BUILD
@@ -130,12 +127,12 @@ void P144_FlagFx(const uint8_t *o) {
   float z = rdf(o + LO_Z);
   if (!(P95_Near <= z) || !(z < (float)P62_I270C44)) return;
   int32_t iz = fist(z), iy = fist(rdf(o + LO_Y));
-  int32_t off_v_s = (int32_t)(((((uint32_t)(int32_t)(int16_t)P59_AngA - (uint32_t)P44_Atan2(iy, iz)) & 0xfffu) - rdu16(o + LO_DIR_V) + 0x800u) & 0xfffu) - 0x800;
+  int32_t off_v_s = (int32_t)(((((uint32_t)(int32_t)(int16_t)P59_AngA - (uint32_t)P44_Atan2(iy, iz)) & 0xfffu) - rdu16_32(o + LO_DIR_V) + 0x800u) & 0xfffu) - 0x800;
   int32_t off_v = off_v_s < 0 ? -off_v_s : off_v_s;
   iz = fist(z); int32_t ix = fist(rdf(o + LO_X));
-  int32_t off_h_s = (int32_t)(((((uint32_t)P44_Atan2(ix, iz) - (uint32_t)(int32_t)(int16_t)P59_AngB) & 0xfffu) - rdu16(o + LO_DIR_H) + 0x800u) & 0xfffu) - 0x800;
+  int32_t off_h_s = (int32_t)(((((uint32_t)P44_Atan2(ix, iz) - (uint32_t)(int32_t)(int16_t)P59_AngB) & 0xfffu) - rdu16_32(o + LO_DIR_H) + 0x800u) & 0xfffu) - 0x800;
   int32_t off_h = off_h_s < 0 ? -off_h_s : off_h_s;
-  uint32_t typ = rdu16(o + LO_TYPE) & 0x7fu;
+  uint32_t typ = rdu16_32(o + LO_TYPE) & 0x7fu;
 #ifndef RE_HOOK_BUILD
   if (typ >= P111_FLARE_N) return;
 #endif
@@ -143,7 +140,7 @@ void P144_FlagFx(const uint8_t *o) {
   uint32_t flare_flags = (uint32_t)cw(t, 6);
   float half, bright, bright_b = 0.0f;
   uint32_t rot = 0;
-  if ((rdu16(o + LO_TYPE) & 0x80u) == 0) {
+  if ((rdu16_32(o + LO_TYPE) & 0x80u) == 0) {
     half = cf(t, 4); bright = 1.0f;
   } else {
     if (off_v >= 0x400 || off_h >= 0x496) return;
@@ -221,7 +218,7 @@ void P144_FlagFx(const uint8_t *o) {
   depth_bias(0);
   uint32_t ofl = rdu32(o + LO_FLAGS);
   if (P14_00b87e84 == 0 || (ofl & 0xe00000u) == 0 || P84_Mirror != 0) return;
-  int32_t car = rd16(o + LO_CAR), lamp = rd16(o + LO_LAMP);
+  int32_t car = rds16(o + LO_CAR), lamp = rds16(o + LO_LAMP);
   if (lamp == -1) return;
   uint8_t *hist;
   if (ofl & 0x800000u) {
@@ -237,8 +234,8 @@ void P144_FlagFx(const uint8_t *o) {
   }
   float ax0 = v0.x, ay0 = v0.y, ax2 = v2.x, ay2 = v2.y;
   int32_t cur = P67_Cur;
-  if (rd16(hist + HIST_FRAME) == (int32_t)((uint32_t)cur & 0xffffu) - 1 && P59_Mode1137324 == P52_ResetB && P99_CamEnd == 0) {
-    int32_t qx = rd16(hist + ((uint32_t)(cur - 2) & 3u) * 8), qy = rd16(hist + ((uint32_t)(cur - 2) & 3u) * 8 + 4);
+  if (rds16(hist + HIST_FRAME) == (int32_t)((uint32_t)cur & 0xffffu) - 1 && P59_Mode1137324 == P52_ResetB && P99_CamEnd == 0) {
+    int32_t qx = rds16(hist + ((uint32_t)(cur - 2) & 3u) * 8), qy = rds16(hist + ((uint32_t)(cur - 2) & 3u) * 8 + 4);
     int32_t sx = (int16_t)ftol((ax0 + ax2) * 0.5f), sy = (int16_t)ftol((ay0 + ay2) * 0.5f);   /* 00546068 = 0.5 */
     wr16(hist + HIST_FRAME, cur);
     wr32(hist + ((uint32_t)cur & 3u) * 8, sx);

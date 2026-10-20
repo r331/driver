@@ -158,8 +158,6 @@ int32_t P120_HudB;
 #define CAR_HEADING_I16 0xea   /* int16 heading inside CAR_ANG (carfields.h: +0xea = heading as int16) */
 
 /* wr16 / wrf — local helpers: unaligned int16 / float writes. */
-static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
-static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 
 /* carp — local helper: car record i (native: out-of-range i maps to the spare last record). */
 static uint8_t *carp(int32_t i) {

@@ -192,7 +192,6 @@ float P126_SideW;
 
 #include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 #define P126_BLK(off) (*(int32_t *)&P56_Blk84[((off) - 0x00c810c0) / 4])   /* поля внутри P56_Blk84 */
 #define P126_CAR(i)   ((uint8_t *)&P99_Cars[(i)])
 

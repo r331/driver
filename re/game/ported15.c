@@ -7,6 +7,7 @@
 #include "reptr.h"
 #include "ported79.h"
 #include <string.h>
+#include "memrw.h"
 GAME_VAR_DEF(uint8_t *, P15_MenuText, 0x005fe9b0)
 GAME_VAR_DEF(uint8_t *, P15_MenuItems, 0x005fe9b8)
 GAME_VAR_DEF(int32_t, P15_MenuMode, 0x005fe9bc)
@@ -39,12 +40,8 @@ GAME_VAR_DEF(P15_i32x9, P15_Vals9, 0x00d044a0)
 #endif
 GAME_VAR_DEF(uint8_t *, P15_Limits, 0x00d0448c)
 
-static uint16_t r16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static void w16(uint8_t *p, uint16_t v) { memcpy(p, &v, 2); }
 static void w32(uint8_t *p, uint32_t v) { memcpy(p, &v, 4); }
 static uint32_t r32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }
-static float rf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
-static void wf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 #define MENU_ITEM_SIZE    0x10   /* one entry of the P15_MenuItems array */
 #define MENU_ITEM_STATE   4      /* u8: entry state; the handlers below set 3 (TODO(RE): unsure — "highlighted") */
 #define MENU_ITEM_FLAGS   5      /* u8: bit 3 (MENU_FLAG_LIT) set by P15_SetHighlightRange */
@@ -69,7 +66,7 @@ static uint8_t *rp(const uint8_t *p) { return (uint8_t *)re_ptr((uint32_t)r32(p)
 /* Writes the hint header P15_MenuText: text address (Game.exe .data string) and the two u16 values
    a, b (TODO(RE): unsure — width/height per the note above, or x/y position). */
 static void set_hint(uint32_t text_addr, uint16_t a, uint16_t b) {
-  if (P15_MenuText) { w32(P15_MenuText + 4, text_addr); w16(P15_MenuText, a); w16(P15_MenuText + 2, b); }
+  if (P15_MenuText) { w32(P15_MenuText + 4, text_addr); wr16(P15_MenuText, a); wr16(P15_MenuText + 2, b); }
 }
 
 /* P15_MenuMiami .. P15_MenuItem7 — Game.exe 004142a4, 004142fc, 004143b6, 0041440e, 004144c8, 00414520,
@@ -134,8 +131,8 @@ static uint8_t *mp(const uint8_t *p) { uint32_t v = r32(p); return v != 0 ? (uin
 void P15_ScaleVertices(uint8_t *obj, float sx, float sy, float sz) {
   uint8_t *v = mp(obj + MODEL_VERTS);
   if (v == NULL) return;
-  for (int i = 0; i < (int)r16(obj + MODEL_VERT_COUNT); i++, v += 16) {
-    wf(v, sx * rf(v)); wf(v + 4, sy * rf(v + 4)); wf(v + 8, sz * rf(v + 8));
+  for (int i = 0; i < (int)rdu16(obj + MODEL_VERT_COUNT); i++, v += 16) {
+    wrf(v, sx * rdf(v)); wrf(v + 4, sy * rdf(v + 4)); wrf(v + 8, sz * rdf(v + 8));
   }
 }
 /* P15_ScaleNormalW — Game.exe 00427a71.  Multiplies the 4th float (+12) of every entry of the model's
@@ -144,7 +141,7 @@ void P15_ScaleVertices(uint8_t *obj, float sx, float sy, float sz) {
 void P15_ScaleNormalW(uint8_t *obj, float s) {
   uint8_t *v = mp(obj + MODEL_NORMS);
   if (v == NULL) return;
-  for (int i = 0; i < (int)r16(obj + MODEL_NORM_COUNT); i++, v += 16) wf(v + 12, s * rf(v + 12));
+  for (int i = 0; i < (int)rdu16(obj + MODEL_NORM_COUNT); i++, v += 16) wrf(v + 12, s * rdf(v + 12));
 }
 /* P15_SkipInteger — Game.exe 004a50a2.  Advances *p past an optional '-' and the following digits. */
 void P15_SkipInteger(char **p) {
@@ -176,16 +173,16 @@ void P15_BlitRect8(uint8_t *src, int sx, int sy, uint32_t w, int h, uint8_t *dst
    list holds (the project notes call 00d12408 a split data-image alias that is empty in native). */
 void P15_ListClearActiveByTag(uint32_t tag) {
   for (uint8_t *n = P15_ListHead; n; n = rp(n + LIST_NEXT)) {
-    uint16_t f = r16(n + LIST_FLAGS);
-    if ((f & LIST_F_ACTIVE) && (f & LIST_F_BYTAG) && r16(n + LIST_TAG) == tag) w16(n, f & 0xfffd);
+    uint16_t f = rdu16(n + LIST_FLAGS);
+    if ((f & LIST_F_ACTIVE) && (f & LIST_F_BYTAG) && rdu16(n + LIST_TAG) == tag) wr16(n, f & 0xfffd);
   }
 }
 /* P15_ListClearAllActive — Game.exe 004d0021.  Clears the active bit of every node of P15_ListHead; the
    walk uses the global cursor P15_ListCur (left NULL at the end), as the original does. */
 void P15_ListClearAllActive(void) {
   for (P15_ListCur = P15_ListHead; P15_ListCur; P15_ListCur = rp(P15_ListCur + LIST_NEXT)) {
-    uint16_t f = r16(P15_ListCur + LIST_FLAGS);
-    if (f & LIST_F_ACTIVE) w16(P15_ListCur, f & 0xfffd);
+    uint16_t f = rdu16(P15_ListCur + LIST_FLAGS);
+    if (f & LIST_F_ACTIVE) wr16(P15_ListCur, f & 0xfffd);
   }
 }
 /* P15_GridCell — Game.exe 004e58ba.  Maps a world position to one of 15 cells of a 3 (x) by 5 (y) grid:

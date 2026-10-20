@@ -184,8 +184,6 @@ int32_t P109_C81268;
 
 #include "memrw.h"
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static const float OOW_LO = 0.015625f;   /* 0x3c800000 */
 #ifdef RE_HOOK_BUILD
 #  define P109_STD __attribute__((stdcall))

@@ -104,12 +104,8 @@ static const uint8_t k_553678[8] = { 0x20, 0x60, 0x60, 0x20, 0x80, 0x40, 0x40, 0
 static const float   k_553848 = 1.0f;     /* .data 00553848: масштаб размеров */
 static const int32_t k_553854 = 1;        /* .data 00553854: 1 — проверка видимости треугольниками, 0 — через LFB */
 
-static float u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
 #include "memrw.h"
-static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
-static int32_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static uint32_t rdu16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(uint8_t *p, int32_t v) { int16_t s = (int16_t)v; memcpy(p, &s, 2); }
+static uint32_t rdu16_32(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static int32_t ftol(double v) { return (int32_t)v; }                  /* __ftol: усечение к нулю */
 static int32_t fist(float v) { int32_t i = (int32_t)lrintf(v); P11_00ba52d0 = i; return i; }  /* fistp → 00ba52d0 */
 /* Glide export by name (NULL when missing). */
@@ -274,10 +270,10 @@ void P143_LampGlow(const uint8_t *o) {
   if (ic == NULL) return;
 #endif
   int32_t iz = fist(z), iy = fist(rdf(o + LO_Y));
-  int32_t off_v = (int32_t)(((((uint32_t)(int32_t)(int16_t)P59_AngA - (uint32_t)P44_Atan2(iy, iz)) & 0xfffu) - rdu16(o + LO_DIR_V) + 0x800u) & 0xfffu) - 0x800;
+  int32_t off_v = (int32_t)(((((uint32_t)(int32_t)(int16_t)P59_AngA - (uint32_t)P44_Atan2(iy, iz)) & 0xfffu) - rdu16_32(o + LO_DIR_V) + 0x800u) & 0xfffu) - 0x800;
   if (off_v < 0) off_v = -off_v;
   iz = fist(z); int32_t ix = fist(rdf(o + LO_X));
-  int32_t off_h = (int32_t)(((((uint32_t)P44_Atan2(ix, iz) - (uint32_t)(int32_t)(int16_t)P59_AngB) & 0xfffu) - rdu16(o + LO_DIR_H) + 0x800u) & 0xfffu) - 0x800;
+  int32_t off_h = (int32_t)(((((uint32_t)P44_Atan2(ix, iz) - (uint32_t)(int32_t)(int16_t)P59_AngB) & 0xfffu) - rdu16_32(o + LO_DIR_H) + 0x800u) & 0xfffu) - 0x800;
   if (off_h < 0) off_h = -off_h;
   if (off_v >= 0x400 || off_h >= 0x400) return;
   float bright = P43_Sin[0x400 + off_v] * P43_Sin[0x400 + off_h];
@@ -309,15 +305,15 @@ void P143_LampGlow(const uint8_t *o) {
   raster(&v2, &v3, &v0);
   gcall1("_grDepthBiasLevel@4", 0);
   if (P14_00b87e84 == 0 || P84_Mirror != 0) return;
-  int32_t car = rd16(o + LO_CAR), lamp = rd16(o + LO_LAMP);
+  int32_t car = rds16(o + LO_CAR), lamp = rds16(o + LO_LAMP);
 #ifndef RE_HOOK_BUILD
   if (car < 0 || car >= 0x42 || lamp < 0 || lamp >= 8) return;
 #endif
   uint8_t *hist = (uint8_t *)P143_LampHist + car * 0x140 + lamp * 0x28;
   float x0 = v0.x, y0 = v0.y, x2 = v2.x, y2 = v2.y;
   int32_t cur = P67_Cur;
-  if (rd16(hist + HIST_FRAME) == (int32_t)((uint32_t)cur & 0xffffu) - 1 && P59_Mode1137324 == P52_ResetB && P99_CamEnd == 0) {
-    int32_t px = rd16(hist + ((uint32_t)(cur - 2) & 3u) * 8), py = rd16(hist + ((uint32_t)(cur - 2) & 3u) * 8 + 4);
+  if (rds16(hist + HIST_FRAME) == (int32_t)((uint32_t)cur & 0xffffu) - 1 && P59_Mode1137324 == P52_ResetB && P99_CamEnd == 0) {
+    int32_t px = rds16(hist + ((uint32_t)(cur - 2) & 3u) * 8), py = rds16(hist + ((uint32_t)(cur - 2) & 3u) * 8 + 4);
     int32_t sx = (int16_t)ftol((x0 + x2) * 0.5f), sy = (int16_t)ftol((y0 + y2) * 0.5f);   /* .rdata 00546068 = 0.5 */
     wr16(hist + HIST_FRAME, cur);
     wr32(hist + ((uint32_t)cur & 3u) * 8, sx);

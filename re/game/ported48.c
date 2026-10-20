@@ -9,6 +9,7 @@
 #include "ported48.h"
 #include "../platform/plat.h"
 #include <string.h>
+#include "memrw.h"
 GAME_VAR_DEF(P48_F0, P48_Drv00, 0x00bdcb00)
 GAME_VAR_DEF(P48_F0, P48_Drv08, 0x00bdcb08)
 GAME_VAR_DEF(P48_F0, P48_Drv0C, 0x00bdcb0c)
@@ -237,22 +238,18 @@ int32_t P48_StartupSystems(void) {
 #define OBJF_RAMPING   0x0040 /* set while a speed ramp or turn runs */
 #define OBJF_TURNING   0x01c0 /* 0x40 | 0x80 | 0x100 set by P48_OpTurn; 0x100 = turn in progress */
 #define OBJF_TURN_RUN  0x0100
-static uint16_t r16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static uint32_t r32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }
-static float    rf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
-static void w16(uint8_t *p, uint16_t v) { memcpy(p, &v, 2); }
 static void w32(uint8_t *p, uint32_t v) { memcpy(p, &v, 4); }
-static void wf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 /* P48_OpSet3 — Game.exe 004d020b.  Operands: u16 w4a, int32 x, y, z.  Sets the object position (and w4a
    unless the current list node has flag bits 0x30), and clears all object flags except bit 2. */
 int32_t P48_OpSet3(void) {
   P10_ScriptPtr += 2;
-  if ((*S_00D12410 & 0x30) == 0) w16(P10_ScriptCtx + OBJ_W4A, r16(P10_ScriptPtr));
+  if ((*S_00D12410 & 0x30) == 0) wr16(P10_ScriptCtx + OBJ_W4A, rdu16(P10_ScriptPtr));
   P10_ScriptPtr += 2;
   w32(P10_ScriptCtx + OBJ_POS + 0, r32(P10_ScriptPtr)); P10_ScriptPtr += 4;
   w32(P10_ScriptCtx + OBJ_POS + 4, r32(P10_ScriptPtr)); P10_ScriptPtr += 4;
   w32(P10_ScriptCtx + OBJ_POS + 8, r32(P10_ScriptPtr)); P10_ScriptPtr += 4;
-  w16(P10_ScriptCtx + OBJ_FLAGS, (uint16_t)(r16(P10_ScriptCtx + OBJ_FLAGS) & OBJF_KEEP));
+  wr16(P10_ScriptCtx + OBJ_FLAGS, (uint16_t)(rdu16(P10_ScriptCtx + OBJ_FLAGS) & OBJF_KEEP));
   return 1;
 }
 /* P48_OpSet4 — Game.exe 004d107e.  Operands: 4 dwords copied to the speed (+0x44) and the vector +0x28..+0x30. */
@@ -268,12 +265,12 @@ int32_t P48_OpSet4(void) {
    finishes (speed = limit, return 1) once speed <= limit (or NaN), else repeats next frame. */
 int32_t P48_OpRampDown(void) {
   uint8_t *orig = P10_ScriptPtr, *c = P10_ScriptCtx;
-  w16(c + OBJ_FLAGS, (uint16_t)(r16(c + OBJ_FLAGS) | OBJF_RAMPING));
-  P10_ScriptPtr += 2; float limit = rf(P10_ScriptPtr);
-  P10_ScriptPtr += 4; float step = rf(P10_ScriptPtr);
+  wr16(c + OBJ_FLAGS, (uint16_t)(rdu16(c + OBJ_FLAGS) | OBJF_RAMPING));
+  P10_ScriptPtr += 2; float limit = rdf(P10_ScriptPtr);
+  P10_ScriptPtr += 4; float step = rdf(P10_ScriptPtr);
   P10_ScriptPtr += 4;
-  wf(c + OBJ_SPEED, rf(c + OBJ_SPEED) - step);
-  if (!(rf(c + OBJ_SPEED) > limit)) { wf(c + OBJ_SPEED, limit); return 1; }   /* fcomp: C0|C3 (<=, NaN) */
+  wrf(c + OBJ_SPEED, rdf(c + OBJ_SPEED) - step);
+  if (!(rdf(c + OBJ_SPEED) > limit)) { wrf(c + OBJ_SPEED, limit); return 1; }   /* fcomp: C0|C3 (<=, NaN) */
   P10_ScriptPtr = orig;
   return 0;
 }
@@ -281,12 +278,12 @@ int32_t P48_OpRampDown(void) {
    finishes (speed = limit) once speed >= limit. */
 int32_t P48_OpRampUp(void) {
   uint8_t *orig = P10_ScriptPtr, *c = P10_ScriptCtx;
-  w16(c + OBJ_FLAGS, (uint16_t)(r16(c + OBJ_FLAGS) | OBJF_RAMPING));
-  P10_ScriptPtr += 2; float limit = rf(P10_ScriptPtr);
-  P10_ScriptPtr += 4; float step = rf(P10_ScriptPtr);
+  wr16(c + OBJ_FLAGS, (uint16_t)(rdu16(c + OBJ_FLAGS) | OBJF_RAMPING));
+  P10_ScriptPtr += 2; float limit = rdf(P10_ScriptPtr);
+  P10_ScriptPtr += 4; float step = rdf(P10_ScriptPtr);
   P10_ScriptPtr += 4;
-  wf(c + OBJ_SPEED, step + rf(c + OBJ_SPEED));
-  if (rf(c + OBJ_SPEED) >= limit) { wf(c + OBJ_SPEED, limit); return 1; }
+  wrf(c + OBJ_SPEED, step + rdf(c + OBJ_SPEED));
+  if (rdf(c + OBJ_SPEED) >= limit) { wrf(c + OBJ_SPEED, limit); return 1; }
   P10_ScriptPtr = orig;
   return 0;
 }
@@ -294,15 +291,15 @@ int32_t P48_OpRampUp(void) {
    a == 2: word +0x40 = b; other a: nothing. */
 int32_t P48_OpFlags(void) {
   uint8_t *c;
-  P10_ScriptPtr += 2; int16_t a = (int16_t)r16(P10_ScriptPtr);
-  P10_ScriptPtr += 2; int16_t b = (int16_t)r16(P10_ScriptPtr);
+  P10_ScriptPtr += 2; int16_t a = (int16_t)rdu16(P10_ScriptPtr);
+  P10_ScriptPtr += 2; int16_t b = (int16_t)rdu16(P10_ScriptPtr);
   P10_ScriptPtr += 2;
   c = P10_ScriptCtx;
   if (a == 1) {
-    if (b != 0) w16(c + OBJ_FLAGS, (uint16_t)(r16(c + OBJ_FLAGS) | OBJF_20));
-    else        w16(c + OBJ_FLAGS, (uint16_t)(r16(c + OBJ_FLAGS) & 0xffdf));
+    if (b != 0) wr16(c + OBJ_FLAGS, (uint16_t)(rdu16(c + OBJ_FLAGS) | OBJF_20));
+    else        wr16(c + OBJ_FLAGS, (uint16_t)(rdu16(c + OBJ_FLAGS) & 0xffdf));
   } else if (a == 2) {
-    w16(c + OBJ_W40, (uint16_t)b);
+    wr16(c + OBJ_W40, (uint16_t)b);
   }
   return 1;
 }
@@ -311,14 +308,14 @@ int32_t P48_OpFlags(void) {
    when it reaches 0: reload counter = init and fall through to the next op.  (Self-modifying loop
    counter in the script data, as in the original.) */
 int32_t P48_OpRepeat(void) {
-  P10_ScriptPtr += 2; uint16_t init = r16(P10_ScriptPtr);
-  P10_ScriptPtr += 2; uint16_t cnt = r16(P10_ScriptPtr);
+  P10_ScriptPtr += 2; uint16_t init = rdu16(P10_ScriptPtr);
+  P10_ScriptPtr += 2; uint16_t cnt = rdu16(P10_ScriptPtr);
   if (cnt != 0) {
-    w16(P10_ScriptPtr, (uint16_t)(cnt - 1));
+    wr16(P10_ScriptPtr, (uint16_t)(cnt - 1));
     P10_ScriptPtr += 2;
-    P10_ScriptPtr -= r16(P10_ScriptPtr);
+    P10_ScriptPtr -= rdu16(P10_ScriptPtr);
   } else {
-    w16(P10_ScriptPtr, init);
+    wr16(P10_ScriptPtr, init);
     P10_ScriptPtr += 2; P10_ScriptPtr += 2;
   }
   return 1;
@@ -332,23 +329,23 @@ int32_t P48_OpRepeat(void) {
    heading is NOT snapped to the target at the end (as in the original). */
 int32_t P48_OpTurn(void) {
   uint8_t *orig = P10_ScriptPtr, *c = P10_ScriptCtx;
-  P10_ScriptPtr += 2; float arg = rf(P10_ScriptPtr);
-  P10_ScriptPtr += 4; uint16_t dir = r16(P10_ScriptPtr);
+  P10_ScriptPtr += 2; float arg = rdf(P10_ScriptPtr);
+  P10_ScriptPtr += 4; uint16_t dir = rdu16(P10_ScriptPtr);
   P10_ScriptPtr += 2;
-  long double q = ((long double)1024.0f * rf(c + OBJ_SPEED)) / (((long double)arg * 3.14159274f) / 2.0f);
+  long double q = ((long double)1024.0f * rdf(c + OBJ_SPEED)) / (((long double)arg * 3.14159274f) / 2.0f);
   uint16_t step = (uint16_t)(int32_t)q;
   uint16_t lim;                              /* angle still to turn */
-  if ((r16(c + OBJ_FLAGS) & OBJF_TURN_RUN) == 0) w16(c + OBJ_ANGLE, (uint16_t)((dir & 3) << 10));
-  w16(c + OBJ_FLAGS, (uint16_t)(r16(c + OBJ_FLAGS) | OBJF_TURNING));
+  if ((rdu16(c + OBJ_FLAGS) & OBJF_TURN_RUN) == 0) wr16(c + OBJ_ANGLE, (uint16_t)((dir & 3) << 10));
+  wr16(c + OBJ_FLAGS, (uint16_t)(rdu16(c + OBJ_FLAGS) | OBJF_TURNING));
   if (dir < 4) {
-    w16(c + OBJ_ANGLE, (uint16_t)(r16(c + OBJ_ANGLE) + step));
-    lim = (uint16_t)((((dir & 3) + 1) << 10) - (int16_t)r16(c + OBJ_ANGLE));
+    wr16(c + OBJ_ANGLE, (uint16_t)(rdu16(c + OBJ_ANGLE) + step));
+    lim = (uint16_t)((((dir & 3) + 1) << 10) - (int16_t)rdu16(c + OBJ_ANGLE));
   } else {
-    w16(c + OBJ_ANGLE, (uint16_t)(r16(c + OBJ_ANGLE) + (0x1000 - step)));   /* ANG_FULL - step */
-    w16(c + OBJ_ANGLE, (uint16_t)(r16(c + OBJ_ANGLE) & 0xfff));
-    lim = (uint16_t)((int16_t)r16(c + OBJ_ANGLE) - (((dir + 3) & 3) << 10));
+    wr16(c + OBJ_ANGLE, (uint16_t)(rdu16(c + OBJ_ANGLE) + (0x1000 - step)));   /* ANG_FULL - step */
+    wr16(c + OBJ_ANGLE, (uint16_t)(rdu16(c + OBJ_ANGLE) & 0xfff));
+    lim = (uint16_t)((int16_t)rdu16(c + OBJ_ANGLE) - (((dir + 3) & 3) << 10));
   }
-  if (lim < step) { w16(c + OBJ_FLAGS, (uint16_t)(r16(c + OBJ_FLAGS) & 0xfebf)); return 1; }   /* ~(0x100 | 0x40) */
+  if (lim < step) { wr16(c + OBJ_FLAGS, (uint16_t)(rdu16(c + OBJ_FLAGS) & 0xfebf)); return 1; }   /* ~(0x100 | 0x40) */
   P10_ScriptPtr = orig;
   return 0;
 }

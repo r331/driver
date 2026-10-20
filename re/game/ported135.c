@@ -117,7 +117,6 @@
 #include "ported134.h"
 
 #include "memrw.h"
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
 #define NZ ((int32_t)(RE_OOW_N))
 
 static void raster(const p85_rv *a, const p85_rv *b, const p85_rv *c) { if (P85_RasterB) P85_RasterB(a, b, c); }

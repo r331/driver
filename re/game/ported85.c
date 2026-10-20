@@ -7,6 +7,7 @@
 #include "../platform/native/diagnostics.h"
 #endif
 #include <string.h>
+#include "memrw.h"
 
 GAME_VAR_DEF(p85_vcache_t, P85_VCache, 0x011cffa0)
 GAME_VAR_DEF(p85_rv3_t, P85_RV, 0x00b1c290)
@@ -106,7 +107,6 @@ int32_t P85_ZI;
 #endif
 
 typedef long double ld;
-static uint32_t bits(float f) { uint32_t u; memcpy(&u, &f, 4); return u; }
 
 /* 00528ac8 */
 /* P85_Project — Game.exe 00528ac8.  Transforms one model vertex to the screen.
@@ -299,31 +299,31 @@ int P85_EdgeReject(const p85_vtx *const *vs, int n) {
 #ifndef RE_HOOK_BUILD
   const int ex = re_view_extra();   /* v2.15 Hor+: экран по x — [−S, 639 + S] */
   if (ex > 0) {
-    for (int i = 0; i < n; i++) a &= bits(vs[i]->x + (float)ex);
+    for (int i = 0; i < n; i++) a &= fbits(vs[i]->x + (float)ex);
     P85_Clip = a; if (a) return 1;
     a = 0x80000000u;
-    for (int i = 0; i < n; i++) a &= bits(vs[i]->y);
+    for (int i = 0; i < n; i++) a &= fbits(vs[i]->y);
     P85_Clip = a; if (a) return 1;
     uint32_t o = 0;
-    for (int i = 0; i < n; i++) { float d = (float)((ld)vs[i]->x - (ld)P85_MaxX - (ld)ex); uint32_t u = bits(d); if (i < 3) P85_D[i] = u; else P85_D3 = u; o |= u; }
+    for (int i = 0; i < n; i++) { float d = (float)((ld)vs[i]->x - (ld)P85_MaxX - (ld)ex); uint32_t u = fbits(d); if (i < 3) P85_D[i] = u; else P85_D3 = u; o |= u; }
     P85_Clip = o; if (o == 0) return 1;
     o = 0;
-    for (int i = 0; i < n; i++) { float d = (float)((ld)vs[i]->y - (ld)P85_MaxY); uint32_t u = bits(d); if (i < 3) P85_D[i] = u; else P85_D3 = u; o |= u; }
+    for (int i = 0; i < n; i++) { float d = (float)((ld)vs[i]->y - (ld)P85_MaxY); uint32_t u = fbits(d); if (i < 3) P85_D[i] = u; else P85_D3 = u; o |= u; }
     P85_Clip = o; if (o == 0) return 1;
     return 0;
   }
 #endif
-  for (int i = 0; i < n; i++) a &= bits(vs[i]->x);
+  for (int i = 0; i < n; i++) a &= fbits(vs[i]->x);
   P85_Clip = a; if (a) return 1;
   a = 0x80000000u;
-  for (int i = 0; i < n; i++) a &= bits(vs[i]->y);
+  for (int i = 0; i < n; i++) a &= fbits(vs[i]->y);
   P85_Clip = a; if (a) return 1;
   {
     uint32_t o = 0;
-    for (int i = 0; i < n; i++) { float d = (float)((ld)vs[i]->x - (ld)P85_MaxX); uint32_t u = bits(d); if (i < 3) P85_D[i] = u; else P85_D3 = u; o |= u; }
+    for (int i = 0; i < n; i++) { float d = (float)((ld)vs[i]->x - (ld)P85_MaxX); uint32_t u = fbits(d); if (i < 3) P85_D[i] = u; else P85_D3 = u; o |= u; }
     P85_Clip = o; if (o == 0) return 1;
     o = 0;
-    for (int i = 0; i < n; i++) { float d = (float)((ld)vs[i]->y - (ld)P85_MaxY); uint32_t u = bits(d); if (i < 3) P85_D[i] = u; else P85_D3 = u; o |= u; }
+    for (int i = 0; i < n; i++) { float d = (float)((ld)vs[i]->y - (ld)P85_MaxY); uint32_t u = fbits(d); if (i < 3) P85_D[i] = u; else P85_D3 = u; o |= u; }
     P85_Clip = o; if (o == 0) return 1;
   }
   return 0;

@@ -210,7 +210,6 @@ int32_t P107_NavRep = 10;        /* .data 005755c4 */
 #endif
 
 #include "memrw.h"
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static const float OOW_LO = 0.015625f;   /* 0x3c800000 */
 
 static void *glide_proc(const char *name) {

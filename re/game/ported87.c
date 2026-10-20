@@ -62,6 +62,7 @@ p87_lumps_t P87_SlotLumpA;
 #define OBJ_ANGLE        0x18     /* int32: rotation (index into the Euler table) */
 #define OBJ_HIDDEN       0x1c     /* int32: 1 if disk bit 0x8000 was set; such objects are not drawn */
 #include "modelhdr.h"   /* model header fields (MDL_*); MDL_RADIUS is the bounding radius for P83_BoxVis */
+#include "memrw.h"
 /* model flag bits (MDL_FLAGS) read here */
 #define MDLF_MISSION     0x0004   /* drawn by P131_MissionObj instead */
 #define MDLF_AXIS_A      0x0010   /* with 0x20: axis-aligned fast path P92_DrawAxis when the angle is a multiple of 90 deg */
@@ -81,9 +82,6 @@ static void *p87_list[256];
 static void list_init(void) { if (!P87_ListPtr) P87_ListPtr = p87_list; }
 #endif
 
-static uint16_t rd16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static int32_t  rd32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
-static float    rdf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
 
 /* 004ed5f8 */
 /* P87_LoadTile — Game.exe 004ed5f8.  Unpacks map lump `lump` (P80_LumpTab[lump], raw lump data) into
@@ -105,7 +103,7 @@ void P87_LoadTile(int32_t lump, int32_t slot) {
   uint8_t *nodes = (uint8_t *)G6_00CE0F20 + (size_t)slot * 0x28000;   /* SLOT_NODES * 8 bytes */
   if (n != 0) {
     for (int32_t i = 0; i < n; i++) {
-      uint32_t a = rd16(cur + i * 4), b = rd16(cur + i * 4 + 2);   /* a = object index, b = next node */
+      uint32_t a = rdu16(cur + i * 4), b = rdu16(cur + i * 4 + 2);   /* a = object index, b = next node */
       uint32_t na = a, nb = b == 0xffff ? 0xffffffffu : b;
       if ((int32_t)na >= P54_Cnt1E0) na += (uint32_t)slot * SLOT_OBJS;
       if (nb != 0xffffffffu) nb += (uint32_t)slot * SLOT_NODES;
@@ -122,17 +120,17 @@ void P87_LoadTile(int32_t lump, int32_t slot) {
   if (kind == 0) {
     for (int32_t i = 0; i < cells; i++) heads[i] = -1;
   } else if (kind == 1) {
-    for (int32_t i = 0; i < cells; i++) { uint16_t v = rd16(cd + i * 2); heads[i] = v == 0xffff ? -1 : (int32_t)v + slot * SLOT_NODES; }
+    for (int32_t i = 0; i < cells; i++) { uint16_t v = rdu16(cd + i * 2); heads[i] = v == 0xffff ? -1 : (int32_t)v + slot * SLOT_NODES; }
   } else if (kind == 2) {
     /* sparse: a u16 mask per 16 cells (MSB = first cell); a set bit is followed by that cell's head */
-    uint32_t bit = 0x8000; int16_t mask = (int16_t)rd16(cd); cd = cur + 7;
+    uint32_t bit = 0x8000; int16_t mask = (int16_t)rdu16(cd); cd = cur + 7;
     for (int32_t i = 0; i < cells; i++) {
       int32_t v;
       if (((int32_t)mask & bit) == 0) v = -1;
-      else { v = (int32_t)rd16(cd) + slot * SLOT_NODES; cd += 2; }
+      else { v = (int32_t)rdu16(cd) + slot * SLOT_NODES; cd += 2; }
       heads[i] = v;
       bit = (uint32_t)((int32_t)bit >> 1);
-      if (bit == 0) { bit = 0x8000; mask = (int16_t)rd16(cd); cd += 2; }
+      if (bit == 0) { bit = 0x8000; mask = (int16_t)rdu16(cd); cd += 2; }
     }
   }
   int32_t cnt = rd32(after); const uint8_t *rec = after + 4;
@@ -140,7 +138,7 @@ void P87_LoadTile(int32_t lump, int32_t slot) {
     uint8_t *o = (uint8_t *)G6_00D00208 + (size_t)(P54_Cnt1E0 + slot * SLOT_OBJS) * MAP_OBJ_SIZE;
     /* disk record: +0 u16 model | 0x8000 hidden, +4/+8/+0xc float x, y, z, +0x10 int16 angle */
     for (int32_t i = 0; i < cnt; i++, rec += MAP_OBJ_DISK, o += MAP_OBJ_SIZE) {
-      uint32_t stamp = P44_XformTag; uint16_t m = rd16(rec); uint32_t mi = m & 0x7fff; int32_t ang = (int16_t)rd16(rec + 0x10), flag = (m & 0x8000) ? 1 : 0;
+      uint32_t stamp = P44_XformTag; uint16_t m = rdu16(rec); uint32_t mi = m & 0x7fff; int32_t ang = (int16_t)rdu16(rec + 0x10), flag = (m & 0x8000) ? 1 : 0;
       memset(o, 0, MAP_OBJ_SIZE);
       memcpy(o + OBJ_STAMP, &stamp, 4); memcpy(o + OBJ_MODEL, &mi, 4);
       memcpy(o + OBJ_POS, rec + 4, 4); memcpy(o + OBJ_POS + 4, rec + 8, 4); memcpy(o + OBJ_POS + 8, rec + 0xc, 4);
@@ -171,7 +169,7 @@ static void draw_obj(const uint8_t *obj, int kind) {
   const uint8_t *mdl = (const uint8_t *)P79_PTR(mref);
   int32_t vis = P83_BoxVis((const float *)(obj + OBJ_POS), rdf(mdl + MDL_RADIUS));
   if (vis == 0) return;
-  uint32_t flags = rd16(mdl + MDL_FLAGS);
+  uint32_t flags = rdu16(mdl + MDL_FLAGS);
   if (flags & MDLF_MISSION) {
     P131_MissionObj(mref, (const uint8_t *)obj, vis);
     P44_MatPtr = (float *)P44_ViewMatT;
@@ -194,7 +192,7 @@ static void draw_obj(const uint8_t *obj, int kind) {
   int32_t low = ((int32_t *)P80_Boxes[mi])[7] < 200;           /* 00cf56fc + модель·0x20 */
   if (kind == 0 && (flags & MDLF_SPIN)) {
     P92_DrawSpin(mref, ang, p, vis == 2 ? 1 : 0);   /* 0042a5de */
-  } else if (kind == 1 && (flags & MDLF_LIST_B) == 0 && (flags & (MDLF_42A423 | MDLF_LIST_A)) != 0 && rd16(mdl + MDL_NRECS) == 1) {
+  } else if (kind == 1 && (flags & MDLF_LIST_B) == 0 && (flags & (MDLF_42A423 | MDLF_LIST_A)) != 0 && rdu16(mdl + MDL_NRECS) == 1) {
     P87_Fn42A423(mref, ang, p, vis == 1 ? 0 : vis == 2 ? 1 : 0);
   } else {
     int32_t mode = vis == 1 ? 0 : vis == 2 ? 1 : (low ? 0 : 2);

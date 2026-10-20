@@ -85,8 +85,6 @@ uint32_t P121_CamW;
 #include "memrw.h"
 #include "carfields.h"
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
-static uint32_t bits(float f) { uint32_t u; memcpy(&u, &f, 4); return u; }
 
 /* 1/w for view depth z from the RE_OOW table (native: 0 out of range). */
 static float oow_at(float z) {
@@ -334,30 +332,30 @@ static int clip_reject(const float *xs, const float *ys, int n) {
 #ifndef RE_HOOK_BUILD
   const float ex = (float)re_view_extra();   /* v2.15 Hor+: экран по x — [−S, 639 + S] */
   if (ex > 0.0f) {
-    for (int i = 0; i < n; i++) a &= bits(xs[i] + ex);
+    for (int i = 0; i < n; i++) a &= fbits(xs[i] + ex);
     P85_Clip = a; if (a) return 1;
     a = 0x80000000u;
-    for (int i = 0; i < n; i++) a &= bits(ys[i]);
+    for (int i = 0; i < n; i++) a &= fbits(ys[i]);
     P85_Clip = a; if (a) return 1;
     uint32_t o = 0;
-    for (int i = 0; i < n; i++) o |= bits(xs[i] - (P85_MaxX + ex));
+    for (int i = 0; i < n; i++) o |= fbits(xs[i] - (P85_MaxX + ex));
     P85_Clip = o; if (o == 0) return 1;
     o = 0;
-    for (int i = 0; i < n; i++) o |= bits(ys[i] - P85_MaxY);
+    for (int i = 0; i < n; i++) o |= fbits(ys[i] - P85_MaxY);
     P85_Clip = o; if (o == 0) return 1;
     return 0;
   }
 #endif
-  for (int i = 0; i < n; i++) a &= bits(xs[i]);
+  for (int i = 0; i < n; i++) a &= fbits(xs[i]);
   P85_Clip = a; if (a) return 1;
   a = 0x80000000u;
-  for (int i = 0; i < n; i++) a &= bits(ys[i]);
+  for (int i = 0; i < n; i++) a &= fbits(ys[i]);
   P85_Clip = a; if (a) return 1;
   uint32_t o = 0;
-  for (int i = 0; i < n; i++) o |= bits(xs[i] - P85_MaxX);
+  for (int i = 0; i < n; i++) o |= fbits(xs[i] - P85_MaxX);
   P85_Clip = o; if (o == 0) return 1;
   o = 0;
-  for (int i = 0; i < n; i++) o |= bits(ys[i] - P85_MaxY);
+  for (int i = 0; i < n; i++) o |= fbits(ys[i] - P85_MaxY);
   P85_Clip = o; if (o == 0) return 1;
   return 0;
 }

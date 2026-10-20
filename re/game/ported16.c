@@ -1,6 +1,7 @@
 /* ported16 — particle integration step, mission idle/fail timer and a HUD rectangle descriptor (Game.exe). */
 #include "ported16.h"
 #include <string.h>
+#include "memrw.h"
 GAME_VAR_DEF(int32_t, P16_ParticleCount, 0x011171a0)
 GAME_VAR_DEF(uint8_t, P16_ParticleBase, 0x0110e160)
 #ifndef RE_HOOK_BUILD /* v2.21 gvar-img */
@@ -68,9 +69,6 @@ int32_t P16_IdleArg2;
 GAME_VAR_DEF(int32_t, P16_IdleArg2, 0x00c81100)
 #endif
 
-static float rf(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
-static void wf(uint8_t *p, float v) { memcpy(p, &v, 4); }
-static int16_t r16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void w16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
 
 /* Particle record (0x24 bytes) */
@@ -86,14 +84,14 @@ static void w16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
 void P16_StepParticles(void) {
   uint8_t *p = &P16_ParticleBase;
   for (int n = P16_ParticleCount; n != 0; n--, p += PART_SIZE) {
-    if (r16(p + PART_LIFE) > 0) {
-      wf(p + PART_POS, rf(p + PART_POS) + rf(p + PART_VEL));
-      wf(p + PART_POS + 4, rf(p + PART_POS + 4) + rf(p + PART_VEL + 4));
-      wf(p + PART_POS + 8, rf(p + PART_POS + 8) + rf(p + PART_VEL + 8));
-      int16_t frame = r16(p + PART_FRAME);
+    if (rds16(p + PART_LIFE) > 0) {
+      wrf(p + PART_POS, rdf(p + PART_POS) + rdf(p + PART_VEL));
+      wrf(p + PART_POS + 4, rdf(p + PART_POS + 4) + rdf(p + PART_VEL + 4));
+      wrf(p + PART_POS + 8, rdf(p + PART_POS + 8) + rdf(p + PART_VEL + 8));
+      int16_t frame = rds16(p + PART_FRAME);
       w16(p + PART_FRAME, (int16_t)(frame - 1));
       if (frame == 0) w16(p + PART_FRAME, 10);
-      w16(p + PART_LIFE, (int16_t)(r16(p + PART_LIFE) - 1));
+      w16(p + PART_LIFE, (int16_t)(rds16(p + PART_LIFE) - 1));
     }
   }
 }

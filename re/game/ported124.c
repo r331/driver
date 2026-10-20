@@ -121,7 +121,6 @@ static uint8_t *motel_item(void) {
   uint8_t *t = (uint8_t *)re_ptr(P100_ItemTab);
   return t ? t + P100_ItemSel * 8 : NULL;
 }
-static uint16_t rd16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 
 /* ---- 00416d6d ---- */
 static char s_snd_name[32];                  /* в оригинале — локальный буфер; static, чтобы адрес прошёл через ChangeSample */
@@ -131,8 +130,8 @@ void P124_MotelSample(void) {
   P48_FreeVoice(10);
   uint8_t *it = motel_item();
   if (it == NULL) return;                    /* native: таблица пунктов вне известных областей */
-  uint16_t fl = (uint16_t)(rd16(it) | MITEM_PLAYED); memcpy(it, &fl, 2);
-  uint32_t n = rd16(it + 2);
+  uint16_t fl = (uint16_t)(rdu16(it) | MITEM_PLAYED); memcpy(it, &fl, 2);
+  uint32_t n = rdu16(it + 2);
   if ((fl & MITEM_JOKE) == 0) {
     if ((fl & MITEM_CAR) == 0) snprintf(s_snd_name, sizeof s_snd_name, "AUDIO\\MOTEL\\ANS%03d.WAV", (int)n);
     else snprintf(s_snd_name, sizeof s_snd_name, "AUDIO\\MOTEL\\CAR%03d.WAV", (int)((n < 3 ? n : 2) + 1));
@@ -159,7 +158,7 @@ int32_t P124_MotelKeys(int32_t junk) {
   if (getenv("RE_MOTELDBG")) {               /* v2.12: отладка автоответчика */
     uint8_t *it = motel_item();
     fprintf(stderr, "[motel] Enter: кнопка %d пункт %d/%d флаги %04x номер %d (таблица %08x)\n", (int)P9_005fe9f0, (int)P100_ItemSel,
-            (int)P100_ItemN, it ? rd16(it) : 0xffff, it ? rd16(it + 2) : -1, (unsigned)P100_ItemTab);
+            (int)P100_ItemN, it ? rdu16(it) : 0xffff, it ? rdu16(it + 2) : -1, (unsigned)P100_ItemTab);
   }
 #endif
   switch (P9_005fe9f0) {
@@ -169,12 +168,12 @@ int32_t P124_MotelKeys(int32_t junk) {
   case MBTN_SELECT: {
     uint8_t *it = motel_item();
     if (it == NULL) break;
-    uint16_t fl = rd16(it);
+    uint16_t fl = rdu16(it);
     if (fl & MITEM_MISSION) { P12_Fn00418433(0x0054e250u, 0x004169afu); P67_Res51C = P100_ItemSel; return 1; }
     if (fl & MITEM_CAR) {
       P12_Fn00418433(0x0054e250u, 0x004169afu);
       P48_FreeVoice(10);
-      P124_CarSelect((int32_t)rd16(it + 2));
+      P124_CarSelect((int32_t)rdu16(it + 2));
       Ui0041A1EC(4);
       P118_CamRoute(9);
       Ui004183E8();
@@ -205,7 +204,7 @@ int32_t P124_ReadBmp(const char *name, uint8_t *dst) {
   g_fread(h, 1, BMP_HDR, f);
   int32_t w = rd32(h + 0x12), hh = rd32(h + 0x16);
   int16_t bpp; memcpy(&bpp, h + 0x1c, 2);
-  if (rd16(h) == BMP_MAGIC && w == SCREEN_W && hh == SCREEN_H && bpp == 0x18 && rd32(h + 0x1e) == 0) {
+  if (rdu16(h) == BMP_MAGIC && w == SCREEN_W && hh == SCREEN_H && bpp == 0x18 && rd32(h + 0x1e) == 0) {
     for (int32_t y = SCREEN_H - 1; y >= 0; y--)
       for (int32_t x = 0; x < w; x++) {
         uint8_t *p = dst + (y * w + x) * 4;
@@ -365,7 +364,7 @@ void P124_WatchShow(void) {
     case 2:
       if (!show) break;
       if (sz == 0) snprintf(buf, 0x80, "%u", (unsigned)v[0]);
-      else if (sz == 1) snprintf(buf, 0x80, "%u", (unsigned)rd16(v));
+      else if (sz == 1) snprintf(buf, 0x80, "%u", (unsigned)rdu16(v));
       else snprintf(buf, 0x80, "%u", (unsigned)rd32(v));
       P96_LogLine(buf);
       break;

@@ -106,8 +106,6 @@ int32_t P118_RouteMax;
 #define FX_POOL_MAX   200
 
 static int16_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
-static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 
 /* запись i таблицы tab (шаг st); в native вне таблицы — нули
    Record i (stride st) of table tab; native returns a zero record when out of range. */

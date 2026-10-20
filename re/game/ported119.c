@@ -116,8 +116,6 @@ int32_t P119_SelIdx;
 #endif
 
 #include "memrw.h"
-static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
-static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 
 #include "trafficrec.h"   /* traffic record fields (TREC_*) */
 

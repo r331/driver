@@ -281,8 +281,6 @@ p127_f16_t P127_GoalPause;
 
 #include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static int32_t dist8(int32_t dx, int32_t dz) { dx = iabs(dx); dz = iabs(dz); return dx < dz ? dz + dx / 2 : dx + dz / 2; }
 #define P127_CAR(i)  ((uint8_t *)&P99_Cars[(i)])
 #define P127_BLK(a)  (*(int32_t *)&P56_Blk84[((a) - 0x00c810c0u) / 4])   /* поля внутри P56_Blk84 */

@@ -111,10 +111,8 @@ int32_t P133_1137320;
 #endif
 #endif
 
-static float u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
 #include "memrw.h"
 static int16_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
 static int32_t rnd(float f) { P11_00ba52d0 = (int32_t)lrintf(f); return P11_00ba52d0; }
 static void grd40(int32_t v) { if (P98_GrD40) P98_GrD40(v); }
 

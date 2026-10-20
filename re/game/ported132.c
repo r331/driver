@@ -121,10 +121,7 @@
 #include "ported143.h"
 #include "redbg.h"
 
-static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 #include "memrw.h"
-static void wr16(uint8_t *p, uint16_t v) { memcpy(p, &v, 2); }
-static uint16_t rd16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 
 #ifndef RE_HOOK_BUILD
 int plat_frame_no(void);   /* v2.29: номер показанного кадра — для журналов отладки */
@@ -503,8 +500,8 @@ void P132_Smoke(const float *pos, const float *vel, int32_t a, int32_t b, int32_
   wr32(r + 0x58, c);
   int32_t q = (b - a) / (step != 0 ? step : 1);
   wr16(r + 0x64, (uint16_t)(q < 0 ? -q : q));
-  wr16(r + 0x66, (uint16_t)((int32_t)rd16(r + 0x64) >> 1));
-  int32_t d = (int32_t)rd16(r + 0x64); if (d == 0) d = 1;
+  wr16(r + 0x66, (uint16_t)((int32_t)rdu16(r + 0x64) >> 1));
+  int32_t d = (int32_t)rdu16(r + 0x64); if (d == 0) d = 1;
   wr32(r + 0x68, mode == 1 ? 0x80006 : 0x100006);
   wr32(r + 0x5c, (c << 4) / d);
   (void)rd32; (void)rdf;

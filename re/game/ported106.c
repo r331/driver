@@ -157,8 +157,6 @@ int32_t P106_PartOn;
 
 #include "memrw.h"
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 
 /* запись модели машины m (00d0cc60 + m*0x16c); в native — в пределах S_00D0CC60, иначе нули */
 static const uint8_t *carmodel(uint32_t m) {

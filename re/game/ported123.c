@@ -152,8 +152,6 @@ uint8_t P123_SideB;
 /* rd16 / wr16 / wrf / camf / set_camf — local helpers: unaligned int16 / float access; camf/set_camf read and
    write the parser's float argument slots P68_CamF[] (stored as int32 words). */
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static float camf(int i) { float v; memcpy(&v, &P68_CamF[i], 4); return v; }
 static void set_camf(int i, float v) { memcpy(&P68_CamF[i], &v, 4); }
 

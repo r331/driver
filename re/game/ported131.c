@@ -345,7 +345,6 @@ void P131_RainDraw(void) {
 
 /* ---- 004fef26: модель с объектами миссии — записи 0x24 таблицы города (адреса групп .data 005734ac, число P103_MObjN):
    +0 тип, +4 модель, +0xc..+0x14 сдвиг (float), +0x1c/+0x1e/+0x20 int16. __ftol(x + z) — фаза качания. ---- */
-static int16_t rd16s(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static int32_t gd32(uint32_t a) { const void *p = re_ptr(a); return p ? rd32(p) : 0; }
 static float sway(float x, float z) {
   int32_t t = (int32_t)(x + z);
@@ -380,7 +379,7 @@ void P131_MissionObj(uint32_t m, const uint8_t *obj, int32_t mode) {
 #endif
     if (rd32(c + 4) != id) continue;
     float c3 = rdf(c + 0xc), c4 = rdf(c + 0x10), c5 = rdf(c + 0x14);
-    int16_t s1c = rd16s(c + 0x1c), s1e = rd16s(c + 0x1e), s20 = rd16s(c + 0x20);
+    int16_t s1c = rds16(c + 0x1c), s1e = rds16(c + 0x1e), s20 = rds16(c + 0x20);
     float pos[3]; float vel[4] = { 0.0f, 0.0f, 0.0f, 0.0f };   /* 004b9287 читает float */
     switch (rd32(c)) {
     case 0: case 1: {

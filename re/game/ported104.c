@@ -190,8 +190,6 @@ int32_t P104_139A28;
 
 #include "memrw.h"
 #include "carfields.h"
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 /* Accessors for Game.exe .data addresses through re_ptr (unmapped address: reads 0, writes are dropped). */
 static int32_t gd32(uint32_t a) { const void *p = re_ptr(a); return p ? rd32(p) : 0; }
 static void gw32(uint32_t a, uint32_t v) { void *p = re_ptr(a); if (p) wr32(p, (int32_t)v); }

@@ -86,7 +86,6 @@ _Static_assert(sizeof(p141_hsmenu_t) == P141_HSMENU_SIZE && sizeof(p141_hsstr_t)
 
 #include "memrw.h"
 /* wr16 — local helper: unaligned int16 write. */
-static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
 /* ci_eq — local helper: case-insensitive string equality. */
 static int ci_eq(const char *a, const char *b) {
   for (; *a && *b; a++, b++) if (toupper((unsigned char)*a) != toupper((unsigned char)*b)) return 0;

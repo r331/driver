@@ -435,13 +435,10 @@ int32_t P102_ObjBKey;
 /* rd16s — Unaligned int16 read. */
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 /* wr16 — Unaligned uint16 write. */
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
 /* wrf — Store a float (bit copy). */
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 /* rdf_ — Unaligned float read. */
 static float rdf_(const void *p) { float v; memcpy(&v, p, 4); return v; }
 /* fbits — Bit pattern of a float. */
-static uint32_t fbits(float v) { uint32_t u; memcpy(&u, &v, 4); return u; }
 /* mul — int32 multiply with 32-bit wrap-around (imul). */
 static int32_t mul(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b); }   /* imul с переполнением */
 /* carp — Car record i of P99_Cars. */

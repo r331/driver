@@ -493,7 +493,6 @@ p95_i6_t P95_CrossTab = { -2, -3, 2, 3, 2, -3 };                     /* 00573f50
 #include "memrw.h"
 #include "trafficrec.h"
 /* wrf — Store a float at p (bit copy). */
-static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 /* wrfu — Store a float into a uint32 slot. */
 static void wrfu(uint32_t *p, float v) { memcpy(p, &v, 4); }
 /* ftol — __ftol: truncate toward zero. */

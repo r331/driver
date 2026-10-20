@@ -4,6 +4,7 @@
    and 00415188 are wrong — ecx is never read).  Native only (the hook build keeps the originals). */
 #include "ported67.h"
 #include <string.h>
+#include "memrw.h"
 
 #ifndef RE_HOOK_BUILD
 #pragma push_macro("P67_Items") /*gvi*/
@@ -45,7 +46,6 @@ void P67_CompactPool(void) {
 }
 
 /* F2I — local helper: the bit pattern of a float as int32 (floats are passed through int32 menu slots). */
-static int32_t F2I(float f) { int32_t v; memcpy(&v, &f, 4); return v; }
 
 /* 00516fbe: каждый промежуточный результат x87 записывался в float — повторяем volatile-промежуточными */
 /* P67_CenterDraw — Game.exe 00516fbe.  Scales a menu position about the screen centre by P19_Scale and
@@ -59,10 +59,10 @@ void P67_CenterDraw(float x, float y, float z, uint32_t p4) {
   volatile float halfH2 = (float)(P19_ScrH >> 1);
   t = t + halfH2;
   GlobalSet0040B0A4();
-  MenuSetPos(F2I(y * P19_Scale), F2I(z * P19_Scale));
+  MenuSetPos(f2i(y * P19_Scale), f2i(z * P19_Scale));
   MenuSetColor(S_00B5A834, S_00B5A835, S_00B5A836);
   volatile float halfW = (float)(P19_ScrW >> 1);
-  MenuSetVals5D77C0(F2I(halfW), F2I(t), 0, 5);
+  MenuSetVals5D77C0(f2i(halfW), f2i(t), 0, 5);
   P67_Fn40ABAC(p4);
 }
 

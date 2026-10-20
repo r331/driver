@@ -352,9 +352,6 @@ p101_pal_t P101_PalLfb;
 #include "memrw.h"
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
-static uint32_t fbits(float v) { uint32_t u; memcpy(&u, &v, 4); return u; }
 static int32_t fx12(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b + 0x800u) >> 12; }
 static uint8_t *texpage(uint32_t slot) { return (uint8_t *)re_ptr((uint32_t)rd32(&g_01145a60[slot * 0x10 + 4])); }
 /* запись модели машины m (00d0cc60 + m*0x16c); в native — в пределах S_00D0CC60 (0x4000 байт), иначе нули */
