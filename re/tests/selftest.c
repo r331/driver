@@ -589,7 +589,7 @@ static int test_ported19(void) {
   if (P19_Cur != 1.0f || P19_Active != 0 || P19_OutC != 1.0f) f++;
   { char s[16] = "  ab cd"; char o[16]; int e = P19_TakeToken(s, o); if (e || strcmp(o, "ab") || strcmp(s, "cd")) f++; }
   { char s[8] = ""; char o[8]; if (!P19_TakeToken(s, o)) f++; }
-  P19_Level = 1; P19_Sel2(0); /* Level<2 → Fn00416040 (stub) */
+  P19_Level = 1; P19_Sel2(0); /* Level<2 → Fn00416040 (links.c → SetupMiami00416040) */
   P19_Level = 4; P19_Sel4(0); if (P19_Cond != 0x31 || P19_Wd != 0x147 || P19_F3 != 1) f++;
   P19_ScrW = 640; P19_DivW = 640; P19_DivC = 2; P19_Scale = 1;
   if (P19_ScaleX(1) != 1 * 1.0f - 320 + 320) f++;
