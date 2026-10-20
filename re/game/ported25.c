@@ -122,7 +122,7 @@ void P25_CDClose(void) {
 /* P25_PlayCDTrack — Game.exe 0052479e.  Plays one whole track (from its TOC start to its end; the end
    is remembered in g_curEnd for P25_CDResume).  An invalid track (< 2 or > count) logs and clears
    Q00B87E90; a failed play closes the device and clears Q00B87E90 too.
-   TODO(RE): unsure — Q00B87E90 looks like the "CD music enabled" option. */
+   Q00B87E90 is the "Music" On/Off entry of the Sound menu 0054dd10 (ToggleOpt0041542A, RE_PROBE menu walk). */
 void P25_PlayCDTrack(int32_t track) {
   if (P25_CdOpen == 0) return;
   if (track < CD_FIRST_MUSIC || P25_CdTracks < track) {

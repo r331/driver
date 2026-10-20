@@ -536,6 +536,8 @@ void IncB87E4CMax3(void) { if (G00B87E4C < 3) { G00B87E4C++; G00575EF8 = 4; Menu
 /* DecB87E4CMin0 — Game.exe 00409c5b */
 void DecB87E4CMin0(void) { if (G00B87E4C > 0) { G00B87E4C--; G00575EF8 = 4; MenuRedraw(); }
 }
+/* Select54A*_ModeN — Driving Games menu 0054a968 (RE_PROBE menu walk): mode 4 Pursuit, 5 Getaway, 2 Cross Town
+   Checkpoint, 1 Trail Blazer, 3 Survival, 6 Dirt Track (then Practice 6 / Time Trial 0xb), 7 Carnage. */
 /* Select54A90C_Mode2 — Game.exe 0040a625 */
 void Select54A90C_Mode2(void) { G0054A90C = 1; G01271060 = 2;
 }

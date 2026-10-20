@@ -358,7 +358,8 @@ int32_t P71_CountNear(int32_t x, int32_t z) {
    P71_Tab2A40: modes 1 (also sets P8_012710a0), 2, 3, 7; modes 6 and 11 additionally load table 0xc's
    record into P71_Tab974 and point P71_Ptr2A08 at 01271088.  A zero result leaves the field 0.
    Modes = high-score table ids (see P141_HsSetup): 1 Trail Blazer, 2 Cross Town Checkpoint, 3 Survival,
-   7 Carnage, 0xb Dirt Track (0xc its best lap).  TODO(RE): mode 6 (also loads table 0xc) not identified. */
+   7 Carnage, 0xb Dirt Track Time Trial (0xc its best lap), 6 Dirt Track Practice (menu 0054a870; loads table 0xc
+   for the best lap only).  Driving Games menu 0054a968: 4 Pursuit, 5 Getaway, 2, 1, 3, 6, 7 (RE_PROBE menu walk). */
 void P71_ScoreSetup(void) {
   P71_Tab974 = 0; P71_Tab2A40 = 0; P71_Ptr2A08 = 0;
   P71_V2A24 = 0; P71_V2A20 = 0; P71_V2A1C = 0; P71_V2A14 = 0;

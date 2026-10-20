@@ -507,7 +507,7 @@ uint32_t P12_Fn00404FAE(void) {
   P138_ReplayCfg("CREDITS"); UiCall0040C455(1, 1);
   g_005f7e5c = 0; g_00b87ef8 = 0; return 1;
 }
-/* Settings: toggle 00575f50 (TODO(RE): unsure — stereo/3D sound?), reinitialise the sound device and reload the menu sound bank. */
+/* Settings: toggle 00575f50 = the "Environmental Audio (EAX)" entry of the Sound menu 0054dd10 (RE_PROBE menu walk), reinitialise the sound device and reload the menu sound bank. */
 uint32_t P12_Fn004152A7(void) {
   g_00575f50 ^= 1;
   G6Call00523628(); Call00523595();
@@ -528,8 +528,14 @@ int32_t P12_Fn00407563(void) {
    it returns 0.  Each instance below is one Game.exe function (address in its name). */
 #define MENUWRAP(NAME, CALLEE, SETV, A, B) \
   int32_t NAME(void) { int32_t r; MenuAction40CD17(); SETV; r = CALLEE(); if (r == 0) M12(A, B); return r; }
+/* Dirt Track menu 0054a870: entry 0 "Practice" (mode 6), entry 1 "Time Trial" (mode 0xb) — RE_PROBE menu walk. */
 MENUWRAP(P12_Fn0040A45B, R12_413D70, g_01271060 = 6, 0x54a818, 0x54a830)
 MENUWRAP(P12_Fn0040A4AD, R12_413D70, g_01271060 = 0xb, 0x54a818, 0x54a830)
+/* Main menu 0054cc90 (RE_PROBE menu walk): 0 Undercover (00412ab9 -> 0054d138), 1 High Scores (00412a4b -> 0054d418),
+   2 Options (00412d4d -> 0054d200), 3 Take A Ride (00412cdf), 4 Driving Games (00412c03 -> 0054a968), 5 Cheats
+   (00412c71 -> 0057b5a8, "None Available" until unlocked), 6 Training (00412b95 -> 0054e1d0), 7 Car Chases
+   (00412b27 -> 0054d300).  Options 0054d200: Detail 0054a470, Sound 0054dd10, Control 0054a008 (Key Redefine
+   0054c530), Gameplay 0054ad60. */
 MENUWRAP(P12_Fn00412A4B, R12_413B00, (void)0, 0x54cb98, 0x54cc50)
 MENUWRAP(P12_Fn00412AB9, R12_4134A0, (void)0, 0x54cb98, 0x54cc50)
 MENUWRAP(P12_Fn00412B27, R12_413890, (void)0, 0x54cb98, 0x54cc50)

@@ -667,11 +667,11 @@ static void tri_state(void) {
     else if (G6_00575EEC == 5) { G6_00575F38 = 1; }
     else { G6_00575EEC = G6_00575EEC + 1; }
 }
-/* MenuToggle00408994 — Game.exe 00408994, cdecl.  Toggle detail option 00d11880/00575f20, set the detail preset index to 4 (custom, inferred) and redraw. */
+/* MenuToggle00408994 — Game.exe 00408994, cdecl.  Toggle detail option "Shadows" (Detail menu entry 1) 00d11880/00575f20, set the detail preset index to 4 (custom, inferred) and redraw. */
 int32_t MenuToggle00408994(void) { dual_toggle(&G6_00D11880, &G6_00575F20); G00575EF8 = 4; MenuRedraw(); return 0; }
-/* MenuToggle00408C37 — Game.exe 00408c37, cdecl.  Toggle detail option 00575ec0/00575ebc, preset index 4 (custom, inferred), redraw. */
+/* MenuToggle00408C37 — Game.exe 00408c37, cdecl.  Toggle detail option "Tyre Tracks" (entry 9) 00575ec0/00575ebc, preset index 4 (custom, inferred), redraw. */
 int32_t MenuToggle00408C37(void) { dual_toggle(&G6_00575EC0, &G6_00575EBC); G00575EF8 = 4; MenuRedraw(); return 0; }
-/* MenuToggle00409142 — Game.exe 00409142, cdecl.  Toggle detail option 00575ef4/00b87e74, preset index 4 (custom, inferred), redraw. */
+/* MenuToggle00409142 — Game.exe 00409142, cdecl.  Toggle detail option "Real Time Lights" (entry 10) 00575ef4/00b87e74, preset index 4 (custom, inferred), redraw.  Labels from the Detail menu 0054a470 text order (RE_PROBE walk; inferred). */
 int32_t MenuToggle00409142(void) { dual_toggle(&G6_00575EF4, &G6_00B87E74); G00575EF8 = 4; MenuRedraw(); return 0; }
 /* MenuToggle0050FE26 — Game.exe 0050fe26, cdecl.  In-game variant of MenuToggle00408994 (redraws via 0050fbf4). */
 int32_t MenuToggle0050FE26(void) { dual_toggle(&G6_00D11880, &G6_00575F20); G00575EF8 = 4; Call0050FBF4(); return 0; }
@@ -679,7 +679,7 @@ int32_t MenuToggle0050FE26(void) { dual_toggle(&G6_00D11880, &G6_00575F20); G005
 int32_t MenuToggle0050FEE5(void) { dual_toggle(&G6_00575EC0, &G6_00575EBC); G00575EF8 = 4; Call0050FBF4(); return 0; }
 /* MenuToggle00510028 — Game.exe 00510028, cdecl.  In-game variant of MenuToggle00409142. */
 int32_t MenuToggle00510028(void) { dual_toggle(&G6_00575EF4, &G6_00B87E74); G00575EF8 = 4; Call0050FBF4(); return 0; }
-/* MenuTri0040E9B5 — Game.exe 0040e9b5, cdecl.  tri_state option, redraw 0040ea70. */
+/* MenuTri0040E9B5 — Game.exe 0040e9b5, cdecl.  tri_state option = "Max frame rate" (Gameplay menu 0054ad60 entry 2, RE_PROBE walk), redraw 0040ea70. */
 int32_t MenuTri0040E9B5(void) { tri_state(); Call0040EA70(); return 0; }
 /* MenuTri00419C8C — Game.exe 00419c8c, cdecl.  tri_state option, redraw 00419b35. */
 int32_t MenuTri00419C8C(void) { tri_state(); Call00419B35(); return 0; }
@@ -743,7 +743,7 @@ void MenuMusic0050F8A2(void) {
     if (Q00B87E90 == 0) { Call00524873(); Call00524763(); }
     Call0050F7B2();
 }
-/* MenuMusic0050F8CC — Game.exe 0050f8cc, cdecl.  Toggle 00b87e94 and pass it to 0052369b.  TODO(RE): unsure (music option). */
+/* MenuMusic0050F8CC — Game.exe 0050f8cc, cdecl.  Toggle 00b87e94 and pass it to 0052369b.  00b87e94 = "Doppler Effect" option (Sound menu entry 5 calls ToggleOpt004154CD on the same word). */
 void MenuMusic0050F8CC(void) { Q00B87E94 = Q00B87E94 ^ 1; Call0052369B(Q00B87E94); Call0050F7B2(); }
 /* MenuAnyFlag00413DF3 — Game.exe 00413df3, cdecl.  1 if any of the option words 00bdfa44..58 is set (00bdfa50 only outside menu mode 7). */
 int32_t MenuAnyFlag00413DF3(void) {
