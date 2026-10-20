@@ -252,8 +252,8 @@ void P44_InitTables(void) {
   for (int i = 0; i < ATAN_TAB_N; i++) P44_AtanTab[i] = (int16_t)lrint(atan((double)i / 1024.0) * 2048.0 / 3.14159265358979323846);
 #endif
 }
-/* P44_ResetState — Game.exe 00525900, cdecl.  Clear a block of engine state variables (00b93ccc..00b93e00, 00b31ea0, 9 table entries);
-   00b93ce0 is set to -1.  TODO(RE): unsure what these variables are. */
+/* P44_ResetState — Game.exe 00525900, cdecl.  Clear the police-commentary trigger state used by P102_CopTalk (00b93ccc..00b93e00, the hit
+   flag 00b31ea0, 9 table entries); 00b93ce0 is set to -1. */
 void P44_ResetState(void) {
   P44_Rst_B93CEC = 0; P44_Rst_B93DFC = 0; P44_Rst_B93E00 = 0; P44_Rst_B93CD0 = 0; P44_Rst_B93CD8 = 0;
   P44_Rst_B93CE8 = 0; P44_Rst_B93CE4 = 0; P44_Rst_B93CCC = 0; P44_Rst_B93DF4 = 0; P44_Rst_B93CF0 = 0;
