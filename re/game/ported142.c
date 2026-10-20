@@ -182,8 +182,11 @@ int32_t P142_B2F304;
 #define W(x)  ((int32_t)(uint32_t)(int64_t)(x))
 #define L(x)  ((int64_t)(x))
 static int32_t dv(int32_t v, int sh) { return (int32_t)((uint32_t)v + ((uint32_t)(v >> 31) & ((1u << sh) - 1u))) >> sh; }  /* v / 2^sh к нулю */
+#define RE_MEMRW_LOCAL16   /* keep the local 16-bit helpers below (hook object identity, see memrw.h) */
 #include "memrw.h"
 static void add32(uint8_t *p, int32_t v) { wr32(p, W(L(rd32(p)) + v)); }
+static int32_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
+static void wr16(uint8_t *p, int32_t v) { int16_t s = (int16_t)v; memcpy(p, &s, 2); }
 static int32_t sn(uint32_t a) { return P59_Sin[a & 0xfff]; }
 static int32_t iabs32(int32_t v) { return v < 0 ? -v : v; }
 static uint32_t oaddr(const uint8_t *o) { return re_addr(o); }
@@ -332,7 +335,7 @@ void P142_CopDrive(uint8_t *rec) {
   int32_t rel_vx = W(L(P99_Cars[0].f40[0]) - rd32(car + CAR_VEL + 0));
   int32_t rel_vz = W(L(P99_Cars[0].f40[2]) - rd32(car + CAR_VEL + 8));
   /* Car's local X (right) axis in the ground plane: matrix elements [0] and [6]. */
-  int32_t right_x = rds16(car + CAR_MAT + 0), right_z = rds16(car + CAR_MAT + 12);
+  int32_t right_x = rd16(car + CAR_MAT + 0), right_z = rd16(car + CAR_MAT + 12);
   int32_t have_target = 0;
   int32_t pt[4] = { 0, 0, 0, 0 };   /* target point x, y, z, w (y/w are not used for steering) */
   P97_129584 = 0;
@@ -480,7 +483,7 @@ void P142_CopDrive(uint8_t *rec) {
     if (cop[COP_REPLAN_T] < 0) cop[COP_ON_PATH] = 0;
     P128_CopReplan((uint8_t *)cop);
     if (cop[COP_ON_PATH] != 0 && cop_f(cop, COP_PATH_SNAP) == 1) {
-      wr32(car + CAR_HEADING, rds16((const uint8_t *)(cop + COP_PATH_HEADING)));
+      wr32(car + CAR_HEADING, rd16((const uint8_t *)(cop + COP_PATH_HEADING)));
       P59_ObjDir(car, 0);
       cop[COP_PATH_SNAP] = 0;
       cop[COP_F0F] = 0;
@@ -581,7 +584,7 @@ void P142_WheelPhys(uint8_t *obj, int32_t drive) {
   CopyVec3_0052797A((uint32_t *)(void *)&st[ST_POS]);
   /* (1) Body contact points vs ground. */
   int32_t max_pen = 0;
-  int32_t n_pts = (0x800 < rds16(obj + CAR_MAT_YY)) ? 4 : 0xc;   /* upright: 4 points are enough */
+  int32_t n_pts = (0x800 < rd16(obj + CAR_MAT_YY)) ? 4 : 0xc;   /* upright: 4 points are enough */
   for (int32_t i = n_pts - 1; i >= 0; i--) {
     int32_t wp[4] = { 0 }, nrm[4] = { 0 }, gnd[4] = { 0 };   /* world point, ground normal, ground point */
     load_pt(model_pt(type, 0x41 + i * 2));
@@ -786,9 +789,9 @@ void P142_WheelPhys(uint8_t *obj, int32_t drive) {
     int32_t fy = W(L(spring) * nrm[1] + FX_HALF + drag_y) >> FX_SHIFT;
     fx = W(L(W(L(fx) + (W(L(spring) * nrm[0] - L(lat_f) * dir_x + FX_HALF + drag_x) >> FX_SHIFT))) * (grip + 500)) >> FX_SHIFT;
     fz = W(L(W(L(fz) + (W(L(spring) * nrm[2] - L(lat_f) * dir_z + FX_HALF + drag_z) >> FX_SHIFT))) * (grip + 500)) >> FX_SHIFT;
-    if (rds16(obj + CAR_MAT_YY) < 0x800) {
+    if (rd16(obj + CAR_MAT_YY) < 0x800) {
       /* tilted more than 60 degrees: fade horizontal forces by 1 - (1 - up_y)^2 */
-      int32_t t = FX_ONE - rds16(obj + CAR_MAT_YY);
+      int32_t t = FX_ONE - rd16(obj + CAR_MAT_YY);
       int32_t fade = (t < 0x1001) ? FX_ONE - (W(L(t) * t + FX_HALF) >> FX_SHIFT) : 0;
       fx = W(L(fx) * fade + FX_HALF) >> FX_SHIFT;
       fz = W(L(fz) * fade + FX_HALF) >> FX_SHIFT;
@@ -883,7 +886,7 @@ void P142_CarsStep(void) {
 #ifndef RE_HOOK_BUILD
   { static int k; if (getenv("RE_CARDBG") && (k++ % atoi(getenv("RE_CARDBG"))) == 0) { uint8_t *c = (uint8_t *)&P99_Cars[0];
     fprintf(stderr, "[car] n %d o0 %s 13c %d 110 %d pos %d %d %d p24 %d %d %d v %d %d %d f8 %d fc %d 104 %d 108 %d 10c %d o3 %d\n", n, (n > 0 && G6_00B2F30C[0] == c) ? "car0" : "?",
-      rds16(c + 0x13c), rd32(c + 0x110), rd32(c + 0x18), rd32(c + 0x1c), rd32(c + 0x20), rd32(c + 0x24), rd32(c + 0x28), rd32(c + 0x2c), rd32(c + 0x40), rd32(c + 0x44), rd32(c + 0x48),
+      rd16(c + 0x13c), rd32(c + 0x110), rd32(c + 0x18), rd32(c + 0x1c), rd32(c + 0x20), rd32(c + 0x24), rd32(c + 0x28), rd32(c + 0x2c), rd32(c + 0x40), rd32(c + 0x44), rd32(c + 0x48),
       rd32(c + 0xf8), rd32(c + 0xfc), rd32(c + 0x104), rd32(c + 0x108), rd32(c + 0x10c), c[3]); } }
   re_probe_step();   /* RE_PROBE (reprobe.h): read-only, returns at once when unset */
   { /* v2.21: RE_TELEPORT="кадр:x:z;кадр:x:z…" (v2.25: до 64 точек) — отладка прохождения миссий (как RE_COPNEAR): на кадре P62_Frame машина игрока
@@ -956,7 +959,7 @@ void P142_CarsStep(void) {
           const uint8_t *o = P58_Objs[k]; uint32_t f = (uint32_t)rd32(o + 0x10);
           if (pass == 0 ? (P98_Range[k] == 0 || (f & 1) == 0 || (f & 8) == 0) : (f & 1) == 0) continue;
           for (uint8_t *nd = (uint8_t *)re_ptr((uint32_t)G00D12408); nd != NULL; nd = (uint8_t *)re_rd_ptr(nd + 0x20)) {
-            if ((rds16(nd) & 8) != 0 && (uint32_t)rds16(nd + 6) == (uint32_t)rd32(o + 0xc)) {
+            if ((rd16(nd) & 8) != 0 && (uint32_t)rd16(nd + 6) == (uint32_t)rd32(o + 0xc)) {
               const uint8_t *tc = (const uint8_t *)re_rd_ptr(nd + 0x1c);
               if (tc != NULL) { float fx, fz; memcpy(&fx, tc, 4); memcpy(&fz, tc + 8, 4); tx = (int32_t)lrintf(fx); tz = (int32_t)lrintf(fz); found = 1;
                 if (((int32_t)P62_Frame % 100) == 0) fprintf(stderr, "[autoram] кадр %d: цель по списку 00d12408 — объект %d (проход %d, флаги %x), порог %d, (%d, %d)\n", (int)P62_Frame, (int)k, (int)pass, (unsigned)f, (int)P98_Range[k], (int)tx, (int)tz); }
@@ -1052,7 +1055,7 @@ void P142_CarsStep(void) {
     clamp24(o + CAR_ANGVEL + 0); clamp24(o + CAR_ANGVEL + 4); clamp24(o + CAR_ANGVEL + 8);
     if (G6_00B87EAC != 0 || G6_00B87EB0 != 0) wr16(o + CAR_OVERLAP, 1);   /* chase modes: always the precise path */
     if (G6_00B87EA0 != 0) wr16(o + CAR_OVERLAP, 0);                     /* director/replay camera mode: never */
-    if (rds16(o + CAR_OVERLAP) == 0) {
+    if (rd16(o + CAR_OVERLAP) == 0) {
       /* position (<<4) += velocity >> 9 */
       add32(o + CAR_POS_HI + 0, rd32(o + CAR_VEL + 0) >> 9);
       add32(o + CAR_POS_HI + 4, rd32(o + CAR_VEL + 4) >> 9);
@@ -1075,7 +1078,7 @@ void P142_CarsStep(void) {
     for (int32_t s = 0; s < 2; s++) {
       for (int32_t i = 0; i < n; i++) {
         uint8_t *a = G6_00B2F30C[i];
-        if (a == NULL || rds16(a + CAR_OVERLAP) == 0) continue;
+        if (a == NULL || rd16(a + CAR_OVERLAP) == 0) continue;
         uint8_t *pa = (s == 0) ? a + CAR_BODY : blk(P102_BlkA, i);
         uint8_t *bb = (s == 0) ? P102_BlkB : P102_BlkC;
         P94_PackState(pa, (int32_t *)(void *)(bb + i * 0x34));
@@ -1084,7 +1087,7 @@ void P142_CarsStep(void) {
           uint8_t *b = G6_00B2F30C[j];
           if (b == NULL) continue;
           uint8_t *pb = (0 < s) ? blk(P102_BlkA, j) : b + CAR_BODY;
-          if (rds16(b + CAR_OVERLAP) == 0 || (rd32(b + CAR_SPEED) == 0 && rd32(a + CAR_SPEED) == 0)) continue;
+          if (rd16(b + CAR_OVERLAP) == 0 || (rd32(b + CAR_SPEED) == 0 && rd32(a + CAR_SPEED) == 0)) continue;
           int32_t ap[3] = { rd32(a + CAR_POS2 + 0), rd32(a + CAR_POS2 + 4), rd32(a + CAR_POS2 + 8) };
           int32_t bp[3] = { rd32(b + CAR_POS2 + 0), rd32(b + CAR_POS2 + 4), rd32(b + CAR_POS2 + 8) };
           int32_t dd[3] = { W(L(bp[0]) - ap[0]), W(L(bp[1]) - ap[1]), W(L(bp[2]) - ap[2]) };
@@ -1175,7 +1178,7 @@ void P142_CarsStep(void) {
       /* advance overlapping cars: half step (s = 0) or full step from both derivatives (s = 1) */
       for (int32_t i = 0; i < n; i++) {
         uint8_t *o = G6_00B2F30C[i];
-        if (o == NULL || rds16(o + CAR_OVERLAP) == 0) continue;
+        if (o == NULL || rd16(o + CAR_OVERLAP) == 0) continue;
         uint8_t *p = o + CAR_BODY, *t = blk(P102_BlkA, i), *rb = blk(P102_BlkB, i), *rc = blk(P102_BlkC, i);
         if (s == 0) {
           for (int m = CAR_BODY_INTS - 1; m >= 0; m--) wr32(t + m * 4, W(L(rd32(p + m * 4)) + (rd32(rb + m * 4) >> 3)));
@@ -1198,12 +1201,12 @@ void P142_CarsStep(void) {
       o[CAR_DAMAGED] = 0;
     }
     /* heading = atan2 of the forward axis (matrix elements [2] and [8]) */
-    wr32(o + CAR_HEADING, (int32_t)((uint32_t)P44_Atan2(rds16(o + CAR_MAT + 4), rds16(o + CAR_MAT + 16)) & 0xfffu));
+    wr32(o + CAR_HEADING, (int32_t)((uint32_t)P44_Atan2(rd16(o + CAR_MAT + 4), rd16(o + CAR_MAT + 16)) & 0xfffu));
     if (traffic_b(o[CAR_ID], 5) != 0 || is_cur(o) || 0xd0cb07u < oaddr(o)) {   /* cops, current car, spare: Euler angles */
-      uint32_t r = P17_ISqrt((uint32_t)W(L(rds16(o + CAR_MAT + 6)) * rds16(o + CAR_MAT + 6) + L(rds16(o + CAR_MAT_YY)) * rds16(o + CAR_MAT_YY)));
-      wr16(o + CAR_ANG + 0, (int32_t)((uint32_t)P44_Atan2(-rds16(o + CAR_MAT + 10), (int32_t)r) & 0xfffu));
+      uint32_t r = P17_ISqrt((uint32_t)W(L(rd16(o + CAR_MAT + 6)) * rd16(o + CAR_MAT + 6) + L(rd16(o + CAR_MAT_YY)) * rd16(o + CAR_MAT_YY)));
+      wr16(o + CAR_ANG + 0, (int32_t)((uint32_t)P44_Atan2(-rd16(o + CAR_MAT + 10), (int32_t)r) & 0xfffu));
       wr16(o + CAR_ANG + 2, rd32(o + CAR_HEADING));
-      wr16(o + CAR_ANG + 4, (int32_t)((uint32_t)P44_Atan2(rds16(o + CAR_MAT + 6), rds16(o + CAR_MAT_YY)) & 0xfffu));
+      wr16(o + CAR_ANG + 4, (int32_t)((uint32_t)P44_Atan2(rd16(o + CAR_MAT + 6), rd16(o + CAR_MAT_YY)) & 0xfffu));
     }
     wr32(o + CAR_POS_X, rd32(o + CAR_POS2 + 0)); wr32(o + CAR_POS_Y, rd32(o + CAR_POS2 + 4)); wr32(o + CAR_POS_Z, rd32(o + CAR_POS2 + 8));
     wr32(o + CAR_VEL_INT + 0, W(L(rd32(o + CAR_VEL + 0)) + FX_HALF) >> FX_SHIFT);

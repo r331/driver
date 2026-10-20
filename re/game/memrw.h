@@ -20,10 +20,23 @@ static inline void    wr32(void *p, int32_t v) { memcpy(p, &v, 4); }
 static inline float   rdf(const void *p) { float v; memcpy(&v, p, 4); return v; }
 static inline int32_t iabs(int32_t v) { return v < 0 ? -v : v; }
 static inline int32_t fround(float v) { return (int32_t)lrintf(v); }   /* fistp (округление к ближайшему, как FPU по умолчанию) */
-static inline uint16_t rdu16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static inline int16_t  rds16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static inline void     wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static inline void     wrf(void *p, float v) { memcpy(p, &v, 4); }
-static inline float    u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }   /* bits -> float */
-static inline uint32_t fbits(float v) { uint32_t u; memcpy(&u, &v, 4); return u; }  /* float -> bits */
-static inline int32_t  f2i(float v) { int32_t i; memcpy(&i, &v, 4); return i; }    /* float -> bits, signed */
+/* Plain static (not inline), like the per-file copies they replace: GCC -O1 (hook build) then makes the same
+   inlining decisions as before, so the objects do not change.  "unused" — a file need not use all of them.
+   wr16 takes int32_t and truncates, so int16_t / uint16_t / int32_t callers all store the same low 16 bits.
+   RE_MEMRW_LOCAL16: a file that defines it before including memrw.h keeps its own local 16-bit / float-bit
+   helpers (ported102/127/133/142/143/144: moving their definitions into the header changes GCC's operand order
+   or function layout in the -O1 hook objects — same semantics, different bytes — so they were left as they were). */
+#ifndef RE_MEMRW_LOCAL16
+#if defined(__GNUC__)
+#  define RE_MEMRW_FN static __attribute__((unused))
+#else
+#  define RE_MEMRW_FN static
+#endif
+RE_MEMRW_FN uint16_t rdu16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
+RE_MEMRW_FN int16_t  rds16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
+RE_MEMRW_FN void     wr16(void *p, int32_t v) { int16_t s = (int16_t)v; memcpy(p, &s, 2); }
+RE_MEMRW_FN void     wrf(void *p, float v) { memcpy(p, &v, 4); }
+RE_MEMRW_FN float    u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }   /* bits -> float */
+RE_MEMRW_FN uint32_t fbits(float v) { uint32_t u; memcpy(&u, &v, 4); return u; }  /* float -> bits */
+RE_MEMRW_FN int32_t  f2i(float v) { int32_t i; memcpy(&i, &v, 4); return i; }    /* float -> bits, signed */
+#endif /* RE_MEMRW_LOCAL16 */
