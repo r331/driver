@@ -1,7 +1,13 @@
+/* Sprite/icon lookup by name in the icon directory (P54_MapA entries at P54_MapAPtr). */
 /* Поиск значка по имени — восстановлено из Game.exe (004ec91e). */
 #include "ported93.h"
 #include <string.h>
 
+/* P93_FindIcon — Game.exe 004ec91e, cdecl.  Find an icon record by name.
+   In:  name — icon name; only the first 8 characters are compared (records hold an 8-byte,
+        not necessarily NUL-terminated name at offset 0).
+   Out: pointer to the 16-byte record whose name matches (exactly 8 chars, or the record name ends
+        where the given name ends); NULL if the directory is empty, the name is empty or not found. */
 uint8_t *P93_FindIcon(const char *name) {
   int32_t n, len, i;
   uint8_t *rec;

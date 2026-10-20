@@ -1,3 +1,11 @@
+/* ported89.c — map cell visibility masks and the main walk over visible map cells (English overview;
+   original notes follow).
+   The city is a grid of cells grouped into tiles of N x N cells (N = P54_GridN); 4 tiles are resident in
+   slots chosen by tile parity.  Each frame P89_DrawMap takes the 31x31 window of cells around the camera,
+   keeps those inside the view wedge of the heading sector (FRUSTRUM.DAT) and the precomputed
+   visibility mask (P89_VisMask -> P82_LightGrid), and sorts the objects of each cell into draw lists
+   by class (put_obj).  Native additions: Hor+ widening (v2.15) and draw_distance > 1 (v2.19) walk extra
+   cells, the latter from a draw-only cache of non-resident tiles (dd_*). */
 /* Маска видимости клеток и главный обход клеток карты — восстановлено из Game.exe (004ef997, 004ef793, 004ee8f4). */
 #include "redbg.h"
 #include "ported89.h"
@@ -47,43 +55,50 @@ GAME_VAR_DEF(p89_list4_t, P89_ListFour, 0x00cf1f80)
 GAME_VAR_DEF(p89_list2_t, P89_ListSeven, 0x00cff9e0)
 
 /* 004ef997 */
+/* P89_Fill1 — Game.exe 004ef997.  Marks all cells of the visibility mask visible (D_00d00204 bytes of 1). */
 void P89_Fill1(uint8_t *out) {
   for (int32_t i = 0; i < D_00d00204; i++) *out++ = 1;
 }
 
 /* 004ef793 */
-void P89_VisMask(int32_t blk, int32_t sub, uint8_t *out) {
+/* P89_VisMask — Game.exe 004ef793.  Decodes the visibility mask of cell `cell_in_tile` of tile `tile` from the
+   map's visibility data (P46_MapBufA): offset table per tile, then per cell a run-length stream of
+   {runs of 8 visible cells, n literal bytes of 8 bits each}.  No data -> everything visible.
+   Native: stops on a malformed stream instead of underflowing the counter. */
+void P89_VisMask(int32_t tile, int32_t cell_in_tile, uint8_t *out) {
   const uint8_t *base = (const uint8_t *)P46_MapBufA;
   if (base == NULL) { P89_Fill1(out); return; }
   uint32_t off, v;
-  memcpy(&off, base + 0x10 + (size_t)blk * 4, 4);
+  memcpy(&off, base + 0x10 + (size_t)tile * 4, 4);
   const uint8_t *tab = base + off;
-  memcpy(&v, tab + (size_t)sub * 4, 4);
+  memcpy(&v, tab + (size_t)cell_in_tile * 4, 4);
   const uint8_t *p = tab + (v & 0x3fffffffu);
   if (p == tab) { P89_Fill1(out); return; }
-  uint32_t rest = (uint32_t)D_00d00204;
-  if ((rest & 7) != 0) rest++;
-  while (rest != 0) {
-    uint8_t n = *p;
-    const uint8_t *q = p + 1;
-    if ((uint32_t)n * 8 > rest) return;               /* охранная проверка: в оригинале счётчик ушёл бы ниже нуля */
-    rest -= (uint32_t)n * 8;
-    for (; n != 0; n--) { memset(out, 1, 8); out += 8; }
-    if (rest == 0) return;
+  uint32_t left = (uint32_t)D_00d00204;
+  if ((left & 7) != 0) left++;
+  while (left != 0) {
+    uint8_t run_bytes = *p;
+    const uint8_t *lit_cnt_p = p + 1;
+    if ((uint32_t)run_bytes * 8 > left) return;               /* охранная проверка: в оригинале счётчик ушёл бы ниже нуля */
+    left -= (uint32_t)run_bytes * 8;
+    for (; run_bytes != 0; run_bytes--) { memset(out, 1, 8); out += 8; }
+    if (left == 0) return;
     p += 2;
-    for (uint8_t m = *q; m != 0; m--) {
-      uint8_t b = *p++;
+    for (uint8_t lit_bytes = *lit_cnt_p; lit_bytes != 0; lit_bytes--) {
+      uint8_t bits = *p++;
       for (int k = 0; k < 8; k++) {
-        *out++ = (uint8_t)(b & 1);
-        rest--;
-        if (rest == 0) break;
-        b >>= 1;
+        *out++ = (uint8_t)(bits & 1);
+        left--;
+        if (left == 0) break;
+        bits >>= 1;
       }
-      if (rest == 0) return;                            /* охранная проверка: оригинал продолжил бы с rest = 0xffffffff */
+      if (left == 0) return;                            /* охранная проверка: оригинал продолжил бы с rest = 0xffffffff */
     }
   }
 }
 
+/* glide_proc / alpha_combine / alpha_test — local helpers: call grAlphaCombine / grAlphaTestFunction from the
+   loaded Glide DLL. */
 static void *glide_proc(const char *name) {
   for (int i = 0; i < P33_GlideCount(); i++)
     if (strcmp(P33_GlideName(i), name) == 0) return P33_GlideProc(i);
@@ -99,22 +114,39 @@ static void alpha_test(int32_t a) {
 }
 
 #include "memrw.h"
+/* Draw class of a map object model (P80_Class[model]); decides when put_obj draws it. */
+enum {
+  OBJ_CLASS_DIRECT   = 1,   /* drawn at once (P87_DrawObjB) */
+  OBJ_CLASS_LIST_A   = 2,   /* queued in P55_TabA, drawn by the caller later */
+  OBJ_CLASS_SHADOW   = 3,   /* queued; drawn last, alpha-blended, lifted 4 units, by day only */
+  OBJ_CLASS_ALPHA    = 4,   /* queued; drawn with alpha test (cut-out textures) */
+  OBJ_CLASS_OPTIONAL = 5,   /* drawn at once only when 00575ee8 is set (TODO(RE): which detail option) */
+  OBJ_CLASS_LIST_B   = 6,   /* queued in P55_TabB */
+  OBJ_CLASS_SEVEN    = 7    /* queued; drawn first with render state 0x13.  TODO(RE): unsure what they are */
+};
+/* Glide GrCmpFnc_t values used for grAlphaTestFunction */
+enum { GR_CMP_GREATER = 4, GR_CMP_ALWAYS = 7 };
+
+/* rd16s — local helper: unaligned int16 read. */
 static int16_t rd16s(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 
 /* разложить объект o по классам (общая часть обоих ветвей 004ee8f4) */
+/* put_obj — local helper (shared by both walks of 004ee8f4): unless object o was already handled this frame
+   (stamp = swap counter) or is hidden (+0x1c), draws or queues it by the class of its model; `guarded`
+   adds list-size checks (native). */
 static void put_obj(uint8_t *o, int guarded) {
   uint32_t stamp = (uint32_t)rd32(o);
   if (stamp != (uint32_t)P47_SwapCnt && rd32(o + 0x1c) == 0) {
-    int32_t mi = rd32(o + 4);
-    if (mi >= 0 && mi < 1126 && S_00BDCD00[mi] != 0) {
-      switch (P80_Class[mi]) {
-      case 1: P87_DrawObjB(o); break;
-      case 2: if (!guarded || P55_CntA < 0x400) { P55_TabA[P55_CntA] = o; P55_CntA++; } break;
-      case 3: if (!guarded || P89_CntShadow < 0x400) { P89_ListShadow[P89_CntShadow] = o; P89_CntShadow++; } break;
-      case 4: if (!guarded || P89_CntFour < 0x400) { P89_ListFour[P89_CntFour] = o; P89_CntFour++; } break;
-      case 5: if (P13_00575ee8 != 0) P87_DrawObjB(o); break;
-      case 6: if (!guarded || P55_CntB < 0x400) { P55_TabB[P55_CntB] = o; P55_CntB++; } break;
-      case 7: if (!guarded || P89_CntSeven < 0x200) { P89_ListSeven[P89_CntSeven] = o; P89_CntSeven++; } break;
+    int32_t model = rd32(o + 4);
+    if (model >= 0 && model < 1126 && S_00BDCD00[model] != 0) {
+      switch (P80_Class[model]) {
+      case OBJ_CLASS_DIRECT: P87_DrawObjB(o); break;
+      case OBJ_CLASS_LIST_A: if (!guarded || P55_CntA < 0x400) { P55_TabA[P55_CntA] = o; P55_CntA++; } break;
+      case OBJ_CLASS_SHADOW: if (!guarded || P89_CntShadow < 0x400) { P89_ListShadow[P89_CntShadow] = o; P89_CntShadow++; } break;
+      case OBJ_CLASS_ALPHA: if (!guarded || P89_CntFour < 0x400) { P89_ListFour[P89_CntFour] = o; P89_CntFour++; } break;
+      case OBJ_CLASS_OPTIONAL: if (P13_00575ee8 != 0) P87_DrawObjB(o); break;
+      case OBJ_CLASS_LIST_B: if (!guarded || P55_CntB < 0x400) { P55_TabB[P55_CntB] = o; P55_CntB++; } break;
+      case OBJ_CLASS_SEVEN: if (!guarded || P89_CntSeven < 0x200) { P89_ListSeven[P89_CntSeven] = o; P89_CntSeven++; } break;
       default: break;
       }
     }
@@ -123,15 +155,17 @@ static void put_obj(uint8_t *o, int guarded) {
 }
 
 /* разложить объекты клетки с головой списка node по классам */
+/* walk_cell — local helper: puts every object of one cell (linked node list starting at `node`).
+   Native: index and loop guards. */
 static void walk_cell(int32_t node, int guarded) {
   int guard = 0;
   RE_DBG(7);
   while (node != -1) {
     if (node < 0 || node >= 4 * 0x5000 || ++guard > 0x5000) return;              /* охранные проверки — в оригинале их нет */
-    const int32_t *nd = (const int32_t *)((const uint8_t *)G6_00CE0F20 + (size_t)node * 8);
-    if (nd[0] < 0 || nd[0] >= P54_Cnt1E0 + 4 * 0x2000) return;
-    put_obj((uint8_t *)G6_00D00208 + (size_t)nd[0] * 0x20, guarded);
-    node = nd[1];
+    const int32_t *node_rec = (const int32_t *)((const uint8_t *)G6_00CE0F20 + (size_t)node * 8);
+    if (node_rec[0] < 0 || node_rec[0] >= P54_Cnt1E0 + 4 * 0x2000) return;
+    put_obj((uint8_t *)G6_00D00208 + (size_t)node_rec[0] * 0x20, guarded);
+    node = node_rec[1];
   }
 }
 
@@ -151,6 +185,13 @@ static uint32_t g_dd_tick;
 static uintptr_t g_dd_key[4];
 int32_t re_dd_loads;                                   /* счётчик разобранных блоков (лог RE_DDLOG) */
 
+/* dd_* — native only (v2.19 draw_distance): a cache of up to DD_CACHE extra tiles decoded from the level's
+   lump table for drawing only (no road data, game slots untouched), loaded at most DD_LOADS per frame,
+   nearest first.  dd_reset clears it; dd_find looks a tile up; dd_load decodes one (copy of the parse in
+   004ed5f8); dd_resident tests the game's slots; dd_stream marks/loads the tiles around a cell; dd_walk
+   and dd_cell put the objects of a cached cell; dd_cur_radius gives the walk radius for the far plane;
+   re_dd_warm preloads everything (render check / first frame); dd_extend walks the cells beyond the
+   original 31x31 window, nearest first. */
 static void dd_reset(void) { for (int i = 0; i < DD_CACHE; i++) g_dd[i].lump = -1; }
 static dd_blk *dd_find(int32_t lump) {
   for (int i = 0; i < DD_CACHE; i++) if (g_dd[i].lump == lump && g_dd[i].nodes) return &g_dd[i];
@@ -313,6 +354,11 @@ static void dd_extend(const uint8_t *um, int32_t R) {
 #endif
 
 /* 004ee8f4 */
+/* P89_DrawMap — Game.exe 004ee8f4, cdecl.  mode 0: only updates the camera cell and the visibility mask.
+   mode != 0: also builds the light matrices, walks the visible cells (all 30x30 in camera mode 6,
+   otherwise the FRUSTRUM.DAT rows of the heading sector, sector = heading / 16), queueing objects, then
+   draws the class-7 list, the alpha-tested list (cut-outs) and, by day with shadows on (00d11880, no fog),
+   the shadow list blended and lifted by 4 units; finally resets the alpha state. */
 void P89_DrawMap(int32_t mode) {
   P87_CntB = 0;
   if (mode != 0) {
@@ -320,40 +366,40 @@ void P89_DrawMap(int32_t mode) {
     if (G6_00B87EEC == 0) P12_Fn00426580(1);
   }
   P88_CellUpdate(mode);
-  int32_t N = P54_GridN;
+  int32_t tile_n = P54_GridN;
   RE_DBG(6);
-  if (N <= 0 || !G6_00CE0F20 || !G6_00D01268 || !G6_00D00208) return;           /* охранная проверка — оригинал упал бы на делении */
-  P89_VisMask(P88_CellA.cell, (P88_CellA.y % N) * N + P88_CellA.x % N, (uint8_t *)P82_LightGrid);
+  if (tile_n <= 0 || !G6_00CE0F20 || !G6_00D01268 || !G6_00D00208) return;           /* охранная проверка — оригинал упал бы на делении */
+  P89_VisMask(P88_CellA.cell, (P88_CellA.y % tile_n) * tile_n + P88_CellA.x % tile_n, (uint8_t *)P82_LightGrid);
   if (mode == 0) return;
   int32_t cx = P88_CellA.x;
-  const uint8_t *row = (const uint8_t *)P55_Frustum + (size_t)((((int32_t)(int16_t)P59_AngB + (((int32_t)(int16_t)P59_AngB >> 31) & 0xf)) >> 4) * 0x80);
+  const uint8_t *frust_row = (const uint8_t *)P55_Frustum + (size_t)((((int32_t)(int16_t)P59_AngB + (((int32_t)(int16_t)P59_AngB >> 31) & 0xf)) >> 4) * 0x80);
   int32_t x0 = cx - 0xf;
-  int32_t y0 = P88_CellA.y - 0xf + rd16s(row);
+  int32_t y0 = P88_CellA.y - 0xf + rd16s(frust_row);
   P89_CntSeven = 0; P55_CntB = 0; P89_CntFour = 0; P55_CntA = 0; P89_CntShadow = 0;
-  P88_CellA.py = (uint8_t)(y0 / N);
-  int32_t ry = y0 - ((y0 / N) & 0xff) * N;
-  int32_t nn = N * N;
-  int32_t first = rd16s(row), rows = first + rd16s(row + 2);
-  const uint8_t *lt = (const uint8_t *)P82_LightGrid + (size_t)first * P21_GridStride;
+  P88_CellA.py = (uint8_t)(y0 / tile_n);
+  int32_t ry = y0 - ((y0 / tile_n) & 0xff) * tile_n;
+  int32_t nn = tile_n * tile_n;
+  int32_t first_row = rd16s(frust_row), end_row = first_row + rd16s(frust_row + 2);
+  const uint8_t *light_row = (const uint8_t *)P82_LightGrid + (size_t)first_row * P21_GridStride;
   P44_MatPtr = (float *)P44_ViewMatT;
   int32_t *heads = (int32_t *)G6_00D01268;
   if (P59_Mode1137324 == 6) {
     y0 = P88_CellA.y - 0xf;
-    P88_CellA.py = (uint8_t)(y0 / N);
-    ry = y0 - ((y0 / N) & 0xff) * N;
-    for (int32_t r = -0xf; r < 0xf; r++) {
+    P88_CellA.py = (uint8_t)(y0 / tile_n);
+    ry = y0 - ((y0 / tile_n) & 0xff) * tile_n;
+    for (int32_t row_i = -0xf; row_i < 0xf; row_i++) {
       for (int32_t c = -0xf; c < 0xf; c++) {
         int32_t x = c + cx;
-        P88_CellA.px = (uint8_t)(x / N);
-        int32_t rx = x - ((x / N) & 0xff) * N;
+        P88_CellA.px = (uint8_t)(x / tile_n);
+        int32_t rx = x - ((x / tile_n) & 0xff) * tile_n;
         if (x > -1 && y0 > -1 && x < P21_GridDiv && y0 < P80_GridH) {
           P88_CellA.pc = (uint8_t)((P88_CellA.px & 1) + (P88_CellA.py & 1) * 2);
-          walk_cell(heads[(size_t)P88_CellA.pc * nn + rx + ry * N], 1);
+          walk_cell(heads[(size_t)P88_CellA.pc * nn + rx + ry * tile_n], 1);
         }
-        if (rx + 1 == N) P88_CellA.px++;
+        if (rx + 1 == tile_n) P88_CellA.px++;
       }
       ry++;
-      if (ry == N) { ry = 0; P88_CellA.py++; }
+      if (ry == tile_n) { ry = 0; P88_CellA.py++; }
       y0++;
     }
   }
@@ -365,44 +411,44 @@ void P89_DrawMap(int32_t mode) {
     int32_t sec = (((int32_t)(int16_t)P59_AngB + (((int32_t)(int16_t)P59_AngB >> 31) & 0xf)) >> 4);
     re_frustum_union((const uint8_t *)P55_Frustum, sec, re_aspect_sectors(re_view_extra()), um);
     const uint8_t *lg = (const uint8_t *)P82_LightGrid;
-    for (int32_t r = 0; r < 31; r++) {
-      int32_t y = P88_CellA.y - 0xf + r;
+    for (int32_t row_i = 0; row_i < 31; row_i++) {
+      int32_t y = P88_CellA.y - 0xf + row_i;
       if (y < 0 || y >= P80_GridH) continue;
-      P88_CellA.py = (uint8_t)(y / N);
-      int32_t ry2 = y - ((y / N) & 0xff) * N;
+      P88_CellA.py = (uint8_t)(y / tile_n);
+      int32_t ry2 = y - ((y / tile_n) & 0xff) * tile_n;
       for (int32_t c = 0; c < 31; c++) {
-        if (um[r * 31 + c] == 0) continue;
+        if (um[row_i * 31 + c] == 0) continue;
         int32_t x = cx - 0xf + c;
-        if (x < 0 || x >= P21_GridDiv || lg[(size_t)r * P21_GridStride + c] == 0) continue;
-        P88_CellA.px = (uint8_t)(x / N);
-        int32_t rx = x - ((x / N) & 0xff) * N;
+        if (x < 0 || x >= P21_GridDiv || lg[(size_t)row_i * P21_GridStride + c] == 0) continue;
+        P88_CellA.px = (uint8_t)(x / tile_n);
+        int32_t rx = x - ((x / tile_n) & 0xff) * tile_n;
         P88_CellA.pc = (uint8_t)((P88_CellA.px & 1) + (P88_CellA.py & 1) * 2);
-        walk_cell(heads[(size_t)P88_CellA.pc * nn + rx + ry2 * N], 1);
+        walk_cell(heads[(size_t)P88_CellA.pc * nn + rx + ry2 * tile_n], 1);
       }
     }
   }
 #endif
   else {
-    for (int32_t r = first; r < rows; r++) {
-      int32_t c = rd16s(row + (size_t)(r * 2 + 2) * 2);
+    for (int32_t row_i = first_row; row_i < end_row; row_i++) {
+      int32_t c = rd16s(frust_row + (size_t)(row_i * 2 + 2) * 2);
       if (c != -1) {
         int32_t x = c + x0;
-        int32_t cend = c + rd16s(row + (size_t)(r * 2 + 3) * 2);
-        P88_CellA.px = (uint8_t)(x / N);
-        int32_t rx = x - ((x / N) & 0xff) * N;
+        int32_t cend = c + rd16s(frust_row + (size_t)(row_i * 2 + 3) * 2);
+        P88_CellA.px = (uint8_t)(x / tile_n);
+        int32_t rx = x - ((x / tile_n) & 0xff) * tile_n;
         for (; c < cend; c++) {
-          if (x > -1 && y0 > -1 && x < P21_GridDiv && y0 < P80_GridH && lt[c] != 0) {
+          if (x > -1 && y0 > -1 && x < P21_GridDiv && y0 < P80_GridH && light_row[c] != 0) {
             P88_CellA.pc = (uint8_t)((P88_CellA.px & 1) + (P88_CellA.py & 1) * 2);
-            walk_cell(heads[(size_t)P88_CellA.pc * nn + rx + ry * N], 1);
+            walk_cell(heads[(size_t)P88_CellA.pc * nn + rx + ry * tile_n], 1);
           }
           rx++;
-          if (rx == N) { rx = 0; P88_CellA.px++; }
+          if (rx == tile_n) { rx = 0; P88_CellA.px++; }
           x++;
         }
       }
       ry++;
-      if (ry == N) { ry = 0; P88_CellA.py++; }
-      lt += P21_GridStride;
+      if (ry == tile_n) { ry = 0; P88_CellA.py++; }
+      light_row += P21_GridStride;
       y0++;
     }
   }
@@ -427,7 +473,7 @@ void P89_DrawMap(int32_t mode) {
     P69_BlendOn = 0xff;
     P62_I252B78 = (int32_t)0xffffffff;
     alpha_combine(3, 8, 0, 1, 1);
-    alpha_test(4);
+    alpha_test(GR_CMP_GREATER);
     P62_I252B78 = 1;
     for (int32_t i = 0; i < P89_CntFour; i++) P87_DrawObjA((const uint8_t *)P89_ListFour[i]);
   }
@@ -436,7 +482,7 @@ void P89_DrawMap(int32_t mode) {
     P69_BlendOn = 0xff;
     P62_I252B78 = (int32_t)0xffffffff;
     alpha_combine(4, 8, 1, 1, 1);
-    alpha_test(7);
+    alpha_test(GR_CMP_ALWAYS);
     P62_I252B78 = 2;
     int32_t old = DrvSetMode0042655A(0);
     for (int32_t i = 0; i < P89_CntShadow; i++) {
@@ -449,7 +495,7 @@ void P89_DrawMap(int32_t mode) {
   }
   if (P62_I252B78 != 0) {
     alpha_combine(3, 8, 0, 2, 1);
-    alpha_test(7);
+    alpha_test(GR_CMP_ALWAYS);
     P62_I252B78 = 0;
   }
 }

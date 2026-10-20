@@ -1,3 +1,5 @@
+/* ported28 — level model loading (Game.exe, cdecl): event models from the map file and the car model set
+   (player, cop, bad guy, nine civilian cars) with their damage deltas.  Original note: */
 /* Загрузка моделей событий и машин уровня — восстановлено из Game.exe. */
 #include "ported28.h"
 #include "ported79.h"
@@ -159,9 +161,25 @@ int32_t P28_BadGuyFlag;
 #define MAIN_HWND ((void *)(intptr_t)G6_00BDF9C0)
 #define MAP_C "D:\\Driver\\Game\\map.c"
 
+/* Model header fields used here (offsets into a level model record). */
+#define MDL_NVERTS   0x14   /* u16 vertex count */
+#define MDL_NOPS     0x16   /* u16 number of draw records ("ops") */
+#define MDL_VERTS    0x20   /* model pointer: vertices, float[4] each */
+#define MDL_OPS      0x2c   /* model pointer: draw records; each record's size is G2_TABLE_00550ACC[first byte] */
+
+/* Car model slots of P28_CarClean / P28_CarDam / P28_CarLow. */
+enum { CARMDL_PLAYER = 0, CARMDL_COP = 1, CARMDL_BADGUY = 2, CARMDL_CIV1 = 3, CARMDL_COUNT = 12 };
+
+/* Scratch buffers for event model decompression (map.c tags 0x3d4 / 0x3d5). */
+#define EVMDL_SCRATCH 0x80000
+
+/* P28_LoadEventModels — Game.exe 004ec58a.  Frees the current event models, then reads the count and for each
+   model: [size][packed data] -> unpack (00475A3D) -> copy into a model arena allocation -> post-process
+   (00427757, 0042793F for both passes 0/1, 004757D2, 00475906; TODO(RE): unsure what each does).
+   Out of memory: the count is reset to 0 and a "Memory Error!" box is shown (the typo "enogh" is original). */
 void P28_LoadEventModels(void *file) {
-  void *tmp = DebugMalloc(0x80000, MAP_C, 0x3d4);
-  void *buf = DebugMalloc(0x80000, MAP_C, 0x3d5);
+  void *tmp = DebugMalloc(EVMDL_SCRATCH, MAP_C, 0x3d4);   /* packed data */
+  void *buf = DebugMalloc(EVMDL_SCRATCH, MAP_C, 0x3d5);   /* unpacked model */
   for (int i = 0; i < P28_EventCount; i++) {
     if (P28_EventModels[i] != 0) { P79_EventFree(re_ptr(P28_EventModels[i])); P28_EventModels[i] = 0; }
   }
@@ -171,7 +189,7 @@ void P28_LoadEventModels(void *file) {
     P27_ReadChunked(&sz, 4, 1, file);
     P27_ReadChunked(tmp, sz, 1, file);
     sz = Call00475A3D(tmp, buf);
-    void *m = P79_EventAlloc(sz);
+    void *m = P79_EventAlloc(sz);   /* m = the event model */
     P28_EventModels[i] = re_addr(m);
     if (m == NULL) {
       P28_EventCount = 0;
@@ -191,12 +209,19 @@ void P28_LoadEventModels(void *file) {
   DebugFree(tmp);
 }
 
+/* Model reference by name from the level's name table (0 if missing; then shows msg, when given). */
 static uint32_t find_model(const char *name, const char *msg) {
   uint32_t m = (uint32_t)P20_FindNameValue(name);
   if (m == 0 && msg != NULL) plat_message_box(MAIN_HWND, msg, "ERROR IN _LEVEL_ DATA", 0);
   return m;
 }
 
+/* P28_LoadCarModels — Game.exe 004bfc30.  Loads the car models of the level by name: PLAYERCAR<n>CLEAN/DAM for the
+   chosen player car n = S_00D1192C + 1 (its low model is the clean one), COPCAR*, CIVCAR1* as the bad guy (a missing
+   low model is only reported when P28_BadGuyFlag == 1) and CIVCAR1..9 CLEAN/DAM/LOW.  Also copies the per-car
+   parameter blocks of the chosen car (6 x 0x50 bytes from P28_Src1, 0x170 bytes from P28_Src2), looks up CARSHINE,
+   computes the per-vertex damage deltas (damaged - clean) / 4096 and the total draw-record size of each clean
+   model, then loads the dent textures.  Missing models produce a message box, not a failure. */
 void P28_LoadCarModels(void) {
   char name[80];
   Call004C2042();
@@ -207,40 +232,40 @@ void P28_LoadCarModels(void) {
   for (int i = 5; i >= 0; i--) memcpy(&P28_Dst1[i * 0x50], &P28_Src1[i * 0x50 + S_00D1192C * 0x1e0], 0x50);
   memcpy(P28_Dst2, &P28_Src2[S_00D1192C * 0x170], 0x170);
   snprintf(name, sizeof name, "PLAYERCAR%dCLEAN", (int)S_00D1192C + 1);
-  P28_CarClean[0] = find_model(name, "Could not find clean player car model.\n Change name in LEV file.");
+  P28_CarClean[CARMDL_PLAYER] = find_model(name, "Could not find clean player car model.\n Change name in LEV file.");
   snprintf(name, sizeof name, "PLAYERCAR%dDAM", (int)S_00D1192C + 1);
-  P28_CarDam[0] = find_model(name, "Could not find damaged player car model.\n Change name in LEV file.");
-  P28_CarLow[0] = P28_CarClean[0];
-  P28_CarClean[1] = find_model("COPCARCLEAN", "Could not find clean cop car model.\n Change name in LEV file.");
-  P28_CarDam[1] = find_model("COPCARDAM", "Could not find damaged cop car model.\n Change name in LEV file.");
-  P28_CarLow[1] = find_model("COPCARLOW", "Could not find low cop car model.\n Change name in LEV file.");
+  P28_CarDam[CARMDL_PLAYER] = find_model(name, "Could not find damaged player car model.\n Change name in LEV file.");
+  P28_CarLow[CARMDL_PLAYER] = P28_CarClean[CARMDL_PLAYER];
+  P28_CarClean[CARMDL_COP] = find_model("COPCARCLEAN", "Could not find clean cop car model.\n Change name in LEV file.");
+  P28_CarDam[CARMDL_COP] = find_model("COPCARDAM", "Could not find damaged cop car model.\n Change name in LEV file.");
+  P28_CarLow[CARMDL_COP] = find_model("COPCARLOW", "Could not find low cop car model.\n Change name in LEV file.");
   if (P28_BadGuyFlag == 1) {
-    P28_CarClean[2] = find_model("CIVCAR1CLEAN", "Could not find clean bad guy car model.\n Change name in LEV file.");
-    P28_CarDam[2] = find_model("CIVCAR1DAM", "Could not find damaged bad guy model.\n Change name in LEV file.");
-    P28_CarLow[2] = find_model("CIVCAR1LOW", "Could not find low bad guy model.\n Change name in LEV file.");
+    P28_CarClean[CARMDL_BADGUY] = find_model("CIVCAR1CLEAN", "Could not find clean bad guy car model.\n Change name in LEV file.");
+    P28_CarDam[CARMDL_BADGUY] = find_model("CIVCAR1DAM", "Could not find damaged bad guy model.\n Change name in LEV file.");
+    P28_CarLow[CARMDL_BADGUY] = find_model("CIVCAR1LOW", "Could not find low bad guy model.\n Change name in LEV file.");
   } else {
-    P28_CarClean[2] = find_model("CIVCAR1CLEAN", "Could not find clean bad guy car model.\n Change name in LEV file.");
-    P28_CarDam[2] = find_model("CIVCAR1DAM", "Could not find damaged bad guy model.\n Change name in LEV file.");
-    P28_CarLow[2] = find_model("CIVCAR1LOW", NULL);
+    P28_CarClean[CARMDL_BADGUY] = find_model("CIVCAR1CLEAN", "Could not find clean bad guy car model.\n Change name in LEV file.");
+    P28_CarDam[CARMDL_BADGUY] = find_model("CIVCAR1DAM", "Could not find damaged bad guy model.\n Change name in LEV file.");
+    P28_CarLow[CARMDL_BADGUY] = find_model("CIVCAR1LOW", NULL);
   }
   for (int i = 0; i < 9; i++) {
     snprintf(name, sizeof name, "CIVCAR%dCLEAN", i + 1);
-    P28_CarClean[3 + i] = (uint32_t)P20_FindNameValue(name);
-    if (P28_CarClean[3 + i] == 0) plat_message_box(MAIN_HWND, "Could not find clean civ car model.\n Change name in LEV file.", name, 0);
+    P28_CarClean[CARMDL_CIV1 + i] = (uint32_t)P20_FindNameValue(name);
+    if (P28_CarClean[CARMDL_CIV1 + i] == 0) plat_message_box(MAIN_HWND, "Could not find clean civ car model.\n Change name in LEV file.", name, 0);
     snprintf(name, sizeof name, "CIVCAR%dDAM", i + 1);
-    P28_CarDam[3 + i] = (uint32_t)P20_FindNameValue(name);
-    if (P28_CarDam[3 + i] == 0) plat_message_box(MAIN_HWND, "Could not find damaged civ car model.\n  Change name in LEV file.", name, 0);
+    P28_CarDam[CARMDL_CIV1 + i] = (uint32_t)P20_FindNameValue(name);
+    if (P28_CarDam[CARMDL_CIV1 + i] == 0) plat_message_box(MAIN_HWND, "Could not find damaged civ car model.\n  Change name in LEV file.", name, 0);
     snprintf(name, sizeof name, "CIVCAR%dLOW", i + 1);
-    P28_CarLow[3 + i] = (uint32_t)P20_FindNameValue(name);
-    if (P28_CarLow[3 + i] == 0) plat_message_box(MAIN_HWND, "Could not find low civ car model.\n  Change name in LEV file.", name, 0);
+    P28_CarLow[CARMDL_CIV1 + i] = (uint32_t)P20_FindNameValue(name);
+    if (P28_CarLow[CARMDL_CIV1 + i] == 0) plat_message_box(MAIN_HWND, "Could not find low civ car model.\n  Change name in LEV file.", name, 0);
   }
   /* дельты вершин «целая − повреждённая» / 4096 */
-  for (int k = 0; k < 12; k++) {
+  for (int k = 0; k < CARMDL_COUNT; k++) {
     if (P28_CarDam[k] == 0 || P28_CarClean[k] == 0) continue;  /* оригинал здесь упал бы на нулевой модели */
-    const float *dm = (const float *)P28_Ptr(*(const int32_t *)(P28_Ptr(P28_CarDam[k]) + 0x20));
-    const float *cl = (const float *)P28_Ptr(*(const int32_t *)(P28_Ptr(P28_CarClean[k]) + 0x20));
+    const float *dm = (const float *)P28_Ptr(*(const int32_t *)(P28_Ptr(P28_CarDam[k]) + MDL_VERTS));
+    const float *cl = (const float *)P28_Ptr(*(const int32_t *)(P28_Ptr(P28_CarClean[k]) + MDL_VERTS));
     float *out = P28_CarDelta[k];
-    int n = *(const uint16_t *)(P28_Ptr(P28_CarClean[k]) + 0x14);
+    int n = *(const uint16_t *)(P28_Ptr(P28_CarClean[k]) + MDL_NVERTS);
     for (int v = 0; v < n; v++) {
       out[0] = (dm[0] - cl[0]) / 4096.0f;
       out[1] = (dm[1] - cl[1]) / 4096.0f;
@@ -248,12 +273,13 @@ void P28_LoadCarModels(void) {
       cl += 4; dm += 4; out += 4;
     }
   }
-  for (int k = 0; k < 12; k++) {
+  /* total byte size of each clean model's draw records */
+  for (int k = 0; k < CARMDL_COUNT; k++) {
     P28_CarOpsSize[k] = 0;
     if (P28_CarClean[k] != 0) {
       int32_t total = 0;
-      const uint8_t *p = (const uint8_t *)P28_Ptr(*(const int32_t *)(P28_Ptr(P28_CarClean[k]) + 0x2c));
-      uint32_t cnt = *(const uint16_t *)(P28_Ptr(P28_CarClean[k]) + 0x16);
+      const uint8_t *p = (const uint8_t *)P28_Ptr(*(const int32_t *)(P28_Ptr(P28_CarClean[k]) + MDL_OPS));
+      uint32_t cnt = *(const uint16_t *)(P28_Ptr(P28_CarClean[k]) + MDL_NOPS);
       while (cnt != 0) {
         int32_t step = G2_TABLE_00550ACC[*p];
         total += step; p += step; cnt--;

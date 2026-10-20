@@ -1,7 +1,13 @@
+/* SDL implementation of the DirectInput platform calls (native).  The device/effect calls only
+   count calls and hand out dummy tokens (inputtest checks the counts and injects failures via
+   plat_di_stub_*); the keyboard state the game reads (GetDeviceState, 256 DIK bytes) is built
+   from the SDL keyboard, an SDL game controller and the RE_KEYS script.  RE_INPUTDBG=1 writes
+   driver_input.log. */
 /* SDL-вариант DirectInput: учёт вызовов без устройства (клавиатуру из SDL подключим вместе с главным циклом). */
 #include "../plat.h"
 #include "../../game/ported36.h"
 #include "../../game/ported98.h"
+#include "../../game/names_g3.h"
 #include "../native/diagnostics.h"
 #include <SDL.h>
 #include <stdio.h>
@@ -11,6 +17,10 @@
 static void dbg_keys(const uint8_t *k);   /* v2.14: RE_INPUTDBG */
 void plat_input_dbg(const char *fmt, ...);
 static void gamepad_close(void);
+/* Stub DirectInput objects: the device / effect / event calls below only validate their handle, count the
+   call (plat_di_stub_counts / _effects / _init_stats report the counters to inputtest) and can be made to
+   fail: FAIL(b) = bit b of the mask given to plat_di_stub_setup (0 create, 1 system device, 2 device,
+   3 QueryInterface, 4 cooperative level, 5 event, 6 property, 7 caps, 8 acquire, 9 event create). */
 static int32_t g_jx, g_jy, g_poll;
 static int g_rel, g_unacq, g_evt, g_kind = -1, g_fail;
 void plat_di_release(void *o) { if (o) g_rel++; }
@@ -21,6 +31,9 @@ static char g_tok[64];
 #define FAIL(b) (g_fmask & (1u << (b)))
 int32_t plat_di_acquire(void *d) { return (d && !FAIL(8)) ? 0 : -1; }
 void plat_vt_poll(void);   /* v2.08: plat_sys.c — RE_FIXED_DT: опрос ввода двигает виртуальные часы (ожидание клавиши/таймера) */
+/* plat_di_get_state — GetDeviceState emulation.  Advances the virtual clock under RE_FIXED_DT.  Keyboard (size 0x100):
+   fills the DIK bytes from plat_input_fill_keys; joystick (size 0x50, DIJOYSTATE): the stub axes.
+   Returns 0, or -1 for a NULL device or an injected failure. */
 int32_t plat_di_get_state(void *d, uint32_t size, void *buf) {
   plat_vt_poll();
     { static int tr = -1, n = 0; if (tr < 0) tr = getenv("RE_TRACE_KEYS") != NULL;
@@ -64,6 +77,8 @@ int32_t plat_di_set_coop(void *dev, void *hwnd, uint32_t flags) { (void)hwnd; (v
 int32_t plat_di_set_event(void *dev, void *ev) { return (dev && ev && !FAIL(5)) ? 0 : -1; }
 int32_t plat_di_set_prop(void *dev, int prop, uint32_t obj, uint32_t how, int32_t a, int32_t b) { (void)prop; (void)obj; (void)how; (void)a; (void)b; if (!dev || FAIL(6)) return -1; g_nprop++; return 0; }
 int32_t plat_di_get_caps_flags(void *dev, uint32_t *flags) { if (!dev || FAIL(7)) return -1; *flags = g_caps; return 0; }
+/* plat_di_enum_joysticks — Report g_njoy stub joysticks to cb (DIDEVICEINSTANCE: instance GUID word 1, dwDevType at +0x24
+   with the sub-type in byte 1: 0x0204 / 0x0404 for the second).  Stops when cb returns 0. */
 int32_t plat_di_enum_joysticks(void *di, plat_di_joy_cb cb) {
     if (!di) return -1;
     for (int i = 0; i < g_njoy; i++) {
@@ -81,6 +96,7 @@ void *plat_event_create(void) { return FAIL(9) ? NULL : tok(); }
    Клавиша: имя (UP DOWN LEFT RIGHT RETURN ENTER ESC ESCAPE SPACE TAB BACK F1..F12 A..Z 0..9 LSHIFT RSHIFT LCTRL RCTRL LALT)
    или номер DIK (0x1c / 28). Буферизованный ввод (GetDeviceData) игра не использует (перенос 004e417f — только GetDeviceState). */
 static int g_in_on;
+/* plat_input_enable — Enable/disable real input (the game enables it from main.c); disabling closes the gamepad. */
 void plat_input_enable(int on) {
     g_in_on = on;
     if (!on) gamepad_close();
@@ -98,6 +114,7 @@ static const struct { const char *n; uint8_t dik; } k_names[] = {
     {"F11",0x57},{"F12",0x58},{"KPENTER",0x9c},{"RCTRL",0x9d},{"RALT",0xb8},
     {"HOME",0xc7},{"UP",0xc8},{"PGUP",0xc9},{"LEFT",0xcb},{"RIGHT",0xcd},{"END",0xcf},{"DOWN",0xd0},{"PGDN",0xd1},{"INSERT",0xd2},{"DELETE",0xd3},
 };
+/* sc_to_dik — SDL scancode -> DirectInput DIK code (0 if unmapped). */
 static uint8_t sc_to_dik(SDL_Scancode sc) {
     if (sc >= SDL_SCANCODE_A && sc <= SDL_SCANCODE_Z) { char n[2] = { (char)('A' + (sc - SDL_SCANCODE_A)), 0 };
         for (size_t i = 0; i < sizeof k_names / sizeof k_names[0]; i++) if (!strcmp(k_names[i].n, n)) return k_names[i].dik; }
@@ -125,6 +142,7 @@ static uint8_t sc_to_dik(SDL_Scancode sc) {
     default: return 0;
     }
 }
+/* plat_key_dik — DIK code for a key name (k_names) or a number (0x1c / 28); -1 if unknown. */
 int plat_key_dik(const char *name) {   /* имя или номер → DIK; -1 — неизвестно */
     if (!name || !*name) return -1;
     if (name[0] >= '0' && name[0] <= '9' && name[1]) { char *e; long v = strtol(name, &e, 0); if (!*e && v > 0 && v < 256) return (int)v; }
@@ -134,6 +152,7 @@ int plat_key_dik(const char *name) {   /* имя или номер → DIK; -1 �
 #define MAX_SCRIPT 256
 static struct { int frame, hold; uint8_t dik; uint8_t logged; } g_scr[MAX_SCRIPT];   /* v2.05: hold — «кадр:клавиша:кадров» */
 static int g_nscr = -1, g_hold = 2;
+/* script_load — Parse RE_KEYS = "frame:key[:hold],..." into g_scr (hold defaults to RE_KEYS_HOLD, 2 frames). */
 static void script_load(void) {
     g_nscr = 0;
     const char *h = getenv("RE_KEYS_HOLD"); if (h && atoi(h) > 0) g_hold = atoi(h);
@@ -149,6 +168,7 @@ static void script_load(void) {
     fprintf(stderr, "[keys] сценарий RE_KEYS: %d нажатий, удержание %d кадр.\n", g_nscr, g_hold);
 }
 /* v2.30: отладка — нажатие через rel кадров от текущего (RE_AUTOCONT: выбор Continue после итога миссии); 0 — принято */
+/* plat_keys_push — Debug: queue a key press `rel` frames from now.  Returns 0, or -1 for an unknown key / full script. */
 int plat_keys_push(int rel, const char *name) {
     if (g_nscr < 0) script_load();
     int d = plat_key_dik(name);
@@ -158,6 +178,7 @@ int plat_keys_push(int rel, const char *name) {
 }
 /* v2.30: отладочный автопилот (RE_AUTORAM) — клавиша нажата на ближайшие 2 опроса */
 static uint8_t g_auto[256];
+/* plat_auto_key — Debug autopilot (RE_AUTORAM): hold key dik for the next two polls. */
 void plat_auto_key(int dik) { if (dik > 0 && dik < 256) g_auto[dik] = 2; }
 static SDL_GameController *g_pad;
 static Uint32 g_pad_latch, g_pad_blocked;
@@ -165,10 +186,12 @@ static int g_pad_focus = 1, g_pad_menu = -1;
 static int g_pad_init_failed;
 static Uint32 g_rumble_until;
 static int g_rumble_strength, g_rumble_failed;
+/* gamepad_stop_rumble — Stop an active rumble pulse. */
 static void gamepad_stop_rumble(void) {
     if (g_pad && g_rumble_until) SDL_GameControllerRumble(g_pad, 0, 0, 0);
     g_rumble_until = 0; g_rumble_strength = 0;
 }
+/* gamepad_close — Close the game controller and reset its latch/blocked/menu state. */
 static void gamepad_close(void) {
     if (g_pad) {
         gamepad_stop_rumble();
@@ -178,6 +201,8 @@ static void gamepad_close(void) {
     }
     g_pad_latch = g_pad_blocked = 0; g_pad_menu = -1; g_rumble_failed = 0;
 }
+/* plat_input_pad_event — SDL event hook: track window focus (losing it clears the latch and rumble) and latch controller
+   button presses so a press shorter than a frame is not lost. */
 void plat_input_pad_event(const void *event) {
     const SDL_Event *e = event;
     if (e->type == SDL_WINDOWEVENT) {
@@ -190,6 +215,9 @@ void plat_input_pad_event(const void *event) {
         e->cbutton.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(g_pad)) && e->cbutton.button < 32)
         g_pad_latch |= 1u << e->cbutton.button;
 }
+/* gamepad_ready — Lazily initialise SDL's game-controller subsystem (logs which SDL library is loaded), detect
+   disconnects and open the first controller.  Returns 1 when a controller is open and the window
+   has focus.  RE_GAMEPAD=0 disables. */
 static int gamepad_ready(void) {
     const char *enabled = getenv("RE_GAMEPAD");
     if (!g_in_on || (enabled && !strcmp(enabled, "0"))) { gamepad_close(); return 0; }
@@ -224,6 +252,9 @@ static int gamepad_ready(void) {
     }
     return g_pad != NULL && g_pad_focus;
 }
+/* plat_gamepad_damage — Rumble for a collision of `damage` units (capped at 1024): strength and duration scale with
+   damage; a weaker hit does not replace an active stronger pulse.  Returns 1 if started, 0 if
+   skipped, -1 if rumble is unsupported.  RE_RUMBLE=0 disables. */
 int plat_gamepad_damage(int damage) {
     const char *enabled = getenv("RE_RUMBLE");
     if (enabled && !strcmp(enabled, "0")) { gamepad_stop_rumble(); return 0; }
@@ -248,16 +279,23 @@ int plat_gamepad_damage(int damage) {
     plat_input_dbg("damage rumble: damage=%d low=%u high=%u duration_ms=%u", damage, low, high, duration);
     return 1;
 }
+/* pad_action — Press the key configured for action index `action` (P36_KeyCfg). */
 static void pad_action(uint8_t *k, int action) {
     uint8_t dik = P36_KeyCfg[action];
     if (dik) k[dik] |= 0x80;
 }
+/* gamepad_keys — Merge the controller into the DIK bytes.  Menus (00b87efc set, or no driving keys
+   configured): D-pad / left stick -> arrows, A/Start -> Return, B/Back -> Escape (16000
+   dead zone).  Driving: stick/D-pad steer, triggers (or D-pad up/down) gas/brake, RB hard turn,
+   A/B handbrake, X burnout, left-stick click horn, LB look back, Y camera key (P98_KeyMode),
+   Start/Back -> Escape (8000 dead zone).  Buttons held across a menu/driving switch are ignored
+   until released. */
 static void gamepad_keys(uint8_t *k) {
     if (!gamepad_ready()) return;
     Uint32 down = 0;
     for (int b = 0; b < SDL_CONTROLLER_BUTTON_MAX && b < 32; b++)
         if (SDL_GameControllerGetButton(g_pad, (SDL_GameControllerButton)b)) down |= 1u << b;
-    int menu = G6_00B87EFC != 0 || P36_KeyCfg[6] == 0;
+    int menu = G6_00B87EFC != 0 || P36_KeyCfg[KEYCFG_GAS] == 0;
     const char *rumble = getenv("RE_RUMBLE");
     if (menu || (rumble && !strcmp(rumble, "0"))) gamepad_stop_rumble();
     if (g_pad_menu >= 0 && menu != g_pad_menu) g_pad_blocked |= down;
@@ -271,24 +309,24 @@ static void gamepad_keys(uint8_t *k) {
     int lt = SDL_GameControllerGetAxis(g_pad, SDL_CONTROLLER_AXIS_TRIGGERLEFT);
     const int deadzone = menu ? 16000 : 8000;
     if (menu) {
-        if (PAD(DPAD_UP) || ay < -deadzone) k[0xc8] |= 0x80;
-        if (PAD(DPAD_DOWN) || ay > deadzone) k[0xd0] |= 0x80;
-        if (PAD(DPAD_LEFT) || ax < -deadzone) k[0xcb] |= 0x80;
-        if (PAD(DPAD_RIGHT) || ax > deadzone) k[0xcd] |= 0x80;
-        if (PAD(A) || PAD(START)) k[0x1c] |= 0x80;
-        if (PAD(B) || PAD(BACK)) k[0x01] |= 0x80;
+        if (PAD(DPAD_UP) || ay < -deadzone) k[DIK_UP] |= 0x80;
+        if (PAD(DPAD_DOWN) || ay > deadzone) k[DIK_DOWN] |= 0x80;
+        if (PAD(DPAD_LEFT) || ax < -deadzone) k[DIK_LEFT] |= 0x80;
+        if (PAD(DPAD_RIGHT) || ax > deadzone) k[DIK_RIGHT] |= 0x80;
+        if (PAD(A) || PAD(START)) k[DIK_RETURN] |= 0x80;
+        if (PAD(B) || PAD(BACK)) k[DIK_ESCAPE] |= 0x80;
     } else {
-        if (PAD(DPAD_LEFT) || ax < -deadzone) pad_action(k, 4);
-        if (PAD(DPAD_RIGHT) || ax > deadzone) pad_action(k, 5);
-        if (rt > 4000 || PAD(DPAD_UP)) pad_action(k, 6);
-        if (lt > 4000 || PAD(DPAD_DOWN)) pad_action(k, 7);
-        if (PAD(RIGHTSHOULDER)) pad_action(k, 8);  /* hard turn */
-        if (PAD(A) || PAD(B)) pad_action(k, 9);   /* handbrake */
-        if (PAD(X)) pad_action(k, 10);             /* burnout */
-        if (PAD(LEFTSTICK)) pad_action(k, 15);     /* horn */
-        if (PAD(LEFTSHOULDER)) pad_action(k, 13);  /* look back */
+        if (PAD(DPAD_LEFT) || ax < -deadzone) pad_action(k, KEYCFG_LEFT);
+        if (PAD(DPAD_RIGHT) || ax > deadzone) pad_action(k, KEYCFG_RIGHT);
+        if (rt > 4000 || PAD(DPAD_UP)) pad_action(k, KEYCFG_GAS);
+        if (lt > 4000 || PAD(DPAD_DOWN)) pad_action(k, KEYCFG_BRAKE);
+        if (PAD(RIGHTSHOULDER)) pad_action(k, KEYCFG_HARDTURN);
+        if (PAD(A) || PAD(B)) pad_action(k, KEYCFG_HANDBRAKE);
+        if (PAD(X)) pad_action(k, KEYCFG_BURNOUT);
+        if (PAD(LEFTSTICK)) pad_action(k, KEYCFG_HORN);
+        if (PAD(LEFTSHOULDER)) pad_action(k, KEYCFG_LOOKBACK);
         if (PAD(Y) && P98_KeyMode) k[P98_KeyMode] |= 0x80;
-        if (PAD(START) || PAD(BACK)) k[0x01] |= 0x80;
+        if (PAD(START) || PAD(BACK)) k[DIK_ESCAPE] |= 0x80;
     }
     { static Uint32 old_buttons; static int old_ax, old_rt, old_lt;
       if (buttons != old_buttons || abs(ax - old_ax) > 2048 || abs(rt - old_rt) > 2048 || abs(lt - old_lt) > 2048) {
@@ -298,11 +336,15 @@ static void gamepad_keys(uint8_t *k) {
 #undef PAD
 }
 static uint8_t g_latch[256];
+/* plat_input_key_event — SDL key-down hook: latch the DIK so a tap between two game polls is still seen. */
 void plat_input_key_event(int scancode, int down, int repeat) {
     if (!g_in_on || !down || repeat) return;
     uint8_t d = sc_to_dik((SDL_Scancode)scancode);
     if (d) g_latch[d] = 1;
 }
+/* plat_input_fill_keys — Build the 256 DIK bytes the game sees: autopilot keys, RE_KEYS script, latched taps, current
+   SDL keyboard state by scancode (layout independent), then the gamepad.  Return/numpad Enter
+   are hidden while Cmd/Alt is held (Alt+Enter toggles full screen). */
 void plat_input_fill_keys(uint8_t *k) {
     if (!g_in_on) return;
     if (g_nscr < 0) script_load();
@@ -320,7 +362,7 @@ void plat_input_fill_keys(uint8_t *k) {
        событий в главном потоке (plat_pump_messages / plat_flip) */
     int n = 0; const Uint8 *st = SDL_GetKeyboardState(&n);
     for (int sc = 0; st && sc < n; sc++) if (st[sc]) { uint8_t d = sc_to_dik((SDL_Scancode)sc); if (d) k[d] = 0x80; }
-    if (SDL_GetModState() & (KMOD_GUI | KMOD_ALT)) { k[0x1c] = 0; k[0x9c] = 0; }   /* Cmd/Alt+Enter — полный экран, не игре */
+    if (SDL_GetModState() & (KMOD_GUI | KMOD_ALT)) { k[DIK_RETURN] = 0; k[DIK_NUMPADENTER] = 0; }   /* Cmd/Alt+Enter — полный экран, не игре */
     gamepad_keys(k);
 }
 
@@ -335,6 +377,7 @@ void plat_input_fill_keys(uint8_t *k) {
 #include <sys/syscall.h>
 #endif
 static FILE *g_idbg; static int g_idbg_on = -1;
+/* plat_is_main_thread — 1 on the process's main thread, 0 on another, -1 when unknown (not macOS/Linux). */
 int plat_is_main_thread(void) {   /* 1 — главный поток процесса, 0 — нет, -1 — неизвестно */
 #if defined(__APPLE__)
     return pthread_main_np() ? 1 : 0;
@@ -344,6 +387,8 @@ int plat_is_main_thread(void) {   /* 1 — главный поток проце�
     return -1;
 #endif
 }
+/* idbg — Open driver_input.log once when RE_INPUTDBG is set (macOS ~/Library/Logs, else next to the
+   binary, else the current directory) and write the SDL/platform header line. */
 static FILE *idbg(void) {
     if (g_idbg_on < 0) {
         const char *e = getenv("RE_INPUTDBG"); g_idbg_on = e && *e && *e != '0';
@@ -367,12 +412,14 @@ static FILE *idbg(void) {
     }
     return g_idbg_on ? g_idbg : NULL;
 }
+/* plat_input_dbg — printf-style line to driver_input.log with time and frame number (no-op when disabled). */
 void plat_input_dbg(const char *fmt, ...) {
     FILE *f = idbg(); if (!f) return;
     va_list a; va_start(a, fmt);
     fprintf(f, "[%6u ms, кадр %d] ", SDL_GetTicks(), plat_frame_no()); vfprintf(f, fmt, a); fputc('\n', f); fflush(f);
     va_end(a);
 }
+/* plat_input_dbg_event — Log one SDL event to driver_input.log (keys, window, controller devices/buttons, mouse buttons). */
 void plat_input_dbg_event(const void *ev) {
     const SDL_Event *e = (const SDL_Event *)ev;
     if (!idbg()) return;
@@ -403,6 +450,7 @@ void plat_input_dbg_event(const void *ev) {
     default: break;
     }
 }
+/* dbg_keys — Log the set of pressed DIK codes whenever it changes. */
 static void dbg_keys(const uint8_t *k) {   /* набор DIK, видимый игре, — при каждом изменении */
     if (!idbg()) return;
     static uint8_t prev[256];

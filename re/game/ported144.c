@@ -1,3 +1,8 @@
+/* ported144.c — light flare sprite with a motion trail (English overview; detailed Russian notes follow).
+   P144_FlagFx (004b588e) draws one light (car lamp, cop flare ...) as a rotated textured quad whose size and
+   brightness depend on distance and on how directly the light faces the camera, colours from the 14-entry
+   flare table .data 00553870 (p111_data.h).  At night it also draws a streak from where the light was on
+   screen two frames ago (per-lamp screen position history), which gives the light trails. */
 /* v1.89: ported144 — см. ported144.h.
    004b588e — объект o (+0 x, +4 y, +8 z, +0x10 точка для 004cc784, +0x50/+0x54 int16 машина/фонарь, +0x64 uint16 тип (& 0x7f)
      и флаг 0x80, +0x68 флаги, +0x6c/+0x6e направление). При 50 ≤ z < 01270c44: отклонения a/b направления на камеру от
@@ -50,6 +55,23 @@
 #include <math.h>
 #include <string.h>
 
+/* Light object record o (camera-space position, built by 004aaf3a for objects with flag 0x20000). */
+#define LO_X      0x00    /* float camera-space x, y, z */
+#define LO_Y      0x04
+#define LO_Z      0x08
+#define LO_EMIT   0x10    /* 3 dwords passed to PushEntry_004CC784 (reflection queue; presumably the world position) */
+#define LO_CAR    0x50    /* int16 car index (row of P143_LampHist, 0x140 bytes = 8 lamps) */
+#define LO_LAMP   0x54    /* int16 lamp index, -1 = no trail */
+#define LO_TYPE   0x64    /* uint16: & 0x7f flare type (row of 00553870), 0x80 = directional (fades off-axis) */
+#define LO_FLAGS  0x68    /* 0xe00000 = has a trail, 0x800000 = trail history per car (P143_LampHist) */
+#define LO_DIR_V  0x6c    /* uint16 facing angle compared with the vertical angle to the camera */
+#define LO_DIR_H  0x6e    /* uint16 facing angle compared with the horizontal angle to the camera */
+/* Trail history record (0x28 bytes): 4 x {int32 sx, int32 sy} ring indexed by frame & 3, +0x20 int16 frame. */
+#define HIST_FRAME 0x20
+/* Flare table row (7 dwords): [0..2] int r, g, b; [3] float near half-size; [4] float far/base half-size;
+   [5] float minimum brightness; [6] flags: 1 = cosine falloff, 2 = blue uses the dimmer factor,
+   4 = extra fade at wide horizontal angles, 8 = short (15000) fade distance when P60_Var1373C0 == 0.
+   TODO(RE): names of [3]/[4] inferred from the interpolation only. */
 #ifndef RE_HOOK_BUILD
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P144_Hist0")
@@ -103,87 +125,100 @@ static void icon_tex(const uint8_t *ic) {
 }
 
 /* ---- 004b588e ---- */
+/* P144_FlagFx — Game.exe 004b588e, cdecl.  Draws the flare of light object o (layout above) if its depth z is
+   in [P95_Near, P62_I270C44).
+   off_v / off_h: absolute angle (4096 = 360) between the light's facing (+0x6c / +0x6e) and the direction to
+   the camera, vertically and horizontally.  Non-directional lights: base size, full brightness.
+   Directional lights: invisible from behind (off_v >= 0x400 or off_h >= 0x496); beyond z 10240 the size is
+   the near size and brightness falls linearly to 0 at 45000 (or 15000); closer, brightness and size grow as
+   the light points at the camera (cube of the cosines, or linearly in off_v + off_h); rot spins the sprite
+   with the angles and depth.  When P26_FxA (rain) and night: also queues a wet-road reflection
+   (PushEntry_004CC784, drawn by P116_Reflections).  Sprite: CARLYT with depth bias -200, or COPFLARE with -2500
+   for cop types 9..12.  Trail (night, flag 0xe00000, not in the mirror, lamp != -1): if the history was
+   updated last frame and the camera did not cut, a quad from the current centre to the centre two frames
+   ago, width 0.35 * half_px, end colour / 4, drawn when the movement is 5..199 px; otherwise the history is
+   reset to the current centre.  Native deviations: see the Russian notes above. */
 void P144_FlagFx(const uint8_t *o) {
-  float z = rdf(o + 8);
+  float z = rdf(o + LO_Z);
   if (!(P95_Near <= z) || !(z < (float)P62_I270C44)) return;
-  int32_t iz = fist(z), iy = fist(rdf(o + 4));
-  int32_t sa = (int32_t)(((((uint32_t)(int32_t)(int16_t)P59_AngA - (uint32_t)P44_Atan2(iy, iz)) & 0xfffu) - rdu16(o + 0x6c) + 0x800u) & 0xfffu) - 0x800;
-  int32_t a = sa < 0 ? -sa : sa;
-  iz = fist(z); int32_t ix = fist(rdf(o));
-  int32_t sb = (int32_t)(((((uint32_t)P44_Atan2(ix, iz) - (uint32_t)(int32_t)(int16_t)P59_AngB) & 0xfffu) - rdu16(o + 0x6e) + 0x800u) & 0xfffu) - 0x800;
-  int32_t b = sb < 0 ? -sb : sb;
-  uint32_t typ = rdu16(o + 0x64) & 0x7fu;
+  int32_t iz = fist(z), iy = fist(rdf(o + LO_Y));
+  int32_t off_v_s = (int32_t)(((((uint32_t)(int32_t)(int16_t)P59_AngA - (uint32_t)P44_Atan2(iy, iz)) & 0xfffu) - rdu16(o + LO_DIR_V) + 0x800u) & 0xfffu) - 0x800;
+  int32_t off_v = off_v_s < 0 ? -off_v_s : off_v_s;
+  iz = fist(z); int32_t ix = fist(rdf(o + LO_X));
+  int32_t off_h_s = (int32_t)(((((uint32_t)P44_Atan2(ix, iz) - (uint32_t)(int32_t)(int16_t)P59_AngB) & 0xfffu) - rdu16(o + LO_DIR_H) + 0x800u) & 0xfffu) - 0x800;
+  int32_t off_h = off_h_s < 0 ? -off_h_s : off_h_s;
+  uint32_t typ = rdu16(o + LO_TYPE) & 0x7fu;
 #ifndef RE_HOOK_BUILD
   if (typ >= P111_FLARE_N) return;
 #endif
   int32_t t = (int32_t)typ;
-  uint32_t cfl = (uint32_t)cw(t, 6);
-  float h, k, k2 = 0.0f;
-  uint32_t q = 0;
-  if ((rdu16(o + 0x64) & 0x80u) == 0) {
-    h = cf(t, 4); k = 1.0f;
+  uint32_t flare_flags = (uint32_t)cw(t, 6);
+  float half, bright, bright_b = 0.0f;
+  uint32_t rot = 0;
+  if ((rdu16(o + LO_TYPE) & 0x80u) == 0) {
+    half = cf(t, 4); bright = 1.0f;
   } else {
-    if (a >= 0x400 || b >= 0x496) return;
+    if (off_v >= 0x400 || off_h >= 0x496) return;
     if (!((double)z <= 10240.0)) {                                    /* .rdata 005461d0 (double) */
-      if ((uint8_t)P60_Var1373C0 == 0 && (cfl & 8u) != 0) k = (15000.0f - z) * cf(t, 5) * u2f(0x395c4a01u);   /* 0054602c, 005461c4 */
-      else k = (45000.0f - z) * cf(t, 5) * u2f(0x37f15450u);                                                  /* 00546030, 005461c8 */
-      h = cf(t, 3);
-      k2 = u2f(0x3f4ccccdu) * k;                                                                              /* 005461c0 = 0.8 */
+      if ((uint8_t)P60_Var1373C0 == 0 && (flare_flags & 8u) != 0) bright = (15000.0f - z) * cf(t, 5) * u2f(0x395c4a01u);   /* 0054602c, 005461c4 */
+      else bright = (45000.0f - z) * cf(t, 5) * u2f(0x37f15450u);                                                  /* 00546030, 005461c8 */
+      half = cf(t, 3);
+      bright_b = u2f(0x3f4ccccdu) * bright;                                                                              /* 005461c0 = 0.8 */
     } else {
       float zt = z * u2f(0x3dcccccdu);                                                                        /* 005461bc = 0.1 */
-      if (cfl & 1u) {
+      if (flare_flags & 1u) {
         float c08 = u2f(0x3f4ccccdu) * cf(t, 5);
         int32_t i = fist(zt);
-        float f = P43_Sin[0x400 + a] * P43_Sin[0x400 + b] * P43_Sin[0x400 + i];
-        k = f * f * f;
-        h = (cf(t, 4) - cf(t, 3)) * k + cf(t, 3);
-        k2 = (1.0f - c08) * k + c08;
-        k = (1.0f - cf(t, 5)) * k + cf(t, 5);
-        if ((cfl & 4u) != 0 && b > 0x400) {
-          float m = (float)(0x496 - b) / 150.0f;                                                              /* 005461b8 = 150 */
+        float f = P43_Sin[0x400 + off_v] * P43_Sin[0x400 + off_h] * P43_Sin[0x400 + i];
+        bright = f * f * f;
+        half = (cf(t, 4) - cf(t, 3)) * bright + cf(t, 3);
+        bright_b = (1.0f - c08) * bright + c08;
+        bright = (1.0f - cf(t, 5)) * bright + cf(t, 5);
+        if ((flare_flags & 4u) != 0 && off_h > 0x400) {
+          float m = (float)(0x496 - off_h) / 150.0f;                                                              /* 005461b8 = 150 */
           m = m * m * m;
-          k *= m; k2 *= m; h *= m;
+          bright *= m; bright_b *= m; half *= m;
         }
       } else {
-        float s = (float)(a + b);
+        float s = (float)(off_v + off_h);
         if (s > 1024.0f) s = 1024.0f;                                                                         /* 00546160 */
-        h = (cf(t, 4) - cf(t, 3)) * s * (1.0f / 1024.0f) + cf(t, 3);                                         /* 005461b4 */
-        k = (1.0f - cf(t, 5)) * s * (1.0f / 1024.0f) + cf(t, 5);
+        half = (cf(t, 4) - cf(t, 3)) * s * (1.0f / 1024.0f) + cf(t, 3);                                         /* 005461b4 */
+        bright = (1.0f - cf(t, 5)) * s * (1.0f / 1024.0f) + cf(t, 5);
       }
     }
-    q = (uint32_t)(sa + sb + (fist(z) >> 4));
+    rot = (uint32_t)(off_v_s + off_h_s + (fist(z) >> 4));
   }
   if (P26_FxA != 0 && P14_00b87e84 != 0) {
-    uint8_t br = (uint8_t)ftol(k * 255.0f);                                                                   /* 00546064 */
-    PushEntry_004CC784((const uint32_t *)(o + 0x10), (uint8_t)(typ == 5 ? 9 : typ), br);
+    uint8_t br = (uint8_t)ftol(bright * 255.0f);                                                                   /* 00546064 */
+    PushEntry_004CC784((const uint32_t *)(o + LO_EMIT), (uint8_t)(typ == 5 ? 9 : typ), br);
   }
   float oow = RE_OOW((int32_t)lrintf(z));
-  float sc = P43_ScaleA * oow;
-  float hs = h * sc;                                                  /* [ebp−0x198] — ширина следа */
-  float nh = -h;
-  q = (q * 2u) & 0xfffu;
-  float sn = P43_Sin[q], cs = P43_Sin[(q + 0x400u) & 0xfffu];
-  float f1 = nh * cs - h * sn, f2 = h * cs + nh * sn;
-  float px = rdf(o), py = rdf(o + 4);
+  float scale = P43_ScaleA * oow;
+  float half_px = half * scale;                                                  /* [ebp−0x198] — ширина следа */
+  float neg_half = -half;
+  rot = (rot * 2u) & 0xfffu;
+  float sn = P43_Sin[rot], cs = P43_Sin[(rot + 0x400u) & 0xfffu];
+  float f1 = neg_half * cs - half * sn, f2 = half * cs + neg_half * sn;
+  float px = rdf(o + LO_X), py = rdf(o + LO_Y);
   float x0 = f1 + px, x1 = f2 + px, x2 = -f1 + px, x3 = -f2 + px;
   float y0 = f2 + py, y1 = -f1 + py, y2 = -f2 + py, y3 = f1 + py;
   if (P84_Mirror != 0) { x0 = -x0; x1 = -x1; x2 = -x2; x3 = -x3; }
   p85_rv v0, v1, v2, v3;
   memset(&v0, 0, sizeof v0); memset(&v1, 0, sizeof v1); memset(&v2, 0, sizeof v2); memset(&v3, 0, sizeof v3);
-  v0.x = (x0 * sc + P43_OffX) - P43_Half; v0.y = (y0 * sc + P43_OffY) - P43_Half;
-  v1.x = (x1 * sc + P43_OffX) - P43_Half; v1.y = (y1 * sc + P43_OffY) - P43_Half;
-  v2.x = (x2 * sc + P43_OffX) - P43_Half; v2.y = (y2 * sc + P43_OffY) - P43_Half;
-  v3.x = (x3 * sc + P43_OffX) - P43_Half; v3.y = (y3 * sc + P43_OffY) - P43_Half;
-  float cr = k * (float)cw(t, 0), cg = k * (float)cw(t, 1);
-  float cb = ((cfl & 2u) ? k2 : k) * (float)cw(t, 2);
+  v0.x = (x0 * scale + P43_OffX) - P43_Half; v0.y = (y0 * scale + P43_OffY) - P43_Half;
+  v1.x = (x1 * scale + P43_OffX) - P43_Half; v1.y = (y1 * scale + P43_OffY) - P43_Half;
+  v2.x = (x2 * scale + P43_OffX) - P43_Half; v2.y = (y2 * scale + P43_OffY) - P43_Half;
+  v3.x = (x3 * scale + P43_OffX) - P43_Half; v3.y = (y3 * scale + P43_OffY) - P43_Half;
+  float cr = bright * (float)cw(t, 0), cg = bright * (float)cw(t, 1);
+  float cb = ((flare_flags & 2u) ? bright_b : bright) * (float)cw(t, 2);
   v0.r = v1.r = v2.r = v3.r = cr;
   v0.g = v1.g = v2.g = v3.g = cg;
   v0.b = v1.b = v2.b = v3.b = cb;
   v0.oow = v1.oow = v2.oow = v3.oow = oow;
-  uint32_t icn; int32_t bias;
-  if (P111_CopFlare == 0 || typ < 9 || typ > 12) { icn = (uint32_t)P96_ObjBOn; bias = -200; }   /* 0xff38 */
-  else { icn = P111_CopFlare; bias = -2500; }                                                   /* 0xf63c */
-  const uint8_t *ic = (const uint8_t *)re_ptr(icn);
+  uint32_t icon_ref; int32_t bias;
+  if (P111_CopFlare == 0 || typ < 9 || typ > 12) { icon_ref = (uint32_t)P96_ObjBOn; bias = -200; }   /* 0xff38 */
+  else { icon_ref = P111_CopFlare; bias = -2500; }                                                   /* 0xf63c */
+  const uint8_t *ic = (const uint8_t *)re_ptr(icon_ref);
 #ifndef RE_HOOK_BUILD
   if (ic == NULL) return;
 #endif
@@ -196,31 +231,31 @@ void P144_FlagFx(const uint8_t *o) {
   raster(&v0, &v1, &v2);
   raster(&v2, &v3, &v0);
   depth_bias(0);
-  uint32_t ofl = rdu32(o + 0x68);
+  uint32_t ofl = rdu32(o + LO_FLAGS);
   if (P14_00b87e84 == 0 || (ofl & 0xe00000u) == 0 || P84_Mirror != 0) return;
-  int32_t car = rd16(o + 0x50), lamp = rd16(o + 0x54);
+  int32_t car = rd16(o + LO_CAR), lamp = rd16(o + LO_LAMP);
   if (lamp == -1) return;
-  uint8_t *hr;
+  uint8_t *hist;
   if (ofl & 0x800000u) {
 #ifndef RE_HOOK_BUILD
     if (car < 0 || car >= 0x42 || lamp < 0 || lamp >= 8) return;
 #endif
-    hr = (uint8_t *)P143_LampHist + car * 0x140 + lamp * 0x28;
+    hist = (uint8_t *)P143_LampHist + car * 0x140 + lamp * 0x28;
   } else {
 #ifndef RE_HOOK_BUILD
     if (lamp != 0) return;
 #endif
-    hr = (uint8_t *)P144_Hist0 + lamp * 0x28;
+    hist = (uint8_t *)P144_Hist0 + lamp * 0x28;
   }
   float ax0 = v0.x, ay0 = v0.y, ax2 = v2.x, ay2 = v2.y;
   int32_t cur = P67_Cur;
-  if (rd16(hr + 0x20) == (int32_t)((uint32_t)cur & 0xffffu) - 1 && P59_Mode1137324 == P52_ResetB && P99_CamEnd == 0) {
-    int32_t qx = rd16(hr + ((uint32_t)(cur - 2) & 3u) * 8), qy = rd16(hr + ((uint32_t)(cur - 2) & 3u) * 8 + 4);
+  if (rd16(hist + HIST_FRAME) == (int32_t)((uint32_t)cur & 0xffffu) - 1 && P59_Mode1137324 == P52_ResetB && P99_CamEnd == 0) {
+    int32_t qx = rd16(hist + ((uint32_t)(cur - 2) & 3u) * 8), qy = rd16(hist + ((uint32_t)(cur - 2) & 3u) * 8 + 4);
     int32_t sx = (int16_t)ftol((ax0 + ax2) * 0.5f), sy = (int16_t)ftol((ay0 + ay2) * 0.5f);   /* 00546068 = 0.5 */
-    wr16(hr + 0x20, cur);
-    wr32(hr + ((uint32_t)cur & 3u) * 8, sx);
-    wr32(hr + ((uint32_t)cur & 3u) * 8 + 4, sy);
-    int32_t w = ftol(hs * u2f(0x3eb33333u));                                                     /* 005461b0 = 0.35 */
+    wr16(hist + HIST_FRAME, cur);
+    wr32(hist + ((uint32_t)cur & 3u) * 8, sx);
+    wr32(hist + ((uint32_t)cur & 3u) * 8 + 4, sy);
+    int32_t w = ftol(half_px * u2f(0x3eb33333u));                                                     /* 005461b0 = 0.35 */
     int32_t ddx = qx - sx, ddy = qy - sy;
     int32_t adx = ddx < 1 ? -ddx : ddx, ady = ddy < 1 ? -ddy : ddy;
     if (adx + ady <= 4 || adx + ady >= 200 || w < 1) return;
@@ -250,9 +285,9 @@ void P144_FlagFx(const uint8_t *o) {
     depth_bias(0);
   } else {
     for (int32_t i = 0; i < 4; i++) {
-      wr32(hr + i * 8, ftol((ax0 + ax2) * 0.5f));
-      wr32(hr + i * 8 + 4, ftol((ay0 + ay2) * 0.5f));
+      wr32(hist + i * 8, ftol((ax0 + ax2) * 0.5f));
+      wr32(hist + i * 8 + 4, ftol((ay0 + ay2) * 0.5f));
     }
-    wr16(hr + 0x20, cur);
+    wr16(hist + HIST_FRAME, cur);
   }
 }

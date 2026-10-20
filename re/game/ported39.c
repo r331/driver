@@ -1,3 +1,5 @@
+/* DirectDraw surfaces: Lock/Unlock, pixel format, Present, front/back buffer creation
+   (through the platform layer plat_dd_*). */
 /* Поверхности DirectDraw: Lock/Unlock, формат пикселей, Present — восстановлено из Game.exe. */
 #include "ported39.h"
 #include "noop.h"
@@ -22,6 +24,35 @@ uint8_t P39_Dummy[64];
 
 #define DDERR_SURFACELOST_HR ((int32_t)0x887601C2)
 
+/* DirectDraw structures are passed to the platform layer as plain uint32_t arrays;
+   indices below are DWORD indices into them (DirectX 6 ddraw.h layout). */
+#define DDSD_SIZE        0x7c   /* sizeof(DDSURFACEDESC2) */
+#define DDSD_I_SIZE      0      /* dwSize */
+#define DDSD_I_FLAGS     1      /* dwFlags */
+#define DDSD_I_HEIGHT    2      /* dwHeight */
+#define DDSD_I_WIDTH     3      /* dwWidth */
+#define DDSD_I_PITCH     4      /* lPitch */
+#define DDSD_I_SURFACE   9      /* lpSurface */
+#define DDSD_I_CAPS      26     /* ddsCaps.dwCaps */
+#define DDSD_CAPS_F      1      /* DDSD_CAPS */
+#define DDSD_CAPS_HW_F   7      /* DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH */
+#define DDSCAPS_PRIMARY  0x200  /* DDSCAPS_PRIMARYSURFACE */
+#define DDSCAPS_BACK_SYS 0x2840u /* OFFSCREENPLAIN | SYSTEMMEMORY | 3DDEVICE */
+#define DDSCAPS_BACK_VID 0x6040u /* OFFSCREENPLAIN | VIDEOMEMORY | 3DDEVICE */
+#define DDPF_SIZE        0x20   /* sizeof(DDPIXELFORMAT) */
+#define DDPF_I_BITS      3      /* dwRGBBitCount */
+#define DDPF_I_RMASK     4      /* dwRBitMask (then G, B) */
+#define DDPF_I_GMASK     5
+#define DDPF_I_BMASK     6
+#define DDFLIP_WAIT_NOVSYNC 9u  /* DDFLIP_WAIT | DDFLIP_NOVSYNC */
+#define DDFLIP_WAIT_F       1u  /* DDFLIP_WAIT */
+#define DEVINFO_SYSMEM_BACK 0x518 /* P32_DevInfo + 0x518: TODO(RE): unsure — 0 selects a system-memory back buffer */
+
+/* P39_LockSurface — Game.exe 0041eb8c, stdcall (ret 24).  Lock the primary (which = 0) or back (1) surface.
+   a0, a2..a4 are unused stdcall arguments.  Ends the 3D scene first (flushes batches).
+   Out: out->ptr / out->pitch = locked memory and pitch, or a 64-byte dummy buffer with
+   pitch 0 when the lock fails (the call still succeeds); out->one = 1, out->zero = 0.
+   Returns 1, or 0 if the device is not ready or which is invalid.  Sets P39_Locked on success. */
 int32_t P39_LockSurface(int32_t a0, int32_t which, int32_t a2, int32_t a3, int32_t a4, P39_SurfInfo *out) {
   (void)a0; (void)a2; (void)a3; (void)a4;
   if (P22_DevReady == 0) return 0;
@@ -29,7 +60,7 @@ int32_t P39_LockSurface(int32_t a0, int32_t which, int32_t a2, int32_t a3, int32
   P22_EndScene();
   uint32_t desc[31];
   memset(desc, 0, sizeof desc);
-  desc[0] = 0x7c;
+  desc[DDSD_I_SIZE] = DDSD_SIZE;
   int32_t hr;
   if (which == 0) hr = plat_dd_lock(P24_Primary, desc);
   else if (which == 1) hr = plat_dd_lock(P24_Back, desc);
@@ -37,9 +68,9 @@ int32_t P39_LockSurface(int32_t a0, int32_t which, int32_t a2, int32_t a3, int32
   uint32_t ptr; int32_t pitch;
   if (hr == 0) {
     P39_Locked = 1;
-    ptr = desc[9]; pitch = (int32_t)desc[4];
+    ptr = desc[DDSD_I_SURFACE]; pitch = (int32_t)desc[DDSD_I_PITCH];
   } else {
-    ptr = (uint32_t)(uintptr_t)&P39_Dummy; pitch = 0;
+    ptr = (uint32_t)(uintptr_t)&P39_Dummy; pitch = 0;   /* lock failed: point at a scratch buffer */
   }
   out->ptr = ptr;
   out->pitch = pitch;
@@ -48,6 +79,8 @@ int32_t P39_LockSurface(int32_t a0, int32_t which, int32_t a2, int32_t a3, int32
   return 1;
 }
 
+/* P39_UnlockSurface — Game.exe 0041ec82, stdcall (ret 8).  Unlock the surface locked by P39_LockSurface (if any) and begin the 3D scene again.
+   Returns 1, or 0 if the device is not ready or which is invalid. */
 int32_t P39_UnlockSurface(int32_t a0, int32_t which) {
   (void)a0;
   if (P22_DevReady == 0) return 0;
@@ -61,11 +94,14 @@ int32_t P39_UnlockSurface(int32_t a0, int32_t which) {
   return 1;
 }
 
+/* P39_GetSurfaceFormat — Game.exe 0041d3ed, cdecl.  Lock surface `which` and fill out->bpp and per-channel loss/shift (from the RGB bit masks).
+   On a pixel-format error unlocks and returns 0.  On success the surface stays LOCKED
+   (the caller unlocks it).  Returns 1 on success. */
 int32_t P39_GetSurfaceFormat(int32_t which, P39_SurfInfo *out) {
   if (P39_LockSurface(0, which, 0, 0, 0, out) != 1) return 0;
   uint32_t pf[8];
   memset(pf, 0, sizeof pf);
-  pf[0] = 0x20;
+  pf[0] = DDPF_SIZE;
   int32_t hr;
   if (which == 0) hr = plat_dd_get_pixel_format(P24_Primary, pf);
   else if (which == 1) hr = plat_dd_get_pixel_format(P24_Back, pf);
@@ -74,22 +110,25 @@ int32_t P39_GetSurfaceFormat(int32_t which, P39_SurfInfo *out) {
     P39_UnlockSurface(0, which);
     return 0;
   }
-  out->bpp = (uint8_t)pf[3];
-  out->r_loss = (uint8_t)MaskShift_00421C1D(pf[4]);
-  out->r_shift = (uint8_t)CountTrailingZeros00421C72(pf[4]);
-  out->g_loss = (uint8_t)MaskShift_00421C1D(pf[5]);
-  out->g_shift = (uint8_t)CountTrailingZeros00421C72(pf[5]);
-  out->b_loss = (uint8_t)MaskShift_00421C1D(pf[6]);
-  out->b_shift = (uint8_t)CountTrailingZeros00421C72(pf[6]);
+  out->bpp = (uint8_t)pf[DDPF_I_BITS];
+  out->r_loss = (uint8_t)MaskShift_00421C1D(pf[DDPF_I_RMASK]);
+  out->r_shift = (uint8_t)CountTrailingZeros00421C72(pf[DDPF_I_RMASK]);
+  out->g_loss = (uint8_t)MaskShift_00421C1D(pf[DDPF_I_GMASK]);
+  out->g_shift = (uint8_t)CountTrailingZeros00421C72(pf[DDPF_I_GMASK]);
+  out->b_loss = (uint8_t)MaskShift_00421C1D(pf[DDPF_I_BMASK]);
+  out->b_shift = (uint8_t)CountTrailingZeros00421C72(pf[DDPF_I_BMASK]);
   return 1;
 }
 
+/* P39_Present — Game.exe 0041dec8, stdcall (ret 4).  Show the finished frame.  Windowed (P24_RestoreMode == 0): blit the back buffer into the
+   window's client area, centred when the window is larger than the mode; full screen: Flip,
+   without waiting for vsync when wait == 0.  A lost surface triggers P24_RestoreSurfaces. */
 void P39_Present(int32_t wait) {
   if (P22_DevReady == 0) return;
   P33_FlushBatches();
   P22_EndScene();
   int32_t hr;
-  if (P24_RestoreMode == 0) {
+  if (P24_RestoreMode == 0) {             /* windowed: blit the back buffer, centred, into the client area */
     int32_t rc[4], dst[4];
     plat_window_client_rect(P24_Hwnd, rc);
     int32_t right = rc[2], bottom = rc[3];
@@ -109,13 +148,14 @@ void P39_Present(int32_t wait) {
     plat_dd_clipper_set_hwnd(P31_DDObj4, P24_Hwnd);
     hr = plat_dd_blt_rect(P24_Primary, dst, P24_Back, rc);
     if (hr != 0) P24_RestoreSurfaces();
-  } else {
-    hr = plat_dd_flip(P24_Primary, wait == 0 ? 9u : 1u);
+  } else {                                /* full screen: page flip */
+    hr = plat_dd_flip(P24_Primary, wait == 0 ? DDFLIP_WAIT_NOVSYNC : DDFLIP_WAIT_F);
     if (hr == DDERR_SURFACELOST_HR) P24_RestoreSurfaces();
   }
   P22_BeginScene();
 }
 
+/* P39_QueryDD4 — Game.exe 00420c5a, cdecl.  QueryInterface for IDirectDraw4 on dd.  Returns NULL on failure. */
 void *P39_QueryDD4(void *dd) {
   NoopFn0042243f();
   if (dd == NULL) return NULL;
@@ -124,6 +164,7 @@ void *P39_QueryDD4(void *dd) {
   return r;
 }
 
+/* P39_QueryD3D — Game.exe 00420cac, cdecl.  QueryInterface for IDirect3D3 on dd.  Returns NULL on failure. */
 void *P39_QueryD3D(void *dd) {
   NoopFn0042243f();
   if (dd == NULL) return NULL;
@@ -132,17 +173,20 @@ void *P39_QueryD3D(void *dd) {
   return r;
 }
 
+/* P39_CreateFrontBack — Game.exe 00421149, cdecl.  Create the primary surface, a w x h 3D-capable back buffer (system or video memory, chosen
+   by P32_DevInfo + 0x518) and a clipper attached to the primary.  Returns 1 on success, 0 if any
+   step fails (already created objects are kept). */
 int32_t P39_CreateFrontBack(int32_t w, int32_t h) {
   uint32_t d[31];
   memset(d, 0, sizeof d);
-  d[0] = 0x7c; d[1] = 1; d[26] = 0x200;
+  d[DDSD_I_SIZE] = DDSD_SIZE; d[DDSD_I_FLAGS] = DDSD_CAPS_F; d[DDSD_I_CAPS] = DDSCAPS_PRIMARY;
   P24_Primary = P24_CreateSurface(P24_DD, d);
   if (P24_Primary == NULL) return 0;
   memset(d, 0, sizeof d);
-  d[0] = 0x7c; d[1] = 7; d[3] = (uint32_t)w; d[2] = (uint32_t)h;
+  d[DDSD_I_SIZE] = DDSD_SIZE; d[DDSD_I_FLAGS] = DDSD_CAPS_HW_F; d[DDSD_I_WIDTH] = (uint32_t)w; d[DDSD_I_HEIGHT] = (uint32_t)h;
   int32_t flag;
-  memcpy(&flag, P32_DevInfo + 0x518, 4);
-  d[26] = flag == 0 ? 0x2840u : 0x6040u;
+  memcpy(&flag, P32_DevInfo + DEVINFO_SYSMEM_BACK, 4);
+  d[DDSD_I_CAPS] = flag == 0 ? DDSCAPS_BACK_SYS : DDSCAPS_BACK_VID;
   P24_Back = P24_CreateSurface(P24_DD, d);
   if (P24_Back == NULL) return 0;
   P31_DDObj4 = P24_CreateClipper(P24_DD);

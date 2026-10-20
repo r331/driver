@@ -1,3 +1,6 @@
+/* Assorted routines: camera / render defaults, heading steering, distance tests, triangle queue,
+   map rows, model names, police (cop AI) slot allocation, BMP page upload, high scores, speedo
+   text, map header and particle init. */
 #include "ported62.h"
 #include <stdio.h>
 #include <string.h>
@@ -429,13 +432,21 @@ p62_hs3_t P62_Hs6;
 #pragma pop_macro("P62_Hs6")
 #endif
 
+#include "carfields.h"
+#include "fixmath.h"
+
+/* rd32 — Unaligned int32 read at p + o. */
 static int32_t  rd32(const uint8_t *p, uint32_t o) { int32_t v; memcpy(&v, p + o, 4); return v; }
+/* wr32 — Unaligned int32 write at p + o. */
 static void     wr32(uint8_t *p, uint32_t o, int32_t v) { memcpy(p + o, &v, 4); }
+/* wr16 — Unaligned uint16 write at p + o. */
 static void     wr16(uint8_t *p, uint32_t o, uint16_t v) { memcpy(p + o, &v, 2); }
+/* fbits — Float from its bit pattern. */
 static float    fbits(uint32_t b) { float f; memcpy(&f, &b, 4); return f; }
 #define SIN(i) ((int32_t)P59_Sin[(i) & 0xfff])
 
-/* 0049c850 */
+/* P62_InitCamDefaults — Game.exe 0049c850, cdecl.  Default chase-camera parameters: angles 0x800 / -0x400, offsets (-45, -256, -160), distances
+   1280 / 1280, 10.0, 42000 for 0113738c, and clears the camera mode bytes. */
 void P62_InitCamDefaults(void) {
   P61_V20 = 0;
   P61_V1C = 0x800;
@@ -455,7 +466,9 @@ void P62_InitCamDefaults(void) {
   P62_I137390 = 0;
 }
 
-/* 00425a50 */
+/* P62_InitRenderConsts — Game.exe 00425a50, cdecl.  Default render constants: projection scale 1152, ambient 0.5, cell scale 1/3000, screen centre
+   (W/2, H/2), far distance 42000 (unless a config is active), 54321.0 for 0125f404, 0xdbba
+   for 01270c44 and render state flags. */
 void P62_InitRenderConsts(void) {
   P43_ScaleA = fbits(0x44900000);
   P19_Out68 = fbits(0x3f000000);
@@ -475,21 +488,24 @@ void P62_InitRenderConsts(void) {
 }
 
 /* 0049431d: машина *id; курс +0x100 (12 бит); +0xfc — желаемый доворот (±0x200 или половина разности) */
+/* P62_HeadingDelta — Game.exe 0049431d, cdecl.  Steer car *id towards heading `want`: CAR_STEER = half the difference when within 0x80
+   (~11 deg), else +-0x200.  Returns |difference| (0..2048). */
 int32_t P62_HeadingDelta(const uint8_t *id, uint32_t want) {
   uint8_t *car = P59_CarsTab + (uint32_t)*id * 0x148;
-  uint32_t cur = (uint32_t)rd32(car, 0x100) & 0xfff;
-  int32_t d = (int32_t)(((want - cur) + 0x800) & 0xfff) - 0x800;
+  uint32_t cur = (uint32_t)rd32(car, CAR_HEADING) & ANG_MASK;
+  int32_t d = (int32_t)(((want - cur) + ANG_180) & ANG_MASK) - ANG_180;   /* signed difference in -180..180 deg */
   int32_t out = 0;
   if (cur != want) {
     int32_t a = d < 0 ? -d : d;
     if (a < 0x80) out = d / 2;
     else out = d < 0 ? -0x200 : 0x200;
   }
-  wr32(car, 0xfc, out);
+  wr32(car, CAR_STEER, out);
   return d < 0 ? -d : d;
 }
 
-/* 00492398 */
+/* P62_FarFromPlayer — Game.exe 00492398, cdecl.  1 if the car of the traffic record with byte 6 == id + 1 is farther than `dist` from the player
+   (squared distance, 32-bit wrap as the original); 0 if dist is 0 or the car is not found. */
 int32_t P62_FarFromPlayer(int32_t id, int32_t dist) {
   if (dist == 0) return 0;
   const uint8_t *e = (const uint8_t *)TrafficRecs;
@@ -497,12 +513,13 @@ int32_t P62_FarFromPlayer(int32_t id, int32_t dist) {
   for (; i < 0x40 && (uint32_t)e[6] != (uint32_t)id + 1u; e += 0x54) i++;
   if (i >= 0x40) return 0;
   const uint8_t *car = P59_CarsTab + (uint32_t)i * 0x148;
-  uint32_t dx = (uint32_t)rd32(car, 200) - (uint32_t)P59_PosX;
-  uint32_t dz = (uint32_t)rd32(car, 0xd0) - (uint32_t)P59_PosZ;
+  uint32_t dx = (uint32_t)rd32(car, CAR_POS_X) - (uint32_t)P59_PosX;
+  uint32_t dz = (uint32_t)rd32(car, CAR_POS_Z) - (uint32_t)P59_PosZ;
   return (int32_t)((uint32_t)dist * (uint32_t)dist) < (int32_t)(dx * dx + dz * dz);
 }
 
 /* 0042d2c9: запись 0x2e слов = тег + 3 вершины по 15 слов, очередь растёт на 0xb8 байт */
+/* P62_QueueTri — Game.exe 0042d2c9, cdecl.  Append a triangle {tag, 3 vertices of 15 words} (0xb8 bytes) to the queue at 0115a13c. */
 void P62_QueueTri(const uint32_t *a, const uint32_t *b, const uint32_t *c, uint32_t tag) {
   uint8_t *q = G0115A13C;
   memcpy(q + 4, a, 15 * 4);
@@ -514,6 +531,8 @@ void P62_QueueTri(const uint32_t *a, const uint32_t *b, const uint32_t *c, uint3
 }
 
 /* 0051ac05: смещение строки в +8+idx*4 (−1 — пустая), дальше пары (счёт, значение) */
+/* P62_MapRow — Game.exe 0051ac05, cdecl.  Decode run-length row idx of map table P54_MapBPtr (offset table at +8, -1 = empty) into
+   P62_MapN^2 int32 values of dst (-1 for an empty row).  Returns 1 if the row exists. */
 int32_t P62_MapRow(int32_t idx, int32_t *dst) {
   const uint8_t *data = (const uint8_t *)P54_MapBPtr;
   int32_t off = rd32(data, 8 + (uint32_t)idx * 4);
@@ -533,6 +552,8 @@ int32_t P62_MapRow(int32_t idx, int32_t *dst) {
 }
 
 /* 004a58ad: таблица «имя\0 + u16» подряд, P62_ModelCount записей */
+/* P62_ModelLookup — Game.exe 004a58ad, cdecl.  Find model `name` in the name table ("name\0" + uint16 id, P62_ModelCount entries) and store its
+   id in *out.  Returns 1, or 0 with "Unkown model" reported as a script error (unless P62_NoErr). */
 int32_t P62_ModelLookup(const char *name, uint16_t *out) {
   const char *p = P62_ModelNames;
   int32_t n = P62_ModelCount;
@@ -552,7 +573,8 @@ int32_t P62_ModelLookup(const char *name, uint16_t *out) {
   return 1;
 }
 
-/* 004a6749 */
+/* P62_FindFreeTrafficSlot — Game.exe 004a6749 (same as P14_Fn004A6749): allocate one of the 8 cop-AI slots (0x112da00,
+   0xcd8 bytes; free when +0xcb4 == 0), clear it and store its index; returns index + 1 or -1. */
 int32_t P62_FindFreeTrafficSlot(void) {
   uint8_t *base = (uint8_t *)P12_0112da00;
   for (int32_t i = 1; i <= 8; i++) {
@@ -566,7 +588,9 @@ int32_t P62_FindFreeTrafficSlot(void) {
   return -1;
 }
 
-/* 0049199a */
+/* P62_SpawnTrafficCar — Game.exe 0049199a, cdecl.  Make traffic car n a police car if fewer than P62_Max are active: allocate a cop-AI slot
+   (record byte 5 = slot + 1), init it for the car (P51_InitCarSlot) and count it in 0112b284.
+   Native: passes the car as a Game.exe address (re_addr) so the slot can reach it. */
 void P62_SpawnTrafficCar(int32_t n) {
   if (G0112B284 < P62_Max) {
     uint8_t *rec = (uint8_t *)TrafficRecs + (uint32_t)n * 0x54;
@@ -590,7 +614,8 @@ void P62_SpawnTrafficCar(int32_t n) {
   }
 }
 
-/* 005047ab */
+/* P62_DownloadPage — Game.exe 005047ab, cdecl.  Copy a w x h rectangle of a 16-bit bitmap (stride in pixels) into a 256x256 page buffer and
+   upload it as texture h.  Native: rejects sizes over 256. */
 void P62_DownloadPage(uint32_t h, const uint16_t *bmp, int32_t x, int32_t y, int32_t w, int32_t hh, int32_t stride) {
   if (bmp == NULL) {
     DebugLog("DownloadPageFromBmp: Bitmap not found, operation aborted.");
@@ -608,8 +633,10 @@ void P62_DownloadPage(uint32_t h, const uint16_t *bmp, int32_t x, int32_t y, int
 }
 
 /* 0051cb98: заголовок «ERCS» (0x53435245), версия 3, затем шесть таблиц */
+/* P62_SaveScores — Game.exe 0051cb98, cdecl.  Write the high-score file: header "ERCS" version 3, then six tables of 0x2c-byte entries
+   (40, 40, 20, 20, 20, 4).  Returns 1. */
 int32_t P62_SaveScores(void *file) {
-  uint32_t hdr[4] = { 0x53435245, 0, 0, 3 };
+  uint32_t hdr[4] = { 0x53435245, 0, 0, 3 };   /* "ERCS", version 3 */
   g_fwrite(hdr, 0x10, 1, file);
   g_fwrite(P62_Hs1, 0x2c, 0x28, file);
   g_fwrite(P62_Hs2, 0x2c, 0x28, file);
@@ -620,13 +647,15 @@ int32_t P62_SaveScores(void *file) {
   return 1;
 }
 
-/* 00413df3 */
+/* P62_MenuBusy — Same as MenuAnyFlag00413DF3: 1 if any of the option words 00bdfa44..58 is set (00bdfa50 only
+   outside menu mode 7). */
 int32_t P62_MenuBusy(void) {
   if (P62_BusyA == 0 && P62_BusyB == 0 && P62_BusyC == 0 && (P62_BusyD == 0 || P62_Menu1271060 == 7) && P62_BusyE == 0) return 0;
   return 1;
 }
 
-/* 0051cdec */
+/* P62_ScoreTable — Game.exe 0051cdec, cdecl.  High score of the current menu entry (01271060 / 01271064), alt = the second table of mode 0xb
+   (as mode 0xc); returns 0 when options are active or no entry.  *idx = table index or -1. */
 int32_t P62_ScoreTable(int32_t *idx, int32_t alt) {
   int32_t r = 0;
   if (P62_MenuBusy() == 0) {
@@ -642,6 +671,8 @@ int32_t P62_ScoreTable(int32_t *idx, int32_t alt) {
 }
 
 /* 005025dc: «%d%s» — скорость·3/10 и единица; после 200 мигает яркостью */
+/* P62_SpeedText — Game.exe 005025dc, cdecl.  Draw the speedometer text "<speed * 3 / 10><unit>" at (605, 450) unless the HUD is off; above
+   200 it blinks when P62_Blink is set. */
 void P62_SpeedText(void) {
   if (P62_HudOff1 == 0 && P62_HudOff2 == 0) {
     char buf[32];
@@ -654,11 +685,12 @@ void P62_SpeedText(void) {
   }
 }
 
-/* 004ec336 */
+/* P62_LoadMapHeader — Game.exe 004ec336, cdecl.  Map header lump: width, height (cells) -> world size (1500 units per cell), half sizes and
+   centres; the rest (size - 8 bytes) is read into P62_MapBuf. */
 void P62_LoadMapHeader(void *file, int32_t size) {
   P27_ReadChunked(&P62_MapW, 4, 1, file);
   P27_ReadChunked(&P62_MapH, 4, 1, file);
-  P62_Map1C10 = P62_MapW * 0x5dc;
+  P62_Map1C10 = P62_MapW * 0x5dc;   /* map size in world units (1500 per cell) */
   P62_Map1C24 = P62_MapH * 0x5dc;
   P62_MapC64 = P62_Map1C10 / 2;
   P62_Map2C40 = P62_Map1C24 / 2;
@@ -668,7 +700,7 @@ void P62_LoadMapHeader(void *file, int32_t size) {
   P27_ReadChunked(P62_MapBuf, 1, size - 8, file);
 }
 
-/* 00514c72 */
+/* P62_ParticleSet — Same as SetObjState_00514C72: object state p +4 = kind, +0x24 = a, +0x40 = b, +0xc = flags | 0x80. */
 void P62_ParticleSet(uint8_t *p, int32_t kind, int32_t a, uint32_t flags, int32_t b) {
   wr16(p, 4, (uint16_t)kind);
   wr32(p, 0x24, a);
@@ -676,7 +708,9 @@ void P62_ParticleSet(uint8_t *p, int32_t kind, int32_t a, uint32_t flags, int32_
   wr32(p, 0xc, (int32_t)(flags | 0x80));
 }
 
-/* 00515813 */
+/* P62_ParticleInit — Game.exe 00515813, cdecl.  Initialise object state p for car: heading from 00515cca; normal mode starts state 3, the
+   alternative mode (P62_Alt) sets flag 0x800 and a velocity (sin, -55, cos).
+   TODO(RE): unsure what kind of object this is (debris? hub caps?). */
 void P62_ParticleInit(uint8_t *p, void *car) {
   uint32_t h = P62_Fn515CCA(p, car);
   wr16(p, 0, 1);

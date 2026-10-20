@@ -1,3 +1,9 @@
+/* ported82.c — camera view frustum planes, sphere visibility tests and dynamic lights (English overview).
+   A plane is float[4] {nx, ny, nz, d}; signed distance = n.p - d (world space).  Planes: P82_PlL / PlR (sides),
+   P82_PlT / PlB (top / bottom), P82_PlF = NEAR plane at z = 50 (forward normal), P77_Plane = FAR plane at
+   P11_01270c24 (backward normal).  Note: the Russian notes in ported82.h call PlF "far" and P77_Plane "near";
+   the code shows the opposite.  Sums are done in x87 extended precision (long double) and rounded to float
+   only where the original stored to memory — keep the casts.  All cdecl. */
 #include "ported82.h"
 #include "aspect.h"
 #include <math.h>
@@ -124,6 +130,7 @@ int32_t P82_CellCY;
 typedef long double ld;
 
 /* v' = v*ViewMat (P44_Xform) */
+/* Rotates camera-space (x, y, z) to world orientation with the view matrix (P44_Xform). */
 static void xf(float x, float y, float z, float *o) {
   float v[3] = { x, y, z };
   P44_MatPtr = P44_ViewMat;
@@ -139,6 +146,7 @@ static float plane_d(const float *v, const float *n, int use_y) {
   return (float)a;
 }
 
+/* Sign bit of a float (1 for negative values and -0.0), as the original tests it. */
 static int sgn(float f) { uint32_t u; memcpy(&u, &f, 4); return (int)(u >> 31); }
 
 
@@ -153,6 +161,9 @@ static void side_fov(float *c, float *s, float *hw) {
 }
 
 /* 00427abe */
+/* P82_FrustumSetup2D — Game.exe 00427abe.  Planes for the top-down (map) view: side, near and far planes with
+   ny = 0 (the original leaves y as stack garbage in the transform; 0 here).  The side planes pass through
+   the screen edges x = -/+320 (wider with native Hor+) at depth P43_ScaleA (the projection distance). */
 void P82_FrustumSetup2D(void) {
   float v[3];
   P82_FovXc = P82_FovX;
@@ -176,6 +187,9 @@ void P82_FrustumSetup2D(void) {
 }
 
 /* 00427eea */
+/* P82_FrustumSetup3D — Game.exe 00427eea.  All six planes for the 3-D view: sides through x = -/+320 (Hor+),
+   top/bottom through y = -/+240 at depth P43_ScaleA, near at z = 50, far at P11_01270c24.
+   The plane normals come from the field-of-view sine/cosine pairs P82_FovX/FovY. */
 void P82_FrustumSetup3D(void) {
   float v[3];
   P82_FovXc = P82_FovX;
@@ -207,6 +221,7 @@ void P82_FrustumSetup3D(void) {
 }
 
 /* расстояние до плоскости (n·p − d), расширенная точность */
+/* Signed distance n.p - d in extended precision; use_y = 0 ignores the y components. */
 static ld dist(const float *n, const float *p, int use_y) {
   ld a = (ld)n[2] * (ld)p[2];
   if (use_y) a += (ld)n[1] * (ld)p[1];
@@ -215,6 +230,9 @@ static ld dist(const float *n, const float *p, int use_y) {
 }
 
 /* 00427d5a */
+/* P82_SphereVis2D — Game.exe 00427d5a.  Sphere (p, r) against the 2-D frustum (x/z only).
+   Returns 0 = outside, 1 = visible, 2 = visible and in front of the near plane test (res + 1 as in the
+   original).  P82_Edge = 1 when the sphere crosses a side plane (needs clipping). */
 int32_t P82_SphereVis2D(const float *p, float r) {
   int32_t res = 0;
   float zero = P8_00546024;
@@ -245,6 +263,9 @@ static int touches(ld d, float r) {
 }
 
 /* 004283d9 */
+/* P82_SphereVis3D — Game.exe 004283d9.  Same against all six planes.  Returns 0 = outside, else 1 + (1 when the
+   sphere reaches the near plane).  P82_Edge = 1 when it crosses a side/top/bottom plane, and always when
+   P60_Var1373C0 is set (TODO(RE): meaning of that flag). */
 int32_t P82_SphereVis3D(const float *p, float r) {
   int32_t res = 0;
   P82_Edge = 0;
@@ -277,6 +298,11 @@ int32_t P82_SphereVis3D(const float *p, float r) {
 }
 
 /* 004268ef */
+/* P82_AddLight — Game.exe 004268ef.  Adds a point light (max 20 = 0x14) at world pos with radius and colour
+   (r, g, b scaled by the global light level P14_00d17b18 / 256) when it lies inside the light grid around the
+   camera cell and its sphere is visible — or, when P13_00b31f04 == 1, its reflection through the camera is
+   (TODO(RE): purpose of that second test unsure).  Light record (0x24 bytes at G2_011F40E0): +0 camera-space
+   position, +0xc int radius, +0x10..+0x18 float colour, +0x1c radius^2, +0x20 P8_00546020 / radius^2. */
 void P82_AddLight(const float *pos, int32_t radius, int32_t cr, int32_t cg, int32_t cb) {
   if (G2_011F43B0 == 0x14) return;
   if (!P76_InBox(pos, P82_LightGrid, P82_CellCX, P82_CellCY)) return;

@@ -1,3 +1,6 @@
+/* ported4.c — table-like batch of tiny Game.exe functions: menu entry handlers generated from one
+   template, buffer alloc/free wrappers and one-line state helpers.  Function names carry the Game.exe
+   address; behaviour is exactly the one-liner. */
 #include "ported128.h"
 #include "ported4.h"
 #include "ported79.h"
@@ -699,6 +702,11 @@ int32_t_arr_01134ec0 D_01134ec0;
 #pragma pop_macro("D_01134ec0") /*gvi*/
 #pragma pop_macro("D_01134ec0")
 #endif
+/* MenuSlotHandlerXXXXXXXX — Game.exe at the address in the name (51 instances of one template).
+   Menu entry callback with a phase argument (TODO(RE): unsure which caller passes 0 and 2 —
+   P114_MenuStep passes 0/1 to draw callbacks): phase 0 sets two .data words 0x10 apart (two consecutive
+   16-byte entries of the screen's item table) to 2; phase 2 redraws the screen through its draw
+   routine (P4Call004076E2, ...09CFA, ...1074D, ...11A9D, ...15979 — one per menu screen). */
 void MenuSlotHandler0040737A(int32_t phase) { if (phase == 0) { D_00549f8c = 2; D_00549f9c = 2; } else if (phase == 2) { P4Call004076E2(); } }
 void MenuSlotHandler00407605(int32_t phase) { if (phase == 0) { D_00549fdc = 2; D_00549fec = 2; } else if (phase == 2) { P4Call004076E2(); } }
 void MenuSlotHandler004088AA(int32_t phase) { if (phase == 0) { D_0054a254 = 2; D_0054a264 = 2; } else if (phase == 2) { P4Call00409CFA(); } }
@@ -750,6 +758,8 @@ void MenuSlotHandler0041549C(int32_t phase) { if (phase == 0) { D_0054dc64 = 2; 
 void MenuSlotHandler0041553B(int32_t phase) { if (phase == 0) { D_0054dc84 = 2; D_0054dc94 = 2; } else if (phase == 2) { P4Call00415979(); } }
 void MenuSlotHandler004155F2(int32_t phase) { if (phase == 0) { D_0054dca4 = 2; D_0054dcb4 = 2; } else if (phase == 2) { P4Call00415979(); } }
 void MenuSlotHandler004156AC(int32_t phase) { if (phase == 0) { D_0054dcc4 = 2; D_0054dcd4 = 2; } else if (phase == 2) { P4Call00415979(); } }
+/* MenuSlotHandlerResetXXXXXXXX — the same template for one state word, additionally clearing the
+   slider-screen flag D_005f7e4c (see P114_MenuStep) in both phases. */
 void MenuSlotHandlerReset004091F3(int32_t phase) { if (phase == 0) { D_0054a424 = 2; D_005f7e4c = 0; } else if (phase == 2) { P4Call00409CFA(); D_005f7e4c = 0; } }
 void MenuSlotHandlerReset0040929A(int32_t phase) { if (phase == 0) { D_0054a414 = 2; D_005f7e4c = 0; } else if (phase == 2) { P4Call00409CFA(); D_005f7e4c = 0; } }
 void MenuSlotHandlerReset00409341(int32_t phase) { if (phase == 0) { D_0054a434 = 2; D_005f7e4c = 0; } else if (phase == 2) { P4Call00409CFA(); D_005f7e4c = 0; } }
@@ -757,8 +767,16 @@ void MenuSlotHandlerReset004093E8(int32_t phase) { if (phase == 0) { D_0054a444 
 void MenuSlotHandlerReset0040948F(int32_t phase) { if (phase == 0) { D_0054a454 = 2; D_005f7e4c = 0; } else if (phase == 2) { P4Call00409CFA(); D_005f7e4c = 0; } }
 void MenuSlotHandlerReset0041576B(int32_t phase) { if (phase == 0) { D_0054dce4 = 2; D_005f7e4c = 0; } else if (phase == 2) { P4Call00415979(); D_005f7e4c = 0; } }
 void MenuSlotHandlerReset00415803(int32_t phase) { if (phase == 0) { D_0054dcf4 = 2; D_005f7e4c = 0; } else if (phase == 2) { P4Call00415979(); D_005f7e4c = 0; } }
+/* ResetEffectsState — Game.exe 004a2bf4.  P4Call004A3354, then D_01134ea0 = 0 (called first by
+   P48_ShutdownSystems).  TODO(RE): unsure what the effects state is. */
 void ResetEffectsState(void) { P4Call004A3354(); D_01134ea0 = 0; }
+/* StepIfActive0041A8AB — while a front-end camera move runs (D_005feda0), steps it (P4Call0041A8CD =
+   route stepper, see P118_CamRoute) and advances the route frame D_005fea98. */
 void StepIfActive0041A8AB(void) { if (D_005feda0 != 0) { P4Call0041A8CD(); D_005fea98++; } }
+/* Alloc/FreeMapBuffer300000 — 3 MB work buffer D_00d00230 (map.c line 0x6d1).
+   Alloc/FreeMapBuffer400000 — the 4 MB map arena D_00c98ed0 (native: 5 MB, last MB for event models,
+   arena references are 32-bit offsets, see ported79.h).  FreeBufferD17EC8 / FreeBuffer5FED98 — free and
+   clear the named buffer. */
 void AllocMapBuffer300000(void) { D_00d00230 = DebugMalloc(0x300000, "D:\\Driver\\Game\\map.c", 0x6d1); }
 void FreeMapBuffer300000(void) { if (D_00d00230 != 0) { DebugFree(D_00d00230); D_00d00230 = 0; } }
 void AllocMapBuffer400000(void) {
@@ -773,6 +791,17 @@ void AllocMapBuffer400000(void) {
 void FreeMapBuffer400000(void) { if (D_00c98ed0 != 0) { DebugFree(D_00c98ed0); D_00c98ed0 = 0; } }
 void FreeBufferD17EC8(void) { if (D_00d17ec8 != 0) { DebugFree(D_00d17ec8); D_00d17ec8 = 0; } }
 void FreeBuffer5FED98(void) { if (D_005fed98 != 0) { DebugFree(D_005fed98); D_005fed98 = 0; } }
+/* SetVarD1193C — sets D_00d1193c and calls P4Call004D2D85(v) only when the value changes.
+   CallIf424A02 — P4Call0041D89C(a, b) only in D3D mode (D_00b1c0d4 && D_00b1c0d8 == 1).
+   CallIfD14EE4 — P4Call004CA98D(D_00d14ee0, D_00d14ee4) when D_00d14ee4 != 0 (= P107_CountModel).
+   LoadShort3FromPtr — three int16 of p into D_00b93e48/4c/50.
+   StopTimer4086EA — stops the menu timer slot D_0054a144 (P25_TimerStop) and clears D_005d577c.
+   InitMapState4D3426 — mode 0, allocate the 3 MB buffer, then 0051aa5b and 004ecade (map init).
+   DrainStackC200F — pops the pending car deformation stack D_010de120 and applies P128_CarDeform.
+   FillOnes4EF997 — p[0 .. D_00d00204-1] = 1.
+   ReleaseSlot4A2C5B — frees slot idx of the 100-slot table reset by ResetSlots_004A2B70 (clears its
+     first word, pushes idx back on the free list D_01134ec0).
+   TickTimer4F5D67 — counts D_00c81494 down; at 0 also clears D_00c80ca0. */
 void SetVarD1193C(int32_t v) { if (v != D_00d1193c) { D_00d1193c = v; P4Call004D2D85(v); } }
 void CallIf424A02(int32_t a, int32_t b) { if (D_00b1c0d4 != 0 && D_00b1c0d8 == 1) P4Call0041D89C(a, b); }
 void CallIfD14EE4(void) { if (D_00d14ee4 != 0) P4Call004CA98D(D_00d14ee0, D_00d14ee4); }

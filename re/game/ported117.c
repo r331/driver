@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 /* v1.62, ported117 — см. ported117.h */
+/* ported117.c — tyre skid marks (two ring buffers of 4 wheels x 256 records), the HUD radar, the
+   full-screen map, and the static menu text list.  English summary of ported117.h:
+   a skid record (0x48 bytes) is one quad of a skid strip — two cross-lines 50 units wide through the
+   previous and the current wheel contact point — plus a surface flag that picks the dust/spark effect. */
 #include "ported117.h"
 #include "ported118.h"
 #include "p117_data.h"
@@ -108,6 +112,18 @@ p117_u4_t P117_SkidLastB;
 #endif
 GAME_VAR_DEF(p117_clip_fn, P117_ClipFn, 0x01270d30)
 
+#define SKID_RECS        0x100    /* records per wheel ring */
+#define SKID_REC_SIZE    0x48
+#define SKID_WHEEL_SIZE  0x4800   /* SKID_RECS * SKID_REC_SIZE */
+#define SKID_ON          0x00     /* u8: 1 = record continues a running strip (joined to the previous) */
+#define SKID_STATE       0x02     /* int16: 2 = latest piece of a strip (turned to 1 when the next joins), 0 = single */
+#define SKID_SURFACE     0x04     /* u8: 1 = cell model has flag 0x4000 (P118_SkidFx effect 3), 0 = normal (effect 2) */
+#define SKID_PTS         0x08     /* 4 points x {x, y, z, unused}: prev+side, prev, cur+side, cur */
+#define SKID_HALF_WIDTH  50.0f    /* .rdata 0054609c: strip width across the direction of travel */
+#define SKID_LIFT        20.0f    /* .rdata 00546118: strip drawn 20 units above the contact point (y up = -y) */
+#define MDL_F_HARD       0x4000   /* model flags word +8: surface that gives effect 3 (TODO(RE): unsure — hard/concrete?) */
+#define RADAR_FRAME_COL  0x111111 /* radar border colour */
+
 static uint32_t rd_u32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }
 static void wr_f(uint8_t *p, float f) { memcpy(p, &f, 4); }
 
@@ -115,26 +131,32 @@ static void wr_f(uint8_t *p, float f) { memcpy(p, &f, 4); }
 typedef struct {
   uint8_t *tab; int32_t *cnt, *start, *st; uint32_t *last; int32_t flag; int32_t set5624;
 } skid_side_t;
+/* Shared tail of P117_SkidRecA / P117_SkidRecB: appends one record to wheel w's ring (start/cnt, 256
+   entries; when full the oldest is overwritten), joins it to the running strip if the wheel was
+   already skidding and s->flag == 1, writes the four strip points (b = previous point, a = current;
+   side offset = 50 * (sin, cos) of -ang), applies the camera wobble when MenuVar55384C is set, picks the
+   surface from the road cell's model and spawns dust (every other frame, unless P26_FxA).
+   s->set5624: also set P102_5624A4 (1 normal, 0 hard surface) — only the A side does. */
 static void skid_rec(const skid_side_t *s, int32_t w, int32_t ang,
                      float bx, float by, float bz, float ax, float ay, float az,
                      const float *pos, int32_t rx, int32_t rz) {
   int32_t i = -ang & 0xfff;
-  float c = P43_Sin[0x400 + i] * 50.0f;   /* .rdata 0054609c = 50.0 */
-  float sn = P43_Sin[i] * 50.0f;
-  int32_t k = s->start[w] + s->cnt[w];
-  if (0xff < k) k -= 0x100;
+  float c = P43_Sin[0x400 + i] * SKID_HALF_WIDTH;   /* cos: sin table at angle + 90 deg */
+  float sn = P43_Sin[i] * SKID_HALF_WIDTH;
+  int32_t k = s->start[w] + s->cnt[w];               /* ring slot for the new record */
+  if (0xff < k) k -= SKID_RECS;
 #ifndef RE_HOOK_BUILD
   if (k < 0 || k > 0xff) return;   /* начало вне 0..0xff (в оригинале — запись за таблицей) */
 #endif
-  uint8_t *rec = s->tab + k * 0x48 + w * 0x4800;
-  if (s->cnt[w] == 0x100) { s->start[w]++; if (0xff < s->start[w]) s->start[w] -= 0x100; }
+  uint8_t *rec = s->tab + k * SKID_REC_SIZE + w * SKID_WHEEL_SIZE;
+  if (s->cnt[w] == SKID_RECS) { s->start[w]++; if (0xff < s->start[w]) s->start[w] -= SKID_RECS; }
   else s->cnt[w]++;
   int16_t v;
   if (s->st[w] == 1 && (uint8_t)s->flag == 1) {
-    rec[0] = 1; v = 2; memcpy(rec + 2, &v, 2);
-    uint8_t *pr = s->last[w] != 0 ? (uint8_t *)re_ptr(s->last[w]) : NULL;
-    if (pr != NULL) { int16_t q; memcpy(&q, pr + 2, 2); if (q == 2) { q = 1; memcpy(pr + 2, &q, 2); } }
-  } else { rec[0] = 0; v = 0; memcpy(rec + 2, &v, 2); }
+    rec[SKID_ON] = 1; v = 2; memcpy(rec + SKID_STATE, &v, 2);
+    uint8_t *pr = s->last[w] != 0 ? (uint8_t *)re_ptr(s->last[w]) : NULL;   /* previous record of this wheel */
+    if (pr != NULL) { int16_t q; memcpy(&q, pr + SKID_STATE, 2); if (q == 2) { q = 1; memcpy(pr + SKID_STATE, &q, 2); } }
+  } else { rec[SKID_ON] = 0; v = 0; memcpy(rec + SKID_STATE, &v, 2); }
   /* четвёртые слова точек (+0x14/+0x24/+0x34/+0x44) в оригинале — мусор стека; здесь не трогаются */
   wr_f(rec + 0x08, bx + sn); wr_f(rec + 0x0c, by); wr_f(rec + 0x10, bz + c);
   wr_f(rec + 0x18, bx);      wr_f(rec + 0x1c, by); wr_f(rec + 0x20, bz);
@@ -149,16 +171,16 @@ static void skid_rec(const skid_side_t *s, int32_t w, int32_t ang,
     uint32_t ma = (P72_Id < 1126) ? P79_ModelTab[P72_Id] : 0;
     if (ma != 0) {
       const uint8_t *mdl = (const uint8_t *)P79_PTR(ma);
-      if (mdl != NULL && (rd_u32(mdl + 8) & 0x4000) != 0) hard = 1;
+      if (mdl != NULL && (rd_u32(mdl + 8) & MDL_F_HARD) != 0) hard = 1;
     }
   }
   if (!hard) {
-    rec[4] = 0;
+    rec[SKID_SURFACE] = 0;
     if (P26_FxA == 0 && fr != 0) P118_SkidFx(p, 100, 500, 2, 0, m, 0);
     if (s->set5624) P102_5624A4 = 1;
   } else {
     if (P26_FxA == 0 && fr != 0) P118_SkidFx(p, 100, 500, 3, 0, m, 0);
-    rec[4] = 1;
+    rec[SKID_SURFACE] = 1;
     if (s->set5624) P102_5624A4 = 0;
   }
   s->st[w] = 1;
@@ -166,6 +188,10 @@ static void skid_rec(const skid_side_t *s, int32_t w, int32_t ang,
 }
 
 /* ---- 0051dd1b ---- */
+/* P117_SkidRecA — Game.exe 0051dd1b.  Adds a skid-mark piece for body corner / wheel w (0..3) of the
+   player car into ring A (P116_SkidRecA): from the previous corner position P117_PrevCorn to the
+   current P102_Corners (int, y negated to y-up), direction = atan2 of the movement.  Does nothing when
+   skid marks are off (P13_00575ec0 == 0).  Native: w range guard. */
 void P117_SkidRecA(int32_t w) {
   if (P13_00575ec0 == 0) return;
 #ifndef RE_HOOK_BUILD
@@ -175,11 +201,15 @@ void P117_SkidRecA(int32_t w) {
   int32_t ang = P44_Atan2(prv[2] - cur[2], prv[0] - cur[0]);
   skid_side_t s = { &P116_SkidRecA[0], P74_SkidD, P74_SkidB, P117_SkidStA, P117_SkidLastA, P102_D0DD80, 1 };
   float pos[3] = { (float)cur[0], (float)-cur[1], (float)cur[2] };
-  skid_rec(&s, w, ang, (float)prv[0], (float)-prv[1] - 20.0f, (float)prv[2],   /* .rdata 00546118 = 20.0 */
-           (float)cur[0], (float)-cur[1] - 20.0f, (float)cur[2], pos, cur[0], cur[2]);
+  skid_rec(&s, w, ang, (float)prv[0], (float)-prv[1] - SKID_LIFT, (float)prv[2],
+           (float)cur[0], (float)-cur[1] - SKID_LIFT, (float)cur[2], pos, cur[0], cur[2]);
 }
 
 /* ---- 0051e1b7 ---- */
+/* P117_SkidRecB — Game.exe 0051e1b7.  Same as P117_SkidRecA for ring B (P116_SkidRecB), with the current
+   point given as floats q and the previous point from P56_Blk16 (stored as float bit patterns).
+   Every float -> int conversion goes through the global P11_00ba52d0, as the original's fistp did.
+   TODO(RE): unsure which wheels / which car ring B serves. */
 void P117_SkidRecB(int32_t w, const float *q) {
   if (P13_00575ec0 == 0) return;
 #ifndef RE_HOOK_BUILD
@@ -193,10 +223,18 @@ void P117_SkidRecB(int32_t w, const float *q) {
   float pos[3] = { q[0], -q[1], q[2] };
   P11_00ba52d0 = (int32_t)lrintf(q[2]); int32_t rz = P11_00ba52d0;
   P11_00ba52d0 = (int32_t)lrintf(q[0]);
-  skid_rec(&s, w, ang, px, -py - 20.0f, pz, q[0], -q[1] - 20.0f, q[2], pos, P11_00ba52d0, rz);
+  skid_rec(&s, w, ang, px, -py - SKID_LIFT, pz, q[0], -q[1] - SKID_LIFT, q[2], pos, P11_00ba52d0, rz);
 }
 
 /* ---- 00504cad: радар ---- */
+/* P117_Radar — Game.exe 00504cad.  Draws the HUD radar centred at (P56_F573FA0, P56_F573FA4):
+   radius r = 0.1 * screen width * scale, a frame 1-2 px wide (2 when scale >= 0.5), then the map
+   texture P100_RadarIcon as a quad of half-size f = 0.1421875 * width * scale rotated by the player's
+   heading (north-up when MenuOptBDFA54; car 0x41's heading when G6_00B87EAC), tinted grey at night
+   (155 instead of 255), pulsing red/blue while P14_00d11a5c >= 0x2aa and there are cops (P95_AmbN >= 1;
+   cf. the felony/chase indicator).  UVs are in texels scaled by 1/64 unless P55_BDFA18.  Clipped to the
+   radar square, then the icons (sprite, mission objects, traffic, nearest target, compass) and the
+   clip window restored from P110_Clip*. */
 void P117_Radar(void) {
   P12_Fn00426580(0x17);
   uint8_t *ic = P100_RadarIcon;
@@ -208,10 +246,11 @@ void P117_Radar(void) {
   int32_t d = r * 2, t = (0.5f <= P19_Scale) ? 2 : 1;
   int32_t x0 = (int32_t)(P56_F573FA0 - (float)r), y0 = (int32_t)(P56_F573FA4 - (float)r);
   int32_t x1 = (int32_t)(P56_F573FA0 + (float)r), y1 = (int32_t)(P56_F573FA4 + (float)r);
-  P108_FillRect((float)(x0 - t), (float)(y0 - t), (float)(d + t * 2), (float)t, 0x111111);
-  P108_FillRect((float)(x0 - t), (float)y1, (float)(d + t * 2), (float)t, 0x111111);
-  P108_FillRect((float)(x0 - t), (float)y0, (float)t, (float)d, 0x111111);
-  P108_FillRect((float)x1, (float)y0, (float)t, (float)d, 0x111111);
+  /* frame: top, bottom, left, right */
+  P108_FillRect((float)(x0 - t), (float)(y0 - t), (float)(d + t * 2), (float)t, RADAR_FRAME_COL);
+  P108_FillRect((float)(x0 - t), (float)y1, (float)(d + t * 2), (float)t, RADAR_FRAME_COL);
+  P108_FillRect((float)(x0 - t), (float)y0, (float)t, (float)d, RADAR_FRAME_COL);
+  P108_FillRect((float)x1, (float)y0, (float)t, (float)d, RADAR_FRAME_COL);
   float sn, cs;
   if (MenuOptBDFA54 != 0) { sn = P43_Sin[0x800]; cs = P43_Sin[0xc00]; }
   else {
@@ -233,7 +272,7 @@ void P117_Radar(void) {
     if (P102_B52A3C < 0x41) { float l = ((float)((P102_B52A3C >> 1) + 0x20) / 64.0f) * full; rr = l; gg = l; }
     else { float l = ((float)(((P102_B52A3C - 0x40) >> 1) + 0x20) / 64.0f) * full; gg = l; bb = l; }
   }
-  if (G6_00B5A778 == 0) P102_B52A3C = (P102_B52A3C - 8) & 0x7f;
+  if (G6_00B5A778 == 0) P102_B52A3C = (P102_B52A3C - 8) & 0x7f;   /* pulse phase 0..127 (not while paused? TODO(RE)) */
   for (int i = 0; i < 4; i++) { v[i].r = rr; v[i].g = gg; v[i].b = bb; v[i].oow = k; }
   if ((int32_t)ic[8] != P86_CurTex) {
     P86_CurTex = ic[8];
@@ -262,6 +301,10 @@ void P117_Radar(void) {
 }
 
 /* ---- 00502fe2: полноэкранная карта ---- */
+/* P117_FullMap — Game.exe 00502fe2.  Draws the full-screen map from the source bitmap P99_C80880
+   (P57_ScrW x S_00C808A0) as 256x256 tiles: each tile is copied into the map texture page (8-bit via
+   P56_BmpPage into a temporarily swapped P65_Texs entry, or 16-bit via P62_DownloadPage) and drawn
+   with P108_MapTexRect; then the radar marks.  Logs and returns if a texture or the source is missing. */
 void P117_FullMap(void) {
   if (P102_MapIcon2 == NULL) { DebugLog("DrawFullscreenMap: No target texture"); return; }
   if (P99_C80880 == NULL) { DebugLog("DrawFullscreenMap: No source map"); return; }
@@ -301,7 +344,11 @@ void P117_FullMap(void) {
 }
 
 /* ---- 0040ce31: список надписей меню (P45_PtrA → записи 16 байт: s16 x, y; [4] шрифт, [5] флаги, [8] адрес строки, 0 — конец; [0xc..0xe] цвет) ---- */
+/* Bit pattern of a float (the menu setters take floats as raw dwords). */
 static int32_t f_bits(float f) { int32_t v; memcpy(&v, &f, 4); return v; }
+/* P117_TextList — Game.exe 0040ce31.  Draws the current menu's static text list (P45_PtrA): per 16-byte
+   entry colour, position (y lifted by 1 for fonts 0/1, by 3 for bigger fonts), font, flags, then the
+   string; the list ends at an entry with string address 0.  Native: RE_TRACE_TEXT debug dump. */
 void P117_TextList(void) {
   if (P45_PtrA == 0) return;
   const uint8_t *e = (const uint8_t *)re_ptr(P45_PtrA);

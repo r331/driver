@@ -19,6 +19,15 @@
    Смешивание — cda_mix() из dsm_mix (plat_dsmix.c) до мягкого ограничителя, 44100 Гц стерео.
    v2.33: динамическая музыка (PS-стиль) для дорожек 4..7 — набор <каталог>/dynamic/ (16 файлов: город × день/ночь × Drive/Chase),
    см. раздел «динамическая музыка» ниже и README «CD-музыка». */
+/* plat_cdaudio.c (English overview) — CD audio emulation for the native build (MCI cdaudio, TMSF time
+   format).  The game (game/ported25.c) only calls plat_cd_* / plat_aux_*; here tracks come from files:
+   directory RE_MUSIC_DIR / music_dir in driver.cfg / ./Music; track N = TrackNN.wav / .flac / .ogg / .mp3
+   (also cdparanoia and EAC names), else a .cue + raw .bin image, else a silent stub track (RE_MUSIC_STUB_LEN
+   seconds; RE_MUSIC_STUB=tone for test tones).  RE_MUSIC=off restores "no CD".  Track ends are signalled
+   like MCI_NOTIFY through the message loop so the game replays the track as the original does; stop keeps
+   the position for resume; volume = auxSetVolume (RE_MUSIC_VOL multiplier); mixing happens in the
+   software mixer (plat_dsmix.c) before its soft limiter.  v2.33 adds optional PlayStation-style dynamic
+   music for tracks 4..7 (dynamic/ set: city x day/night x drive/chase). */
 #include "../plat.h"
 #include "plat_cdaudio.h"
 #include "plat_gfx.h"
@@ -63,6 +72,7 @@ void plat_snd_lockdev(int on);   /* plat_snd.c */
 #define MAXT 100
 
 /* ===================== разбор .cue ===================== */
+/* ===== (en) .cue sheet parsing ===== */
 static int ieqn(const char *a, const char *b, size_t n) { for (size_t i = 0; i < n; i++) { if (tolower((unsigned char)a[i]) != tolower((unsigned char)b[i])) return 0; if (!a[i]) return 1; } return 1; }
 static const char *skipws(const char *p) { while (*p == ' ' || *p == '\t') p++; return p; }
 static int msf_sectors(const char *p, int64_t *out) {
@@ -123,6 +133,7 @@ void cda_cue_resolve(cda_cue *c, const int64_t *file_bytes) {
 }
 
 /* ===================== поиск файлов ===================== */
+/* ===== (en) Track file lookup ===== */
 typedef struct {
   int kind; char path[1024];
   int64_t off;          /* CUE: байт начала дорожки в файле */
@@ -199,6 +210,7 @@ static int wav_probe(FILE *f, int *rate, int *ch, int *bits, int64_t *off, int64
 }
 
 /* ===================== источник PCM (поток) ===================== */
+/* ===== (en) PCM source (streaming decoders) ===== */
 enum { SRC_BUF = 1024 };
 typedef struct {
   int kind, track; FILE *f; int64_t off, frames, pos; int rate, ch, bits, be;
@@ -308,6 +320,7 @@ static void src_next(src_t *s, float *o) {
 }
 
 /* ===================== каталог → таблица дорожек ===================== */
+/* ===== (en) Music directory -> track table ===== */
 static void join(char *out, size_t n, const char *a, const char *b) {   /* a/b без предупреждений -Wformat-truncation */
   size_t la = strlen(a), lb = strlen(b);
   if (la + 1 + lb + 1 > n) { out[0] = 0; return; }
@@ -425,6 +438,7 @@ int cda_track_source(int track, const char **path, int64_t *frames44) {
    игрока или ещё не потерял: P95_SndReady || P95_AmbN > 0). Признаки передаёт игра: plat_music_hint (game/ported131.c,
    только native). Игровая логика не меняется — эмуляция только выбирает, что смешивать.
    Слоты набора: город·4 + ночь·2 + погоня (0 Майами Day Drive … 15 New York Night Chase) — порядок 01..16 у пользователя. */
+/* ===== (en) v2.33 dynamic music (an addition, not in the original) ===== */
 static const char *const k_dyn_city[4] = { "Майами", "Сан-Франциско", "Лос-Анджелес", "Нью-Йорк" };
 static const char *const k_dyn_kind[4] = { "Day Drive", "Day Chase", "Night Drive", "Night Chase" };
 static trk_t g_dyn[CDA_DYN_N];
@@ -546,6 +560,7 @@ static int dyn_enabled(void) {
 }
 
 /* ===================== устройство (состояние воспроизведения — под блокировкой звука) ===================== */
+/* ===== (en) Device state (guarded by the sound lock) ===== */
 static struct {
   int on, track; src_t s; int64_t pos44, end44; float f0[2], f1[2]; double frac, step; int notify; void *hwnd;
 } g_p;
@@ -559,6 +574,7 @@ static int g_cdn, g_cdaux = -1, g_tplay; static uint32_t g_cdfrom, g_cdto;
    Chase отличаются не больше чем на max(1 с, 2 %)): оба голоса идут всё время с одной позиции, зацикливаются по меньшей длине,
    переключается только громкость (линейный кроссфейд). Иначе неслышный голос стоит, при включении начинается с начала
    (кроссфейд равной мощности). Каждый голос зациклен сам; уведомления MM_MCINOTIFY нет — игра считает, что дорожка играет. */
+/* ===== (en) v2.33 dynamic set playback ===== */
 typedef struct {
   int used, slot, run; src_t s; float f0[2], f1[2]; double frac, step; int64_t pos44, loop44; float g, tgt;
 } dvoice_t;

@@ -1,4 +1,11 @@
 /* v2.19: дальность прорисовки — см. drawdist.h. Чистый C, без данных игры. */
+/* drawdist.c — native draw-distance extension (v2.19; English overview, see drawdist.h for the full notes).
+   Pure maths, no game data, no Game.exe counterpart.  The original walks a 31x31 window of map cells around
+   the camera cell masked by FRUSTRUM.DAT (256 heading sectors); with multiplier m > 1 the walk radius becomes
+   round(15 * m) cells: inside the 31x31 square the original mask is used unchanged, outside it a view cone
+   (heading from the FRUSTRUM.DAT sector centroids, half-angle from aspect.h plus a per-cell margin).
+   The 1/z table grows past the original 0xdbba entries when the far plane needs it.
+   Magic numbers: 31 = window size, 15 = its centre cell, 0xdbba = original 1/z table entries (56250). */
 #include "drawdist.h"
 #include "aspect.h"
 #include <math.h>
@@ -10,18 +17,23 @@
 #endif
 
 #define DD_PI 3.14159265358979323846
+#define OOW_N0    0xdbba    /* entries in the original 1/z table 00ba53a0 (56250) */
 
+/* Multiplier clamped to [1, RE_DD_MAX]; NaN -> 1. */
 double re_dd_clamp(double m) {
   if (!(m > 1.0)) return 1.0;
   if (m > RE_DD_MAX) return RE_DD_MAX;
   return m;
 }
 
+/* Walk radius in cells: round(15 * m), never below the original 15. */
 int re_dd_radius(double m) {
   int r = (int)floor(RE_DD_BASE_R * re_dd_clamp(m) + 0.5);
   return r < RE_DD_BASE_R ? RE_DD_BASE_R : r;
 }
 
+/* Heading of a 31x31 mask: unit vector toward the centroid of its cells (centre cell excluded), in
+   (column, row) axes.  Returns 0 (and (0, 1)) for an empty mask. */
 int re_dd_heading(const uint8_t *m, double *hx, double *hy) {
   double sx = 0, sy = 0;
   for (int r = 0; r < 31; r++)
@@ -33,6 +45,8 @@ int re_dd_heading(const uint8_t *m, double *hx, double *hy) {
   return 1;
 }
 
+/* Camera heading for angle ang (4096 per turn) in FRUSTRUM.DAT axes: the centroids of sectors 0 and 64 are the
+   two axes (they are symmetric, so the square clipping does not bias them); h = cos(phi)*e0 + sin(phi)*e64. */
 int re_dd_heading_tab(const uint8_t *tab, int ang, double *hx, double *hy) {
   uint8_t m[31 * 31];
   double ax, ay, bx, by;
@@ -47,6 +61,8 @@ int re_dd_heading_tab(const uint8_t *tab, int ang, double *hx, double *hy) {
   return 1;
 }
 
+/* Cone test for cell offset (dx, dy): within radius R + 0.5 and within half-angle th of the heading plus the
+   angular half-size of a cell (asin(1.5 / d)); the immediate neighbours (d < 2) are always in. */
 int re_dd_cell_in(int dx, int dy, double hx, double hy, double th, int R) {
   double d = sqrt((double)dx * dx + (double)dy * dy);
   if (d > R + 0.5) return 0;
@@ -58,6 +74,9 @@ int re_dd_cell_in(int dx, int dy, double hx, double hy, double th, int R) {
   return acos(cs) <= th + pad;
 }
 
+/* Walk decision for cell (dx, dy): inside the 31x31 square the original mask decides, except beyond the
+   14.5-cell circle (square corners / seam) where a cell the mask rejects may still pass the cone test;
+   outside the square only the cone decides.  The caller checks the PVS for cells inside the square. */
 int re_dd_visit(int dx, int dy, const uint8_t *mask31, double hx, double hy, double th, int R) {
   if (dx >= -15 && dx <= 15 && dy >= -15 && dy <= 15) {
     if (mask31[(dy + 15) * 31 + dx + 15]) return 1;
@@ -66,6 +85,7 @@ int re_dd_visit(int dx, int dy, const uint8_t *mask31, double hx, double hy, dou
   return re_dd_cell_in(dx, dy, hx, hy, th, R);
 }
 
+/* qsort order for cell offsets: by squared distance, then row, then column (deterministic). */
 static int cmp_d(const void *a, const void *b) {
   const int8_t *p = (const int8_t *)a, *q = (const int8_t *)b;
   int da = p[0] * p[0] + p[1] * p[1], db = q[0] * q[0] + q[1] * q[1];
@@ -73,6 +93,8 @@ static int cmp_d(const void *a, const void *b) {
   if (p[1] != q[1]) return p[1] - q[1];
   return p[0] - q[0];
 }
+/* Fills out with all (2R+1)^2 offsets (dx, dy) sorted nearest first, so the per-class lists of 0x400 entries
+   are filled with near objects before far ones.  Returns the count (0 when R is out of 0..127). */
 int re_dd_order(int R, int8_t *out) {
   if (R < 0 || R > 127) return 0;
   int n = 0;
@@ -82,16 +104,21 @@ int re_dd_order(int R, int8_t *out) {
   return n;
 }
 
+/* 1/z beyond the original table: k / zi (k as in the table fill at 00526427); 0 for zi <= 0. */
 float re_dd_oow(float k, int32_t zi) { return zi <= 0 ? 0.0f : k / (float)zi; }
 
+/* Size of the 1/z table needed for far plane `far`: the original 0xdbba when it fits, else far * 1.25 + 2
+   (capped at 0x7fffff). */
 int32_t re_dd_oow_n(double far) {
-  if (far + 2.0 <= 0xdbba) return 0xdbba;          /* дальняя плоскость оригинала (≤ 45000) помещается в таблицу */
+  if (far + 2.0 <= OOW_N0) return OOW_N0;          /* дальняя плоскость оригинала (≤ 45000) помещается в таблицу */
   double need = far * 1.25 + 2.0;
-  if (need <= 0xdbba) return 0xdbba;
+  if (need <= OOW_N0) return OOW_N0;
   if (need > 0x7fffff) need = 0x7fffff;
   return (int32_t)need;
 }
 
+/* re_dd_on: 1 while the main 3-D view is drawn with the extended distance (see drawdist.h).
+   re_dd_vis: LOD/detail distance multiplier while re_dd_on, else 1. */
 int re_dd_on;
 float re_dd_vis(void) { return re_dd_on ? (float)re_draw_distance() : 1.0f; }
 
@@ -124,6 +151,10 @@ static void synth(uint8_t *tab, int circle) {
   }
 }
 
+/* Self-test (ctest): 0 = pass, otherwise the number of the failed check.  Checks clamping, radius, 1/z table
+   sizing, walk order, and on synthetic frustum tables (wedge and circle, three Hor+ widths) that the cone
+   walk has no holes inside the view angle, nothing behind the camera or past R, and never trims the
+   original 31x31 mask. */
 int re_dd_selftest(void) {
   int t = 0;
 #define T(c) do { t++; if (!(c)) { free(tab); free(ord); return t; } } while (0)

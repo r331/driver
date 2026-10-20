@@ -1,3 +1,5 @@
+/* Front-end screen frame: menu text table drawing, per-frame setup and the director (replay
+   editor) screen switch. */
 #include "ported66.h"
 #include "reptr.h"
 #include "ported89.h"
@@ -27,13 +29,18 @@ float P66_C255 = 0, P66_C128 = 0, P66_C2 = 0;
 #pragma pop_macro("P66_C255") /*gvi*/
 #endif
 
+/* P66_InitConsts — Native: initialise the float constants 255, 128 and 2 that live in Game.exe .data. */
 void P66_InitConsts(void) {
 #ifndef RE_HOOK_BUILD
   P66_C255 = 255.0f; P66_C128 = 128.0f; P66_C2 = 2.0f;
 #endif
 }
 
-/* 004188b0 */
+/* P66_FrameBegin — Game.exe 004188b0, cdecl.  Per-frame setup of a front-end screen.  Starts CD track 3 when 00b87e90 is set and no CD audio
+   plays; refreshes sound volumes and front-end state, picks the background by P15_State
+   (1 -> 4, 2 -> 6, 3 -> 5, else 7; 1 when P66_LoadFlag is set), draws both map layers and
+   draws element 0x18.  Sets P66_Scene = 00cb8f20 and clears 00d0ddc0.
+   TODO(RE): unsure what the P12_Fn00426580 arguments name (screen backgrounds/overlays). */
 void P66_FrameBegin(void) {
   P66_Scene = 0x00cb8f20u;
   G6_00D0DDC0 = 0;
@@ -56,12 +63,20 @@ void P66_FrameBegin(void) {
   P12_Fn00426580(0x18);
 }
 
+/* rd16 — Unaligned little-endian int16 read. */
 static int16_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
+/* rd32 — Unaligned little-endian uint32 read. */
 static uint32_t rd32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }
 /* __ftol оригинала — усечение; произведение двух float точно помещается в double (как в x87) */
+/* Scale — Colour component scaled by the fade level: truncation like the original's __ftol; the float
+   product is exact in double as on x87. */
 static int32_t Scale(double a, float cur) { return (int32_t)(a * (double)cur); }
 
-/* 0041897c */
+/* P66_DrawTable — Game.exe 0041897c, cdecl.  Draw a menu text table.  Entries are 16 bytes {int16 x, int16 y, ?, u8 flags at +5, ?,
+   uint32 text at +8, u8 r, g, b at +0xc..0xe}; the table ends at text == 0.  The first entry
+   is drawn in yellow (255, 255, 128), the rest in their own colour, all scaled by the fade
+   level P19_Cur.  While input is locked (P59_NoKeyFlag / P59_MenuLock) entries are drawn
+   with a 2-pixel drop shadow instead (flag bits 0x10 / 4). */
 void P66_DrawTable(const void *tbl) {
   const uint8_t *t = (const uint8_t *)tbl;
   for (int32_t i = 0; rd32(t + i * 16 + 8) != 0; i++) {
@@ -90,6 +105,8 @@ void P66_DrawTable(const void *tbl) {
 }
 
 /* таблицы пунктов лежат в .data Game.exe: в native их образа нет — такой адрес не разыменовываем */
+/* Resolve — Native: translate a Game.exe .data address of a menu table to the data image (re_ptr); other
+   values are used as pointers. */
 static const void *Resolve(uint32_t a) {
 #ifdef RE_HOOK_BUILD
   return (const void *)(uintptr_t)a;
@@ -99,6 +116,7 @@ static const void *Resolve(uint32_t a) {
 #endif
 }
 
+/* CallCb — Call a screen callback by its Game.exe address.  Native: only 004169af is known. */
 static void CallCb(uint32_t cb) {
 #ifdef RE_HOOK_BUILD
   ((void (*)(void))(uintptr_t)cb)();
@@ -108,6 +126,7 @@ static void CallCb(uint32_t cb) {
 }
 
 /* указатели 01270e80/01270de4 (звук меню) в native пусты, пока нет звукового драйвера — тогда эти вызовы пропускаются */
+/* SndFnsReady — Native: 0 while the front-end sound function pointers (01270e80, 01270de4) are not set. */
 static int SndFnsReady(void) {
 #ifdef RE_HOOK_BUILD
   return 1;
@@ -116,7 +135,10 @@ static int SndFnsReady(void) {
 #endif
 }
 
-/* 0041846c */
+/* P66_ScreenFrame — Game.exe 0041846c, cdecl.  Draw one front-end frame: table `tbl` (Game.exe address, may be 0) and callback `cb`.
+   Rate-limited by P66_Nest: a frame is drawn only when the counter reaches 0; it is then
+   reloaded with the frame tick count.  Does nothing while the window is inactive.  Wraps the
+   drawing in front-end sound updates and swaps the Glide buffers. */
 void P66_ScreenFrame(uint32_t tbl, uint32_t cb) {
   Ui0041889C();
   if (P31_Active == 0) return;
@@ -137,7 +159,10 @@ void P66_ScreenFrame(uint32_t tbl, uint32_t cb) {
   P66_Nest = (int32_t)P21_FrameTicks();
 }
 
-/* 004c862f */
+/* P66_DirSwitch — Game.exe 004c862f, cdecl.  Director (replay editor) screen: draw according to P29_Mode unless P29_Flag48 is set.
+   Modes 1, 4, 6, 8, 9, 10, 12: overlay + panel; 3: open the director (SetDirectorMode 1,2,0)
+   when it has no buffer yet; 5: panel, white colour, overlay.  Always draws the corner
+   indicator.  TODO(RE): unsure what each P29_Mode value is. */
 void P66_DirSwitch(void) {
   if (P29_Flag48 != 0) return;
   int32_t n = P29_Mode - 1;

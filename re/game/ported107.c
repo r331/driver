@@ -220,6 +220,8 @@ static void *glide_proc(const char *name) {
 }
 
 /* ---- 00490f3a: следы шин (004af619) и фары (004aef57) машины трафика, затем задние огни/стоп-сигналы ---- */
+/* P107_TrafficLights — Game.exe 00490f3a.  For a traffic car: tyre marks (004af619) and headlights
+   (004aef57), then tail / brake lights. */
 void P107_TrafficLights(int32_t n, uint8_t *rec) {
   if ((rec[0xc] == 1 && rec[5] != 0 && rec[1] == 4) || rec[1] == 9) {
     if (rec[1] == 9) P102_CarTracks(n, (const int16_t *)(rec + 0x16), 1.0f);
@@ -261,6 +263,7 @@ void P107_TrafficLights(int32_t n, uint8_t *rec) {
 }
 
 /* ---- 004221bf: освободить слот текстуры i (палитра, текстура, поверхность — Release) ---- */
+/* P107_TexRelease — Game.exe 004221bf.  Frees texture slot i (palette, texture, surface — Release). */
 void P107_TexRelease(int32_t i) {
 #ifndef RE_HOOK_BUILD
   if (i < 0 || i >= 32) return;
@@ -278,6 +281,8 @@ void P107_TexRelease(int32_t i) {
 }
 
 /* ---- 004262ce: линия Glide между точками экрана 640×480 (масштаб P19_Scale к центру), цвет 0xRRGGBB ---- */
+/* P107_Line — Game.exe 004262ce.  Glide line between two 640x480 design points (zoomed by P19_Scale about
+   the centre), colour 0xRRGGBB. */
 void P107_Line(float x0, float y0, float x1, float y1, uint32_t rgb) {
   float a[16], b[16];
   memset(a, 0, sizeof a); memset(b, 0, sizeof b);   /* z, ooz, a в оригинале не заданы (стек) */
@@ -297,6 +302,8 @@ void P107_Line(float x0, float y0, float x1, float y1, uint32_t rgb) {
 }
 
 /* ---- 004ca98d: надпись отсчёта/финиша kind (0 «3», 1 «2», 2 «1», 3 GO, 4 CHECK, 5 FINISH) на кадре t: приближение, поворот, яркость ---- */
+/* P107_CountModel — Game.exe 004ca98d.  Countdown / finish caption `kind` (0 "3", 1 "2", 2 "1", 3 GO,
+   4 CHECK, 5 FINISH) at frame t: zoom-in, rotation, brightness. */
 void P107_CountModel(int32_t kind, int32_t t) {
   uint32_t m;
   switch (kind) {
@@ -349,6 +356,8 @@ void P107_CountModel(int32_t kind, int32_t t) {
 }
 
 /* ---- 004a9f45 / 004aa217: прямоугольник 640×480 (P19_ScaleX/Y) — четыре GrVertex по 60 байт, grDrawPolygonVertexList(4) ---- */
+/* P107_Rect — Game.exe 004a9f45 / P107_RectGrad — Game.exe 004aa217.  Rectangle in 640x480 design space
+   (P19_ScaleX/Y): four Glide vertices, grDrawPolygonVertexList(4); RectGrad with a colour gradient. */
 static void rect4(int32_t x, int32_t y, int32_t w, int32_t h, const uint8_t *c0, const uint8_t *c1, int grad) {
   float oow = (P55_BDFA18 == 0) ? OOW_LO : 1.0f;
   if (y <= -0x201) return;
@@ -384,6 +393,8 @@ void P107_RectGrad(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t top, uin
 }
 
 /* ---- 00506fa0: стрелка компаса радара — три линии от центра (P56_F573FA0/A4) и крестик; смещение по городу (.data 00573f68) ---- */
+/* P107_Compass — Game.exe 00506fa0.  Radar compass needle: three lines from the radar centre
+   (P56_F573FA0/A4) and a cross; per-city offset from .data 00573f68. */
 void P107_Compass(void) {
   static const int32_t k_ofs[7][2] = { { -20, 0 }, { 3, 20 }, { 6, -19 }, { -6, -19 }, { 20, 0 }, { 9, 18 }, { 9, 18 } };   /* .data 00573f68 */
   int32_t city = D_00b87e30;
@@ -428,6 +439,8 @@ void P107_Compass(void) {
 
 /* ---- 004b5049: огонь машины — запись .data 0x1c (+4 значок, +8 rgb, +0xc яркость, +0x10/+0x14 экранные x,y, +0x18 размер),
    четыре GrVertex 00b1ffd0/00b20020/00b200a0/00b201a0, два треугольника P85_RasterB ---- */
+/* P107_CarLight — Game.exe 004b5049.  One car light sprite from a 0x1c .data record (+4 icon, +8 rgb,
+   +0xc brightness, +0x10/+0x14 screen x,y, +0x18 size); four Glide vertices, two P85_RasterB triangles. */
 #define SV(addr) (&P107_SprV[((addr) - 0x00b1ffd0u) / 4])
 void P107_CarLight(uint32_t recaddr, float k) {
   const uint8_t *r = (const uint8_t *)re_ptr(recaddr);
@@ -469,6 +482,8 @@ void P107_CarLight(uint32_t recaddr, float k) {
 
 /* ---- 0050f304: навигация по меню — пункты по 0x14 (+5 флаги, +8 тип, +0xc обработчик, +0x10..+0x13 соседи влево/вправо/вверх/вниз).
    Возвращает новый пункт или -1 (Esc). Обработчики — re_fn по адресу. ---- */
+/* P107_MenuNav — Game.exe 0050f304.  Menu navigation over 0x14-byte entries (+5 flags, +8 type,
+   +0xc handler, +0x10..+0x13 left/right/up/down neighbours); returns the new entry or -1 (Esc). */
 static void nav_call(const uint8_t *t, uint32_t i) {
   re_fn_t f = re_fn((uint32_t)rd32(t + 0xc + i * 0x14));
   if (f != NULL) f();
@@ -508,6 +523,8 @@ int32_t P107_MenuNav(uint32_t tab, int32_t pos) {
 }
 
 /* ---- 004ddaca: ввод машины car (биты keys: 1 газ назад, 2 газ, 4/8 руль, 0x10 резкий руль, 0x20 ручник, 0x40 тормоз, 0x80 круиз, 0x100 сигнал) ---- */
+/* P107_CarInput — Game.exe 004ddaca.  Applies input bits `keys` to car `car`: 1 reverse throttle,
+   2 throttle, 4/8 steer, 0x10 sharp steer, 0x20 handbrake, 0x40 brake, 0x80 cruise, 0x100 horn. */
 static int32_t imul12(int32_t v, int32_t k) { int32_t m = (int32_t)((uint32_t)v * (uint32_t)k); return (m + (int32_t)((uint32_t)(m >> 31) & 0xfffu)) >> 12; }
 void P107_CarInput(int32_t car, uint32_t keys) {
   static const int32_t k_steer[32] = { 0, 0, 0, 0, 16, 16, 32, 32, 48, 48, 64, 64, 96, 96, 128, 128, 160, 160, 192, 192,
@@ -625,6 +642,9 @@ tail:
 
 /* ---- 004958b7: ряд машин трафика вдоль дороги перед игроком (сторона P103_1426E0, участки 011426f8 / 011443c0 таблицы 00c12c60),
    затем заполнение промежутков припаркованными. 1 — выполнено. ---- */
+/* P107_TrafficRow — Game.exe 004958b7.  Places a row of traffic cars along the road ahead of the player
+   (side P103_1426E0, segments 011426f8 / 011443c0 of table 00c12c60), then fills the gaps with parked
+   cars.  Returns 1. */
 static int32_t row_cell(int32_t seg, int off) {
 #ifndef RE_HOOK_BUILD
   if (seg < 0 || (uint32_t)seg * 0x14 + off + 4 > sizeof P11_00c12c60) return 0;

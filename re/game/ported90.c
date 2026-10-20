@@ -7,9 +7,21 @@
 #include "../platform/native/diagnostics.h"
 #endif
 
+/* P90_DrawSingle — Game.exe 0042a423, cdecl.  Short form of the block-model renderer 00429143 for map models
+   that consist of a single record (flat pieces of ground / road; 004ee4b7 calls it when the model has
+   flags 0x2400 without 0x4000 and +0x16 == 1).
+   In:  m    — model offset in the level model area (P79_PTR);
+        idx  — orientation index into P56_EulerTab (0x40-byte matrices) and the matrix cache P84_MatCache;
+        pos  — world position (x, y, z) used as the transform bias;
+        mode — low byte selects the record handler table: 0 -> P84_Tab0, 1 -> P84_Tab1, else P84_Tab2.
+   Steps: light spheres touching the model (P63_SphereHits) or none; light from above for plane 0 (P81_PosY);
+   view x EulerTab[idx] matrix, recomputed only when P84_MatFlag[idx] != P47_SwapCnt (once per frame);
+   in mirror mode (P84_Mirror) a copy with column 0 negated and the bias x negated;
+   then the handler for the type of the first record (+0x2c) is called with argument 0 (no plane culling).
+   Side effects: P44_MatPtr, P44_Bias*, P84_VertRef/Planes, G2_011F4064, P44_XformTag++. */
 /* 0042a423 */
 void P90_DrawSingle(uint32_t m, int32_t idx, float *pos, int32_t mode) {
-  uint8_t *mdl = (uint8_t *)P79_PTR(m);
+  uint8_t *mdl = (uint8_t *)P79_PTR(m);   /* model header: +0x20 vertices, +0x24 planes, +0x2c record list */
 #ifndef RE_HOOK_BUILD
   re_diag_model(m);
 #endif

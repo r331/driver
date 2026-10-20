@@ -1,3 +1,5 @@
+/* Directional light split into six axis-aligned intensities (+X/-X/+Y/-Y/+Z/-Z), and the
+   far-distance guard P81_Limit.  x87 rounding and NaN behaviour of the original are kept. */
 #include "ported81.h"
 #include <math.h>
 #include <string.h>
@@ -68,12 +70,19 @@ float P81_NegZ;
 
 /* |v| + фон (x87: сумма в расширенной точности, запись во float), потолок 1.0 (сравнение «строго больше»;
    NaN не ограничивается — как test ah,0x41 в оригинале). */
+/* p81_mag — Intensity on the lit side: |v| + ambient, clamped to 1.0.
+   The sum is formed in extended precision then stored as float (x87); the clamp uses strict
+   "greater than", so NaN is not clamped (as the original's test ah,0x41). */
 static float p81_mag(float v, float base) {
   float r = (float)((long double)fabs((double)v) + (long double)base);
   if (r > 1.0f) r = 1.0f;
   return r;
 }
 
+/* P81_Light — Game.exe 004cb619, cdecl.  Split the light direction (P19_OutA/B/C) into six per-axis intensities.
+   For each axis the side the vector points to gets |component| + ambient (P19_Out68, clamped to
+   1.0), the opposite side gets the ambient alone.  A NaN component counts as negative, like the
+   original's fcomp.  Writes P81_PosX..P81_NegZ. */
 void P81_Light(void) {
   float base = P19_Out68;
   float x = P19_OutA, y = P19_OutB, z = P19_OutC;
@@ -85,6 +94,10 @@ void P81_Light(void) {
   else           { P81_NegZ = p81_mag(z, base); P81_PosZ = base; }
 }
 
+/* P81_Limit — Game.exe 004e959a, cdecl.  Flag a large backwards distance jump.
+   d = v - P53_Var26A4 (a float read bit-for-bit).  If d is negative (or NaN) and either |d| > 100
+   or P81_Span is not positive, sets P81_Flag = 0x40000000.
+   TODO(RE): unsure what the flag value 0x40000000 means to its readers. */
 void P81_Limit(int32_t v) {
   float ref; memcpy(&ref, &P53_Var26A4, 4);
   float d = (float)v - ref;
