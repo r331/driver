@@ -65,7 +65,7 @@ hook: вызов оригинала по адресу. native: слабая за
 - `PNN_` — функция/переменная из `portedNN.c/.h`. `CallXXXXXXXX` и `PNN_FnXXXXXX` в `unported.h` — вызовы по адресу.
 - Переменные с адресом в имени (`P11_00b87e38`, `G6_01145A60`, `A_00D04B00`) — ячейки Game.exe; новые имена внутри
   уже описанных таблиц — макросы `*_VAR` над таблицей (cartab.h, nodetab.h, menugfx.h …), а не новые переменные.
-- Мелкие помощники чтения полей (`rd32`, `wr32`, `rdf`, `iabs`, `fround`) — `re/game/memrw.h`; имена полей машины —
+- Мелкие помощники чтения полей (`rd32`, `wr32`, `rdf`, `iabs`, `fround`, `rdu16`, `rds16`, `wr16`, `wrf`, `u2f`, `fbits`, `f2i`) — `re/game/memrw.h`; имена полей машины —
   `re/game/carfields.h`, другие общие записи (камера режиссёра, трафик, модели, MLADDER, клавиши) — свои заголовки,
   константы фиксированной точки и углов — `re/game/fixmath.h` (см. «Соглашения» ниже).
 
@@ -159,7 +159,7 @@ A_00C56780; `mission` — смены 00c810c4 / 00c810e8 / 00c81100; `menu` — 
 | Группа | Скрипты |
 |---|---|
 | таблицы `.data` из Game.exe → `re/game/*.h` | `gen_pNN_data.py`, `gen_p84_handlers.py`, `gen_sintab.py`, `gen_data_init.py` (data_init.c, data_image.c), `gen_gvar_img.py` |
-| связки и таблицы адресов | `gen_fn_table.py` (fn_table.c из install.c), `gen_thunk_table.py`, `gen_native_links.py` (links.c; после v2.x файл правился и вручную — сверять дифф), `gen_stdcall.py` |
+| связки и таблицы адресов | `gen_fn_table.py` (fn_table.c из install.c), `gen_thunk_table.py`, `gen_native_links.py` (links.c байт в байт; ручная часть — после строки `manual part`, несвязанные переносы — `tools/native_links_skip.txt`), `gen_stdcall.py` |
 | проверки | `find_gvar_bypass.py`, `find_split_alias.py`, `mark_thunks.py`, `pedump.py` |
 | одноразовые шаги начала проекта (v0.x), оставлены для воспроизводимости | `name_pass1.py`, `split_modules.py` (создал `src/`), `gen_glide.py` (пишет в /tmp), `redriver2_funcs.txt` |
 | данные игрока | `texpack.py` (HD-пак), `driver_save.py` (сейвы), `make_music_stubs.py` |
