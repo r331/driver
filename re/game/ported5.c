@@ -538,7 +538,8 @@ void SetIconIdx00412D0F(int32_t reset) {
 }
 /* FloatStep (4) — option sliders: raise / lower Q01270C24 (00409A91 / 00409ACA) or Q0125F3F8 (00409B03 /
    00409B3C) by the step Q0054604C within the .rdata limits, then request a menu redraw.
-   TODO(RE): unsure which options the two floats are (brightness / screen scale?). */
+   Per ported126.c's debug keys these are the draw distance 01270c24 (15000..45000) and 0125f3f8
+   ("mirror", up to 42000), stepped by 3000.  TODO(RE): confirm 0125f3f8. */
 void FloatStep00409A91(void) {
     if (Q01270C24 < Q00546030) { Q01270C24 = Q01270C24 + Q0054604C; MenuVar575EF8 = 4; MenuRedraw(); }
 }
