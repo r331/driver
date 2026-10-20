@@ -1,7 +1,4 @@
 /* Автогенерация: tools/gen_native_links.py. Ещё не перенесённые вызовы в native уходят в слабые заглушки stubs.c; здесь — перенесённые. */
-#include <string.h>
-#include <stdio.h>
-#include "../../game/engine.h"
 #include "../../game/unported.h"
 #include "../../game/ported11.h"
 #include "../../game/ported12.h"
@@ -143,6 +140,7 @@
 #include "../../game/ported149.h"
 #include "../../game/ported150.h"
 #include "../../game/ported151.h"
+#include "../../game/ported152.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -212,7 +210,6 @@ void P56_DrawSpr (float a0, float a1, float a2, float a3, void *a4, int32_t a5, 
 void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
 void P56_Fn4E5011 (int32_t a0, void *a1) { P103_GhostState(); }
-void P56_Fn4E5284 (void *a0) { (void)a0; P94_FadeStep(); }   /* v2.25: секундомер интервью (конец по времени) */
 void P56_Fn4E53B5 (int32_t a0, void *a1) { P105_StuntHints(a0, a1); }
 void P87_Fn42A423 (uint32_t m, int32_t idx, float *pos, int32_t mode) { P90_DrawSingle(m, idx, pos, mode); }
 void P55_Fn4ED5F8 (int32_t a0, int32_t a1) { P87_LoadTile(a0, a1); }
@@ -306,8 +303,6 @@ void Call00524763 (void) { P25_CDClose(); }
 void Call00408770 (void) { P77_Menu408770(); }
 void Call004072BE (void) { P65_SetNameFields(); }
 void Call0040C165 (void) { P56_ResetFrontend(); }
-void Call0048B65D (void) { P38_FmvStop(); }
-void Call0048B568 (void) { P50_FmvReleaseObjs(); }
 void Call005237B1 (void) { P48_StopAll(); }
 void Call0052436A (void) { InitChannels_0052436A(); }
 void Call0052479E (int32_t a0) { P25_PlayCDTrack(a0); }
@@ -384,7 +379,6 @@ void G6Call0040C5BE (int32_t a0) { P54_ClearSwap(a0); }
 void G6Call0050E940 (int32_t a0) { SetLatchValue0050E940(a0); }
 void G6Call00418119 (int32_t a0) { Ui00418119(a0); }
 void G6Call00417CBB (void) { P45_PickColor(); }
-void G6Call004A2B70 (void) { ResetSlots_004A2B70(); }
 void G6Call004BA457 (void) { P95_SortObjA(); }
 void G6Call004BA57A (void) { P95_SortObjC(); }
 void G6Call004BA64D (void) { P95_SortObjB(); }
@@ -429,6 +423,11 @@ void P58_Fn416605 (void) { P100_ReplayMenuInit(); }
 void P58_Fn51763A (const char *a0, int32_t a1) { P98_LoadLang(a0, a1); }
 void P58_Fn413E37 (void) { P100_PadMenuInit(); }
 
+/* ==== manual part: tools/gen_native_links.py keeps everything below verbatim ==== */
+#include <string.h>
+#include <stdio.h>
+#include "../../game/engine.h"
+void P56_Fn4E5284 (void *a0) { (void)a0; P94_FadeStep(); }   /* v2.25: секундомер интервью (конец по времени) */
 static void link_miss0(const char *fn, uint32_t a, uint32_t b) { char m[96]; snprintf(m, sizeof m, "%s: no native object %08x/%08x", fn, (unsigned)a, (unsigned)b); DebugLog(m); }
 /* v2.00: заглушки unported.h, у которых уже есть перенос (найдены запуском игры: «not ported» в журнале) */
 /* v2.25: 0052a910 — CRT sprintf(dst, fmt, a) по адресам Game.exe: строки сообщений интервью/тренировки (004e5982 → буфер 00d04680,
