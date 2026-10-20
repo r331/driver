@@ -12,6 +12,7 @@
 #include "ported122.h"
 #include "cartab.h"
 #include "unported.h"
+#include "ported125.h"   /* P125_ObjABurst (004b955c) */
 #include "smallfuncs.h"
 #include "smallfuncs2.h"
 #include "ported6.h"
@@ -190,7 +191,7 @@ void P123_ObjAFall(uint8_t *o) {
       P11_00ba52d0 = (int32_t)lrintf(rdf(o + 0)); pos[0] = P11_00ba52d0;
       P11_00ba52d0 = (int32_t)lrintf(ground_y);          pos[1] = P11_00ba52d0;
       P11_00ba52d0 = (int32_t)lrintf(rdf(o + 8)); pos[2] = P11_00ba52d0;
-      P121_Fn4B955C(pos, vel, 5, 0);
+      P125_ObjABurst(pos, vel, 5, 0);
       wr32(o + 0x68, 0);
       PoolPush004AC702((uint16_t)rd16(o + 0x6c));
     } else if (kind == 0) {

@@ -2,6 +2,7 @@
    They work directly on Game.exe tables by address (A_xxxxxxxx = byte table at that address,
    G8_xxxxxxxx = scalar).  TODO(RE): the purpose of most tables is not known yet. */
 #include "ported7.h"
+#include "fpucw.h"
 #include <string.h>
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("A_005D57AE")
@@ -468,5 +469,14 @@ void CopyShort9_005278FB(const int16_t *p) { memcpy(&A_00B93E58[0], p, 18); }
 long double Dot4_005270BD(const float *a, const float *c) { return (long double)a[2] * c[2] + (long double)a[1] * c[1] + (long double)a[0] * c[0] + (long double)a[4] * c[4]; }
 /* CountActive_005120A7 — Game.exe 005120a7, cdecl.  Count the 64 entries of 00c56780 (0xb4 bytes) with type 3 and flag 0x10 into 00c56710. */
 void CountActive_005120A7(void) { G8_00C56710 = 0; for (int32_t i = 0; i < 0x40; i++) { uint16_t t; uint32_t f; memcpy(&t, &A_00C56780[i*0xb4], 2); memcpy(&f, &A_00C56780[i*0xb4 + 12], 4); if ((f & 0x10) != 0 && t == 3) G8_00C56710++; } }
-/* InitFpuCw_005283E2 — Game.exe 005283e2, cdecl.  x87 control words: 0057a0e2 = 0x37f (default: round to nearest, all exceptions masked), 0057a0e0 = 0xc7f (truncate). */
-void InitFpuCw_005283E2(void) { G8_0057A0E2_u16 = 0x37f; G8_0057A0E0_u16 = 0xc7f; }
+/* InitFpuCw_005283E2 — Game.exe 005283e2, cdecl.  finit; fstcw 0057a0e2 (0x37f: round to nearest, 64-bit precision, all
+   exceptions masked); 0057a0e0 = (0057a0e2 & 0xfcff) | 0xc00 = 0xc7f (truncate, 24-bit precision); fldcw 0057a0e0 — from here
+   on every fistp of the game truncates (see fpucw.h).  v2.34: until then only the two words were stored and the control word
+   stayed at round-to-nearest in both builds.  Hook: the real fninit/fldcw; native: re_fpu_load_cw emulates the rounding. */
+void InitFpuCw_005283E2(void) {
+  G8_0057A0E2_u16 = 0x37f; G8_0057A0E0_u16 = 0xc7f;
+#if defined(RE_HOOK_BUILD) && (defined(__i386__) || defined(__x86_64__))
+  __asm__ volatile("fninit\n\tfldcw %0" : : "m"(G8_0057A0E0_u16));
+#endif
+  re_fpu_load_cw(1);
+}

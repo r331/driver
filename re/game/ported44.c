@@ -248,8 +248,9 @@ int32_t P44_Rst_B93CE0;
    round(atan(i / 1024) * 2048 / pi) for all 1025 entries). */
 void P44_InitTables(void) {
 #ifndef RE_HOOK_BUILD
-  /* таблица из .data Game.exe совпадает с round(atan(i/1024) * 2048 / pi) для всех 1025 записей (проверено) */
-  for (int i = 0; i < ATAN_TAB_N; i++) P44_AtanTab[i] = (int16_t)lrint(atan((double)i / 1024.0) * 2048.0 / 3.14159265358979323846);
+  /* таблица из .data Game.exe совпадает с round(atan(i/1024) * 2048 / pi) для всех 1025 записей (проверено);
+     (lrint) — библиотечная функция без эмуляции x87 (fpucw.h): таблица — константа .data, не код игры */
+  for (int i = 0; i < ATAN_TAB_N; i++) P44_AtanTab[i] = (int16_t)(lrint)(atan((double)i / 1024.0) * 2048.0 / 3.14159265358979323846);
 #endif
 }
 /* P44_ResetState — Game.exe 00525900, cdecl.  Clear the police-commentary trigger state used by P102_CopTalk (00b93ccc..00b93e00, the hit

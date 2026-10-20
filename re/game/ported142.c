@@ -271,7 +271,28 @@ static int32_t cop_f(int32_t *c, int i) { return c[i]; }
         every 8th frame (staggered by slot) re-plan the route.
    Native deviations (see file header): slot out of 1..8 or car missing -> return; divisions by zero
    (an exception in the original) give 0. */
+#ifndef RE_HOOK_BUILD
+static void cop_drive_body(uint8_t *rec);
+/* RE_COPTRACE=N — native debug: every N frames one line per driven cop (slot, car, AI record fields, throttle). */
 void P142_CopDrive(uint8_t *rec) {
+  cop_drive_body(rec);
+  static int every = -2; if (every == -2) { const char *e = getenv("RE_COPTRACE"); every = e ? (atoi(e) > 0 ? atoi(e) : 10) : 0; }
+  if (every <= 0 || P62_Frame % every != 0) return;
+  int32_t slot = (int32_t)rec[5] - 1;
+  if (slot < 0 || slot >= COP_SLOTS) { fprintf(stderr, "[coptr] f=%d rec car=%d slot %d — нет слота\n", (int)P62_Frame, rec[0], slot + 1); return; }
+  const int32_t *cop = (const int32_t *)(const void *)&P12_0112da00[slot * COP_REC_INTS];
+  const uint8_t *car = cop_car(rec[0]);
+  fprintf(stderr, "[coptr] f=%d slot %d car %d st %d b268 %d c24a0 %d ret %d close %d path %d tsp %d tst %d stuck %d unst %d dmg %d pos %d %d spd %d fwd %d thr %d steer %d ai %d wheels %d pl %d %d\n",
+          (int)P62_Frame, slot + 1, rec[0], rec[1], (int)P56_B268, (int)P98_C824A0, cop[COP_RETIRED], cop[COP_CLOSE], cop[COP_ON_PATH],
+          cop[COP_TGT_SPEED], cop[COP_TGT_STEER], cop[COP_STUCK_N], cop[COP_UNSTICK_T], cop[COP_DAMAGE],
+          car ? rd32(car + CAR_POS_X) : 0, car ? rd32(car + CAR_POS_Z) : 0, car ? rd32(car + CAR_SPEED) : 0, car ? rd32(car + CAR_FWD_SPEED) : 0,
+          car ? rd32(car + CAR_THROTTLE) : 0, car ? rd32(car + CAR_STEER) : 0, car ? car[CAR_AI_DRIVEN] : 0, car ? rd32(car + CAR_WHEELS_DOWN) : 0,
+          (int)PlayerPosX, (int)PlayerPosZ);
+}
+static void cop_drive_body(uint8_t *rec) {
+#else
+void P142_CopDrive(uint8_t *rec) {
+#endif
 #ifndef RE_HOOK_BUILD
   static int reg;
   if (!reg) {
