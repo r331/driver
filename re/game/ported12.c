@@ -1,3 +1,6 @@
+/* ported12 — batch of small Game.exe functions (cdecl); each name P12_FnXXXXXXXX carries its Game.exe address.
+   Frontend menu actions, screen fades, the 1/z table, traffic / particle / texture housekeeping, camera route
+   stepping, save-game naming and a few HUD helpers.  Brief comments only; most globals keep address names. */
 #include "ported139.h"
 #include "ported140.h"
 #include "ported138.h"
@@ -493,15 +496,18 @@ p12_00576688_t P12_00576688;
 
 #include "memrw.h"
 
+/* Menu action: start mode 0x105 (TODO(RE): unsure which game mode) via 0040C455(1, 0), then return to menu page 00549ae8. */
 uint32_t P12_Fn00404F70(void) {
   MenuAction40CD17(); g_00b87e38 = 0x105; g_01271060 = 8;
   UiCall0040C455(1, 0); M12(0x549ae8, 0x549b00); return 0;
 }
+/* Menu action: play the CREDITS replay sequence (flags set around it); returns 1. */
 uint32_t P12_Fn00404FAE(void) {
   MenuAction40CD17(); g_00b87ef8 = 1; g_005f7e5c = 1;
   P138_ReplayCfg("CREDITS"); UiCall0040C455(1, 1);
   g_005f7e5c = 0; g_00b87ef8 = 0; return 1;
 }
+/* Settings: toggle 00575f50 (TODO(RE): unsure — stereo/3D sound?), reinitialise the sound device and reload the menu sound bank. */
 uint32_t P12_Fn004152A7(void) {
   g_00575f50 ^= 1;
   G6Call00523628(); Call00523595();
@@ -510,6 +516,7 @@ uint32_t P12_Fn004152A7(void) {
   else { Call00524496(0x54dec8, 0); Call0052360D(5); }
   Call00414D1F(); return 0;
 }
+/* Settings: open the key-binding menu for the current input mode (keyboard -> B, joystick -> A). */
 int32_t P12_Fn00407563(void) {
   int32_t r;
   if (g_00b87eec == 0) MenuAction40CD17();
@@ -517,6 +524,8 @@ int32_t P12_Fn00407563(void) {
   if (r == 0 && g_00b87eec == 0) M12(0x549f60, 0x549f78);
   return r;
 }
+/* Menu actions of one shape: leave the menu, set a variable, run a sub-screen, and return to menu page (A, B) when
+   it returns 0.  Each instance below is one Game.exe function (address in its name). */
 #define MENUWRAP(NAME, CALLEE, SETV, A, B) \
   int32_t NAME(void) { int32_t r; MenuAction40CD17(); SETV; r = CALLEE(); if (r == 0) M12(A, B); return r; }
 MENUWRAP(P12_Fn0040A45B, R12_413D70, g_01271060 = 6, 0x54a818, 0x54a830)
@@ -537,18 +546,22 @@ MENUWRAP(P12_Fn004137D6, R12_40E870, (void)0, 0x54d188, 0x54d1a0)
 MENUWRAP(P12_Fn00413973, R12_4123D0, (void)0, 0x54d278, 0x54d290)
 MENUWRAP(P12_Fn00413CBF, R12_40F2D0, (void)0, 0x54d390, 0x54d3a8)
 
+/* Menu action: 00408600(p); p == -1 returns to menu page 0054cb98. */
 void P12_Fn004129DF(int32_t p) {
   MenuAction40CD17(); UiCall00408600(p);
   if (p == -1) M12(0x54cb98, 0x54cc50);
 }
+/* Fade the motel / frontend screen in (target 1.0f) and run frames until the fade ends. */
 void P12_Fn004183F7(uint32_t a, uint32_t b) {
   Call004184DE(0x3f800000u);
   while (g_005fea60 != 0) { Call00522323(); Call004E3391(); UiCall004184F5(); Call0041846C(a, b); }
 }
+/* Fade out (target 0) and run frames until the fade ends. */
 void P12_Fn00418433(uint32_t a, uint32_t b) {
   Call004184DE(0);
   while (g_005fea60 != 0) { Call00522323(); Call004E3391(); UiCall004184F5(); Call0041846C(a, b); }
 }
+/* Advances one of two fade timers (replay / live) by a step; wraps to -1 at the end value. */
 void P12_Fn0050229C(void) {
   if (g_00b5a778 == 0) {
     g_00b32980 = g_00b32980 + g_00546054;
@@ -560,27 +573,32 @@ void P12_Fn0050229C(void) {
 }
 #ifndef RE_HOOK_BUILD
 int32_t re_oow_n = 0xdbba;
+/* native: 1/z for integer depth i — table P12_Fn00526427 below, extended past it (draw_distance > 1). */
 float re_oow_get(int32_t i) {
   if (i >= 0 && i < 0xdbba) return g_00ba53a0[i];
   return re_dd_oow(g_0125f3e0, i);       /* v2.19: продолжение таблицы (как в 00526427: k / z); z < 0 — 0 */
 }
 #endif
+/* Fills the 1/z table: entry i = k / i (k = g_0125f3e0), entry 0 = 0. */
 void P12_Fn00526427(void) {
   for (int32_t i = 0; i < 0xdbba; i++) {
     if (i == 0) g_00ba53a0[0] = 0;
     else g_00ba53a0[i] = g_0125f3e0 / (float)i;
   }
 }
+/* Ends all pending traffic turn events (see P104_TrafficTurn) and clears their state. */
 void P12_Fn00496505(void) {
   for (int32_t i = 0; i < g_01144284; i++) Call00493ECE((int32_t)g_01144340[i]);
   g_01145934 = 0; g_011426f8 = -1; g_01144284 = 0; g_0113a6c0 = 0;
 }
+/* Static-object collisions for every active traffic car that is moving (state byte 2 == 1) or has a car slot. */
 void P12_Fn00491360(void) {
   for (int32_t i = 0; i < 0x40; i++) {
     const uint8_t *p = &g_011443e0[i * 0x54];
     if (p[1] != 0 && (p[2] == 1 || p[5] != 0)) P129_CarObjects(p[0] + 1);
   }
 }
+/* For each of the 8 car slots that is active and flagged, re-initialises the nearby-traffic data of its car. */
 void P12_Fn0048EBC8(void) {
   for (int32_t i = 0; i < 8; i++) {
     const uint32_t *p = &g_0112da00[i * 0x336];
@@ -597,10 +615,12 @@ void P12_Fn00511FB8(void) {
     if ((g_00c5678c[i * 0x2d] & 0x10) != 0)
       P43_FreeSlot((uint8_t *)A_00C56780 + g_00c594a0[i] * 0xb4);
 }
+/* Clears the key-repeat history and three input buffers. */
 void P12_Fn005229F0(void) {
   g_00bdf980 = 0; g_00bde728 = 0; g_00bde764 = 0; g_00bde760 = 0;
   Call0048DB65(0x00bde740, 0x20); Call0048DB65(0x00bde680, 0xa8); Call0048DB65(0x00bde780, 0x1200);
 }
+/* Snapshots the car records (0x148) and three 0x34-byte traffic tables for the replay, then 005186CE. */
 void P12_Fn005188EC(void) {
   Call005283B5(0x00c54d20, 0x00d077c0, 0x148);
   Call005283B5(0x00c4da60, 0x00d06a20, 0x34);
@@ -608,11 +628,13 @@ void P12_Fn005188EC(void) {
   Call005283B5(0x00c4d9c0, 0x00d0eb80, 0x34);
   g_00b5a898 = 0; Call005186CE();
 }
+/* First key (DirectInput scan code) that is bindable (table 0054b010) and currently down, else 0. */
 uint32_t P12_Fn0040F09C(void) {
   for (uint32_t i = 0; i < 0x100; i++)
     if (g_0054b010[i] != 0 && IsKeyDown((int)(i & 0xff)) != 0) return i;
   return 0;
 }
+/* Load-game menu: loads the selected slot if it is used (1 on success), else plays the error sound. */
 uint32_t P12_Fn004120AF(void) {
   if (g_005fe7a8[g_005fe84c] != 0) {
     if (R12_405CB4(g_005fe84c) != 0) { UiCall0040C480(1); return 1; }
@@ -620,6 +642,7 @@ uint32_t P12_Fn004120AF(void) {
   }
   return 0;
 }
+/* Load-replay menu: loads the selected replay and starts it (1), else plays the error sound. */
 uint32_t P12_Fn004124AF(void) {
   if (g_005fe884[g_005fe928] != 0) {
     if (R12_405F2E(g_005fe928) != 0) {
@@ -629,6 +652,7 @@ uint32_t P12_Fn004124AF(void) {
   }
   return 0;
 }
+/* Shows the BMP named at Game.exe address a and waits for a key, or until b ticks passed. */
 void P12_Fn0040C813(uint32_t a, int32_t b) {
   P124_ShowBmp((const char *)re_ptr(a), 0);
   while (R12_4D97E9() != 0) {}
@@ -636,6 +660,7 @@ void P12_Fn0040C813(uint32_t a, int32_t b) {
   do { if (b <= g_005d577c) break; } while (R12_4D97E9() == 0);
   Call004086EA(); Call004D78F3(0); g_005f7e60 = 1;
 }
+/* Uploads a 640x480 image as 3 x 2 texture tiles of 256 x 256. */
 void P12_Fn0040DA56(uint32_t a) {
   int32_t n = 0;
   P40_ResetTexMem();
@@ -645,6 +670,7 @@ void P12_Fn0040DA56(uint32_t a) {
       P40_UploadSlot(n, (int32_t)v); n++;
     }
 }
+/* Advances the motel camera route by one node when the current spline segment is done; finishes at the last node. */
 void P12_Fn0041A8CD(void) {
   if (g_005fea98 == rd32(&g_005febbc[(g_005feb60 + 1) * 0x34]) &&
       (g_005feb60 = g_005feb60 + 1, g_005feb60 == g_005feb48 - 1)) {
@@ -653,6 +679,7 @@ void P12_Fn0041A8CD(void) {
     P98_CamSpline(g_005fea98, &P118_Route[(uint32_t)g_005feb60 * 0x34]);   /* v1.63: в прежнем переносе шаг ошибочно 0xd байт */
   }
 }
+/* Save-game menu: starts editing the name of the selected slot (cursor at its end). */
 uint32_t P12_Fn0041AECF(void) {
   UiCall0041AF29(g_005feeec * 2 + 1);
   g_005feef0 = 1;
@@ -660,11 +687,13 @@ uint32_t P12_Fn0041AECF(void) {
   else g_005feef8 = (int32_t)strlen((const char *)&g_005fee60[g_005feeec * 0x11]);
   return 0;
 }
+/* Save-game menu: ends name editing and saves the game to the selected slot. */
 void P12_Fn0041AF85(void) {
   g_005feef0 = 0; g_005feef4 = 0; g_005feef8 = 0;
   P140_SaveGame(g_005feeec, (const char *)P12_005fee60 + g_005feeec * 0x11);
   Call0041AFCA();
 }
+/* Selects palette p for 8-bit textures (uploads it if not current; -1 = none); returns the previous one. */
 int32_t P12_Fn00426580(int32_t p) {
   int32_t old = g_01252b74;
   if (p == -1) g_01252b74 = -1;
@@ -674,6 +703,7 @@ int32_t P12_Fn00426580(int32_t p) {
   }
   return old;
 }
+/* Fade-in step of the 1/z scale g_0125f3e0 (snaps to 1.0 near the end) and refreshes the table. */
 void P12_Fn00425EE0(void) {
   if (g_0125f3e0 < g_00546020) {
     g_0125f3e0 = g_0125f3e0 + g_00546054;
@@ -682,6 +712,7 @@ void P12_Fn00425EE0(void) {
     g_01270c38 = 2;
   }
 }
+/* When the texture set changed, marks all palette slots dirty and reloads the textures that need it. */
 void P12_Fn00489ED6(void) {
   if (g_00cff9ac != g_00b1c3f0) {
     g_00b1c3dc = 0;
@@ -691,6 +722,7 @@ void P12_Fn00489ED6(void) {
   }
   g_00b1c3f0 = g_00cff9ac;
 }
+/* Reloads the queued texture pages and clears the queue. */
 void P12_Fn0048A627(void) {
   for (int32_t i = 0; i < g_00b1c3dc; i++) {
     int32_t k = g_00b1c3f4[i];
@@ -699,6 +731,7 @@ void P12_Fn0048A627(void) {
   }
   g_00b1c3dc = 0;
 }
+/* Re-uploads texture page p from data address v (see P104_CarDents). */
 void P12_Fn0048A46B(int32_t p, int32_t v) {
   if (g_01145a60[p * 0x10 + 1] != 0xff) {
     uint32_t u = g_01145a60[p * 0x10 + 1];
@@ -707,6 +740,7 @@ void P12_Fn0048A46B(int32_t p, int32_t v) {
     Call004248C6(0, rd32(&g_01146f20[u * 0x1c + 4]), 3, 0x01146f28u + u * 0x1c, p);
   }
 }
+/* Debris pass: 004B998B for each of the 200 debris records with flag 0x2, when debris is active. */
 void P12_Fn004B9933(void) {
   if (g_011173c8 != 0) {
     for (int32_t i = 0; i < 200; i++) {
@@ -715,6 +749,7 @@ void P12_Fn004B9933(void) {
     }
   }
 }
+/* Per-tick effects update (not during replays): particles, debris, every other tick the effect lists; 16-step counter. */
 void P12_Fn004AAE34(void) {
   if (g_00b5a778 == 0) {
     if (g_00553850 != 0) Call004C0C6F(0);
@@ -726,25 +761,30 @@ void P12_Fn004AAE34(void) {
     }
   }
 }
+/* Pause handling: toggles between paused and running when the pause request changed. */
 void P12_Fn0050E963(void) {
   if (g_00b5a76c == 0) {
     if (g_00b5a778 != 0 || g_00b5a770 != 0) Call0050F289();
   } else if (g_00b5a778 == 0 || g_00b5a770 != 0) P127_Pause();
   g_00b5a770 = 0;
 }
+/* Initialises the radar grid neighbour offsets (8 directions, 55 cells per row) and its list heads. */
 void P12_Fn0050C010(void) {
   for (int32_t i = 0; i < 8; i++) g_00c7d800[i] = g_00574530[i * 2] + g_00574530[i * 2 + 1] * 0x37;
   g_00c7d828 = 0x00c7d82c; g_00c7d834 = 0x00c7d838; g_00c7d840 = 0x00c7d844;
   g_00c7d84c = 0; g_00c595a0 = 0;
 }
+/* Loads the FONT and BIG fonts. */
 void P12_Fn00516E76(void) {
   g_00c55034 = R12_40A8B0(re_addr("FONT"), 0, -1, 5, 0x18)   /* .data 00575a28 "FONT" */;
   R12_40A8B0(re_addr("BIG"), 1, -1, 5, 0x18)      /* .data 00575a30 "BIG" */;
   CopySlots_0040AA82(1);
 }
+/* Re-syncs the body state of the current player car record (004DAA36). */
 void P12_Fn004DC8EA(void) {
   Call004DAA36(0x00d077c0u + (uint32_t)g_00d11878 * 0x52, 0x00d077d8u + (uint32_t)g_00d11878 * 0x52);
 }
+/* Shows HUD message string a for b ticks (c != 0: only if no message is showing). */
 void P12_Fn004E5982(int32_t a, int32_t b, int32_t c) {
   if (c == 0 || g_00d044d0 == 0) { Call0052A910(0x00d04680, g_00c55820[a], 0); g_00d044d0 = b; }
 }
@@ -757,6 +797,7 @@ p12_lerp_t P12_PartLerp;
 #pragma pop_macro("P12_PartLerp") /*gvi*/
 #pragma pop_macro("P12_PartLerp")
 #endif
+/* Interpolates the per-part records (0x14 bytes, 4 floats after a 0x10 header) of a and b at t into P12_PartLerp. */
 void P12_Fn004F3E78(const float *a, const float *b, float t) {
   const uint8_t *pa = (const uint8_t *)a + 0x10, *pb = (const uint8_t *)b + 0x10;
   int32_t n = g_00c821a0;
@@ -769,12 +810,14 @@ void P12_Fn004F3E78(const float *a, const float *b, float t) {
     pa += 0x14; pb += 0x14;
   }
 }
+/* Copies 128 rows of 0x100 bytes from a to b with the two buffers' pitches. */
 void P12_Fn00504699(int32_t a, int32_t b) {
   for (int32_t i = 0; i < 0x80; i++) {
     Call005283B5((uint32_t)b, a, 0x100);
     a = a + 0x100 + g_00b52a38 * 2; b = b + 0x100 + g_00b32970 * 2;
   }
 }
+/* Plays one-shot speech/sample p of table 00576688 at most every 500 frames, adding its score value. */
 void P12_Fn00525CB7(int32_t p) {
   if (g_00b93ce0 != p && 500 < g_00d118c0 - g_00576688[p * 3 + 1]) {
     Call004D6190(g_00576688[p * 3] + 0xf000);

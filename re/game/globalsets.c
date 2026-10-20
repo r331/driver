@@ -1,3 +1,11 @@
+/* globalsets.c — tiny Game.exe functions that only copy or set global variables (English overview).
+   Each GlobalSet<address> is one Game.exe function at that address; the globals G<address> are named by their
+   Game.exe address.  The bodies are kept literally (integer constants as the original stored them):
+   1065353216 = 0x3f800000 = 1.0f; 5723352 = 0x5754d8 (front-end menu page, see SetMode1_00510448 in ported8.c);
+   other large constants such as 5562880 = 0x54e200 or 17945664 = 0x111d440 are Game.exe addresses stored into
+   pointer variables.  Most functions save menu values (00c55xxx -> 0054xxxx) or reset groups of flags; their
+   purpose is named, where known, in the callers.  GlobalSet0051D811 copies the player car corners (native:
+   written by P102_PlayerCorners) to the previous-frame copy P117_PrevCorn.  All cdecl. */
 #include "globalsets.h"
 #include "ported117.h"
 #include "ported102.h"

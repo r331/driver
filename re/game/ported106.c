@@ -223,6 +223,8 @@ static void pair(float *a, float *b, const float *s, int32_t w, float z, int ori
 }
 
 /* ---- 004ae6fb: пятна фар на дороге (объекты B), если машина повёрнута к камере (|угол| ≤ 0x600) ---- */
+/* P106_CarHeadSpots — Game.exe 004ae6fb.  Headlight spots on the road (B objects) for a car facing the
+   camera (|relative angle| <= 0x600). */
 void P106_CarHeadSpots(int32_t car) {
 #ifndef RE_HOOK_BUILD
   if (car < 0 || car >= 65) return;
@@ -235,7 +237,7 @@ void P106_CarHeadSpots(int32_t car) {
   if (!(d < 0x601 && -0x601 < d)) return;
   uint16_t fl = rd16(m + 0x102);
   for (int32_t side = 0; side < 2; side++) {
-    int32_t dmg = side == 0 ? P99_Cars[car].vel[0] : P99_Cars[car].vel[1];
+    int32_t dmg = side == 0 ? P99_Cars[car].damage[0] : P99_Cars[car].damage[1];
     int32_t mark = side == 0 ? 0 : 2;
     const uint8_t *src = side == 0 ? m + 0x10 : m;
     if (dmg >= 1000) continue;
@@ -301,6 +303,7 @@ static void tail_lights(int32_t car, int brake) {
 }
 
 /* ---- 004adfcc: задние огни машины (объекты C), пока объектов < 0xc9 ---- */
+/* P106_CarTailLights — Game.exe 004adfcc.  Tail lights of a car (C objects) while fewer than 0xc9 C objects exist. */
 void P106_CarTailLights(int32_t car) {
 #ifndef RE_HOOK_BUILD
   if (car < 0 || car >= 65) return;
@@ -311,6 +314,8 @@ void P106_CarTailLights(int32_t car) {
 }
 
 /* ---- 004ad837: стоп-сигналы (объекты C и B), если машина повёрнута задом к камере (|угол| ≤ 0x320) ---- */
+/* P106_CarBrakeLights — Game.exe 004ad837.  Brake lights (C and B objects) when the car's back faces the
+   camera (|relative angle| <= 0x320). */
 void P106_CarBrakeLights(int32_t car) {
 #ifndef RE_HOOK_BUILD
   if (car < 0 || car >= 65) return;
@@ -323,6 +328,8 @@ void P106_CarBrakeLights(int32_t car) {
 }
 
 /* ---- 00420a21: годится ли формат эмулируемой текстуры 256×256 для устройства dev (CreateSurface + Release) ---- */
+/* P106_CanDevTex — Game.exe 00420a21.  Whether device dev accepts the emulated 256x256 texture format
+   (CreateSurface + Release). */
 int32_t P106_CanDevTex(const uint8_t *dev, void *dd) {
   uint32_t d[31];
   memset(d, 0, sizeof d);
@@ -343,6 +350,8 @@ int32_t P106_CanDevTex(const uint8_t *dev, void *dd) {
 }
 
 /* ---- 0042282f: 256×256 индексов src → 16 бит во все поверхности списка (палитра — узел +0xc) ---- */
+/* P106_EmulUpload8 — Game.exe 0042282f.  256x256 palette indices src -> 16-bit pixels into every surface
+   of the list (palette = node +0xc). */
 void P106_EmulUpload8(void *node, int32_t src) {
   for (uint8_t *n = (uint8_t *)node; n != NULL; n = (uint8_t *)re_rd_ptr(n + 0x18)) {
     uint32_t d[31];
@@ -361,6 +370,8 @@ void P106_EmulUpload8(void *node, int32_t src) {
 }
 
 /* ---- 004228eb: 256 строк по 0x200 байт src в поверхности списка с типом +4 == G6_0054EF2C ---- */
+/* P106_EmulUpload16 — Game.exe 004228eb.  256 rows of 0x200 bytes from src into the list surfaces whose
+   type (+4) == G6_0054EF2C. */
 void P106_EmulUpload16(void *node, int32_t src) {
   for (uint8_t *n = (uint8_t *)node; n != NULL; n = (uint8_t *)re_rd_ptr(n + 0x18)) {
     if (rd32(n + 4) != G6_0054EF2C) continue;
@@ -384,6 +395,8 @@ void P106_EmulUpload16(void *node, int32_t src) {
 }
 
 /* ---- 004d92d2: строка text шрифтом 8×8 (P21_Font8) в LFB с позиции (G6_00D117A4, G6_00D117A8) цветом WH00B2C3A8 ---- */
+/* P106_LfbText — Game.exe 004d92d2.  Text with the 8x8 font P21_Font8 straight into the frame buffer
+   (LFB) at (G6_00D117A4, G6_00D117A8) in colour WH00B2C3A8. */
 typedef struct { uint32_t size; void *lfb; uint32_t stride; uint32_t mode; uint32_t origin; } p106_lfbinfo_t;
 void P106_LfbText(uint32_t text) {
   p106_lfbinfo_t info; memset(&info, 0, sizeof info);
@@ -425,6 +438,8 @@ void P106_LfbText(uint32_t text) {
 }
 
 /* ---- 004ef66a: небо — модели P79_ModelTab[0..3] в точке (0, 40, 36) вида, текстура по таблице .data 00562d9c ---- */
+/* P106_SkyModels — Game.exe 004ef66a.  Sky: models P79_ModelTab[0..3] at view point (0, 40, 36),
+   texture from the .data table 00562d9c. */
 /* .data 00562d9c: 7 городов × 5 (tools/pedump rd из Game.exe) */
 static const int32_t k_sky_tex[7 * 5] = {
   0x2, 0x14, 0x15, 0x14, 0x16,  0x2, 0x14, 0x15, 0x14, 0x16,  0x2, 0x2, 0x2, 0x2, 0x2,  0x2, 0x14, 0x15, 0x14, 0x16,
@@ -470,6 +485,8 @@ void P106_SkyModels(void) {
 }
 
 /* ---- 00512174: такт 64 частиц A_00C56780 (0xb4): клетки карты вокруг, падение/курс, вращение, путь, дальность от игрока ---- */
+/* P106_PartTick — Game.exe 00512174.  Per-frame step of the 64 walkers A_00C56780 (0xb4 bytes): map
+   cells around, falling / course, rotation, path, distance from the player. */
 static float rdf4(const uint8_t *p) { float v; memcpy(&v, p, 4); return v; }
 static int32_t fr(float v) { return (int32_t)lrintf(v); }   /* fistp */
 static int16_t road_at(const uint8_t *p, int32_t dx, int32_t dz) {
@@ -587,6 +604,8 @@ void P106_PartTick(void) {
 }
 
 /* ---- 0048bf52: пресет окружения EAX i (IKsPropertySet::Set, свойство 0, 16 байт из .data 005511f0) ---- */
+/* P106_EaxPreset — Game.exe 0048bf52.  EAX environment preset i (IKsPropertySet::Set, property 0,
+   16 bytes from .data 005511f0). */
 static const uint8_t k_eax_guid[16] = { 0xc1, 0x6f, 0x4e, 0x4a, 0x41, 0xc3, 0xd1, 0x11, 0xb7, 0x3a, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 };  /* .data 00546740 */
 /* .data 005511f0: 7 записей {окружение, громкость, затухание, демпфирование} (tools/pedump rd из Game.exe) */
 static const uint32_t k_eax_preset[7][4] = {

@@ -1,3 +1,6 @@
+/* Last platform routines: installing the Direct3D emulation of the Glide API, grSstWinOpen
+   (window / DirectDraw / D3D device setup), the 3D device suitability check, re-opening Glide
+   after a resolution change, and WinMain. */
 /* v1.96: ported151 — см. ported151.h.
    0041cede — idx ∈ [0, 00b1c0e0): 00a421cc = idx; 123 ячейки 01270c58..01271024 ← адреса функций эмуляции Glide через D3D
      (0041d8e9..0041fab9, 00421cab, метка 0041e3b0 в grDepthBufferMode, 0041ed98 — grSstWinOpen); 00a421ec, 00a421f4 ← аргументы.
@@ -171,17 +174,34 @@ int32_t P151_PrioOn;
 #else
 #  define P151_STD
 #  define SLOT(addr, name) glide_proc(name)
+/* glide_proc — Native: Glide function pointer by export name (the hook build reads the Game.exe cell instead). */
 static void *glide_proc(const char *name) {
   for (int i = 0; i < P33_GlideCount(); i++)
     if (strcmp(P33_GlideName(i), name) == 0) return P33_GlideProc(i);
   return NULL;
 }
 #endif
+/* Glide 2 screen resolution codes (GR_RESOLUTION_*, glide.h); 0xff = GR_RESOLUTION_NONE (windowed). */
+#define GR_RES_320x240   0x1
+#define GR_RES_512x384   0x3
+#define GR_RES_640x480   0x7
+#define GR_RES_800x600   0x8
+#define GR_RES_1024x768  0xc
+#define GR_RES_1280x1024 0xd
+#define GR_RES_1600x1200 0xe
+#define GR_RES_NONE      0xff
+
+/* rd32 — Unaligned uint32 read. */
 static uint32_t rd32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }
+/* wr32 — Unaligned uint32 write. */
 static void wr32(uint8_t *p, uint32_t v) { memcpy(p, &v, 4); }
+/* u2f — reinterpret uint32 bits as float. */
 static float __attribute__((unused)) u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
+/* call_i1 — Call a stdcall (hook) Glide function with one int argument; NULL is skipped. */
 static void call_i1(void *f, int32_t a) { if (f) ((void (P151_STD *)(int32_t))f)(a); }
+/* call_i2 — As call_i1 with two arguments. */
 static void call_i2(void *f, int32_t a, int32_t b) { if (f) ((void (P151_STD *)(int32_t, int32_t))f)(a, b); }
+/* call_i3 — As call_i1 with three arguments. */
 static void call_i3(void *f, int32_t a, int32_t b, int32_t c) { if (f) ((void (P151_STD *)(int32_t, int32_t, int32_t))f)(a, b, c); }
 
 /* ---- 0041cede ---- */
@@ -218,6 +238,10 @@ static const struct { uint32_t slot, fn; } k_d3d_tab[] = {
   { 0x01270e38u, 0x0041ed98u }, { 0x01271020u, 0x0041f2a0u }, { 0x01270d20u, 0x0041ed2du }, { 0x01270db0u, 0x0041e4b9u },
   { 0x01270e84u, 0x0041e729u }, { 0x01270e30u, 0x0041ea2au }, { 0x01270d9cu, 0x0041f929u },
 };
+/* P151_InstallD3D — Game.exe 0041cede, cdecl.  Point the 123 Glide function cells at Game.exe's Direct3D emulation (k_d3d_tab: cell -> emulator)
+   for 3D device idx; native also sets the module variables that cache some of these pointers.
+   Stores no8bit (disable 8-bit textures) and full (full screen).  Returns 0 if idx is not a
+   known device, else 1. */
 int32_t P151_InstallD3D(int32_t idx, int32_t no8bit, int32_t full) {
   if (idx < 0 || P42_DevCount <= idx) return 0;
   P151_DevIdx = idx;
@@ -248,14 +272,22 @@ int32_t P151_InstallD3D(int32_t idx, int32_t no8bit, int32_t full) {
 }
 
 /* ---- 0041ed98 ---- */
+/* P151_WinOpen — Game.exe 0041ed98, stdcall (ret 28).  grSstWinOpen emulation: release a previous device, take the window (or the active one), create
+   DirectDraw 4 / Direct3D 3 for the selected device; windowed (mode 0xff): normal cooperative
+   level and a back buffer the size of the client area; otherwise exclusive full screen with the
+   Glide resolution `mode`.  Then Z buffer, D3D device, capability flags P23_DevCaps, viewport,
+   8-bit texture support (RE_NO8BIT overrides in native), texture emulation, render states, and two
+   clear+swap.  a2..a6 (refresh, colour format, origin, buffers) are ignored.  Returns 1 when the
+   device is ready, 0 on any failure (everything released). */
+#line 251   /* keeps the __LINE__ values of RE_TRACE_FAIL messages identical to the pre-comment source */
 int32_t P151_WinOpen(int32_t hwnd, int32_t mode, int32_t a2, int32_t a3, int32_t a4, int32_t a5, int32_t a6) {
   (void)a2; (void)a3; (void)a4; (void)a5; (void)a6;
   int32_t w = 0, h = 0;
   if (P22_DevReady != 0) { NoopFn0042243f(); P31_ReleaseDirectDraw(); }   /* «WARNING: Hardware already allocated... freeing first» */
   P24_Hwnd = (void *)(intptr_t)hwnd;
   if (hwnd == 0) P24_Hwnd = plat_window_active();
-  if (mode != 0xff) plat_window_maximize(P24_Hwnd);
-  P24_RestoreMode = mode != 0xff;
+  if (mode != GR_RES_NONE) plat_window_maximize(P24_Hwnd);
+  P24_RestoreMode = mode != GR_RES_NONE;   /* 1 = full screen with a display mode change */
   P32_DevInfo = (uint8_t *)re_rd_ptr((uint8_t *)&P74_DevTab[0] + (size_t)P151_DevIdx * 0x4c + 0x48);
   uint8_t *dv = P32_DevInfo;
   P31_DDObj0 = P35_GetDirectDrawInterface(re_rd_ptr(dv));
@@ -272,13 +304,13 @@ int32_t P151_WinOpen(int32_t hwnd, int32_t mode, int32_t a2, int32_t a3, int32_t
   } else {
     if (plat_dd_set_cooperative(P24_DD, P24_Hwnd, 0x11) != 0) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
     switch (mode) {
-    case 1: w = 0x140; h = 0xf0; break;
-    case 3: w = 0x200; h = 0x180; break;
-    case 7: w = 0x280; h = 0x1e0; break;
-    case 8: w = 800; h = 600; break;
-    case 0xc: w = 0x400; h = 0x300; break;
-    case 0xd: w = 0x500; h = 0x400; break;
-    case 0xe: w = 0x640; h = 0x4b0; break;
+    case GR_RES_320x240:   w = 0x140; h = 0xf0; break;
+    case GR_RES_512x384:   w = 0x200; h = 0x180; break;
+    case GR_RES_640x480:   w = 0x280; h = 0x1e0; break;
+    case GR_RES_800x600:   w = 800; h = 600; break;
+    case GR_RES_1024x768:  w = 0x400; h = 0x300; break;
+    case GR_RES_1280x1024: w = 0x500; h = 0x400; break;
+    case GR_RES_1600x1200: w = 0x640; h = 0x4b0; break;
     default: P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; }
     }
     if (P24_SetDisplayMode(P24_DD, w, h) == 0) { P31_ReleaseDirectDraw(); { RE_TRACE_FAIL(); return 0; } }
@@ -323,6 +355,11 @@ int32_t P151_WinOpen(int32_t hwnd, int32_t mode, int32_t a2, int32_t a3, int32_t
 }
 
 /* ---- 00420038 ---- */
+/* P151_CheckDev — Game.exe 00420038, cdecl.  Check whether 3D device record rec (0x4c bytes, device info at +0x48) is usable: hardware
+   (prefers the HAL description), TLVERTEX and DrawPrimitive support, 256x256 textures, textures
+   loadable while rendering; creates a temporary DirectDraw/D3D device to enumerate texture and
+   Z formats and decides 8-bit texture support (+0x588).  Returns 1 if usable.  Log messages of
+   the original are release-build no-ops (NoopFn0042243f). */
 int32_t P151_CheckDev(uint8_t *rec) {
   uint8_t *dv = (uint8_t *)re_rd_ptr(rec + 0x48);
   NoopFn0042243f(); NoopFn0042243f();                 /* «Checking 3D device:», имя записи */
@@ -370,6 +407,12 @@ out:
 }
 
 /* ---- 00425f7b ---- */
+/* P151_Reopen — Game.exe 00425f7b, cdecl.  Re-open Glide after a mode change: resize the window to P19_ScrW x P19_ScrH, select the board,
+   open windowed (mode 0) or full screen with the resolution matching the screen width (mode 1),
+   select the projection tables for 00bdfa18, set depth buffering (mode 2, function 3), no culling,
+   alpha reference 0x82, constant colour 0xbb000000, fog, texture combine; unless keep, reset the
+   view scale and transform tag.  Returns 1, or 0 for an unsupported width / open failure. */
+#line 373   /* see above */
 int32_t P151_Reopen(int32_t hwnd, int32_t mode, int32_t keep) {
   plat_window_move((void *)(intptr_t)hwnd, 0, 0, P19_ScrW, P19_ScrH, 1);
   int32_t fs = P151_FsFlag != 0;
@@ -377,17 +420,17 @@ int32_t P151_Reopen(int32_t hwnd, int32_t mode, int32_t keep) {
   InitFpuCw_005283E2();
   call_i1(SLOT(0x01270e88u, "_grSstSelect@4"), 0);
   if (mode == 0) {
-    if (P47_GlideWinOpen(hwnd, 0xff, 0, 0, fs, 2, 1) == 0) { RE_TRACE_FAIL(); return 0; }
+    if (P47_GlideWinOpen(hwnd, GR_RES_NONE, 0, 0, fs, 2, 1) == 0) { RE_TRACE_FAIL(); return 0; }
   } else if (mode == 1) {
     int32_t res;
     switch (P19_ScrW) {
-    case 0x140: res = 1; break;
-    case 0x200: res = 3; break;
-    case 0x280: res = 7; break;
-    case 800: res = 8; break;
-    case 0x400: res = 0xc; break;
-    case 0x500: res = 0xd; break;
-    case 0x640: res = 0xe; break;
+    case 0x140: res = GR_RES_320x240; break;
+    case 0x200: res = GR_RES_512x384; break;
+    case 0x280: res = GR_RES_640x480; break;
+    case 800:   res = GR_RES_800x600; break;
+    case 0x400: res = GR_RES_1024x768; break;
+    case 0x500: res = GR_RES_1280x1024; break;
+    case 0x640: res = GR_RES_1600x1200; break;
     default: { RE_TRACE_FAIL(); return 0; }
     }
     if (P47_GlideWinOpen(hwnd, res, 0, 0, fs, 2, 1) == 0) { RE_TRACE_FAIL(); return 0; }
@@ -432,6 +475,7 @@ int32_t P151_Reopen(int32_t hwnd, int32_t mode, int32_t keep) {
 }
 
 /* ---- 00521f10 ---- */
+/* lang_fatal — Fatal error with language string 0x132 (copied, bounded in native) after freeing buffers. */
 static void lang_fatal(void) {
   P58_LangStrings();
   const char *s = (const char *)re_ptr(P97_StrAddr[0x132]);
@@ -443,11 +487,18 @@ static void lang_fatal(void) {
   ResetDirector_00522306();
   P30_FatalError(P151_ErrBuf);
 }
+/* set_b87eb8 — write 00b87eb8 (front-end / config mode flag) and its native alias P58_CfgOn. */
 static void set_b87eb8(int32_t v) { P55_B87EB8 = v;
 #ifndef RE_HOOK_BUILD
   P58_CfgOn = v;
 #endif
 }
+/* P151_WinMain — Game.exe 00521f10, stdcall (ret 16).  Program entry.  Resets options, sets 640x480x16, writes the log banner, creates the window,
+   loads config.dat (native: defaults and a new config.dat when missing; hook: fatal), starts Glide,
+   timers, process priority and hides the screensaver, then starts all systems and runs the front
+   end (P140_Frontend) or, without front end, the game loop / menu loop directly.  On exit shuts
+   everything down; exit code 0xc9 shows "The lead car went out of range!".  Returns the exit code
+   00b87e24. */
 int32_t P151_WinMain(int32_t hinst, int32_t prev, int32_t cmd, int32_t show) {
   (void)prev; (void)cmd;
   set_b87eb8(1);

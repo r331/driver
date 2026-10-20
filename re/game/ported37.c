@@ -1,4 +1,7 @@
 /* DirectInput: инициализация и перечисление джойстиков — восстановлено из Game.exe (Input.c). */
+/* ported37.c — DirectInput setup (English overview): P37_InitInput (004e2ee0) creates the DirectInput object,
+   keyboard, mouse (buffered, event-driven) and enumerates joysticks through P37_JoyEnumCb (004e3cdf).
+   All DirectInput calls go through the plat_di_* layer (plat.h). */
 #include "ported37.h"
 #include <string.h>
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -15,6 +18,14 @@ int32_t P37_MouseShared;
 static const uint8_t k_defcfg[20] = { 0x3b,0x3c,0x3d,0x3e,0x2c,0x2d,0x28,0x35,0x39,0x1c,0x2b,0x24,0x25,0x26,0x2e,0x23,0x02,0x03,0x00,0x00 };
 static const uint8_t k_defkeys[12] = { 0x20,0x21,0x00,0x02,0x01,0x03,0x04,0x05,0x06,0x07,0x08,0x09 };
 
+/* P37_JoyEnumCb — Game.exe 004e3cdf, DirectInput device enumeration callback.
+   In:  inst — DIDEVICEINSTANCE of the found joystick (+4 = instance GUID, +0x24 = dwDevType).
+   Creates the device (IDirectInputDevice2), sets the joystick data format, cooperative level 5
+   (DISCL_FOREGROUND | DISCL_EXCLUSIVE), axis range -31..31 and dead zone 3 on X/Y, acquires it, creates the two
+   force-feedback effects when the device reports DIDC_FORCEFEEDBACK (0x100), and appends it to the
+   joystick tables P34_EffC / P36_JoyAxisCap / P36_JoyAux (max 8).
+   Returns 1 = continue enumeration, 0 = stop (table full).  A device that fails any step is released
+   and skipped (returns 1). */
 int32_t P37_JoyEnumCb(const void *inst, void *di) {
   (void)di;
   void *d1 = plat_di_create_device(P34_Di, (const uint8_t *)inst + 4);
@@ -33,8 +44,8 @@ int32_t P37_JoyEnumCb(const void *inst, void *di) {
   P34_Joy = dev;
   if (P36_AcquireDevice(2) == 0) { plat_di_release(dev); return 1; }
   uint32_t sub; memcpy(&sub, (const uint8_t *)inst + 0x24, 4);
-  sub = (sub & 0xff00) >> 8;
-  int32_t axes = (sub != 4);
+  sub = (sub & 0xff00) >> 8;     /* device subtype (DIDEVTYPE_GET_SUBTYPE) */
+  int32_t axes = (sub != 4);     /* TODO(RE): subtype 4 (DIDEVTYPEJOYSTICK_GAMEPAD?) gets flag 0 — meaning of P36_JoyAxisCap unsure */
   uint32_t caps = 0;
   if (plat_di_get_caps_flags(dev, &caps) != 0) { plat_di_release(dev); return 1; }
   int32_t ff = 0;
@@ -49,6 +60,13 @@ int32_t P37_JoyEnumCb(const void *inst, void *di) {
   return P36_JoyCount < 8;
 }
 
+/* P37_InitInput — Game.exe 004e2ee0, cdecl.  Creates DirectInput (version 0x500), the system keyboard and
+   mouse, sets their data formats and cooperative levels (DirectInput DISCL bits: 6 = FOREGROUND | NONEXCLUSIVE,
+   5 = FOREGROUND | EXCLUSIVE; the mouse is non-exclusive (6) when P37_MouseShared == 0 and exclusive (5) otherwise — TODO(RE): the
+   global's name looks inverted),
+   acquires the keyboard, loads the default key layout (20 bytes -> P36_KeyCfg, 12 bytes -> P19_Keys1),
+   attaches an event and a 32-entry buffer to the mouse, then enumerates joysticks when P36_JoyPresent.
+   Returns 1 on success; on any failure releases everything (P34_ReleaseInput) and returns 0. */
 int32_t P37_InitInput(void) {
   if (P34_Di) P34_ReleaseInput();
   P34_Di = plat_di_create((void *)(uintptr_t)G6_00BDF9C4, 0x500);

@@ -1,3 +1,9 @@
+/* ported147.c — mission script (MScript) command compiler and the score-record helper (English overview;
+   detailed Russian notes follow).  P147_ParseCmd (004f68a1) compiles one text command into the script's
+   record list (P77_List): most opcodes store {opcode, int args...}; set/variable ops, conditions and string
+   commands have their own layouts; level-setup keywords (weather, night, map, chase, car type ...) take
+   effect immediately and store nothing.  Opcode names come from mscript_ops.h.
+   P147_ScoreRec (00503ddf) merges the current marker/timer record into the best-score record. */
 /* v1.92: ported147 — 004f68a1 (разбор команды MScript) и 00503ddf (запись рекорда по записи скрипта).
    004f68a1: реальная граница 004f68a1..004f832e (ret, cdecl), 0x1a8e = 6798 байт (в functions.csv было 295);
    таблица переходов 004f832f (+ байтовая 004f83ef, коды 2..0x97, остальные — ветка по умолчанию 004f8271).
@@ -17,6 +23,7 @@
    в 01271070; слово 00b32a14 = 8; 00503e83(*00b32a08, 00b32a10) ≠ 0 → копия в *00b32a08 (+4 = 8), 1. В native адрес
    01271088 (единственное значение 00b32a08 из P71_ScoreSetup) — слова P56_Blk11[10..15] и псевдонимы P71_S1271*. */
 #include "ported147.h"
+#include "mscript_ops.h"
 #include "unported.h"
 #include "reptr.h"
 #include "crt.h"
@@ -87,6 +94,9 @@ p147_chase_t P147_ChaseName;
 
 static const char *const k_lev[7] = { "MIAMI_01.LEV", "FRISCO_01.LEV", "LA_01.LEV", "NY_01.LEV", "IVIEW.LEV", "TRAIN.LEV", "NC_01.LEV" };   /* .data 00562d44 */
 
+/* Small parsing helpers: upper-case in place, next token of the current line, "%d" parse (1 = ok), append a
+   record of `size` bytes to P77_List (NULL = out of memory), quoted string into dst; set_* write a value to
+   every data-image alias of the same Game.exe variable; fist = fistp of a float given as bits. */
 static void strupr_c(char *s) { for (; *s; s++) if (*s >= 'a' && *s <= 'z') *s = (char)(*s - 0x20); }   /* 0053fb50 _strupr */
 static int32_t tok(void) { return P65_NextToken(P65_Line, P65_Tok); }
 static int32_t num(const char *s, int32_t *out) { int r = g_sscanf(s, "%d", out); return r != 0 && r != -1; }   /* 0052e250 "%d" */
@@ -139,6 +149,15 @@ static void goal_copy(void) {
 }
 
 /* ---- 004f68a1 ---- */
+/* P147_ParseCmd — Game.exe 004f68a1, cdecl.  Compiles the command whose keyword entry is cmdp (p42_cmd_t:
+   id, argc, size) from the rest of the current line (P65_Line).
+   Returns 0xb = compiled, continue with the next line; 0 = INCREASE/DECREASE record written (TODO(RE): why
+   these return 0); 0xc = syntax error / unknown variable; 3 = out of memory; 9 = NULL command; or the
+   tokeniser's error code.  Immediate keywords: RAINING / LIGHTNING / SNOWING / FOGGY set P26_FxA/B/C/D,
+   NIGHT / DARKNIGHT / DAWN / DUSK set the night and fog flags, LOADMAP picks the city from the level name,
+   RANDOMCHASE picks the next recorded chase replay (replaydata\Chase\<name><n>.leader) and switches to
+   replay-driven input, PLAYERCARTYPE / SETLEADCAR* / TRAININGMODE store settings, USELASTPLAYERPOSITION
+   reuses the previous end position.  Variable-length records: string commands store {id, [arg,] len, text}. */
 int32_t P147_ParseCmd(void *cmdp) {
   p42_cmd_t *cmd = (p42_cmd_t *)cmdp;
   const char *ifname = NULL;
@@ -146,19 +165,19 @@ int32_t P147_ParseCmd(void *cmdp) {
   if (cmd == NULL) return 9;
   int32_t id = cmd->id;
   switch (id) {
-  case 2:
+  case MS_SET:
     r = tok(); if (r != 0) return r;
     strupr_c(P65_Tok);
     return P122_SetVar(cmd, NULL);
-  case 0xc: case 0xd: case 0xe: case 0xf:
+  case MS_INCREASE: case MS_INC: case MS_DECREASE: case MS_DEC:
     r = tok(); if (r != 0) return r;
     strupr_c(P65_Tok);
     v = P42_FindVar(P65_Tok);
     if (v == -1 || P42_Vars[v].type != 3) return 0xc;
     if ((p = rec_add(8)) == NULL) return 3;
-    p[0] = id <= 0xd ? 0xc : 0xe; p[1] = v;
+    p[0] = id <= MS_INC ? MS_INCREASE : MS_DECREASE; p[1] = v;
     return 0;
-  case 0x10: case 0x11:
+  case MS_ADD: case MS_SUB:
     r = tok(); if (r != 0) return r;
     strupr_c(P65_Tok);
     v = P42_FindVar(P65_Tok);
@@ -168,12 +187,12 @@ int32_t P147_ParseCmd(void *cmdp) {
     if ((p = rec_add(0xc)) == NULL) return 3;
     p[0] = id; p[1] = v; p[2] = P65_Ints[0];
     return 0xb;
-  case 0x13:
+  case MS_SETPLAYERPOSITION:
     r = P65_ReadInts(cmd); if (r != 0) return r;
     B84(0x00c81278u) = 1; B84(0x00c812c0u) = P65_Ints[0]; B84(0x00c812c4u) = -500; B84(0x00c812c8u) = P65_Ints[1];
     break;
-  case 0x14: case 0x87: {
-    int32_t maxn = id == 0x14 ? 3 : 4, per = id == 0x14 ? 3 : 1;
+  case MS_SPAWNCOPS: case MS_LOSETAILSOUNDS: {
+    int32_t maxn = id == MS_SPAWNCOPS ? 3 : 4, per = id == MS_SPAWNCOPS ? 3 : 1;
     r = tok(); if (r != 0) return r;
     strupr_c(P65_Tok);
     if (!num(P65_Tok, &P65_Ints[0])) return 0xc;
@@ -184,9 +203,9 @@ int32_t P147_ParseCmd(void *cmdp) {
       strupr_c(P65_Tok);
       if (1 + i >= 64 || !num(P65_Tok, &P65_Ints[1 + i])) return 0xc;
     }
-    if (id == 0x14) {
+    if (id == MS_SPAWNCOPS) {
       if ((p = rec_add(n * 0xc + 8)) == NULL) return 3;
-      p[0] = 0x14; p[1] = n;
+      p[0] = MS_SPAWNCOPS; p[1] = n;
       for (int32_t i = 0; i < n * 3; i++) p[2 + i] = P65_Ints[1 + i];
     } else {
       G6_00B20368 = n; G8_00B20368 = n;
@@ -194,18 +213,18 @@ int32_t P147_ParseCmd(void *cmdp) {
     }
     return 0xb;
   }
-  case 0x16: case 0x66: case 0x8d: {
+  case MS_INFORMPLAYER: case MS_ADDDASHMESSAGE: case MS_MODELBONUS: {
     r = tok(); if (r != 0) return r;
     strupr_c(P65_Tok);
     if (!num(P65_Tok, &P65_Ints[0])) return 0xc;
     r = P96_ParseQuoted(P65_Line, P65_Tok); if (r != 0) return r;
     int32_t len = (int32_t)strlen(P65_Tok) + 1;
     if ((p = rec_add(len + 0xc)) == NULL) return 3;
-    p[0] = id; p[1] = id == 0x8d ? P65_Ints[0] : P65_Ints[0] * 0x32; p[2] = len;
+    p[0] = id; p[1] = id == MS_MODELBONUS ? P65_Ints[0] : P65_Ints[0] * 0x32; p[2] = len;   /* x 50: TODO(RE): seconds -> frames? */
     memcpy(p + 3, P65_Tok, (size_t)len);
     return 0xb;
   }
-  case 0x5e: case 0x73: case 0x89: case 0x8a: {
+  case MS_LOADTRAIL: case MS_LOG: case MS_ENABLEMODEL: case MS_DISABLEMODEL: {
     r = P96_ParseQuoted(P65_Line, P65_Tok); if (r != 0) return r;
     int32_t len = (int32_t)strlen(P65_Tok) + 1;
     if ((p = rec_add(len + 8)) == NULL) return 3;
@@ -213,7 +232,7 @@ int32_t P147_ParseCmd(void *cmdp) {
     memcpy(p + 2, P65_Tok, (size_t)len);
     return 0xb;
   }
-  case 0x6a: case 0x71: {
+  case MS_GOTO: case MS_GOSUB: {
     r = tok(); if (r != 0) return r;
     int32_t len = (int32_t)strlen(P65_Tok) + 1;
     if ((p = rec_add(len + 8)) == NULL) return 3;
@@ -221,11 +240,11 @@ int32_t P147_ParseCmd(void *cmdp) {
     strcpy((char *)(p + 2), P65_Tok);
     return 0xb;
   }
-  case 0x1e: P26_FxA = 1; break;
-  case 0x1f: set_b201dc(1); set_b87e84(1); P52_FogOn = 0; break;
-  case 0x5f: set_b201dc(1); set_b87e84(1); P52_FogOn = 1; break;
-  case 0x20: set_b201dc(1); set_b87e84(1); P26_FxB = 1; break;
-  case 0x22:
+  case MS_RAINING: P26_FxA = 1; break;                 /* weather flags of P26_RandomFx */
+  case MS_NIGHT: set_b201dc(1); set_b87e84(1); P52_FogOn = 0; break;
+  case MS_DARKNIGHT: set_b201dc(1); set_b87e84(1); P52_FogOn = 1; break;
+  case MS_LIGHTNING: set_b201dc(1); set_b87e84(1); P26_FxB = 1; break;
+  case MS_LOADMAP:
     r = quoted(P138_LevBuf, sizeof(p138_s100_t));
     if (r != 0) { P77_LevelName = NULL; B84(0x00c81164u) = 0; P138_LevBuf[0] = 0; return r; }
     P77_LevelName = P138_LevBuf; B84(0x00c81164u) = (int32_t)re_addr(P138_LevBuf);
@@ -233,13 +252,13 @@ int32_t P147_ParseCmd(void *cmdp) {
     for (int32_t i = 0; i < 7; i++)
       if (strcmp(P138_LevBuf, k_lev[i]) == 0) { set_city(i); return 0xb; }
     break;
-  case 0x27: P14_00b202dc = 1; P80_Flag17AEC = 0; break;
-  case 0x28: P14_00b202d8 = 1; set_b87e84(1); set_b201dc(1); P80_Flag17AEC = 0; break;
-  case 0x34:
+  case MS_DUSK: P14_00b202dc = 1; P80_Flag17AEC = 0; break;
+  case MS_DAWN: P14_00b202d8 = 1; set_b87e84(1); set_b201dc(1); P80_Flag17AEC = 0; break;
+  case MS_SETPLAYERYROTATION:
     r = P65_ReadInts(cmd); if (r != 0) return r;
     B84(0x00c810fcu) = P65_Ints[0];
     break;
-  case 0x3d: {
+  case MS_RANDOMCHASE: {
     r = quoted(P147_ChaseName, sizeof(p147_chase_t));
     if (r != 0) { P138_LevBuf[0] = 0; return r; }   /* оригинал: 00c81780 = 0 */
     int32_t n = 0;
@@ -260,27 +279,27 @@ int32_t P147_ParseCmd(void *cmdp) {
     }
     break;
   }
-  case 0x3e:
+  case MS_OVERHEADMAP:
     r = quoted(P136_MapName, sizeof(p136_path_t));
     if (r != 0) { P136_MapName[0] = 0; return r; }
     break;
-  case 0x3f: P95_C818B8 = 1; break;
-  case 0x40:
+  case MS_CRATES: P95_C818B8 = 1; break;
+  case MS_PLAYERCARTYPE:
     r = tok(); if (r != 0) return r;
     if (!num(P65_Tok, &P65_Ints[0])) return 0xc;
     S_00D1192C = P65_Ints[0];
     if (P12_00bdfa40 != 0 && D_00b87e30 >= 0 && D_00b87e30 < 4 && P62_Menu1271060 == 8) S_00D1192C = P12_00bdfa40 - 1;
     break;
-  case 0x41: case 0x43: case 0x44: case 0x96:
+  case MS_PLAYERCARDAMAGE: case MS_SETLEADCARMODEL: case MS_SETLEADCARPALETTE: case MS_TRAININGMODE:
     r = tok(); if (r != 0) return r;
     if (!num(P65_Tok, &P65_Ints[0])) return 0xc;
-    if (id == 0x41) P95_BDFA60 = P65_Ints[0];
-    else if (id == 0x43) P95_BDF9D4 = P65_Ints[0];
-    else if (id == 0x44) P95_BDF9D0 = P65_Ints[0] + 4;
+    if (id == MS_PLAYERCARDAMAGE) P95_BDFA60 = P65_Ints[0];
+    else if (id == MS_SETLEADCARMODEL) P95_BDF9D4 = P65_Ints[0];
+    else if (id == MS_SETLEADCARPALETTE) P95_BDF9D0 = P65_Ints[0] + 4;
     else P88_Mode575 = P65_Ints[0];
     break;
-  case 0x42: P26_FxC = 1; break;
-  case 0x4d: case 0x4e: {
+  case MS_SNOWING: P26_FxC = 1; break;
+  case MS_QUICKRENDER: case MS_NOTSOQUICKRENDER: {
     r = tok(); if (r != 0) return r;
     if (!num(P65_Tok, &P65_Ints[0])) return 0xc;
     int32_t b = -1;
@@ -288,11 +307,11 @@ int32_t P147_ParseCmd(void *cmdp) {
       if (!num(P65_Tok, &P65_Ints[1])) return 0xc;
       b = P65_Ints[1];
     }
-    if (id == 0x4d) { P125_C814E4 = b; P125_C814E0 = P65_Ints[0]; }
+    if (id == MS_QUICKRENDER) { P125_C814E4 = b; P125_C814E0 = P65_Ints[0]; }
     else { P125_C81694 = b; P125_C81690 = P65_Ints[0]; }
     break;
   }
-  case 0x53:
+  case MS_USELASTPLAYERPOSITION:
     if (GameMode == 0) { P124_DebugLog("MSCRIPT: Reusing player position (MStart = MNext)"); goal_copy(); }
     B84(0x00c81278u) = 1;
     P11_00ba52d0 = fist(P127_GoalSave[0]);
@@ -301,8 +320,8 @@ int32_t P147_ParseCmd(void *cmdp) {
     B84(0x00c812c8u) = P11_00ba52d0;
     P102_D06A04 = 1;
     break;
-  case 0x54: P26_FxD = 1; break;
-  case 0x69:
+  case MS_FOGGY: P26_FxD = 1; break;
+  case MS_LABEL:
     r = tok(); if (r != 0) return r;
 #ifdef RE_HOOK_BUILD
     P139_AddLabel(P65_Tok, P77_ListN, (int32_t *)&P99_ScrNames);
@@ -310,12 +329,12 @@ int32_t P147_ParseCmd(void *cmdp) {
     add_label_n(P65_Tok, P77_ListN, (p65_tab_t *)&P99_ScrNames);
 #endif
     return 0xb;
-  case 0x6b: ifname = "IfEqual: "; /* fallthrough */
-  case 0x6c: if (ifname == NULL) ifname = "IfNotEqual: "; /* fallthrough */
-  case 0x6d: if (ifname == NULL) ifname = "IfLessThan: "; /* fallthrough */
-  case 0x6e: if (ifname == NULL) ifname = "IfGreaterThan: "; /* fallthrough */
-  case 0x6f: if (ifname == NULL) ifname = "IfLessOrEqual: "; /* fallthrough */
-  case 0x70: {
+  case MS_IFEQUAL: ifname = "IfEqual: "; /* fallthrough */
+  case MS_IFNOTEQUAL: if (ifname == NULL) ifname = "IfNotEqual: "; /* fallthrough */
+  case MS_IFLESSTHAN: if (ifname == NULL) ifname = "IfLessThan: "; /* fallthrough */
+  case MS_IFGREATERTHAN: if (ifname == NULL) ifname = "IfGreaterThan: "; /* fallthrough */
+  case MS_IFLESSOREQUAL: if (ifname == NULL) ifname = "IfLessOrEqual: "; /* fallthrough */
+  case MS_IFGREATEROREQUAL: {
     if (ifname == NULL) ifname = "IfGreaterOrEqual: ";
     r = tok(); if (r != 0) return r;
     strupr_c(P65_Tok);
@@ -333,11 +352,11 @@ int32_t P147_ParseCmd(void *cmdp) {
     p[0] = id; p[1] = v; p[2] = P65_Ints[0];
     return 0xb;
   }
-  case 0x86:
+  case MS_RANDOMWEATHER:
     if (GameMode == 0) P26_RandomFx(D_00b87e30 & 3);
     return 0xb;
-  case 0x88: S_00D1192C = P68_B87E54; return 0xb;
-  case 0x97: G6_00B87EA0 = 1; P62_HudOff1 = 1; break;
+  case MS_USESTOREDCARTYPE: S_00D1192C = P68_B87E54; return 0xb;
+  case MS_TRAINING: G6_00B87EA0 = 1; P62_HudOff1 = 1; break;
   default:
     r = P65_ReadInts(cmd); if (r != 0) return r;
     r = P77_ListAdd(cmd->size); if (r != 0) return r;
@@ -350,6 +369,7 @@ int32_t P147_ParseCmd(void *cmdp) {
 }
 
 /* ---- 00503ddf ---- */
+/* Helpers writing the 6-word records 00b32a10 / 01271070 together with their data-image aliases. */
 static void set_2a10(const int32_t *w) {
   memcpy(P147_Rec2A10, w, sizeof(p147_rec6_t));
   P71_V2A14 = w[1]; P71_V2A1C = w[3]; P71_V2A20 = w[4]; P71_V2A24 = w[5];
@@ -360,6 +380,11 @@ static void set_1070(const int32_t *w) {
   for (int k = 0; k < 6; k++) P56_Blk11[4 + k] = (uint32_t)w[k];
   P71_S1271074 = w[1]; P71_S127107C = w[3]; P71_S1271080 = w[4]; P71_S1271084 = w[5];
 }
+/* P147_ScoreRec — Game.exe 00503ddf, cdecl.  Takes the 6-word record of the current marker/timer (P113_MrkRec):
+   in menu mode 6 as is, otherwise combined with the saved one (P14_Fn00503EF4) which it then replaces;
+   word 1 = 8; stores it in P147_Rec2A10, and if P14_Fn00503E83 says it beats the record at P71_Ptr2A08,
+   copies it there.  Returns 1 when a new record was stored, else 0.
+   TODO(RE): exact meaning of the 6 words and of the value 8 unsure. */
 int32_t P147_ScoreRec(void) {
   int32_t rec[6], cur[6];
   const uint8_t *src = (const uint8_t *)re_ptr(P113_MrkRec);

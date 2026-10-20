@@ -1,3 +1,6 @@
+/* Save game, key names, front-end main loop, the MLADDER story interpreter (campaign flow), WAV
+   sample loading and sound init, sound bank lines, and the helicopter marker flight.
+   English summary; the Russian notes below give every address. */
 /* v1.85: ported140 — см. ported140.h.
    00405d60 — запись сохранения 012852a0 (0x38): имя, уровень/номер/A/B/Y (012852b0..c0 = P68_Saved), сумма 0040682d → заголовок
      0057b6b0 {0x57231356, сумма}; _mkdir("SAVES"), SAVES\GAME%d.BIN "wb": 8 + 0x38.
@@ -27,6 +30,7 @@
 #include <stdlib.h>
 #include "ported150.h"
 #include "ported140.h"
+#include "carfields.h"
 #include "ported148.h"
 #include <string.h>
 #include <stdio.h>
@@ -90,6 +94,7 @@
 #  ifdef _WIN32
 #    include <direct.h>
 #  endif
+/* re_crt_mkdir — Native CRT _mkdir (backslashes converted to '/' outside Windows). */
 int re_crt_mkdir(const char *path) {
 #  ifdef _WIN32
   return _mkdir(path);
@@ -176,9 +181,12 @@ p140_f3_t P140_MrkVel;
 #endif
 #endif
 
+/* rd32 — Unaligned uint32 read. */
 static uint32_t rd32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }
 
 /* 012852b0..c0: состояние для возврата (уровень, номер записи, A, B, Y) */
+/* save_state — Copy the campaign position (level, ladder record index, chapter, story flags 0127104c, 00b87e54)
+   into P68_Saved (012852b0..c0) for saving / returning. */
 static void save_state(void) {
   P68_Saved[0] = P19_Level;
   P68_Saved[1] = (int32_t)(P68_IntroCur - P68_IntroBase) >> 4;
@@ -191,6 +199,8 @@ static void save_state(void) {
 }
 
 /* ---- 00405d60 ---- */
+/* P140_SaveGame — Game.exe 00405d60, cdecl.  Write SAVES\GAME<slot+1>.BIN: 8-byte header {0x57231356, checksum} + 0x38-byte record (name up
+   to 15 characters + the campaign position).  Creates SAVES if needed. */
 void P140_SaveGame(int32_t slot, const char *name) {
   char path[0x100];
   memset(P56_SaveBuf, 0, 0x38);
@@ -220,6 +230,9 @@ static const uint16_t k_keyptr[][2] = {
   { 0x2dc, 24 }, { 0x2e4, 25 }, { 0x2f0, 26 }, { 0x330, 27 }, { 0x33c, 28 }, { 0x344, 29 }, { 0x350, 30 }, { 0x490, 27 },
   { 0x494, 30 }, { 0x498, 32 } };
 static int g_regkeys;
+/* P140_KeysLoad — Game.exe 0040ec30, cdecl.  Load key names from KEYS.<ENG|FRE|GER|SPA|ITA|USA> (language 00c557fc, out-of-range -> English):
+   0x21 lines of printable text (max 15 characters) into P140_KeyStr, and the per-DIK-code name
+   pointers P140_KeyName. */
 void P140_KeysLoad(void) {
   char path[0x100];
   int32_t len = 0;
@@ -267,13 +280,20 @@ void P140_KeysLoad(void) {
 }
 
 /* ---- 004127f0 ---- */
+/* set_menu_mode — Write the menu mode 01271060 and all its aliases. */
 static void set_menu_mode(int32_t v) {
   MenuMode1271060 = v; P11_01271060 = v; P62_Menu1271060 = v; G01271060 = v;
 #ifndef RE_HOOK_BUILD
   P56_Blk11[0] = (uint32_t)v;
 #endif
 }
+/* set_counter — Write the front-end idle counter 005d577c and its aliases. */
 static void set_counter(int32_t v) { MenuCounter5D577C = v; D_005d577c = v; G005D577C = v; }
+/* P140_Frontend — Game.exe 004127f0, cdecl.  Front end: key names, the three splash pictures (COPYRIGHT / USCOPYRIGHT, GT, REFLECT), intro
+   FMV, front-end init, then the main menu loop (table 0054cc90) with the quit confirmation menu
+   (0054cd20); quitting saves config.dat.  While the window is inactive only the clock runs; after
+   0x2c idle ticks 004129df(-1) runs (attract mode, inferred).  `unused` is the ECX of Ghidra's
+   __fastcall signature. */
 void P140_Frontend(int32_t unused) {
   (void)unused;
   P140_KeysLoad();
@@ -314,35 +334,49 @@ void P140_Frontend(int32_t unused) {
 }
 
 /* ---- 0041b3ab ---- */
+/* set_level — Write the highest unlocked level 00575ef0 and its aliases. */
 static void set_level(int32_t v) { MenuState575EF0 = v; P19_Level = v; P58_Page = v; G00575EF0 = v; }
+/* set_e38 — Write the mission number 00b87e38 and its aliases. */
 static void set_e38(int32_t v) { P11_00b87e38 = v; P17_Cond2 = v; P19_Cond = v; P45_Mode = v; UiVar00B87E38 = v; }
+/* set_1dc — Write 00b201dc and its aliases. */
 static void set_1dc(int32_t v) { MenuVarB201DC = v; P13_00b201dc = v; G00B201DC = v; }
+/* set_ea0 — Write 00b87ea0 (training/interview flag) and P62_HudOff1. */
 static void set_ea0(int32_t v) { G6_00B87EA0 = v; P62_HudOff1 = v; }
+/* set_e5c — Write 005f7e5c and its alias. */
 static void set_e5c(int32_t v) { P12_005f7e5c = v; P58_S5F7E5C = v; }
+/* set_c4 — Write 00c810c4 (mission result, see C4_FAILED) and its aliases. */
 static void set_c4(int32_t v) {
   P14_00c810c4 = v; P16_IdleMode = v;
 #ifndef RE_HOOK_BUILD
   P56_Blk84[1] = (uint32_t)v;
 #endif
 }
+#include "ladder.h"   /* MLADDER record codes LAD_* */
+#define C4_FAILED 0xff0   /* 00c810c4 value set on failure (idle timeout, marker shot down) — inferred meaning */
+
+/* P140_LadderRun — Game.exe 0041b3ab, cdecl.  Run the MLADDER campaign script from record P68_IntroCur until it returns to the menu: each
+   record {code, a, next, else} (LAD_* in ladder.h) unlocks levels, shows choice screens, plays missions
+   or cut-scenes, tests story flags or the last mission's result, runs the interview or credits.
+   Stops on a NULL/unregistered record address, an unknown code, or when GameMode becomes 1
+   (quit).  Native: RE_SKIP_INTERVIEW=1 acts like the skip-interview cheat. */
 void P140_LadderRun(void) {
   for (;;) {
     const uint8_t *rec = (const uint8_t *)re_ptr(P68_IntroCur);
     if (rec == NULL) return;
     uint32_t a = rd32(rec + 4);
     switch (rd32(rec)) {
-    case 0:
+    case LAD_SETCITY:
       P68_IntroA = (int32_t)a;
       if (P19_Level < P68_IntroA + 1) { set_level(P68_IntroA + 1); P58_SaveConfig(); }
       P68_IntroCur = rd32(rec + 8);
       break;
-    case 1:
+    case LAD_ROOM:
       save_state();
       D_00b87e30 = P68_IntroA;
       P68_IntroCur = P131_MenuPick(P139_IntroStr + a * 0x20u);
       if (P68_IntroCur == 0) return;
       break;
-    case 2:
+    case LAD_MISSION:
       save_state();
       D_00b87e30 = P68_IntroA;
       set_e38((int32_t)a);
@@ -353,28 +387,28 @@ void P140_LadderRun(void) {
       if (rec == NULL) return;
       P68_IntroCur = rd32(rec + 8);
       break;
-    case 3:
+    case LAD_RENDER:
       P150_PlayFmv(G6_00BDF9C0, (int32_t)a, -1);
       P68_IntroCur = rd32(rec + 8);
       break;
-    case 4:
+    case LAD_TRIGGER:
       FlagSet0127104C((uint8_t)a);
       P68_IntroCur = rd32(rec + 8);
       break;
-    case 5:
+    case LAD_IF:
       P68_IntroCur = TestBit0041B7AD(a) == 0 ? rd32(rec + 0xc) : rd32(rec + 8);
       break;
-    case 6:
-      P68_IntroCur = P14_00c810c4 == 0xff0 ? rd32(rec + 0xc) : rd32(rec + 8);
+    case LAD_IFOK:
+      P68_IntroCur = P14_00c810c4 == C4_FAILED ? rd32(rec + 0xc) : rd32(rec + 8);
       break;
-    case 7:
+    case LAD_ENDIF:
       P68_IntroCur = rd32(rec + 8);
       break;
-    case 9:
-      if (P14_00c810c4 == 0xff0) return;
+    case LAD_QUITONFAIL:
+      if (P14_00c810c4 == C4_FAILED) return;
       P68_IntroCur = rd32(rec + 8);
       break;
-    case 0xb:
+    case LAD_INTERVIEW:
 #ifndef RE_HOOK_BUILD
       /* v2.11: RE_SKIP_INTERVIEW=1 — отладка: как чит 00b87e9c (пункт 5 меню Cheats, при 00bdf9fc ≠ 0) — интервью пропускается */
       if (getenv("RE_SKIP_INTERVIEW") != NULL) MenuOptB87E9C = 1;
@@ -392,7 +426,7 @@ void P140_LadderRun(void) {
       if (rec == NULL) return;
       P68_IntroCur = rd32(rec + 8);
       break;
-    case 0xc:
+    case LAD_END:
       P12_00b87ef8 = 1; set_e5c(1);
       P138_ReplayCfg("CREDITS");
       P136_GameLoop(1);
@@ -410,6 +444,9 @@ void P140_LadderRun(void) {
 }
 
 /* ---- 0048bf9a ---- */
+/* P140_SndLoadWav — Game.exe 0048bf9a, cdecl.  Load WAV file `path` into DirectSound voice n (buffer via P148_BufFromWav, EAX properties when
+   enabled; the file name is kept in the voice).  Returns the dword at file offset 0x1c
+   (nAvgBytesPerSec, used as the sample's frequency field), or -1 on error / no DirectSound. */
 int32_t P140_SndLoadWav(int32_t n, const char *path) {
   uint8_t hdr[0x14];
   if (P38_Ds == NULL) return -1;
@@ -440,6 +477,10 @@ int32_t P140_SndLoadWav(int32_t n, const char *path) {
 }
 
 /* ---- 005233be ---- */
+/* P140_SndInit — Game.exe 005233be, cdecl.  (Re)start sound driver drv: resets fades, sample and channel tables, builds the volume table
+   P48_VolTab[i] = 2000 * log10(i / 10000) clamped to -10000..0 (DirectSound hundredths of dB),
+   opens the driver and sets the master level 0.15.  Returns 1, or 0 for a bad driver index or
+   when the hardware cannot be opened. */
 int32_t P140_SndInit(int32_t drv, int32_t arg, int32_t eax) {
   if (G6_00B91CF4 != 0) P48_SndShutdown();
   if (drv < 0 || G6_00B91D2C <= drv) return 0;
@@ -473,6 +514,9 @@ int32_t P140_SndInit(int32_t drv, int32_t arg, int32_t eax) {
 }
 
 /* ---- 00524bd8 ---- */
+/* P140_BankLine — Game.exe 00524bd8, cdecl.  Parse one sound bank line "NAME [/LOOP] [/2D] [/FREQ=n] [/VOL=n] [/PRI=n]" (upper-cased in
+   place): load sample 00b91d34 (flags: 1 loop, 2 2D, 4 load error; default priority 8) and
+   increment the sample count. */
 void P140_BankLine(char *line) {
   char name[0x100];
   int32_t i = 0;
@@ -507,20 +551,29 @@ void P140_BankLine(char *line) {
 
 /* ---- 004e9bbf ---- */
 #define CAR0 ((uint8_t *)&P99_Cars[0])
+/* c0i — int32 field of the player's car record (P99_Cars[0]). */
 static int32_t c0i(uint32_t off) { int32_t v; memcpy(&v, CAR0 + off, 4); return v; }
+/* c0w — int16 field of the player's car record. */
 static int16_t c0w(uint32_t off) { int16_t v; memcpy(&v, CAR0 + off, 2); return v; }
+/* mrk_hit — Stage the marker hit value (P99_Mrk2730 or P99_Mrk2738, rounded) in 00ba52d0 as the original. */
 static void mrk_hit(int32_t k) { P11_00ba52d0 = (int32_t)lrintf(k == 0 ? P99_Mrk2730 : P99_Mrk2738); }
+/* mrk_smoke — Smoke/skid effect at the marker position. */
 static void mrk_smoke(void) {
-  P118_SkidFx(P98_MrkPos, 100, 500, 1, c0i(0x110), P140_MrkVel, 0);
+  P118_SkidFx(P98_MrkPos, 100, 500, 1, c0i(CAR_SPEED), P140_MrkVel, 0);
 }
+/* P140_MrkFly — Game.exe 004e9bbf, cdecl.  Helicopter marker flight (unless paused): steer towards the player's car along its heading
+   with limited climb (45 / -50), keep ~390 above ground; count hits (00d02750 >> 6).  A hit over
+   0x4f or the player's car pitched/rolled between 0x200 and 0xe00 shoots it down: sound 3, menu
+   mode 9, crash point, result C4_FAILED.  A downed marker falls (004e919d); smoke above 0x28 hits.
+   TODO(RE): unsure — "marker" may be the chase target helicopter of specific missions. */
 void P140_MrkFly(void) {
   if (G6_00B5A778 != 0) return;
   if (P98_MrkOff == 0) {
-    float dx = (float)c0i(0x40) - P99_Mrk2760;
-    float dy = (float)c0i(0x44) - P99_Mrk2764;
-    float dz = (float)c0i(0x48) - P99_Mrk2768;
-    P99_Mrk2760 = (float)c0i(0x40); P99_Mrk2764 = (float)c0i(0x44); P99_Mrk2768 = (float)c0i(0x48);
-    uint32_t u = (uint32_t)(c0i(0x100) - 0x400) & 0xfff;
+    float dx = (float)c0i(CAR_VEL) - P99_Mrk2760;
+    float dy = (float)c0i(CAR_VEL + 4) - P99_Mrk2764;
+    float dz = (float)c0i(CAR_VEL + 8) - P99_Mrk2768;
+    P99_Mrk2760 = (float)c0i(CAR_VEL); P99_Mrk2764 = (float)c0i(CAR_VEL + 4); P99_Mrk2768 = (float)c0i(CAR_VEL + 8);
+    uint32_t u = (uint32_t)(c0i(CAR_HEADING) - 0x400) & 0xfff;
     float sn = P43_Sin[u], cs = P43_Sin[0x400 + u];
     float a = cs * dz + sn * dx;
     float b = sn * dz + -dx * cs;
@@ -553,7 +606,7 @@ void P140_MrkFly(void) {
     P98_MrkSrc[0] = P98_MrkSrc[0] + P99_Mrk2730;
     P98_MrkSrc[1] = P98_MrkSrc[1] + P99_Mrk2734;
     P98_MrkSrc[2] = P98_MrkSrc[2] + P99_Mrk2738;
-    float top = 390.0f - (float)((c0i(0x128) + c0i(0x12c)) >> 6);
+    float top = 390.0f - (float)((c0i(CAR_DAMAGE + 0xc) + c0i(CAR_DAMAGE + 0x10)) >> 6);
     if (45.0f < P98_MrkSrc[0]) {
       P98_MrkSrc[0] = 45.0f; mrk_hit(0); P99_Mrk2750 = P99_Mrk2750 + P11_00ba52d0 * 5; P99_Mrk2730 = 0.0f;
     }
@@ -567,7 +620,7 @@ void P140_MrkFly(void) {
       P98_MrkSrc[2] = 230.0f; mrk_hit(1); P99_Mrk2750 = P99_Mrk2750 + P11_00ba52d0 * -5; P99_Mrk2738 = 0.0f;
     }
     P99_MrkA = P99_Mrk2750 >> 6;
-    int32_t rx = c0w(0xe8), rz = c0w(0xec);
+    int32_t rx = c0w(CAR_ANG), rz = c0w(CAR_ANG + 4);
     if (0x4f < P99_MrkA || (0x200 < rx && rx < 0xe00) || (0x200 < rz && rz < 0xe00)) {
       P97_SndStart(3, 3, P98_MrkPos[0], P98_MrkPos[1], P98_MrkPos[2]);
       P99_MrkA = 0x50;
@@ -588,11 +641,11 @@ void P140_MrkFly(void) {
 #endif
       P44_XformT((float *)P76_ColObj);
       memcpy(o, P76_ColObj, sizeof o);
-      o[0] = o[0] + (float)c0i(0xc8);
-      o[1] = o[1] + (float)-c0i(0xcc);
-      o[2] = o[2] + (float)c0i(0xd0);
+      o[0] = o[0] + (float)c0i(CAR_POS_X);
+      o[1] = o[1] + (float)-c0i(CAR_POS_Y);
+      o[2] = o[2] + (float)c0i(CAR_POS_Z);
       memcpy(P76_ColObj, o, sizeof o);
-      set_c4(0xff0);
+      set_c4(C4_FAILED);
       P14_00c810e8 = 1; P14_00c81100 = 0xb4;
 #ifndef RE_HOOK_BUILD
       P56_Blk84[(0x00c810e8 - 0x00c810c0) / 4] = 1; P56_Blk84[(0x00c81100 - 0x00c810c0) / 4] = 0xb4;

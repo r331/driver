@@ -1,3 +1,6 @@
+/* ported45.c — small front-end menu helpers (English overview; original notes follow).
+   Switching a menu item between its two variants, a short blocking "wait" animation, and picking a
+   button colour by the selected level.  All cdecl. */
 /* Меню и ожидание — восстановлено из Game.exe (cdecl). */
 #include "ported45.h"
 #include "ported58.h"
@@ -102,6 +105,9 @@ uint32_t P45_Col4;
 #pragma pop_macro("P45_Col4")
 #endif
 
+/* P45_ModeA — Game.exe 0040834f.  Maps the current item code P45_Mode to its "A" variant (0x2e..0x31;
+   the "B" codes 0x92..0x95 map back), redraws the menu (0040cd17, 0040c455(1, 0)).  Returns 1.
+   TODO(RE): unsure what the A/B variants are on screen. */
 int32_t P45_ModeA(void) {
   switch (P45_Mode) {
     case 0x2e: case 0x92: P45_Mode = 0x2e; break;
@@ -114,6 +120,7 @@ int32_t P45_ModeA(void) {
   Call3_0040C455(1, 0);
   return 1;
 }
+/* P45_ModeB — Game.exe 00408458.  Same as P45_ModeA but selects the "B" variant 0x92..0x95.  Returns 1. */
 int32_t P45_ModeB(void) {
   switch (P45_Mode) {
     case 0x2e: case 0x92: P45_Mode = 0x92; break;
@@ -126,19 +133,24 @@ int32_t P45_ModeB(void) {
   Call3_0040C455(1, 0);
   return 1;
 }
-void P45_Wait(uint32_t a, uint32_t b) {
-  P58_ItemList = (int16_t *)re_ptr(a);   /* бывший P45_PtrB: тот же 005f7e64 */
+/* P45_Wait — Game.exe 0040ccb4.  Sets the menu item list (P58_ItemList = items_addr, a Game.exe address
+   translated with re_ptr) and P45_PtrA = b, then runs 6 frames with P45_Busy = 1 and P45_Step counting
+   5..0 (messages 00522323, input, draw 0040cb9f); finally restarts the menu timer (004086b4). */
+void P45_Wait(uint32_t items_addr, uint32_t b) {
+  P58_ItemList = (int16_t *)re_ptr(items_addr);   /* бывший P45_PtrB: тот же 005f7e64 */
   P45_PtrA = b;
   P45_Busy = 1;
-  for (int32_t i = 5; i > -1; i--) {
+  for (int32_t step = 5; step > -1; step--) {
     Call00522323();
     P36_PollInput();
-    P45_Step = i;
+    P45_Step = step;
     Call0040CB9F();
   }
   P45_Busy = 0;
   StartTimer004086B4();
 }
+/* P45_PickColor — Game.exe 00417cbb.  P45_Color = P45_Col0..4 by P45_Pick (other values keep it), black
+   background and a fade/flash towards (0xff, 0xff, 0x80) over 0x32 steps (0051707a). */
 void P45_PickColor(void) {
   switch (P45_Pick) {
     case 0: P45_Color = P45_Col0; break;

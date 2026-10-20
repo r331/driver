@@ -1,3 +1,5 @@
+/* ported113.c — options menu table, the marker helicopter and drawing of path-animated models
+   (English overview; original notes follow).  All cdecl (plain ret checked with work/rets.py). */
 /* v1.58 (см. ported113.h). */
 #include "ported113.h"
 #include "ported11.h"
@@ -27,6 +29,7 @@
 #include <math.h>
 
 #include "memrw.h"
+/* rd16s — local helper: unaligned int16 read. */
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static const float K_ONE  = 1.0f;      /* .rdata 00546020 */
 static const float K_FIVE = 5.0f;      /* .rdata 00546188 */
@@ -82,42 +85,56 @@ p57_menutab_t P57_MenuTab = { P57_MENU_INIT };
 #endif
 
 /* ---- 004048dd ---- */
+/* P113_MenuOpts — Game.exe 004048dd.  Builds the options menu (table 0057b5a8, see menu57.h): one entry per
+   option whose enable flag (00bdf9e0 + 4*flag) is set, with its handler and string; entries are linked
+   up/down in a ring.  With no option enabled, a single entry (string 0xd3, handler 00404ffe) is shown.
+   Terminates the table with an empty entry and selects the menu texture.
+   Side effects: P57_MenuTab, P54_Out (string slots), P54_SelTab (entry -> option index). */
 void P113_MenuOpts(void) {
   static const struct { uint8_t flag; uint32_t fn; uint16_t str; } k_opt[10] = {
     { 0, 0x00404eb0u, 0xf1 }, { 1, 0x00404ec9u, 0xf2 }, { 2, 0x00404ee2u, 0xf3 }, { 3, 0x00404efbu, 0xf4 },
     { 4, 0x00404f14u, 0xf5 }, { 7, 0x00404f2du, 0xaf }, { 10, 0x00404f46u, 0x10f }, { 6, 0x00404f5fu, 0x64 },
     { 8, 0x00404f70u, 0xb0 }, { 9, 0x00404faeu, 0xb1 } };    /* флаг 00bdf9e0 + 4·flag, обработчик, строка 00c55820 + 4·str */
-  uint32_t c = 0;
+  uint32_t count = 0;
   P54_Out[0] = P97_StrAddr[0x63];                            /* 00c559ac */
   for (int32_t i = 0; i < 10; i++) {
     if (P102_BDF9E0[k_opt[i].flag] == 0) continue;
-    P57_OPT_FN(c, 0) = 0x00404e52u; P57_OPT_FN(c, 1) = 0x00404e7eu; P57_OPT_FN(c, 2) = k_opt[i].fn;
-    P54_Out[(c * 2 + 1) * 4] = P97_StrAddr[k_opt[i].str];
-    P54_SelTab[c] = i;
-    c++;
+    P57_OPT_FN(count, 0) = 0x00404e52u; P57_OPT_FN(count, 1) = 0x00404e7eu; P57_OPT_FN(count, 2) = k_opt[i].fn;
+    P54_Out[(count * 2 + 1) * 4] = P97_StrAddr[k_opt[i].str];
+    P54_SelTab[count] = i;
+    count++;
   }
-  if (c == 0) {
+  if (count == 0) {
     P57_OPT_FN(0, 0) = 0x00404e52u; P57_OPT_FN(0, 1) = 0x00404e7eu; P57_OPT_FN(0, 2) = 0x00404ffeu;
     for (int32_t j = 0; j < 4; j++) P57_OPT_NAV(0, j) = 0;
     P54_Out[4] = P97_StrAddr[0xd3];                          /* 00c55b6c */
     P54_SelTab[0] = -1;
-    c = 1;
+    count = 1;
   } else {
-    for (uint32_t i = 0; i < c; i++) {
+    for (uint32_t i = 0; i < count; i++) {
       P57_OPT_NAV(i, 0) = (uint8_t)i; P57_OPT_NAV(i, 1) = (uint8_t)i;
       P57_OPT_NAV(i, 2) = (uint8_t)(i - 1); P57_OPT_NAV(i, 3) = (uint8_t)(i + 1);
     }
-    P57_OPT_NAV(0, 2) = (uint8_t)(c - 1);
-    P57_OPT_NAV(c - 1, 3) = 0;
+    P57_OPT_NAV(0, 2) = (uint8_t)(count - 1);
+    P57_OPT_NAV(count - 1, 3) = 0;
   }
-  P57_OPT_FN(c, 0) = 0; P57_OPT_FN(c, 1) = 0; P57_OPT_FN(c, 2) = 0;
-  for (int32_t j = 0; j < 4; j++) P57_OPT_NAV(c, j) = 0;
-  P54_Out[(c * 2 + 1) * 4] = 0;
-  P54_SelTab[c] = -1;
+  P57_OPT_FN(count, 0) = 0; P57_OPT_FN(count, 1) = 0; P57_OPT_FN(count, 2) = 0;
+  for (int32_t j = 0; j < 4; j++) P57_OPT_NAV(count, j) = 0;
+  P54_Out[(count * 2 + 1) * 4] = 0;
+  P54_SelTab[count] = -1;
   P54_MenuTexSel();
 }
 
 /* ---- 004e969f ---- */
+/* P113_Heli — Game.exe 004e969f.  The marker helicopter P53_Mrk (00d026a0).
+   mode 0 (logic, skipped while paused): starts falling when record P113_MrkRec reaches id P113_MrkId;
+   builds the orientation basis P113_MrkMat from view angles 00d02700/02 (forward, right = fwd x up,
+   up_ortho = right x fwd); while falling, integrates velocity (P53_Mrk[4..6]) and position with a gravity
+   term 1.6006666 per tick until it reaches ground height P113_MrkGround, moves the camera limit and view
+   angles over the first 200 ticks; spins the rotor angle 00d0270c by 0x5a per tick.
+   mode != 0 (draw): if visible (sphere + map cell), draws the body (model 00d02634) and the rotor (00d0263c)
+   offset by (-290, -340) along the body's axes and rotated by the rotor angle, with blend mode 2.
+   Native guards: missing record / models return; angles masked to 0..0xfff. */
 void P113_Heli(int32_t mode) {
   static float m[16];                                       /* оригинал: стековая матрица (указатель 00bdc28c остаётся на ней) */
   if (mode == 0) {
@@ -127,7 +144,7 @@ void P113_Heli(int32_t mode) {
     if (rec != NULL)
 #endif
     if (rd32(rec + 0x10) == P113_MrkId) P113_MrkFall = 1;
-    float v[4] = { 0.0f, 0.0f, 1.0f, 0.0f }, up[4] = { 0.0f, 1.0f, 0.0f, 0.0f }, r[4] = { 0 }, u[4] = { 0 };
+    float fwd[4] = { 0.0f, 0.0f, 1.0f, 0.0f }, up[4] = { 0.0f, 1.0f, 0.0f, 0.0f }, right[4] = { 0 }, up_ortho[4] = { 0 };
     memset(m, 0, sizeof m);
     m[0] = 1.0f; m[4] = 1.0f; m[8] = 1.0f;
     int32_t ax = (int16_t)P42_AngY, ay = (int16_t)P42_AngX;   /* movsx 00d02700 / 00d02702 */
@@ -137,20 +154,20 @@ void P113_Heli(int32_t mode) {
     P44_RotX(m, ax);
     P44_RotY(m, ay);
     P44_MatPtr = m;
-    P44_Xform(v);
-    P43_Normalize(v);
-    P43_Cross(r, v, up);
-    P43_Cross(u, r, v);
-    P113_MrkMat[1] = u[0]; P113_MrkMat[4] = u[1]; P113_MrkMat[7] = u[2];
-    P113_MrkMat[0] = r[0]; P113_MrkMat[3] = r[1]; P113_MrkMat[6] = r[2];
-    P113_MrkMat[2] = v[0]; P113_MrkMat[5] = v[1]; P113_MrkMat[8] = v[2];
+    P44_Xform(fwd);
+    P43_Normalize(fwd);
+    P43_Cross(right, fwd, up);
+    P43_Cross(up_ortho, right, fwd);
+    P113_MrkMat[1] = up_ortho[0]; P113_MrkMat[4] = up_ortho[1]; P113_MrkMat[7] = up_ortho[2];
+    P113_MrkMat[0] = right[0]; P113_MrkMat[3] = right[1]; P113_MrkMat[6] = right[2];
+    P113_MrkMat[2] = fwd[0]; P113_MrkMat[5] = fwd[1]; P113_MrkMat[8] = fwd[2];
     if (P113_MrkFall != 0) {
-      float d[3]; d[0] = 0.0f; memcpy(&d[1], &P81_Flag, 4); d[2] = 0.0f;   /* 00d02708 — float */
-      P44_Xform(d);
-      d[1] = d[1] - 1.6006666f;                               /* .rdata 005469c8 */
-      P53_Mrk[4] = P53_Mrk[4] + d[0];
-      P53_Mrk[5] = P53_Mrk[5] + d[1];
-      P53_Mrk[6] = P53_Mrk[6] + d[2];
+      float fall[3]; fall[0] = 0.0f; memcpy(&fall[1], &P81_Flag, 4); fall[2] = 0.0f;   /* 00d02708 — float */
+      P44_Xform(fall);
+      fall[1] = fall[1] - 1.6006666f;                               /* .rdata 005469c8 */
+      P53_Mrk[4] = P53_Mrk[4] + fall[0];
+      P53_Mrk[5] = P53_Mrk[5] + fall[1];
+      P53_Mrk[6] = P53_Mrk[6] + fall[2];
       P53_Mrk[0] = P53_Mrk[0] + P53_Mrk[4];
       P53_Mrk[1] = P53_Mrk[1] - P53_Mrk[5];
       P53_Mrk[2] = P53_Mrk[2] + P53_Mrk[6];
@@ -196,45 +213,52 @@ void P113_Heli(int32_t mode) {
 #ifndef RE_HOOK_BUILD
 int32_t P113_PedStat[5] = { 0, 0, 0, 0, 0x7fffffff };   /* вызовы, ближе 15001, в пирамиде, в сетке света, мин. дист. */
 #endif
+/* P113_PartDraw — Game.exe 005129e1.  Draws one path-animated multi-part model `p` (judging by the native
+   RE_PEDDBG statistics in P113_PedStat, these are pedestrians).
+   Animation frame: p+0x34 of animation p+0x1c (frames of 0x14 * 00c821a0 + 0x10 bytes in P54_Tab4[anim]);
+   with flag 0x80 in p+0xc it blends towards frame 0 of animation p+4 by (5 - p+0x40) / 5 (p+0x40 clamped 0..5).
+   Position p+0x84..0x8c (+ the frame's y); skipped beyond octagonal distance 0x3a99 (15001) from the camera,
+   outside the view (sphere radius 800) or outside the lit map cells.  Orientation: Euler angles p+0x5c..0x60.
+   Appends icon p+2 to the P98_IconIdx list.  Native: range guards on every table index. */
 void P113_PartDraw(uint8_t *p) {
-  int32_t ty = rd32(p + 0x1c) - 1;
-  int32_t k = rd32(p + 0x34);
+  int32_t anim = rd32(p + 0x1c) - 1;
+  int32_t frame = rd32(p + 0x34);
 #ifndef RE_HOOK_BUILD
-  if (ty < 0 || ty >= 4) return;
-  if (k < 0 || (P103_PathLen[ty] > 0 && k >= P103_PathLen[ty])) return;
+  if (anim < 0 || anim >= 4) return;
+  if (frame < 0 || (P103_PathLen[anim] > 0 && frame >= P103_PathLen[anim])) return;
 #endif
-  const uint8_t *buf = (const uint8_t *)P54_Tab4[ty];
+  const uint8_t *buf = (const uint8_t *)P54_Tab4[anim];
 #ifndef RE_HOOK_BUILD
   if (buf == NULL) return;
 #endif
-  int32_t st = P12_00c821a0 * 0x14 + 0x10;
-  const float *fr = (const float *)(buf + st * k);
-  const float *f0 = NULL;
-  float t = 0.0f, y;
+  int32_t frame_stride = P12_00c821a0 * 0x14 + 0x10;
+  const float *frame_data = (const float *)(buf + frame_stride * frame);
+  const float *frame0 = NULL;
+  float blend = 0.0f, y;
   if ((rd32(p + 0xc) & 0x80) == 0) {
-    y = fr[1];
+    y = frame_data[1];
   } else {
     int32_t w = rd16s(p + 4);                                  /* 00c81b7c[w] = P54_Tab4[w-1] */
 #ifndef RE_HOOK_BUILD
     if (w < 1 || w > 4 || P54_Tab4[w - 1] == NULL) return;
 #endif
-    f0 = (const float *)P54_Tab4[w - 1];
+    frame0 = (const float *)P54_Tab4[w - 1];
     if (rd32(p + 0x40) > 4) wr32(p + 0x40, 5);
     if (rd32(p + 0x40) < 0) wr32(p + 0x40, 0);
-    t = (float)(5 - rd32(p + 0x40)) / K_FIVE;
-    y = (K_ONE - t) * (f0[1] - fr[1]) + fr[1];
+    blend = (float)(5 - rd32(p + 0x40)) / K_FIVE;
+    y = (K_ONE - blend) * (frame0[1] - frame_data[1]) + frame_data[1];
   }
   P100_PartBase[0] = rdf(p + 0x84);
   P100_PartBase[1] = y + rdf(p + 0x88);
   P100_PartBase[2] = rdf(p + 0x8c);
   float dx = P100_PartBase[0] - P44_CamX, dz = P100_PartBase[2] - P44_CamZ;
-  P11_00ba52d0 = (int32_t)lrintf(dx); int32_t ax = P11_00ba52d0 < 0 ? -P11_00ba52d0 : P11_00ba52d0;
-  P11_00ba52d0 = (int32_t)lrintf(dz); int32_t az = P11_00ba52d0 < 0 ? -P11_00ba52d0 : P11_00ba52d0;
-  int32_t d = ax < az ? az + ax / 2 : ax + az / 2;
+  P11_00ba52d0 = (int32_t)lrintf(dx); int32_t adx = P11_00ba52d0 < 0 ? -P11_00ba52d0 : P11_00ba52d0;
+  P11_00ba52d0 = (int32_t)lrintf(dz); int32_t adz = P11_00ba52d0 < 0 ? -P11_00ba52d0 : P11_00ba52d0;
+  int32_t dist = adx < adz ? adz + adx / 2 : adx + adz / 2;
 #ifndef RE_HOOK_BUILD
-  P113_PedStat[0]++; if (d < P113_PedStat[4]) P113_PedStat[4] = d;   /* v2.10: RE_PEDDBG — сколько отсеяно на каждом шаге */
+  P113_PedStat[0]++; if (dist < P113_PedStat[4]) P113_PedStat[4] = dist;   /* v2.10: RE_PEDDBG — сколько отсеяно на каждом шаге */
 #endif
-  if (d >= 0x3a99) return;
+  if (dist >= 0x3a99) return;
 #ifndef RE_HOOK_BUILD
   P113_PedStat[1]++;
 #endif
@@ -252,9 +276,9 @@ void P113_PartDraw(uint8_t *p) {
   P44_EulerToQuat(ang, q);
   P100_PartModel = rd32(p + 0x44);
   if ((rd32(p + 0xc) & 0x80) == 0) {
-    P100_DrawParts(p, fr + 4, (const uint8_t *)P100_PartNodes, q, pos);
+    P100_DrawParts(p, frame_data + 4, (const uint8_t *)P100_PartNodes, q, pos);
   } else {
-    P12_Fn004F3E78(fr, f0, t);
+    P12_Fn004F3E78(frame_data, frame0, blend);
     P100_DrawParts(p, (const float *)P12_PartLerp, (const uint8_t *)P100_PartNodes, q, pos);
   }
 #ifndef RE_HOOK_BUILD

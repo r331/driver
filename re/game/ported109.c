@@ -1,3 +1,5 @@
+/* ported109.c — assorted renderer, sound, radar and input helpers (English overview; one Russian line per
+   function follows each "---- address" marker).  Glide calls are looked up by export name (glide_proc). */
 /* v1.54 (см. ported109.h). */
 #include "ported109.h"
 #include "ported108.h"
@@ -226,6 +228,10 @@ static int32_t mul32(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uin
    освободить голос и загрузить (драйвер +0x28); громкость по умолчанию из записи сэмпла 00bdc880 (+4), позиция a,b,c в +4/+0x10 ---- */
 typedef void (*p109_f1)(int32_t);
 typedef void (*p109_f2)(int32_t, int32_t);
+/* P109_SndPlay — Game.exe 0052498e.  Starts sample `sample` on voice `voice` (20 voices of 0x34 bytes at
+   S_00BDC2A0): the same sample is restarted through the driver, a different one frees the voice and loads it;
+   volume defaults to the sample's own (P68_Samps +4, clamped to -10000..0 hundredths of dB), position (a, b, c).
+   Ignored while sound is off or voice == -1. */
 void P109_SndPlay(int32_t voice, int32_t sample, float a, float b, float c) {
   if (G6_00B91CF4 == 0 || voice == -1 || G00575F40 == 0) return;
 #ifndef RE_HOOK_BUILD
@@ -263,6 +269,8 @@ void P109_SndPlay(int32_t voice, int32_t sample, float a, float b, float c) {
 
 /* ---- 004d7f91 / 004d81da: прямоугольник с цветом в каждой вершине (A (x,y), B (x+w,y+h), C (x,y+h), D (x+w,y)),
    два треугольника ABC, ABD; 004d81da — цвета 0xRRGGBB и координаты через P51_ScalePair ---- */
+/* Rectangle with a colour per corner (A (x,y), B (x+w,y+h), C (x,y+h), D (x+w,y)) as triangles ABC, ABD;
+   `scale` = scale the coordinates with P51_ScalePair (004d81da). */
 static void grad_quad(float x, float y, float w, float h, const float col[4][3], int scale) {
   if (P85_StateDirty != 0) { if (P85_StateFn) P85_StateFn(1, 0, 0, 2, 0); P85_StateDirty = 0; }
   blend0();
@@ -286,12 +294,15 @@ void P109_GradRect(float x, float y, float w, float h, int32_t c0, int32_t c1, i
   grad_quad(x, y, w, h, col, 0);
 }
 #define P109_RGB(c) { (float)(((int32_t)(c) >> 16) & 0xff), (float)(((int32_t)(c) >> 8) & 0xff), (float)((c) & 0xff) }
+/* P109_GradRectS — Game.exe 004d81da: grad_quad with 0xRRGGBB corner colours and scaled coordinates. */
 void P109_GradRectS(float x, float y, float w, float h, uint32_t cA, uint32_t cD, uint32_t cB, uint32_t cC) {
   const float col[4][3] = { P109_RGB(cA), P109_RGB(cB), P109_RGB(cC), P109_RGB(cD) };
   grad_quad(x, y, w, h, col, 1);
 }
 
 /* ---- 0040dce0: плитка w×h текстуры idx в (x,y) цветом rgb (uv с поправкой 0.5), grDrawPolygonVertexList ---- */
+/* P109_TileDraw — Game.exe 0040dce0.  Draws a w x h tile of texture page idx at (x, y) in colour rgb (texel
+   coordinates offset by 0.5) with grDrawPolygonVertexList. */
 void P109_TileDraw(int32_t x, int32_t y, int32_t w, int32_t h, int32_t idx, void *color) {
   const uint8_t *rgb = (const uint8_t *)color;
   float k = (P55_BDFA18 == 0) ? OOW_LO : 1.0f, c = P80_Half;
@@ -312,6 +323,9 @@ void P109_TileDraw(int32_t x, int32_t y, int32_t w, int32_t h, int32_t idx, void
 
 /* ---- 0040b6fd: значок (страница page, u,v, размер tw×th текселей) в (x,y) с масштабом sx,sy; без 3D (005f7e58) — спрайт в буфер
    (005d77c0 & 8 — с прозрачностью 00407d07, иначе по ключу 00407cb8), аргументы — __ftol (усечение) ---- */
+/* P109_IconDraw — Game.exe 0040b6fd.  Draws an icon (page, texel rect u, v, tw x th) at (x, y) scaled by sx, sy;
+   without 3-D hardware (005f7e58) it is blitted into the sprite buffer instead (with transparency or colour
+   key).  Arguments are truncated like __ftol. */
 void P109_IconDraw(float x, float y, float sx, float sy, float u, float vv, float tw, float th, int32_t page, const uint8_t *rgb) {
   if (P56_F7E58 != 0) {
     if ((G005D77C0 & 8) == 0) P65_SpriteKeyed((int32_t)x, (int32_t)y, page, (int32_t)u, (int32_t)vv, (int32_t)tw, (int32_t)th);
@@ -338,6 +352,10 @@ void P109_IconDraw(float x, float y, float sx, float sy, float u, float vv, floa
 
 /* ---- 00522a50: модели капель (6 записей 00bde680 по 0x1c, +0x18 — адрес объекта): mode 0 — модели без флага 8, 1 — с флагом 8,
    другое — все; матрица — EulerTab[-курс] с поворотами X/Z по фазе; флаг модели 0x1000 — alpha-combine/alpha-test на время ---- */
+/* P109_DropsDraw — Game.exe 00522a50.  Draws the knocked-over objects: the models of the 6 records at 00bde680 (0x1c bytes, +0x18 object
+   address): mode 0 = models without flag 8, 1 = with flag 8, other = all; orientation = EulerTab[-heading] with
+   X/Z rotations by a phase; model flag 0x1000 enables alpha combine / alpha test while drawing.
+   00bde680 is P101_Drops, the fly records of street objects knocked over by cars (see P125_DropHit). */
 void P109_DropsDraw(int32_t mode32) {
   int8_t mode = (int8_t)mode32;
   if (mode != 0) P85_BlendForce = 2;
@@ -386,6 +404,8 @@ void P109_DropsDraw(int32_t mode32) {
 
 /* ---- 004219e8: таблица пикселей + эмулируемые 8-битные текстуры всех 32 слотов (парами); метка __fastcall ложная — ecx уходит
    в 00421a80, которая его не читает ---- */
+/* P109_EmulInit — Game.exe 004219e8.  Builds the pixel conversion table and the emulated 8-bit textures of all
+   32 slots (in pairs).  The original's __fastcall label is false (ecx is not read). */
 int32_t P109_EmulInit(void) {
   P98_PixTabInit();
   for (int32_t i = 0; i < 0x20; i += 2)
@@ -396,6 +416,8 @@ int32_t P109_EmulInit(void) {
 }
 
 /* ---- 00421719: 256 строк по 256 байт src в 8-битную эмулируемую текстуру слота (чётный — создать, нечётный — должен быть 8 бит) ---- */
+/* P109_SlotUpload8 — Game.exe 00421719.  Uploads 256 x 256 bytes of src into the emulated 8-bit texture of slot
+   (even slot: create; odd slot: must already be 8-bit). */
 int32_t P109_SlotUpload8(const uint8_t *src, int32_t slot) {
 #ifndef RE_HOOK_BUILD
   if (slot < 0 || slot >= 32 || src == NULL) return 0;
@@ -424,6 +446,8 @@ int32_t P109_SlotUpload8(const uint8_t *src, int32_t slot) {
 }
 
 /* ---- 00421861: 256×256 индексов 16 бит src → 16-битная эмулируемая текстура слота через таблицу пикселей 00601bc0 ---- */
+/* P109_SlotUpload16 — Game.exe 00421861.  Uploads 256 x 256 16-bit indices through the pixel table 00601bc0
+   into the slot's 16-bit emulated texture. */
 int32_t P109_SlotUpload16(const uint16_t *src, int32_t slot) {
 #ifndef RE_HOOK_BUILD
   if (slot < 0 || slot >= 32 || src == NULL) return 0;
@@ -450,6 +474,8 @@ int32_t P109_SlotUpload16(const uint16_t *src, int32_t slot) {
 }
 
 /* ---- 00502cee: маркеры целей скрипта (фигуры радара 00573f08/18/28/38 над машиной 0x41 и объектами P58_Objs) ---- */
+/* P109_ScriptMarkers — Game.exe 00502cee.  Draws the mission-script target markers (radar shapes 00573f08/18/28/38)
+   over car 0x41 and the target objects P58_Objs. */
 void P109_ScriptMarkers(void) {
   if (G6_00B87EA0 != 0) return;
   if (G6_00B87EB0 != 0) {
@@ -470,6 +496,8 @@ void P109_ScriptMarkers(void) {
 }
 
 /* ---- 00504866: стрелки радара на машины трафика типа 4 впереди игрока (в системе курса игрока) ---- */
+/* P109_RadarArrows — Game.exe 00504866.  Radar arrows toward the cop cars (traffic state 4) ahead of the player,
+   in the player's heading frame. */
 void P109_RadarArrows(void) {
   int32_t h = P99_Cars[0].heading;
   int32_t s1 = P59_Sin[(h + 0x400) & 0xfff], s2 = P59_Sin[h & 0xfff];
@@ -488,6 +516,8 @@ void P109_RadarArrows(void) {
 }
 
 /* ---- 005191c5: такт ввода по режиму пульта 00c4d70c (3 — запись/воспроизведение, 1 — запись игрока или машины 0x41, 2 — чтение) ---- */
+/* P109_InputTick — Game.exe 005191c5.  Input step by pad mode 00c4d70c: 3 = record / play back, 1 = record the
+   player or car 0x41, 2 = read (replay). */
 void P109_InputTick(void) {
   if (P103_C54D04 != 0) P12_Fn005188EC();
   if (P103_C54FC4 != 0) P101_ReplayBegin(P109_C81268);
@@ -531,6 +561,8 @@ void P109_InputTick(void) {
 }
 
 /* ---- 00505b54: машины трафика на радаре (в 45000 от игрока): треугольник по курсу 00505e2b + квадрат 0xff ---- */
+/* P109_RadarTraffic — Game.exe 00505b54.  Traffic cars within 45000 of the player on the radar: a triangle pointing
+   along the car's heading (00505e2b) plus a 0xff square. */
 void P109_RadarTraffic(void) {
   if (P100_RadarIcon == NULL || P109_C8089C == 0) return;
   float f1 = 0.003125f * (float)P19_ScrW * P19_Scale;     /* .rdata 00546a30 */

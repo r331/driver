@@ -9,6 +9,10 @@
    004f8485 — установка переменной скрипта (таблица P42_Vars, команда P42_Cmds[2]);
    0041ab60 — меню ввода имён: пункты 0054e948/0054e828, строки 005fee60 по 0x11, курсор «.» мигает (0054e9d8);
    004a05fa — индексы моделей объектов по 18 группам 01136940 (адреса групп — 01136a80) и сортировка пузырьком. */
+/* ported122.c (English overview) — ground decals (spot shadow, headlight glow), the tick of the 200
+   debris objects P95_ObjA, icon-name import for the map, the mission-script EVENT block parser, font
+   glyph import, icon pixel copy, mission-script variable assignment, the high-score name entry menu,
+   and the object-model index groups (cones, bins, boxes ...).  All cdecl. */
 #include "ported122.h"
 #include "cartab.h"
 #include "unported.h"
@@ -116,10 +120,39 @@ int32_t P122_Blink = 10;                     /* .data 0054e9d8 */
 #endif
 
 #include "memrw.h"
+#define DECAL_FADE_START  10240.0f /* headlight glow: full strength up to this view depth */
+#define DECAL_FADE_LEN    4760.0f  /* ... then fades linearly to 0 over this depth */
+#define GLOW_REC_RGB      0x38     /* float[3] colour of the glow record (scaled by the fade) */
+#define OBJA_COUNT        200      /* records in P95_ObjA */
+#define OBJA_SIZE         0x78
+#define OBJA_LIFE         0x58     /* int32: remaining life, decreased by OBJA_DECAY */
+#define OBJA_DECAY        0x5c     /* int32 */
+#define OBJA_COUNTDOWN    0x64     /* int16: frames to live; at 0 the object is freed */
+#define OBJA_FLAGS        0x68     /* u32 */
+#define OBJA_POOL_ID      0x6c     /* u16: id returned to the pool on free */
+#define OBJAF_ACTIVE      0x0002
+#define OBJAF_PARTICLE    0x0004   /* moved by P100_PartStep */
+#define OBJAF_FALL        0x0008   /* moved by P123_ObjAFall */
+#define OBJAF_SPEED_B     0x1000   /* StepSpeedB_004B9E54; timed */
+#define OBJAF_SPEED_A     0x8000   /* StepSpeedA_004B9E2B; timed */
+#define FONT_REC_SIZE     0x806    /* one font in the glyph table at 005d57a0: header + 256 glyphs */
+#define FONT_GLYPHS       0x0e     /* glyph i at +0x0e + i*8: {u16 present, u16 page, u8 u, v, w, h} */
+#define NAME_LEN          0x11     /* one high-score name: 16 chars + NUL */
+#define NAME_MAX_CHARS    0x0f
+#define BLINK_FRAMES      10       /* cursor blink period (frames) */
+#define VAR_TYPE_STRING   1        /* P42_Vars[].type */
+#define VAR_TYPE_END      0x7f     /* table terminator */
+#define SCRIPT_ERR_SYNTAX 9        /* parser error code returned by P122_SetVar */
+
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
 
 /* Общая часть 004accf0/004ac779: 4 вершины мира → кэш вершин 0..3, проекция, четырёхугольник записи rec. */
+/* Projects four world vertices v[] into vertex-cache entries 0..3 and draws record rec as a textured
+   quad (mode = blend mode).  The view matrix is mirrored in x for the mirror view (P84_Mirror).  The
+   quad is dropped if any vertex is beyond the far limit Q00546030; near-plane crossing goes through the
+   clipping path P121_ClipTexQuad.  fade: scale rec's colour by the depth fade (headlight glow).
+   Always bumps P44_XformTag so the cache entries are not reused. */
 static void quad_tail(float v[4][3], uint8_t *rec, uint32_t mode, int fade) {
   float m[9];
   for (int k = 0; k < 4; k++) {
@@ -134,11 +167,12 @@ static void quad_tail(float v[4][3], uint8_t *rec, uint32_t mode, int fade) {
     if (Q00546030 < P85_VCache[k].z) { P44_XformTag++; return; }
   }
   if (fade) {
-    float h = (P85_VCache[2].z + P85_VCache[3].z) / 2.0f - 10240.0f, s;
+    float h = (P85_VCache[2].z + P85_VCache[3].z) / 2.0f - DECAL_FADE_START, s;   /* depth of the far edge */
     if (h < 0.0f) s = 1.0f;
-    else if (h - 4760.0f <= 0.0f) s = 1.0f - h / 4760.0f;
+    else if (h - DECAL_FADE_LEN <= 0.0f) s = 1.0f - h / DECAL_FADE_LEN;
     else s = 0.0f;
-    for (int k = 0; k < 3; k++) { float f; memcpy(&f, rec + 0x38 + k * 4, 4); f *= s; memcpy(rec + 0x38 + k * 4, &f, 4); }
+    /* note: scales the record's colour in place, so it compounds frame after frame (as in the original) */
+    for (int k = 0; k < 3; k++) { float f; memcpy(&f, rec + GLOW_REC_RGB + k * 4, 4); f *= s; memcpy(rec + GLOW_REC_RGB + k * 4, &f, 4); }
   }
   G2_011F4064 = rec;
   if (P85_VCache[0].z < P95_Near || P85_VCache[1].z < P95_Near || P85_VCache[2].z < P95_Near || P85_VCache[3].z < P95_Near)
@@ -152,6 +186,9 @@ static void quad_tail(float v[4][3], uint8_t *rec, uint32_t mode, int fade) {
 }
 
 /* ---- 004accf0 ---- */
+/* P122_SpotShadow — Game.exe 004accf0.  Draws the square spot decal P122_SpotRec of half-size `size`
+   centred under the point at Game.exe address pos (float x, -, z), each corner 2 units above the road
+   (y up = negative).  P122_SpotShadowF — the same body for a native pointer (native caller 00502e76). */
 void P122_SpotShadow(uint32_t pos, int32_t size) {
   const float *p = (const float *)re_ptr(pos);
   if (p == NULL) return;
@@ -166,6 +203,9 @@ void P122_SpotShadowF(const float *p, int32_t size) {   /* v1.68: тело 004ac
 }
 
 /* ---- 004ac779 ---- */
+/* P122_CarGlow — Game.exe 004ac779.  Draws the headlight pool P122_GlowRec on the road in front of car
+   `car`: a 700 x 1000 quad from 500 to 1500 units ahead in car space (P98_CarMat), moved to the car
+   position, 20 units above the road, colour faded with view depth.  Native: car index guard (0..64). */
 void P122_CarGlow(int32_t car) {
   if (car < 0 || car >= 65) return;            /* P98_CarMat — 65 матриц */
   const uint8_t *c = (const uint8_t *)&P99_Cars[car];
@@ -173,32 +213,41 @@ void P122_CarGlow(int32_t car) {
                     { 350.0f, 0.0f, -1500.0f }, { -350.0f, 0.0f, -1500.0f } };
   P44_MatPtr = P98_CarMat[car];
   for (int k = 0; k < 4; k++) P44_XformT(v[k]);
-  for (int k = 0; k < 4; k++) { v[k][0] += (float)rd32(c + 0xc8); v[k][2] += (float)rd32(c + 0xd0); }
+  for (int k = 0; k < 4; k++) { v[k][0] += (float)rd32(c + 0xc8); v[k][2] += (float)rd32(c + 0xd0); }   /* CAR_POS_X / CAR_POS_Z */
   for (int k = 0; k < 4; k++) v[k][1] = (float)(-0x14 - P100_RoadHeightF(v[k]));
   quad_tail(v, P122_GlowRec, 3, 1);
 }
 
 /* ---- 004ba31b ---- */
+/* P122_ObjATick — Game.exe 004ba31b.  Per-frame step of the 200 debris objects P95_ObjA: active ones
+   move by their kind (particle / falling / speed A / speed B); the timed kinds (A, B) lose OBJA_DECAY
+   life per frame (life <= 0 forces the countdown to end) and their countdown; at 0 the object is
+   cleared and its id returned to the pool (PoolPush004AC702).  TODO(RE): unsure what A / B are. */
 void P122_ObjATick(void) {
-  for (int32_t i = 0; i < 200; i++) {
-    uint8_t *o = &P95_ObjA[i * 0x78];
-    uint32_t f = (uint32_t)rd32(o + 0x68);
-    if ((f & 2) == 0) continue;
-    if (f & 4) P100_PartStep((float *)o);
-    else if (f & 8) P123_ObjAFall(o);
-    else if (f & 0x8000) StepSpeedA_004B9E2B(o);
-    else if (f & 0x1000) StepSpeedB_004B9E54(o);
-    if (f & 0x9000) {
-      int32_t t = rd32(o + 0x58) - rd32(o + 0x5c);
-      wr32(o + 0x58, t);
-      if (t < 1) { wr32(o + 0x58, 0); wr16(o + 0x64, 1); }
-      wr16(o + 0x64, (int16_t)(rd16(o + 0x64) - 1));
-      if (rd16(o + 0x64) == 0) { wr32(o + 0x68, 0); PoolPush004AC702((uint16_t)rd16(o + 0x6c)); }
+  for (int32_t i = 0; i < OBJA_COUNT; i++) {
+    uint8_t *o = &P95_ObjA[i * OBJA_SIZE];
+    uint32_t f = (uint32_t)rd32(o + OBJA_FLAGS);
+    if ((f & OBJAF_ACTIVE) == 0) continue;
+    if (f & OBJAF_PARTICLE) P100_PartStep((float *)o);
+    else if (f & OBJAF_FALL) P123_ObjAFall(o);
+    else if (f & OBJAF_SPEED_A) StepSpeedA_004B9E2B(o);
+    else if (f & OBJAF_SPEED_B) StepSpeedB_004B9E54(o);
+    if (f & (OBJAF_SPEED_A | OBJAF_SPEED_B)) {
+      int32_t t = rd32(o + OBJA_LIFE) - rd32(o + OBJA_DECAY);
+      wr32(o + OBJA_LIFE, t);
+      if (t < 1) { wr32(o + OBJA_LIFE, 0); wr16(o + OBJA_COUNTDOWN, 1); }
+      wr16(o + OBJA_COUNTDOWN, (int16_t)(rd16(o + OBJA_COUNTDOWN) - 1));
+      if (rd16(o + OBJA_COUNTDOWN) == 0) { wr32(o + OBJA_FLAGS, 0); PoolPush004AC702((uint16_t)rd16(o + OBJA_POOL_ID)); }
     }
   }
 }
 
 /* ---- 0040d56c ---- */
+/* P122_MapNames — Game.exe 0040d56c.  Imports the icon records of one texture page into the icon-name
+   table P54_MapAPtr (16 bytes each, count P54_MapA): hdr +4 = offset of the 12-byte records inside
+   names, hdr +0xc = record count; each record's name is the n-th NUL-separated string of names (n =
+   record +10), stored upper-cased, up to 8 chars, cut at '.'; then page and record bytes +4, +5, +6, +8
+   (u, v, w, h per the icon layout). */
 void P122_MapNames(const uint8_t *hdr, const char *names, uint8_t page) {
   const uint8_t *r = (const uint8_t *)names + rd32(hdr + 4);
   for (int32_t i = 0; i < rd16(hdr + 0xc); i++, r += 0xc) {
@@ -216,6 +265,11 @@ void P122_MapNames(const uint8_t *hdr, const char *names, uint8_t page) {
 }
 
 /* ---- 004a44d4 ---- */
+/* P122_EventsParse — Game.exe 004a44d4.  Parses one EVENT block of the mission script source starting at
+   p: allocates a 0x24-byte event record (P122_EvCur), appends it to the event list G00D12408 (next
+   pointer at +0x20, as Game.exe addresses), feeds every line up to EVENT_END to P123_EvLine, and stores
+   the line count P122_Ev24C at +4.  Returns the position after the block, or NULL on error.
+   (00d12408 is also P15_ListHead — the same list.) */
 char *P122_EventsParse(char *p) {
   P122_EvCur = (uint8_t *)P98_DebugMalloc(0x24, "D:\\Driver\\Game\\compiler.c", 0x216);
   if (P122_EvCur == NULL) { P26_ErrorInLine("Not enough memory for events!"); return NULL; }
@@ -240,20 +294,25 @@ char *P122_EventsParse(char *p) {
 }
 
 /* ---- 0040a8b0 ---- */
+/* Writes n bytes at offset off of the font table, into every native alias of that memory. */
 static void font_wr(uint32_t off, const void *src, uint32_t n) {   /* off — от 005d57a0; все псевдонимы таблицы */
   if (off + n <= sizeof(P58_Font)) memcpy(&P58_Font[off], src, n);
   if (off >= 0xe && off - 0xe + n <= sizeof(P14_005d57ae)) memcpy(&P14_005d57ae[off - 0xe], src, n);
   if (off >= 0xe && off - 0xe + n <= sizeof(A_005D57AE)) memcpy(&A_005D57AE[off - 0xe], src, n);
 }
+/* P122_FontIcons — Game.exe 0040a8b0.  Builds font `font` from icons named "<prefix><code>" for codes
+   0..255: glyph = {present 1, page, u, v, w, h} (w/h 0 -> 255), or just present 0 if no such icon.
+   Header words +8..+0xc = a5, a3, a4 (TODO(RE): unsure — spacing / height values).  Returns the page of
+   the last glyph found (-1 if none / native: prefix not resolvable). */
 int32_t P122_FontIcons(uint32_t prefix, int32_t font, int32_t a3, int32_t a4, int32_t a5) {
   const char *pre = (const char *)re_ptr(prefix);
-  uint32_t base = (uint32_t)(font & 0xff) * 0x806, last = 0xffffffffu;
+  uint32_t base = (uint32_t)(font & 0xff) * FONT_REC_SIZE, last = 0xffffffffu;
   if (pre == NULL) return -1;            /* native: строка вне известных областей */
   for (int32_t c = 0; c < 0x100; c++) {
     char nm[64];
     snprintf(nm, sizeof nm, "%s%d", pre, c);
     const uint8_t *ic = P93_FindIcon(nm);
-    uint32_t g = base + 0xe + (uint32_t)c * 8;
+    uint32_t g = base + FONT_GLYPHS + (uint32_t)c * 8;
     int16_t z = 0;
     if (ic == NULL) { font_wr(g, &z, 2); continue; }
     int16_t pg = ic[8], one = 1;
@@ -267,6 +326,8 @@ int32_t P122_FontIcons(uint32_t prefix, int32_t font, int32_t a3, int32_t a4, in
 }
 
 /* ---- 004e7450 ---- */
+/* P122_IconCopy — Game.exe 004e7450.  Copies the 16-bit pixels of icon `name` over the icon at address
+   dst (same size required; 0 = 256), inside the texture pages, then re-uploads dst's page. */
 void P122_IconCopy(int32_t dst, const char *name) {
   const uint8_t *s = P93_FindIcon(name), *d = (const uint8_t *)re_ptr((uint32_t)dst);
   if (s == NULL || d == NULL) return;
@@ -282,18 +343,23 @@ void P122_IconCopy(int32_t dst, const char *name) {
 }
 
 /* ---- 004f8485 ---- */
+/* P122_SetVar — Game.exe 004f8485.  Mission-script compiler: "<variable> = value".  Without var, looks
+   the current token P65_Tok up in P42_Vars and uses command P42_Cmds[2].  A string variable reads a
+   quoted string (variable 0 is set at once via P59_VarSetString; others become a list record
+   {2, idx, text}); other types read integers into a record {2, idx, value}.
+   Returns 0 on success, 9 for an unknown variable / wrong command, or the reader's error code. */
 int32_t P122_SetVar(p42_cmd_t *cmd, p42_var_t *var) {
   int32_t idx = 0;
   if (var == NULL) {
     var = &P42_Vars[0];
     const int32_t nvars = (int32_t)(sizeof P42_Vars / sizeof P42_Vars[0]);   /* native: таблица без 0x7f — не выходить за её конец */
-    while (idx < nvars && var->type != 0x7f && strcmp(P65_Tok, var->name) != 0) { idx++; var++; }
-    if (idx >= nvars || strlen(var->name) == 0) return 9;
+    while (idx < nvars && var->type != VAR_TYPE_END && strcmp(P65_Tok, var->name) != 0) { idx++; var++; }
+    if (idx >= nvars || strlen(var->name) == 0) return SCRIPT_ERR_SYNTAX;
     cmd = &P42_Cmds[2];
   }
-  if (cmd->id != 2) return 9;
+  if (cmd->id != 2) return SCRIPT_ERR_SYNTAX;
   int32_t *rec;
-  if (var->type == 1) {
+  if (var->type == VAR_TYPE_STRING) {
     int32_t r = P96_ParseQuoted(P65_Line, P65_Tok);
     if (r != 0) return r;
     if (idx == 0) { P59_VarSetString(0, P65_Tok); return 0; }
@@ -312,6 +378,7 @@ int32_t P122_SetVar(p42_cmd_t *cmd, p42_var_t *var) {
 }
 
 /* ---- 004a05fa ---- */
+/* Model names of the 18 object groups (group 11 and 15 empty, group 16 = GLASS01..GLASS34). */
 static const char *const k_objnames[18][9] = {
   { "CONE", "CONE1", "CONE2", "CONE3", "TRAININGCONES1", "TRAININGCONES2", "TRAININGCONES3", "TRAININGCONES4", "BIGCONE" },
   { "BALLARD", "BALLARD2" }, { "BIN1", "BIN2" }, { "BOX", "BOX1", "BOX2", "BOX3", "PAPERBOX", "PAPERBOX2" },
@@ -319,6 +386,10 @@ static const char *const k_objnames[18][9] = {
   { "SIGN1", "SIGN2", "SIGN3", "SIGN4", "SIGN5", "SIGN6" }, { "TABLE", "TABLE2" }, { "CHAIR", "CHAIR2" },
   { "PARK_M" }, { "BOARD1", "BOARD2", "BOARD3" }, { NULL }, { "TAR_DRUM", "DRUM" }, { "BENCH" }, { "HOTDOGS" },
   { NULL }, { NULL } /* 16: GLASS01..GLASS34 */, { "UMBRELLA", "PARASOL" } };
+/* P122_ObjNames — Game.exe 004a05fa.  Resolves the model indices of the 18 groups into P69_Thr (group c
+   starts at P69_Ptrs[c], a Game.exe address into the table P69_TBASE) and sorts each group ascending
+   (bubble sort; native: index guard < 79).  Returns 0.  TODO(RE): unsure what uses the groups (props
+   that react to being hit?). */
 int32_t P122_ObjNames(void) {
   uint32_t k = 0;
   for (int c = 0; c < 18; c++) {
@@ -339,7 +410,12 @@ int32_t P122_ObjNames(void) {
 }
 
 /* ---- 0041ab60 ---- */
+/* Bounded write into the name buffer P12_005fee60 (NAME_LEN bytes per name). */
 static void name_put(int32_t i, uint8_t v) { if (i >= 0 && i < (int32_t)sizeof(P12_005fee60)) P12_005fee60[i] = v; }
+/* P122_NameMenu — Game.exe 0041ab60.  High-score name entry screen (entries 0054e948, frame 0054e828)
+   until the selection becomes -1.  In edit mode (P12_005feef0) P74_KeyScan gives -3 = cancel, -2 = accept
+   (if non-empty), -1 = backspace, or a character (up to 15).  The cursor '.' blinks every 10 frames.
+   Name n, char i is P12_005fee60[n * 0x11 + i] (n = P8_005feeec, i = P12_005feef8).  Returns 0. */
 int32_t P122_NameMenu(void) {
   CopyWord0041AD8D();
   P8_005feee8 = 0; P8_005feeec = 0; G005FEEEC = 0;
@@ -357,22 +433,22 @@ int32_t P122_NameMenu(void) {
       case -3: Ui00418886(); P12_005feef0 = 0; P12_005feef4 = 0; P55_NamesC(); break;
       case -2: if (P12_005feef8 != 0) { Ui00418886(); P12_005feef4 = 1; P12_Fn0041AF85(); } break;
       case -1:
-        if (0 < P12_005feef8) { Ui00418886(); P12_005feef8--; name_put(P12_005feef8 + P8_005feeec * 0x11, 0); }
+        if (0 < P12_005feef8) { Ui00418886(); P12_005feef8--; name_put(P12_005feef8 + P8_005feeec * NAME_LEN, 0); }
         break;
       default:
-        if (P12_005feef8 < 0xf) {
+        if (P12_005feef8 < NAME_MAX_CHARS) {
           Ui00418886();
-          name_put(P12_005feef8 + P8_005feeec * 0x11, (uint8_t)k);
+          name_put(P12_005feef8 + P8_005feeec * NAME_LEN, (uint8_t)k);
           P12_005feef8++;
-          name_put(P12_005feef8 + P8_005feeec * 0x11, 0);
+          name_put(P12_005feef8 + P8_005feeec * NAME_LEN, 0);
         }
       }
     }
-    if (--P122_Blink < 0) { P122_Blink = 10; P122_BlinkOn ^= 1; }
+    if (--P122_Blink < 0) { P122_Blink = BLINK_FRAMES; P122_BlinkOn ^= 1; }
     if (P12_005feef0 == 0 || P122_BlinkOn == 0) P66_ScreenFrame(0x0054e828u, 0);
     else {
-      int32_t i = P12_005feef8 + P8_005feeec * 0x11;
-      name_put(i, 0x2e); name_put(i + 1, 0);
+      int32_t i = P12_005feef8 + P8_005feeec * NAME_LEN;
+      name_put(i, 0x2e); name_put(i + 1, 0);   /* '.' cursor shown for one draw, then removed */
       P66_ScreenFrame(0x0054e828u, 0);
       name_put(i, 0);
     }

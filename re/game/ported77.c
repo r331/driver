@@ -1,3 +1,5 @@
+/* Level loading (.lev block file), sound bank text file, three front-end menu screens,
+   per-level table reset, MScript block list and the camera far plane. */
 #include "ported77.h"
 #include <stdio.h>
 #include <string.h>
@@ -99,6 +101,10 @@ int32_t P77_S574570;
 #ifndef RE_HOOK_BUILD
 char P77_CurLevelPath[256];   /* v2.17: путь последнего открытого .lev (native) */
 #endif
+/* P77_OpenLevel — Game.exe 004eca08, cdecl.  Open the level file for reading: flat.lev (flat-map mode 00b87eec), iview.lev (state 4 or
+   iview flag), train.lev (state 5 or train flag), else Levels\<P77_LevelName> (Miami_01.lev
+   by default).  Native: backslashes become '/', and the path is remembered in
+   P77_CurLevelPath for the HD texture pack.  Returns the FILE handle or NULL. */
 void *P77_OpenLevel(void) {
   char path[256];
   const char *p;
@@ -122,6 +128,11 @@ void *P77_OpenLevel(void) {
 }
 
 /* 004ecade: файл = число блоков, затем блоки [тип][размер][данные]; (прочие типы пропускаются как в оригинале — без default). */
+/* P77_LoadLevel — Game.exe 004ecade, cdecl.  Load the current level: a block count, then blocks {int32 type, int32 size, data}
+   dispatched to their loaders (type 3 and unknown types are not skipped — as the original,
+   which has no default; 0x12 is skipped by size).  Then finds wheel models and runs the
+   post-load setup (00516e76, 00501c63, 00501770, 00426caf).  Returns 1, or 0 if the file is
+   missing. */
 int32_t P77_LoadLevel(void) {
   int32_t count = 0, kind, size;
   P12_Fn00426580(-1);
@@ -167,6 +178,10 @@ int32_t P77_LoadLevel(void) {
 }
 
 /* 00524496: банк звуков — текстовый файл; строки с ';' в начале — комментарии, остальные разбирает 00524bd8 (она увеличивает счётчик 00b91d34). */
+/* P77_LoadBank — Game.exe 00524496, cdecl.  Load a sound bank text file: lines starting with ';' are comments, each other line is parsed
+   by 00524bd8 (which increments the sound count 00b91d34).  A non-zero slot records the first
+   sound index in 00b91bc4[(slot >> 12) & 15].  Returns 00b91d34 minus (old count + parsed
+   lines), i.e. 0 when every line added one sound.  Returns 0 if sound is off or no file. */
 int32_t P77_LoadBank(const char *name, uint16_t slot) {
   uint32_t line[32];
   int32_t n;
@@ -184,6 +199,10 @@ int32_t P77_LoadBank(const char *name, uint16_t slot) {
 
 /* Общий цикл экрана меню: таблица пунктов tbl, состояние *st, заголовок a/b, перерисовка redraw + 0041846c(b, cb).
    Режим 00b87eec != 0 — шаг 00418675 вместо опроса 0040c8f1; выход по -1 (в опросе — с ожиданием 0040cd17). */
+/* screen_loop — Common loop of a front-end menu screen: table tbl, selected row *st, title strings a/b,
+   redraw callback and screen callback cb.  In flat-map mode (00b87eec) steps 00418675 and
+   redraws until it returns -1 (result 0); otherwise polls P57_MenuStep until it returns
+   non-zero (-1 = back -> 0).  Returns the menu result. */
 static int32_t screen_loop(uint32_t tbl, int32_t *st, uint32_t a, uint32_t b, void (*redraw)(void), uint32_t cb) {
   int32_t r;
   P57_MenuInit(tbl, 0);
@@ -206,16 +225,19 @@ static int32_t screen_loop(uint32_t tbl, int32_t *st, uint32_t a, uint32_t b, vo
     }
   }
 }
+/* P77_Menu407160 — Game.exe 00407160, cdecl.  Front-end menu screen at table 0054a008 (no callback).  TODO(RE): unsure which screen. */
 int32_t P77_Menu407160(void) {
   P54_InitInputMode();
   G6_0057B728 = 0; MenuI0057B730 = 1; MenuI0054A060 = 2;
   return screen_loop(0x0054a008, &G6_0057B728, 0x00549f60, 0x00549f78, MenuRed0040766D, 0);
 }
+/* P77_Menu414C30 — Game.exe 00414c30, cdecl.  Front-end menu screen at table 0054dd10, callback 004159e5.  TODO(RE): unsure which screen. */
 int32_t P77_Menu414C30(void) {
   Call00414D1F();
   G6_005FE9CC = 0; MenuI005FE9D0 = 6; MenuI0054DE08 = 7;
   return screen_loop(0x0054dd10, &G6_005FE9CC, 0x0054db58, 0x0054dbc0, MenuRed00415904, 0x004159e5);
 }
+/* P77_Menu408770 — Game.exe 00408770, cdecl.  Front-end menu screen at table 0054a470, callback 00409d66.  TODO(RE): unsure which screen. */
 int32_t P77_Menu408770(void) {
   G6Call004094E3();
   MenuRedraw();
@@ -223,7 +245,9 @@ int32_t P77_Menu408770(void) {
   return screen_loop(0x0054a470, &G6_005D5788, 0x0054a170, 0x0054a250, MenuRed00409C85, 0x00409d66);
 }
 
-/* 00509c40 */
+/* P77_ResetTables — Game.exe 00509c40, cdecl.  Clear the per-level object tables (b590e0, c62d60, c65dc0, c7d800, c5fe00, near list
+   c7d860, c7d8c0, c62e60) and their counters; 00574570 is reset to 0x5e8.
+   TODO(RE): unsure what 0x5e8 is. */
 void P77_ResetTables(void) {
   memset(P77_B590E0, 0, sizeof P77_B590E0);
   memset(P77_C62D60, 0, sizeof P77_C62D60);
@@ -247,6 +271,8 @@ void P77_ResetTables(void) {
 }
 
 /* 004f8643: список указателей на блоки MScript растёт на один: новый блок size байт; 3 — нет памяти, 0 — готово. */
+/* P77_ListAdd — Game.exe 004f8643, cdecl.  Grow the MScript block list by one new block of `size` bytes.  Returns 0, or 3 (MScript
+   "Out of memory") if an allocation fails. */
 int32_t P77_ListAdd(int32_t size) {
   void **arr = DebugMalloc((P77_ListN + 1) * (int)sizeof(void *), "D:\\Driver\\Game\\MScript.c", 0xb3f);
   if (arr == NULL) return 3;
@@ -262,6 +288,10 @@ int32_t P77_ListAdd(int32_t size) {
 }
 
 /* 004282f8: d — расстояние; матрица вида = 011f4080, плоскость (нормаль = −(0,0,−1)·M, d = (p+cam)·n). */
+/* P77_CameraPlane — Game.exe 004282f8, cdecl.  Set the far clip distance d: 01270c24 = d, 01270c44 = d * 1.25 (signed /4 rounding toward
+   zero), and the plane P77_Plane = (n, n . (p + camera)) where n = -(0, 0, -1) transformed by
+   the view matrix and p = (0, 0, d) transformed.  The dot product is summed in extended
+   precision (x87) in the original's order. */
 void P77_CameraPlane(int32_t d) {
   float v[3];
   Q01270C24 = (float)d;

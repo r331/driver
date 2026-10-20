@@ -1,7 +1,10 @@
+/* Map models: link relocation, record list, bounding radius, axis classification of polygon
+   vectors, duplicate search and disk -> memory conversion.  Header layout: MDL_* in modelhdr.h. */
 #include "ported79.h"
 #include <math.h>
 #include <string.h>
 #include "p79_data.h"
+#include "modelhdr.h"
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P79_ModelTab")
@@ -95,6 +98,8 @@ float P79_ClsLo;
 #endif
 
 /* Значения из .data Game.exe: 0x005460a0 = 1.001f, 0x005460a4 = 0.998f; таблицы шагов записей 0x550acc (112 int) */
+/* P79_InitConsts — Native: the .data constants 1.001f / 0.998f (axis test window) and the 112-entry record size
+   table 00550acc. */
 void P79_InitConsts(void) {
 #ifndef RE_HOOK_BUILD
   P79_ClsHi = 1.0010000467300415f; P79_ClsLo = 0.9980000257492065f;
@@ -103,7 +108,10 @@ void P79_InitConsts(void) {
 }
 
 static uint32_t g_pool = 0x400000;
+/* P79_PoolReset — Native: reset the event-model pool (1 MiB after the 4 MiB map arena). */
 void P79_PoolReset(void) { g_pool = 0x400000; }
+/* P79_EventAlloc — Allocate `size` bytes for an event model.  Hook: DebugMalloc.  Native: bump allocation from
+   the pool, 16-byte aligned, so links stay arena offsets; NULL when the pool is exhausted. */
 void *P79_EventAlloc(int32_t size) {
 #ifdef RE_HOOK_BUILD
   return DebugMalloc(size, "D:\\Driver\\Game\\map.c", 0x3ed);
@@ -114,6 +122,7 @@ void *P79_EventAlloc(int32_t size) {
   return p;
 #endif
 }
+/* P79_EventFree — Free an event model (native: no-op, the pool is reset as a whole). */
 void P79_EventFree(void *p) {
 #ifdef RE_HOOK_BUILD
   DebugFree(p);
@@ -122,95 +131,110 @@ void P79_EventFree(void *p) {
 #endif
 }
 
+/* rd32 — Unaligned uint32 read at p + o. */
 static uint32_t rd32(const void *p, int o) { uint32_t v; memcpy(&v, (const uint8_t *)p + o, 4); return v; }
+/* wr32 — Unaligned uint32 write at p + o. */
 static void wr32(void *p, int o, uint32_t v) { memcpy((uint8_t *)p + o, &v, 4); }
+/* rd16 — Unaligned uint16 read at p + o. */
 static uint16_t rd16(const void *p, int o) { uint16_t v; memcpy(&v, (const uint8_t *)p + o, 2); return v; }
+/* wr16 — Unaligned uint16 write at p + o. */
 static void wr16(void *p, int o, uint16_t v) { memcpy((uint8_t *)p + o, &v, 2); }
+/* addf — Add d to the uint32 at p + o (relocate a link). */
 static void addf(void *p, int o, uint32_t d) { wr32(p, o, rd32(p, o) + d); }
+/* step1 — Size in bytes of a polygon record of type t (table 00550acc). */
 static int32_t step1(uint8_t t) { return G2_TABLE_00550ACC[t]; }       /* 00550acc + t*4 */
 
 /* 0042754a: адреса всех записей модели → out[i] (ссылки) */
+/* P79_ModelList — Game.exe 0042754a, cdecl.  Write the link of every polygon record of model m to out[0..MDL_NRECS-1]. */
 void P79_ModelList(void *m, uint32_t *out) {
-  uint8_t *rec = (uint8_t *)P79_PTR(rd32(m, 0x2c));
-  for (int i = 0; i < (int)rd16(m, 0x16); i++) {
+  uint8_t *rec = (uint8_t *)P79_PTR(rd32(m, MDL_RECS));
+  for (int i = 0; i < (int)rd16(m, MDL_NRECS); i++) {
     out[i] = P79_OFF(rec);
     rec += step1(*rec);
   }
 }
 
-/* 00427757 */
+/* P79_Relocate — Game.exe 00427757, cdecl.  Make model m's links absolute (add the model's own link) and set MDL_LINKED; no-op when
+   already linked.  Own-geometry models also relocate table +0x34 and the sub-block (its links
+   are relative to itself) and rebuild the record list there.  Models with a parent copy the
+   parent's MDL_VERTS / MDL_RECVEC / MDL_L34 links (relocating the parent temporarily if needed). */
 void P79_Relocate(void *m) {
-  uint16_t fl = rd16(m, 2);
-  if (fl & 0x8000) return;
+  uint16_t fl = rd16(m, MDL_FLAGS);
+  if (fl & MDL_LINKED) return;
   uint32_t me = P79_OFF(m);
-  int32_t parent = (int32_t)rd32(m, 4);
+  int32_t parent = (int32_t)rd32(m, MDL_PARENT);
   if (parent == -1) {
-    wr16(m, 2, fl ^ 0x8000);
-    addf(m, 0x1c, me); addf(m, 0x20, me); addf(m, 0x24, me); addf(m, 0x28, me); addf(m, 0x2c, me);
-    if (rd32(m, 0x34) != 0) addf(m, 0x34, me);
-    if (rd32(m, 0x30) != 0) {
-      addf(m, 0x30, me);
-      uint32_t s = rd32(m, 0x30);
+    wr16(m, MDL_FLAGS, fl ^ MDL_LINKED);
+    addf(m, MDL_L1C, me); addf(m, MDL_VERTS, me); addf(m, MDL_RECVEC, me); addf(m, MDL_L28, me); addf(m, MDL_RECS, me);
+    if (rd32(m, MDL_L34) != 0) addf(m, MDL_L34, me);
+    if (rd32(m, MDL_SUB) != 0) {
+      addf(m, MDL_SUB, me);
+      uint32_t s = rd32(m, MDL_SUB);
       void *sp = P79_PTR(s);
       addf(sp, 0x10, s); addf(sp, 0x14, s); addf(sp, 0x18, s); addf(sp, 0xc, s);
       P79_ModelList(m, (uint32_t *)P79_PTR(rd32(sp, 0xc)));
     }
   } else {
     void *par = P79_PTR(P79_ModelTab[parent]);
-    wr16(m, 2, fl ^ 0x8000);
-    addf(m, 0x1c, me); addf(m, 0x2c, me); addf(m, 0x28, me);
-    if (!(rd16(par, 2) & 0x8000)) {
+    wr16(m, MDL_FLAGS, fl ^ MDL_LINKED);
+    addf(m, MDL_L1C, me); addf(m, MDL_RECS, me); addf(m, MDL_L28, me);
+    if (!(rd16(par, MDL_FLAGS) & MDL_LINKED)) {
       P79_Relocate(par);
-      wr32(m, 0x20, rd32(par, 0x20)); wr32(m, 0x24, rd32(par, 0x24)); wr32(m, 0x34, rd32(par, 0x34));
+      wr32(m, MDL_VERTS, rd32(par, MDL_VERTS)); wr32(m, MDL_RECVEC, rd32(par, MDL_RECVEC)); wr32(m, MDL_L34, rd32(par, MDL_L34));
       P79_Unrelocate(par);
     } else {
-      wr32(m, 0x20, rd32(par, 0x20)); wr32(m, 0x24, rd32(par, 0x24)); wr32(m, 0x34, rd32(par, 0x34));
+      wr32(m, MDL_VERTS, rd32(par, MDL_VERTS)); wr32(m, MDL_RECVEC, rd32(par, MDL_RECVEC)); wr32(m, MDL_L34, rd32(par, MDL_L34));
     }
   }
 }
 
-/* 004275ae */
+/* P79_Unrelocate — Game.exe 004275ae, cdecl.  Inverse of P79_Relocate: make links relative again and clear MDL_LINKED.  For own-geometry
+   models the sub-block's +0xc link is left absolute (as in the original). */
 void P79_Unrelocate(void *m) {
-  uint16_t fl = rd16(m, 2);
-  if (!(fl & 0x8000)) return;
+  uint16_t fl = rd16(m, MDL_FLAGS);
+  if (!(fl & MDL_LINKED)) return;
   uint32_t me = P79_OFF(m);
-  if ((int32_t)rd32(m, 4) == -1) {
-    wr16(m, 2, fl ^ 0x8000);
-    addf(m, 0x1c, -me); addf(m, 0x20, -me); addf(m, 0x24, -me); addf(m, 0x28, -me); addf(m, 0x2c, -me);
-    if (rd32(m, 0x34) != 0) addf(m, 0x34, -me);
-    if (rd32(m, 0x30) != 0) {
-      uint32_t s = rd32(m, 0x30);
+  if ((int32_t)rd32(m, MDL_PARENT) == -1) {
+    wr16(m, MDL_FLAGS, fl ^ MDL_LINKED);
+    addf(m, MDL_L1C, -me); addf(m, MDL_VERTS, -me); addf(m, MDL_RECVEC, -me); addf(m, MDL_L28, -me); addf(m, MDL_RECS, -me);
+    if (rd32(m, MDL_L34) != 0) addf(m, MDL_L34, -me);
+    if (rd32(m, MDL_SUB) != 0) {
+      uint32_t s = rd32(m, MDL_SUB);
       void *sp = P79_PTR(s);
       addf(sp, 0x10, -s); addf(sp, 0x14, -s); addf(sp, 0x18, -s);      /* +0xc остаётся (как в оригинале) */
-      addf(m, 0x30, -me);
+      addf(m, MDL_SUB, -me);
     }
   } else {
-    wr16(m, 2, fl ^ 0x8000);
-    addf(m, 0x1c, -me); addf(m, 0x2c, -me); addf(m, 0x28, -me);
-    if (rd32(m, 0x30) != 0) {
-      uint32_t s = rd32(m, 0x30);
+    wr16(m, MDL_FLAGS, fl ^ MDL_LINKED);
+    addf(m, MDL_L1C, -me); addf(m, MDL_RECS, -me); addf(m, MDL_L28, -me);
+    if (rd32(m, MDL_SUB) != 0) {
+      uint32_t s = rd32(m, MDL_SUB);
       void *sp = P79_PTR(s);
       addf(sp, 0x10, -s); addf(sp, 0x14, -s); addf(sp, 0x18, -s); addf(sp, 0xc, -s);
-      addf(m, 0x30, -me);
+      addf(m, MDL_SUB, -me);
     }
   }
 }
 
 /* 0042793f: наибольшая длина вершины (x87: произведения во long double, Y² усечено до float) */
+/* P79_Radius — Game.exe 0042793f, cdecl.  Largest vertex distance of model m: mode 0 with Y -> MDL_RADIUS, mode 1 ignoring Y ->
+   MDL_RADIUS_XZ.  Y^2 is rounded to float before the sum (x87 order kept). */
 void P79_Radius(void *m, int32_t mode) {
   float best = 0.0f;
-  const uint8_t *v = (const uint8_t *)P79_PTR(rd32(m, 0x20));
-  for (int i = 0; i < (int)rd16(m, 0x14); i++, v += 16) {
+  const uint8_t *v = (const uint8_t *)P79_PTR(rd32(m, MDL_VERTS));
+  for (int i = 0; i < (int)rd16(m, MDL_NVERTS); i++, v += 16) {
     float x, y, z, y2; memcpy(&x, v, 4); memcpy(&y, v + 4, 4); memcpy(&z, v + 8, 4);
     y2 = mode == 0 ? (float)((long double)y * y) : 0.0f;
     double s = (double)((long double)x * x + y2 + (long double)z * z);
     float r = (float)sqrt(s);
     if (best < r) best = r;
   }
-  if (mode == 0) memcpy((uint8_t *)m + 0xc, &best, 4); else memcpy((uint8_t *)m + 0x10, &best, 4);
+  if (mode == 0) memcpy((uint8_t *)m + MDL_RADIUS, &best, 4); else memcpy((uint8_t *)m + MDL_RADIUS_XZ, &best, 4);
 }
 
 /* 0047560b: 1/2 — ось X (−/+), 5/6 — Y, 4/3 — Z; 0 — вершина не лежит на оси */
+/* P79_VertClass — Game.exe 0047560b, cdecl.  Classify a unit vector: 1/2 = -X/+X, 5/6 = -Y/+Y, 4/3 = -Z/+Z when that component is within
+   (0.998, 1.001) in magnitude (first axis wins); 0 otherwise.  Counts in P79_Total / P79_Outside. */
 int32_t P79_VertClass(const float *v) {
   P79_Total++;
   static const int8_t neg[3] = {1, 5, 4}, pos[3] = {2, 6, 3};
@@ -223,31 +247,35 @@ int32_t P79_VertClass(const float *v) {
   return 0;
 }
 
-/* 004757d2 */
+/* P79_MarkRecords — Game.exe 004757d2, cdecl.  Store the axis class of each record's vector (MDL_RECVEC) in record byte 1, then flag the
+   model: all records axis-aligned -> MDL_FLAGS |= 0x30, some -> |= 0x10; updates statistics. */
 void P79_MarkRecords(void *m) {
-  const uint8_t *vert = (const uint8_t *)P79_PTR(rd32(m, 0x24));
-  uint8_t *rec = (uint8_t *)P79_PTR(rd32(m, 0x2c));
+  const uint8_t *vert = (const uint8_t *)P79_PTR(rd32(m, MDL_RECVEC));
+  uint8_t *rec = (uint8_t *)P79_PTR(rd32(m, MDL_RECS));
   P79_Outside = 0; P79_Total = 0;
-  for (int i = 0; i < (int)rd16(m, 0x16); i++) {
+  for (int i = 0; i < (int)rd16(m, MDL_NRECS); i++) {
     uint8_t t = *rec;
     rec[1] = (uint8_t)P79_VertClass((const float *)vert);
     rec += step1(t);
     vert += 16;
   }
-  uint16_t n = rd16(m, 0x16);
-  if ((int32_t)n == P79_Total) { wr16(m, 2, rd16(m, 2) | 0x30); P79_NumAll++; }
+  uint16_t n = rd16(m, MDL_NRECS);
+  if ((int32_t)n == P79_Total) { wr16(m, MDL_FLAGS, rd16(m, MDL_FLAGS) | 0x30); P79_NumAll++;   /* every record axis-aligned */ }
   else if ((int32_t)n == P79_Outside) { P79_NumNone++; }
-  else { wr16(m, 2, rd16(m, 2) | 0x10); P79_NumMixed++; }
+  else { wr16(m, MDL_FLAGS, rd16(m, MDL_FLAGS) | 0x10); P79_NumMixed++; }
   P79_SumTotal += P79_Total;
   P79_SumOut += P79_Outside;
 }
 
 /* 00475906: для каждой записи ищет первую такую же вершину; свою — помечает 8, чужую — считает */
+/* P79_FindSameVerts — Game.exe 00475906, cdecl.  For each record find the first identical vector (all 4 floats) in MDL_RECVEC and store its
+   index in record +4; a record that is its own first match gets byte 1 |= 8.  Returns the
+   number of records that reuse an earlier vector. */
 int32_t P79_FindSameVerts(void *m) {
   int32_t cnt = 0;
-  uint8_t *rec = (uint8_t *)P79_PTR(rd32(m, 0x2c));
-  const float *verts = (const float *)P79_PTR(rd32(m, 0x24));
-  int n = rd16(m, 0x16);
+  uint8_t *rec = (uint8_t *)P79_PTR(rd32(m, MDL_RECS));
+  const float *verts = (const float *)P79_PTR(rd32(m, MDL_RECVEC));
+  int n = rd16(m, MDL_NRECS);
   for (int i = 0; i < n; i++) {
     const float *a = verts + i * 4, *b = verts;
     for (int j = 0; j < n; j++, b += 4) {
@@ -264,48 +292,54 @@ int32_t P79_FindSameVerts(void *m) {
 
 /* 00475a3d: src — модель с диска (смещения от начала src), dst — модель в памяти (смещения от начала dst).
    В оригинале src правился на месте (+= src); здесь он только читается. */
+/* P79_Convert — Game.exe 00475a3d, cdecl.  Convert a disk model (links relative to src) into memory format at dst (links relative to dst):
+   copies the header, widens xyz triples to float4 with w = 1.0 (vertices, and the MDL_L28
+   array), copies the record vectors (MDL_RECVEC), the byte array (padded to 4) and table +0x34 (own-geometry models
+   only), and rebuilds each polygon record via the field-copy program P79_Ops (U = u16 -> u32,
+   F = u8 -> float, else byte).  Record types >= 0x38 or with bit 3 are only skipped.
+   Returns the memory size.  Native: src is read-only (the original relocated it in place). */
 int32_t P79_Convert(void *srcv, void *dstv) {
   const uint8_t *src = (const uint8_t *)srcv; uint8_t *dst = (uint8_t *)dstv;
   const float one = 1.0f;
-  int32_t cur = 0x38;
-  memcpy(dst, src, 0x38);
-  int32_t parent = (int32_t)rd32(src, 4);
-  uint32_t o34 = rd32(src, 0x34);
+  int32_t cur = MDL_HDR_SIZE;
+  memcpy(dst, src, MDL_HDR_SIZE);
+  int32_t parent = (int32_t)rd32(src, MDL_PARENT);
+  uint32_t o34 = rd32(src, MDL_L34);
   if (parent == -1) {
-    int n = rd16(src, 0x14);
-    const uint8_t *s = src + rd32(src, 0x20); uint8_t *d = dst + 0x38;
+    int n = rd16(src, MDL_NVERTS);
+    const uint8_t *s = src + rd32(src, MDL_VERTS); uint8_t *d = dst + MDL_HDR_SIZE;
     for (int i = 0; i < n; i++, s += 12, d += 16) { memcpy(d, s, 12); memcpy(d + 12, &one, 4); }
-    wr32(dst, 0x20, 0x38);
-    cur = n * 16 + 0x38;
-    int nr = rd16(src, 0x16);
-    if (nr != 0) memcpy(dst + cur, src + rd32(src, 0x24), (size_t)nr << 4);
-    wr32(dst, 0x24, (uint32_t)cur);
+    wr32(dst, MDL_VERTS, MDL_HDR_SIZE);
+    cur = n * 16 + MDL_HDR_SIZE;
+    int nr = rd16(src, MDL_NRECS);
+    if (nr != 0) memcpy(dst + cur, src + rd32(src, MDL_RECVEC), (size_t)nr << 4);
+    wr32(dst, MDL_RECVEC, (uint32_t)cur);
     cur += nr * 16;
   }
-  int nn = rd16(src, 0x18);
+  int nn = rd16(src, MDL_N28);
   if (nn != 0) {
-    const uint8_t *s = src + rd32(src, 0x28); uint8_t *d = dst + cur;
+    const uint8_t *s = src + rd32(src, MDL_L28); uint8_t *d = dst + cur;
     for (int i = 0; i < nn; i++, s += 12, d += 16) { memcpy(d, s, 12); memcpy(d + 12, &one, 4); }
   }
-  wr32(dst, 0x28, (uint32_t)cur);
+  wr32(dst, MDL_L28, (uint32_t)cur);
   cur += nn * 16;
-  int nb = rd16(src, 0x1a);
-  if (nb != 0) memcpy(dst + cur, src + rd32(src, 0x1c), (size_t)nb);
-  wr32(dst, 0x1c, (uint32_t)cur);
+  int nb = rd16(src, MDL_NBYTES1C);
+  if (nb != 0) memcpy(dst + cur, src + rd32(src, MDL_L1C), (size_t)nb);
+  wr32(dst, MDL_L1C, (uint32_t)cur);
   cur += (nb + 3) & ~3;
   if (parent == -1) {
-    if (o34 == 0) wr32(dst, 0x34, 0);
+    if (o34 == 0) wr32(dst, MDL_L34, 0);
     else {
       const uint8_t *t = src + o34;
       int32_t k = (int32_t)rd32(t, 0);
       memcpy(dst + cur, t, (size_t)(k * 0x14 + 4));
-      wr32(dst, 0x34, (uint32_t)cur);
+      wr32(dst, MDL_L34, (uint32_t)cur);
       cur += 4 + k * 0x14;
     }
   }
-  const uint8_t *rs = src + rd32(src, 0x2c);
-  wr32(dst, 0x2c, (uint32_t)cur);
-  int nrec = rd16(src, 0x16);
+  const uint8_t *rs = src + rd32(src, MDL_RECS);
+  wr32(dst, MDL_RECS, (uint32_t)cur);
+  int nrec = rd16(src, MDL_NRECS);
   for (int i = 0; i < nrec; i++) {
     uint8_t t = *rs;
     uint8_t *d = dst + cur;

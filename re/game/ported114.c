@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 /* v1.59 (см. ported114.h). */
+/* ported114.c (English overview) — assorted HUD / render routines: D3D mip download for paletted
+   pages, interview paper marks, the credits frame, pedestrian-pool sprites, the script record timer,
+   the collision colour flash, a debug path overlay, debris icons and shadows, a generic icon drawer,
+   the camera-script frame with fade, full-map target marks, and the generic menu step (P114_MenuStep).
+   Each function keeps its Russian note; the English line under it is a translation / summary. */
 #include "ported114.h"
 #include "reptr.h"
 #include "noop.h"
@@ -70,6 +75,8 @@ static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 
 /* ---- 0041d53c: загрузка мип-уровня (режим D3D 1): 8-битная текстура при включённых списках — привязать узел палитры к слоту ---- */
+/* P114_TexDownloadMip — Game.exe 0041d53c.  Mip-level download in D3D mode 1: for an 8-bit page while
+   palette lists are enabled, binds the palette node to the texture slot. */
 void P114_TexDownloadMip(int32_t tmu, int32_t addr, int32_t evenOdd, int32_t info, int32_t handle) {
   P33_FlushBatches();
   const uint8_t *in = (const uint8_t *)re_ptr((uint32_t)info);
@@ -89,6 +96,8 @@ void P114_TexDownloadMip(int32_t tmu, int32_t addr, int32_t evenOdd, int32_t inf
 }
 
 /* ---- 004e5fd7: отметка пункта idx (0..8) на «бумаге» ELPAPEL (.data 00562b80: x0, x1, y0, y1 по 16 байт) ---- */
+/* P114_PaperMark — Game.exe 004e5fd7.  Draws the completion mark of interview task idx (0..8) on the
+   ELPAPEL paper; mark rectangles {x0, x1, y0, y1} (16 bytes each) from .data 00562b80. */
 void P114_PaperMark(int32_t idx) {
   static const float k_mark[9][4] = {   /* .data 00562b80 */
     { 21, 79, 20, 28 }, { 17, 91, 31, 39 }, { 18, 67, 41, 49 }, { 21, 59, 52, 59 }, { 23, 58, 62, 69 },
@@ -113,6 +122,8 @@ void P114_PaperMark(int32_t idx) {
 }
 
 /* ---- 004a995c: кадр титров — строки P98_Credits по y − прокрутка G00B1FFBC, рамки/градиенты 640×480 ---- */
+/* P114_CreditsDraw — Game.exe 004a995c.  One frame of the credits: lines of P98_Credits at their y minus
+   the scroll G00B1FFBC, plus the 640x480 frames / gradients. */
 #ifdef RE_HOOK_BUILD
 #  define WHITE_ADDR 0x00552e18u
 #else
@@ -149,6 +160,8 @@ void P114_CreditsDraw(void) {
 }
 
 /* ---- 005128b7: частицы A_00C56780 с флагом 0x10 — по текстурам .data 005759a8, высота дороги − 224, P113_PartDraw ---- */
+/* P114_PartModels — Game.exe 005128b7.  Draws every pool object of A_00C56780 with flag 0x10 (walkers)
+   via P113_PartDraw, textures from .data 005759a8, at road height - 224. */
 void P114_PartModels(void) {
   static const int32_t k_tex[5] = { 0x0e, 0x1a, 0x1c, 0x1d, 0x1e };   /* .data 005759a8 */
   if (P60_PartLimit == 0) return;
@@ -166,6 +179,8 @@ void P114_PartModels(void) {
 }
 
 /* ---- 004f5afe: таймер записи скрипта {кадры, флаги, счётчик, сотые, сек, мин} ---- */
+/* P114_Timer — Game.exe 004f5afe.  Advances a mission-script timer record {frames, flags, counter,
+   hundredths, seconds, minutes}. */
 void P114_Timer(int32_t *t) {
 #ifndef RE_HOOK_BUILD
   if (t == NULL) return;
@@ -191,6 +206,8 @@ void P114_Timer(int32_t *t) {
 }
 
 /* ---- 004e8bd0: пять колец дыма вокруг P76_ColObj и вспышка цветом P76_ColA/B/C на всё окно 3D (два треугольника, смешивание 3) ---- */
+/* P114_ColorFlash — Game.exe 004e8bd0.  Five smoke rings around P76_ColObj and a full-3D-window flash in
+   colour P76_ColA/B/C (two triangles, blend mode 3). */
 void P114_ColorFlash(void) {
   if (P76_Angle >= 0xc0) return;
   float s = (float)P76_Angle * 8.0f + 500.0f;                       /* .rdata 0054616c, 005469c0 */
@@ -216,6 +233,9 @@ void P114_ColorFlash(void) {
 
 /* ---- 0050cfeb: отладочный путь (список узлов по 0x20: +0 следующий, +4 предыдущий — адреса; +8/+0xc x/z, +0x14/+0x16 экран,
         +0x18 тип, +0x1e направление) — квадраты и линии на экране, только в режиме 6 или при отладке 00c7d850 ---- */
+/* P114_PathDraw — Game.exe 0050cfeb.  Debug overlay of a node path (0x20-byte nodes: +0 next, +4 prev
+   (addresses), +8/+0xc x/z, +0x14/+0x16 screen x/y, +0x18 type, +0x1e direction) as squares and lines;
+   only in game mode 6 or with the debug flag 00c7d850. */
 void P114_PathDraw(uint8_t *p, int32_t mode) {
   if (G00BDFA54 != 0 || (P59_Mode1137324 != 6 && P77_C7D850 == 0)) return;
   float py = -1.0f;
@@ -283,6 +303,8 @@ static void blend(uint8_t m) {
 }
 
 /* ---- 004b3e55: обломки P97_Debris (100 × 0x3c, +0x22 флаги): проход значками с альфа-тестом, затем тени (смешивание 2) ---- */
+/* P114_DebrisAll — Game.exe 004b3e55.  Draws the 100 debris records P97_Debris (0x3c bytes, +0x22 flags):
+   first the icons with alpha test, then their shadows (blend mode 2). */
 void P114_DebrisAll(void) {
   state4();
   blend(0);
@@ -301,6 +323,8 @@ void P114_DebrisAll(void) {
 }
 
 /* ---- 004d8511: значок ic (+8 страница, +9/+10 u/v, +0xb/+0xc ширина/высота) в (x, y) с масштабом sx/sy, цвет r,g,b, смешивание 0..3 ---- */
+/* P114_DrawSpr — Game.exe 004d8511.  Icon ic (+8 page, +9/+10 u/v, +0xb/+0xc width/height) at (x, y),
+   scale sx/sy, colour r,g,b, blend 0..3. */
 void P114_DrawSpr(float x, float y, float sx, float sy, void *icv, int32_t r, int32_t g, int32_t b, int32_t bl) {
   const uint8_t *ic = (const uint8_t *)icv;
   state4();
@@ -329,6 +353,9 @@ void P114_DrawSpr(float x, float y, float sx, float sy, void *icv, int32_t r, in
 
 /* ---- 0049f474: кадр сценария камеры — при задержке 00c810d0 очистка и текст 00c81168; затемнение P99_CamFade
         (прямоугольник ScrW × CamMax двумя треугольниками, смешивание 2), grBufferSwap(0), высота окна CamSpd >> 12 ---- */
+/* P114_CamFadeFrame — Game.exe 0049f474.  Frame of a camera script: during the delay 00c810d0 clears and
+   shows the text at 00c81168; draws the fade P99_CamFade (ScrW x CamMax rectangle, blend 2), swaps
+   buffers, window height CamSpd >> 12.  TODO(RE): unsure — this looks like the letterbox wipe of cut-scenes. */
 void P114_CamFadeFrame(void) {
   int32_t delay = (P99_CamDelay != 0);
   if (delay) {
@@ -366,6 +393,8 @@ void P114_CamFadeFrame(void) {
 }
 
 /* ---- 005073f1: карта — игрок (белый) и цели P58_Objs (10 × 0x34: +0x10 флаги, +0x14/+0x1c x/z) красным, масштаб |00b3297c| ---- */
+/* P114_RadarMarks — Game.exe 005073f1.  Full map marks: the player in white and active targets of
+   P58_Objs (10 x 0x34: +0x10 flags, +0x14/+0x1c x/z) in red, scaled by |00b3297c|. */
 void P114_RadarMarks(void) {
   float px = (float)P59_PosX, pz = (float)P59_PosZ;
   P12_Fn00426580(0);
@@ -414,6 +443,13 @@ int32_t P114_RepDelay = 10;
 
 /* ---- 0040c8f1: шаг меню. Пункт таблицы (0x10): +0 рисовать (мигание), +4 рисовать обычным, +8 выбрать; +0xc/+0xd влево/вправо,
         +0xe/+0xf вверх/вниз (номер пункта). Обработчики — адреса Game.exe через re_fn. Esc (1) — -1 ---- */
+/* P114_MenuStep — Game.exe 0040c8f1.  One step of menu table tbl (Game.exe address; 16-byte entries:
+   +0 draw-highlighted fn, +4 draw-normal fn, +8 select fn, +0xc/+0xd left/right neighbour, +0xe/+0xf
+   up/down neighbour) with selection *cur.  Esc: redraw normal and return -1.  The highlight blinks
+   every 20 frames.  Left/right either move the selection or (D_005f7e4c, slider screens) call the
+   neighbour entry's draw fn with key repeat (first delay 40 frames, then every frame).  Up/down move;
+   Enter calls the select fn and returns its result.  Returns 0 while nothing was chosen.
+   Native: RE_TRACE_KEYS trace.  Scan codes: 1 Esc, 0xcb/0xcd left/right, 0xc8/0xd0 up/down, 0x1c Enter. */
 typedef void (*p114_fn1_t)(int32_t);
 typedef int32_t (*p114_fn0_t)(void);
 static void call1(const uint8_t *t, uint32_t i, uint32_t off, int32_t a) {

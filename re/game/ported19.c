@@ -1,3 +1,6 @@
+/* ported19.c — key-binding uniqueness checks for the controls menu, the menu value fader, a word
+   tokenizer, three chained menu selection handlers gated by progress, and the 640x480 -> screen
+   coordinate scale used by menu drawing. */
 #include "ported19.h"
 #include "unported.h"
 #include <string.h>
@@ -212,6 +215,9 @@ int32_t P19_Cond;
 #pragma pop_macro("P19_Cond")
 #endif
 
+/* P19_KeysUnique12 — Game.exe 004107b9.  Returns 1 if the 12 key bindings P19_Keys1 (read in the order
+   0..4, 6, 7, 5, 8..11) are pairwise different, ignoring entries equal to 0x22; else 0.
+   TODO(RE): unsure why 0x22 is exempt (DIK_G, or a "no key" marker). */
 int32_t P19_KeysUnique12(void) {
   static const int idx[12] = {0,1,2,3,4,6,7,5,8,9,10,11};
   char k[12];
@@ -223,6 +229,8 @@ int32_t P19_KeysUnique12(void) {
   return 1;
 }
 
+/* P19_KeysUnique14 — Game.exe 00411b09.  Returns 1 if the 14 bytes of P19_Keys2 (0054b7c4) are pairwise
+   different (no exemption), else 0. */
 int32_t P19_KeysUnique14(void) {
   for (int i = 0; i < 14; i++)
     for (int j = i + 1; j < 14; j++)
@@ -230,6 +238,9 @@ int32_t P19_KeysUnique14(void) {
   return 1;
 }
 
+/* P19_FadeStep — Game.exe 004184f5.  While P19_Active, moves P19_Cur toward P19_Target by P19_Step
+   (stopping exactly at the target and clearing P19_Active), then copies P19_Cur to four outputs
+   (01251a68, 005507d0/d4/d8).  TODO(RE): unsure what the four outputs are (fade colour components?). */
 void P19_FadeStep(void) {
   if (P19_Active == 0) return;
   if (P19_Target <= P19_Cur) {
@@ -244,6 +255,9 @@ void P19_FadeStep(void) {
   P19_Out68 = P19_Cur; P19_OutA = P19_Cur; P19_OutB = P19_Cur; P19_OutC = P19_Cur;
 }
 
+/* P19_TakeToken — Game.exe 0041c7da.  Cuts the first word off s: skips leading spaces, copies characters
+   up to the next space or '\n' into out (NUL-terminated), and shifts the rest of s (after that one
+   delimiter) to the front of s.  Returns 1 if the word is empty, else 0.  No bound on out. */
 int P19_TakeToken(char* s, char* out) {
   int n = 0, pos = 0;
   size_t left = strlen(s);
@@ -262,6 +276,12 @@ int P19_TakeToken(char* s, char* out) {
   return n == 0;
 }
 
+/* P19_Sel2 / P19_Sel3 / P19_Sel4 — Game.exe 00416084 / 004160e9 / 0041614e.  Menu entry k (2..4) handler,
+   gated by the progress value P19_Level: if P19_Level < k the selection falls back to entry k-1
+   (P19_Sel = k-2, then entry k-1's handler; entry 1 is Fn00416040).  Otherwise it sets the hint text
+   address and size (P19_PtrA / P19_Wd / P19_Ht), the entry's enable flag P19_Fk and the id written to
+   P19_Cond (00b87e38): 0x2f / 0x30 / 0x31.  TODO(RE): unsure — which menu (city or mission select)
+   and what the 00b87e38 ids name. */
 void P19_Sel2(int32_t a) {
   if (P19_Level < 2) { P19_Sel = 0; Fn00416040(a); }
   else { P19_PtrA = 0x54e10c; P19_Wd = 0x148; P19_Ht = 0xa6; P19_F1 = 1; P19_Cond = 0x2f; }
@@ -275,9 +295,13 @@ void P19_Sel4(int32_t a) {
   else { P19_PtrA = 0x54e114; P19_Wd = 0x147; P19_Ht = 0x9a; P19_F3 = 1; P19_Cond = 0x31; }
 }
 
+/* P19_ScaleX — Game.exe 005174c6.  Design x (640-wide) -> screen x, zoomed by P19_Scale about the screen
+   centre: (v * ScrW / DivW - ScrW / DivC) * Scale + ScrW / DivC, with DivW = 640, DivC = 2 read from
+   .rdata (00546060 / 00546050; values per ported73.c's P73_Text, which inlines the same formula). */
 float P19_ScaleX(float v) {
   return (v * ((float)P19_ScrW / P19_DivW) - (float)P19_ScrW / P19_DivC) * P19_Scale + (float)P19_ScrW / P19_DivC;
 }
+/* P19_ScaleY — Game.exe 00517512.  Same as P19_ScaleX for y (DivH = 480 at 0054605c). */
 float P19_ScaleY(float v) {
   return (v * ((float)P19_ScrH / P19_DivH) - (float)P19_ScrH / P19_DivC) * P19_Scale + (float)P19_ScrH / P19_DivC;
 }

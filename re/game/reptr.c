@@ -1,4 +1,20 @@
-/* Реестр «адрес Game.exe ↔ native-объект» (v1.42). См. reptr.h. */
+/* Реестр «адрес Game.exe ↔ native-объект» (v1.42). См. reptr.h.
+
+   English summary.  Game data structures store 32-bit Game.exe addresses (pointers inside tables, lists,
+   records).  In the hook build those are real pointers, so every function here is the identity.  In the
+   native build they are translated through this registry:
+     re_ptr(addr)  -> native pointer, searched in this order:
+                      1. the car table 00d077c0 (always the native P99_Cars array),
+                      2. GAME_VARs that live inside the .data image (gvar_img_tab.c ranges),
+                      3. dynamic registrations (re_ptr_register / re_ptr_register_dyn),
+                      4. static regions k_regions (GAME_VAR arrays referenced by address),
+                      5. the .rdata/.data/.bss image of Game.exe (data_image.c, game mode only).
+     re_addr(p)    -> the address for a native pointer (the reverse); unknown pointers get a synthetic
+                      address via re_ptr_register_dyn so they round-trip.
+     re_fn(addr)   -> ported function for a Game.exe code address: runtime registrations, k_fns,
+                      fn_table.c (generated from the hook install list), then incremental-link thunks
+                      (jmp rel32 at 00401005..00402aea, thunk_table.c) followed to their target.
+   The lookup order is behaviour: changing it changes which alias a write lands in. */
 #define RE_GVAR_PLAIN   /* v2.03: k_regions — константные адреса native-объектов */
 #include <stdlib.h>
 #include <string.h>

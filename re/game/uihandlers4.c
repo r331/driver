@@ -1,3 +1,9 @@
+/* uihandlers4.c — auto-generated batch of one-line UI setters / toggles from Game.exe (cdecl), each tagged with its
+   Game.exe address.  Most addresses duplicate menustate.c (same code under other names; the hook DLL installs the
+   last re_hook, native fn_table.c the first — see docs/DEAD_CODE_AUDIT.md).  Kept as is: names and order are
+   referenced by the hook lists.  Groups: flag setters, the seven MenuOpt toggles (refresh), graphics switches
+   (mark dirty + redraw), slider steps, menu-mode select / clear pairs, two "state 2 or 004076E2" handlers and two
+   value copies. */
 #include "uihandlers4.h"
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("G01271060")
@@ -422,109 +428,163 @@ int32_t G00D118C8;
 #pragma pop_macro("G00D118C8") /*gvi*/
 #pragma pop_macro("G00D118C8")
 #endif
+/* Set5F7E4C_1 — Game.exe 00404687 */
 void Set5F7E4C_1(void) { G005F7E4C = 1;
 }
+/* Set54A0CC_0 — Game.exe 0040844c */
 void Set54A0CC_0(void) { G0054A0CC = 0;
 }
+/* Set54A0BC_1 — Game.exe 00408337 */
 void Set54A0BC_1(void) { G0054A0BC = 1;
 }
+/* Set54A0BC_0 — Game.exe 00408343 */
 void Set54A0BC_0(void) { G0054A0BC = 0;
 }
+/* Inc5D577C — Game.exe 00408710 */
 void Inc5D577C(void) { G005D577C++;
 }
+/* Set54A844_1 — Game.exe 0040a443 */
 void Set54A844_1(void) { G0054A844 = 1;
 }
+/* Set54A844_0 — Game.exe 0040a44f */
 void Set54A844_0(void) { G0054A844 = 0;
 }
+/* Set54A854_1 — Game.exe 0040a495 */
 void Set54A854_1(void) { G0054A854 = 1;
 }
+/* Set54A854_0 — Game.exe 0040a4a1 */
 void Set54A854_0(void) { G0054A854 = 0;
 }
+/* Set575EF0_4Ret0 — Game.exe 00404f5f */
 int32_t Set575EF0_4Ret0(void) { G00575EF0 = 4; return 0;
 }
+/* ToggleBDFA44_Call40500D — Game.exe 00404eb0 */
 int32_t ToggleBDFA44_Call40500D(void) { G00BDFA44 ^= 1; MenuRefresh(); return 0;
 }
+/* ToggleBDFA48_Call40500D — Game.exe 00404ec9 */
 int32_t ToggleBDFA48_Call40500D(void) { G00BDFA48 ^= 1; MenuRefresh(); return 0;
 }
+/* ToggleBDFA4C_Call40500D — Game.exe 00404ee2 */
 int32_t ToggleBDFA4C_Call40500D(void) { G00BDFA4C ^= 1; MenuRefresh(); return 0;
 }
+/* ToggleBDFA50_Call40500D — Game.exe 00404efb */
 int32_t ToggleBDFA50_Call40500D(void) { G00BDFA50 ^= 1; MenuRefresh(); return 0;
 }
+/* ToggleBDFA54_Call40500D — Game.exe 00404f14 */
 int32_t ToggleBDFA54_Call40500D(void) { G00BDFA54 ^= 1; MenuRefresh(); return 0;
 }
+/* ToggleB87E9C_Call40500D — Game.exe 00404f2d */
 int32_t ToggleB87E9C_Call40500D(void) { G00B87E9C ^= 1; MenuRefresh(); return 0;
 }
+/* ToggleBDFA58_Call40500D — Game.exe 00404f46 */
 int32_t ToggleBDFA58_Call40500D(void) { G00BDFA58 ^= 1; MenuRefresh(); return 0;
 }
+/* ToggleEF8_55384C — Game.exe 00408a69 */
 int32_t ToggleEF8_55384C(void) { G0055384C ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* ToggleEF8_553850 — Game.exe 00408b03 */
 int32_t ToggleEF8_553850(void) { G00553850 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* ToggleEF8_B31F04 — Game.exe 00408b9d */
 int32_t ToggleEF8_B31F04(void) { G00B31F04 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* ToggleEF8_575F44 — Game.exe 00408d0c */
 int32_t ToggleEF8_575F44(void) { G00575F44 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* ToggleEF8_55C974 — Game.exe 00408da6 */
 int32_t ToggleEF8_55C974(void) { G0055C974 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* ToggleEF8_575F30 — Game.exe 00408e40 */
 int32_t ToggleEF8_575F30(void) { G00575F30 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* ToggleEF8_B201DC — Game.exe 00408eda */
 int32_t ToggleEF8_B201DC(void) { G00B201DC ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* ToggleEF8_575EE8 — Game.exe 00408f74 */
 int32_t ToggleEF8_575EE8(void) { G00575EE8 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* ToggleEF8_575F3C — Game.exe 0040900e */
 int32_t ToggleEF8_575F3C(void) { G00575F3C ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* ToggleEF8_D118C8 — Game.exe 004090a8 */
 int32_t ToggleEF8_D118C8(void) { G00D118C8 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* RefreshMenu00409231 — Game.exe 00409231 */
 int32_t RefreshMenu00409231(void) { G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* RefreshMenu004092D8 — Game.exe 004092d8 */
 int32_t RefreshMenu004092D8(void) { G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* RefreshMenu0040937F — Game.exe 0040937f */
 int32_t RefreshMenu0040937F(void) { G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* RefreshMenu00409426 — Game.exe 00409426 */
 int32_t RefreshMenu00409426(void) { G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* RefreshMenu004094CD — Game.exe 004094cd */
 int32_t RefreshMenu004094CD(void) { G00575EF8 = 4; MenuRedraw(); return 0;
 }
+/* Inc5759A4Max40 — Game.exe 00409b75 */
 void Inc5759A4Max40(void) { if (G005759A4 < 64) { G005759A4++; G00575EF8 = 4; MenuRedraw(); }
 }
+/* Dec5759A4Min0 — Game.exe 00409b9f */
 void Dec5759A4Min0(void) { if (G005759A4 > 0) { G005759A4--; G00575EF8 = 4; MenuRedraw(); }
 }
+/* IncB87E4CMax3 — Game.exe 00409c31 */
 void IncB87E4CMax3(void) { if (G00B87E4C < 3) { G00B87E4C++; G00575EF8 = 4; MenuRedraw(); }
 }
+/* DecB87E4CMin0 — Game.exe 00409c5b */
 void DecB87E4CMin0(void) { if (G00B87E4C > 0) { G00B87E4C--; G00575EF8 = 4; MenuRedraw(); }
 }
+/* Select54A90C_Mode2 — Game.exe 0040a625 */
 void Select54A90C_Mode2(void) { G0054A90C = 1; G01271060 = 2;
 }
+/* Select54A91C_Mode1 — Game.exe 0040a64d */
 void Select54A91C_Mode1(void) { G0054A91C = 1; G01271060 = 1;
 }
+/* Select54A8FC_Mode5 — Game.exe 0040a675 */
 void Select54A8FC_Mode5(void) { G0054A8FC = 1; G01271060 = 5;
 }
+/* Select54A92C_Mode3 — Game.exe 0040a69d */
 void Select54A92C_Mode3(void) { G0054A92C = 1; G01271060 = 3;
 }
+/* Select54A8EC_Mode4 — Game.exe 0040a6c5 */
 void Select54A8EC_Mode4(void) { G0054A8EC = 1; G01271060 = 4;
 }
+/* Select54A94C_Mode7 — Game.exe 0040a6ed */
 void Select54A94C_Mode7(void) { G0054A94C = 1; G01271060 = 7;
 }
+/* Select54A93C_Mode6 — Game.exe 0040a715 */
 void Select54A93C_Mode6(void) { G0054A93C = 1; G01271060 = 6;
 }
+/* Clear54A90C_IfZero — Game.exe 0040a63b */
 void Clear54A90C_IfZero(int32_t a0) { if (a0 == 0) G0054A90C = 0;
 }
+/* Clear54A91C_IfZero — Game.exe 0040a663 */
 void Clear54A91C_IfZero(int32_t a0) { if (a0 == 0) G0054A91C = 0;
 }
+/* Clear54A8FC_IfZero — Game.exe 0040a68b */
 void Clear54A8FC_IfZero(int32_t a0) { if (a0 == 0) G0054A8FC = 0;
 }
+/* Clear54A92C_IfZero — Game.exe 0040a6b3 */
 void Clear54A92C_IfZero(int32_t a0) { if (a0 == 0) G0054A92C = 0;
 }
+/* Clear54A8EC_IfZero — Game.exe 0040a6db */
 void Clear54A8EC_IfZero(int32_t a0) { if (a0 == 0) G0054A8EC = 0;
 }
+/* Clear54A94C_IfZero — Game.exe 0040a703 */
 void Clear54A94C_IfZero(int32_t a0) { if (a0 == 0) G0054A94C = 0;
 }
+/* Menu549FBC / Menu549FCC: argument 0 sets the variable to 2, argument 2 calls 004076E2 (TODO(RE): unsure). */
+/* Menu549FBC — Game.exe 00407460 */
 void Menu549FBC(int32_t a0) { if (a0 == 0) G00549FBC = 2; else if (a0 == 2) Call004076E2();
 }
+/* Menu549FCC — Game.exe 00407539 */
 void Menu549FCC(int32_t a0) { if (a0 == 0) G00549FCC = 2; else if (a0 == 2) Call004076E2();
 }
+/* Copy54A0C0 — Game.exe 0040831c */
 void Copy54A0C0(void) { G0054A0C0 = G00C559A4; G0054A0D0 = G00C559A8;
 }
+/* Copy54A838 — Game.exe 0040a41c */
 void Copy54A838(void) { G0054A838 = G00C55A04; G0054A848 = G00C559F0; G0054A858 = G00C559F4;
 }

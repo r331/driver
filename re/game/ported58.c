@@ -1,3 +1,6 @@
+/* ported58.c — front-end and level helpers (English overview; original notes follow): menu screen loops and
+   switches, cheat codes, item drawing, freeing level lists, demo playback, language strings, logo /
+   backgrounds, save-slot names, config.dat, text width. */
 #include "ported138.h"
 #include "ported58.h"
 #include "ported116.h"
@@ -402,7 +405,14 @@ _Static_assert(sizeof(p58_cheat_t) == 8 && sizeof(p58_slot_t) == 8 && sizeof(p58
                sizeof(p58_list_t) == 8, "p58 struct sizes (32-bit Game.exe)");
 #endif
 
+/* Save / config file signatures and sizes (SAVES\GAMEn.BIN, config.dat). */
+#define SAVE_MAGIC        0x57231356u
+#define SAVE_NAME_BYTES   0x38      /* checksummed name block read from a save file */
+#define CONFIG_MAGIC      0x93587031u
+#define CONFIG_BYTES      0x10c     /* settings block of config.dat */
+
 /* Строки таблиц из .data Game.exe (нужны только native). */
+/* P58_InitConsts — native only.  Fills the .data string tables DEMO0..3 and ENG / FRE / GER / SPA / ITA / USA. */
 void P58_InitConsts(void) {
 #ifndef RE_HOOK_BUILD
   P58_Demos[0] = "DEMO0"; P58_Demos[1] = "DEMO1"; P58_Demos[2] = "DEMO2"; P58_Demos[3] = "DEMO3"; P58_Demos[4] = NULL;
@@ -411,6 +421,8 @@ void P58_InitConsts(void) {
 }
 
 /* 00417e0d: пять вариантов; в 005fea44 кладётся адрес обработчика в Game.exe (thunk-и 00401dde / 00401dc5 / 00417f45 / 00402621 / 004013c5). */
+/* P58_MenuSwitch — Game.exe 00417e0d.  Picks one of 5 screens by P58_MenuSel: fade to black, camera route 5..9,
+   stores the screen's handler (a Game.exe thunk address) in 005fea44 and its index. */
 void P58_MenuSwitch(void) {
   switch (P58_MenuSel) {
   case 0: SetFade0051707A(0, 0, 0, 0x32); Ui00418119(5); P58_MenuFn = 0x00401dde; P58_MenuIdx = 0; break;
@@ -423,6 +435,8 @@ void P58_MenuSwitch(void) {
 }
 
 /* 00413381 / 004133b4: таблица кодов читов {строка, адрес флага}: все / по строке. */
+/* P58_CheatsAll / P58_CheatByName — Game.exe 00413381 / 004133b4.  Enable all cheats, or the one whose code string
+   matches `name` (table {string, flag address}, max 12), then save config.dat. */
 void P58_CheatsAll(void) {
   for (int i = 0; i < 12 && P58_Cheats[i].name != NULL; i++) *P58_Cheats[i].var = 1;
   P47_Fn405BFA();
@@ -434,6 +448,8 @@ void P58_CheatByName(const char *name) {
 }
 
 /* 00407dba: записи по 20 байт {…, флаги +8}; конец — бит 4, рисуются записи с битом 8. */
+/* P58_ItemsDraw — Game.exe 00407dba.  Draws the menu items of P58_ItemList (20-byte records, flag word +8: bit 4 ends
+   the list, bit 8 = visible) into frame-buffer address a. */
 void P58_ItemsDraw(int32_t a) {
   if (P58_ItemList == NULL) return;
   int32_t idx = 0;
@@ -447,6 +463,7 @@ void P58_ItemsDraw(int32_t a) {
 }
 
 /* 004efc03 */
+/* P58_FreeRecs — Game.exe 004efc03.  Frees the level's page -> palette list (P58_Tab4EFC03, see ported86.c). */
 void P58_FreeRecs(void) {
   Dev00424858();
   if (P58_Tab4EFC03 != NULL) {
@@ -457,6 +474,7 @@ void P58_FreeRecs(void) {
 }
 
 /* 004f5dcd */
+/* P58_FreeLists — Game.exe 004f5dcd.  Frees the mission's chunk pointers and limits (see P58_FindChunk). */
 void P58_FreeLists(void) {
   for (int32_t i = 0; i < P58_CntC814E8; i++) DebugFree(P58_PtrsC816A0[i]);
   if (P58_PtrsC816A0 != NULL) DebugFree(P58_PtrsC816A0);
@@ -465,6 +483,7 @@ void P58_FreeLists(void) {
 }
 
 /* 004f8d6d: список {число, массив элементов}; элемент начинается с указателя на строку. */
+/* P58_FreeNames — Game.exe 004f8d6d.  Frees a {count, items} list whose items start with a string pointer. */
 void P58_FreeNames(p58_list_t *l) {
   if (l->count == 0) return;
   void **arr = l->items;
@@ -478,6 +497,7 @@ void P58_FreeNames(p58_list_t *l) {
 }
 
 /* Общий цикл экрана меню: таблица пунктов, ожидание-прокрутка, опрос до ненулевого результата. */
+/* menu_loop — local helper: generic menu screen loop (init table, wait animation, step until a result). */
 static int32_t menu_loop(uint32_t tbl, int32_t *state, uint32_t a, uint32_t b) {
   int32_t r;
   P57_MenuInit(tbl, 0);
@@ -493,6 +513,8 @@ static int32_t menu_loop(uint32_t tbl, int32_t *state, uint32_t a, uint32_t b) {
 }
 
 /* 00419f00 / 00419ab0: экраны со своей таблицей пунктов 0054e700/0054e600 — шаг 00418675, перерисовка, выход по -1. */
+/* P58_Menu419F00 / P58_Menu419AB0 — Game.exe 00419f00 / 00419ab0.  Run the screens with item tables 0054e700 /
+   0054e600 (P110_MenuSel) until Esc; the first saves config.dat afterwards.  Return -1. */
 int32_t P58_Menu419F00(void) {
   GlobalSet00419F80();
   P58_S5FEA88 = 0; P58_S5FEA8C = 1;
@@ -522,6 +544,8 @@ int32_t P58_Menu419AB0(void) {
 }
 
 /* 00413d70: подготовка 00413e37, таблица/параметры в 5fe9b4/5fe9b0/5fe9b8; выход -1 = закрыть (0). */
+/* P58_Menu413D70 — Game.exe 00413d70.  Prepares (00413e37) and runs the screen in 005fe9b4..; -1 closes it and
+   returns 0, else the choice. */
 int32_t P58_Menu413D70(void) {
   int32_t r;
   P58_Fn413E37();
@@ -532,6 +556,8 @@ int32_t P58_Menu413D70(void) {
 }
 
 /* 00416540: звук 3..6 по 5fe9f8, затем опрос 00416794 с перерисовкой 0041846c(0054e250, 004169af). */
+/* P58_Menu416540 — Game.exe 00416540.  Plays voice sample 3..6 for selection 005fe9f8, runs the screen (00416794)
+   until a result, frees the voice.  Returns the result. */
 int32_t P58_Menu416540(void) {
   int32_t r;
   P58_Fn416605();
@@ -554,6 +580,8 @@ int32_t P58_Menu416540(void) {
 }
 
 /* 00415f67: таблица пунктов по странице (2..4, иначе 1) и копирование пяти значений. */
+/* P58_PrepPage — Game.exe 00415f67.  Selects the item table of page 1..4 (others -> 1), highlights it and copies
+   five strings into the page. */
 void P58_PrepPage(void) {
   switch (P58_Page) {
   case 2: P58_TabPtr = 0x0054e040; SetHiliteBits_0041621C(3, 4); break;
@@ -567,6 +595,8 @@ void P58_PrepPage(void) {
 }
 
 /* 0051be3c: таблица 0x4000 указателей на записи блока карты по номеру (short в начале записи); запись = 8 + 0x34*n байт. */
+/* P58_BuildBlockIndex — Game.exe 0051be3c.  Index of 0x4000 pointers to map block records by their number (int16
+   at the start of each record; record = 8 + 0x34 * n bytes).  Native: out-of-range numbers are skipped. */
 void P58_BuildBlockIndex(void) {
   for (int32_t i = 0; i < 0x4000; i++) P58_BlkIdx[i] = NULL;
   int32_t *p = P58_BlkBuf + 1;
@@ -579,6 +609,7 @@ void P58_BuildBlockIndex(void) {
 }
 
 /* 00408600: демо-ролик n (или следующий по кругу при -1). */
+/* P58_PlayDemo — Game.exe 00408600.  Plays demo replay n, or with -1 the next one in turn (DEMO0..3, wrapping). */
 void P58_PlayDemo(int32_t n) {
   P58_DemoFlag = 1; P58_S5F7E5C = 1;
   P138_ReplayCfg(n == -1 ? P58_Demos[P58_DemoNo] : P58_Demos[n]);
@@ -591,6 +622,7 @@ void P58_PlayDemo(int32_t n) {
 }
 
 /* 00516da0: строки «LANG.xxx» и «MISSION.xxx» для текущего языка (0..5). */
+/* P58_LangStrings — Game.exe 00516da0.  Loads the "LANG.xxx" and "MISSION.xxx" string files of language 0..5. */
 void P58_LangStrings(void) {
   char buf[256];
   if (P58_LangNo < 0 || P58_LangNo > 5) P58_LangNo = 0;
@@ -602,6 +634,7 @@ void P58_LangStrings(void) {
 }
 
 /* 004a9b1a: значок DLOGO по центру сверху (размер в байтах +0xb/+0xc, 0 = 256). */
+/* P58_DrawLogo — Game.exe 004a9b1a.  Draws the DLOGO icon centred at the top (x = 480 - w/2, y = 10). */
 void P58_DrawLogo(void) {
   uint8_t *ic = P56_FindIcon("DLOGO");
   if (ic == NULL) return;
@@ -611,6 +644,8 @@ void P58_DrawLogo(void) {
 }
 
 /* 00506bff: 10 объектов по 0x34 байта (флаги +0x10: бит 1 вкл., бит 0x10 скрыт), либо запасной */
+/* P58_DrawObjs — Game.exe 00506bff.  Radar icons of the 10 mission objects (flag 1 on, 0x10 hidden), or of the spare
+   object in a chase replay (00b87eb0). */
 void P58_DrawObjs(void) {
   if (P58_SB87EB0 == 0) {
     for (int i = 0; i < 10; i++) {
@@ -623,6 +658,7 @@ void P58_DrawObjs(void) {
 }
 
 /* 00524e22: десятичное число со знаком до пробела/конца строки; не цифра — 0. */
+/* P58_ParseInt — Game.exe 00524e22.  Signed decimal up to a space or the end; any other character gives 0. */
 int32_t P58_ParseInt(const uint8_t *s) {
   uint32_t v = 0; int neg = 0;
   if (*s == '-') { neg = 1; s++; }
@@ -635,6 +671,7 @@ int32_t P58_ParseInt(const uint8_t *s) {
 }
 
 /* 004eb19b: список {?, буфер} с конца, затем сам массив */
+/* P58_FreeList — Game.exe 004eb19b.  Frees list 00b31ec4 (buffers from the end), then the array. */
 void P58_FreeList(void) {
   if (P58_ListB31EC4 != NULL) {
     while (P58_CntB31EBC != 0) {
@@ -652,6 +689,7 @@ void P58_FreeList(void) {
 }
 
 /* 004a3354: сетка ширина×высота указателей на {…, …, буфер} */
+/* P58_FreeGrid — Game.exe 004a3354.  Frees the width x height grid of cell records and their item buffers. */
 void P58_FreeGrid(void) {
   if (P58_Grid != NULL) {
     for (int32_t i = 0; i < P58_GridW * P58_GridH; i++) {
@@ -668,6 +706,9 @@ void P58_FreeGrid(void) {
 }
 
 /* 004f6011: кусок (указатель) по накопленным границам v/0x32; не найден — флаги ошибки в блоке c810c0. */
+/* P58_FindChunk — Game.exe 004f6011.  Returns the chunk whose cumulative limit covers v / 50; if none, sets the
+   error state in the 00c810c0 block (result 0xff0, flag, countdown 0x5a).  NULL for v == 0 or not found.
+   TODO(RE): unsure what v measures (a distance or time along a route?). */
 void *P58_FindChunk(int32_t v) {
   if (v != 0) {
     int32_t lo = 0;
@@ -681,6 +722,7 @@ void *P58_FindChunk(int32_t v) {
 }
 
 /* 0040cf35: фон главного меню 3×2 плитки BKGRND1A..F */
+/* P58_Backgrounds — Game.exe 0040cf35.  Draws the main-menu background as 3x2 tiles BKGRND1A..F. */
 void P58_Backgrounds(void) {
   P58_Fn40CFDF(0x000, 0x030, 0x0054aa40, "BKGRND1A", 0);
   P58_Fn40CFDF(0x100, 0x030, 0x0054aa40, "BKGRND1B", 0);
@@ -691,46 +733,55 @@ void P58_Backgrounds(void) {
 }
 
 /* 00405e79: файл SAVES\GAMEn.BIN (n = slot+1): подпись 0x57231356 и сумма 0x38 байт; затем строка копируется в dst (strcpy в оригинале, здесь не дальше 0x38 байт). */
+/* P58_SaveSlot — Game.exe 00405e79.  Reads the name of save slot `slot` (SAVES\GAME<slot+1>.BIN: signature
+   SAVE_MAGIC + checksum, then 0x38 bytes) into dst.  Returns 1, or 0 if missing / invalid.
+   Native: the copy stops at 0x38 bytes (strcpy in Game.exe). */
 int32_t P58_SaveSlot(int32_t slot, char *dst) {
   char name[32];
   snprintf(name, sizeof name, "SAVES\\GAME%d.BIN", slot + 1);
   void *f = g_fopen(name, "rb");
   if (f == NULL) return 0;
   g_fread(P56_SaveHdr, 1, 8, f);
-  g_fread(P56_SaveBuf, 1, 0x38, f);
+  g_fread(P56_SaveBuf, 1, SAVE_NAME_BYTES, f);
   g_fclose(f);
-  if (P56_SaveHdr[0] != 0x57231356u) return 0;
-  if (P56_Fn40682D(P56_SaveBuf, 0x38) != (int32_t)P56_SaveHdr[1]) return 0;
+  if (P56_SaveHdr[0] != SAVE_MAGIC) return 0;
+  if (P56_Fn40682D(P56_SaveBuf, SAVE_NAME_BYTES) != (int32_t)P56_SaveHdr[1]) return 0;   /* byte checksum */
   int i = 0;
-  while (i < 0x38 && P56_SaveBuf[i] != 0) { dst[i] = (char)P56_SaveBuf[i]; i++; }
+  while (i < SAVE_NAME_BYTES && P56_SaveBuf[i] != 0) { dst[i] = (char)P56_SaveBuf[i]; i++; }
   dst[i] = 0;
   return 1;
 }
 
 /* 00405bfa: запись CONFIG.DAT {подпись 0x93587031, сумма} + 0x10c байт настроек. */
+/* P58_SaveConfig — Game.exe 00405bfa.  Writes config.dat: {CONFIG_MAGIC, checksum} + 0x10c bytes of settings,
+   unless saving is off or locked. */
 void P58_SaveConfig(void) {
   if (P58_CfgOn == 0 || P58_CfgLock != 0) return;
-  { uint32_t snap[0x43]; P102_ConfigSnap(snap); memcpy(P58_Cfg, snap, 0x10c); }   /* v1.78: 00406875 перенесена (P102) */
-  int32_t sum = SumBytes(P58_Cfg, 0x10c);   /* v1.78: ported 0040682d (была заглушка) */
-  P58_CfgHdr[0] = 0x93587031u; P58_CfgHdr[1] = (uint32_t)sum;
+  { uint32_t snap[0x43]; P102_ConfigSnap(snap); memcpy(P58_Cfg, snap, CONFIG_BYTES); }   /* v1.78: 00406875 перенесена (P102) */
+  int32_t sum = SumBytes(P58_Cfg, CONFIG_BYTES);   /* v1.78: ported 0040682d (была заглушка) */
+  P58_CfgHdr[0] = CONFIG_MAGIC; P58_CfgHdr[1] = (uint32_t)sum;
   void *f = g_fopen("config.dat", "wb");
   if (f != NULL) {
     g_fwrite(P58_CfgHdr, 1, 8, f);
-    g_fwrite(P58_Cfg, 1, 0x10c, f);
+    g_fwrite(P58_Cfg, 1, CONFIG_BYTES, f);
     g_fclose(f);
   }
 }
 
 /* 0040b1cc: ширина строки шрифтом font (запись глифа 8 байт, таблица 0x806 на шрифт). */
+/* P58_TextWidth — Game.exe 0040b1cc.  Width of string s in font `font` (0x806-byte table per font, 8-byte glyph
+   records: a glyph with flag 0 advances by the font's default width (+0xc), others by glyph width + the
+   font's spacing (+0xa); variable names follow that reading).
+   Native: invalid font numbers return 0. */
 float P58_TextWidth(const uint8_t *s, int32_t font) {
   float w = 0.0f;
   if (font < 0 || font >= 8) return 0.0f;      /* оригинал номер не проверяет */
-  const uint8_t *t = &P58_Font[0] + font * 0x806;
+  const uint8_t *font_tab = &P58_Font[0] + font * 0x806;
   while (*s != 0) {
-    uint32_t c = *s++;
-    int16_t flag, a, b; memcpy(&flag, t + 0xe + c * 8, 2); memcpy(&a, t + 0xc, 2); memcpy(&b, t + 0xa, 2);
-    int32_t v = (flag == 0) ? (int32_t)a : (int32_t)t[0x14 + c * 8] + (int32_t)b;
-    w = w + (float)v;
+    uint32_t ch = *s++;
+    int16_t flag, space_w, spacing; memcpy(&flag, font_tab + 0xe + ch * 8, 2); memcpy(&space_w, font_tab + 0xc, 2); memcpy(&spacing, font_tab + 0xa, 2);
+    int32_t adv = (flag == 0) ? (int32_t)space_w : (int32_t)font_tab[0x14 + ch * 8] + (int32_t)spacing;
+    w = w + (float)adv;
   }
   return w;
 }

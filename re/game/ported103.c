@@ -504,6 +504,7 @@ p103_b88_t P103_C54EE0;
 
 static int32_t mul(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b); }   /* imul с переполнением */
 #include "memrw.h"
+#include "carfields.h"
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
@@ -730,22 +731,35 @@ static uint8_t *tcar(int32_t i) {
 }
 
 /* ---- 00493ff7: шаг записи трафика (0x54): узел дороги под машиной, выравнивание, сигнал, если машина в поле зрения ---- */
+/* Store the road-graph lookup result of P101_RoadNode into the traffic record:
+   +0x18 distance along the road, +0x1c lateral offset (left), +0x20 node (sign-extended int16), +0xe lane. */
 static void rd_store(uint8_t *rec) {
   wr32(rec + 0x18, P101_RdDist);
   wr32(rec + 0x1c, P101_RdLeft);
   wr32(rec + 0x20, (int32_t)(int16_t)P101_RdNode);   /* movsx */
   wr16(rec + 0xe, (uint16_t)P101_RdLane);
 }
+/* P103_TrafficTick — Game.exe 00493ff7, cdecl.  Handler of traffic state TRF_DRIVE (see ported133.c).
+   In:  rec — traffic record (0x54 bytes): +0x38 signed speed (0 = stopped: nothing to do), [2] sub-state
+        (1 = only refresh the road position), +0x24 road direction (int8, heading = value << 10, 90-degree
+        steps), [3] flag for the P54_ObjInit switch below, +0x50 horn cool-down.
+   Steps: when the car is within 0x20 (~3 degrees) of the road direction, align it to the lane
+        (P102_TrafficAlign); look up the road node under the car; despawn when it left the road graph
+        (node 0x3fff, or -1 after an alignment); when P101_RoadNode returns 1 either switch the record with
+        P54_ObjInit (if rec[3]) or do nothing this tick (TODO(RE): unsure what result 1 means); on 0 store
+        the road position and which side of the cell the car is on.
+        A moving car in view of a player going faster than 0x1e may honk (3D sound 0x19..0x1b by car
+        index), at most once per 20 ticks. */
 void P103_TrafficTick(uint8_t *rec) {
   if (rd32(rec + 0x38) == 0) return;
   uint8_t *car = tcar(rec[0]);
   if (rec[2] == 1) {
-    if (P101_RoadNode(rd32(car + 0xc8), rd32(car + 0xd0), (int8_t)rec[0x24]) == 0) rd_store(rec);
+    if (P101_RoadNode(rd32(car + CAR_POS_X), rd32(car + CAR_POS_Z), (int8_t)rec[0x24]) == 0) rd_store(rec);
     return;
   }
   int32_t al = 0;
-  if (P62_HeadingDelta(rec, (uint32_t)rd32(rec + 0x24) << 10) < 0x20) al = P102_TrafficAlign(rec, (int32_t)re_addr(car + 0xc8), (int32_t)re_addr(car + 0xd0), (int8_t)rec[0x24]);
-  int32_t r = P101_RoadNode(rd32(car + 0xc8), rd32(car + 0xd0), (int8_t)rec[0x24]);
+  if (P62_HeadingDelta(rec, (uint32_t)rd32(rec + 0x24) << 10) < 0x20) al = P102_TrafficAlign(rec, (int32_t)re_addr(car + CAR_POS_X), (int32_t)re_addr(car + CAR_POS_Z), (int8_t)rec[0x24]);
+  int32_t r = P101_RoadNode(rd32(car + CAR_POS_X), rd32(car + CAR_POS_Z), (int8_t)rec[0x24]);
   if ((al != 0 && (int16_t)P101_RdNode == -1) || (int16_t)P101_RdNode == 0x3fff) { P74_FreeTraffic(rec[0]); return; }
   if (r == 1 && rec[3] != 0) { P54_ObjInit(rec); return; }
   if (r != 0) return;
@@ -756,8 +770,8 @@ void P103_TrafficTick(uint8_t *rec) {
     int32_t k = rec[0] & 3;
     if (k == 3) k = 2;
     wr32(rec + 0x50, 0x14);
-    int32_t v = P97_SndStart((uint32_t)(k + 0x19), -1, (float)rd32(car + 0xc8), (float)(-rd32(car + 0xcc)), (float)rd32(car + 0xd0));
-    if (v != -1) SoundLoop_0052422D(v, (int32_t)re_addr(car + 0xc8));
+    int32_t v = P97_SndStart((uint32_t)(k + 0x19), -1, (float)rd32(car + CAR_POS_X), (float)(-rd32(car + CAR_POS_Y)), (float)rd32(car + CAR_POS_Z));
+    if (v != -1) SoundLoop_0052422D(v, (int32_t)re_addr(car + CAR_POS_X));
   }
 }
 

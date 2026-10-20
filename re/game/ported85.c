@@ -109,6 +109,16 @@ typedef long double ld;
 static uint32_t bits(float f) { uint32_t u; memcpy(&u, &f, 4); return u; }
 
 /* 00528ac8 */
+/* P85_Project — Game.exe 00528ac8.  Transforms one model vertex to the screen.
+   In:  v->x, y, z — model-space position (from the model's vertex list).
+   Out: v->vx, vy, z — camera-space position (M = P44_MatPtr, row-vector convention x*M + bias);
+        v->oow — 1/z from the reciprocal table RE_OOW (indexed by integer z, P85_ZI = rounded z);
+        v->x, y — screen position: camera x/y * (oow * P43_ScaleA) + P43_OffX/OffY - P43_Half;
+        v->stamp = P44_XformTag marks the cache entry valid for this transform.
+   Precision quirk kept on purpose: the original mixes x87 extended precision (values kept on the FPU
+   stack, here `long double`) with float rounding (24-bit precision mode after Glide/D3D init), so the
+   casts below reproduce exactly where the original rounded.  Do not "simplify" them.
+   Native deviation: z outside the 1/z table marks the vertex instead of reading past the table. */
 void P85_Project(p85_vtx *v) {
   const float *m = P44_MatPtr;
   ld x = v->x, y = v->y, z = v->z;
@@ -149,6 +159,8 @@ void P85_Project(p85_vtx *v) {
 }
 
 /* общие части обработчиков */
+/* Vertex idx of the current model from the vertex cache P85_VCache, projecting it on first use in this
+   transform (cache entry stamped with P44_XformTag; native also checks the entry's format tag). */
 p85_vtx *P85_Prep(int32_t idx) {
   p85_vtx *c = &P85_VCache[idx];
   if (!P85_VC_VALID(c, P85_FMT_BIAS)) {
@@ -276,7 +288,12 @@ void P85_CallRaster(void) {
   if ((uint8_t)P82_Edge == 0) P85_RasterA(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
   else P85_RasterB(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
 }
-/* отсечение при P82_Edge≠0: 1 — треугольник/четырёхугольник пропускается */
+/* отсечение при P82_Edge≠0: 1 — треугольник/четырёхугольник пропускается
+   Trivial reject of a polygon that is completely off one screen edge, using float sign bits as the
+   original does: AND of the sign bits of all x (or y) set -> all vertices left of (above) the screen;
+   OR of the bits of (x - MaxX) (or y - MaxY) == 0 -> all differences are +0 or positive -> all right of
+   (below) the screen.  The bit patterns are left in P85_Clip / P85_D for later clipping code.
+   Native Hor+ (v2.15): the visible x range widens to [-S, 639 + S]. */
 int P85_EdgeReject(const p85_vtx *const *vs, int n) {
   uint32_t a = 0x80000000u;
 #ifndef RE_HOOK_BUILD
@@ -327,6 +344,10 @@ static void put_color(const uint8_t *rec, int off, int lit) {
   }
 }
 
+/* Model record handlers for flat / lit triangles and quads.  G2_011F4064 walks the model's record list:
+   +8.. vertex indices, then three float colours (+0x14 for triangles, +0x18 for quads), +4 = plane
+   index for lighting.  Quads are drawn as two triangles (v0, v2, v1) and (v0, v2, v3).
+   arg = blend mode byte for P85_SetBlend. */
 static void do_tri(uint32_t arg, int lit) {
   const uint8_t *rec = G2_011F4064;
   int32_t i0 = *(const int32_t *)(rec + 8), i1 = *(const int32_t *)(rec + 0xc), i2 = *(const int32_t *)(rec + 0x10);
