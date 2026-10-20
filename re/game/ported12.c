@@ -786,9 +786,11 @@ void P12_Fn00516E76(void) {
   R12_40A8B0(re_addr("BIG"), 1, -1, 5, 0x18)      /* .data 00575a30 "BIG" */;
   CopySlots_0040AA82(1);
 }
-/* Re-syncs the body state of the current player car record (004DAA36). */
+/* Debug key (flag 0x1e, P126_DebugKeys): re-initialises car record g_00d11878 (RingAdvance004D7B36 cycles it) through
+   004daa36 = P56_ObjInit(record, record + 0x18).  Game.exe 004dc8ea: imul $0x148 (record size); the stride was 0x52 (= 0x148 / 4,
+   int-pointer arithmetic of the decompiler) — wrong record for any car but 0. */
 void P12_Fn004DC8EA(void) {
-  Call004DAA36(0x00d077c0u + (uint32_t)g_00d11878 * 0x52, 0x00d077d8u + (uint32_t)g_00d11878 * 0x52);
+  Call004DAA36(0x00d077c0u + (uint32_t)g_00d11878 * 0x148, 0x00d077d8u + (uint32_t)g_00d11878 * 0x148);
 }
 /* Shows HUD message string a for b ticks (c != 0: only if no message is showing). */
 void P12_Fn004E5982(int32_t a, int32_t b, int32_t c) {
