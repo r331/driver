@@ -424,7 +424,8 @@ enum {
   TRF_OBJECT = 1,   /* P54_ObjTick — TODO(RE): unsure (parked / scripted object car?) */
   TRF_DRIVE  = 2,   /* P103_TrafficTick — normal traffic driving along the road graph */
   TRF_STEP   = 3,   /* P119_TrafficStep */
-  TRF_COP    = 4,   /* P142_CopDrive — police AI */
+  TRF_COP    = 4,   /* P142_CopDrive — police AI; RE_PROBE (v2.34): always model [0xc] = 1 (police car) with the cop slot in [5], CAR_AI_DRIVEN
+                        mostly set; model-1 patrols drive in TRF_DRIVE with [5] already set until the chase starts */
   TRF_HOLD   = 5,   /* P134_TrafficHold — timed steering hold, then back to TRF_DRIVE */
   TRF_ACTOR  = 6,   /* ActorStep00494678 */
   TRF_NOOP   = 7
