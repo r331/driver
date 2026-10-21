@@ -8,12 +8,12 @@
 #include "ported79.h"
 #include <string.h>
 #include "memrw.h"
-GAME_VAR_DEF(uint8_t *, P15_MenuText, 0x005fe9b0)
-GAME_VAR_DEF(uint8_t *, P15_MenuItems, 0x005fe9b8)
-GAME_VAR_DEF(int32_t, P15_MenuMode, 0x005fe9bc)
+#ifdef RE_HOOK_BUILD   /* v2.35: native — the image cell P53_MenuSel (ported15.h) */
 GAME_VAR_DEF(int32_t, P15_MenuSel, 0x01271064)
-GAME_VAR_DEF(uint8_t *, P15_ListHead, 0x00d12408)
-GAME_VAR_DEF(uint8_t *, P15_ListCur, 0x00d12410)
+#endif
+#ifndef RE_HOOK_BUILD
+p15_listcur_u P15_ListCurU;   /* v2.35: 00d12410 — P15_ListCur and S_00D12410 */
+#endif
 #ifndef RE_HOOK_BUILD /* v2.21 gvar-img */
 #pragma push_macro("P15_State")
 #undef P15_State
@@ -38,7 +38,9 @@ P15_i32x9 P15_Vals9;
 #else
 GAME_VAR_DEF(P15_i32x9, P15_Vals9, 0x00d044a0)
 #endif
+#ifdef RE_HOOK_BUILD   /* v2.35: native — a view of P55_Paper1 (ported15.h) */
 GAME_VAR_DEF(uint8_t *, P15_Limits, 0x00d0448c)
+#endif
 
 static void w32(uint8_t *p, uint32_t v) { memcpy(p, &v, 4); }
 static uint32_t r32(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return v; }
@@ -208,7 +210,7 @@ void P15_RaiseLimits(void) {
 #ifndef RE_HOOK_BUILD
         /* v2.25: 00d0448c — 32-битный адрес значка LINE (P55_LoadPaper пишет его в ячейку образа P55_Paper1), а не native-указатель:
            отдельный объект P15_Limits был NULL → SIGSEGV на первом засчитанном манёвре интервью */
-        const uint8_t *limp = (const uint8_t *)re_ptr(*(uint32_t *)re_gvar(0x00d0448cu, sizeof(uint32_t), (void *)&P15_Limits));
+        const uint8_t *limp = P15_Limits;   /* v2.35: a view of the image cell P55_Paper1 (ported15.h) */
         if (limp == NULL) continue;
         uint8_t lim = limp[0xb];
 #else

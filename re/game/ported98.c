@@ -819,7 +819,7 @@ void P98_DebugFree(void *p) {
    the event models. */
 void P98_ScriptFreeAll(void) {
   uint8_t *n = P15_ListHead;
-  P15_ListHead = NULL;
+  P15_SetListHead(NULL);
   while (n != NULL) {
     uint8_t *next = link(n + 0x20);
     uint8_t *o = link(n + 0x1c);

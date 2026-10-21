@@ -7,7 +7,9 @@ GAME_VAR_DEF(P50_VoiceTab, P50_Voices, 0x00b1c9a0)
 GAME_VAR_DEF(void *, P50_FmvA, 0x00b1c840)
 GAME_VAR_DEF(void *, P50_FmvB, 0x00b1c844)
 GAME_VAR_DEF(void *, P50_FmvC, 0x00b1c848)
+#ifdef RE_HOOK_BUILD   /* v2.35: native — P38_Mms2 (ported50.h) */
 GAME_VAR_DEF(void *, P50_FmvFlag, 0x00b1c83c)
+#endif
 GAME_VAR_DEF(void *, P50_Fmv834, 0x00b1c834)
 GAME_VAR_DEF(void *, P50_Fmv830, 0x00b1c830)
 GAME_VAR_DEF(void *, P50_Fmv82C, 0x00b1c82c)

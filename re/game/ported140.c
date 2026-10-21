@@ -636,10 +636,7 @@ void P140_MrkFly(void) {
       for (uint32_t k = 0; k < 6; k++) { int32_t w = 0x1000; memcpy(CAR0 + 0x11c + k * 4, &w, 4); }
       float o[3] = { P98_MrkSrc[0], P98_MrkSrc[1] - 100.0f, P98_MrkSrc[2] };
       memcpy(P76_ColObj, o, sizeof o);
-      P44_MatPtr = (float *)P98_CarMat;
-#ifndef RE_HOOK_BUILD
-      P11_00bdc28c = 0x01135060;
-#endif
+      P44_MatPtr = (float *)P98_CarMat;   /* 00bdc28c = 01135060 (v2.35: P11_00bdc28c is a view of P44_MatPtr in native) */
       P44_XformT((float *)P76_ColObj);
       memcpy(o, P76_ColObj, sizeof o);
       o[0] = o[0] + (float)c0i(CAR_POS_X);

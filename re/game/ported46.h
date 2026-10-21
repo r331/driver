@@ -30,3 +30,9 @@ void    P46_SetBounds(int32_t a, int32_t b, int32_t c, int32_t d);     /* 004d61
 void    P46_UpdateObjects(void);                                        /* 004defd1: 004df024(obj, obj[3]==1) для каждого объекта */
 void    P46_LoadMapA(void *file, int32_t size);                         /* 004ec7f4: malloc size (map.c:0x42b) + чтение из файла */
 void    P46_LoadMapB(void *file, int32_t size);                         /* 004ec4ce: malloc size (map.c:0x39f) + чтение + 0051be3c */
+/* v2.35: 00bdfbc4 — one object: the native pointer P58_BlkBuf (block index of map B); P46_MapBufC is a read-only view */
+#ifndef RE_HOOK_BUILD
+extern int32_t *P58_BlkBuf;
+#undef P46_MapBufC
+#define P46_MapBufC ((void *)P58_BlkBuf)
+#endif

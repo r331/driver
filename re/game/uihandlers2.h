@@ -120,3 +120,11 @@ void Ui004268E0(void); /* 004268e0 */
 #define UiVar00B1C280 (*(int32_t *)re_gvar(0x00b1c280u, sizeof(int32_t), (void *)&UiVar00B1C280))
 #endif
 /* gvar-img v2.03 end */
+/* v2.35: 00b1c280 — one object: the native pointer P56_EulerTab (Euler matrix table, DebugMalloc); UiVar00B1C280 is a
+   read-only view (its 32-bit address).  The image cell is no longer used. */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#include "reptr.h"
+extern uint8_t *P56_EulerTab;
+#undef UiVar00B1C280
+#define UiVar00B1C280 ((int32_t)re_addr_known(P56_EulerTab))
+#endif

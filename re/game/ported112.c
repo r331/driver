@@ -288,8 +288,8 @@ void P112_ChaseTick(void) {
   if (P77_C7D850 != 0) P110_RadarGrid();
 }
 
-/* ---- записи скрипта: список с P15_ListHead, следующая — адрес +0x20; текущая пишется в оба псевдонима 00d12410 ---- */
-/* Current event-script record (two native aliases of 00d12410) and running it. */
+/* ---- записи скрипта: список с P15_ListHead, следующая — адрес +0x20; текущая — 00d12410 (v2.35: в native один объект) ---- */
+/* Current event-script record (00d12410; P15_ListCur and S_00D12410 name one native object since v2.35) and running it. */
 static void set_cur(uint8_t *r) { P15_ListCur = r; S_00D12410 = (uint16_t *)(void *)r; }
 static void run_cur(void) { P97_ScriptResetCur(); P111_ScriptTick(); }
 /* P112_ScriptRunId — Game.exe 004cfe69.  Runs every event-script record with id id (+6) that is externally
@@ -297,13 +297,17 @@ static void run_cur(void) { P97_ScriptResetCur(); P111_ScriptTick(); }
    around it so it can be called from inside a script. */
 void P112_ScriptRunId(uint16_t id) {
   uint8_t *sp = P10_ScriptPtr, *sc = P10_ScriptCtx, *cur = P15_ListCur;
+#ifdef RE_HOOK_BUILD
   int32_t sp2 = S_00D12414; uint8_t *sc2 = S_00D1240C; uint16_t *cur2 = S_00D12410;
+#endif
   for (set_cur(P15_ListHead); P15_ListCur != NULL; set_cur((uint8_t *)re_rd_ptr(P15_ListCur + 0x20))) {
     uint16_t f = rd16(P15_ListCur);
     if ((f & 8) != 0 && (f & 2) == 0 && rd16(P15_ListCur + 6) == id) run_cur();
   }
   P10_ScriptPtr = sp; P10_ScriptCtx = sc; P15_ListCur = cur;
+#ifdef RE_HOOK_BUILD   /* native (v2.35): S_00D1240C/S_00D12410/S_00D12414 are the same objects as the three above */
   S_00D12414 = sp2; S_00D1240C = sc2; S_00D12410 = cur2;
+#endif
 }
 /* P112_ScriptTriggers — Game.exe 004cf123.  Per tick: active records (flag 0x2) are ticked; inactive ones start when
    the player enters their map cell (flag 0x4) or their circle (no flag 0x8; centre +0x14/+0x18, squared radius

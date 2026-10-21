@@ -20,7 +20,9 @@ P33_CountArr P33_Count;
 #pragma pop_macro("P33_Count")
 #endif
 GAME_VAR_DEF(P33_VBufArr, P33_VBuf, 0x00622048)
+#ifdef RE_HOOK_BUILD   /* v2.35: native — P31_DDObj2 (ported33.h) */
 GAME_VAR_DEF(void *, P33_Device, 0x00a42160)
+#endif
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P33_GlideOk")
 #undef P33_GlideOk

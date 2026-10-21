@@ -197,7 +197,12 @@ void P137_LevelEnd(void) {
   P137_FREE(P54_MapBPtr);
   P137_FREE(P62_MapBuf);
   P137_FREE(P46_MapBufA);
-  if (P56_EulerTab != 0) { P98_DebugFree(P56_EulerTab); P56_EulerTab = 0; UiVar00B1C280 = 0; }
+  if (P56_EulerTab != 0) {
+    P98_DebugFree(P56_EulerTab); P56_EulerTab = 0;
+#ifdef RE_HOOK_BUILD
+    UiVar00B1C280 = 0;   /* native (v2.35): UiVar00B1C280 is a view of P56_EulerTab */
+#endif
+  }
   P137_FREE(P20_Names);
   P137_FREE(P78_VertsA);
   P137_FREE(P78_VertsB);
