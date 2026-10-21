@@ -24,7 +24,7 @@
 python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv')) if x['module']!='CRT']; print(sum(x['status']=='ported' for x in r), 'из', len(r))"
 ```
 
-**Native как игра — v2.34** (проверено сценариями `RE_KEYS` и настоящей клавиатурой X11 (xdotool) под Xvfb, Linux arm64; сборка, selftest и inputtest — на macOS arm64 в CI):
+**Native как игра — v2.35** (проверено сценариями `RE_KEYS` и настоящей клавиатурой X11 (xdotool) под Xvfb, Linux arm64; сборка, selftest и inputtest — на macOS arm64 в CI):
 - работает: заставки и главное меню, режим **Take A Ride** в Майами — езда по городу (стриминг блоков карты), трафик, столкновения, HUD (Damage/Felony, радар, спидометр);
 - управление машиной: газ, тормоз/задний ход, ручник, резкий руль, смена камеры (вид с капота), пауза по Esc с меню (Continue / Restart / Sound Setup / Gfx Details / Film Director / Quick Replay / Show Map / Exit) — см. «Управление»;
 - звук: DirectSound эмулируется собственным микшером (SDL_audio или запись в WAV), двигатель и шумы слышны, мягкий ограничитель — без клиппинга; музыка — эмуляция CD-audio (v2.22, дорожки из файлов вашего диска — см. «CD-музыка»);
@@ -41,6 +41,7 @@ python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv'))
 - v2.22: CD-музыка — эмуляция привода CD-audio: дорожки `Music/TrackNN.wav|flac|ogg|mp3` или образ `.cue/.bin`, без файлов — тишина; цикл и громкость как в оригинале — см. «CD-музыка»;
 - v2.33: динамическая музыка в стиле PlayStation (по желанию): свои 16 файлов в `Music/dynamic/` — у каждого города день/ночь × Drive/Chase, при погоне копов кроссфейд на Chase и обратно — см. «CD-музыка»;
 - v2.23: исправлен серый полигон поверх неба (чаще слева вверху) — плоские/гуро-полигоны ближнего набора отсекаются по z = 1, вершины за камерой больше не уходят в угол экрана;
+- v2.35: слиты все расщеплённые псевдонимы образа данных (осталось 0): у каждого адреса Game.exe в native один объект. Заработали проверки скрипта событий, которых раньше не было: «You lost your target» по удалению от цели (004f5012), освобождение списка событий между миссиями, продвижение скрипта у шести команд, пыль, подсветка пункта меню; Take A Ride и Survival не изменились (побайтно) — см. docs/NATIVE_GAPS.md «Исправлено в v2.35»;
 - не проверены/не работают: ночь и другие города (SF, LA, NY); FMV-ролики пропускаются.
 
 Подробно: [docs/NATIVE_GAPS.md](docs/NATIVE_GAPS.md) (разрывы native, переключатели отладки), [docs/PLATFORM_PLAN.md](docs/PLATFORM_PLAN.md) (журнал переноса по шагам),
@@ -508,6 +509,7 @@ RE_KEYS="300:LEFT,340:LEFT,380:LEFT,460:RETURN,560:RETURN,660:RETURN,700:APOSTRO
 | `RE_PROBE=1\|all\|car,traffic,ped,mission,menu,walk` | отладка RE: журнал полей для открытых вопросов [docs/RE_QUESTIONS.md](docs/RE_QUESTIONS.md) (`RE_PROBE_LOG`, `RE_PROBE_EVERY`, `RE_PROBE_SHOTS`, `RE_PROBE_WALK`); только native, только чтение — см. docs/ARCHITECTURE.md «RE_PROBE» |
 | `RE_COPTRACE=N` | v2.34, отладка копов (только native): каждые N кадров строка `[coptr]` на каждого ведомого копа (слот, машина, поля записи ИИ, газ, руль), `[copplan]` — результат построения маршрута P128_CopReplan |
 | `RE_FPU_CHOP=0` | v2.34, отладка: не эмулировать округление x87 «к нулю» Game.exe (`lrintf` и т. п. округляют к ближайшему, как до v2.34) — для сравнения прогонов; см. docs/ARCHITECTURE.md |
+| `RE_RANGEDBG=1` | v2.35, отладка (только native): журнал проверки дальности 004f5012 (`P98_ScriptRange`) — объект скрипта, порог, расстояние, позиции цели и игрока; «→ цель потеряна», когда срабатывает |
 
 Остальные отладочные переключатели (`RE_TRACE*`, `RE_GSTAT`, `RE_CARDBG` …) описаны в [docs/NATIVE_GAPS.md](docs/NATIVE_GAPS.md).
 
