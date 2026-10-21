@@ -88,6 +88,7 @@ void Dot4_005270BD(void);
 void DrainStackC200F(void);
 void DrawBanner_004F5D98(void);
 void DrawCornerIndicator(void);
+void DrawDirectorMenu(void);
 void DrawFrame_004A9DDC(void);
 void DrawNode(void);
 void DrawNodeChain(void);
@@ -3542,6 +3543,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x004c379du, (re_fn_t)GetWaypointForFrame },
   { 0x004c37f6u, (re_fn_t)DumpWaypoints },
   { 0x004c38e2u, (re_fn_t)P124_ReplayMenu },
+  { 0x004c3bc7u, (re_fn_t)DrawDirectorMenu },
   { 0x004c3c94u, (re_fn_t)DrawNodeChain },
   { 0x004c3cf1u, (re_fn_t)DrawNodeMarkersChain },
   { 0x004c3d5cu, (re_fn_t)DrawNode },

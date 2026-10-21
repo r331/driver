@@ -483,6 +483,7 @@ void re_install_all(void) {
     re_hook(0x004c3e6a, (void*)DrawNodeMarker, "DrawNodeMarker");
     re_hook(0x004c3c94, (void*)DrawNodeChain, "DrawNodeChain");
     re_hook(0x004c3cf1, (void*)DrawNodeMarkersChain, "DrawNodeMarkersChain");
+    re_hook(0x004c3bc7, (void*)DrawDirectorMenu, "DrawDirectorMenu");
     re_hook(0x004c41ec, (void*)GetNodeParent, "GetNodeParent");
     re_hook(0x004c4226, (void*)FindNodeAtPixel, "FindNodeAtPixel");
     re_hook(0x004c3f26, (void*)SetNodeEnabled, "SetNodeEnabled");

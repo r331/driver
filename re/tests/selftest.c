@@ -2606,7 +2606,8 @@ void P66_Fn523829(void) { if (!re_selftest_on) { P115_SndUpdate(); return; } t66
 void P66_Fn427EEA(void) { if (!re_selftest_on) { P82_FrustumSetup3D(); return; } t66_fn++; }
 void P66_Fn4169AF(void) { t66_cb++; }
 static int t66_a, t66_b;
-void P66_Fn4C3BC7(void) { t66_a++; }
+void DrawDirectorMenu(void);
+void P66_Fn4C3BC7(void) { if (!re_selftest_on) { DrawDirectorMenu(); return; } t66_a++; }
 void P66_Fn4C68A7(int32_t a) { if (!re_selftest_on) { P112_DirTimeline(a); return; } t66_b += a; }
 static int test_p66(void) {
   int f = 0;
