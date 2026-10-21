@@ -9,6 +9,8 @@ cleanup/round2: регенерация воспроизводит links.c бай
 - Имена, уже строго определённые в re/game/*.c, re/platform/native/*.c (кроме links.c/stubs.c) или re/tests/*.c,
   пропускаются (иначе — повторное определение при компоновке).  tests/*.c входят в native-сборку: шпионы selftest
   (tests/selftest.c, «if (!re_selftest_on) return <перенос>(...)») в игре и есть связь с переносом — как game_fwd.c.
+- fix/peds: строки unported.h с комментарием в конце теперь разбираются (раньше молча пропускались: StoreCameraState,
+  RestoreCameraState, FindAutoCamera); адрес-thunk (jmp из thunk_table.c) связывается с переносом цели (GetMarkerYAdjust).
 - Всё после строки MANUAL_MARK в links.c — ручная часть: переносится как есть, её имена не генерируются."""
 import re,sys,os,subprocess,tempfile
 root=sys.argv[1]
@@ -35,12 +37,14 @@ defined.update(re.findall(r'^[A-Za-z_][\w \t\*]*?\b(\w+)\s*\([^;{]*\)\s*\{',manu
 inst=open(root+'/platform/win32/install.c',encoding='utf-8').read()
 hooks={}
 for m in re.finditer(r're_hook\(\s*0x([0-9a-fA-F]+)\s*,\s*\(void\*\)\s*(\w+)',inst): hooks[int(m.group(1),16)]=m.group(2)
+# fix/peds: an unported.h address that is an incremental-link thunk (jmp) resolves to its target's port
+thunks={int(a,16):int(b,16) for a,b in re.findall(r'\{\s*0x([0-9a-fA-F]+)u,\s*0x([0-9a-fA-F]+)u\s*\}',open(root+'/platform/native/thunk_table.c',encoding='utf-8').read())}
 incs=re.findall(r'#include "\.\./\.\./game/([\w.]+)"',inst)
 un=open(root+'/game/unported.h',encoding='utf-8').read()
 body=un[un.index('#define UNPORTED_LIST'):un.index('\n\n',un.index('#define UNPORTED_LIST'))]
 rows=[]
 for line in body.split('\\\n'):
-    line=line.strip()
+    line=re.sub(r'/\*.*?\*/','',line).strip()   # fix/peds: rows with a trailing comment were silently skipped
     m=re.match(r'V\((\w+),\s*0x([0-9a-fA-F]+),\s*(\(.*?\)),\s*(\(.*?\))\)\s*$',line)
     if m: rows.append(('V','void',m.group(1),int(m.group(2),16),m.group(3),m.group(4))); continue
     m=re.match(r'R\(([\w\s\*]+?),\s*(\w+),\s*0x([0-9a-fA-F]+),\s*(\(.*?\)),\s*(\(.*?\))\)\s*$',line)
@@ -59,7 +63,7 @@ def ok(line):
     os.unlink(path); return r.returncode==0
 n=0; bad=[]
 for k,rt,name,addr,params,args in rows:
-    fn=hooks.get(addr)
+    fn=hooks.get(addr) or hooks.get(thunks.get(addr))
     if not fn or fn==name or name in skip or name in defined: continue
     line=entry(k,rt,name,params,args,fn)
     if '--nocheck' in sys.argv or ok(line): out.append(line); n+=1
