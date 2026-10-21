@@ -325,7 +325,13 @@ void P133_EventModels(void) {
       P44_Xform(rel);
       int16_t pg = rd16(o + 0x40);
       if (pg != page && pg != -1) { page = pg; P12_Fn00426580(page); }
+#ifdef RE_HOOK_BUILD
       P84_DrawModel(mdl, m, rel, vis == 1 ? 0 : (vis == 2 ? 1 : 2));
+#else
+      /* v2.35: P28_EventModels holds re_addr addresses (P79_EventAlloc), P84_DrawModel takes an arena reference (P79_PTR) —
+         convert, as in P97_ScriptEachP.  Unreachable before v2.35: the script list 00d12408 was an empty split alias. */
+      P84_DrawModel(P79_OFF(mp), m, rel, vis == 1 ? 0 : (vis == 2 ? 1 : 2));
+#endif
     }
   }
 }
