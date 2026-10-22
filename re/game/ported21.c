@@ -8,6 +8,9 @@
 #include "unported.h"
 #include "ported19.h"
 #include "uihandlers3.h"
+#ifndef RE_HOOK_BUILD
+void P96_LogLine(const char *s);   /* ported96.c, 004d90f4 */
+#endif
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P21_GridDiv")
 #undef P21_GridDiv
@@ -156,7 +159,11 @@ void P21_DrawClock(void) {
   int32_t y = (P19_ScrH + ((P19_ScrH >> 31) & 7)) / 8 - 1;
   int32_t x = (P19_ScrW + ((P19_ScrW >> 31) & 7)) / 8 - (int32_t)strlen(P21_ClockBuf);
   Call004D94B7((uint32_t)x, (uint32_t)y);
+#ifdef RE_HOOK_BUILD
   Call004D90F4((int32_t)(intptr_t)P21_ClockBuf);
+#else
+  P96_LogLine(P21_ClockBuf);   /* 004d90f4 копирует строку; 64-битный указатель в int32_t не помещается */
+#endif
 }
 
 #ifndef RE_HOOK_BUILD
@@ -177,7 +184,11 @@ void P21_DrawFps(void) {
   int32_t y = (P19_ScrH + ((P19_ScrH >> 31) & 7)) / 8 - 1;
   snprintf(buf, sizeof buf, "%dfps", (int)P21_FpsVal);
   Call004D94B7(0, (uint32_t)y);
+#ifdef RE_HOOK_BUILD
   Call004D90F4((int32_t)(intptr_t)buf);
+#else
+  P96_LogLine(buf);            /* как P21_DrawClock: буфер на стеке — родной указатель */
+#endif
 }
 
 #ifndef RE_HOOK_BUILD /* gvar-img */

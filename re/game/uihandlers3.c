@@ -492,8 +492,18 @@ void Ui00426CAF(void) {
 #endif
 }
 /* Ui00426CC6 — Game.exe 00426cc6.  Calls 004d8f30(00b1c280) and clears 00b1c280. */
+#ifndef RE_HOOK_BUILD
+extern uint8_t *P56_EulerTab; void P98_DebugFree(void *p);
+#endif
 void Ui00426CC6(void) {
+#ifdef RE_HOOK_BUILD
     UiCall004D8F30(UiVar00B1C280); UiVar00B1C280 = 0;
+#else
+    /* native: 00b1c280 — таблица P56_EulerTab (DebugMalloc, ported56.c), родной указатель; 32-битный псевдоним UiVar00B1C280
+       в native отдельный объект (всегда 0) — освобождается сама таблица, как в P137_LevelEnd */
+    if (P56_EulerTab != NULL) { P98_DebugFree(P56_EulerTab); P56_EulerTab = NULL; }
+    UiVar00B1C280 = 0;
+#endif
 }
 /* Reset0042D2B0 — Game.exe 0042d2b0.  01159d74 = 0 and rewinds the pointer 0115a13c to 0115a140. */
 void Reset0042D2B0(void) {
