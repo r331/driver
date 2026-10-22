@@ -852,7 +852,6 @@ void plat_flip(void) {
     /* v2.24: проверка — на 3-м показе, затем каждые 30, пока не будет кадра с изображением (заставки бывают чёрными), до 6000 показов */
     if (g_swap) { g_chk_flips++; if (g_fbo && ((!g_chk_ok && g_chk_flips <= 6000 && (g_chk_flips == 3 || g_chk_flips % 30 == 0)) || (plat_gfx_dbg() && g_chk_flips % 600 == 0))) plat_render_selfcheck(NULL, NULL); }
     else if (g_chk_flips < 4) glerr("кадр");
-    glFinish();
     if (g_swap) {
         plat_frame_tick("flip");
         /* Cocoa presents only when the window's draw framebuffer is bound.
@@ -864,6 +863,11 @@ void plat_flip(void) {
         glBindFramebuffer(GL_FRAMEBUFFER, target_fbo());
         glViewport(g_cx, g_cy, g_cw, g_ch);
         clear_bars();
+    } else {
+        /* Offscreen callers have no swap to submit the frame. Window swaps
+           already submit GL work; finishing first serializes CPU and GPU
+           and can miss the next vblank without changing the image. */
+        glFinish();
     }
 }
 /* plat_render_uploads — texture upload counter (count, pixels) for statistics. */
