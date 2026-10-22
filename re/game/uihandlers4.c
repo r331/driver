@@ -1,3 +1,8 @@
+/* uihandlers4.c — auto-generated batch of one-line UI handlers from Game.exe (cdecl), each tagged with its
+   Game.exe address: two "state 2 or 004076E2" handlers and a value copy.  The other 50 handlers of this batch were
+   second ports of menustate.c functions (same addresses) and were removed in cleanup/round2 — menustate.c is the
+   single implementation (docs/DEAD_CODE_AUDIT.md).  The G00xxxxxx variables stay: other modules and data_init.c
+   use these names. */
 #include "uihandlers4.h"
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("G01271060")
@@ -422,109 +427,13 @@ int32_t G00D118C8;
 #pragma pop_macro("G00D118C8") /*gvi*/
 #pragma pop_macro("G00D118C8")
 #endif
-void Set5F7E4C_1(void) { G005F7E4C = 1;
-}
-void Set54A0CC_0(void) { G0054A0CC = 0;
-}
-void Set54A0BC_1(void) { G0054A0BC = 1;
-}
-void Set54A0BC_0(void) { G0054A0BC = 0;
-}
-void Inc5D577C(void) { G005D577C++;
-}
-void Set54A844_1(void) { G0054A844 = 1;
-}
-void Set54A844_0(void) { G0054A844 = 0;
-}
-void Set54A854_1(void) { G0054A854 = 1;
-}
-void Set54A854_0(void) { G0054A854 = 0;
-}
-int32_t Set575EF0_4Ret0(void) { G00575EF0 = 4; return 0;
-}
-int32_t ToggleBDFA44_Call40500D(void) { G00BDFA44 ^= 1; MenuRefresh(); return 0;
-}
-int32_t ToggleBDFA48_Call40500D(void) { G00BDFA48 ^= 1; MenuRefresh(); return 0;
-}
-int32_t ToggleBDFA4C_Call40500D(void) { G00BDFA4C ^= 1; MenuRefresh(); return 0;
-}
-int32_t ToggleBDFA50_Call40500D(void) { G00BDFA50 ^= 1; MenuRefresh(); return 0;
-}
-int32_t ToggleBDFA54_Call40500D(void) { G00BDFA54 ^= 1; MenuRefresh(); return 0;
-}
-int32_t ToggleB87E9C_Call40500D(void) { G00B87E9C ^= 1; MenuRefresh(); return 0;
-}
-int32_t ToggleBDFA58_Call40500D(void) { G00BDFA58 ^= 1; MenuRefresh(); return 0;
-}
-int32_t ToggleEF8_55384C(void) { G0055384C ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t ToggleEF8_553850(void) { G00553850 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t ToggleEF8_B31F04(void) { G00B31F04 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t ToggleEF8_575F44(void) { G00575F44 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t ToggleEF8_55C974(void) { G0055C974 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t ToggleEF8_575F30(void) { G00575F30 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t ToggleEF8_B201DC(void) { G00B201DC ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t ToggleEF8_575EE8(void) { G00575EE8 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t ToggleEF8_575F3C(void) { G00575F3C ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t ToggleEF8_D118C8(void) { G00D118C8 ^= 1; G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t RefreshMenu00409231(void) { G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t RefreshMenu004092D8(void) { G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t RefreshMenu0040937F(void) { G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t RefreshMenu00409426(void) { G00575EF8 = 4; MenuRedraw(); return 0;
-}
-int32_t RefreshMenu004094CD(void) { G00575EF8 = 4; MenuRedraw(); return 0;
-}
-void Inc5759A4Max40(void) { if (G005759A4 < 64) { G005759A4++; G00575EF8 = 4; MenuRedraw(); }
-}
-void Dec5759A4Min0(void) { if (G005759A4 > 0) { G005759A4--; G00575EF8 = 4; MenuRedraw(); }
-}
-void IncB87E4CMax3(void) { if (G00B87E4C < 3) { G00B87E4C++; G00575EF8 = 4; MenuRedraw(); }
-}
-void DecB87E4CMin0(void) { if (G00B87E4C > 0) { G00B87E4C--; G00575EF8 = 4; MenuRedraw(); }
-}
-void Select54A90C_Mode2(void) { G0054A90C = 1; G01271060 = 2;
-}
-void Select54A91C_Mode1(void) { G0054A91C = 1; G01271060 = 1;
-}
-void Select54A8FC_Mode5(void) { G0054A8FC = 1; G01271060 = 5;
-}
-void Select54A92C_Mode3(void) { G0054A92C = 1; G01271060 = 3;
-}
-void Select54A8EC_Mode4(void) { G0054A8EC = 1; G01271060 = 4;
-}
-void Select54A94C_Mode7(void) { G0054A94C = 1; G01271060 = 7;
-}
-void Select54A93C_Mode6(void) { G0054A93C = 1; G01271060 = 6;
-}
-void Clear54A90C_IfZero(int32_t a0) { if (a0 == 0) G0054A90C = 0;
-}
-void Clear54A91C_IfZero(int32_t a0) { if (a0 == 0) G0054A91C = 0;
-}
-void Clear54A8FC_IfZero(int32_t a0) { if (a0 == 0) G0054A8FC = 0;
-}
-void Clear54A92C_IfZero(int32_t a0) { if (a0 == 0) G0054A92C = 0;
-}
-void Clear54A8EC_IfZero(int32_t a0) { if (a0 == 0) G0054A8EC = 0;
-}
-void Clear54A94C_IfZero(int32_t a0) { if (a0 == 0) G0054A94C = 0;
-}
+/* Menu549FBC / Menu549FCC: argument 0 sets the variable to 2, argument 2 calls 004076E2 (TODO(RE): unsure). */
+/* Menu549FBC — Game.exe 00407460 */
 void Menu549FBC(int32_t a0) { if (a0 == 0) G00549FBC = 2; else if (a0 == 2) Call004076E2();
 }
+/* Menu549FCC — Game.exe 00407539 */
 void Menu549FCC(int32_t a0) { if (a0 == 0) G00549FCC = 2; else if (a0 == 2) Call004076E2();
 }
-void Copy54A0C0(void) { G0054A0C0 = G00C559A4; G0054A0D0 = G00C559A8;
-}
+/* Copy54A838 — Game.exe 0040a41c */
 void Copy54A838(void) { G0054A838 = G00C55A04; G0054A848 = G00C559F0; G0054A858 = G00C559F4;
 }

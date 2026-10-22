@@ -197,7 +197,6 @@ void    P101_CarSkids(int32_t car);                                           /*
 void    P101_ProjT(float *v);                                                 /* 00528bb7 */
 void    P101_XformBias2(float *v);                                            /* 00528c91 */
 void    P101_Proj(float *v);                                                  /* 00528d17 */
-void    P101_FillRows(uint8_t *dst, int32_t w, int32_t rows, uint8_t c);      /* 005291ed */
 void    P101_Pal16(const uint8_t *src, uint8_t *dst, int32_t unused, int32_t rows);  /* 00529253 */
 void    P101_Pal32(const uint8_t *src, uint8_t *dst, int32_t unused, int32_t rows);  /* 005292d1 */
 void    P101_ClipNearUV(const uint8_t *a, const uint8_t *b, float ua0, float ua1, float ub0, float ub1);   /* 0042da16 */

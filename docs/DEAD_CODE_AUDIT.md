@@ -14,85 +14,33 @@
 Не мёртвый код в обычном смысле — **оставить**. Если репозиторий нужно облегчить, можно вынести в отдельный репозиторий
 или архив, но `docs/functions.csv` и комментарии в портах ссылаются на эти функции по именам.
 
-## 2. 60 адресов Game.exe перехвачены дважды (`re/platform/win32/install.c`)
+## 2. 60 адресов Game.exe, перехваченных дважды — РЕШЕНО (cleanup/round2)
 
-Для 60 адресов `re_hook` вызывается два раза: одна функция из `re/game/menustate.c`, другая из `re/game/uihandlers4.c`
-(одни и те же обработчики меню перенесены дважды под разными именами). Две цели сборки выбирают **разных** победителей:
+Было: для 60 адресов `re_hook` вызывался дважды (hook DLL брала последний, native `fn_table.c` — первый). Теперь у каждого
+адреса одна реализация; `fn_table.c` перегенерирован (2207 записей). Сверка: тела пар скомпилированы hook-сборкой и
+сравнены дизассемблером с Game.exe (`rp-game.dis`).
 
-- hook-сборка (`DINPUT.dll`): каждый `re_hook` пишет JMP поверх функции, поэтому работает **последний** вызов;
-- native (`re/platform/native/fn_table.c`, генерируется `tools/gen_fn_table.py`): в таблицу попадает **первый**.
+- **50 обработчиков меню 00404687..0040a715: оставлен `menustate.c`**, копии в `uihandlers4.c` удалены. 37 пар давали
+  одинаковый код; в 13 парах входа/выхода режимов меню (0040a625..0040a715) `menustate.c` пишет байт (`movb`, как
+  Game.exe), а `uihandlers4.c` писал dword — копия была менее точной. В native раньше побеждал `uihandlers4.c` в 44
+  случаях — прогон Take A Ride от смены не изменился. `reptr.c` (k_fns), selftest `test_ui4` переведены на имена
+  `menustate.c`. Переменные `G00xxxxxx` в `uihandlers4.c` оставлены (их используют другие модули и `data_init.c`).
+- **10 прочих пар** — оставлен именованный/документированный порт, дубль удалён, прямые вызовы переведены:
 
-Тела пар по смыслу совпадают (например `MenuFlagSet` и `Set5F7E4C_1` оба ставят 005f7e4c = 1), но пишут через разные
-имена переменных (`MenuFlag5F7E4C` против `G005F7E4C`) — если какое-то из имён окажется расщеплённым псевдонимом
-(отдельный native-объект вместо образа данных), поведение целей разойдётся. В native проигравшие функции не вызываются
-(компоновщик с `--gc-sections` их выбрасывает), в hook-сборке — наоборот.
+| Адрес | Оставлено | Удалено | Примечание |
+|---|---|---|---|
+| 00413df3 | `P62_MenuBusy` | `MenuAnyFlag00413DF3` (ported6) | код одинаковый |
+| 0048ac0d | `P50_FmvStopRelease` | `Chain0048AC0D` (ported5) | вызовы в ported150/52 переведены |
+| 0048cc5f | `P50_Nop` | `NoopFn0048cc5f` (noop.c) | |
+| 004a6749 | `P62_FindFreeTrafficSlot` | `P14_Fn004A6749` | memset вместо P14_Fn0048DB65 (тот же memset); вызовы в ported119 |
+| 004e12e4 | `P16_IdleTimer` | `P14_Fn004E12E4` | код одинаковый; вызов в ported132 |
+| 004eafcf | `P78_LoadLampsBlock` | `Fwd004EAFCF` (ported5) | прямой вызов вместо вызова по адресу |
+| 004ef997 | `P89_Fill1` | `FillOnes4EF997` (ported4) | |
+| 00514c72 | `P62_ParticleSet` | `SetObjState_00514C72` (ported7) | код одинаковый |
+| 005223be | `P30_InitWindowGlobals` | `ClearHandles005223BE` (ported6) | вызов в ported151 |
+| 005291ed | `P152_FillRows` | `P101_FillRows` | P152 документирован и вызывается P152_ScreenFill; лишняя проверка dst == NULL — только защита native |
 
-**Нужно решение:** оставить одну реализацию на адрес (скорее `menustate.c` — осмысленные имена; в native сейчас
-побеждает `menustate.c` в 16 случаях и `uihandlers4.c` в 44), убрать второй `re_hook` и перегенерировать
-`fn_table.c`. После этого — прогон меню и кампании в обеих целях. В этой ветке не трогалось.
-
-| Адрес | native: `fn_table.c` (первый `re_hook`) | hook: последний `re_hook` (его JMP и остаётся) |
-|---|---|---|
-| 00404687 | `MenuFlagSet` (menustate.c) | `Set5F7E4C_1` (uihandlers4.c) |
-| 00404eb0 | `MenuToggleOptBDFA44` (menustate.c) | `ToggleBDFA44_Call40500D` (uihandlers4.c) |
-| 00404ec9 | `MenuToggleOptBDFA48` (menustate.c) | `ToggleBDFA48_Call40500D` (uihandlers4.c) |
-| 00404ee2 | `MenuToggleOptBDFA4C` (menustate.c) | `ToggleBDFA4C_Call40500D` (uihandlers4.c) |
-| 00404efb | `MenuToggleOptBDFA50` (menustate.c) | `ToggleBDFA50_Call40500D` (uihandlers4.c) |
-| 00404f14 | `MenuToggleOptBDFA54` (menustate.c) | `ToggleBDFA54_Call40500D` (uihandlers4.c) |
-| 00404f2d | `MenuToggleOptB87E9C` (menustate.c) | `ToggleB87E9C_Call40500D` (uihandlers4.c) |
-| 00404f46 | `MenuToggleOptBDFA58` (menustate.c) | `ToggleBDFA58_Call40500D` (uihandlers4.c) |
-| 00404f5f | `MenuStateSetFour` (menustate.c) | `Set575EF0_4Ret0` (uihandlers4.c) |
-| 0040831c | `Copy54A0C0` (uihandlers4.c) | `MenuCopyPos` (menustate.c) |
-| 00408337 | `MenuFlag54A0BCSet` (menustate.c) | `Set54A0BC_1` (uihandlers4.c) |
-| 00408343 | `MenuFlag54A0BCClear` (menustate.c) | `Set54A0BC_0` (uihandlers4.c) |
-| 0040844c | `MenuVar54A0CCClear` (menustate.c) | `Set54A0CC_0` (uihandlers4.c) |
-| 00408710 | `MenuCounter5D577CInc` (menustate.c) | `Inc5D577C` (uihandlers4.c) |
-| 00408a69 | `ToggleEF8_55384C` (uihandlers4.c) | `MenuToggle55384CRedraw` (menustate.c) |
-| 00408b03 | `ToggleEF8_553850` (uihandlers4.c) | `MenuToggle553850Redraw` (menustate.c) |
-| 00408b9d | `ToggleEF8_B31F04` (uihandlers4.c) | `MenuToggleB31F04Redraw` (menustate.c) |
-| 00408d0c | `MenuToggle575F44Redraw` (menustate.c) | `ToggleEF8_575F44` (uihandlers4.c) |
-| 00408da6 | `ToggleEF8_55C974` (uihandlers4.c) | `MenuToggle55C974Redraw` (menustate.c) |
-| 00408e40 | `MenuToggle575F30Redraw` (menustate.c) | `ToggleEF8_575F30` (uihandlers4.c) |
-| 00408eda | `ToggleEF8_B201DC` (uihandlers4.c) | `MenuToggleB201DCRedraw` (menustate.c) |
-| 00408f74 | `ToggleEF8_575EE8` (uihandlers4.c) | `MenuToggle575EE8Redraw` (menustate.c) |
-| 0040900e | `MenuToggle575F3CRedraw` (menustate.c) | `ToggleEF8_575F3C` (uihandlers4.c) |
-| 004090a8 | `ToggleEF8_D118C8` (uihandlers4.c) | `MenuToggleD118C8Redraw` (menustate.c) |
-| 00409231 | `RefreshMenu00409231` (uihandlers4.c) | `MenuRedraw409231` (menustate.c) |
-| 004092d8 | `RefreshMenu004092D8` (uihandlers4.c) | `MenuRedraw4092D8` (menustate.c) |
-| 0040937f | `RefreshMenu0040937F` (uihandlers4.c) | `MenuRedraw40937F` (menustate.c) |
-| 00409426 | `RefreshMenu00409426` (uihandlers4.c) | `MenuRedraw409426` (menustate.c) |
-| 004094cd | `RefreshMenu004094CD` (uihandlers4.c) | `MenuRedraw4094CD` (menustate.c) |
-| 00409b75 | `Inc5759A4Max40` (uihandlers4.c) | `MenuIncVar5759A4` (menustate.c) |
-| 00409b9f | `Dec5759A4Min0` (uihandlers4.c) | `MenuDecVar5759A4` (menustate.c) |
-| 00409c31 | `IncB87E4CMax3` (uihandlers4.c) | `MenuIncVarB87E4C` (menustate.c) |
-| 00409c5b | `DecB87E4CMin0` (uihandlers4.c) | `MenuDecVarB87E4C` (menustate.c) |
-| 0040a443 | `Set54A844_1` (uihandlers4.c) | `MenuSet54A844On` (menustate.c) |
-| 0040a44f | `Set54A844_0` (uihandlers4.c) | `MenuSet54A844Off` (menustate.c) |
-| 0040a495 | `Set54A854_1` (uihandlers4.c) | `MenuSet54A854On` (menustate.c) |
-| 0040a4a1 | `Set54A854_0` (uihandlers4.c) | `MenuSet54A854Off` (menustate.c) |
-| 0040a625 | `Select54A90C_Mode2` (uihandlers4.c) | `MenuEnterMode2` (menustate.c) |
-| 0040a63b | `Clear54A90C_IfZero` (uihandlers4.c) | `MenuLeaveMode2` (menustate.c) |
-| 0040a64d | `Select54A91C_Mode1` (uihandlers4.c) | `MenuEnterMode1` (menustate.c) |
-| 0040a663 | `Clear54A91C_IfZero` (uihandlers4.c) | `MenuLeaveMode1` (menustate.c) |
-| 0040a675 | `Select54A8FC_Mode5` (uihandlers4.c) | `MenuEnterMode5` (menustate.c) |
-| 0040a68b | `Clear54A8FC_IfZero` (uihandlers4.c) | `MenuLeaveMode5` (menustate.c) |
-| 0040a69d | `Select54A92C_Mode3` (uihandlers4.c) | `MenuEnterMode3` (menustate.c) |
-| 0040a6b3 | `Clear54A92C_IfZero` (uihandlers4.c) | `MenuLeaveMode3` (menustate.c) |
-| 0040a6c5 | `Select54A8EC_Mode4` (uihandlers4.c) | `MenuEnterMode4` (menustate.c) |
-| 0040a6db | `Clear54A8EC_IfZero` (uihandlers4.c) | `MenuLeaveMode4` (menustate.c) |
-| 0040a6ed | `Select54A94C_Mode7` (uihandlers4.c) | `MenuEnterMode7` (menustate.c) |
-| 0040a703 | `Clear54A94C_IfZero` (uihandlers4.c) | `MenuLeaveMode7` (menustate.c) |
-| 0040a715 | `Select54A93C_Mode6` (uihandlers4.c) | `MenuEnterMode6` (menustate.c) |
-| 00413df3 | `MenuAnyFlag00413DF3` (ported6.c) | `P62_MenuBusy` (ported62.c) |
-| 0048ac0d | `Chain0048AC0D` (ported5.c) | `P50_FmvStopRelease` (ported50.c) |
-| 0048cc5f | `NoopFn0048cc5f` (noop.c) | `P50_Nop` (ported50.c) |
-| 004a6749 | `P14_Fn004A6749` (ported14.c) | `P62_FindFreeTrafficSlot` (ported62.c) |
-| 004e12e4 | `P14_Fn004E12E4` (ported14.c) | `P16_IdleTimer` (ported16.c) |
-| 004eafcf | `Fwd004EAFCF` (ported5.c) | `P78_LoadLampsBlock` (ported78.c) |
-| 004ef997 | `FillOnes4EF997` (ported4.c) | `P89_Fill1` (ported89.c) |
-| 00514c72 | `SetObjState_00514C72` (ported7.c) | `P62_ParticleSet` (ported62.c) |
-| 005223be | `ClearHandles005223BE` (ported6.c) | `P30_InitWindowGlobals` (ported30.c) |
-| 005291ed | `P101_FillRows` (ported101.c) | `P152_FillRows` (ported152.c) |
+После удаления у `unported.h` стали ненужны `Call0048B65D`, `Call0048B568`, `Call004EAFE0`, `G6Call004A2B70` — убраны.
 
 ## 3. ~326 слабых заглушек `unported.h`, перекрытых портами (устаревшие имена)
 
@@ -105,8 +53,8 @@
 ## 4. Псевдонимы образа данных, которые выбрасывает компоновщик — оставлены
 
 С `-ffunction-sections -fdata-sections -Wl,--gc-sections` компоновщик выкидывает 13 объектов данных в `re/game/`
-(например `CamParamTblArr`, `P10_Tab`, `P96_PartTab`, `MenuFlag54A9xx`) и, кроме проигравших дублей из п. 2, 5 функций (используются только hook-сборкой или
-встроены в вызывающих: `P50_FmvStopRelease`, `re_crt_mkdir`, `P14_Fn004E3924`, `re_dd_heading`, `re_dd_cell_in`). Объекты данных — native-копии адресов Game.exe,
+(например `CamParamTblArr`, `P10_Tab`, `P96_PartTab`, `MenuFlag54A9xx`) и 4 функции (используются только hook-сборкой или
+встроены в вызывающих: `re_crt_mkdir`, `P14_Fn004E3924`, `re_dd_heading`, `re_dd_cell_in`). Объекты данных — native-копии адресов Game.exe,
 к которым обращения идут через `re_gvar(...)`/макросы; они документируют карту адресов и нужны hook-сборке или
 генераторам (`tools/gen_gvar_img.py`). Выигрыш от удаления — байты; **оставлены**. Сторонние single-header библиотеки
 (`dr_flac`/`dr_mp3` в `plat_cdaudio.c`, `cgltf` в `plat_detail.c`) дают остальные выброшенные секции — это норма.
@@ -120,15 +68,210 @@
 Ни сборка, ни CI их не вызывают; упоминаются только в документации. Оставлены как история воспроизводимости
 (как были получены `src/` и `docs/functions.csv`); при повторном запуске, вероятно, потребуют правок.
 
-`re/platform/native/links.c` разошёлся со своим генератором `tools/gen_native_links.py`: перегенерация даёт ~100 строк
-разницы (другие `#include`, новые обёртки для вызовов, которые уже перекрыты определениями в портах → были бы
-повторные определения). Файл правился руками; **не перегенерировать** вслепую. Решение: либо научить генератор
-пропускать уже определённые имена, либо объявить `links.c` ручным файлом и удалить генератор (связано с п. 3).
+**`links.c` и генератор — РЕШЕНО (cleanup/round2).** `tools/gen_native_links.py` снова воспроизводит
+`re/platform/native/links.c` байт в байт:
+- имена, уже строго определённые в `re/game` / `re/platform/native` (например `Call0040C20B`, `LoadIconByName` в
+  `game_fwd.c`), пропускаются — раньше перегенерация дала бы повторные определения;
+- `tools/native_links_skip.txt` — список имён, которые генератор не должен связывать. В cleanup/round2 в нём было
+  38 имён «перенос есть, связи нет»; **fix/link-ported (п. 7.1) показал, что все 38 уже связаны** (шпионы
+  `tests/selftest.c` и `game_fwd.c`), генератор теперь видит определения и в `re/tests/*.c`, список пуст;
+- всё после строки `/* ==== manual part … ==== */` в `links.c` — ручная часть (sprintf 0052a910, R12_40DAE1,
+  колбэки таймеров, `P56_Fn4E5284` с другой сигнатурой); генератор переносит её как есть.
 
-## 6. Возможная ошибка в selftest
+## 6. Ошибка в selftest — ИСПРАВЛЕНО (cleanup/round2)
 
-`re/tests/selftest.c:611` (`test_p21`): `memset(P21_Entries, 0, sizeof P21_Entries)`. `P21_Entries` — макрос-указатель
-(`re/game/ported21.h`), поэтому `sizeof` = размер указателя (8 байт на 64-бит, 4 на i686), а не таблицы
-`0x40 * 0x54`. Тест проходит, потому что проверяемые байты и так нулевые, но очистка не та, что задумана.
-Вероятно, нужно `memset(P21_Entries, 0, 0x40 * 0x54)` (или хотя бы `2 * 0x54`). Не исправлено — поведение теста
-не менялось в этой ветке.
+`test_p21`: `memset(P21_Entries, 0, sizeof P21_Entries)` очищал 8 байт (sizeof макроса-указателя); теперь
+`memset(P21_Entries, 0, 0x40 * 0x54)`. Тест проходит, как и раньше.
+
+## 7. Раунд 2 (`cleanup/round2`, PR #5): что ещё сделано и что осталось
+
+- **`P87_DrawCells` удалена.** Адреса в Game.exe нет, вызывал только selftest (упрощённый 004ee8f4 времён v1.32).
+  Проверка рендера `RE_REAL_CITY` теперь идёт по точному пути `P89_DrawMap` (синоним `RE_REAL_MAP`; `RE_REAL_R` убран).
+- **Предупреждения native (Linux, gcc 14): 30 → 0.** selftest — настоящие исправления; в игре — приведения типов без
+  изменения кода, `PackRGB00503ECC(const uint8_t *)`; `-Wformat-truncation` в ported126/138/139/147/150 заглушён
+  `#pragma` (только GCC): пути реплеев/FMV собираются ограниченным snprintf в буферы фиксированного размера, усечение
+  длинного имени — ожидаемое поведение, а увеличение буферов изменило бы объектный код; в `diagnostics.c` (платформа)
+  буферы путей увеличены по-настоящему.
+- **Дубли помощников → `memrw.h`:** `rdu16`, `rds16`, `wr16(p, v)`, `wrf(p, v)`, `u2f`, `fbits`, `f2i` — локальные
+  копии (75) убраны из 42 файлов (`ported87` — ещё и дубли `rd32/rdf`). Новые помощники — `static` (не `inline`) с
+  `__attribute__((unused))`, как бывшие локальные копии, чтобы hook-сборка (-O1) принимала прежние решения о
+  встраивании; `wr16` принимает `int32_t` и усекает (у копий были `uint16_t`/`int16_t`/`int32_t`).
+  **В 6 файлах (`ported102/127/133/142/143/144`) локальные копии оставлены** (`#define RE_MEMRW_LOCAL16` перед
+  `#include "memrw.h"`): перенос определений в заголовок менял у GCC -O1 порядок операндов (`cmp a,b; jl` ↔
+  `cmp b,a; jg`) или порядок функций в hook-объектах — семантика та же, байты другие. Итог: все hook- и
+  native-объекты, которых не касались удаления (п. 2, `P87_DrawCells`, `links.c`/`unported.h`, selftest), совпадают
+  с `fix/cops` байт в байт.
+- **Неиспользуемые функции/глобалы:** поиск по `nm` (определено в `re/game`, нет ссылок ни в native, ни в hook-объектах,
+  ни в fn_table/install/links) дал только известные 5 функций из п. 4 (`re_dd_cell_in`, `re_dd_heading`,
+  `P14_Fn004E3924`, `re_crt_mkdir`, `P37_JoyEnumCb` — нужны hook-сборке/встроены). Глобалы без ссылок — псевдонимы
+  образа данных (оставлены, п. 4) и отладочные счётчики (`P85_LastBlend` — только запись; `P84_Hand*` — для журнала).
+- **Осталось:** ~60 групп мелких локальных помощников с другой сигнатурой или смыслом (`rd32(p, o)`, `wr16(p, o, v)`,
+  `rd32` → uint32, `mul`, `ftol`, `neg`, `carmodel`, `oow_at`, `tex_select` …) — объединять только с переименованием
+  и сверкой объектов; п. 3 (326 устаревших имён `unported.h`). 38 «несвязанных» переносов — см. п. 7.1 (уже связаны).
+
+
+### 7.1. 38 «перенесённых, но не связанных» функций (`fix/link-ported`, PR #6) — уже связаны
+
+Итог: **связывать нечего — все 38 в native уже вызывают перенос; ни одно соответствие не отвергнуто.** Находка
+раунда 2 была ошибкой генератора, а не пробелом в native.
+
+- **Почему так вышло.** `tests/selftest.c` входит в native-сборку (`NATIVE_SRC` в `re/CMakeLists.txt`, один бинарник
+  с игрой). С v2.02 в нём «шпионы» для этих имён: строгое определение вида
+  `if (!re_selftest_on) { return <перенос>(...); } <счётчик selftest>` — в игре (`re_selftest_on = 0`) вызов идёт в
+  перенос, в `--selftest` — в счётчик. Они перекрывают слабые заглушки `stubs.c` так же, как `links.c`. Ещё 2 имени
+  (`Call004EC91E`, `Call0040BF50`) так же связаны в `platform/native/game_fwd.c`. Генератор искал готовые определения
+  только в `re/game` и `re/platform/native`, не видел шпионов и сгенерировал бы для них повторные определения — их и
+  заглушили списком `native_links_skip.txt`, приняв за «несвязанные».
+- **Проверка на бинарнике:** в `driver` (base `ec72cac`) символ, например, `P77_Fn501C63` — это шпион selftest
+  (проверка `re_selftest_on`, затем `P102_HudInit`), а не заглушка `stubs.c`. Пробная перегенерация `links.c` без
+  списка ломает компоновку: `multiple definition of 'P56_FindIcon'` … (`selftest.c.o` против `links.c.o`).
+- **Проверка соответствий (все 38 верны):** адрес строки `unported.h` → `re_hook` в `platform/win32/install.c`
+  (на каждый адрес ровно один) → тот же перенос в `fn_table.c` → комментарий «Game.exe <адрес>» у определения
+  переноса. Сигнатуры совместимы (generator `gcc -fsyntax-only -Werror=int-conversion,incompatible-pointer-types`
+  проходит для всех 36 V/R-строк; порядок аргументов сверен у неочевидных: `P61_Fn5139D7(0, x, z, out)` ↔
+  `P101_PickCell(want, x, z, out)`, `P63_Fn49521E(rec, 1, 0)` ↔ `P102_TrafficAhead(rec, dist, parked)` (так же
+  зовёт `P118`), `Call005233BE` ↔ `P140_SndInit(drv, arg, eax)`). Шпионы передают те же аргументы, что дал бы
+  генератор. Единственное место, где генератор ошибся бы: `Call004EC91E` (R-строка `int32_t`) — сгенерированное
+  `(int32_t)P93_FindIcon(…)` обрезало бы 64-битный указатель; правильная связь — в `game_fwd.c` через
+  `re_addr()` (32-битный адрес записи значка, как в Game.exe).
+- **Что изменено:** `tools/gen_native_links.py` считает определёнными и имена из `re/tests/*.c`;
+  `tools/native_links_skip.txt` пуст (только заголовок). `links.c` перегенерируется байт в байт (259 связей; «типы не
+  сходятся» 17 → 16 — одно из них оказалось шпионом selftest). Каталог `re/` не изменился: все 196 native-объектов
+  совпадают с базой (кроме `diagnostics.c.o` — там `__TIME__` сборки), hook-сборка (`./build.sh hook`) — 0 предупреждений.
+- **Прогоны** (Linux arm64, Xvfb; бинарник тот же, что у базы): Take A Ride Miami 1700 кадров `RE_FIXED_DT=1`
+  (и с `RE_FPU_CHOP=0`), Survival 2400 кадров, обход меню RE_PROBE walk (8 запусков, 10 экранов меню; 8-й — таймаут 300 с) — «not ported» в debug.log/stdout: 0 → 0,
+  падений и assert нет.
+- **Осталось:** 16 имён `unported.h`, у которых перенос по адресу есть, но генератор не связывал их из-за
+  несовпадения типов, — связаны вручную, см. п. 7.2.
+
+| Группа | Имя заглушки | Адрес | Перенос | Где связь |
+|---|---|---|---|---|
+| HUD/текст/2D | `P56_FindIcon` | 004ec91e | `P93_FindIcon` | tests/selftest.c:2737 |
+| HUD/текст/2D | `Call004EC91E` | 004ec91e | `P93_FindIcon` | platform/native/game_fwd.c:17 |
+| HUD/текст/2D | `P58_Fn4AA4EA` | 004aa4ea | `P110_IconRect` | tests/selftest.c:2738 |
+| HUD/текст/2D | `P66_Draw5173D7` | 005173d7 | `P73_Text` | tests/selftest.c:2603 |
+| HUD/текст/2D | `P67_Fn40ABAC` | 0040abac | `P116_Text` | tests/selftest.c:2732 |
+| HUD/текст/2D | `P70_Fn5063A4` | 005063a4 | `P135_RadarLine` | tests/selftest.c:2932 |
+| HUD/текст/2D | `P70_Fn507925` | 00507925 | `P131_RadarArrow` | tests/selftest.c:2933 |
+| HUD/текст/2D | `P77_Fn501770` | 00501770 | `P136_OverlayMap` | tests/selftest.c:3465 |
+| HUD/текст/2D | `P77_Fn501C63` | 00501c63 | `P102_HudInit` | tests/selftest.c:3464 |
+| HUD/текст/2D | `P66_Fn4C68A7` | 004c68a7 | `P112_DirTimeline` | tests/selftest.c:2610 |
+| HUD/текст/2D | `P76_Fn40DCE0` | 0040dce0 | `P109_TileDraw` | tests/selftest.c:3354 |
+| меню/фронтенд/устройства | `P57_MenuStep` | 0040c8f1 | `P114_MenuStep` | tests/selftest.c:2044 |
+| меню/фронтенд/устройства | `P58_Fn418675` | 00418675 | `P110_MenuSel` | tests/selftest.c:2085 |
+| меню/фронтенд/устройства | `Call00414D1F` | 00414d1f | `P103_OptionsInit` | tests/selftest.c:2741 |
+| меню/фронтенд/устройства | `Call0040BF50` | 0040bf50 | `P136_FrontInit` | platform/native/game_fwd.c:6 |
+| меню/фронтенд/устройства | `P68_Fn41B1C0` | 0041b1c0 | `P139_LadderLoad` | tests/selftest.c:2797 |
+| меню/фронтенд/устройства | `P68_Fn41B3AB` | 0041b3ab | `P140_LadderRun` | tests/selftest.c:2798 |
+| меню/фронтенд/устройства | `P74_Fn41CE90` | 0041ce90 | `P149_DDEnumAll` | tests/selftest.c:3158 |
+| меню/фронтенд/устройства | `P74_Fn424B70` | 00424b70 | `P76_GlideRegister` | tests/selftest.c:3159 |
+| звук | `Call005233BE` | 005233be | `P140_SndInit` | tests/selftest.c:2740 |
+| звук | `P66_Fn523829` | 00523829 | `P115_SndUpdate` | tests/selftest.c:2605 |
+| звук | `P67_Stream` | 00524496 | `P77_LoadBank` | tests/selftest.c:2736 |
+| звук | `P77_Fn524BD8` | 00524bd8 | `P140_BankLine` | tests/selftest.c:3466 |
+| 3-D сцена/эффекты | `P66_Fn427EEA` | 00427eea | `P82_FrustumSetup3D` | tests/selftest.c:2606 |
+| 3-D сцена/эффекты | `P69_Fn4AAF3A` | 004aaf3a | `P139_Effects` | tests/selftest.c:2887 |
+| 3-D сцена/эффекты | `P69_Fn4B2C4B` | 004b2c4b | `P121_DustDraw` | tests/selftest.c:2886 |
+| 3-D сцена/эффекты | `P69_Fn4B33D8` | 004b33d8 | `P135_DebrisTri` | tests/selftest.c:2884 |
+| 3-D сцена/эффекты | `P69_Fn4B3E55` | 004b3e55 | `P114_DebrisAll` | tests/selftest.c:2885 |
+| 3-D сцена/эффекты | `P69_Fn4BA720` | 004ba720 | `P98_DrawSix` | tests/selftest.c:2888 |
+| 3-D сцена/эффекты | `P76_Fn4268EF` | 004268ef | `P82_AddLight` | tests/selftest.c:3355 |
+| мир (трафик, частицы) | `P61_Fn5139D7` | 005139d7 | `P101_PickCell` | tests/selftest.c:2931 |
+| мир (трафик, частицы) | `P63_Fn49521E` | 0049521e | `P102_TrafficAhead` | tests/selftest.c:2043 |
+| мир (трафик, частицы) | `P75_Fn491A56` | 00491a56 | `P119_TrafficSpawn` | tests/selftest.c:3266 |
+| мир (трафик, частицы) | `P75_Fn4958B7` | 004958b7 | `P107_TrafficRow` | tests/selftest.c:3265 |
+| мир (трафик, частицы) | `P75_Fn4EDD08` | 004edd08 | `P88_CellUpdate` | tests/selftest.c:3267 |
+| мир (трафик, частицы) | `P67_Fn514165` | 00514165 | `P71_Course` | tests/selftest.c:2735 |
+| мир (трафик, частицы) | `P67_Fn51500C` | 0051500c | `P101_PartTurn` | tests/selftest.c:2734 |
+| мир (трафик, частицы) | `P68_Fn514A47` | 00514a47 | `P98_PartAim` | tests/selftest.c:2796 |
+
+
+### 7.2. 16 «перенесённых, но с несовпадением типов» — связаны вручную (`fix/link-mismatch`, PR #7)
+
+Итог: **связаны все 16, отвергнутых нет.** Адаптеры — в ручной части `re/platform/native/links.c` (после `MANUAL_MARK`);
+`tools/gen_native_links.py` по-прежнему воспроизводит `links.c` байт в байт (259 связей, «типы не сходятся» 16 → 0).
+
+- **Проверка соответствия** (для каждого): адрес строки `unported.h` → ровно один `re_hook` в `platform/win32/install.c` →
+  тот же перенос в `fn_table.c` → комментарий «Game.exe <адрес>» у определения; сигнатура сверена с дизассемблером Game.exe
+  (число аргументов по `add esp,N` у вызывающего / чтению `[ebp+N]` в функции).
+- **Правило адаптера:** аргумент, который в Game.exe — 32-битный адрес, переводится `re_ptr()`/`re_span()` (участок
+  проверяется целиком), строка/буфер native → адрес — `re_addr()`; при промахе — запись `<имя>: no native object` в
+  debug.log (`link_miss`), как у прежних ручных связей v2.04.
+
+| Имя заглушки | Адрес | Перенос | Несовпадение и адаптер |
+|---|---|---|---|
+| `P62_Fn424A02` | 00424a02 | `CallIf424A02` | `(uint32_t, void *)` ↔ `(int32_t, int32_t)`: страница `P62_Page` → `re_addr` (00b32a34) |
+| `P47_Fn405FDB` | 00405fdb | `P59_ReplayCheck` | `out` — адрес, `re_ptr` (0 → NULL; оригинал проверяет `out != 0`, 00406072) |
+| `Fn00416040` | 00416040 | `SetupMiami00416040` | аргумент в Game.exe не читается — отброшен |
+| `Call00524496` | 00524496 | `P77_LoadBank` | имя банка — адрес строки .data (TITLE.DSS / MOTEL.DSS) → `re_ptr`; слот `uint16_t` |
+| `Call004D78F3` | 004d78f3 | `P21_FrameTicks` | аргумент не читается, результат вызывающий (0040c813) не берёт |
+| `Call004DAA36` | 004daa36 | `P56_ObjInit` | запись машины и позиция — адреса → `re_span(a, 0x148)` / `re_span(q, 12)` |
+| `Call004D28A3` | 004d28a3 | `P100_CarSounds` | таблица звуков — адрес → `re_ptr` |
+| `Call00514A47` | 00514a47 | `P98_PartAim` | частица — адрес → `re_ptr` |
+| `Call004D90F4` | 004d90f4 | `P96_LogLine` | строка — адрес → `re_ptr` (LogLine копирует строку) |
+| `UiCall004D8F30` | 004d8f30 | `P98_DebugFree` | то же, что `Call004D8F30` |
+| `GameDrawIcon` | 004e72f8 | `P96_IconRect` | запись значка — адрес → `re_ptr`; порядок (x, y, w, h, значок, цвет) совпадает |
+| `G6Call00519D22` | 00519d22 | `ReturnOne00519D22` | в Game.exe пустая функция `return 1` (титры) — аргумент отброшен |
+| `Call004BF910` | 004bf910 | `P21_FpsToBuf` | 8-битный экран — адрес → `re_span(a, 0x280 * 8)`; цвета `uint8_t` |
+| `Call00528982` | 00528982 | `P44_Xform` | вектор — адрес → `re_span(a, 12)` |
+| `Call004D8F30` | 004d8f30 | `P98_DebugFree` | блок — адрес `re_addr` от DebugMalloc (`P101_MirrorMaskR`) → `re_ptr`; 0 — ничего |
+| `P58_Fn407E2F` | 00407e2f | `P100_IconLfb2x` | Game.exe передаёт 4 аргумента (00407e18, `add esp,0x10`); 5-й/6-й у заглушки лишние; LFB и имя — адреса → `re_ptr` |
+
+- **Исправления у вызывающих** (без них связь была бы неверной; hook-объекты не меняются — `#ifdef RE_HOOK_BUILD`):
+  - `ported21.c` `P21_DrawClock`/`P21_DrawFps` (004d986e / 004d53e8) отдавали в `Call004D90F4` усечённый 64-битный указатель
+    (`(int32_t)(intptr_t)buf`, буфер на стеке) — в native теперь прямо `P96_LogLine(buf)`.
+  - `uihandlers3.c` `Ui00426CC6` (00426cc6): 00b1c280 — таблица `P56_EulerTab` (родной указатель); 32-битный псевдоним
+    `UiVar00B1C280` в native отдельный и всегда 0 — в native освобождается сама таблица, как в `P137_LevelEnd`.
+    v2.35: псевдоним слит — в native `UiVar00B1C280` теперь представление `P56_EulerTab` (расщеплённых псевдонимов
+    образа данных осталось 0, NATIVE_GAPS «Исправлено в v2.35»).
+  - `ported11.c` `InitVec_00526582` (00526582): матрицу для 00528982 задаёт 00bdc28c, а в native его читатель — родной
+    `P44_MatPtr`, отдельный от `P11_00bdc28c`; в native ставится `P44_MatPtr = P44_ViewMat` (011f4080).
+    v2.35: 00bdc28c слит — `P11_00bdc28c` в native теперь представление `P44_MatPtr` (так же исправлен
+    `P12_Fn004AAE34`, 004aae34).
+- **Ошибка, исправленная и в hook-сборке:** `ported12.c` `P12_Fn004DC8EA` (004dc8ea, отладочная клавиша флага 0x1e —
+  переинициализация машины `g_00d11878`) брал шаг записи `0x52` (= 0x148 / 4, арифметика int-указателя декомпилятора)
+  вместо `0x148` (Game.exe: `imul $0x148`): для любой машины, кроме 0, — чужой адрес. Единственный изменившийся hook-объект —
+  `ported12.c.o`, разница — ровно `imul $0x52` → `imul $0x148`.
+- **Где вызываются** (вызывающие в `re/game`): `Call00524496` — Options → Sound: «устройство» 00415014 (`P121_SndNextDev`) и
+  EAX 004152a7; `Call004D78F3` — заставка BMP 0040c813; `Call004DAA36` — отладочная клавиша; `Call004D28A3`/`Call00514A47` —
+  переходники 004d262c/00513cf9; `Call004D90F4` — часы/FPS отладочного экрана (`G00B87E7C == 0`); `Call004D8F30` —
+  `FreeBuffer_004F30E6` (конец уровня/зеркало); `P58_Fn407E2F` — пункты экрана ожидания `P45_Wait` (00407dba);
+  `Call004BF910` — FPS в меню (`SndHelper_00407D97`); `G6Call00519D22` — титры; `P47_Fn405FDB` — подготовка реплея 00405f2e;
+  `P62_Fn424A02` — `P62_DownloadPage` (D3D-ветка); `Fn00416040` — меню выбора по прогрессу; `GameDrawIcon` — значки узлов меню режиссёра
+  `DrawNode` (004c3d5c; до `fix/peds` в native не вызывался: имя узла — 32-битный указатель, `unk24 = 0`, см. 7.3);
+  `UiCall004D8F30`, `Call00528982` — вызывающие (`Ui00426CC6`, `InitVec_00526582`) есть только в таблице функций (`Ui00426CC6` в native теперь
+  освобождает `P56_EulerTab` сам и `UiCall004D8F30` не зовёт — связь нужна только для полноты).
+- **Прогоны** (Linux arm64, Xvfb; батчи: 6 простых адаптеров → все 16 → исправления вызывающих; база `0180a03`):
+  native 0 предупреждений, ctest зелёный, `./build.sh hook` 0 предупреждений; Take A Ride Miami 1700 кадров `RE_FIXED_DT=1`
+  (и `RE_FPU_CHOP=0`), Survival 2400 кадров — у всех трёх батчей журнал машины, debug.log и снимок байт в байт с базой;
+  обход меню RE_PROBE walk (8 запусков, 10 экранов меню, 8-й — таймаут 300 с, как у базы) — состояние обхода и снимки
+  меню те же. «not ported» в debug.log/stdout: 0 → 0, `no native object` — 0, падений и assert нет. В этих прогонах ни одна
+  из 16 не вызывается — поведение игры не изменилось (версия в README не поднималась).
+- **Связь доказана прогоном** Options → Sound → RETURN на «Device» (00415014 `P121_SndNextDev`) и на EAX (004152a7):
+  в базе debug.log — 2× `not ported: Call00524496`, после — 0 и без `no native object` (строка TITLE.DSS из .data найдена
+  через `re_ptr`); снимок меню тот же. Банк звуков под Xvfb не грузится — нет звукового устройства (`G6_00B91CF4 == 0`,
+  `P77_LoadBank` выходит сразу), с настоящим звуком не проверено.
+
+### 7.3. Меню режиссёра и ещё 4 «молча» несвязанные заглушки (`fix/peds`)
+
+Прогон с открытием Film Director (пауза → Film Director → обход узлов) дал в debug.log 82 строки «not ported» (база — 0,
+потому что в базе меню режиссёра не рисовалось вовсе): 80× `GetMarkerYAdjust (004023c9)` — по разу на подпись узла в нижнем
+правом углу клетки (`DrawNodeMarker` 004c3e6a, `push 0; call 004023c9`), и 2× `StoreCameraState (004c5499)` — снимок
+камеры при входе в режиссёра (`BackupCameraState` 004c8e9e). Обе функции уже перенесены:
+
+- `tools/gen_native_links.py` молча пропускал строки `unported.h` с комментарием в конце (регулярное выражение требовало `)`
+  в конце строки): так остались несвязанными `StoreCameraState` → `P61_StoreCamState` (004c5499), `RestoreCameraState` →
+  `P61_RestoreCamState` (004c536c), `FindAutoCamera` → `P98_DirCamNext` (004c6740). Четвёртая такая строка,
+  `P58_Fn416794`, уже связана шпионом selftest. Комментарии теперь отрезаются перед разбором.
+- 004023c9 — не функция, а thunk инкрементальной компоновки (`jmp 0040aae2`), поэтому адрес не находился среди `re_hook`.
+  Генератор теперь проходит thunk по `platform/native/thunk_table.c`: `GetMarkerYAdjust` → `ScanSlot_0040AAE2`. Других строк
+  `unported.h` с адресом-thunk на перенос нет.
+- Итог генератора: 259 → 263 связей, «типы не сходятся» 0; ручная часть `links.c` не менялась. В native-прогонах без режиссёра
+  ни одна из 4 не вызывается (журналы базы — 0 «not ported»), поэтому Take A Ride / Survival не меняются; `FindAutoCamera`
+  раньше всегда давала «камеры нет» (заглушка возвращала 0) — теперь автокамера реплея выбирается как в Game.exe.
+- Само меню: `P66_Fn4C3BC7` (заглушка selftest на 004c3bc7) теперь вне selftest вызывает перенос `DrawDirectorMenu`
+  (`dirnodes.c`, сверено с дизассемблером 004c3bc7..004c3c93); значки узлов — `ClearDirectorTable` переводит имя `re_ptr`,
+  `DrawNode` зовёт `GameDrawIcon`; подписи — `NodeIconTex` = таблица строк языка 00c55820 (`P97_StrAddr`) вместо отдельного
+  нулевого массива `NodeIconTexArr` (расщеплённый псевдоним, `find_split_alias.py` его не видел — массив без `GAME_VAR`).
+  Для интегратора: ветка `fix/aliases` сводит расщеплённые псевдонимы — при слиянии проверить, что 00c55820 не сведён дважды.
+

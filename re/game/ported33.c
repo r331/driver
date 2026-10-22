@@ -1,3 +1,5 @@
+/* Per-texture-slot vertex batches (flushed as D3D triangle lists) and the glide2x.dll
+   function table (Game.exe Render.c). */
 /* Сброс буферов вершин по слотам и таблица функций Glide — восстановлено из Game.exe (Render.c). */
 #include "ported33.h"
 #include "ported32.h"
@@ -18,7 +20,9 @@ P33_CountArr P33_Count;
 #pragma pop_macro("P33_Count")
 #endif
 GAME_VAR_DEF(P33_VBufArr, P33_VBuf, 0x00622048)
+#ifdef RE_HOOK_BUILD   /* v2.35: native — P31_DDObj2 (ported33.h) */
 GAME_VAR_DEF(void *, P33_Device, 0x00a42160)
+#endif
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P33_GlideOk")
 #undef P33_GlideOk
@@ -31,6 +35,14 @@ int32_t P33_GlideOk;
 
 /* A texture slot holds 4096 vertices. Flush before a complete primitive would
    cross that boundary; dropping later vertices makes nearby road tiles vanish. */
+#define VB_SLOTS        0x21   /* vertex batches: 32 texture slots + 1 untextured */
+#define VB_SLOT_UNTEX   0x20   /* batch drawn with texturing disabled */
+#define D3DPT_TRIANGLELIST 4
+#define D3DTOP_DISABLE     1
+
+/* P33_EnsureRoom — Native: make room for `vertices` more vertices in batch `slot`, flushing all batches first
+   when the slot would overflow (a primitive must not straddle a flush).  Returns 0 for an
+   invalid slot/count or a corrupt counter, else 1.  Restores the bound texture after a flush. */
 int P33_EnsureRoom(int32_t slot, int32_t vertices) {
   const int32_t capacity = (int32_t)(sizeof P33_VBuf[0] / sizeof(plat_vertex));
   if (slot < 0 || slot >= 33 || vertices <= 0 || vertices > capacity) return 0;
@@ -52,15 +64,18 @@ int P33_EnsureRoom(int32_t slot, int32_t vertices) {
   return 1;
 }
 
+/* P33_FlushBatches — Game.exe 00422ae7, cdecl.  Draw every non-empty vertex batch as a triangle list and reset its counter.  Batch 0x20 is
+   drawn untextured; other slots bind their texture or palette.  The current texture handle,
+   palette and slot and stage-0 COLOROP are restored afterwards. */
 void P33_FlushBatches(void) {
   void *keep_handle = P32_CurHandle;
   int32_t keep_pal = G6_0054EF2C;
   int32_t keep_slot = P32_CurSlot;
   uint32_t colorop = plat_get_tex_stage(0, 1);
-  for (int slot = 0; slot < 0x21; slot++) {
+  for (int slot = 0; slot < VB_SLOTS; slot++) {
     if (P33_Count[slot] == 0) continue;
-    if (slot == 0x20) {                     /* без текстуры: COLOROP = 1 (DISABLE), текстуры нет */
-      plat_set_tex_stage(0, 1, 1);
+    if (slot == VB_SLOT_UNTEX) {            /* без текстуры: COLOROP = 1 (DISABLE), текстуры нет */
+      plat_set_tex_stage(0, 1, D3DTOP_DISABLE);
       plat_set_texture(0, NULL);
     } else if (P32_Slots[slot].has_list == 0) {
       plat_set_texture(0, P32_Slots[slot].tex);
@@ -68,7 +83,7 @@ void P33_FlushBatches(void) {
     } else {
       P32_SelectSlotPalette(slot);
     }
-    plat_draw_prim(4, (const plat_vertex *)P33_VBuf[slot], P33_Count[slot]);   /* D3DPT_TRIANGLELIST, FVF 0x1c4 */
+    plat_draw_prim(D3DPT_TRIANGLELIST, (const plat_vertex *)P33_VBuf[slot], P33_Count[slot]);   /* D3DPT_TRIANGLELIST, FVF 0x1c4 */
     P33_Count[slot] = 0;
   }
   P32_CurSlot = keep_slot;
@@ -204,8 +219,11 @@ static const uint32_t P33_GlideZero[] __attribute__((unused)) = { 0x01270db0, 0x
 #ifndef RE_HOOK_BUILD
 static void *g_glide_native[sizeof P33_GlideTab / sizeof P33_GlideTab[0]];
 #endif
+/* P33_GlideCount — Number of glide2x.dll functions in the table (119). */
 int P33_GlideCount(void) { return (int)(sizeof P33_GlideTab / sizeof P33_GlideTab[0]); }
+/* P33_GlideName — Export name of Glide function i, or NULL. */
 const char *P33_GlideName(int i) { return (i >= 0 && i < P33_GlideCount()) ? P33_GlideTab[i].name : NULL; }
+/* P33_GlideProc — Pointer of Glide function i (hook: read from the Game.exe cell; native: the local table). */
 void *P33_GlideProc(int i) {
   if (i < 0 || i >= P33_GlideCount()) return NULL;
 #ifdef RE_HOOK_BUILD
@@ -216,12 +234,14 @@ void *P33_GlideProc(int i) {
 }
 
 #ifndef RE_HOOK_BUILD
+/* P33_SetNativeProc — Native: install a native implementation for the Glide export `name`.  Returns 0 if unknown. */
 int P33_SetNativeProc(const char *name, void *proc) {
   for (int i = 0; i < P33_GlideCount(); i++)
     if (strcmp(P33_GlideTab[i].name, name) == 0) { g_glide_native[i] = proc; return 1; }
   return 0;
 }
 /* v1.96: то же по адресу ячейки Game.exe (0041cede пишет таблицу по адресам); 0 — ячейки нет в таблице имён */
+/* P33_SetNativeProcAt — Native: as P33_SetNativeProc, keyed by the Game.exe cell address. */
 int P33_SetNativeProcAt(uint32_t addr, void *proc) {
   for (int i = 0; i < P33_GlideCount(); i++)
     if (P33_GlideTab[i].addr == addr) { g_glide_native[i] = proc; return 1; }
@@ -229,6 +249,8 @@ int P33_SetNativeProcAt(uint32_t addr, void *proc) {
 }
 #endif
 
+/* P33_LoadGlideProcs — Game.exe 00424c40, cdecl.  Resolve all glide2x.dll exports from P31_GlideModule into the function table (hook: also
+   zeroes the four unused cells).  Returns 0 if Glide is not available (P33_GlideOk == 0). */
 int32_t P33_LoadGlideProcs(void) {
   if (P33_GlideOk == 0) return 0;
   void *mod = (void *)(intptr_t)P31_GlideModule;

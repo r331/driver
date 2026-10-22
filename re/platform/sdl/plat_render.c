@@ -1,3 +1,11 @@
+/* plat_render.c — native only: the OpenGL 3.3 core render backend (English overview; original notes follow).
+   The game sends already-transformed vertices (like D3D TLVERTEX: x, y in window pixels, z 0..1, rhw = 1/w);
+   the shader restores perspective-correct interpolation.  GL entry points are loaded through get_proc
+   (SDL_GL_GetProcAddress or OSMesaGetProcAddress), without linking libGL.
+   Sections: frame/content rectangles and Hor+ (v2.15/v2.26), GL state, render target FBO / MSAA / post pass
+   (v2.16), facade detail meshes (v2.31), textures with alpha-test variants and mipmaps, drawing, clears,
+   self-check against a black frame (v2.24), flip and readback.
+   No Game.exe addresses here: this file implements the plat_* interface used by the ported code. */
 /* Рендер-бэкенд OpenGL 3.3 core. Игра шлёт уже преобразованные вершины (как D3D TLVERTEX):
    x,y — пиксели окна, z 0..1, rhw = 1/w; шейдер восстанавливает перспективно-корректные интерполяции.
    GL-функции берутся через get_proc (SDL_GL_GetProcAddress или OSMesaGetProcAddress), без линковки с libGL. */
@@ -75,6 +83,7 @@ GLFUNCS(DECL)
 void plat_gfx_logf(const char *fmt, ...);
 int  plat_gfx_dbg(void);
 static int g_glerr_n;
+/* glerr — drains pending GL errors and logs them with `where`; returns whether there were any. */
 static int glerr(const char *where) {   /* все накопившиеся ошибки GL; возврат — была ли ошибка */
     int any = 0;
     for (int i = 0; i < 8; i++) {
@@ -160,6 +169,7 @@ static int g_tw, g_th, g_msaa, g_maxs, g_aniso_hw, g_a2c, g_uSharp, g_uTexSize, 
 static double g_rscale = 1.0; static float g_aniso;
 static int g_chk_flips, g_chk_fail, g_chk_ok;   /* v2.24: показы с последней настройки цели; откат по проверке кадра */
 const char *plat_render_gfx_info(char *b, int n);
+/* target_fbo — framebuffer to draw into: the multisampled FBO if any, else the single-sample FBO (0 = window). */
 static unsigned target_fbo(void) { return g_fbo_ms ? g_fbo_ms : g_fbo; }
 /* v2.14: нативное разрешение. g_w×g_h — логический кадр игры (640×480: в нём игра даёт x,y вершин, прямоугольники 2D и
    viewport); g_dw×g_dh — реальный буфер окна (SDL_GL_GetDrawableSize, на Retina — в пикселях). Кадр игры вписывается
@@ -171,7 +181,11 @@ static int g_dw, g_dh, g_cx, g_cy, g_cw, g_ch; static double g_scx = 1.0, g_scy 
    S — по центру (меню/фронтенд — pillarbox, 3D — во всю ширину), 0 / 2S — HUD с якорем к левому / правому краю (plat_hud_anchor).
    RE_ASPECT=auto (по окну, по умолчанию) | 4:3 (оригинал, S = 0 — как v2.14) | W:H. Уже 4:3 (портрет) — S = 0, letterbox. */
 static int g_s, g_ew = 640, g_shift, g_amode_set; static double g_amode;
+/* aspect_mode_init — reads RE_ASPECT once. */
 static void aspect_mode_init(void) { if (!g_amode_set) { g_amode = re_aspect_parse(getenv("RE_ASPECT")); g_amode_set = 1; } }
+/* content_rect — recomputes the Hor+ extra width S (g_s, only for a 640x480 game frame), the logical frame width
+   g_ew = 640 + 2S, and the content rectangle g_cx..g_ch in render-target pixels (largest uniform scale,
+   centred; frames narrower than 4:3 get bars). */
 static void content_rect(void) {
     if (g_dw <= 0 || g_dh <= 0) { g_dw = g_w; g_dh = g_h; }
     if (g_tw <= 0 || g_th <= 0) { g_tw = g_dw; g_th = g_dh; }
@@ -188,17 +202,24 @@ static void content_rect(void) {
     g_cx = (g_tw - g_cw) / 2; g_cy = (g_th - g_ch) / 2;
 }
 /* логический прямоугольник кадра шириной g_ew (верх-лево, y вниз; x уже со сдвигом) → прямоугольник GL в буфере (низ-лево) */
+/* map_rect / scissor_logical — map a logical rectangle (top-left origin, y down, already shifted) to a GL
+   window rectangle (bottom-left origin), and set the scissor from one. */
 static void map_rect(int x, int y, int w, int h, int *o) {
     double x0 = g_cx + x * g_scx, x1 = g_cx + (x + w) * g_scx, y0 = g_cy + (g_h - y - h) * g_scy, y1 = g_cy + (g_h - y) * g_scy;
     o[0] = (int)(x0 + 0.5); o[1] = (int)(y0 + 0.5); o[2] = (int)(x1 + 0.5) - o[0]; o[3] = (int)(y1 + 0.5) - o[1];
 }
 static void scissor_logical(int x, int y, int w, int h) { int r[4]; map_rect(x, y, w, h, r); glScissor(r[0], r[1], r[2], r[3]); }
 /* прямоугольник игры (координаты 640×480): весь кадр 640×480 → вся логическая ширина, иначе — со сдвигом текущего якоря */
+/* game_rect — horizontal extent of the game's 640-wide coordinates in the logical frame: the whole width for the
+   full 640x480 frame, otherwise shifted by the current HUD anchor. */
 static void game_rect(int *x, int *w) {
     if (*x <= 0 && *x + *w >= g_w) { *x = 0; *w = g_ew; }
     else *x += g_shift;
 }
 static void fbo_setup(void);
+/* plat_render_set_drawable / plat_render_set_logical / plat_render_content / plat_render_size /
+   plat_render_set_aspect — window drawable size, the game's logical size, queries of the content rectangle,
+   and the aspect mode; each recomputes the content rectangle and the viewport. */
 void plat_render_set_drawable(int dw, int dh) {
     if (dw <= 0 || dh <= 0) return;
     int ch = dw != g_dw || dh != g_dh; g_dw = dw; g_dh = dh;
@@ -218,9 +239,12 @@ void plat_render_content(int *x, int *y, int *w, int *h, int *tw, int *th) {   /
 void plat_render_size(int *dw, int *dh, int *lw, int *lh) { if (dw) *dw = g_dw; if (dh) *dh = g_dh; if (lw) *lw = g_w; if (lh) *lh = g_h; }
 /* v2.15 */
 void plat_render_set_aspect(const char *mode) { g_amode = re_aspect_parse(mode); g_amode_set = 1; content_rect(); if (g_ok) glViewport(g_cx, g_cy, g_cw, g_ch); }
+/* plat_view_extra — S of the current frame (extra logical pixels on each side of 640). */
 int  plat_view_extra(void) { return g_s; }
+/* plat_hud_anchor — where 2D HUD elements go in the wider frame: a < 0 left edge, 0 centre (4:3 part), > 0 right edge. */
 void plat_hud_anchor(int a) { g_shift = g_s + (a < 0 ? -g_s : a > 0 ? g_s : 0); }
 /* окно → логические координаты кадра игры 640×480 (мышь; меню — по центру); 0 — точка вне 640×480 */
+/* plat_render_to_logical — window pixel -> logical 640x480 game coordinates (mouse); 0 if outside. */
 int plat_render_to_logical(double px, double py, int *lx, int *ly) {
     px *= (double)g_tw / g_dw; py *= (double)g_th / g_dh;   /* v2.16: пиксели окна → пиксели цели (render_scale) */
     double x = (px - g_cx) / g_scx - g_s, y = (py - (g_th - g_cy - g_ch)) / g_scy;
@@ -229,22 +253,27 @@ int plat_render_to_logical(double px, double py, int *lx, int *ly) {
     return x >= 0 && y >= 0 && x < g_w && y < g_h;
 }
 /* после показа кадра: весь буфер (и полосы) — чёрный; содержимое заднего буфера после swap в GL не определено */
+/* clear_bars — after showing a frame, clears the whole window buffer (bars included) to black, since the back
+   buffer contents after a swap are undefined in GL. */
 static void clear_bars(void) {
     if (!g_ok || (g_cw == g_tw && g_ch == g_th)) return;
     glDisable(GL_SCISSOR_TEST); glClearColor(0, 0, 0, 1); glClear(GL_COLOR_BUFFER_BIT);
 }
 
+/* blendf — maps a D3D blend factor (D3DBLEND_*) to the GL one. */
 static unsigned blendf(int d3d) {
     static const unsigned m[11] = { GL_ONE, GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
                                     GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR };
     return (d3d >= 1 && d3d <= 10) ? m[d3d] : GL_ONE;
 }
+/* compile / link_prog — compile one shader / link a program; log errors. */
 static unsigned compile(unsigned type, const char *src) {
     unsigned s = glCreateShader(type); glShaderSource(s, 1, &src, NULL); glCompileShader(s);
     GLint ok = 0; glGetShaderiv(s, GL_COMPILE_STATUS, &ok);
     if (!ok) { char log[1024]; log[0] = 0; glGetShaderInfoLog(s, sizeof log, NULL, log); plat_gfx_logf("[gfx] ошибка компиляции шейдера (%s): %s\n", type == GL_VERTEX_SHADER ? "вершинный" : "фрагментный", log); return 0; }
     return s;
 }
+/* apply_state — applies the cached D3D-style render state (blend, depth test/write, alpha test, cull) to GL before a draw. */
 static void apply_state(void) {
     static const unsigned zf[9] = { GL_LEQUAL, GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS };
     if (g_zt) { glEnable(GL_DEPTH_TEST); glDepthFunc(zf[g_zf >= 1 && g_zf <= 8 ? g_zf : 4]); } else glDisable(GL_DEPTH_TEST);
@@ -255,6 +284,8 @@ static void apply_state(void) {
     if (g_blend) { glEnable(GL_BLEND); glBlendFunc(blendf(g_bs), blendf(g_bd)); } else glDisable(GL_BLEND);
 }
 /* ===== v2.16: цель рисования (FBO/MSAA), сэмплеры (фильтрация/анизотропия), пост-проход ===== */
+/* fbo_free / fbo_ms_try / fbo_setup — v2.16 render target: free, try an MSAA FBO with n samples, and (re)build the
+   FBO at render_scale x window size with fallback to direct rendering (driver_gfx.log says which). */
 static void fbo_free(void) {
     if (g_fbo_ms) glDeleteFramebuffers(1, &g_fbo_ms);
     if (g_fbo) glDeleteFramebuffers(1, &g_fbo);
@@ -323,6 +354,7 @@ static void fbo_setup(void) {
     g_chk_flips = 0; g_chk_ok = 0;   /* v2.24: проверка показа — заново после каждой перенастройки */
     { static int n; if (n++ < 12 || plat_gfx_dbg()) { char b[256]; plat_gfx_logf("[gfx] цель рисования: %s\n", plat_render_gfx_info(b, sizeof b)); } }
 }
+/* samplers_setup — sampler objects for the texture filtering / mipmap / anisotropy settings. */
 static void samplers_setup(void) {
     const re_gfx_cfg *c = re_gfx();
     unsigned *ss[4] = { &g_s3d, &g_s2d, &g_spl, &g_spn };
@@ -342,6 +374,7 @@ static void samplers_setup(void) {
     for (int i = 2; i < 4; i++) { glSamplerParameteri(*ss[i], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); glSamplerParameteri(*ss[i], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); }
     g_tex_proc = (c->mipmaps || c->dilate) ? 1 : 0;
 }
+/* has_ext — 1 if the GL context lists extension `name`. */
 static int has_ext(const char *name) {
     GLint n = 0; glGetIntegerv(GL_NUM_EXTENSIONS, &n);
     for (GLint i = 0; i < n; i++) { const char *e = (const char *)glGetStringi(GL_EXTENSIONS, (GLuint)i); if (e && !strcmp(e, name)) return 1; }
@@ -356,6 +389,8 @@ static unsigned link_prog(const char *vsrc, const char *fsrc) {
     return p;
 }
 /* resolve MSAA и пост-проход в буфер окна (идемпотентно: снимок и показ могут вызвать дважды); затем снова цель рисования */
+/* compose — resolves MSAA and runs the post pass (FXAA / gamma) into the window buffer; idempotent per frame
+   (screenshot and present may both call it). */
 static void compose(void) {
     if (!g_ok || !g_fbo) return;
     const re_gfx_cfg *c = re_gfx();
@@ -376,6 +411,7 @@ static void compose(void) {
     glBindSampler(0, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, target_fbo()); glViewport(g_cx, g_cy, g_cw, g_ch);
 }
+/* plat_render_gfx_info — one-line description of what is actually enabled (for the log and tests). */
 const char *plat_render_gfx_info(char *b, int n) {   /* v2.16: что реально включено (лог, тесты) */
     snprintf(b, (size_t)n, "цель %dx%d (окно %dx%d, scale %.2f), MSAA %d (max %d), A2C %d, aniso %.0f (max %d), FBO %s", g_tw, g_th, g_dw, g_dh, g_rscale, g_msaa, g_maxs,
              g_a2c, g_aniso, g_aniso_hw, g_fbo ? "да" : g_fbo_off ? "нет (прямо в окно)" : "нет");
@@ -403,6 +439,7 @@ static const char *DFS =
 typedef struct { unsigned vao, vbo, ibo, tex; int ni; } dmesh_t;
 static dmesh_t g_dm[MAX_DMESH];
 static unsigned g_dprog; static int g_du[11];
+/* detail_forget / detail_init — v2.31 facade detail meshes: forget all GL objects / compile the mesh shader. */
 static void detail_forget(void) { memset(g_dm, 0, sizeof g_dm); g_dprog = 0; }
 static void detail_init(void) {
     static const char *un[11] = { "uM", "uP", "uZ", "uView", "uShift", "uZOff", "uL", "uTex", "uTint", "uCut", "uClip" };
@@ -412,6 +449,8 @@ static void detail_init(void) {
     for (int i = 0; i < 11; i++) g_du[i] = glGetUniformLocation(g_dprog, un[i]);
 }
 /* pos/nrm — по 3 float, uv — 2 float на вершину; rgba — A<<24|B<<16|G<<8|R; возвращает номер меша (1..) или 0 */
+/* plat_mesh_create — uploads a detail mesh (pos/nrm 3 floats, uv 2 floats per vertex, indices, RGBA colour).
+   Returns the mesh number (1..) or 0. */
 int plat_mesh_create(const float *pos, const float *nrm, const float *uv, int nv, const uint32_t *idx, int ni, const uint32_t *rgba, int tw, int th) {
     if (!g_ok || !g_dprog || nv <= 0 || ni < 3 || !pos || !uv || !idx) return 0;
     int m = 0; for (int i = 1; i < MAX_DMESH && !m; i++) if (!g_dm[i].vao) m = i;
@@ -458,6 +497,7 @@ int plat_mesh_create(const float *pos, const float *nrm, const float *uv, int nv
     glerr("detail mesh");
     return m;
 }
+/* plat_mesh_free — frees mesh m. */
 void plat_mesh_free(int m) {
     if (!g_ok || m <= 0 || m >= MAX_DMESH || !g_dm[m].vao) return;
     glDeleteBuffers(1, &g_dm[m].vbo); glDeleteBuffers(1, &g_dm[m].ibo); glDeleteVertexArrays(1, &g_dm[m].vao); glDeleteTextures(1, &g_dm[m].tex);
@@ -466,6 +506,8 @@ void plat_mesh_free(int m) {
 /* одна копия меша: m16 — матрица меш → камера (по столбцам, как GL), proj — K, ScaleA, OffX − Half, OffY − Half;
    zp — режим глубины (0: 1 − oow·ZScaleA; 1: 1 − ZNum/(ZDenA/oow + ZBias)), ZBias|ZScaleA, ZNum, ZDenA; tint 0..1; zoff — сдвиг из стены (м);
    clip — xmin, ymin, xmax, ymax в пространстве меша (часть прямоугольника, покрытая полигонами) или NULL */
+/* plat_mesh_draw — draws mesh m with model matrix m16 and the game's projection; clip = the part of the mesh
+   rectangle covered by the wall polygons (or NULL). */
 void plat_mesh_draw(int m, const float *m16, const float *proj, const float *zp, const float *tint, const float *clip, float zoff, float poly_ofs) {
     if (!g_ok || !g_dprog || m <= 0 || m >= MAX_DMESH || !g_dm[m].vao) return;
     int zt = g_zt, zw = g_zw, zf = g_zf, bl = g_blend;
@@ -488,6 +530,9 @@ void plat_mesh_draw(int m, const float *m16, const float *proj, const float *zp,
     if (poly_ofs != 0.0f) glDisable(GL_POLYGON_OFFSET_FILL);
     glBindVertexArray(g_vao); glBindBuffer(GL_ARRAY_BUFFER, g_vbo);
 }
+/* plat_render_attach — binds the backend to a GL context: loads entry points, creates shaders, buffers and the
+   render target.  Returns 0 on success, negative on failure (-1 missing entry point, -2 shader compile,
+   -3 link). */
 int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int w, int h) {
 #define LOAD(r, n, a) if (!(gl##n = (r (*) a)get_proc("gl" #n))) { plat_gfx_logf("[gfx] GL: нет функции gl" #n "\n"); return -1; }
     GLFUNCS(LOAD)
@@ -538,9 +583,11 @@ int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int 
     { char b[512], b2[256]; plat_gfx_logf("[gfx] %s\n[gfx] %s\n", re_gfx_describe(re_gfx(), b, sizeof b), plat_render_gfx_info(b2, sizeof b2)); }
     return 0;
 }
+/* plat_render_shutdown — drops all GL objects and texture sources (context going away). */
 void plat_render_shutdown(void) { g_ok = 0; detail_forget(); for (int i = 0; i < MAX_TEX; i++) free(g_tex[i].src); memset(g_tex, 0, sizeof g_tex); g_swap = NULL; g_fbo = g_fbo_ms = g_ctex = g_drb = g_crb_ms = g_drb_ms = 0; g_tw = g_th = 0; }
 
 int png_write_rgba(const char *path, const uint32_t *px, int w, int h);
+/* tex_dump — v2.06 RE_TEXDUMP: writes each uploaded texture as PNG into the given directory. */
 static void tex_dump(int i, int w, int h, const uint32_t *rgba) {   /* v2.06: RE_TEXDUMP=каталог — каждая загрузка текстуры в PNG */
     static int n; const char *d = getenv("RE_TEXDUMP"); if (!d || !rgba || n >= 400) return;
     char p[512]; snprintf(p, sizeof p, "%s/t%03d_id%d_%dx%d.png", d, n++, i, w, h); png_write_rgba(p, rgba, w, h);
@@ -550,6 +597,9 @@ static void tex_dump(int i, int w, int h, const uint32_t *rgba) {   /* v2.06: RE
    альфа-теста). Только текстуры степени двойки до 1024 (страницы игры 256×256); кадр LFB 640×480 и прочее — как есть. */
 static int g_up_n, g_up_px, g_var_n;
 /* уровень в GL; inv — альфа хранится инвертированной (вариант «видно при низкой альфе») */
+/* put_level / upload_variant / tex_vars_free / tex_upload / tex_variant — texture upload: power-of-two pages get
+   mipmaps and up to three alpha variants (0 as is, 1 alpha 0 transparent, 2 alpha 255 transparent, stored
+   inverted) chosen at draw time by the alpha-test semantics; tex_variant creates a variant on first use. */
 static void put_level(int lv, int w, int h, const uint32_t *px, int inv) {
     if (!inv) { glTexImage2D(GL_TEXTURE_2D, lv, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, px); return; }
     uint32_t *t = (uint32_t *)malloc((size_t)w * h * 4); if (!t) return;
@@ -609,6 +659,8 @@ static unsigned tex_variant(int i, int v) {
     }
     return t->var[v];
 }
+/* plat_tex_create / plat_tex_update / plat_tex_bind / plat_tex_free — create a texture from RGBA pixels (returns its
+   handle), replace its picture (v2.01), select it for drawing, free it. */
 int plat_tex_create(int w, int h, const uint32_t *rgba) {
     if (!g_ok || w <= 0 || h <= 0) return 0;
     for (int i = 1; i < MAX_TEX; i++) if (!g_tex[i].id) {
@@ -626,6 +678,7 @@ void plat_tex_update(int tex, int w, int h, const uint32_t *rgba) {   /* v2.01: 
     g_tex[tex].w = w; g_tex[tex].h = h; tex_upload(&g_tex[tex], w, h, rgba);
     g_tex[tex].w = w; g_tex[tex].h = h; tex_dump(tex, w, h, rgba);
 }
+/* plat_clear_rect — v2.01: colour fill of a rectangle of the back surface (DirectDraw Blt COLORFILL). */
 void plat_clear_rect(uint32_t c, int x, int y, int w, int h) {   /* v2.01: Blt COLORFILL задней поверхности */
     if (!g_ok || w <= 0 || h <= 0) return;
     game_rect(&x, &w);
@@ -638,10 +691,14 @@ void plat_tex_free(int tex) {
     if (!g_ok || tex <= 0 || tex >= MAX_TEX || !g_tex[tex].id) return;
     tex_vars_free(&g_tex[tex]); glDeleteTextures(1, &g_tex[tex].id); memset(&g_tex[tex], 0, sizeof g_tex[tex]); if (g_cur == tex) g_cur = 0;
 }
+/* plat_set_blend / plat_set_zbuffer / plat_scene_begin / plat_scene_end — cached blend and depth state; scene
+   begin/end are no-ops in GL. */
 void plat_set_blend(int e, int s, int d) { g_blend = e; if (e) { g_bs = s; g_bd = d; } }
 void plat_set_zbuffer(int t, int w) { g_zt = t; g_zw = w; }
 void plat_scene_begin(void) {}
 void plat_scene_end(void) {}
+/* plat_set_render_state / plat_get_render_state — D3D render-state ids (e.g. 14 z-write, 15 alpha test, 22 cull,
+   23 z-func) cached in g_rs[] and mapped to the GL state used by apply_state. */
 void plat_set_render_state(int state, uint32_t value) {
     if (state < 0 || state >= 64) return;
     g_rs[state] = (int)value;
@@ -659,9 +716,11 @@ void plat_set_render_state(int state, uint32_t value) {
     default: break;   /* остальные (альфа-тест, cull) пока только запоминаются */
     }
 }
+/* plat_set_tex_stage / plat_get_tex_stage — D3D texture-stage states (colour op, filters) cached for draws. */
 void plat_set_tex_stage(int stage, int type, uint32_t value) {
     if (stage >= 0 && stage < 8 && type >= 0 && type < 32) g_tss[stage][type] = (int)value;
 }
+/* plat_set_viewport — the game's viewport rectangle (logical coordinates). */
 void plat_set_viewport(int x, int y, int w, int h) {
     /* v2.15: полный вид — и 640×480 без расширения, и расширенный [−S, 640 + S] (окно отсечения 3D P110_Clip*); иначе — со сдвигом якоря */
     int full = (x <= -g_s && y <= 0 && x + w >= g_w + g_s && y + h >= g_h) || (g_s == 0 && x == 0 && y == 0 && w >= g_w && h >= g_h);
@@ -673,6 +732,8 @@ uint32_t plat_get_tex_stage(int stage, int type) {
 }
 static int g_dp_calls, g_dp_type, g_dp_count;
 static void draw(const plat_vertex *v, int count, unsigned mode);
+/* plat_draw_prim / plat_draw_prim_last — D3D-style DrawPrimitive: type 4 (D3DPT_TRIANGLELIST) and 2 (D3DPT_LINELIST)
+   are drawn, others ignored; the last call is remembered for tests.  RE_TRACE_DD / RE_ATDBG / RE_ZDBG print traces. */
 void plat_draw_prim(int ptype, const plat_vertex *v, int count) {
     g_dp_calls++; g_dp_type = ptype; g_dp_count = count; { extern int g_re_dbg[16]; g_re_dbg[3]++; g_re_dbg[4] += count; }
     if (getenv("RE_TRACE_DD") && g_dp_calls < 60 && v && count >= 3) fprintf(stderr, "[gl] v1 %.1f %.1f uv %.5f %.5f v2 %.1f %.1f uv %.5f %.5f\n", v[1].x, v[1].y, v[1].u, v[1].v, v[2].x, v[2].y, v[2].u, v[2].v);
@@ -685,6 +746,7 @@ void plat_draw_prim(int ptype, const plat_vertex *v, int count) {
     else if (ptype == 2) plat_draw_lines(v, count);
 }
 int plat_draw_prim_last(int *ptype, int *count) { if (ptype) *ptype = g_dp_type; if (count) *count = g_dp_count; return g_dp_calls; }
+/* draw — uploads count vertices, applies the state and the current texture variant, and issues the GL draw. */
 static void draw(const plat_vertex *v, int count, unsigned mode) {
     re_diag_draw(v, count, mode, g_cur, g_zt, g_zw, g_zf, g_blend, g_bs, g_bd, g_at, g_af, g_aref);
     apply_state();
@@ -709,8 +771,11 @@ static void draw(const plat_vertex *v, int count, unsigned mode) {
     glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)count * sizeof(plat_vertex), v, GL_STREAM_DRAW);
     glDrawArrays(mode, 0, count);
 }
+/* plat_draw_tris / plat_draw_lines — draw whole triangles / lines from a vertex array. */
 void plat_draw_tris(const plat_vertex *v, int count) { if (g_ok && v && count >= 3) draw(v, count - count % 3, GL_TRIANGLES); }
 void plat_draw_lines(const plat_vertex *v, int count) { if (g_ok && v && count >= 2) draw(v, count - count % 2, GL_LINES); }
+/* plat_clear / plat_set_current_viewport / plat_clear_depth — clear colour (and depth) of the logical frame; depth-only
+   clear of a rectangle to value z. */
 void plat_clear(uint32_t c, int clear_z) {
     if (!g_ok) return;
     glDepthMask(1); glClearColor(((c >> 16) & 255) / 255.f, ((c >> 8) & 255) / 255.f, (c & 255) / 255.f, (c >> 24) / 255.f);
@@ -732,6 +797,9 @@ void plat_snd_pump(void);
 /* v2.24: проверка показа. После resolve/пост-прохода сравнить кадр в FBO (что нарисовала игра) с буфером окна (что будет показано):
    сетка 8×8 точек кадра. В FBO есть изображение, а в окне — пусто, или ошибка GL при показе → откат на прямой рендер без FBO
    (как v2.15 / preset safe). Проверяется на 3-м, 30-м и 150-м показе после каждой настройки цели (и каждые 600 показов при RE_GFXDBG). */
+/* grid_nonblack / plat_render_selfcheck — v2.24: sample a grid of pixels in a framebuffer and compare the FBO with
+   the window after presenting; if the FBO has content but the window stays black, fall back to direct
+   rendering.  Returns 0 when fine (or nothing to compare), 1 after falling back. */
 static int grid_nonblack(unsigned fb, int x0, int y0, int w, int h, unsigned *sum) {
     int n = 0; unsigned char px[4]; *sum = 0;
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fb); glPixelStorei(GL_PACK_ALIGNMENT, 1);
@@ -768,6 +836,8 @@ int plat_render_selfcheck(int *fbo_nb, int *win_nb) {   /* 0 — норма (и�
     return 0;
 }
 /* v2.24: переключение на лету (Cmd/Alt+Shift+Enter — plat_sys.c): 1 — через FBO (если доступен), 0 — прямо в окно */
+/* plat_render_set_fbo / plat_render_fbo_on — v2.24: switch the render target on the fly (1 = through the FBO if
+   available, 0 = straight to the window) / query it. */
 int plat_render_set_fbo(int on) {
     if (!g_ok) return -1;
     if (on && g_pprog) g_fbo_off = 0; else g_fbo_off = 1;
@@ -775,6 +845,7 @@ int plat_render_set_fbo(int on) {
     return g_fbo ? 1 : 0;
 }
 int plat_render_fbo_on(void) { return g_fbo != 0; }
+/* plat_flip — presents the frame: compose, swap, clear the bars, run the periodic self-check. */
 void plat_flip(void) {
     plat_snd_pump(); if (!g_ok) return;
     if (g_swap) compose();   /* v2.16: resolve + пост-проход в буфер окна до снимка/показа */
@@ -795,7 +866,9 @@ void plat_flip(void) {
         clear_bars();
     }
 }
+/* plat_render_uploads — texture upload counter (count, pixels) for statistics. */
 int plat_render_uploads(int *pixels) { if (pixels) *pixels = g_up_px; return g_up_n; }   /* v2.16: счётчик загрузок текстур (статистика) */
+/* plat_blit2d — copies a rectangle of texture tex to the logical frame at (dx, dy) (2D screens). */
 void plat_blit2d(int tex, int sx, int sy, int sw, int sh, int dx, int dy) {
     if (!g_ok || tex <= 0 || tex >= MAX_TEX || !g_tex[tex].id) return;
     float tw = (float)g_tex[tex].w, th = (float)g_tex[tex].h;
@@ -810,6 +883,7 @@ void plat_blit2d(int tex, int sx, int sy, int sw, int sh, int dx, int dy) {
     draw(q, 6, GL_TRIANGLES);
     g_cur = sv; g_zt = szt; g_blend = sb; g_bs = sbs; g_bd = sbd;
 }
+/* plat_render_readback — reads the frame back as RGBA (screenshots / tests).  Returns 0 on success, -1 on failure. */
 int plat_render_readback(uint32_t *out) {
     if (!g_ok || !out) return -1;
     compose();   /* v2.16: кадр — после resolve/пост-прохода (offscreen-тесты зовут без plat_flip) */

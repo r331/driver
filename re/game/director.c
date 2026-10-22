@@ -1,3 +1,6 @@
+/* director.c — the replay director's camera list (Director.c in Game.exe): a list of camera records sorted by start
+   frame (cam->id), insertion / deletion, lookup by frame, camera state backup, waypoints and a few helpers.
+   Each function is preceded by its Game.exe address.  Original note: */
 /* Director.c — восстановлено из Game.exe (PC, 1999-09-10). Переносимый код: без WinAPI. */
 #include <stdio.h>
 #include "director.h"
@@ -6,6 +9,7 @@
 #include "dirnodes.h"
 #include "crt.h"
 #include "directorstorage.h"
+#include "dircam.h"
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -115,16 +119,20 @@ int32_t GameMode;
 #endif
 
 /* 004c6168 */
+/* Camera whose start frame (id) is id, or NULL. */
 DIRECTOR_CAMERA *FindCameraById(int id) {
     for (int i = 0; i < NumCameras; i++)
         if (CameraList[i]->id == id) return CameraList[i];
     return NULL;
 }
 /* 004c622c */
+/* Rewrites each camera's index field to its list position. */
 void RenumberCameras(void) {
     for (int i = 0; i < NumCameras; i++) CameraList[i]->index = i;
 }
 /* 004c6312 — возвращает новую камеру (копию cam) или NULL */
+/* Inserts a copy of cam at list position pos (>= count or -1: append); reallocates the pointer list.  Returns the new
+   camera or NULL on allocation failure (logged). */
 DIRECTOR_CAMERA *InsertCamera(DIRECTOR_CAMERA *cam, int pos) {
     if (pos >= NumCameras) pos = -1;
     DIRECTOR_CAMERA **nl = DebugMalloc((NumCameras + 1) * (int)sizeof(*nl), "D:\\Driver\\Game\\Director.c", 0xa8a);
@@ -150,6 +158,7 @@ DIRECTOR_CAMERA *InsertCamera(DIRECTOR_CAMERA *cam, int pos) {
     return CameraList[at];
 }
 /* 004c6524 */
+/* Deletes camera idx (clears CurCamera if it was current); invalid index is logged. */
 void DeleteCamera(int idx) {
     if (idx >= NumCameras || idx < 0) { DebugLog("DeleteCamera: Error! Specified camera does not exist."); return; }
     if (NumCameras < 2) {
@@ -169,6 +178,7 @@ void DeleteCamera(int idx) {
     RenumberCameras();
 }
 /* 004c6264 */
+/* Adds a copy of cam starting at frame id, replacing an existing camera at that frame and keeping the list sorted. */
 DIRECTOR_CAMERA *AddDirectorCamera(DIRECTOR_CAMERA *cam, int id) {
     DIRECTOR_CAMERA *old = FindCameraById(id);
     if (old) DeleteCamera(old->index);
@@ -181,15 +191,18 @@ DIRECTOR_CAMERA *AddDirectorCamera(DIRECTOR_CAMERA *cam, int id) {
 }
 
 /* 004c60fa */
+/* Overwrites camera idx with *src (invalid index logged). */
 void SetCamera(const DIRECTOR_CAMERA *src, int idx) {
     if (idx < 0 || idx >= NumCameras) { DebugLog("SetCamera: Cannot set camera contents, camera does not exist."); return; }
     *CameraList[idx] = *src;
 }
 /* 004c6142 */
+/* Camera at list index idx, or NULL. */
 DIRECTOR_CAMERA *GetCamera(int idx) {
     return (idx < NumCameras && idx >= 0) ? CameraList[idx] : NULL;
 }
 /* 004c61b2 — камера, действующая на кадре frame (список отсортирован по id) */
+/* Camera active at frame (the last one starting at or before it). */
 DIRECTOR_CAMERA *FindCameraForFrame(int frame) {
     for (int i = 0; i < NumCameras; i++)
         if (CameraList[i]->id <= frame &&
@@ -197,12 +210,15 @@ DIRECTOR_CAMERA *FindCameraForFrame(int frame) {
     return NULL;
 }
 /* 004c64bd */
+/* Frees all cameras and the list. */
 void FreeCameraList(void) {
     for (int i = 0; i < NumCameras; i++) DebugFree(CameraList[i]);
     if (CameraList) DebugFree(CameraList);
     NumCameras = 0;
     CameraList = NULL;
 }
+/* 004c6691 */
+/* Camera whose start frame is nearest to frame.  The best distance is stored signed (original quirk), see below. */
 /* 004c6691 — ближайшая по кадру камера. Как в оригинале: лучшая дистанция запоминается со знаком,
    поэтому после камеры правее кадра (отрицательная разница) дальше выигрывает только ещё более правая. */
 DIRECTOR_CAMERA *FindNearestCamera(int frame) {
@@ -215,11 +231,14 @@ DIRECTOR_CAMERA *FindNearestCamera(int frame) {
     return best;
 }
 /* 004c6715 */
+/* |start frame of cam - frame|. */
 int CameraFrameDistance(const DIRECTOR_CAMERA *cam, int frame) {
     int d = cam->id - frame;
     return d < 0 ? -d : d;
 }
 /* 004c9360 — камера по умолчанию на кадре 2 */
+/* Adds the default camera at frame 2 (distance / max distance 0x500, field +0x18 = 0x800, +0x70 = 0xffffff00;
+   TODO(RE): unsure what those two fields are). */
 void AddDefaultCamera(void) {
     DIRECTOR_CAMERA c;
     memset(&c, 0, sizeof c);
@@ -230,17 +249,20 @@ void AddDefaultCamera(void) {
     AddDirectorCamera(&c, 2);
 }
 /* 004c372a */
+/* Frees the recorded waypoint buffer. */
 void FreeDirectorBuffer(void) {
     if (DirectorBuffer) DebugFree(DirectorBuffer);
     DirectorBuffer = NULL;
     DirectorBufferCount = 0;
 }
 /* 004c812e */
+/* Frees cameras and waypoints. */
 void FreeDirectorData(void) {
     FreeCameraList();
     FreeDirectorBuffer();
 }
 /* 004c8e9e — запомнить состояние игровой камеры (один раз до сброса) */
+/* Saves the game camera state once (until restored / dropped), also into DirectorCam. */
 void BackupCameraState(void) {
     if (CamBackupValid == 0) {
         CamBackupValid = 1;
@@ -249,10 +271,12 @@ void BackupCameraState(void) {
     }
 }
 /* 004c8ed2 */
+/* Forgets the saved camera state. */
 void DropCameraBackup(void) {
     if (CamBackupValid != 0) CamBackupValid = 0;
 }
 /* 004c8eec */
+/* Restores and forgets the saved camera state. */
 void RestoreCameraBackup(void) {
     if (CamBackupValid != 0) {
         RestoreCameraState(&CamBackup);
@@ -261,6 +285,7 @@ void RestoreCameraBackup(void) {
 }
 
 /* 004c375a — запись путевой точки, следующая за кадром (по одной на 150 кадров), либо NULL */
+/* Waypoint record after frame (one waypoint per 150 frames), or NULL. */
 WAYPOINT_REC *GetWaypointAfterFrame(int frame) {
     if (!DirectorBuffer) return NULL;
     int i = frame / 150 + 1;
@@ -268,6 +293,7 @@ WAYPOINT_REC *GetWaypointAfterFrame(int frame) {
     return NULL;
 }
 /* 004c8070 — сброс состояния режиссёра (вызывает также удаление Waypoint.tmp и временного файла камер) */
+/* Resets the director state; outside replay modes (GameMode 4/5) also deletes Waypoint.tmp and $TEMP$.CAMS. */
 void ResetDirectorState(void) {
     WaypointCount = 0;
     WaypointDirty = 0;
@@ -290,6 +316,7 @@ void ResetDirectorState(void) {
 CAR_OBJ *CarObjTable[64]; float CarMinDist;
 #endif
 /* 004c52d9 — текущая камера <- запись списка для текущего кадра; при смене камеры двигает позицию */
+/* Makes the camera of the current frame current; on a camera change moves the view to its position. */
 void SyncCameraFromList(void) {
     int32_t old = DirectorUnk64;
     DIRECTOR_CAMERA *c = (DIRECTOR_CAMERA *)FindCameraRecordForFrame(DirectorUnk6C);
@@ -299,10 +326,11 @@ void SyncCameraFromList(void) {
     DirectorUnk64 = CurCamera->index;
     if (DirectorUnk64 != old) {
         const int32_t *w = (const int32_t *)c;
-        SetCameraPosition((float)w[0x13], (float)w[0x14], (float)w[0x15]);
+        SetCameraPosition((float)w[DIRCAM_W_POS], (float)w[DIRCAM_W_POS + 1], (float)w[DIRCAM_W_POS + 2]);
     }
 }
 /* 004c60b2 — 1, если у машины камеры нет флага 0x400 и её дальность >= порога */
+/* 1 when the car watched by cam has no flag 0x400 and is at least CarMinDist away. */
 int IsCameraCarFarEnough(const DIRECTOR_CAMERA *cam) {
     const CAR_OBJ *car = CarObjTable[cam->index];
     if (car->flags & 0x400) return 0;
@@ -337,17 +365,19 @@ DIRTABLE_T DirTableB;
 #pragma pop_macro("DirTableB")
 #endif
 /* 004c57b7 — название типа камеры */
+/* Display name of a camera type (the source of the DIRCAM_* names in dircam.h). */
 const char *GetCameraTypeName(int type) {
     switch (type) {
-    case 0:    return "Chase camera";
-    case 1:    return "Flying camera";
-    case 2:    return "In car camera";
-    case 0x10: return "Static camera";
-    case 0x11: return "Watch car camera";
+    case DIRCAM_CHASE:    return "Chase camera";
+    case DIRCAM_FLYING:   return "Flying camera";
+    case DIRCAM_INCAR:    return "In car camera";
+    case DIRCAM_STATIC:   return "Static camera";
+    case DIRCAM_WATCHCAR: return "Watch car camera";
     default:   return "WARNING! Unknown camera type.";
     }
 }
 /* 004c5222 — выбрать новую автокамеру и сделать её текущей */
+/* Picks a new automatic camera, starts it at the current frame (at least 2) and makes it current. */
 void SelectNewCamera(void) {
     if (!FindAutoCamera((void **)&CurCamera)) return;
     InitNewCamera(CurCamera);
@@ -355,9 +385,11 @@ void SelectNewCamera(void) {
     w[5] = DirectorUnk6C < 4 ? 2 : DirectorUnk6C;
     DirectorUnk64 = w[1];
     DirectorCam = *CurCamera;
-    SetCameraPosition((float)w[0x13], (float)w[0x14], (float)w[0x15]);
+    SetCameraPosition((float)w[DIRCAM_W_POS], (float)w[DIRCAM_W_POS + 1], (float)w[DIRCAM_W_POS + 2]);
 }
 /* 004c5d40 — сколько из 64 машин (тип 4, активные) ближе 30000 по плоскости к игроку (квадрат < 900000000) */
+/* Number of active traffic records of kind 1 in state 4 whose car is within 30000 units (x/z) of the player.
+   TODO(RE): unsure what kind 1 / state 4 are (cops in pursuit?). */
 int CountNearbyCars(void) {
     int n = 0;
     for (int i = 0; i < 0x40; i++) {
@@ -372,12 +404,14 @@ int CountNearbyCars(void) {
     return n;
 }
 /* 004c810f */
+/* Clears both director node tables. */
 void ClearDirectorTables(void) {
     ClearDirectorTable((DIR_NODE *)&DirTableA);
     ClearDirectorTable((DIR_NODE *)&DirTableB);
 }
 
 /* 004c567a — лог дампа камеры (cam: 0x8c байт как int32[0x23]) */
+/* Logs a camera record (0x8c bytes as int32[0x23]) to debug.log. */
 void CameraDump(const int32_t *c) {
     char buf[128];
     DebugLog("CameraDump....");

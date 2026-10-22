@@ -1,3 +1,7 @@
+/* HD texture pack (native only, v2.17+): finds and decodes PNG replacements of the game's 256x256
+   texture pages (stb_image, PNG only), checks them against the original page and merges alpha.
+   Pack layout: <pack>/<level>/pNNN.png (16-bit pages) and pNNN_cKKKK.png (8-bit page NNN with
+   palette slot KKKK); an optional overlay directory (sky variants) is searched first. */
 /* v2.17: HD-пак текстур — загрузка PNG (stb_image, public domain, только PNG) и сверка со страницей игры. */
 #include "plat_texpack.h"
 #include "plat_gfx.h"
@@ -23,12 +27,15 @@
 #pragma GCC diagnostic ignored "-Wunused-function"   /* статические объявления stb (gif и пр.) без определений */
 #endif
 
+/* re_texpack_dir — Pack directory: $RE_TEXPACK, else driver.cfg `texpack`, else NULL (pack disabled). */
 const char *re_texpack_dir(void) {
     const char *e = getenv("RE_TEXPACK");
     if (e && *e) return e;
     const char *c = re_gfx()->texpack;
     return c[0] ? c : NULL;
 }
+/* re_texpack_level_name — Level name for the pack from a level path: the file name without directory and without a
+   (case-insensitive) ".lev" suffix, truncated to n - 1 characters. */
 void re_texpack_level_name(const char *path, char *out, int n) {
     if (!out || n <= 0) return;
     out[0] = 0; if (!path) return;
@@ -39,6 +46,8 @@ void re_texpack_level_name(const char *path, char *out, int n) {
     if (len >= n) len = n - 1;
     memcpy(out, b, (size_t)len); out[len] = 0;
 }
+/* re_texpack_decode_png — Decode a PNG in memory to malloc'ed RGBA pixels (R in the low byte).  Sets *w, *h.
+   Returns NULL on error. */
 uint32_t *re_texpack_decode_png(const void *buf, int len, int *w, int *h) {
     int x = 0, y = 0, ch = 0;
     unsigned char *d = stbi_load_from_memory((const unsigned char *)buf, len, &x, &y, &ch, 4);
@@ -51,6 +60,7 @@ uint32_t *re_texpack_decode_png(const void *buf, int len, int *w, int *h) {
     return px;
 }
 static uint32_t *load_file(const char *path, int *w, int *h);
+/* level_case — Copy a level name in case `mode`: 0 unchanged, 1 lower case, 2 upper case (ASCII). */
 static void level_case(const char *in, char *out, int n, int mode) {   /* 0 — как есть, 1 — строчные, 2 — прописные */
     int i = 0;
     for (; in[i] && i < n - 1; i++) { char ch = in[i]; out[i] = mode == 1 && ch >= 'A' && ch <= 'Z' ? (char)(ch | 32) : mode == 2 && ch >= 'a' && ch <= 'z' ? (char)(ch & ~32) : ch; }
@@ -59,6 +69,9 @@ static void level_case(const char *in, char *out, int n, int mode) {   /* 0 — 
 /* v2.27: вариант неба — оверлей пака: $RE_TEXPACK_SKY (подкаталог пака или полный путь; «0»/пусто — выкл.), иначе первое слово
    файла <пак>/sky.txt (напр. «sky_cc0»). Файлы оверлея (<пак>/<оверлей>/<уровень>/pNNN[_cKKKK].png) ищутся раньше основного
    пака и проходят ту же сверку со страницей. */
+/* re_texpack_overlay — Overlay directory (v2.27 sky variants): $RE_TEXPACK_SKY (sub-directory of the pack or an
+   absolute path; empty or "0" disables), else the first word of <pack>/sky.txt.  Writes the
+   full path to out and returns it, or NULL when there is no overlay. */
 const char *re_texpack_overlay(const char *dir, char *out, int n) {
     if (!out || n <= 0) return NULL;
     out[0] = 0; if (!dir || !*dir) return NULL;
@@ -77,12 +90,16 @@ const char *re_texpack_overlay(const char *dir, char *out, int n) {
     return out;
 }
 static uint32_t *load_one(const char *dir, const char *level, int idx, int pal, int *w, int *h);
+/* load_any — Load page idx (palette slot pal, -1 for 16-bit pages): the overlay first, then the pack.
+   sky.txt is re-read on every call (cheap, a few hundred pages per level). */
 static uint32_t *load_any(const char *dir, const char *level, int idx, int pal, int *w, int *h) {
     char odir[1024];   /* sky.txt читается при каждой загрузке страницы (их сотни за уровень, файл крошечный) */
     if (re_texpack_overlay(dir, odir, sizeof odir)) { uint32_t *px = load_one(odir, level, idx, pal, w, h); if (px) return px; }
     return load_one(dir, level, idx, pal, w, h);
 }
 /* v2.18: каталог уровня — как в игре (P77_CurLevelPath, напр. MIAMI_01), строчными, ПРОПИСНЫМИ (файл miami_01.lev) */
+/* load_one — Try the level directory as given, in lower case and in upper case; returns the first PNG
+   that loads and passes load_file's size check. */
 static uint32_t *load_one(const char *dir, const char *level, int idx, int pal, int *w, int *h) {
     char path[1024];
     for (int c = 0; c < 3; c++) {
@@ -93,15 +110,19 @@ static uint32_t *load_one(const char *dir, const char *level, int idx, int pal, 
     }
     return NULL;
 }
+/* re_texpack_load — HD replacement for 16-bit page idx of `level`, or NULL. */
 uint32_t *re_texpack_load(const char *dir, const char *level, int idx, int *w, int *h) {
     if (!dir || !level || !*level) return NULL;
     return load_any(dir, level, idx, -1, w, h);
 }
 /* v2.18: 8-битная страница с палитрой: <dir>/<level>/pNNN_cKKKK.png, KKKK — номер слота палитры уровня (0..49) */
+/* re_texpack_load8 — HD replacement for 8-bit page idx with palette slot pal (0..49), or NULL. */
 uint32_t *re_texpack_load8(const char *dir, const char *level, int idx, int pal, int *w, int *h) {
     if (!dir || !level || !*level || pal < 0) return NULL;
     return load_any(dir, level, idx, pal, w, h);
 }
+/* re_texpack_pal8_rgba — Expand an 8-bit 256x256 page to RGBA through a BGRA palette (grey ramp when pal is NULL);
+   alpha is always 255 (GR_TEXFMT_P_8 has no transparent index). */
 void re_texpack_pal8_rgba(const uint8_t *idx, const uint8_t *pal, uint32_t *out) {
     for (int i = 0; i < 256 * 256; i++) {
         unsigned k = idx[i];
@@ -110,6 +131,8 @@ void re_texpack_pal8_rgba(const uint8_t *idx, const uint8_t *pal, uint32_t *out)
         out[i] = 0xFF000000u | b << 16 | g << 8 | r;   /* GR_TEXFMT_P_8: альфа 255, прозрачного индекса нет */
     }
 }
+/* load_file — Read and decode one PNG file (max 64 MiB).  Only square power-of-two images 256..1024
+   pixels wide are accepted. */
 static uint32_t *load_file(const char *path, int *w, int *h) {
     FILE *f = fopen(path, "rb");
     if (!f) return NULL;
@@ -127,6 +150,7 @@ static uint32_t *load_file(const char *path, int *w, int *h) {
     return px;
 }
 /* среднее блока HD-картинки (sx×sy) в точке x,y страницы 256 */
+/* block_avg — Average RGBA of the sx x sy block of the HD image that covers original texel (x, y). */
 static void block_avg(const uint32_t *hd, int w, int sx, int sy, int x, int y, unsigned c[4]) {
     unsigned r = 0, g = 0, b = 0, a = 0;
     for (int dy = 0; dy < sy; dy++) for (int dx = 0; dx < sx; dx++) {
@@ -135,6 +159,8 @@ static void block_avg(const uint32_t *hd, int w, int sx, int sy, int x, int y, u
     }
     unsigned k = (unsigned)(sx * sy); c[0] = r / k; c[1] = g / k; c[2] = b / k; c[3] = a / k;
 }
+/* re_texpack_compare_rgba — Compare an HD image with a 256x256 RGBA reference: *err = mean absolute RGB difference per
+   texel (0..255) of the block averages, *amis = fraction of texels whose alpha >= 128 differs. */
 void re_texpack_compare_rgba(const uint32_t *hd, int w, int h, const uint32_t *ref, double *err, double *amis) {
     int sx = w / 256, sy = h / 256; double e = 0; long am = 0;
     for (int y = 0; y < 256; y++) for (int x = 0; x < 256; x++) {
@@ -146,6 +172,9 @@ void re_texpack_compare_rgba(const uint32_t *hd, int w, int h, const uint32_t *r
     if (err) *err = e / 65536.0;
     if (amis) *amis = (double)am / 65536.0;
 }
+/* re_texpack_merge — Check an HD image (w x w) against the original RGBA page and, if the error is at most
+   RE_TEXPACK_MAX_ERR, replace its alpha with the original's (nearest texel).  Returns 1 when
+   merged; 0 (and *err = -1 for a bad size) otherwise. */
 int re_texpack_merge(const uint32_t *orig, uint32_t *hd, int w, double *err) {
     if (!orig || !hd || w < 256 || w > 1024 || (w & (w - 1))) { if (err) *err = -1; return 0; }
     double e = 0; re_texpack_compare_rgba(hd, w, w, orig, &e, NULL);
@@ -158,6 +187,8 @@ int re_texpack_merge(const uint32_t *orig, uint32_t *hd, int w, double *err) {
     }
     return 1;
 }
+/* re_texpack_compare — As re_texpack_compare_rgba against a 16-bit ARGB1555 page (5-bit channels expanded to 8 bits).
+   The colour error counts every texel, also transparent ones. */
 void re_texpack_compare(const uint32_t *hd, int w, int h, const uint16_t *page, double *err, double *amis) {
     int sx = w / 256, sy = h / 256; double e = 0; long am = 0;
     for (int y = 0; y < 256; y++) for (int x = 0; x < 256; x++) {

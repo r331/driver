@@ -39,7 +39,7 @@ typedef int32_t p87_lumps_t[4];
 extern int32_t P87_CntA, P87_CntB;
 #pragma pop_macro("P87_CntB") /*gvi*/
 #pragma pop_macro("P87_CntA") /*gvi*/
-extern void **P87_ListPtr;
+/* v2.35: P87_ListPtr (00562d7c) — no native object; the cursor is the image cell P75_Ptr562D7C (ported87.c list_push) */
 #pragma push_macro("P87_SlotLump") /*gvi*/
 #undef P87_SlotLump /*gvi*/
 #pragma push_macro("P87_SlotLumpA") /*gvi*/
@@ -53,7 +53,6 @@ void P87_DrawObjA(const uint8_t *obj);           /* 004ee18b */
 void P87_DrawObjB(const uint8_t *obj);           /* 004ee4b7 */
 /* Не из оригинала (упрощённый вариант 004ee8f4 без маски видимости): нарисовать объекты клеток квадрата радиуса r вокруг клетки (cx, cy)
    — по спискам плиток, загруженных в слоты; метка кадра = P44_XformTag. Возвращает число нарисованных объектов. */
-int32_t P87_DrawCells(int32_t cx, int32_t cy, int32_t r);
 /* gvar-img v2.03 begin (tools/gen_gvar_img.py) */
 #if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
 #undef P87_CntA
@@ -66,3 +65,8 @@ int32_t P87_DrawCells(int32_t cx, int32_t cy, int32_t r);
 #define P87_SlotLump (*(p87_lumps_t *)re_gvar(0x00c39da0u, sizeof(p87_lumps_t), (void *)&P87_SlotLump))
 #endif
 /* gvar-img v2.03 end */
+/* v2.35: 00562d7c — native: P87_ListPtr is a read-only view of the image cursor P75_Ptr562D7C (no separate object) */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P87_ListPtr
+#define P87_ListPtr ((void **)re_ptr(P75_Ptr562D7C))
+#endif

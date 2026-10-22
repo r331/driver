@@ -1,3 +1,6 @@
+/* ported110.c — 2D/3D drawing helpers of the HUD and menus and the 3D view window setup (English overview;
+   original notes follow): debug radar grid, gauges, icons, glows, script sprites, menu selection, smoke
+   rings, P110_ViewSetup.  Glide calls go by name through the loaded DLL (P33). */
 /* v1.55 (см. ported110.h). */
 #include "ported110.h"
 #include "aspect.h"
@@ -238,8 +241,8 @@ p110_celltab_t P110_CellTab = P110_CELLTAB_INIT;  /* .data 00574574 (tools/gen_p
 #endif
 
 #include "memrw.h"
+/* rd16 / wrf — local helpers: unaligned uint16 read / float write. */
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static const float OOW_LO = 0.015625f;   /* 0x3c800000 */
 #ifdef RE_HOOK_BUILD
 #  define P110_STD __attribute__((stdcall))
@@ -248,6 +251,8 @@ static const float OOW_LO = 0.015625f;   /* 0x3c800000 */
 #  define P110_STD
 #  define P110_KEY(a) KeyState[(a) - 0x00d04b00]
 #endif
+/* glide_proc / poly_list / depth_bias — local helpers: Glide entry by name, grDrawPolygonVertexList,
+   grDepthBiasLevel. */
 static void *glide_proc(const char *name) {
   for (int i = 0; i < P33_GlideCount(); i++)
     if (strcmp(P33_GlideName(i), name) == 0) return P33_GlideProc(i);
@@ -261,6 +266,8 @@ static void depth_bias(int32_t v) {   /* 01270e20 */
   void (P110_STD *f)(int32_t) = (void (P110_STD *)(int32_t))glide_proc("_grDepthBiasLevel@4");
   if (f != NULL) f(v);
 }
+/* state_tex / state_flat / blend / tex_page / raster — local helpers: textured or flat render state, blend mode
+   0..3 (alpha-blend parameter table k), texture page bind (by slot of the 01145a60 table), rasteriser B. */
 static void state_tex(void) {
   if (P85_StateDirty != 4) { if (P85_StateFn) P85_StateFn(3, 1, 0, 1, 0); P85_StateDirty = 4; G6_01270C34 = 4; }
 }
@@ -282,6 +289,7 @@ static void tex_page(uint32_t tex) {
   }
 }
 static void raster(const p85_rv *a, const p85_rv *b, const p85_rv *c) { if (P85_RasterB) P85_RasterB(a, b, c); }
+/* oow_at — local helper: 1/z from the reciprocal table for rounded z (native: 0 outside the table). */
 static float oow_at(float z) {
   long zi = lrintf(z);
 #ifndef RE_HOOK_BUILD
@@ -293,6 +301,9 @@ static float oow_at(float z) {
 /* ---- 0050bd09: отладочная сетка радара — 55×55 клеток P77_C5FE00 по 4×4 пикселя, цвет по типу клетки (.data 00574574).
    Типы 8/9 — четыре квадранта 2×2 по битам 2/4/8/0x10. Цвет прошлой клетки сохраняется для типов без своего цвета
    (в оригинале начальное значение не задано; здесь — «не рисовать»). ---- */
+/* P110_RadarGrid — Game.exe 0050bd09.  Debug view of the radar grid: 55x55 cells of 00c5fe00 as 4x4-pixel
+   squares coloured by cell type (P110_CellTab); types 8/9 split into four 2x2 quadrants by bits.
+   Native: cells without a colour of their own are not drawn until one is set (uninitialised in Game.exe). */
 void P110_RadarGrid(void) {
   uint32_t col = 0xffffffffu, cc = 0;
   for (uint32_t y = 0; y < 0x37; y++) {
@@ -326,6 +337,9 @@ void P110_RadarGrid(void) {
 /* ---- 00502787: полоса-индикатор. Запись: +0 x, +4 y, +8 w, +0xc h (640×480), +0x10 значение, +0x14 максимум, +0x18..+0x20 цвет,
    +0x24 адрес подписи, +0x28 флаги (1 — вертикально, 2 — справа налево), +0x2c включено. Рамка 0x808080, фон 0x303030,
    заливка — grDrawPolygonVertexList (низ темнее в 4 раза), подпись с тенью. ---- */
+/* P110_Gauge — Game.exe 00502787.  Draws a bar gauge record p (+0 x, +4 y, +8 w, +0xc h in 640x480, +0x10 value,
+   +0x14 max, +0x18.. colour, +0x24 label, +0x28 flags 1 = vertical / 2 = right-to-left, +0x2c enabled):
+   grey frame, dark background, filled part with a darker bottom, shadowed label. */
 void P110_Gauge(uint8_t *p) {
 #ifndef RE_HOOK_BUILD
   if (p == NULL) return;
@@ -369,6 +383,8 @@ void P110_Gauge(uint8_t *p) {
 }
 
 /* ---- 004aa4ea: значок icon (+8 страница, +9/+0xa u/v, +0xb/+0xc w/h; 0 — 256) в прямоугольнике 640×480; page ≠ -1 — своя страница ---- */
+/* P110_IconRect — Game.exe 004aa4ea.  Draws icon (+8 page, +9/+0xa u/v, +0xb/+0xc w/h, 0 = 256) stretched to the
+   640x480 rectangle (x, y, w, h); page != -1 overrides the icon's page. */
 void P110_IconRect(int32_t x, int32_t y, int32_t w, int32_t h, void *icon, int32_t page) {
   if (y <= -0x201) return;
   const uint8_t *ic = (const uint8_t *)icon;
@@ -395,6 +411,8 @@ void P110_IconRect(int32_t x, int32_t y, int32_t w, int32_t h, void *icon, int32
 }
 
 /* ---- 004b53de / 004b8871 / 004b82b2: значок 01123208 размером 40×40 вокруг точки камеры p (+0 x, +4 y, +8 z) со сдвигом глубины -90 ---- */
+/* glow_quad / glow_ok — local helpers: a 40x40 glow sprite (icon 01123208) around camera-space point p with depth
+   bias -90, coloured (r, g, b); glow_ok tests that p is in front of the camera. */
 static void glow_quad(const uint8_t *p, float r, float g, float b) {
   const uint8_t *ic = (const uint8_t *)re_ptr(P110_GlowIcon);
 #ifndef RE_HOOK_BUILD
@@ -422,6 +440,8 @@ static void glow_quad(const uint8_t *p, float r, float g, float b) {
 static int glow_ok(const uint8_t *p) {
   return P95_Near <= rdf(p + 8) && rdf(p + 8) < (float)P62_I270C44 && P110_GlowIcon != 0;
 }
+/* P110_GlowA / P110_GlowB / P110_GlowC — Game.exe 004b53de / 004b8871 / 004b82b2.  Three glow colours drawn with
+   glow_quad.  TODO(RE): unsure which lights use which variant. */
 void P110_GlowA(const uint8_t *p) {
 #ifndef RE_HOOK_BUILD
   if (p == NULL) return;
@@ -451,6 +471,9 @@ void P110_GlowC(const uint8_t *p) {
 
 /* ---- 004cdda6: спрайты стека скрипта G2_ScriptStack — [0] число записей, записи по 0xd слов с +0x65 (слова 8/9 — x/y, 10 — 1/w),
    значок G00D17B1C, размер 16 × P43_ScaleA × 1/w; смешивание 3, режим драйвера 0 на время вывода ---- */
+/* P110_ScriptSprites — Game.exe 004cdda6.  Draws the sprites on the script stack (G2_ScriptStack: count, records
+   of 13 words from +0x65; words 8/9 screen x/y, 10 = 1/w) with icon 00d17b1c (snow), size 16 * ScaleA / w,
+   blend mode 3. */
 void P110_ScriptSprites(void) {
   int32_t *st = G2_ScriptStack;
 #ifndef RE_HOOK_BUILD
@@ -486,6 +509,8 @@ void P110_ScriptSprites(void) {
 
 /* ---- 0041938a: значок ic в точке (x, y) 640×480 с масштабом (sx, sy), цветом (r, g, b) × P19_Cur и смешиванием mode 0..3;
    масштаб экрана — .data 0054e520/0054e524 ---- */
+/* P110_IconQuad — Game.exe 0041938a.  Draws icon ic at (x, y) in 640x480 scaled by (sx, sy) and the screen scale
+   (0054e520/24), colour (r, g, b) times the menu fade P19_Cur, blend mode 0..3. */
 void P110_IconQuad(float x, float y, float sx, float sy, const uint8_t *ic, uint32_t r, uint32_t g, uint32_t b, uint32_t mode) {
 #ifndef RE_HOOK_BUILD
   if (ic == NULL) return;
@@ -511,47 +536,55 @@ void P110_IconQuad(float x, float y, float sx, float sy, const uint8_t *ic, uint
 
 /* ---- 00418675: выбор пункта меню — пункты по 0x10 (+0 выделить(2), +4 снять(2), +8 выполнить(), +0xc..+0xf соседи влево/вправо/вверх/вниз).
    При 005f7e4c ≠ 0 влево/вправо вызывают обработчик соседа с автоповтором (40, затем 3 кадра). Esc → -1. Обработчики — re_fn. ---- */
+#include "dik.h"   /* DirectInput scan codes (DIK_*) read by the menu selector */
+/* sel_call — local helper: calls the handler at offset `off` of a menu item table (with argument 2 when arg). */
 static void sel_call(const uint8_t *t, uint32_t off, int arg) {
   re_fn_t f = re_fn((uint32_t)rd32(t + off));
   if (f == NULL) return;
   if (arg) ((void (*)(int32_t))f)(2);
   else f();
 }
+/* P110_MenuSel — Game.exe 00418675.  One step of keyboard menu navigation over the item table at `tbl` (0x10 bytes
+   per item: +0 highlight(2), +4 unhighlight(2), +8 activate(), +0xc..+0xf left/right/up/down neighbours).
+   Esc unhighlights and returns -1; Enter activates; arrows move.  When 005f7e4c is set, left/right call the
+   neighbour's handler instead, with auto-repeat (40 frames, then every 3).  Returns the selected item. */
 int32_t P110_MenuSel(uint32_t tbl, int32_t cur) {
-  const uint8_t *t = (const uint8_t *)re_ptr(tbl);
+  const uint8_t *items = (const uint8_t *)re_ptr(tbl);
 #ifndef RE_HOOK_BUILD
-  if (t == NULL) return cur;
+  if (items == NULL) return cur;
 #endif
-  uint32_t p = (uint32_t)cur, old = p;
-  if (IsKeyDown(1) != 0) {
+  uint32_t sel = (uint32_t)cur, old_sel = sel;
+  if (IsKeyDown(DIK_ESCAPE) != 0) {
     Ui00418886();
-    sel_call(t, 4 + p * 0x10, 1);
+    sel_call(items, 4 + sel * 0x10, 1);
     return -1;
   }
   if ((MenuFlag5F7E4C | D_005f7e4c | G005F7E4C) == 0) {
-    if (IsKeyDown(0xcb) != 0) p = t[0xc + p * 0x10];
-    else if (IsKeyDown(0xcd) != 0) p = t[0xd + p * 0x10];
+    if (IsKeyDown(DIK_LEFT) != 0) sel = items[0xc + sel * 0x10];
+    else if (IsKeyDown(DIK_RIGHT) != 0) sel = items[0xd + sel * 0x10];
   } else {
-    uint8_t l = P110_KEY(0x00d04bcb), rr = P110_KEY(0x00d04bcd);
-    if (((l | rr) & 0x80) == 0) { P110_SelCnt = 0; P110_SelRep = 0x28; }
+    uint8_t key_left = P110_KEY(0x00d04bcb), key_right = P110_KEY(0x00d04bcd);
+    if (((key_left | key_right) & 0x80) == 0) { P110_SelCnt = 0; P110_SelRep = 0x28; }
     if (P110_SelCnt == 0) {
-      if (l & 0x80) { sel_call(t, (uint32_t)t[0xc + p * 0x10] * 0x10, 1); P110_SelCnt = P110_SelRep; P110_SelRep = 3; }
-      else if (rr & 0x80) { sel_call(t, (uint32_t)t[0xd + p * 0x10] * 0x10, 1); P110_SelCnt = P110_SelRep; P110_SelRep = 3; }
+      if (key_left & 0x80) { sel_call(items, (uint32_t)items[0xc + sel * 0x10] * 0x10, 1); P110_SelCnt = P110_SelRep; P110_SelRep = 3; }
+      else if (key_right & 0x80) { sel_call(items, (uint32_t)items[0xd + sel * 0x10] * 0x10, 1); P110_SelCnt = P110_SelRep; P110_SelRep = 3; }
     } else P110_SelCnt--;
   }
-  if (IsKeyDown(200) != 0) p = t[0xe + p * 0x10];
-  else if (IsKeyDown(0xd0) != 0) p = t[0xf + p * 0x10];
-  else if (IsKeyDown(0x1c) != 0) { Ui00418886(); sel_call(t, 8 + p * 0x10, 0); }
-  if (old != p) {
+  if (IsKeyDown(DIK_UP) != 0) sel = items[0xe + sel * 0x10];
+  else if (IsKeyDown(DIK_DOWN) != 0) sel = items[0xf + sel * 0x10];
+  else if (IsKeyDown(DIK_RETURN) != 0) { Ui00418886(); sel_call(items, 8 + sel * 0x10, 0); }
+  if (old_sel != sel) {
     Ui00418886();
-    sel_call(t, 4 + old * 0x10, 1);
-    sel_call(t, p * 0x10, 1);
+    sel_call(items, 4 + old_sel * 0x10, 1);
+    sel_call(items, sel * 0x10, 1);
   }
-  return (int32_t)p;
+  return (int32_t)sel;
 }
 
 /* ---- 004e8595: кольца дыма — 6 полос по 66 вершин сферы P96_Sphere (повёрнутой на ang, масштаб sc, flat — высота × 20),
    цвет (r, g, b) темнее к краям (−20/−30/−50 за ряд), значок SMOKE P108_SmokeIcon; треугольники полосы — скользящее окно из 3 вершин ---- */
+/* P110_SmokeRing — Game.exe 004e8595.  Draws a smoke puff: 6 bands of 66 vertices of the unit sphere P96_Sphere,
+   rotated by ang and scaled by sc (flat: height x 20), colour darkening towards the edge, SMOKE texture. */
 void P110_SmokeRing(float sc, const float *pos, int32_t ang, uint32_t r, uint32_t g, uint32_t b, int32_t flat, int32_t tex) {
   const uint8_t *ic = (const uint8_t *)re_ptr(P108_SmokeIcon);
 #ifndef RE_HOOK_BUILD
@@ -598,6 +631,8 @@ void P110_SmokeRing(float sc, const float *pos, int32_t ang, uint32_t r, uint32_
 /* ---- 00425b12: окно 3D-вида — центр (P101_ScrX0/Y0, P43_OffX/OffY) со сдвигом (x, y), окно отсечения P110_Clip* по масштабу 0125f3e0
    (при смене масштаба — пересчёт 00526427 с масштабом × ширина/640). mode 1 — сначала очистка всего экрана, 2 — окно усечением (__ftol)
    и очистка, иначе — окно с округлением (fistp через 00ba52d0). Glide-функции — по имени через P33. ---- */
+/* clip_window / buffer_clear / set_scale / clip_round — local helpers: grClipWindow, grBufferClear, the view
+   scale 0125f3e0 (with its native alias P19_Scale), and the clip window rounded like fistp. */
 static void clip_window(int32_t a, int32_t b, int32_t c, int32_t d) {
   void (P110_STD *f)(int32_t, int32_t, int32_t, int32_t) = (void (P110_STD *)(int32_t, int32_t, int32_t, int32_t))glide_proc("_grClipWindow@16");
   if (f != NULL) f(a, b, c, d);
@@ -612,46 +647,50 @@ static void clip_round(void) {
   P11_00ba52d0 = x0;
   clip_window(x0, y0, x1, y1);
 }
+/* P110_ViewSetup — Game.exe 00425b12.  Sets up the 3D view window: projection centre (screen centre + (x, y)),
+   clip window scaled by 0125f3e0 (or the full screen when P110_FullClip), recomputing the projection
+   (00526427) when the scale changed.  mode 1 clears the whole screen first, 2 sets the window truncated and
+   clears it, otherwise sets it rounded.  Native (v2.15 Hor+): the clip window is wider by S on each side. */
 void P110_ViewSetup(int32_t x, int32_t y, int32_t mode) {
-  float sc = P11_0125f3e0;
+  float scale = P11_0125f3e0;
   int32_t W = P19_ScrW, H = P19_ScrH;
-  if (P62_F25F404 != sc) {
-    P62_F25F404 = sc;
-    set_scale(((float)W / P19_DivW) * sc);
+  if (P62_F25F404 != scale) {
+    P62_F25F404 = scale;
+    set_scale(((float)W / P19_DivW) * scale);
     P12_Fn00526427();
     set_scale(P62_F25F404);
   }
-  sc = P11_0125f3e0;
-  P19_Scale = sc;   /* native-псевдонимы 0125f3e0 */
+  scale = P11_0125f3e0;
+  P19_Scale = scale;   /* native-псевдонимы 0125f3e0 */
 #ifndef RE_HOOK_BUILD
   /* v2.15 Hor+ (aspect.h): основной вид (ширина 640) — окно отсечения шире на S с каждой стороны, центр проекции прежний (W/2 + x) */
-  const int32_t ex = re_view_extra();
-  const float Wc = (float)(W + 2 * ex);
+  const int32_t extra = re_view_extra();
+  const float clip_w = (float)(W + 2 * extra);
 #else
-  const int32_t ex = 0;
-  const float Wc = (float)W;
+  const int32_t extra = 0;
+  const float clip_w = (float)W;
 #endif
   if (P110_FullClip == 0) {
-    P110_ClipX0 = ((float)W / 2.0f + (float)x) - (Wc * sc) / 2.0f;
-    P110_ClipY0 = ((float)H / 2.0f + (float)y) - ((float)H * sc) / 2.0f;
-    P110_ClipX1 = Wc * sc + P110_ClipX0;
-    P110_ClipY1 = (float)H * sc + P110_ClipY0;
+    P110_ClipX0 = ((float)W / 2.0f + (float)x) - (clip_w * scale) / 2.0f;
+    P110_ClipY0 = ((float)H / 2.0f + (float)y) - ((float)H * scale) / 2.0f;
+    P110_ClipX1 = clip_w * scale + P110_ClipX0;
+    P110_ClipY1 = (float)H * scale + P110_ClipY0;
   } else {
-    P110_ClipX0 = 0.0f - (float)ex; P110_ClipY0 = 0.0f;
-    P110_ClipX1 = (float)(W + ex) + 0.0f; P110_ClipY1 = (float)H + 0.0f;
+    P110_ClipX0 = 0.0f - (float)extra; P110_ClipY0 = 0.0f;
+    P110_ClipX1 = (float)(W + extra) + 0.0f; P110_ClipY1 = (float)H + 0.0f;
   }
   P101_ScrX0 = (float)(W / 2) + (float)x;
   P101_ScrY0 = (float)(H / 2) + (float)y;
-  P43_OffX = (float)x + P43_Half + (float)(W / 2);
+  P43_OffX = (float)x + P43_Half + (float)(W / 2);   /* + P43_Half: cancelled again after projection (see P43_ProjectGrid) */
   P43_OffY = (float)y + P43_Half + (float)(H / 2);
   P62_F252A94 = (float)(W / 2);
   P62_F25F3F4 = (float)(H / 2);
-  uint8_t m = (uint8_t)mode;
-  if (m == 1) {
-    clip_window(-ex, 0, W + ex, H);
+  uint8_t mode8 = (uint8_t)mode;
+  if (mode8 == 1) {
+    clip_window(-extra, 0, W + extra, H);
     buffer_clear(0, 0, 0xffff);
     clip_round();
-  } else if (m == 2) {
+  } else if (mode8 == 2) {
     clip_window((int32_t)P110_ClipX0, (int32_t)P110_ClipY0, (int32_t)P110_ClipX1, (int32_t)P110_ClipY1);
     buffer_clear(0, 0, 0xffff);
   } else clip_round();

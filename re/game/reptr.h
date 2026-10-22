@@ -13,6 +13,7 @@ typedef void (*re_fn_t)(void);
 
 void    *re_ptr(uint32_t addr);                                  /* 0 → NULL; в native вне областей → NULL */
 uint32_t re_addr(const void *p);                                 /* NULL → 0 */
+uint32_t re_addr_known(const void *p);                           /* v2.35: как re_addr, но вне известных областей → 0 (без регистрации) */
 void     re_ptr_register(uint32_t addr, void *native, uint32_t size);
 uint32_t re_ptr_register_dyn(void *native, uint32_t size);      /* → синтетический адрес */
 void     re_ptr_unregister(const void *native);

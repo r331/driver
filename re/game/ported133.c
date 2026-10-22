@@ -112,6 +112,7 @@ int32_t P133_1137320;
 #endif
 
 static float u2f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
+#define RE_MEMRW_LOCAL16   /* keep the local 16-bit helpers below (hook object identity, see memrw.h) */
 #include "memrw.h"
 static int16_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
@@ -210,39 +211,59 @@ int32_t P133_LoadConfig(void) {
 /* ---- 0049f6c7 ---- */
 static void cam_y(float v) { P44_CamY = v; P59_VY = v; }
 static void set_mode(int32_t m) { P59_Mode1137324 = (uint8_t)m; G2_01137324 = m; }
+/* Camera modes: P59_Mode1137324 (Game.exe 01137324, u8). */
+enum {
+  CAM_CHASE      = 0x00,   /* chase camera behind P61_V10 (P134_CamChase) */
+  CAM_FREE_ORBIT = 0x01,   /* free camera around the car, 512 above the road (P128_FreeCam) */
+  CAM_IN_CAR     = 0x02,   /* camera fixed to the car's angles + offset (P61_SetupCamN, 0049e5e7) */
+  CAM_FREE_MOVE  = 0x06,   /* free-flying camera (P99_FreeCamMove) */
+  CAM_CINEMATIC  = 0x07,   /* cutscene camera (P134_CamCine); forced while 00c824a0 is set */
+  CAM_BEHIND     = 0x08,   /* P99_CamBehind */
+  CAM_SHAKE      = 0x09,   /* P131_CamShake */
+  CAM_FIXED      = 0x10,   /* fixed position, stored angles (P134_CamTarget(-1)) */
+  CAM_TRACK      = 0x11    /* fixed position aimed at P61_V10 (P134_CamTarget) */
+};
+#define CAM_SCALE_DEFAULT 384.0f   /* projection scale (focal length) of the normal views */
+
+/* P133_CamUpdate — Game.exe 0049f6c7, cdecl.  Per-frame camera update, dispatching on the camera mode.
+   In:  lock — non-zero freezes the free-camera keys (P128_FreeCamLock); passed 1 from the draw pass.
+   Debug option 00bdfa54 (outside the replay director) bypasses everything with P59_SetupCamera.
+   Keys 0/1 (when not paused) raise/lower the camera.  In director/no-HUD mode the chase camera
+   follows the spare record 0x41.  A camera more than 45000 units (squared 2024999936) away from the
+   player is reset to the chase camera. */
 void P133_CamUpdate(int32_t lock) {
   if ((MenuOptBDFA54 | G00BDFA54) != 0 && P29_Mode == 0) { P59_SetupCamera(); return; }
   P128_FreeCamLock = lock;
-  if (P98_C824A0 != 0) set_mode(7);
+  if (P98_C824A0 != 0) set_mode(CAM_CINEMATIC);
   if ((G6_00B5A778 == 0 || P29_Mode != 0) && lock == 0) {
     P133_1137320 = P98_FreeTurn; P61_Heading = (int16_t)((uint32_t)P98_FreeTurn >> 16);
     if (P36_Pad0 != 0) { cam_y(P44_CamY - P43_FadeDiv); P61_OffY = P61_OffY - P43_FadeDiv; }
     if (P36_Pad1 != 0) { cam_y(P44_CamY + P43_FadeDiv); P61_OffY = P61_OffY + P43_FadeDiv; }
   }
   if ((G6_00B87EA0 | P62_HudOff1) != 0 && P88_Mode575 == 0) {
-    P60_Var1373C0 = 0; P43_ScaleA = 384.0f; P134_CamChase(0x41); return;
+    P60_Var1373C0 = 0; P43_ScaleA = CAM_SCALE_DEFAULT; P134_CamChase(0x41); return;
   }
   switch (P59_Mode1137324) {
-  case 0: P60_Var1373C0 = 0; P43_ScaleA = 384.0f; P134_CamChase(P61_V10); break;
-  case 1: {
-    P60_Var1373C0 = 0; P43_ScaleA = 384.0f;
+  case CAM_CHASE: P60_Var1373C0 = 0; P43_ScaleA = CAM_SCALE_DEFAULT; P134_CamChase(P61_V10); break;
+  case CAM_FREE_ORBIT: {
+    P60_Var1373C0 = 0; P43_ScaleA = CAM_SCALE_DEFAULT;
     P128_FreeCam(P61_V10);
     float cam[3] = { P44_CamX, P44_CamY, P44_CamZ };
     P61_OffY = (float)-P100_RoadHeightF(cam) - 512.0f;          /* .data 005460dc */
     P61_Dist8 = 1280.0f;
     break; }
-  case 2: P60_Var1373C0 = 0; P43_ScaleA = 384.0f; P61_SetupCamN(P61_V10b); break;
-  case 6: P99_FreeCamMove(); break;
-  case 7: P134_CamCine(); break;
-  case 8: P99_CamBehind(); break;
-  case 9: P131_CamShake(); break;
-  case 0x10: P134_CamTarget(-1); break;
-  case 0x11: P134_CamTarget(P61_V10); break;
+  case CAM_IN_CAR: P60_Var1373C0 = 0; P43_ScaleA = CAM_SCALE_DEFAULT; P61_SetupCamN(P61_V10b); break;
+  case CAM_FREE_MOVE: P99_FreeCamMove(); break;
+  case CAM_CINEMATIC: P134_CamCine(); break;
+  case CAM_BEHIND: P99_CamBehind(); break;
+  case CAM_SHAKE: P131_CamShake(); break;
+  case CAM_FIXED: P134_CamTarget(-1); break;
+  case CAM_TRACK: P134_CamTarget(P61_V10); break;
   default: break;
   }
   float dx = fabsf((float)P99_Cars[0].pos[0] - P44_CamX), dz = fabsf((float)P99_Cars[0].pos[2] - P44_CamZ);
   if (2024999936.0f < dz * dz + dx * dx) {
-    set_mode(0); P61_OffY = -256.0f; P61_Dist8 = 1280.0f; P61_V18 = 0x800;
+    set_mode(CAM_CHASE); P61_OffY = -256.0f; P61_Dist8 = 1280.0f; P61_V18 = 0x800;   /* default chase view: OffY -256 (camera Y is negated: 256 up), distance 1280, orbit offset 0x800 (180 deg) */
   }
 }
 
@@ -304,7 +325,13 @@ void P133_EventModels(void) {
       P44_Xform(rel);
       int16_t pg = rd16(o + 0x40);
       if (pg != page && pg != -1) { page = pg; P12_Fn00426580(page); }
+#ifdef RE_HOOK_BUILD
       P84_DrawModel(mdl, m, rel, vis == 1 ? 0 : (vis == 2 ? 1 : 2));
+#else
+      /* v2.35: P28_EventModels holds re_addr addresses (P79_EventAlloc), P84_DrawModel takes an arena reference (P79_PTR) —
+         convert, as in P97_ScriptEachP.  Unreachable before v2.35: the script list 00d12408 was an empty split alias. */
+      P84_DrawModel(P79_OFF(mp), m, rel, vis == 1 ? 0 : (vis == 2 ? 1 : 2));
+#endif
     }
   }
 }
@@ -395,6 +422,22 @@ void P133_MirrorDraw(void) {
 }
 
 /* ---- 004967d2 ---- */
+/* Traffic records: TrafficRecs (Game.exe 011443e0), 64 records of 0x54 bytes, record i drives car i+1.
+   Known bytes: [0] car index in P59_CarsTab, [1] state (handler below), [2] sub-state, [5] cop slot
+   1..8 (0 = not a cop), [6] keep alive when far from the player, [10] tick counter (state 1);
+   +0x38 signed speed, +0x48/+0x4c map cell of the car.  Others: see ported63.c / ported75.c. */
+enum {
+  TRF_FREE   = 0,   /* slot unused */
+  TRF_OBJECT = 1,   /* P54_ObjTick — TODO(RE): unsure (parked / scripted object car?) */
+  TRF_DRIVE  = 2,   /* P103_TrafficTick — normal traffic driving along the road graph */
+  TRF_STEP   = 3,   /* P119_TrafficStep */
+  TRF_COP    = 4,   /* P142_CopDrive — police AI; RE_PROBE (v2.34): always model [0xc] = 1 (police car) with the cop slot in [5], CAR_AI_DRIVEN
+                        mostly set; model-1 patrols drive in TRF_DRIVE with [5] already set until the chase starts */
+  TRF_HOLD   = 5,   /* P134_TrafficHold — timed steering hold, then back to TRF_DRIVE */
+  TRF_ACTOR  = 6,   /* ActorStep00494678 */
+  TRF_NOOP   = 7
+};
+/* Per-state handler table of the original (.data 00551308), as a switch. */
 static void traffic_fn(uint8_t *r) {
   switch (r[1]) {                                               /* .data 00551308 */
   case 0: NoopFn00493f95(); break;
@@ -416,6 +459,15 @@ static int32_t far2(int32_t ax, int32_t az, int32_t bx, int32_t bz) {
   return a * a + b * b;
 }
 static int32_t sin_step(uint32_t a) { return ((int32_t)P59_Sin[a & 0xfff] * 0x1c2) / 4096; }
+/* P133_TrafficTick — Game.exe 004967d2, cdecl.  One logic tick of all traffic.
+   The reference point is the player, or the chase target (record 0x41) in chase modes (where the
+   traffic count is forced to 0x20).  In a chase (00b87eb0) the mission fails with "target lost"
+   (result 3, 150-frame countdown) when the player is farther than ~sqrt(0x16b) scaled cells.
+   Per record: run its state handler; non-object cars also coast along their heading by
+   sin/cos * 0x1c2 / 4096 per tick; despawn cars that drift out of range (unless kept alive), snap
+   kept cars to the ground, update the map cell, push the car into the active physics list
+   (MenuAddItem004DC8B0 — despite its name this is 004dc8b0 "add car to G6_00B2F30C"), and on odd
+   frames re-slot / re-lane moving traffic.  Finally recount free/used slots and refill (P75_TrafficFill). */
 void P133_TrafficTick(void) {
   uint8_t *car = P59_CarsTab, *rec = TrafficRecs;
   int32_t px, pz;
@@ -466,7 +518,7 @@ void P133_TrafficTick(void) {
       if (99 < rec[10]) continue;
       rec[10]++;
     }
-    if (rec[1] == 4) MenuAddItem004DC8B0(car, 0);
+    if (rec[1] == TRF_COP) MenuAddItem004DC8B0(car, 0);   /* 004dc8b0: add to the active physics list */
     else {
       wr32(rec + 0x38, rd32(car + 0x10c) < 1 ? -rd32(car + 0x110) : rd32(car + 0x110));
       if (i < 0x40) { P119_TrafficSpeed(rec, car); MenuAddItem004DC8B0(car, 0); }

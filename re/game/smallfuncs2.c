@@ -1,3 +1,5 @@
+/* smallfuncs2 — one-line Game.exe leaf functions; each name ends with its Game.exe address.  Brief comments
+   only; the globals keep their address names because their meaning is not established. */
 #include "smallfuncs2.h"
 #include <string.h>
 GAME_VAR_DEF(int32_t*, G2_ScriptStack, 0x00d17af8)
@@ -152,7 +154,9 @@ GAME_VAR_DEF(uint8_t*, G2_011F4064, 0x011f4064)
 g2_pair_t G2_005603BC;
 #pragma pop_macro("G2_005603BC")
 #endif
+#ifdef RE_HOOK_BUILD   /* v2.35: native — P27_MemTab (smallfuncs2.h) */
 GAME_VAR_DEF(g2_slot_t, G2_00B203A0, 0x00b203a0)
+#endif
 GAME_VAR_DEF(g2_camarr_t, G2_011F40E0, 0x011f40e0)
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("G2_TABLE_00550ACC")
@@ -174,19 +178,36 @@ g2_ints_t G2_ARR_01145940;
 #pragma pop_macro("G2_ARR_01145940")
 #endif
 _Static_assert(sizeof(g2_slot_t) == 0xc000, "slot");
+/* Index of the lowest set bit of v (0 for v == 0). */
 int32_t CountTrailingZeros00421C72(uint32_t v) { int32_t n = 0; if (v == 0) return 0; while ((v & 1) == 0) { v >>= 1; n++; } return n; }
+/* Fills an 8-entry table with the constant pattern 1,0,2,2,1,0,1,2; returns 1.  TODO(RE): unsure what it is. */
 int32_t FillTable8_0041D954(int32_t* p) { p[0]=1;p[1]=0;p[2]=2;p[3]=2;p[4]=1;p[5]=0;p[6]=1;p[7]=2; return 1; }
+/* Pops the mission-script value stack G2_ScriptStack: s[0] = top index (the stack grows downwards, capacity 100),
+   values at s[1..]; returns -1 when empty. */
 int32_t ScriptStackPop004CB982(void) { int32_t* s = G2_ScriptStack; if (s[0] < 100) { int32_t r = s[s[0] + 1]; s[0]++; return r; } return -1; }
+/* Second entry point of the same pop. */
 int32_t ScriptStackPop004CB9BA(void) { return ScriptStackPop004CB982(); }
+/* Pushes v onto the script value stack (no overflow check, as the original). */
 void ScriptStackPush004CB9F2(int32_t v) { int32_t* s = G2_ScriptStack; s[0]--; s[s[0] + 1] = v; }
-int32_t ScriptSkip16_004D14D8(void) { S_00D12414 += 0x10; return 1; }
+/* Advances the script program counter S_00D12414 by 0x10 bytes (skips one instruction); returns 1. */
+int32_t ScriptSkip16_004D14D8(void) { SF_SCRIPT_IP_ADD(0x10); return 1; }
+/* Adds d to G2_00D11A5C, clamped above at 0xfff; returns the old value.  TODO(RE): unsure what the value is. */
 int32_t AddClamp4095_004D2ADE(int32_t d) { int32_t o = G2_00D11A5C; G2_00D11A5C += d; if (G2_00D11A5C > 0xfff) G2_00D11A5C = 0xfff; return o; }
+/* Writes three range parameters depending on G2_00D11A5C (< 0x2aa: 4000, 12500, 0x200; else 8000, 25000,
+   0x400).  TODO(RE): unsure — distance / radius limits? */
 void FillRange004D2B16(uint16_t* p) { if (G2_00D11A5C < 0x2aa) { p[0]=4000; p[1]=0x30d4; p[2]=0x200; } else { p[0]=8000; p[1]=25000; p[2]=0x400; } }
+/* Clears the two entries of G2_005603BC and the globals 00b20358 / 00b20354. */
 void ClearPair004D6D68(void) { for (int i = 0; i < 2; i++) G2_005603BC[i].v = 0; G2_00B20358 = 0; G2_00B20354 = 0; }
+/* Clears the 0x1000 entries of the slot block G2_00B203A0 and four related counters. */
 void ClearSlots004D8C23(void) { for (int i = 0; i < 0x1000; i++) G2_00B203A0[i].v = 0; G2_00B20380 = 0; G2_00B2C3A4 = 0; G2_00B20398 = 0; G2_00B20394 = 0; }
+/* Switches G2_00D04654 to mode 2 (once) and resets four related globals. */
 void SetMode2_004E612A(void) { if (G2_00D04654 != 2) { G2_00D04654 = 2; G2_01137324 = 0; G2_00C54EC0 = 1; G2_00D044C8 = 0; G2_00D118A8 = 1; } }
+/* Next entry of the index queue G2_ARR_01145940 (read index G2_01143600, end G2_00575EE4), or -1 when empty. */
 int32_t PopIndex00493E9B(void) { if (G2_01143600 == G2_00575EE4) return -1; int32_t r = G2_ARR_01145940[G2_01143600]; G2_01143600++; return r; }
+/* Returns the character after the next '\n' at p and counts the line in G2_01134120 (no end-of-buffer check). */
 char* SkipLine004A59C6(char* p) { char c; G2_01134120++; do { c = *p; p++; } while (c != '\n'); return p; }
 _Static_assert(sizeof(g2_cam_t) == 36, "cam");
+/* Advances the model draw-record pointer G2_011F4064 by the size of the current record (G2_TABLE_00550ACC[kind]). */
 void AdvanceOpPtr0042F7B8(void) { G2_011F4064 += G2_TABLE_00550ACC[*G2_011F4064]; }
+/* Negates field c of each of the G2_011F43B0 camera entries (TODO(RE): unsure — named Z by the original port). */
 void NegateCamZ004EAF8D(void) { for (int i = 0; i < G2_011F43B0; i++) G2_011F40E0[i].c = -G2_011F40E0[i].c; }

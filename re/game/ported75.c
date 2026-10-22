@@ -1,3 +1,5 @@
+/* ported75.c — traffic spawning, ambient sounds, car engine voice, object reset and a screenshot-to-texture helper
+   (English overview; Russian notes per function follow).  All cdecl. */
 #include "ported75.h"
 #include <string.h>
 
@@ -130,6 +132,15 @@ p75_page_t P75_Page;
 
 static int32_t p75_i32(const uint8_t *p) { int32_t v; memcpy(&v, p, 4); return v; }
 
+/* Spacing between the spawn positions along one side of a road junction cell (0x5dc = 1500 units). */
+#define SPAWN_STEP 0x5dc
+
+/* P75_TrafficPos — Game.exe 004913cc.  Computes a traffic spawn position on side `side` (0..3) of road node
+   `cls`: node record (0x24 bytes at P59_C39DC0) = 4 bytes "positions per side" + 4 (x, y) side start points;
+   positions are SPAWN_STEP apart.  last == 1 -> the last position; pick & 0xff == 0xff -> a random one;
+   otherwise position pick (counted from the end when rev).  Except for last == 1 the point is then jittered:
+   across the side by -0x80..0x7f, or — on one-way nodes (bit 0 of byte 0x34 of the 0x42-byte node record in
+   P59_BF1C48) — pushed 0x80..0xff off the side start.  Result in P54_G40 (x) / P54_G44 (y). */
 /* 004913cc: таблица 00c39dc0, запись 0x24 на класс: байты +0..3 — число позиций на стороне, int +4.. — пары (x, y) начал сторон.
    Шаг между позициями 0x5dc. rev — считать с конца, last==0xff — случайная позиция, cls==1 — последняя. Результат — 01139a30 (x), 01139a2c (y);
    затем (кроме pick==1) случайный сдвиг поперёк стороны. Флаг направления — бит 0 байта 0x34 записи 0x42 таблицы 00bf1c48. */
@@ -139,15 +150,15 @@ void P75_TrafficPos(int32_t cls, int32_t side, int32_t rev, int32_t last, uint32
   int32_t n = (int32_t)rec[side] - 1;
   int32_t off;
   if (last == 1) {
-    off = n * 0x5dc;
+    off = n * SPAWN_STEP;
   } else if ((pick & 0xff) == 0xff) {
     int32_t r = (int32_t)Rand_004D9078();
-    off = (n + 1 != 0 ? r % (n + 1) : 0) * 0x5dc;
+    off = (n + 1 != 0 ? r % (n + 1) : 0) * SPAWN_STEP;
   } else {
     uint8_t p = (uint8_t)pick;
     if ((int32_t)p > n) p = (uint8_t)n;
     if (rev != 0) p = (uint8_t)(n - p);
-    off = (int32_t)p * 0x5dc;
+    off = (int32_t)p * SPAWN_STEP;
   }
   int32_t x = 0, y = 0;
   switch (side) {
@@ -170,6 +181,11 @@ void P75_TrafficPos(int32_t cls, int32_t side, int32_t rev, int32_t last, uint32
   P54_G44 = y;
 }
 
+/* P75_TrafficSpawn — Game.exe 00492e42.  One traffic car spawn: pops a free car slot; while fewer than
+   G0113A6C0 slots have been collected they are only queued (P12_01144340), afterwards the queue is
+   processed (P75_Fn4958B7) first.  Picks a random entry of the spawn table P75_Spawn (12 bytes: s16 node
+   (-1 = side from byte 2), +4/+8 ints) and places the car with P75_Fn491A56; counts successes in P75_E8 and
+   records the spawn when recording a replay.  Replay playback: the slot is not chosen (0, see note). */
 /* 00492e42: одно появление машины трафика. Номер слота берётся со стека свободных (0113a6c4-таблица — PopIndex00493E9B);
    пока набрано меньше 0113a6c0 — только запоминается в очереди 01144340, потом очередь разбирается 004958b7.
    Запись таблицы появления выбирается случайно. В режиме повтора (00b87eb0 != 0) слот в оригинале не задан — берётся 0. */
@@ -200,12 +216,15 @@ void P75_TrafficSpawn(void) {
   if (G8_00B87EAC != 0 && ok != 0) P55_SaveRec(car);
 }
 
+/* P75_TrafficFill — Game.exe 0049512b.  Tops up traffic: wanted count = P51_TrafficN (0x14 while recording
+   a replay); when fewer cars are active (P75_4288) spawns min(wanted, P75_43D0) times.  In replay playback it
+   instead reads spawn records until the end marker (-1). */
 /* 0049512b: пополнение трафика: нужное число — 00575ee4 (или 0x14 при записи повтора 00b87eac); при игре — до этого числа или
    до 011443d0 появлений за вызов; при воспроизведении повтора читаются записи 0051990a до конца (-1). */
 void P75_TrafficFill(void) {
   if (P75_E4 != 0) return;
   if (G8_00B87EB0 == 0) {
-    P75_12BC = (G8_00B87EAC == 0) ? P51_TrafficN : 0x14;
+    P75_12BC = (G8_00B87EAC == 0) ? P51_TrafficN : 0x14;   /* 20 cars while recording a replay */
     if (P75_4288 < P75_12BC) {
       int32_t n = (P75_12BC < P75_43D0) ? P75_12BC : P75_43D0;
       for (int32_t i = 0; i < n; i++) P75_TrafficSpawn();
@@ -221,6 +240,9 @@ void P75_TrafficFill(void) {
   }
 }
 
+/* P75_BgSound — Game.exe 004d6c5a.  Random ambient sounds: every ~500..870 frames (random) plays one of the
+   ambient ids 4, 6, 7, 8 (+0xf000 = ambient sound id space), chosen by frame & 3, if that one has not played
+   for more than 0x8ca (2250) frames; the next delay is random. */
 /* 004d6c5a: случайные фоновые звуки раз в ~500+ кадров. Таблица 00560398: (идентификатор, кадр последнего запуска) × 4 —
    идентификаторы 4, 6, 7, 8 (+0xf000 — запуск как у звука окружения). */
 void P75_BgSound(void) {
@@ -246,8 +268,11 @@ void P75_BgSound(void) {
   }
 }
 
-/* 004d6dac: при смене клетки карты под игроком (поле +0x138 первой машины >> 3) запускается звук (1 или 2 + 0xf000)
-   не чаще, чем через случайные ~350+ кадров; стоя на месте (скорость > 30) 1000 кадров подряд — звук 0xf000. */
+/* P75_CarSound — Game.exe 004d6dac.  Speech/ambient cue on the player's hit damage: Get138 = CAR_DAMAGE_SUM
+   (accumulated hit damage, carfields.h).  When it changed by a step of 8 or more (>> 3 differs) and a random
+   pause (~350+ frames) has passed, plays cue 1 or 2 (+0xf000); when it has not changed for 1000 ticks with
+   P62_Spd > 30, plays cue 0xf000.  (Older notes read +0x138 >> 3 as the "map cell"; the RE_PROBE run shows the
+   field changes only on collisions, never on cell changes.)  G2_00B20358 = last damage >> 3. */
 void P75_CarSound(void) {
   int32_t v = Get138(P60_Cars);
   if ((v >> 3) == G2_00B20358) {
@@ -268,6 +293,9 @@ void P75_CarSound(void) {
   G2_00B20358 = v >> 3;
 }
 
+/* P75_ResetObjs — Game.exe 004ee065.  Resets the object/selection state: pointer 00562d7c = buffer 00cfe760,
+   counters, 0x1200 bytes of 1 at S_00BDCD00, selection reset (-1 in several selection vars) and
+   P55_Fn4EDAA2.  TODO(RE): which objects these are (map objects? pedestrians?) is not established. */
 /* 004ee065: сброс выбора/объектов: указатель 00562d7c на буфер 00cfe760, счётчики, 0x1200 байт значений 1 в 00bdcd00,
    затем сброс выбора (P55_ResetSel: -1 в 00cff9c0/00c97a20/00d0022c.. и два вызова) и 00401c67 (= P55_Fn4EDAA2 внутри). */
 void P75_ResetObjs(void) {
@@ -287,6 +315,10 @@ void P75_ResetObjs(void) {
   P55_Fn4EDAA2();
 }
 
+/* P75_CarVoice — Game.exe 004d68da.  Puts sound voice `slot` at the position of car `car` (record 0x148 bytes
+   from ObjPosTable; y negated for the sound system) with pitch from the int16 fields +0x7c / +0x7e:
+   ((a >> 2) + 1000 - (b >> 7)) * 0x5622 / 4096 (0x5622 = 22050 Hz); voice slot2 (if not -1) gets the same
+   position and volume b - 10000.  TODO(RE): +0x7c/+0x7e presumably engine revs / load. */
 /* 004d68da: положение (x, -y, z) машины car из таблицы 00d07888 (запись 0x148) -> голос slot; высота голоса slot — по полям
    +0x7c/+0x7e (((a>>2)+1000-(b>>7))*0x5622/4096); голос slot2 (если не -1) — то же положение и громкость b-10000. */
 void P75_CarVoice(int32_t car, int32_t slot, int32_t slot2) {
@@ -303,6 +335,9 @@ void P75_CarVoice(int32_t car, int32_t slot, int32_t slot2) {
   }
 }
 
+/* P75_BmpToPage — Game.exe 0040dae1.  Cuts a 256x256 block at (x0, y0) from a 640x480 32-bit picture into the
+   16-bit texture page P75_Page as RGB555 (byte 0 -> bits 10..14, byte 1 -> 5..9, byte 2 -> 0..4); pixels past
+   the picture edge are left unchanged.  Returns P75_Page. */
 /* 0040dae1: из картинки src (BGRA, 640 в строке, 480 строк) вырезать 256x256 с угла (x0, y0) в RGB555 (5 бит каналов:
    R<<10 | G<<5 | B, где байты +0, +1, +2) -> 005d7e40; вне картинки пиксели не трогаются. Возвращает 005d7e40. */
 uint8_t *P75_BmpToPage(const uint8_t *src, int32_t x0, int32_t y0) {

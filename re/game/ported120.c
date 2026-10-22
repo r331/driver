@@ -1,3 +1,6 @@
+/* ported120.c — car effects (debris, exhaust smoke, sparks), lit objects, script table reset, debug info,
+   an integer parser for scripts, cone recording and the mode-specific HUD texts (English overview;
+   original notes follow).  All cdecl. */
 /* v1.65: ported120 — восстановлено из Game.exe. Все функции cdecl (ret без операнда; work/rets.py).
    004af93c — объект B с затенением по счётчику повторов P68_Rep_ (ключ — адрес объекта) и источником света AddEntry_00426ABC;
    004cd875 — сброс таблицы записей скрипта (100 номеров, значок SNOW → G00D17B1C, P26_FxC);
@@ -151,15 +154,19 @@ int32_t P120_HudB;
 #define P120_HudPtr (*(uint32_t *)&P56_Blk84[(0x00c812b8 - 0x00c810c0) / 4])   /* 00c812b8 — uint32-адрес пары int32 */
 
 #include "memrw.h"
-static void wr16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
-static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
+#include "carfields.h"
+#define CAR_HEADING_I16 0xea   /* int16 heading inside CAR_ANG (carfields.h: +0xea = heading as int16) */
 
+/* wr16 / wrf — local helpers: unaligned int16 / float writes. */
+
+/* carp — local helper: car record i (native: out-of-range i maps to the spare last record). */
 static uint8_t *carp(int32_t i) {
 #ifndef RE_HOOK_BUILD
   if (i < 0 || i >= P99_CARS_N) i = P99_CARS_N - 1;
 #endif
   return (uint8_t *)&P99_Cars[i];
 }
+/* carmodel — local helper: per-model record m of the table 00d0cc60 (0x16c bytes each; native: zeros if out of range). */
 static const uint8_t *carmodel(uint32_t m) {   /* 00d0cc60 + m*0x16c */
 #ifndef RE_HOOK_BUILD
   static const uint8_t zero[0x16c];
@@ -167,6 +174,7 @@ static const uint8_t *carmodel(uint32_t m) {   /* 00d0cc60 + m*0x16c */
 #endif
   return &S_00D0CC60[m * 0x16c];
 }
+/* set_mat — local helper: makes car i's float matrix (01135060[i]) the current transform P44_MatPtr. */
 static void set_mat(int32_t i) {   /* 00bdc28c = &01135060[i] (P44_MatPtr / P11_00bdc28c) */
 #ifndef RE_HOOK_BUILD
   if (i < 0 || i >= 65) i = 0;
@@ -175,25 +183,32 @@ static void set_mat(int32_t i) {   /* 00bdc28c = &01135060[i] (P44_MatPtr / P11_
 }
 
 /* ---- 004af93c ---- */
+/* P120_ObjBShade — Game.exe 004af93c.  At night (00b87e84) adds a "B" object with a light: brightness 255,
+   reduced by 64 per repeat of the same object in the repeat table P68_Rep_ plus random flicker (objects
+   repeated more than twice are skipped), and a point light of radius 2000 at the object.
+   TODO(RE): unsure which objects are "B" objects (street lights?). */
 void P120_ObjBShade(uint8_t *obj, float x, float y, float z, int16_t kind, int16_t b) {
-  int16_t v = 0xff;
+  int16_t shade = 0xff;
   if (P14_00b87e84 == 0) return;
   int32_t key = (int32_t)re_addr(obj);
   for (int k = 0; k < 4; k++) {
     if (P68_Rep_[k].key == key) {
       if (P68_Rep_[k].cnt > 2) return;
-      if (G6_00B5A778 == 0) v = (int16_t)(v - (int16_t)(P68_Rep_[k].cnt * 0x40 + (N14_Rand() & 0x7f)));
-      else v = (int16_t)(0xff - P68_Rep_[k].cnt * 0x40);
+      if (G6_00B5A778 == 0) shade = (int16_t)(shade - (int16_t)(P68_Rep_[k].cnt * 0x40 + (N14_Rand() & 0x7f)));
+      else shade = (int16_t)(0xff - P68_Rep_[k].cnt * 0x40);
       break;
     }
   }
-  float p[3];
-  p[0] = rdf(obj + 8); p[1] = y + rdf(obj + 0xc); p[2] = rdf(obj + 0x10);
-  P101_AddObjB(obj, x, y, z, kind, b, v);
-  AddEntry_00426ABC((const uint32_t *)(void *)p, 2000, v, v, v);
+  float pos[3];
+  pos[0] = rdf(obj + 8); pos[1] = y + rdf(obj + 0xc); pos[2] = rdf(obj + 0x10);
+  P101_AddObjB(obj, x, y, z, kind, b, shade);
+  AddEntry_00426ABC((const uint32_t *)(void *)pos, 2000, shade, shade, shade);
 }
 
 /* ---- 004cd875 ---- */
+/* P120_ScriptReset — Game.exe 004cd875.  Resets the script record table p (100 numbered entries, 0x34 bytes
+   each from +0x1c4), the script counters and a random seed; looks up the "SNOW" icon (no icon -> snow off)
+   and shrinks its UV rectangle by one texel on each side (avoids bleeding). */
 void P120_ScriptReset(int32_t *p) {
   P120_ScrC = 0; P120_ScrB = 0; P120_ScrA = 0; P120_ScrD = 0; P120_ScrE = 0;
   P120_ScrSeed = (int32_t)(N14_Rand() & 0xff);
@@ -211,119 +226,132 @@ void P120_ScriptReset(int32_t *p) {
 }
 
 /* ---- 004ad6f5 ---- */
-void P120_CarDebris(int32_t i, int32_t h) {
+/* P120_CarDebris — Game.exe 004ad6f5.  Spawns up to 20 debris objects (pool P95_ObjA, see P123_ObjAFall)
+   scattered randomly around car i at height h.  Native: y of the random offset is 0 (uninitialised in
+   Game.exe), out-of-pool slots are skipped. */
+void P120_CarDebris(int32_t i, int32_t height) {
   set_mat(i);
-  const uint8_t *c = carp(i);
-  int32_t n = 0x14;
-  while (n != 0) {
-    n--;
-    int32_t k = PoolPop004AC6D0();
-    if (k < 0) break;
+  const uint8_t *car = carp(i);
+  int32_t left = 0x14;
+  while (left != 0) {
+    left--;
+    int32_t slot = PoolPop004AC6D0();
+    if (slot < 0) break;
 #ifndef RE_HOOK_BUILD
-    if (k >= 200) continue;
+    if (slot >= 200) continue;
 #endif
-    float v[3];
-    v[0] = (float)(int32_t)((N14_Rand() & 0x1ff) - 0x100);
-    v[2] = (float)(int32_t)((N14_Rand() & 0x3ff) - 0x200);
-    v[1] = 0.0f;   /* в оригинале local_18 до XformT не задан (мусор стека) */
-    P44_XformT(v);
-    v[0] += (float)rd32(c + 0xc8);
-    v[1] = (float)-h;
-    v[2] += (float)rd32(c + 0xd0);
-    uint8_t *r = &P95_ObjA[k * 0x78];
-    wrf(r, v[0]); wrf(r + 4, v[1]); wrf(r + 8, v[2]);
-    wr32(r + 0xc, 0);   /* local_10 — мусор стека в оригинале */
-    wr32(r + 0x68, 0x8002);
-    wr32(r + 0x58, 200);
-    wrf(r + 0x5c, (float)((N14_Rand() & 0xf) + 10));
-    wr32(r + 0x50, 100); wr32(r + 0x54, 400); wr32(r + 0x60, 10);
-    wr16(r + 0x64, 100);
+    float pos[3];
+    pos[0] = (float)(int32_t)((N14_Rand() & 0x1ff) - 0x100);
+    pos[2] = (float)(int32_t)((N14_Rand() & 0x3ff) - 0x200);
+    pos[1] = 0.0f;   /* в оригинале local_18 до XformT не задан (мусор стека) */
+    P44_XformT(pos);
+    pos[0] += (float)rd32(car + CAR_POS_X);
+    pos[1] = (float)-height;
+    pos[2] += (float)rd32(car + CAR_POS_Z);
+    uint8_t *obj = &P95_ObjA[slot * 0x78];
+    wrf(obj, pos[0]); wrf(obj + 4, pos[1]); wrf(obj + 8, pos[2]);
+    wr32(obj + 0xc, 0);   /* local_10 — мусор стека в оригинале */
+    wr32(obj + 0x68, 0x8002);
+    wr32(obj + 0x58, 200);
+    wrf(obj + 0x5c, (float)((N14_Rand() & 0xf) + 10));
+    wr32(obj + 0x50, 100); wr32(obj + 0x54, 400); wr32(obj + 0x60, 10);
+    wr16(obj + 0x64, 100);
   }
 }
 
 /* ---- 004afe3c ---- */
+/* P120_CarSmoke — Game.exe 004afe3c.  Exhaust smoke for car i at the model's exhaust point (+0xb0, moved by
+   damage zone 3), blowing backwards (5 units along the car's z), at view distance `dist`; also sparks
+   for the player when P62_BusyA is set.  Skipped while paused. */
 void P120_CarSmoke(int32_t i, int32_t dist) {
   if (G6_00B5A778 != 0) return;
-  const uint8_t *c = carp(i);
-  const uint8_t *m = carmodel(c[2]);
-  float p[4], v[4];
-  p[0] = rdf(m + 0xb0); p[1] = rdf(m + 0xb4);
-  p[2] = rdf(m + 0xb8) - (float)(rd32(c + 0x128) >> 6);
-  p[3] = rdf(m + 0xbc);
+  const uint8_t *car = carp(i);
+  const uint8_t *model = carmodel(car[CAR_MODEL]);
+  float pos[4], vel[4];
+  pos[0] = rdf(model + 0xb0); pos[1] = rdf(model + 0xb4);
+  pos[2] = rdf(model + 0xb8) - (float)(rd32(car + CAR_DAMAGE + 3 * 4) >> 6);
+  pos[3] = rdf(model + 0xbc);
   set_mat(i);
-  P44_XformT(p);
-  p[0] += (float)rd32(c + 0xc8);
-  p[1] -= (float)rd32(c + 0xcc);
-  p[2] += (float)rd32(c + 0xd0);
-  v[0] = 0.0f; v[1] = 0.0f; v[2] = 5.0f; v[3] = 0.0f;
-  P44_XformT(v);
-  P118_SkidFx(p, 0x14, 0x32, 2, dist, v, 1);
-  if (i == 0 && P62_BusyA != 0) P96_SpawnSpark(p, 0x32, 200, (int16_t)((N14_Rand() & 3) + 8));
+  P44_XformT(pos);
+  pos[0] += (float)rd32(car + CAR_POS_X);
+  pos[1] -= (float)rd32(car + CAR_POS_Y);
+  pos[2] += (float)rd32(car + CAR_POS_Z);
+  vel[0] = 0.0f; vel[1] = 0.0f; vel[2] = 5.0f; vel[3] = 0.0f;
+  P44_XformT(vel);
+  P118_SkidFx(pos, 0x14, 0x32, 2, dist, vel, 1);
+  if (i == 0 && P62_BusyA != 0) P96_SpawnSpark(pos, 0x32, 200, (int16_t)((N14_Rand() & 3) + 8));
 }
 
 /* ---- 004b00ad ---- */
+/* P120_CarSparks — Game.exe 004b00ad.  Sparks at the two model points +0xd0 of car i, each with its own
+   random timer, size and x jitter (tables 0110b040 / 011171c0 / 0110e2e0).  Skipped while paused.
+   TODO(RE): unsure what the model point +0xd0 is (exhaust again, for backfire?). */
 void P120_CarSparks(int32_t i) {
   if (G6_00B5A778 != 0) return;
 #ifndef RE_HOOK_BUILD
   if (i < 0 || i >= 0x41) return;
 #endif
-  const uint8_t *c = carp(i);
-  const uint8_t *m = carmodel(c[2]);
+  const uint8_t *car = carp(i);
+  const uint8_t *model = carmodel(car[CAR_MODEL]);
   for (int32_t k = 1; k >= 0; k--) {
-    uint8_t *tm = &A_0110B040[i * 8 + k * 4], *sz = &A_011171C0[i * 8 + k * 4], *dx = &A_0110E2E0[i * 8 + k * 4];
-    float p[4];
-    p[1] = rdf(m + 0xd4); p[2] = rdf(m + 0xd8); p[3] = rdf(m + 0xdc);
-    p[0] = rdf(m + 0xd0) + (float)rd32(dx);
-    wr32(tm, rd32(tm) - 1);
-    if (rd32(tm) < 1) {
-      wr32(tm, (int32_t)(N14_Rand() & 7));
-      wr32(sz, (int32_t)((N14_Rand() & 3) + 8));
-      wr32(dx, (int32_t)((N14_Rand() & 0x3f) - 0x20));
+    uint8_t *timer = &A_0110B040[i * 8 + k * 4], *size = &A_011171C0[i * 8 + k * 4], *jitter = &A_0110E2E0[i * 8 + k * 4];
+    float pos[4];
+    pos[1] = rdf(model + 0xd4); pos[2] = rdf(model + 0xd8); pos[3] = rdf(model + 0xdc);
+    pos[0] = rdf(model + 0xd0) + (float)rd32(jitter);
+    wr32(timer, rd32(timer) - 1);
+    if (rd32(timer) < 1) {
+      wr32(timer, (int32_t)(N14_Rand() & 7));
+      wr32(size, (int32_t)((N14_Rand() & 3) + 8));
+      wr32(jitter, (int32_t)((N14_Rand() & 0x3f) - 0x20));
     }
     set_mat(i);
-    P44_XformT(p);
-    p[0] += (float)rd32(c + 0xc8);
-    p[1] -= (float)rd32(c + 0xcc);
-    p[2] += (float)rd32(c + 0xd0);
-    P96_SpawnSpark(p, 0x32, 200, (int16_t)rd32(sz));
+    P44_XformT(pos);
+    pos[0] += (float)rd32(car + CAR_POS_X);
+    pos[1] -= (float)rd32(car + CAR_POS_Y);
+    pos[2] += (float)rd32(car + CAR_POS_Z);
+    P96_SpawnSpark(pos, 0x32, 200, (int16_t)rd32(size));
   }
 }
 
 /* ---- 004f60b7 ---- */
+/* P120_DebugInfo — Game.exe 004f60b7.  On-screen debug block: player position, heading, speed, active
+   pedestrians and recorded cones (when 00b87e7c is clear and debug info is on). */
 void P120_DebugInfo(void) {
   char b[64];
   if (P11_00b87e7c != 0 || P120_DbgOn == 0) return;
-  const uint8_t *c = carp(0);
+  const uint8_t *car = carp(0);
   int32_t y = P19_ScrH / 8 - 9;
   CursorSet004D94B7(0, y);
   P96_LogLine("--- Debug Information ---");
-  snprintf(b, sizeof b, "Player car X position = %d", rd32(c + 0xc8)); P96_LogLine(b);
-  snprintf(b, sizeof b, "Player car Y position = %d", rd32(c + 0xcc)); P96_LogLine(b);
-  snprintf(b, sizeof b, "Player car Z position = %d", rd32(c + 0xd0)); P96_LogLine(b);
-  int16_t ry; memcpy(&ry, c + 0xea, 2);
-  snprintf(b, sizeof b, "Player car Y rotation = %d (Curr %d)", (int)ry, G00BDF984); P96_LogLine(b);
-  snprintf(b, sizeof b, "Player car speed = %d", rd32(c + 0x10c)); P96_LogLine(b);
+  snprintf(b, sizeof b, "Player car X position = %d", rd32(car + CAR_POS_X)); P96_LogLine(b);
+  snprintf(b, sizeof b, "Player car Y position = %d", rd32(car + CAR_POS_Y)); P96_LogLine(b);
+  snprintf(b, sizeof b, "Player car Z position = %d", rd32(car + CAR_POS_Z)); P96_LogLine(b);
+  int16_t rot_y; memcpy(&rot_y, car + CAR_HEADING_I16, 2);
+  snprintf(b, sizeof b, "Player car Y rotation = %d (Curr %d)", (int)rot_y, G00BDF984); P96_LogLine(b);
+  snprintf(b, sizeof b, "Player car speed = %d", rd32(car + CAR_FWD_SPEED)); P96_LogLine(b);
   snprintf(b, sizeof b, "Number of pedestrians active = %d/%d", P43_FreeCnt, P13_005759a4); P96_LogLine(b);
   if (P120_ConeN > 0) { snprintf(b, sizeof b, "Number of cones recorded = %d", P120_ConeN); P96_LogLine(b); }
 }
 
 /* ---- 004a4d84 ---- */
+/* P120_ParseCamInt — Game.exe 004a4d84.  Parses an optionally negative unsigned integer (or, with mode 4, a
+   model name) at *pp into P68_CamI0..3 (`which`), advancing *pp.  Returns 1, or 0 after reporting an error. */
 int32_t P120_ParseCamInt(char **pp, int32_t which, int32_t mode) {
   char neg = **pp;
   if (neg == '-') (*pp)++;
   uint32_t u = 0;
   uint16_t val;
-  int32_t n = g_sscanf(*pp, "%u", &u);
+  int32_t nconv = g_sscanf(*pp, "%u", &u);
   val = (uint16_t)u;
   P15_SkipInteger(pp);
-  if ((n == 0 || n == -1) && (int16_t)mode == 4) {
+  if ((nconv == 0 || nconv == -1) && (int16_t)mode == 4) {
     uint8_t name[256];
     *pp = (char *)P94_ReadIdent((uint8_t *)*pp, name);
     if (P62_ModelLookup((const char *)name, &val) == 0) {
       P26_ErrorInLine("Model number must be an unsigned integer or name");
       return 0;
     }
-  } else if (n == 0 || n == -1) {
+  } else if (nconv == 0 || nconv == -1) {
     P26_ErrorInLine("Expecting integer value.");
     return 0;
   }
@@ -338,22 +366,25 @@ int32_t P120_ParseCamInt(char **pp, int32_t which, int32_t mode) {
 }
 
 /* ---- 004fbeb2 ---- */
+/* P120_ConeRec — Game.exe 004fbeb2.  Development tool: keys 0x3f / 0x40 start / stop recording; while on, every
+   P95_B87E40+1 ticks writes the player's x, road height, z to the cone file (max 100 cones).
+   Native: the file is never opened, only the count advances. */
 void P120_ConeRec(void) {
   if (P34_Keys[0x3f] != 0) P95_B87ED8 = 1;
   if (P34_Keys[0x40] != 0) P95_B87ED8 = 0;
   if (P95_B87ED8 == 0 || P120_ConeN == 100) return;
   uint16_t t = (uint16_t)(P120_ConeTick + 1);
   if (P120_ConeTick == 0) {
-    const uint8_t *c = carp(0);
-    int32_t pos[3] = { rd32(c + 0xc8), 0, rd32(c + 0xd0) };
+    const uint8_t *car = carp(0);
+    int32_t pos[3] = { rd32(car + CAR_POS_X), 0, rd32(car + CAR_POS_Z) };
     P120_ConeTick = t;
-    int32_t h = -P100_RoadHeight(pos);
+    int32_t height = -P100_RoadHeight(pos);
 #ifdef RE_HOOK_BUILD
     void *f = (void *)(uintptr_t)(uint32_t)Q00C812F0;
 #else
     void *f = NULL;   /* в native файл 00c812f0 не открывается (Call0052ADB0 — заглушка) */
 #endif
-    if (f != NULL) { g_fwrite(&pos[0], 1, 4, f); g_fwrite(&h, 1, 4, f); g_fwrite(&pos[2], 1, 4, f); }
+    if (f != NULL) { g_fwrite(&pos[0], 1, 4, f); g_fwrite(&height, 1, 4, f); g_fwrite(&pos[2], 1, 4, f); }
     P120_ConeN++;
   } else {
     P120_ConeTick = t;
@@ -363,6 +394,8 @@ void P120_ConeRec(void) {
 
 /* ---- 005032ce ---- */
 static char p120_buf[32];
+/* S / T / tab / hms — local helpers of the HUD texts: string address idx, shadowed text, record table at a
+   Game.exe address, and "%02d:%02d:%02d" of a record when it is filled (+st == 8). */
 static uint32_t S(int32_t idx) { return P97_StrAddr[idx]; }   /* адрес строки 00c55820 + idx*4 */
 static void T(int32_t x, int32_t y, uint32_t s, int32_t a, int32_t f, uint8_t r, uint8_t g, uint8_t b) { P70_ShadowText(x, y, s, a, (uint32_t)f, r, g, b); }
 #define BUF (re_addr(p120_buf))   /* v2.04: re_addr вместо усечения указателя */
@@ -372,12 +405,19 @@ static int hms(const uint8_t *t, uint32_t st, uint32_t o) { return t != NULL && 
 #ifndef RE_HOOK_BUILD
 static void P120_HudTimesBody(void);
 #endif
+/* P120_HudTimes — Game.exe 005032ce.  Native wrapper: anchors these HUD texts to the right edge (Hor+), then
+   draws them (P120_HudTimesBody); the hook build has the body directly. */
 void P120_HudTimes(void) {
 #ifndef RE_HOOK_BUILD
   plat_hud_anchor(1);   /* v2.15: счётчики/время режимов (x 470..570 в 640-кадре) — к правому краю */
   P120_HudTimesBody();
   plat_hud_anchor(0);
 }
+/* P120_HudTimesBody — body of 005032ce.  Draws the counters / times of the current game mode (01271060):
+   1 and 2 — count / total and best values, 3 — best time, 6 / 0xb — count, current and best times plus
+   two more records on the left, 7 — money ("$%d") and the best.
+   Modes: 1 Trail Blazer, 2 Cross Town Checkpoint, 3 Survival, 7 Carnage, 0xb Dirt Track (P141_HsSetup);
+   6 = Dirt Track Practice (menu 0054a870 "Practice"; 0xb = "Time Trial"). */
 static void P120_HudTimesBody(void) {
 #endif
   const uint8_t *ta = tab(P71_Tab2A40);

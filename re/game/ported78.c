@@ -1,3 +1,5 @@
+/* Map-file lump loaders: vertex lump, street lamp grid ("GLMP") and chair placement lump
+   (seats for sitting pedestrians). */
 #include "ported78.h"
 #include <stdio.h>
 #include <string.h>
@@ -24,6 +26,11 @@ p78_hdr_t P78_LampHdr;
 #endif
 
 /* 004eb811: запись на диске 0x2c байта (3 слова, 3 short, 3 слова, 3 short, 2 ushort) → запись 0x40 с w = 1.0f. */
+/* P78_LoadVerts — Game.exe 004eb811, cdecl.  Load the vertex lump of `size` bytes from file f.
+   Each 0x2c-byte disk record (3 int32, 3 int16, 3 int32, 3 int16, 2 uint16) is expanded to a
+   0x40-byte record with w = 1.0f after each xyz triple and the two uint16 widened to uint32.
+   Allocates P78_VertsA and P78_VertsB (count * 0x40 each), fills only P78_VertsB; sets
+   P78_VertCount and S_00D0DDE0 = 1.  TODO(RE): unsure what the int16 triples are (normals?). */
 void P78_LoadVerts(void *f, int32_t size) {
   static const char *file = "D:\\Driver\\Game\\map.c";
   const float one = 1.0f;
@@ -53,6 +60,10 @@ void P78_LoadVerts(void *f, int32_t size) {
 }
 
 /* 004eafe0: сетка фонарей: заголовок 0x14 байт «GLMP», w, h, число записей; запись = {индекс ячейки, число} + число*0x28 байт. */
+/* P78_LoadLamps — Game.exe 004eafe0, cdecl.  Load the street lamp grid.  Header 0x14 bytes: "GLMP", ?, width, height, record count; each
+   record = {cell index, count} followed by count * 0x28 bytes of lamps.  Rebuilds
+   P58_ListB31EC4 (width * height slots).  Returns 1 on success; 0 and rewinds the file if the
+   magic does not match; 0 on allocation failure.  Native: rejects out-of-range cell indices. */
 int32_t P78_LoadLamps(void *f) {
   static const char *file = "D:\\Driver\\Game\\lamps.c";
   long start = g_ftell(f);
@@ -82,9 +93,13 @@ int32_t P78_LoadLamps(void *f) {
   return 1;
 }
 
+/* P78_LoadLampsBlock — Map-lump callback wrapper around P78_LoadLamps (result ignored). */
 void P78_LoadLampsBlock(void *f) { P78_LoadLamps(f); }
 
 /* 004a31fc: ячейка = {индекс, число, буфер}; прежний буфер освобождается. */
+/* P78_ChairAdd — Game.exe 004a31fc, cdecl.  Put a chair list into the chair grid: cell rec->a gets {index, count rec->b, items}.
+   Allocates the cell on first use; an existing cell's old item buffer is freed.  Returns 1, or 0
+   if the grid is missing or (native check) the index is out of range / allocation fails. */
 int32_t P78_ChairAdd(const p58_cell_t *rec) {
   if (P58_Grid == NULL || P58_GridW == 0 || P58_GridH == 0) return 0;
   int32_t idx = rec->a;
@@ -105,6 +120,11 @@ int32_t P78_ChairAdd(const p58_cell_t *rec) {
 
 /* 004a2f77: блок кресел. Заголовок 0x14 байта {?, версия (2), ширина, высота, число лампов}; сетка ширина*высота указателей;
    лист = {индекс ячейки, число, ...} + число*0x14 байт. Версия не 2 — блок пропускается. */
+/* P78_LoadChairs — Game.exe 004a2f77, cdecl.  Load the chair placement lump (`size` bytes).  Header 0x14 bytes: {?, version (must be 2),
+   width, height, list count}; then each list = {cell index, count, ?} + count * 0x14-byte
+   chairs.  Allocates the P58_Grid pointer grid and adds each list via P78_ChairAdd, counting
+   chairs in D_01134ea0.  Other versions are skipped (sitting pedestrians disabled).  Logs progress.
+   Note: P58_GridH receives the width and P58_GridW the height — kept as in the original. */
 void P78_LoadChairs(void *f, int32_t size) {
   char msg[160];
   DebugLog("\nAttempting to process Chair placement lump.");

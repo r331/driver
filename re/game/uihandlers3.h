@@ -440,3 +440,15 @@ void Call004C020E(void); /* 004c020e */
 #define G00D044C8 (*(int32_t *)re_gvar(0x00d044c8u, sizeof(int32_t), (void *)&G00D044C8))
 #endif
 /* gvar-img v2.03 end */
+/* v2.35: 005fe9b8 — one object: the data-image cell P58_S5FE9B8 (32-bit address); UiPtr005FE9B8 = P15_MenuItems, a view */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#include "ported15.h"
+#undef UiPtr005FE9B8
+#define UiPtr005FE9B8 P15_MenuItems
+#endif
+/* v2.35: 0113a6c4 — one object: the car table pointer P59_CarsTab (P103 writes it); G0113A6C4 names the same native variable */
+#ifndef RE_HOOK_BUILD
+extern uint8_t *P59_CarsTab;
+#undef G0113A6C4
+#define G0113A6C4 P59_CarsTab
+#endif

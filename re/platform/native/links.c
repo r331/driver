@@ -1,7 +1,4 @@
 /* Автогенерация: tools/gen_native_links.py. Ещё не перенесённые вызовы в native уходят в слабые заглушки stubs.c; здесь — перенесённые. */
-#include <string.h>
-#include <stdio.h>
-#include "../../game/engine.h"
 #include "../../game/unported.h"
 #include "../../game/ported11.h"
 #include "../../game/ported12.h"
@@ -143,6 +140,7 @@
 #include "../../game/ported149.h"
 #include "../../game/ported150.h"
 #include "../../game/ported151.h"
+#include "../../game/ported152.h"
 #include "../../game/ported13.h"
 #include "../../game/director.h"
 #include "../../game/directorstorage.h"
@@ -212,7 +210,6 @@ void P56_DrawSpr (float a0, float a1, float a2, float a3, void *a4, int32_t a5, 
 void P56_Fn406479 (void) { P57_SaveScores(); }
 int32_t P56_Fn40682D (void *a0, int32_t a1) { return (int32_t)SumBytes(a0, a1); }
 void P56_Fn4E5011 (int32_t a0, void *a1) { P103_GhostState(); }
-void P56_Fn4E5284 (void *a0) { (void)a0; P94_FadeStep(); }   /* v2.25: секундомер интервью (конец по времени) */
 void P56_Fn4E53B5 (int32_t a0, void *a1) { P105_StuntHints(a0, a1); }
 void P87_Fn42A423 (uint32_t m, int32_t idx, float *pos, int32_t mode) { P90_DrawSingle(m, idx, pos, mode); }
 void P55_Fn4ED5F8 (int32_t a0, int32_t a1) { P87_LoadTile(a0, a1); }
@@ -306,8 +303,6 @@ void Call00524763 (void) { P25_CDClose(); }
 void Call00408770 (void) { P77_Menu408770(); }
 void Call004072BE (void) { P65_SetNameFields(); }
 void Call0040C165 (void) { P56_ResetFrontend(); }
-void Call0048B65D (void) { P38_FmvStop(); }
-void Call0048B568 (void) { P50_FmvReleaseObjs(); }
 void Call005237B1 (void) { P48_StopAll(); }
 void Call0052436A (void) { InitChannels_0052436A(); }
 void Call0052479E (int32_t a0) { P25_PlayCDTrack(a0); }
@@ -349,10 +344,14 @@ void Call0040CB9F (void) { P119_MenuFrame(); }
 void MenuRedraw (void) { P104_GfxMenuInit(); }
 void MenuRefresh (void) { P54_MenuTexSel(); }
 void Call004076E2 (void) { MenuWhite004076E2(); }
+void StoreCameraState (void *cam) { P61_StoreCamState(cam); }
+void RestoreCameraState (void *cam) { P61_RestoreCamState(cam); }
 void * FindCameraRecordForFrame (int frame) { return (void *)FindCameraForFrame(frame); }
+int FindAutoCamera (void **out) { return (int)P98_DirCamNext(out); }
 void InitNewCamera (void *cam) { P98_CamClamp(cam); }
 void DrawSprite (int x, int y, uint32_t tex, int a, int b, int c, int d, int e) { P70_ShadowText(x, y, tex, a, b, c, d, e); }
 void DrawRect (float x, float y, float w, float h, uint32_t color) { P108_FillRect(x, y, w, h, color); }
+int GetMarkerYAdjust (int a) { return (int)ScanSlot_0040AAE2(a); }
 int IsKeyDown (int sc) { return (int)IsFlagSetNotMasked_004E383A(sc); }
 int GetGroundHeight (int *pos) { return (int)P100_RoadHeight(pos); }
 void Call00411A9D (void) { MenuHiliteWhite00411A9D(); }
@@ -384,7 +383,6 @@ void G6Call0040C5BE (int32_t a0) { P54_ClearSwap(a0); }
 void G6Call0050E940 (int32_t a0) { SetLatchValue0050E940(a0); }
 void G6Call00418119 (int32_t a0) { Ui00418119(a0); }
 void G6Call00417CBB (void) { P45_PickColor(); }
-void G6Call004A2B70 (void) { ResetSlots_004A2B70(); }
 void G6Call004BA457 (void) { P95_SortObjA(); }
 void G6Call004BA57A (void) { P95_SortObjC(); }
 void G6Call004BA64D (void) { P95_SortObjB(); }
@@ -429,6 +427,11 @@ void P58_Fn416605 (void) { P100_ReplayMenuInit(); }
 void P58_Fn51763A (const char *a0, int32_t a1) { P98_LoadLang(a0, a1); }
 void P58_Fn413E37 (void) { P100_PadMenuInit(); }
 
+/* ==== manual part: tools/gen_native_links.py keeps everything below verbatim ==== */
+#include <string.h>
+#include <stdio.h>
+#include "../../game/engine.h"
+void P56_Fn4E5284 (void *a0) { (void)a0; P94_FadeStep(); }   /* v2.25: секундомер интервью (конец по времени) */
 static void link_miss0(const char *fn, uint32_t a, uint32_t b) { char m[96]; snprintf(m, sizeof m, "%s: no native object %08x/%08x", fn, (unsigned)a, (unsigned)b); DebugLog(m); }
 /* v2.00: заглушки unported.h, у которых уже есть перенос (найдены запуском игры: «not ported» в журнале) */
 /* v2.25: 0052a910 — CRT sprintf(dst, fmt, a) по адресам Game.exe: строки сообщений интервью/тренировки (004e5982 → буфер 00d04680,
@@ -486,3 +489,45 @@ void Call004B998B(uint32_t a0) { int32_t *p = (int32_t *)re_ptr(a0); if (p) P101
 void P56_DrawText (int32_t a0, int32_t a1, const char *a2, int32_t a3, int32_t a4, int32_t a5, int32_t a6, int32_t a7) {
   P70_ShadowText(a0, a1, re_addr(a2), a3, (uint32_t)a4, (uint8_t)a5, (uint8_t)a6, (uint8_t)a7);
 }
+/* fix/link-mismatch (DEAD_CODE_AUDIT 7.1): 16 заглушек unported.h, у которых перенос по адресу есть, но генератор не связывал их
+   из-за несовпадения типов. Адреса Game.exe → re_ptr/re_span, пустые/лишние аргументы оригинала отброшены (сверено с Game.exe). */
+void Fn00416040(int32_t a0) { (void)a0; SetupMiami00416040(); }               /* 00416040: аргумент не читается (cdecl, 004160a3 add esp,4) */
+void Call004D78F3(int32_t a0) { (void)a0; (void)P21_FrameTicks(); }           /* 004d78f3: аргумент не читается, результат вызывающий (0040c813) не берёт */
+void G6Call00519D22(int32_t a0) { (void)a0; (void)ReturnOne00519D22(); }       /* 00519d22: в Game.exe пустая функция «return 1» (титры, 00519d2c/00519d70) */
+int32_t P47_Fn405FDB(int32_t a0, int32_t a1) {                                /* 00405fdb ReplayCheck(slot, out): out — адрес, 0 → NULL (оригинал проверяет) */
+  return P59_ReplayCheck(a0, re_ptr((uint32_t)a1)); }
+void Call00524496(uint32_t a0, int32_t a1) {                                  /* 00524496 LoadBank(имя, слот): имя — строка .data (TITLE.DSS / MOTEL.DSS) */
+  const char *s = (const char *)re_ptr(a0);
+  if (s) (void)P77_LoadBank(s, (uint16_t)a1); else link_miss("Call00524496", a0, 0); }
+void P62_Fn424A02(uint32_t a, void *b) { CallIf424A02((int32_t)a, (int32_t)re_addr(b)); }   /* 00424a02(handle, страница): страница — адрес Game.exe (P62_Page 00b32a34) */
+void Call004DAA36(uint32_t a0, uint32_t a1) {                                /* 004daa36 ObjInit(запись машины 00d077c0+i*0x148, позиция q[3]) */
+  uint8_t *o = (uint8_t *)re_span(a0, 0x148); const int32_t *q = (const int32_t *)re_span(a1, 12);
+  if (o && q) P56_ObjInit(o, q); else link_miss("Call004DAA36", a0, a1); }
+void Call004D28A3(int32_t a0) {                                               /* 004d28a3 CarSounds(таблица звуков) — адрес Game.exe */
+  uint8_t *t = (uint8_t *)re_ptr((uint32_t)a0);
+  if (t) P100_CarSounds(t); else link_miss("Call004D28A3", (uint32_t)a0, 0); }
+void Call00514A47(int32_t a0) {                                               /* 00514a47 PartAim(частица/пешеход) — адрес Game.exe */
+  int16_t *p = (int16_t *)re_ptr((uint32_t)a0);
+  if (p) P98_PartAim(p); else link_miss("Call00514A47", (uint32_t)a0, 0); }
+void Call00528982(uint32_t a0) {                                              /* 00528982 Xform(вектор float[3]) на P44_MatPtr */
+  float *v = (float *)re_span(a0, 12);
+  if (v) P44_Xform(v); else link_miss("Call00528982", a0, 0); }
+void Call004BF910(uint32_t a0, uint32_t a1, uint32_t a2) {                    /* 004bf910 FpsToBuf(8-битный экран 640 байт/строка, fg, bg) */
+  uint8_t *d = (uint8_t *)re_span(a0, 0x280 * 8);                             /* 8 строк глифов; ширина текста «NNNNfps» < 640 */
+  if (d) P21_FpsToBuf(d, (uint8_t)a1, (uint8_t)a2); else link_miss("Call004BF910", a0, 0); }
+void Call004D8F30(uint32_t a0) {                                              /* 004d8f30 DebugFree(адрес блока DebugMalloc, re_addr) */
+  if (a0 == 0) return;
+  void *p = re_ptr(a0);
+  if (p) P98_DebugFree(p); else link_miss("Call004D8F30", a0, 0); }
+void UiCall004D8F30(int32_t a0) { Call004D8F30((uint32_t)a0); }               /* то же 004d8f30 (Ui00426CC6) */
+void Call004D90F4(int32_t a0) {                                               /* 004d90f4 LogLine(строка) — адрес Game.exe; P96_LogLine копирует строку */
+  const char *s = (const char *)re_ptr((uint32_t)a0);
+  if (s) P96_LogLine(s); else link_miss("Call004D90F4", (uint32_t)a0, 0); }
+void GameDrawIcon(float x, float y, float sx, float sy, uint32_t icon, uint32_t color) {   /* 004e72f8 IconRect(x, y, w, h, запись значка, цвет) */
+  const uint8_t *ic = (const uint8_t *)re_ptr(icon);
+  if (ic) P96_IconRect(x, y, sx, sy, ic, color); else link_miss("GameDrawIcon", icon, 0); }
+/* 00407e2f IconLfb2x(LFB, x, y, имя): Game.exe передаёт 4 аргумента (00407e18, add esp,0x10); a4/a5 заглушки — лишние у вызывающего P58_ItemsDraw */
+void P58_Fn407E2F(int32_t a0, int32_t a1, int32_t a2, int32_t a3, void *a4, int32_t a5) {
+  (void)a4; (void)a5;
+  uint8_t *dst = (uint8_t *)re_ptr((uint32_t)a0); const char *name = (const char *)re_ptr((uint32_t)a3);
+  if (dst && name) P100_IconLfb2x(dst, a1, (uint32_t)a2, name); else link_miss("P58_Fn407E2F", (uint32_t)a0, (uint32_t)a3); }

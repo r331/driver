@@ -1,3 +1,7 @@
+/* ported99.c — assorted gameplay helpers (English overview; original notes follow): radar transform, gearbox,
+   replay-director camera checks, cop sight, road lookup, free / chase cameras, traffic and cop targets,
+   car model reset and dents, chair objects, junction blocking, script messages and data, event / command
+   lists, path and segment geometry, menu item drawing. */
 /* v1.44: таблица игроков/машин 00d077c0 (game/cartab.h) и функции, читающие её (см. ported99.h). */
 #include "ported99.h"
 #include "p99_data.h"
@@ -188,10 +192,13 @@ int16_t P99_RoadPick;
 #endif
 
 #include "memrw.h"
+/* rd16s — local helper: unaligned int16 read. */
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 #define CAR(i) (&P99_Cars[(i)])
 
 /* ---- 00506a07: точки мира (int x, y, z, —) → координаты радара (x, —, z), поворот на курс машины S_00D11878 ---- */
+/* P99_RadarXform — Game.exe 00506a07.  Transforms n world points (int x, y, z, pad) to radar coordinates (x, -, z),
+   rotated by the radar heading 00d11878. */
 void P99_RadarXform(const int32_t *src, int32_t *dst, int32_t n) {
   uint32_t a = (uint32_t)(-CAR(S_00D11878)->heading) & 0xfff;
   float s = P43_Sin[a], c = P43_Sin[a + 0x400];
@@ -208,30 +215,35 @@ void P99_RadarXform(const int32_t *src, int32_t *dst, int32_t n) {
 }
 
 /* ---- 004d6ae7: коробка передач машины car — передача (+0x142) по оборотам (+0x10c / 2048), вернуть множитель × обороты ---- */
+/* P99_GearBox — Game.exe 004d6ae7.  Picks car `car`'s gear (0..3) from rpm = |forward speed| / 2048 using the shift
+   table P99_GearTab {down (coasting), down (throttle), up, ratio, ratio when coasting}; reverse uses gear 0.
+   Returns ratio * rpm (used as the engine pitch).  TODO(RE): column meanings inferred from use. */
 int32_t P99_GearBox(int32_t car) {
   p99_car_t *c = CAR(car);
   int32_t gear = c->gear;
-  int32_t dir = c->ff8, rev = c->f10c, r;
-  if (rev < 1) {
-    r = -rev / 0x800;
+  int32_t throttle = c->ff8, fwd_speed = c->f10c, rpm;
+  if (fwd_speed < 1) {
+    rpm = -fwd_speed / 0x800;
     gear = 0;
   } else {
-    r = rev / 0x800;
+    rpm = fwd_speed / 0x800;
     if (gear < 0) gear = 0;
     if (gear > 3) gear = 3;
     int32_t prev;
     do {
       prev = gear;
-      int32_t lo = dir < 1 ? P99_GearTab[gear][0] : P99_GearTab[gear][1];
-      if (r < lo) gear--;
-      if (P99_GearTab[gear][2] < r) gear++;
+      int32_t down_at = throttle < 1 ? P99_GearTab[gear][0] : P99_GearTab[gear][1];
+      if (rpm < down_at) gear--;
+      if (P99_GearTab[gear][2] < rpm) gear++;
     } while (prev != gear);
   }
   c->gear = (uint8_t)gear;
-  return (dir == 0 ? P99_GearTab[gear][4] : P99_GearTab[gear][3]) * r;
+  return (throttle == 0 ? P99_GearTab[gear][4] : P99_GearTab[gear][3]) * rpm;
 }
 
 /* ---- 004c3427: камера режиссёра — дистанция до машины cam[4] (тип 0 — по cam[3]) ---- */
+/* P99_CamCheckDist — Game.exe 004c3427.  Replay-director camera: checks the distance to its target car cam[4]
+   (type 0: by cam[3]) and updates the camera's state. */
 void P99_CamCheckDist(int32_t *cam) {
   if (P29_Mode == 0) return;
   if (cam[4] == -1) cam[4] = 0;
@@ -257,6 +269,9 @@ void P99_CamCheckDist(int32_t *cam) {
 }
 
 /* ---- 004c5e08: камера режиссёра — игрок ушёл далеко / машина трафика пропала ---- */
+/* P99_CamCheckPlayer — Game.exe 004c5e08.  Replay-director camera: returns 1 (and resets the camera) when the followed
+   traffic car is gone, or the player (the leader in chase replays) is too far (>= 0x88b9) or its slot is free;
+   0 when nothing changed. */
 int32_t P99_CamCheckPlayer(int32_t *cam) {
   if (cam[0] == 0) return 0;
   if (cam[0] == 2) {
@@ -277,6 +292,8 @@ int32_t P99_CamCheckPlayer(int32_t *cam) {
 }
 
 /* ---- 004d2b5d: видит ли коп view игрока (вблизи — P56_CopsA, в секторе — P56_CopsB) ---- */
+/* P99_CopsNear — Game.exe 004d2b5d.  Whether cop `view` can see the player: close by (P56_CopsA) or within its view
+   sector (P56_CopsB). */
 int32_t P99_CopsNear(const int16_t *view, uint8_t *car) {
   int32_t r0 = view[0] >> 4, r1 = view[1] >> 4;
   if (UiVar00B87E38 == 0x15a || UiVar00B87E38 == 0x15b || UiVar00B87E38 == 0x1be || UiVar00B87E38 == 0x1bf)
@@ -294,6 +311,7 @@ int32_t P99_CopsNear(const int16_t *view, uint8_t *car) {
 }
 
 /* ---- 0051b7a3: узел дороги под машиной car (по направлению движения) или -1 ---- */
+/* P99_RoadAtCar — Game.exe 0051b7a3.  Road node under car `car` (chosen by its direction of travel), or -1. */
 int32_t P99_RoadAtCar(uint32_t car) {
   const p99_car_t *c = CAR(car & 0xff);
   uint32_t dir = (uint8_t)Round1024(c->heading);
@@ -319,6 +337,8 @@ int32_t P99_RoadAtCar(uint32_t car) {
 #else
 #  define P99_KEY(a) KeyState[(a) - 0x00d04b00]
 #endif
+/* P99_FreeCamMove — Game.exe 0049c99c.  Debug free camera: left/right and up/down arrows (and two pad buttons for
+   height) move an offset by 0x200; the camera sits at player + offset, looking straight down (AngA 0x400). */
 void P99_FreeCamMove(void) {
   if (P99_KEY(0x00d04bcb) != 0) P62_I137388 -= 0x200;
   else if (P99_KEY(0x00d04bcd) != 0) P62_I137388 += 0x200;
@@ -334,6 +354,7 @@ void P99_FreeCamMove(void) {
 }
 
 /* ---- 0049e47b: камера за игроком (матрица по углам машины, смещение (0, 60, 350)) ---- */
+/* P99_CamBehind — Game.exe 0049e47b.  Chase camera behind the player: matrix from the car's angles, offset (0, 60, 350). */
 void P99_CamBehind(void) {
   const p99_car_t *c = CAR(0);
   P59_AngA = (uint16_t)(c->ang[0] & 0xfff);
@@ -354,6 +375,7 @@ void P99_CamBehind(void) {
 }
 
 /* ---- 004e9427: сброс маркера/сферы и углов игрока ---- */
+/* P99_MarkerReset — Game.exe 004e9427.  Resets the marker / sphere and the player's angles. */
 void P99_MarkerReset(void) {
   P98_MrkOff = 0;
   P96_InitSphere();
@@ -374,6 +396,10 @@ void P99_MarkerReset(void) {
 }
 
 /* ---- 004a1b2d: ближайшая машина трафика впереди игрока, развёрнутая к нему (флаг +0x15 записи) ---- */
+/* P99_TrafficAhead — Game.exe 004a1b2d.  Picks a traffic car (record index) heading towards the player: returns at
+   once a record already marked (+0x15); otherwise the last active undamaged car outside the visible cells
+   whose heading is more than 90 deg from the player's and that points at the player (within ~63 deg),
+   which is then marked.  -1 if none. */
 int32_t P99_TrafficAhead(void) {
   float pp[3] = { (float)CAR(0)->pos[0], 0.0f, (float)CAR(0)->pos[2] };
   int32_t cx, cy;
@@ -402,6 +428,8 @@ int32_t P99_TrafficAhead(void) {
 }
 
 /* ---- 004a6e84: цель копа — точка 00c1cd20[P97_B2B0], если игрок далеко и мало копов её уже держат ---- */
+/* P99_CopTarget — Game.exe 004a6e84.  Cop target: point 00c1cd20[P97_B2B0] when the player is far away and few cops
+   already head there. */
 int32_t P99_CopTarget(int32_t *cop) {
   if (P97_B2B0 != -1) {
     int32_t tx = rd32(&P11_00c1cd20[P97_B2B0 * 8]), tz = rd32(&P11_00c1cd20[P97_B2B0 * 8 + 4]);
@@ -428,7 +456,10 @@ int32_t P99_CopTarget(int32_t *cop) {
 }
 
 /* ---- 004c0218: целая модель машины car (-1 — игрок): вершины/нормали/операции из модели P28_CarClean[тип] ---- */
+/* p99_model — local helper: model pointer from a model reference (NULL for 0). */
 static const uint8_t *p99_model(uint32_t ref) { return ref != 0 ? (const uint8_t *)P79_PTR(ref) : NULL; }
+/* P99_CarModelClean — Game.exe 004c0218.  Restores car `car`'s model (-1 = the player) to the undamaged one:
+   vertices, normals and operations copied from P28_CarClean[model]. */
 void P99_CarModelClean(int32_t car) {
   int32_t slot = car + 1;
   uint32_t kind = slot == 0 ? 0u : TrafficRecs[car * 0x54 + 0xc];
@@ -444,6 +475,8 @@ void P99_CarModelClean(int32_t car) {
 }
 
 /* ---- 004c1b6c: сброс вмятин игрока (car 0) или операций модели машины car ---- */
+/* P99_CarOpsReset — Game.exe 004c1b6c.  Removes the player's dents (car 0: restores the dent texture page from the
+   clean copy) or resets the model operations of car `car`. */
 void P99_CarOpsReset(int32_t car) {
   if (car == 0) {
     const uint8_t *d = (const uint8_t *)re_ptr((uint32_t)P27_DentTex[0]);
@@ -711,11 +744,12 @@ p99_rgb_t P99_Rgb8;
 #pragma pop_macro("P99_Rgb8")
 #endif
 
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
+/* wrf / rd16 / wr16 — local helpers: unaligned float / uint16 access. */
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
 
 /* ---- 004a2e14: кресло в точке (x, y) клетки сетки P58_Grid — занять (флаг 1 записи, слот в A_01134540) ---- */
+/* P99_ChairHit — Game.exe 004a2e14.  Occupies the chair at (x, y) in its cell of P58_Grid (flag 1, slot in
+   01134540).  TODO(RE): "chair" is the original naming of these objects; unsure what they are in game. */
 int32_t P99_ChairHit(float x, float y) {
   int32_t r = 0;
   if (P58_Grid == NULL) return 0;
@@ -741,7 +775,10 @@ int32_t P99_ChairHit(float x, float y) {
 }
 
 /* ---- 00496eb4: перекрёсток node заблокирован светофором для выбранного узла P99_RoadPick ---- */
+/* p99_link — local helper: link k of junction node n (table 00c1ed80, 0x2c bytes per node). */
 static int16_t p99_link(int32_t n, int32_t k) { return rd16s(&P11_00c1ed80[0xa + n * 0x2c + k * 8]); }
+/* P99_JunctionBlock — Game.exe 00496eb4.  Whether junction `node` is blocked by its traffic light for the chosen
+   road node P99_RoadPick. */
 int32_t P99_JunctionBlock(int32_t node) {
   if (P99_RoadPick == -1 || P99_RoadPick == node) return 0;
   int16_t b = rd16s(&P11_00bf1c40[4 + node * 0x42]);
@@ -764,11 +801,14 @@ int32_t P99_JunctionBlock(int32_t node) {
 }
 
 /* ---- 004f4d3c: сообщения скрипта (WINDOWMESSAGE / LOSETAILMESSAGE / MAXSPEEDMESSAGE) по флагам объектов P58_Objs ---- */
+/* p99_msg — local helper: value of the named script message variable. */
 static int32_t p99_msg(const char *name) {
   int32_t v = P42_FindVar(name);
   if (-1 < v && P42_Vars[v].addr != 0) { DrawTextLine004FBBC5((int32_t)P42_Vars[v].addr); return 1; }
   return 0;
 }
+/* P99_ScriptMsgs — Game.exe 004f4d3c.  Shows the script messages WINDOWMESSAGE / LOSETAILMESSAGE / MAXSPEEDMESSAGE
+   according to the flags of the mission objects P58_Objs. */
 int32_t P99_ScriptMsgs(void) {
   if (G6_00B87EA0 != 0 || P62_HudOff2 != 0) return 0;
   for (int32_t i = 0; i < 10; i++) {
@@ -795,6 +835,7 @@ int32_t P99_ScriptMsgs(void) {
 }
 
 /* ---- 00412d7d: затемнить (on = 0 — белые, иначе серые 0x40) пункты меню и подписи ---- */
+/* P99_MenuDim — Game.exe 00412d7d.  Menu items and labels white (on == 0) or dimmed grey 0x40. */
 void P99_MenuDim(int32_t on) {
   Ui0040C867();
   uint8_t v = on == 0 ? 0xff : 0x40;
@@ -805,6 +846,8 @@ void P99_MenuDim(int32_t on) {
 }
 
 /* ---- 00514c9f: частица p окажется перед плоскостью (+0x94/+0x9c, нормаль +0x64/+0x6c) через n шагов пути ---- */
+/* P99_PartAhead — Game.exe 00514c9f.  Whether pedestrian/particle p will be in front of its plane (+0x94/+0x9c,
+   normal +0x64/+0x6c) after n path steps. */
 int32_t P99_PartAhead(uint8_t *p, int32_t n) {
   if ((rd32(p + 0xc) & 0x80) != 0) return 0;
   int32_t k = rd32(p + 0x34);
@@ -831,6 +874,8 @@ int32_t P99_PartAhead(uint8_t *p, int32_t n) {
 }
 
 /* ---- 00420854: колбэк перечисления форматов текстур DirectDraw (stdcall ret 8): DDPIXELFORMAT fmt (8 dword) → ctx ---- */
+/* P99_DDEnumFmt — Game.exe 00420854, stdcall (ret 8).  DirectDraw texture-format enumeration callback: records
+   DDPIXELFORMAT fmt (8 dwords) into ctx. */
 int32_t P99_DDEnumFmt(const uint32_t *fmt, uint8_t *ctx) {
   if (ctx == NULL) return 1;
   uint32_t fl = (uint32_t)rd32(ctx + 0x58c);
@@ -852,6 +897,7 @@ int32_t P99_DDEnumFmt(const uint32_t *fmt, uint8_t *ctx) {
 }
 
 /* ---- 004f638d: освободить данные скрипта миссии (список, строки, строковые переменные типа 1) ---- */
+/* P99_ScriptFree — Game.exe 004f638d.  Frees the mission script data (list, strings, string variables of type 1). */
 void P99_ScriptFree(void) {
   if (P77_List != NULL) {
     for (int32_t i = 0; i < P77_ListN; i++) { if (P77_List[i] != NULL) P98_DebugFree(P77_List[i]); P77_List[i] = NULL; }
@@ -873,6 +919,7 @@ void P99_ScriptFree(void) {
 
 /* ---- 004d3444: освободить буферы карты уровня ---- */
 #define P99_FREE(v) do { if ((v) != NULL) { P98_DebugFree((void *)(v)); (v) = NULL; } } while (0)
+/* P99_MapFree — Game.exe 004d3444.  Frees the level's map buffers. */
 void P99_MapFree(void) {
   FreeMapBuffer400000();
   FreeMapBufs004ECE1A();
@@ -896,11 +943,13 @@ void P99_MapFree(void) {
 }
 
 /* ---- 0049ea37: шаг сценария камеры (ключи P99_CamKeys, сплайн P98_CamSpline) ---- */
+/* p99_cam_end — local helper: ends the scripted camera sequence. */
 static void p99_cam_end(void) {
   P99_CamOn = 0; P99_CamDone = 1;
   P61_V1C = (int32_t)((uint32_t)(CAR(0)->heading + P61_V18) & 0xfff);
   P99_CamSpd = P99_CamMax << 12;
 }
+/* P99_CamScriptStep — Game.exe 0049ea37.  One step of a scripted camera sequence (keys P99_CamKeys, spline P98_CamSpline). */
 void P99_CamScriptStep(void) {
   if (P99_CamDelay != 0) {
     P99_CamDelay--;
@@ -926,6 +975,7 @@ void P99_CamScriptStep(void) {
 }
 
 /* ---- 004f8862: строковая переменная скрипта (тип 1): копия s в куче, адрес — в поле +0x24 ---- */
+/* P99_VarSetStr — Game.exe 004f8862.  Sets script string variable var (type 1): copies s to the heap, address in +0x24. */
 void P99_VarSetStr(uint8_t *var, const char *s) {
   if (rd32(var + 0x20) != 1) return;
   size_t n = strlen(s);
@@ -952,6 +1002,8 @@ static const char *const k_cmdfmt[P99_CMD_N] = P99_CMDFMT_INIT;
 #  define P99_FMT_14 P99_FMT14
 #  define P99_FMT_15 P99_FMT15
 #endif
+/* P99_CmdAppend — Game.exe 004a5338.  Appends command `cmd` with its arguments (size / format tables 00551b32 /
+   00551bb0) to event object ev's command list. */
 void P99_CmdAppend(uint16_t cmd, uint8_t *ev) {
   uint32_t sz = P99_CMDSZ(cmd);
   uint8_t *w;
@@ -982,6 +1034,8 @@ void P99_CmdAppend(uint16_t cmd, uint8_t *ev) {
 }
 
 /* ---- 004a4340: новое событие (узел 0x24 + объект 0x60) в конец списка скрипта P15_ListHead ---- */
+/* P99_EventAdd — Game.exe 004a4340.  New event (node 0x24 + object 0x60) at the end of the script list P15_ListHead;
+   used for the n-th copy of a MULTIEVENT. */
 void P99_EventAdd(int32_t n) {
   uint8_t *ev = (uint8_t *)P98_DebugMalloc(0x24, "D:\\Driver\\Game\\compiler.c", 0x1cd);
   if (ev == NULL) { P26_ErrorInLine("Not enough memory for events!"); return; }
@@ -1006,6 +1060,8 @@ void P99_EventAdd(int32_t n) {
 }
 
 /* ---- 0051358d: частица p (тип 4) — на свободное кресло клетки под ней, если частиц меньше лимита ---- */
+/* P99_PartOnChair — Game.exe 0051358d.  Puts pedestrian/particle p (type 4) on a free chair of the cell under it,
+   while there are fewer than the limit. */
 int32_t P99_PartOnChair(uint8_t *p, int32_t n) {
   int32_t r = 0;
   if (!(G8_00C56710 < P73_C56760 && n < P73_C56760 / 4)) return 0;
@@ -1035,6 +1091,7 @@ int32_t P99_PartOnChair(uint8_t *p, int32_t n) {
 }
 
 /* ---- 004f568a: цель скрипта g (тип 2/7) достигнута/потеряна — состояние 0x7fff и сброс флагов объекта o ---- */
+/* P99_GoalCheck — Game.exe 004f568a.  Script goal g (type 2 / 7) reached or lost: state 0x7fff and clears object o's flags. */
 void P99_GoalCheck(int32_t t, uint8_t *g, int32_t *o) {
   int32_t busy = 0;
   if (0x2a9 < G2_00D11A5C && (P95_SndReady != 0 || 0 < P95_AmbN)) busy = 1;
@@ -1050,6 +1107,9 @@ void P99_GoalCheck(int32_t t, uint8_t *g, int32_t *o) {
 }
 
 /* ---- 004a7920: проекция машины (+0xc64/+0xc6c) на путь (список +0x60: узел +0 следующий, +8/+0xc точка) ---- */
+/* P99_PathAhead — Game.exe 004a7920.  Projects the cop record's position (+0xc64/+0xc6c) onto its path (list +0x60:
+   node +0 next, +8/+0xc point), advancing the current segment index (+0x14) as needed; returns the
+   projection along the current segment (octagonal length), or 0 when the path ended (clears +0xcb8). */
 int32_t P99_PathAhead(uint8_t *car) {
   if (rd32(car + 0xcb8) == 0) return 0;
   uint8_t *n = car + 0x60;
@@ -1074,6 +1134,8 @@ int32_t P99_PathAhead(uint8_t *car) {
 }
 
 /* ---- 00526aeb: пересечение отрезков ab и cd (целые): 0 — нет, 1 — точка (ox, oy), 2 — параллельны ---- */
+/* P99_SegCross — Game.exe 00526aeb.  Intersection of integer segments ab and cd: 0 none, 1 point (*ox, *oy),
+   2 parallel. */
 int32_t P99_SegCross(const int32_t *a, const int32_t *b, const int32_t *c, const int32_t *d, int32_t *ox, int32_t *oy) {
   int32_t a1 = b[1] - a[1], b1 = a[0] - b[0], c1 = b[0] * a[1] - a[0] * b[1];
   uint32_t r3 = (uint32_t)(b1 * c[1] + c1 + a1 * c[0]), r4 = (uint32_t)(b1 * d[1] + c1 + a1 * d[0]);
@@ -1092,6 +1154,9 @@ int32_t P99_SegCross(const int32_t *a, const int32_t *b, const int32_t *c, const
 }
 
 /* ---- 00526cd5: отсечение отрезка a→b прямоугольником box (x0, x1? см. P43_ClipT): o1 — новый конец, o0 — новое начало ---- */
+/* P99_SegClip — Game.exe 00526cd5.  Clips segment a -> b to rectangle box (Liang-Barsky, P43_ClipT): *o0 new start,
+   *o1 new end; box = {x0, y0, x1, y1}.  Returns 1 if an end was moved, 0 if unchanged or rejected
+   (o0/o1 are only written when moved). */
 int32_t P99_SegClip(const int32_t *box, const int32_t *a, const int32_t *b, int32_t *o0, int32_t *o1) {
   int32_t dx = b[0] - a[0], dy = b[1] - a[1], r = 0;
   if (dx == 0 && dy == 0) return 0;
@@ -1114,6 +1179,8 @@ int32_t P99_SegClip(const int32_t *box, const int32_t *a, const int32_t *b, int3
 
 /* ---- 0050f569: пункты меню (записи 0x14: x16, y16, флаги текста8, флаги8 (+5: 1 — строка языка, 2 — адрес, 4, 0x10 — конец),
         +8 текст) — тень, затем цвет: 0 — жёлтый, выбранный P17_ValA — красный ---- */
+/* P99_MenuItems — Game.exe 0050f569.  Draws pause-menu items (0x14-byte records: x16, y16, text flags, flags (+5:
+   1 language string, 2 address, 4, 0x10 end), +8 text) with a shadow; yellow, the selected one (P17_ValA) red. */
 void P99_MenuItems(const int16_t *it) {
   int32_t k = 0;
   for (; (((const uint8_t *)it)[5] & 0x10) == 0; it += 10) {

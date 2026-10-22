@@ -1,0 +1,7 @@
+# Имена unported.h, которые tools/gen_native_links.py НЕ должен связывать в links.c, хотя перенос по адресу есть
+# (re_hook): связь меняет поведение native — каждое такое имя с причиной в комментарии. Формат: имя [# комментарий].
+#
+# fix/link-ported: список пуст. 38 имён, которые здесь были (cleanup/round2), уже связаны с переносами в native:
+# 36 — шпионами tests/selftest.c («if (!re_selftest_on) return <перенос>(...)», selftest.c входит в native-сборку),
+# 2 (Call004EC91E, Call0040BF50) — platform/native/game_fwd.c. Генератор теперь сам видит определения в tests/*.c,
+# поэтому пропускает их без этого списка. Проверка соответствий адресов — docs/DEAD_CODE_AUDIT.md, п. 7.

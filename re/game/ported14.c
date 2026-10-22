@@ -1,3 +1,5 @@
+/* Assorted gameplay helpers: countdown and idle timers, traffic-light phase, time difference,
+   joystick button test, road junction marking, effect slot allocation. */
 #include "ported14.h"
 #include "ported12.h"
 #include "unported.h"
@@ -293,6 +295,9 @@ p14_00b20360_t P14_00b20360;
 
 #include "memrw.h"
 
+/* P14_Fn004CAC86 — Game.exe 004cac86, cdecl.  Start-of-mission countdown tick: on step 2 of each 30-tick period plays sound 0x10 (counts
+   1..3) or 0x11 (the last one); after three periods sets 00c810c4 = 0x7fff and stops.
+   TODO(RE): unsure — inferred from the 3-step sequence and the two sounds. */
 void P14_Fn004CAC86(void) {
   g_00d14ee4++;
   if (g_00d14ee4 == 2) {
@@ -310,21 +315,10 @@ void P14_Fn004CAC86(void) {
   }
 }
 
-void P14_Fn004E12E4(void) {
-  if (g_00c810c4 == 0xff0) return;
-  if (g_00d078b0 < 3) {
-    if (g_00b5a778 == 0 && g_00b87ee4 == 0) g_00d0778c++;
-  } else {
-    g_00d0778c = 0;
-  }
-  int32_t limit = (g_00bdfa58 == 0 && g_00bdfa44 == 0) ? 300 : 600;
-  if (limit < g_00d0778c) {
-    g_00c810c4 = 0xff0;
-    g_00c810e8 = 2;
-    g_00c81100 = 0x5a;
-  }
-}
 
+/* P14_Fn0051BD9C — Game.exe 0051bd9c, cdecl.  Traffic-light phase timer: when 00c4bdc4 runs out, both phase counters 00c29d80/00c29d81
+   advance 1..4 (wrapping), the next period is 300 ticks for phases 1 and 3 and 100 otherwise
+   (green vs amber, inferred), and 00bf1c20 counts the changes. */
 void P14_Fn0051BD9C(void) {
   g_00c4bdc4--;
   if (g_00c4bdc4 == 0) {
@@ -337,21 +331,27 @@ void P14_Fn0051BD9C(void) {
   }
 }
 
+/* P14_Fn0048DB65 — Game.exe 0048db65, cdecl.  memset(p, 0, n). */
 void P14_Fn0048DB65(void *p, uint32_t n) { memset(p, 0, n); }
 
 /* разность времени a-b (кадры/секунды/минуты) -> out */
+/* P14_Fn00503EF4 — Game.exe 00503ef4, cdecl.  out = a - b for a time record {+0xc hundredths, +0x10 seconds, +0x14 minutes} with borrows.
+   The hundredths borrow is applied after the seconds borrow (as in the original), so seconds can
+   end at -1. */
 void P14_Fn00503EF4(const uint8_t *a, const uint8_t *b, uint8_t *out) {
-  int32_t hi = rd32(a + 0x14) - rd32(b + 0x14);
-  int32_t mid = rd32(a + 0x10) - rd32(b + 0x10);
-  if (mid < 0) { hi--; mid += 0x3c; }
-  int32_t lo = rd32(a + 0xc) - rd32(b + 0xc);
-  if (lo < 0) { mid--; lo += 100; }
-  wr32(out + 0x14, hi);
-  wr32(out + 0x10, mid);
-  wr32(out + 0xc, lo);
+  int32_t minutes = rd32(a + 0x14) - rd32(b + 0x14);
+  int32_t seconds = rd32(a + 0x10) - rd32(b + 0x10);
+  if (seconds < 0) { minutes--; seconds += 0x3c; }
+  int32_t hundredths = rd32(a + 0xc) - rd32(b + 0xc);
+  if (hundredths < 0) { seconds--; hundredths += 100; }
+  wr32(out + 0x14, minutes);
+  wr32(out + 0x10, seconds);
+  wr32(out + 0xc, hundredths);
 }
 
 /* копия блока 128 строк x 128 байт с пропусками */
+/* P14_Fn00504439 — Game.exe 00504439, cdecl.  Copy a 128 x 128-byte block (64 16-bit pixels per row) with source/destination row gaps
+   00b52a38 / 00b32970. */
 void P14_Fn00504439(const uint8_t *src, uint8_t *dst) {
   for (int32_t row = 0; row < 0x80; row++) {
     for (int32_t i = 0; i < 0x40; i++) {
@@ -366,6 +366,7 @@ void P14_Fn00504439(const uint8_t *src, uint8_t *dst) {
 }
 
 /* точка (x,y) внутри треугольника t[0..5] (все три знака векторных произведений >= 0) */
+/* P14_Fn00526A34 — Game.exe 00526a34, cdecl.  1 if (x, y) is inside the triangle t = {x0, y0, x1, y1, x2, y2} (all edge cross products >= 0). */
 int32_t P14_Fn00526A34(int32_t x, int32_t y, const int32_t *t) {
   if ((x - t[0]) * (t[3] - t[1]) - (y - t[1]) * (t[2] - t[0]) < 0) return 0;
   if ((x - t[2]) * (t[5] - t[3]) - (y - t[3]) * (t[4] - t[2]) < 0) return 0;
@@ -373,6 +374,9 @@ int32_t P14_Fn00526A34(int32_t x, int32_t y, const int32_t *t) {
   return 1;
 }
 
+/* P14_Fn004E3924 — Game.exe 004e3924 (IsButtonActive_004E3924): is joystick input k active?  0x20 / 0x21 = stick
+   pushed left / right beyond 14 (with Y within range), 0x22 never, otherwise button k pressed
+   now (00b31db8[k]) and not in the previous poll (00b31d30[k]). */
 int32_t P14_Fn004E3924(uint8_t k) {
   if (k == 0x20) {
     if (g_00b31e20 < -0xe && -0xf < g_00b31dfc) return 1;
@@ -384,12 +388,16 @@ int32_t P14_Fn004E3924(uint8_t k) {
   return 0;
 }
 
+/* P14_Fn0040F0FB — Game.exe 0040f0fb, cdecl.  First active joystick input 0..0x21 (for key redefinition), else 0x22 if Space is held, else -1. */
 int32_t P14_Fn0040F0FB(void) {
   for (int32_t i = 0; i < 0x22; i++)
     if (P14_Fn004E3924((uint8_t)i) != 0) return i;
   return IsKeyDown(0x39) == 0 ? -1 : 0x22;
 }
 
+/* P14_Fn004CAD47 — Game.exe 004cad47, cdecl.  Pick a value for 00d17b18: 0xff if 00b202d8 is set, 0 if 00b202dc, 0x80 if 00b87e84; otherwise
+   sets 00d17b28 to an even random value 0x5a.. and starts 004cb4ff(0x32, 0x32, 0x14).
+   TODO(RE): unsure what these are. */
 void P14_Fn004CAD47(void) {
   if (g_00b202d8 != 0) { g_00d17b18 = 0xff; return; }
   if (g_00b202dc != 0) { g_00d17b18 = 0; return; }
@@ -400,6 +408,8 @@ void P14_Fn004CAD47(void) {
   N14_Fn4CB4FF(0x32, 0x32, 0x14);
 }
 
+/* P14_Fn004A3B80 — Game.exe 004a3b80, cdecl.  Call 004ca98d(kind, id) with kind 0/1/2 by the value at p+0x30 (< 30, < 60, < 90); id = p+0xc.
+   TODO(RE): unsure what kinds 0..5 of 004ca98d are. */
 void P14_Fn004A3B80(const uint8_t *p) {
   int32_t v = rd32(p + 0x30), id = rd32(p + 0xc);
   if (v < 0x1e) P4Call004CA98D(0, id);
@@ -407,6 +417,8 @@ void P14_Fn004A3B80(const uint8_t *p) {
   else if (v < 0x5a) P4Call004CA98D(2, id);
 }
 
+/* P14_Fn004A39F6 — Game.exe 004a39f6, cdecl.  For an active entry p (p+0x10 != 0): update 004fba23(p + 0x30), then unless p+0x14 == 1 call
+   004ca98d with kind 4 (flag 0x100 at p+0x10), 5 (00c810c4 == 0x80f1) or 3 (p+0x30 < 30). */
 void P14_Fn004A39F6(const uint8_t *p) {
   if (p == 0 || rd32(p + 0x10) == 0) return;
   N14_Fn4FBA23(p + 0x30);
@@ -420,6 +432,8 @@ void P14_Fn004A39F6(const uint8_t *p) {
 }
 
 /* ВНИМАНИЕ: первая итерация читает слово перед a (как в оригинале) */
+/* P14_Fn0050D97A — Game.exe 0050d97a, cdecl.  Convert n words (in pairs) of a to b: bits 10..13 shifted to 1..4, bit 0 = bit 16 of the
+   previous word.  The first iteration reads the word before a (as in the original). */
 void P14_Fn0050D97A(const uint32_t *a, uint32_t *b, int32_t n) {
   int32_t left;
   do {
@@ -436,18 +450,10 @@ void P14_Fn0050D97A(const uint32_t *a, uint32_t *b, int32_t n) {
 }
 
 
-int32_t P14_Fn004A6749(void) {
-  for (int32_t i = 1; i <= 8; i++) {
-    uint32_t *e = &g_0112da00[(i - 1) * 0x336];
-    if (e[0x32d] == 0) {
-      P14_Fn0048DB65(e, 0xcd8);
-      e[0] = (uint32_t)(i - 1);
-      return i;
-    }
-  }
-  return -1;
-}
 
+/* P14_Fn0051BED5 — Game.exe 0051bed5, cdecl.  Mark plain road nodes: for each road slot (00c1ed80, 0x2c bytes, 00b5a8ec entries) byte 3 = 1
+   when exactly two of its four neighbour links (int16 at +0xa, +0x12, +0x1a, +0x22) are set
+   (not -1), else 0.  Read by P63_CanEnter. */
 void P14_Fn0051BED5(void) {
   for (int32_t i = 0; i < g_00b5a8ec; i++) {
     uint8_t *e = &g_00c1ed80[i * 0x2c];
@@ -461,6 +467,8 @@ void P14_Fn0051BED5(void) {
 
 
 
+/* P14_Fn004A7E6E — Game.exe 004a7e6e, cdecl.  Call 004d2ade(a), then raise event 0x8000..0x8003 by the value 00d11a5c (> 0x2a9, >= 0x5ff,
+   >= 0x954, >= 0xca9).  TODO(RE): unsure what the thresholds/events denote. */
 void P14_Fn004A7E6E(int32_t a) {
   N14_Fn4D2ADE(a);
   uint32_t v = g_00d11a5c;
@@ -473,6 +481,8 @@ void P14_Fn004A7E6E(int32_t a) {
 }
 
 
+/* P14_Fn004D623B — Game.exe 004d623b, cdecl.  Unless paused (00b5a778) or 00d118a8 is set: run the mode-specific update for 00b87e48
+   (1: 004d6c5a, 2: 004d6dac, 3: 005259c8(a)), then 004d6ef2. */
 void P14_Fn004D623B(int32_t a) {
   if (g_00b5a778 == 0 && g_00d118a8 == 0) {
     if (g_00b87e48 == 1) N14_Fn4D6C5A();
@@ -482,6 +492,8 @@ void P14_Fn004D623B(int32_t a) {
   }
 }
 
+/* P14_Fn00503E83 — Game.exe 00503e83, cdecl.  Comparison for sorting time records: 1 if a+4 != 8, else 1 when b's time (00503ecc) is less
+   than a's.  TODO(RE): unsure what field +4 == 8 means. */
 int32_t P14_Fn00503E83(const uint8_t *a, const uint8_t *b) {
   if (rd32(a + 4) != 8) return 1;
   return (int32_t)N14_Fn503ECC(b) < (int32_t)N14_Fn503ECC(a) ? 1 : 0;

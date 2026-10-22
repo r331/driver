@@ -1,4 +1,7 @@
 /* v1.53 (см. ported108.h). */
+/* ported108.c (English overview) — replay playback step, emulated texture surfaces, FMV audio start,
+   radar shapes (arrow, traffic cars, data-defined figures), object smoke quads, data sprites, filled
+   rectangles and map texture rectangles.  English lines below each Russian note. */
 #include "aspect.h"
 #include "ported108.h"
 #include "ported107.h"
@@ -180,6 +183,8 @@ static void tex_select(const uint8_t *ic) {
 }
 
 /* ---- 00518ab4: такт воспроизведения записи машины 0x41; на последнем кадре — вернуть сохранённое состояние ---- */
+/* P108_ReplayStep — Game.exe 00518ab4.  Plays back the recording of car 0x41 one frame; on the last
+   frame restores the saved state. */
 void P108_ReplayStep(void) {
   if (G6_00B87EA0 != 0 && P88_Mode575 == 2 && P101_RecState == 0) return;
   if (P101_RecSaved == 0) return;
@@ -200,6 +205,8 @@ void P108_ReplayStep(void) {
 }
 
 /* ---- 0042205e / 00421e6c: эмулируемая текстура слота 256×256 (DDSURFACEDESC 0x7c, флаги 0x1007) ---- */
+/* P108_EmulTex16 — Game.exe 0042205e / P108_EmulTex8 — Game.exe 00421e6c.  Emulated 256x256 texture
+   surface for a slot (DDSURFACEDESC 0x7c bytes, flags 0x1007), 16-bit / 8-bit. */
 static int32_t emul_make(int32_t slot, int32_t pf_ofs, int32_t bpp, int32_t list) {
   uint32_t d[31];
   memset(d, 0, sizeof d);
@@ -238,6 +245,8 @@ int32_t P108_EmulTex8(int32_t slot) {
 }
 
 /* ---- 0048b5e3: второй поток FMV — SetState(RUN), таймер на (длительность + 1) с ---- */
+/* P108_FmvStart — Game.exe 0048b5e3.  Starts the second (audio) FMV stream and a timer for its length
+   + 1 s.  Returns 1 on success. */
 int32_t P108_FmvStart(void) {
   if (P38_Mms2 == NULL || plat_mms_set_state(P38_Mms2, 1) != 0) return 0;
   P38_TimerFlag = 0; G00551134 = 0;
@@ -247,6 +256,7 @@ int32_t P108_FmvStart(void) {
 }
 
 /* ---- 00504a0a: треугольник-стрелка радара (вершина вверх), красный с яркостью red ≤ 255 ---- */
+/* P108_RadarArrow — Game.exe 00504a0a.  Radar arrow triangle (apex up), red with brightness red <= 255. */
 void P108_RadarArrow(int32_t x, int32_t red) {
   if (red > 0xff) red = 0xff;
   int32_t W = P19_ScrW, H = P19_ScrH;
@@ -269,6 +279,8 @@ void P108_RadarArrow(int32_t x, int32_t red) {
 }
 
 /* ---- 00505e2b: машина трафика на радаре — треугольник по курсу (длина 00d11a42, раствор 00d11a44) ---- */
+/* P108_RadarCar — Game.exe 00505e2b.  A traffic car on the radar: triangle along its heading (length
+   00d11a42, spread 00d11a44). */
 void P108_RadarCar(float x, float z, int32_t i) {
   int32_t red = (0x2a9 < G2_00D11A5C && (P95_SndReady != 0 || 0 < P95_AmbN)) ? 1 : 0;
   state_flat(); blend3();
@@ -299,6 +311,8 @@ void P108_RadarCar(float x, float z, int32_t i) {
 }
 
 /* ---- 004b1993 / 004b1ea0: квадрат дыма объекта (+0x10/+0x14/+0x18 вид, +0x50 размер), значок SMOKE ---- */
+/* P108_SmokeA — Game.exe 004b1993 / P108_SmokeB — Game.exe 004b1ea0.  Smoke quad of an object (+0x10/
+   +0x14/+0x18 view position, +0x50 size) with the SMOKE icon. */
 #ifndef RE_HOOK_BUILD
 static const uint8_t k_smoke_rgb[24][3] = {   /* .data 00553680 */
   {7,7,7},{25,2,2},{35,0,0},{60,0,0},{60,25,0},{60,35,0},{60,55,0},{60,55,25},{60,55,35},{60,55,55},{70,70,70},{0,0,0},
@@ -357,6 +371,8 @@ void P108_SmokeB(const uint8_t *o) {
 }
 
 /* ---- 004b4b27: спрайт записи .data (+4 значок, +8 rgb, +0xc яркость, +0x10/+0x14 x,y, +0x18 размер), поворот ang; вершины 00b20060.. ---- */
+/* P108_Sprite — Game.exe 004b4b27.  Sprite from a .data record (+4 icon, +8 rgb, +0xc brightness,
+   +0x10/+0x14 x,y, +0x18 size) rotated by ang; vertices in 00b20060... */
 #define SV(addr) ((p85_rv *)&P107_SprV[((addr) - 0x00b1ffd0u) / 4])
 void P108_Sprite(uint32_t recaddr, float oow, uint32_t ang) {
   const uint8_t *r = (const uint8_t *)re_ptr(recaddr);
@@ -395,6 +411,8 @@ void P108_Sprite(uint32_t recaddr, float oow, uint32_t ang) {
 
 /* ---- 00503f76: фигура радара — запись .data {вершины (по 16 байт), индексы (по 3), число треугольников} в точке pos+ofs.
    Фигура 00573f08 смещается по x на 4·00c808f4 (мигание). ---- */
+/* P108_RadarShape — Game.exe 00503f76.  Radar figure from a .data record {vertices (16 bytes each),
+   index triples, triangle count} at pos + ofs; figure 00573f08 is shifted in x by 4 * 00c808f4 (blink). */
 void P108_RadarShape(uint32_t shape, const int32_t *pos, const int32_t *ofs, const int32_t *scr) {
   if (P98_C824A0 != 0) return;
   float v[3];
@@ -444,6 +462,8 @@ void P108_RadarShape(uint32_t shape, const int32_t *pos, const int32_t *ofs, con
 }
 
 /* ---- 004d7c46 / 004d7deb: прямоугольник 0xRRGGBB двумя треугольниками (смешивание 0 / 3), после — состояние «грязное» (-1) ---- */
+/* P108_FillRect — Game.exe 004d7c46 / P108_FillRectB — Game.exe 004d7deb.  Filled rectangle colour
+   0xRRGGBB as two triangles (blend 0 / 3); the render state is marked dirty (-1) afterwards. */
 static void fill_rect(float x, float y, float w, float h, uint32_t rgb, int blend) {
   state_flat();
   if (blend == 0) { if (P85_BlendCur != 0) { if (P85_BlendFn) P85_BlendFn(4, 0, 4, 0); P85_BlendCur = 0; P69_BlendOn = 0; } }
@@ -464,6 +484,8 @@ void P108_FillRectB(float x, float y, float w, float h, uint32_t rgb) { fill_rec
 
 /* ---- 00507eea: текстурный прямоугольник карты (страница tex, uv u0,v0..u1,v1 с поправкой 0.5), вершины через P94_MapToScreen,
    grDrawPolygonVertexList (01270e78) по имени из P33 ---- */
+/* P108_MapTexRect — Game.exe 00507eea.  Textured map rectangle (page tex, uv u0,v0..u1,v1 with a 0.5
+   texel correction); vertices through P94_MapToScreen, drawn with grDrawPolygonVertexList. */
 #ifdef RE_HOOK_BUILD
 #  define P108_STD __attribute__((stdcall))
 #else

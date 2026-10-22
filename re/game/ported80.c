@@ -1,3 +1,9 @@
+/* ported80.c — loading the map blocks of a level file (English overview): model block (P80_LoadModels), map
+   header / grid / light block (P80_LoadHeader), and model bounding boxes.  All cdecl.
+   Light: P80_Save* = the level's normal sun light (direction + intensity from the header), P80_Alt* = the same
+   scaled by (2 * G00B87E4C) / 45 + 0.2, used at night and at dawn (P14_00b202d8 — script keyword DAWN;
+   P14_00b202dc = DUSK keeps the normal light).  By day in rain (P26_FxA) the light is dimmed to 0.45 / 0.5.
+   TODO(RE): G00B87E4C — presumably the night brightness setting. */
 #include "ported80.h"
 #include "ported81.h"
 #include <math.h>
@@ -249,6 +255,7 @@ float P80_Half;
 #endif
 
 /* Значения float-констант из .data Game.exe: 1.0, 45.0, 0.2 (0x3e4ccccd), 0.45 (0x3ee66666), 0.5 */
+/* Native only: values of the float constants kept in .data by the original (1.0, 45.0, 0.2, 0.45, 0.5). */
 void P80_InitConsts(void) {
 #ifndef RE_HOOK_BUILD
   P80_One = 1.0f; P80_C45 = 45.0f; P80_C02 = 0.2f; P80_C045 = 0.45f; P80_Half = 0.5f;
@@ -259,6 +266,10 @@ static uint32_t rd32(const void *p, int o) { uint32_t v; memcpy(&v, (const uint8
 static uint16_t rd16(const void *p, int o) { uint16_t v; memcpy(&v, (const uint8_t *)p + o, 2); return v; }
 static float rdf(const void *p, int o) { float v; memcpy(&v, (const uint8_t *)p + o, 4); return v; }
 
+/* P80_Bounds — Game.exe 00426ce3.  Axis-aligned bounding box of model `model` over the vertices referenced by
+   all its records (3 for even record types, 4 for odd = quads; record stride from G2_TABLE_00550ACC).
+   out (8 floats): min x, y, z, max x, y, z, height (max y - min y), and as int bits round(height) (also left in
+   P11_00ba52d0 like the original's fistp).  Returns out. */
 /* 00426ce3: вершины модели (+0x20, шаг 0x10) берутся по индексам записей (+8, +0xc, +0x10 и для нечётного типа +0x14);
    шаг записи — G2_TABLE_00550ACC[тип]. Сравнения строгие, как в x87-коде оригинала. */
 float *P80_Bounds(float *out, int32_t model) {
@@ -288,6 +299,11 @@ float *P80_Bounds(float *out, int32_t model) {
 }
 
 /* 004eb490 */
+/* P80_LoadModels — Game.exe 004eb490.  Reads the level's model block: count, then [size][data] per model,
+   converted to the in-memory format (P79_Convert) into the map arena D_00c98ed0.  Then resolves references
+   (root models with parent -1 first, then the children), computes the bounding boxes (P80_Boxes) and a
+   render class per model (P80_Class) from the model flags.  TODO(RE): meaning of the classes 0..7 (class 0/1
+   for flag 0x800 depends on night: presumably lit windows). */
 void P80_LoadModels(void *f) {
   int32_t size;
   uint8_t *tmp = (uint8_t *)DebugMalloc(0x20000, "D:\\Driver\\Game\\map.c", 0x119);
@@ -331,6 +347,11 @@ void P80_LoadModels(void *f) {
   DebugFree(tmp);
 }
 
+/* P80_LoadHeader — Game.exe 004ed055.  Reads map block 2: 11-word header {grid w, grid h, cell size, slot count,
+   region size, ?, ?, light intensity (float), light direction x, y, z}; derives the grid constants (view radius
+   45000 / cell cells, map RLE size, ...), sets up the day/night light (see the file header) and recomputes
+   lighting; then reads the 0x14-byte entries into 0x20-byte records (G6_00D00208; TODO(RE): what they are)
+   and the per-slot lists {n dwords; m bytes; k x 0x14 bytes} into D_00d00230, pointers in P80_LumpTab. */
 /* 004ed055: заголовок блока 2 — 11 слов {w, h, cell, nSlots, grid, ?, ?, w(float), dx, dy, dz} (0x2c байта);
    затем число записей и по 0x14 байта → в таблицу по 0x20 байт; затем nSlots списков {n, n слов; m, m байт; k, k×0x14}.
    Указатели на списки кладутся в P80_LumpTab (родного размера); сами списки идут подряд в буфер D_00d00230. */
@@ -350,7 +371,7 @@ void P80_LoadHeader(void *f) {
   D_00d00204 = P21_GridStride * P21_GridStride;
   P80_HalfW = P21_GridDiv / 2; P80_HalfH = P80_GridH / 2;
   P42_CellX = P80_HalfW * P80_Cell; P42_CellY = P80_HalfH * P80_Cell;
-  P62_MapN = P54_GridN * (P80_Cell / 0x5dc);
+  P62_MapN = P54_GridN * (P80_Cell / 0x5dc);   /* map RLE cells of 1500 units per region */
   P80_InvMap = (float)((long double)P80_One / (float)P62_MapN);
   P80_Cols = P54_GridN != 0 ? P21_GridDiv / P54_GridN : 0;
   P72_Rows = P54_GridN != 0 ? P80_GridH / P54_GridN : 0;
@@ -360,7 +381,7 @@ void P80_LoadHeader(void *f) {
   P80_Alt3 = P80_Dir3;
   P80_Alt0 = P19_OutA; P80_Alt1 = P19_OutB; P80_Alt2 = P19_OutC;
   P80_AltW = P19_Out68;
-  float k = (float)((long double)(float)(int32_t)((uint32_t)G00B87E4C << 1) / P80_C45 + P80_C02);
+  float k = (float)((long double)(float)(int32_t)((uint32_t)G00B87E4C << 1) / P80_C45 + P80_C02);   /* dark-light scale */
   P80_Alt0 *= k; P80_Alt1 *= k; P80_Alt2 *= k; P80_AltW *= k;
   if (P14_00b202d8 != 0) {
     P19_OutA = P80_Alt0; P19_OutB = P80_Alt1; P19_OutC = P80_Alt2; P80_Dir3 = P80_Alt3; P19_Out68 = P80_AltW;

@@ -1,5 +1,13 @@
 #include "drawdist.h"
 #include <stdlib.h>
+/* ported137.c — level teardown, pedestrian motion capture loading, front-end texture loading and car drawing
+   (English overview; detailed Russian notes follow).
+   P137_LevelEnd (004d4663)  — saves the player car to STARTPOS.X (with motion cleared) and frees all level data.
+   P137_LoadMcd (004f3490)   — reads one .MCD motion-capture animation (root offset + 0x30 bone nodes per frame).
+   P137_MotionInit (004f388e) — loads the pedestrian models PED1..4 BASE/HEAD and the WALK/RUN/DIVE/SITTING
+                                animations.
+   P137_LoadTsd (0040d07b)    — loads FRONTEND.TSD: palettes and named 256x256 texture pages.
+   P137_DrawCar (004a1037)    — draws one car with its shadow, lights, wheels and effects (LOW model when far). */
 /* v1.82: ported137 — см. ported137.h.
    004d4663 — конец уровня: если удаётся открыть STARTPOS.X ("wb"), у записи игрока обнуляются скорости/силы
      (+0x40..+0x70 кроме +0x64/+0x74, +0x5c = −0x2aaa, +0x78..+0x84, +0xf8/+0xfc, +0x10c..+0x138) и запись 0 (sizeof) пишется в файл;
@@ -149,13 +157,17 @@ static float p137_f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
 static int32_t p137_rd(const void *p) { int32_t v; memcpy(&v, p, 4); return v; }
 
 /* ---- 004d4663 ---- */
+/* P137_LevelEnd — Game.exe 004d4663, cdecl.  If STARTPOS.X can be created, writes the player car record into it
+   with its velocities, forces and controls cleared (+0x5c = -0x2aaa kept from the original; TODO(RE): why).
+   Then frees the map, model, replay, CD-audio and effect buffers, script lists and trails; plays the end
+   cut-scene when the script requested one (00c810c4 == 0x8000, P150_PlayFmv). */
 #define P137_FREE(v) do { if ((v) != 0) { P98_DebugFree((void *)(v)); (v) = 0; } } while (0)
 void P137_LevelEnd(void) {
   void *f = g_fopen("STARTPOS.X", "wb");
   if (f != NULL) {
     p99_car_t *c = &P99_Cars[0];
     c->f138 = 0; c->f130 = 0; c->f12c = 0; c->f128 = 0;
-    c->vel[2] = 0; c->vel[1] = 0; c->vel[0] = 0;
+    c->damage[2] = 0; c->damage[1] = 0; c->damage[0] = 0;
     memset(c->f78, 0, sizeof(c->f78));
     c->ff8 = 0; c->ffc = 0; c->f10c = 0; c->f114 = 0; c->f118 = 0; c->speed = 0;
     for (int i = 0; i < 7; i++) c->f40[i] = 0;
@@ -185,7 +197,12 @@ void P137_LevelEnd(void) {
   P137_FREE(P54_MapBPtr);
   P137_FREE(P62_MapBuf);
   P137_FREE(P46_MapBufA);
-  if (P56_EulerTab != 0) { P98_DebugFree(P56_EulerTab); P56_EulerTab = 0; UiVar00B1C280 = 0; }
+  if (P56_EulerTab != 0) {
+    P98_DebugFree(P56_EulerTab); P56_EulerTab = 0;
+#ifdef RE_HOOK_BUILD
+    UiVar00B1C280 = 0;   /* native (v2.35): UiVar00B1C280 is a view of P56_EulerTab */
+#endif
+  }
   P137_FREE(P20_Names);
   P137_FREE(P78_VertsA);
   P137_FREE(P78_VertsB);
@@ -208,6 +225,11 @@ void P137_LevelEnd(void) {
 }
 
 /* ---- 004f3490 ---- */
+/* P137_LoadMcd — Game.exe 004f3490, cdecl.  Reads motion file `name` into dst: header [node-offset flag][node
+   count][frame count], optional bone offsets, then per frame the root position (12 bytes) and 16 bytes per node.
+   Frames k < skip_a or k >= frames - (skip_a + skip_b) are read and discarded (a 0 disables that bound).
+   Output per kept frame: [0, y, z - previous z, 1] followed by the nodes [x, y, z, 1, w].
+   Returns the number of frames kept (0 when the file cannot be opened). */
 int32_t P137_LoadMcd(const char *name, void *dst, int32_t skip_a, int32_t skip_b) {
   char msg[0x100];
   int32_t n = 0, flag = 0, frames = 0;
@@ -253,6 +275,10 @@ int32_t P137_LoadMcd(const char *name, void *dst, int32_t skip_a, int32_t skip_b
 }
 
 /* ---- 004f388e ---- */
+/* P137_MotionInit — Game.exe 004f388e, cdecl.  Finds the pedestrian models (PED1..4 BASE and HEAD; cities 0-1
+   reuse PED1 for the fourth) and the HEAD - BASE differences, allocates four 0x80002-byte animation buffers and
+   loads WALK / RUN / DIVE / SITTING.MCD (RUSSJUMP.MCD instead of WALK in a special mode), storing their lengths
+   (P103_PathLen) and the total root travel. */
 static const char *const p137_mcd[4] = { "WALK.MCD", "RUN.MCD", "DIVE.MCD", "SITTING.MCD" };   /* .data 00563714 */
 int32_t P137_MotionInit(void) {
   P124_DebugLog("\nAttempting to initialise motion capture data...");
@@ -301,6 +327,10 @@ int32_t P137_MotionInit(void) {
 }
 
 /* ---- 0040d07b ---- */
+/* P137_LoadTsd — Game.exe 0040d07b, cdecl.  Loads the front-end texture set `name` ("TSD " file, float version):
+   palettes (two fixed ones in version 1.0, else a list), then in two passes the block headers with their names
+   and the 64 KB texture pages into a 64 KB aligned arena (P65_Texs[k], names in P54_MapAPtr).
+   Returns 1 on success, 0 on failure. */
 int32_t P137_LoadTsd(const char *name) {
   uint8_t tag[4], hdr8[8], skip[4];
   float ver = 0.0f;
@@ -371,6 +401,7 @@ int32_t P137_LoadTsd(const char *name) {
 }
 
 /* ---- 004a1037 ---- */
+/* Native: 1 when pointer p can be expressed as a model-arena reference (P79_PTR(P79_OFF(p)) == p). */
 static int p137_ref_ok(const void *p) {
 #ifdef RE_HOOK_BUILD
   (void)p; return 1;
@@ -378,6 +409,13 @@ static int p137_ref_ok(const void *p) {
   return P79_PTR(P79_OFF(p)) == p;
 #endif
 }
+/* P137_DrawCar — Game.exe 004a1037, cdecl.  Draws car `car`; rec = its traffic record index or -1 (player /
+   no record).  Skipped for camera modes 8 and 2 (when looking away) and in the mirror for the player; needs its
+   map cell to be in view (except camera mode 6).  At night queues a headlight glow for slow visible traffic
+   cars.  Builds the car's float world matrix (P98_CarMat, rows 0 and 2 negated), fades with depth, and closer
+   than 15000 draws shadow, lights, wheels, dust, smoke, sparks, debris, water splashes and skid marks, with the
+   model's vertex/plane/record pointers temporarily redirected to the car's deformed copies; farther away the
+   LOW model.  Traffic record bytes used: [5] cop slot, [0xc] car model kind (index into P28_CarClean). */
 void P137_DrawCar(int32_t car, int32_t rec) {
   float pos[3];
   if (car < 0 || car >= P99_CARS_N) return;
@@ -405,7 +443,7 @@ void P137_DrawCar(int32_t car, int32_t rec) {
   float rad = p137_f((uint32_t)p137_rd(mdl + 0xc));
   if (P14_00b87e84 != 0 && car != 0 && car - 1 < 0x40) {
     const uint8_t *r = tr + (car - 1) * 0x54;
-    if (r[1] != 1 && c->vel[0] < 1000 && c->vel[1] < 1000 && P82_SphereVis3D(pos, rad * P56_C54611C) != 0 && P123_GlowN < 65) {
+    if (r[1] != 1 && c->damage[0] < 1000 && c->damage[1] < 1000 && P82_SphereVis3D(pos, rad * P56_C54611C) != 0 && P123_GlowN < 65) {
       P123_GlowCars[P123_GlowN] = car;
       P123_GlowN++;
     }
@@ -453,14 +491,14 @@ void P137_DrawCar(int32_t car, int32_t rec) {
   }
   if (P95_D11920 == 0) {
     sp = c->f10c;
-    int calm = c->vel[0] < 0xfa1 && c->vel[1] < 0xfa1;
+    int calm = c->damage[0] < 0xfa1 && c->damage[1] < 0xfa1;
     if (calm && rk != 0) {
       int32_t ix = rk - 1;
       calm = ix >= 0 && (size_t)(ix + 1) * 0xcd8 + 0x40 <= sizeof(P12_0112da00) &&
              p137_rd((const uint8_t *)P12_0112da00 + 0x40 + ix * 0xcd8) <= P137_DUST_LIM;
     }
     if (calm) {
-      if ((3000 < c->vel[0] || 3000 < c->vel[1]) && sp < 400000 && -200000 < sp) P119_CarDust(car, 0, sp);
+      if ((3000 < c->damage[0] || 3000 < c->damage[1]) && sp < 400000 && -200000 < sp) P119_CarDust(car, 0, sp);
     } else if (sp < 400000 && -200000 < sp) {
       P119_CarDust(car, 1, sp);
       if (sp < 30000 && -30000 < sp) P120_CarSparks(car);
