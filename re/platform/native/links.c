@@ -344,10 +344,14 @@ void Call0040CB9F (void) { P119_MenuFrame(); }
 void MenuRedraw (void) { P104_GfxMenuInit(); }
 void MenuRefresh (void) { P54_MenuTexSel(); }
 void Call004076E2 (void) { MenuWhite004076E2(); }
+void StoreCameraState (void *cam) { P61_StoreCamState(cam); }
+void RestoreCameraState (void *cam) { P61_RestoreCamState(cam); }
 void * FindCameraRecordForFrame (int frame) { return (void *)FindCameraForFrame(frame); }
+int FindAutoCamera (void **out) { return (int)P98_DirCamNext(out); }
 void InitNewCamera (void *cam) { P98_CamClamp(cam); }
 void DrawSprite (int x, int y, uint32_t tex, int a, int b, int c, int d, int e) { P70_ShadowText(x, y, tex, a, b, c, d, e); }
 void DrawRect (float x, float y, float w, float h, uint32_t color) { P108_FillRect(x, y, w, h, color); }
+int GetMarkerYAdjust (int a) { return (int)ScanSlot_0040AAE2(a); }
 int IsKeyDown (int sc) { return (int)IsFlagSetNotMasked_004E383A(sc); }
 int GetGroundHeight (int *pos) { return (int)P100_RoadHeight(pos); }
 void Call00411A9D (void) { MenuHiliteWhite00411A9D(); }

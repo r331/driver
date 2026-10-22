@@ -6,6 +6,7 @@
 #include "ported71.h"
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P71_Near")
@@ -333,6 +334,10 @@ void P71_InitNear(uint8_t *car) {
   }
 }
 
+#ifndef RE_HOOK_BUILD
+/* RE_PEDWRAP=1 (experiment, native only): squared distance without the 32-bit wrap of Game.exe */
+static int count_near_nowrap(void) { static int on = -1; if (on < 0) on = getenv("RE_PEDWRAP") != NULL && atoi(getenv("RE_PEDWRAP")) != 0; return on; }
+#endif
 /* 0051380b */
 /* P71_CountNear — Game.exe 0051380b.  Number of active walkers whose squared distance to (x, z) is below
    P71_Near + P71_NearAdd (32-bit wrapping arithmetic as in the original).  When none is found the
@@ -345,6 +350,9 @@ int32_t P71_CountNear(int32_t x, int32_t z) {
       int32_t dx = Rnd(rdf(e, PED_POS_X)) - x;
       int32_t dz = Rnd(rdf(e, PED_POS_Z)) - z;
       int32_t d2 = (int32_t)((uint32_t)dx * (uint32_t)dx + (uint32_t)dz * (uint32_t)dz);
+#ifndef RE_HOOK_BUILD
+      if (count_near_nowrap()) { if ((int64_t)dx * dx + (int64_t)dz * dz < (int64_t)P71_Near + P71_NearAdd) n++; continue; }
+#endif
       if (d2 < P71_Near + P71_NearAdd) n++;
     }
   }

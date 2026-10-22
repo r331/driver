@@ -27,6 +27,7 @@ int SetNodeEnabled(int id, int enable);
 void ClearDirectorTable(DIR_NODE *tbl);          /* 004c36da */
 void DrawNodeChain(DIR_NODE *start);             /* 004c3c94 */
 void DrawNodeMarkersChain(DIR_NODE *start);      /* 004c3cf1 */
+void DrawDirectorMenu(void);                      /* 004c3bc7 */
 DIR_NODE *GetNodeParent(int id);                 /* 004c41ec */
 void DumpWaypoints(void);                         /* 004c37f6 */
 void DrawCornerIndicator(void);                  /* 004c42a9 */
@@ -48,15 +49,19 @@ extern int32_t DirIndicatorOn, DirIndicatorCnt; extern uint32_t IndicatorTex;
 void DrawNode(DIR_NODE *node);                    /* 004c3d5c */
 void DrawNodeMarker(DIR_NODE *node);              /* 004c3e6a */
 #define DirSelectedColor GAME_VAR(uint32_t, DirSelectedColor, 0x00d17b8c)
+/* 00c55820 is the language string table (P97_StrAddr, filled by P98_LoadLang): DrawNodeMarker passes string
+   address NodeIconTex[unk00] to DrawSprite = 0051755e P70_ShadowText, i.e. it prints the node's caption.
+   Native before fix/peds: a separate zero array NodeIconTexArr (split alias) — captions were never drawn. */
 #ifdef RE_HOOK_BUILD
 #define NodeIconTex ((uint32_t*)(uintptr_t)0x00c55820)
 #else
-#define NodeIconTex NodeIconTexArr
+#include "strtab.h"
+#define NodeIconTex P97_StrAddr
 #endif
 #ifndef RE_HOOK_BUILD
 #pragma push_macro("DirSelectedColor") /*gvi*/
 #undef DirSelectedColor /*gvi*/
-extern uint32_t DirSelectedColor; extern uint32_t NodeIconTexArr[];
+extern uint32_t DirSelectedColor;
 #pragma pop_macro("DirSelectedColor") /*gvi*/
 #endif
 

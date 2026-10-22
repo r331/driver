@@ -925,11 +925,23 @@ void P102_ScanCells(void) {
   if (n <= 0) return;
 #endif
   uint8_t *sp = P75_Spawn, *dp = P102_DustPts;
+#ifndef RE_HOOK_BUILD
+  static int dbg = -1, calls; int st_oob = 0, st_null = 0, st_empty = 0, st_road = 0;
+  if (dbg < 0) dbg = getenv("RE_PEDSPAWN") != NULL;
+#endif
   for (int32_t k = 0; k < P94_DirCnt; k++) {
 #ifndef RE_HOOK_BUILD
     if (k >= 128) break;
+    if (dbg && (k == P94_DirCnt - 1 || k == 127) && (calls++ % 100) == 0)
+      fprintf(stderr, "[pedscan] frame %d dirs %d ring0 %d,%d oob %d null %d empty %d road %d (of %d so far)\n", P62_Frame, P94_DirCnt,
+              P94_DirTab[0][0], P94_DirTab[0][1], st_oob, st_null, st_empty, st_road, k);
 #endif
     int32_t cx = px + P94_DirTab[k][0], cz = pz + P94_DirTab[k][1];
+#ifndef RE_HOOK_BUILD
+    if (dbg) { if (cx < 0 || P62_MapW <= cx || cz < 0 || P62_MapH <= cz) st_oob++;
+      else { int32_t nn = n, ux2 = cx / nn, uz2 = (P72_Rows - 1) - cz / nn; const int16_t *t2 = (const int16_t *)P54_RoadA[(ux2 & 1) + (uz2 & 1) * 2];
+        if (t2 == NULL) st_null++; else if (t2[(cz - (cz / nn) * nn) * nn + (cx - ux2 * nn)] == -0x8000) st_empty++; else st_road++; } }
+#endif
     if (cx < 0 || P62_MapW <= cx || cz < 0 || P62_MapH <= cz) continue;
     uint32_t ux = (uint32_t)(cx / n), uz = (uint32_t)((P72_Rows - 1) - cz / n);
     int32_t fx = cx - (int32_t)ux * n, fz = cz - (cz / n) * n;
@@ -1129,6 +1141,14 @@ void P102_SpawnDust(void) {
     int32_t ok = P99_PartOnChair(p, cnt);
     if (ok == 0 && (ok = P60_SpawnParticle(p, cnt)) == 0) P43_FreeSlot(p);
     if (ok != 0) wr32(p + 8, iabs((int32_t)Rand_004D9078() % 5));
+#ifndef RE_HOOK_BUILD
+    /* RE_PEDSPAWN=1 (debug, native only): one line per spawn attempt — point and resulting distance to the player */
+    { static int on = -1; if (on < 0) on = getenv("RE_PEDSPAWN") != NULL;
+      if (on) { float dx = (float)rd32(pt + 4) - (float)P99_Cars[0].pos[0], dz = (float)rd32(pt + 8) - (float)P99_Cars[0].pos[2];
+        float qx = f[0] - (float)P99_Cars[0].pos[0], qz = f[2] - (float)P99_Cars[0].pos[2];
+        fprintf(stderr, "[pedspawn] frame %d ok %d type %d near %d point %.0f ped %.0f\n", P62_Frame, ok, ok ? (int)rd16s(p) : -1, cnt,
+                sqrtf(dx * dx + dz * dz), ok ? sqrtf(qx * qx + qz * qz) : -1.0f); } }
+#endif
   }
 }
 

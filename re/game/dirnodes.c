@@ -5,6 +5,8 @@
 #include "dirnodes.h"
 #include "director.h"
 #include "unported.h"
+#include "reptr.h"
+int32_t P12_Fn00426580(int32_t p);   /* 00426580 (ported12.c): render state for the director overlay */
 #include <string.h>
 #include <stdio.h>
 #include "engine.h"
@@ -55,9 +57,6 @@ uint32_t IndicatorTex;
 uint32_t DirSelectedColor;
 #pragma pop_macro("DirSelectedColor") /*gvi*/
 #pragma pop_macro("DirSelectedColor")
-#endif
-#ifndef RE_HOOK_BUILD
-uint32_t NodeIconTexArr[64];
 #endif
 /* 004c5367 — пустая функция */
 /* DirNopStub — Game.exe 004c5367.  Empty. */
@@ -111,16 +110,18 @@ int SetNodeEnabled(int id, int enable) {
 }
 /* 004c36da — для каждого узла: имя (+4, указатель Game.exe) -> иконка (+0x24) */
 /* ClearDirectorTable — Game.exe 004c36da.  Resolves each node's icon: unk24 = LoadIconByName(name at
-   unk04), or 0 for an empty name.  Native: names are 32-bit Game.exe pointers, so all icons are 0
-   (nodes are then drawn as plain squares). */
+   unk04), or 0 for an empty name.  Native: the name is a Game.exe address (the tables DirTableA/B and
+   their strings live in the .data image), resolved with re_ptr; unk24 keeps the icon record as a
+   32-bit address (LoadIconByName returns re_addr), exactly as the 32-bit field of Game.exe. */
 void ClearDirectorTable(DIR_NODE *tbl) {
     for (DIR_NODE *n = tbl; n->id != NODE_END; n++) {
 #ifdef RE_HOOK_BUILD
         const char *name = (const char *)(uintptr_t)n->unk04;
-        n->unk24 = (strlen(name) == 0) ? 0 : (int32_t)LoadIconByName(name);
 #else
-        n->unk24 = 0; /* в native имя — 32-битный указатель, недоступен */
+        const char *name = (const char *)re_ptr((uint32_t)n->unk04);   /* NULL: address outside the image */
+        if (name == NULL) { n->unk24 = 0; continue; }
 #endif
+        n->unk24 = (strlen(name) == 0) ? 0 : (int32_t)LoadIconByName(name);
     }
 }
 /* Next node of a chain: link2 or link1 of cur, chosen by the FIRST node's NODE_F_LINK2 (inlined in the original). */
@@ -140,6 +141,20 @@ void DrawNodeMarkersChain(DIR_NODE *start) {
     if (!start) return;
     for (DIR_NODE *c = start; c; c = NextInChain(start, c))
         if (c->id == DirectorUnk7C) DrawNodeMarker(c);
+}
+/* DrawDirectorMenu — Game.exe 004c3bc7, cdecl.  Draws the director's node menu: render state 0x1b
+   (P12_Fn00426580), then the node chains — every ancestor chain of the selected node DirectorUnk7C
+   (GetNodeParent walked up through ids), the root chain (node 1) and node 0x1b's chain — and then the
+   markers (captions) of the same chains in the same order.  Native: before fix/peds this was the empty stub
+   P66_Fn4C3BC7, so the director screen showed no nodes at all. */
+void DrawDirectorMenu(void) {
+    P12_Fn00426580(0x1b);
+    for (DIR_NODE *n = GetNodeParent(DirectorUnk7C); n; n = GetNodeParent(n->id)) DrawNodeChain(n);
+    DrawNodeChain(FindNodeById(1));
+    DrawNodeChain(FindNodeById(0x1b));
+    for (DIR_NODE *n = GetNodeParent(DirectorUnk7C); n; n = GetNodeParent(n->id)) DrawNodeMarkersChain(n);
+    DrawNodeMarkersChain(FindNodeById(1));
+    DrawNodeMarkersChain(FindNodeById(0x1b));
 }
 /* 004c41ec — узел, на который указывает +0x18 узла id */
 /* GetNodeParent — Game.exe 004c41ec.  Node referenced by field unk18 of node id (TODO(RE): "parent" is
@@ -187,11 +202,15 @@ void DrawNode(DIR_NODE *n) {
     if (n->unk24 == 0) { DrawRect(x, y, 45.0f, 45.0f, col); return; }
 #ifdef RE_HOOK_BUILD
     const uint8_t *icon = (const uint8_t *)(uintptr_t)(uint32_t)n->unk24;
-    GameDrawIcon(x, y, 45.0f / (float)icon[0xb], 45.0f / (float)icon[0xc], (uint32_t)n->unk24, col);
+#else
+    const uint8_t *icon = (const uint8_t *)re_ptr((uint32_t)n->unk24);   /* unk24 = re_addr of the icon record */
+    if (icon == NULL) { DrawRect(x, y, 45.0f, 45.0f, col); return; }
 #endif
+    GameDrawIcon(x, y, 45.0f / (float)icon[0xb], 45.0f / (float)icon[0xc], (uint32_t)n->unk24, col);
 }
 /* 004c3e6a — маркер узла: иконка (по unk00) в углу клетки; серый (0x40) если узел выключен, бит 1 — нижний правый угол */
-/* DrawNodeMarker — Game.exe 004c3e6a.  Draws the node's marker sprite NodeIconTex[unk00] (none for -1) at
+/* DrawNodeMarker — Game.exe 004c3e6a.  Draws the node's caption — language string NodeIconTex[unk00] = 00c55820[unk00]
+   through DrawSprite = 0051755e P70_ShadowText (text with shadow; none for -1) — at
    the bottom of its cell — lower right when flag bit 0 is set (lifted by GetMarkerYAdjust), else below
    the cell; grey (0x40) when the node is disabled. */
 void DrawNodeMarker(DIR_NODE *n) {
