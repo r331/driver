@@ -347,8 +347,10 @@ int32_t S_00D1192C;
 #pragma pop_macro("S_00D1192C") /*gvi*/
 #pragma pop_macro("S_00D1192C")
 #endif
+#ifdef RE_HOOK_BUILD   /* v2.35: native — P10_ScriptCtx / P15_ListCurU (smallfuncs.h) */
 GAME_VAR_DEF(uint8_t*, S_00D1240C, 0x00d1240c)
 GAME_VAR_DEF(uint16_t*, S_00D12410, 0x00d12410)
+#endif
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("S_00D12414")
 #undef S_00D12414
@@ -539,13 +541,13 @@ void CopySlotTemplate004A1010(void) {
 /* Opcodes of the 004d1xxx bytecode interpreter: ip S_00D12414 advances past the opcode (2 bytes, or 4 with an
    operand) and flags in the context record S_00D1240C (+0x44, u16 +0x48) are set/cleared.  Return 1 = continue
    with the next opcode, 0 = stop for this frame (TODO(RE): inferred from the loop opcode in ported10.c). */
-int32_t ScriptOpSkipClear004D1111(void) { S_00D12414 += 2; I32(S_00D1240C, 0x44) = 0; return 1; }
-int32_t ScriptOpSetBit4_004D13D8(void) { S_00D12414 += 2; U16(S_00D1240C, 0x48) |= 4; return 0; }
-int32_t ScriptOpClearBit2_004D1402(void) { S_00D12414 += 2; *S_00D12410 &= 0xfffd; return 0; }
-int32_t ScriptOpSetBit200_004D03D0(void) { S_00D12414 += 2; U16(S_00D1240C, 0x48) |= 0x200; return 1; }
-int32_t ScriptOpSetBit2_004D0404(void) { S_00D12414 += 2; U16(S_00D1240C, 0x48) = (U16(S_00D1240C, 0x48) & 0xff7e) | 2; return 1; }
-int32_t ScriptOpToggle10_004D1737(void) { S_00D12414 += 2; U16(S_00D1240C, 0x48) ^= 0x10; return 1; }
-int32_t ScriptOpSkip4_004D1601(void) { S_00D12414 += 4; return 1; }
+int32_t ScriptOpSkipClear004D1111(void) { SF_SCRIPT_IP_ADD(2); I32(S_00D1240C, 0x44) = 0; return 1; }
+int32_t ScriptOpSetBit4_004D13D8(void) { SF_SCRIPT_IP_ADD(2); U16(S_00D1240C, 0x48) |= 4; return 0; }
+int32_t ScriptOpClearBit2_004D1402(void) { SF_SCRIPT_IP_ADD(2); *S_00D12410 &= 0xfffd; return 0; }
+int32_t ScriptOpSetBit200_004D03D0(void) { SF_SCRIPT_IP_ADD(2); U16(S_00D1240C, 0x48) |= 0x200; return 1; }
+int32_t ScriptOpSetBit2_004D0404(void) { SF_SCRIPT_IP_ADD(2); U16(S_00D1240C, 0x48) = (U16(S_00D1240C, 0x48) & 0xff7e) | 2; return 1; }
+int32_t ScriptOpToggle10_004D1737(void) { SF_SCRIPT_IP_ADD(2); U16(S_00D1240C, 0x48) ^= 0x10; return 1; }
+int32_t ScriptOpSkip4_004D1601(void) { SF_SCRIPT_IP_ADD(4); return 1; }
 void RingAdvance004D7B36(void) { S_00D11878++; if (S_00D11878 == S_00D0DDE0) S_00D11878 = 0; }
 /* --- подсветка пунктов меню (значения 2/3 в таблицах) --- */
 /* Menu highlight setters: write state 2 / 3 or colour red (0xff, 0, 0) / white to the two 0x10-byte entries of

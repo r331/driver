@@ -275,6 +275,17 @@ uint32_t re_addr(const void *pv) {
   if (g_img != NULL && p >= g_img && p < g_img + g_img_size) return g_img_base + (uint32_t)(p - g_img);   /* v2.02 */
   return re_ptr_register_dyn((void *)(uintptr_t)p, 1);
 }
+/* v2.35: re_addr без регистрации — 0, если указатель вне известных областей (список 00cfe760 в ported87.c) */
+uint32_t re_addr_known(const void *pv) {
+  const uint8_t *p = (const uint8_t *)pv;
+  if (p == NULL) return 0;
+  for (uint32_t i = 0; i < g_ndyn; i++)
+    if (p >= g_dyn[i].p && p < g_dyn[i].p + g_dyn[i].size) return g_dyn[i].addr + (uint32_t)(p - g_dyn[i].p);
+  for (size_t i = 0; i < sizeof k_regions / sizeof k_regions[0]; i++)
+    if (p >= k_regions[i].p && p < k_regions[i].p + k_regions[i].size) return k_regions[i].addr + (uint32_t)(p - k_regions[i].p);
+  if (g_img != NULL && p >= g_img && p < g_img + g_img_size) return g_img_base + (uint32_t)(p - g_img);
+  return 0;
+}
 void re_ptr_register(uint32_t addr, void *native, uint32_t size) {
   if (native == NULL || size == 0) return;
   for (uint32_t i = 0; i < g_ndyn; i++)

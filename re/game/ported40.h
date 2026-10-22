@@ -61,3 +61,9 @@ void P40_DownloadPalette(int32_t slot, int32_t palette); /* 004efc7c: отпра
 #define P40_ListCount (*(int32_t *)re_gvar(0x00b31eecu, sizeof(int32_t), (void *)&P40_ListCount))
 #endif
 /* gvar-img v2.03 end */
+/* v2.35: 00b31ee8 — one object: the native table pointer P58_Tab4EFC03 (P126_ReadMapPals writes it; native records with
+   native pointers); P40_ListPtr is a read-only view (its 32-bit address).  The image cell is no longer used. */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#undef P40_ListPtr
+#define P40_ListPtr ((uint32_t)re_addr_known((const void *)P58_Tab4EFC03))
+#endif

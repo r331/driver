@@ -516,3 +516,23 @@ void SetColorWhite0041A085(void);
 #define S_0127104C (*(uint32_t *)re_gvar(0x0127104cu, sizeof(uint32_t), (void *)&S_0127104C))
 #endif
 /* gvar-img v2.03 end */
+/* v2.35: split aliases 00d1240c / 00d12410 / 00d12414 merged (native; hook — the GAME_VAR cells above).
+   The event-script interpreter registers are native pointers: 00d1240c = P10_ScriptCtx, 00d12410 = the union P15_ListCurU
+   (P15_ListCur as bytes, S_00D12410 as u16 flags), 00d12414 = P10_ScriptPtr.  S_00D12414 is a read-only view (the 32-bit
+   address of P10_ScriptPtr); the opcode handlers below advance the pointer with SF_SCRIPT_IP_ADD.  Before v2.35 the handlers
+   004d1111/03d0/0404/1737/1601 (return 1 = next opcode) advanced the image cell while P111_ScriptTick read P10_ScriptPtr:
+   the stream never moved past them. */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#include "ported10.h"
+#include "ported15.h"
+#include "reptr.h"
+#undef S_00D1240C
+#define S_00D1240C P10_ScriptCtx
+#undef S_00D12410
+#define S_00D12410 (P15_ListCurU.w)
+#undef S_00D12414
+#define S_00D12414 ((int32_t)re_addr(P10_ScriptPtr))
+#define SF_SCRIPT_IP_ADD(n) (P10_ScriptPtr += (n))
+#else
+#define SF_SCRIPT_IP_ADD(n) (S_00D12414 += (n))
+#endif

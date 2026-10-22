@@ -133,7 +133,11 @@ void SelectByDifficulty_00416D17(void) {
    dword of record i (identity free-list / index), and clears D_01134528.
    TODO(RE): unsure what the 100 slots hold. */
 void ResetSlots_004A2B70(void) {
+#ifdef RE_HOOK_BUILD
   P9_01134530 = 0; P9_0113452c = 0; P9_011342e8 = 0; D_01134ea0 = 0;
+#else
+  P9_01134530 = 0; P9_0113452c = 0; P58_Grid = NULL; D_01134ea0 = 0;   /* 011342e8 = the chair grid pointer P58_Grid (v2.35) */
+#endif
   memset(&A_01134540[0], 0, 0x960);
   for (int32_t i = 0; i < 100; i++) { D_01134ec0[i] = i; memcpy(&A_01134540[i*24], &i, 4); }
   D_01134528 = 0; }

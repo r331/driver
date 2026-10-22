@@ -28,7 +28,6 @@ int32_t P87_CntB;
 #pragma pop_macro("P87_CntB") /*gvi*/
 #pragma pop_macro("P87_CntB")
 #endif
-GAME_VAR_DEF(void **, P87_ListPtr, 0x00000000)
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P87_SlotLump")
 #undef P87_SlotLump
@@ -63,6 +62,11 @@ p87_lumps_t P87_SlotLumpA;
 #define OBJ_HIDDEN       0x1c     /* int32: 1 if disk bit 0x8000 was set; such objects are not drawn */
 #include "modelhdr.h"   /* model header fields (MDL_*); MDL_RADIUS is the bounding radius for P83_BoxVis */
 #include "memrw.h"
+#ifndef RE_HOOK_BUILD
+#include "ported75.h"    /* v2.35: P75_Ptr562D7C — the list cursor 00562d7c */
+#include "ported104.h"   /* P104_Buf760 — the list 00cfe760 */
+#include "reptr.h"
+#endif
 /* model flag bits (MDL_FLAGS) read here */
 #define MDLF_MISSION     0x0004   /* drawn by P131_MissionObj instead */
 #define MDLF_AXIS_A      0x0010   /* with 0x20: axis-aligned fast path P92_DrawAxis when the angle is a multiple of 90 deg */
@@ -77,9 +81,17 @@ p87_lumps_t P87_SlotLumpA;
 #  define P87_LIST_END ((void **)0x00cfe7a0)
 static void list_init(void) {}
 #else
-static void *p87_list[256];
-#  define P87_LIST_END (&p87_list[256])
-static void list_init(void) { if (!P87_ListPtr) P87_ListPtr = p87_list; }
+/* v2.35: 00562d7c — one object, the data-image cell P75_Ptr562D7C: write cursor (a Game.exe address) into the 16-slot list
+   P104_Buf760 (00cfe760..00cfe7a0) that P127_FarDebris (004ad3b5) reads and rewinds and P75_ResetObjs resets.  Before v2.35
+   native kept its own 256-entry pointer list here (never reset, never read), so the far-debris list stayed empty.
+   Objects without a Game.exe address (draw-distance cache beyond the original window) are not listed. */
+static void list_init(void) {}
+static void list_push(const uint8_t *obj) {
+  uint32_t cur = P75_Ptr562D7C, a;
+  if (cur < 0x00cfe760u || cur >= 0x00cfe7a0u || (a = re_addr_known(obj)) == 0) return;
+  P104_Buf760[(cur - 0x00cfe760u) / 4] = a;
+  P75_Ptr562D7C = cur + 4;
+}
 #endif
 
 
@@ -180,11 +192,19 @@ static void draw_obj(const uint8_t *obj, int kind) {
   if ((flags & MDLF_LIST_B) == 0 || (mflags & 0x2000) == 0) {
     if ((flags & MDLF_LIST_A) != 0 && (mflags & 0x80) != 0) {
       uint32_t t = (uint32_t)P87_CntA & 0xf; P87_CntA++;
+#ifdef RE_HOOK_BUILD
       if (t == 0 && P87_ListPtr < P87_LIST_END) *P87_ListPtr++ = (void *)obj;
+#else
+      if (t == 0) list_push(obj);
+#endif
     }
   } else {
     uint32_t t = (uint32_t)P87_CntB & 0xf; P87_CntB++;
+#ifdef RE_HOOK_BUILD
     if (t == 0 && P87_ListPtr < P87_LIST_END) *P87_ListPtr++ = (void *)obj;
+#else
+    if (t == 0) list_push(obj);
+#endif
   }
   float p[3]; p[0] = rdf(obj + OBJ_POS) - P44_CamX; p[1] = rdf(obj + OBJ_POS + 4) - P44_CamY; p[2] = rdf(obj + OBJ_POS + 8) - P44_CamZ;
   P44_Xform(p);

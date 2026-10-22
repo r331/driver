@@ -12,7 +12,9 @@
 GAME_VAR_DEF(P46_TexNode *, P46_TexHead, 0x00a42180)
 GAME_VAR_DEF(void *, P46_MapBufA, 0x00b31ee4)
 GAME_VAR_DEF(void *, P46_MapBufB, 0x00b5a90c)
+#ifdef RE_HOOK_BUILD   /* v2.35: native — a view of P58_BlkBuf (ported46.h) */
 GAME_VAR_DEF(void *, P46_MapBufC, 0x00bdfbc4)
+#endif
 
 /* Texture-node kind handled directly by P46_TexCall2 (field +0xc of the download descriptor). */
 #define TEXDESC_KIND      0xc
@@ -77,14 +79,18 @@ void P46_LoadMapA(void *file, int32_t size) {
   if (b != NULL) P27_ReadChunked(b, size, 1, file);
 }
 /* P46_LoadMapB — Game.exe 004ec4ce.  Like P46_LoadMapA (tag map.c:0x39f) into P46_MapBufB; then mirrors the
-   pointer into P46_MapBufC and P58_BlkBuf (one address 00bdfbc4 in Game.exe, two variables in native) and
+   pointer into 00bdfbc4 (P46_MapBufC / P58_BlkBuf — one native object since v2.35) and
    calls 0051be3c (P46_Fn51BE3C). */
 void P46_LoadMapB(void *file, int32_t size) {
   void *b = DebugMalloc(size, "D:\\Driver\\Game\\map.c", 0x39f);
   P46_MapBufB = b;
   if (b != NULL) {
     P27_ReadChunked(b, size, 1, file);
-    P46_MapBufC = P46_MapBufB; P58_BlkBuf = (int32_t *)b;   /* тот же адрес 00bdfbc4 (в native — отдельная переменная) */
+#ifdef RE_HOOK_BUILD
+    P46_MapBufC = P46_MapBufB; P58_BlkBuf = (int32_t *)b;   /* тот же адрес 00bdfbc4 */
+#else
+    P58_BlkBuf = (int32_t *)b;   /* 00bdfbc4: v2.35 — один объект, P46_MapBufC = его представление (ported46.h) */
+#endif
     P46_Fn51BE3C();
   }
 }

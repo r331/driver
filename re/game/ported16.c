@@ -2,8 +2,10 @@
 #include "ported16.h"
 #include <string.h>
 #include "memrw.h"
+#ifdef RE_HOOK_BUILD   /* v2.35: native — views of P96_DustN / P96_Dust (ported16.h) */
 GAME_VAR_DEF(int32_t, P16_ParticleCount, 0x011171a0)
 GAME_VAR_DEF(uint8_t, P16_ParticleBase, 0x0110e160)
+#endif
 #ifndef RE_HOOK_BUILD /* v2.21 gvar-img */
 #pragma push_macro("P16_IdleMode")
 #undef P16_IdleMode

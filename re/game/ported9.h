@@ -127,3 +127,11 @@ uint32_t IsButtonActive_004E3924(uint8_t i);
 #define P9_00b31d30 (*(g8_bytes_t *)re_gvar(0x00b31d30u, sizeof(g8_bytes_t), (void *)&P9_00b31d30))
 #endif
 /* gvar-img v2.03 end */
+/* v2.35: 011342e8 — one object: the native chair-grid pointer P58_Grid (P78_LoadChairs allocates it); P9_011342e8 is a
+   read-only view (its 32-bit address).  ResetSlots_004A2B70 clears P58_Grid itself. */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#include "reptr.h"
+extern void **P58_Grid;
+#undef P9_011342e8
+#define P9_011342e8 ((int32_t)re_addr_known((const void *)P58_Grid))
+#endif

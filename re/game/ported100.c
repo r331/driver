@@ -456,22 +456,13 @@ void P100_ReplayMenuInit(void) {
 /* Wheel / joystick settings screen: item and text tables by menu mode (01271060) and device (00575ef0). */
 /* ---- 00413e37: экран руля/джойстика — таблицы пунктов по режиму 01271060 и устройству 00575ef0 ---- */
 static void menu_items(uint32_t a) {
-  P58_S5FE9B8 = a;
-#ifndef RE_HOOK_BUILD
-  P15_MenuItems = UiPtr005FE9B8 = (uint8_t *)re_ptr(a);   /* псевдонимы 005fe9b8 в native */
-#endif
+  P58_S5FE9B8 = a;   /* v2.35: P15_MenuItems / UiPtr005FE9B8 — views of this cell in native */
 }
 static void menu_text(uint32_t a) {
-  P58_S5FE9B0 = a;
-#ifndef RE_HOOK_BUILD
-  P15_MenuText = (uint8_t *)re_ptr(a);
-#endif
+  P58_S5FE9B0 = a;   /* v2.35: P15_MenuText — a view of this cell in native */
 }
 static void menu_mode(int32_t m) {
-  P15_MenuMode = m;
-#ifndef RE_HOOK_BUILD
-  G6_005FE9BC = m;
-#endif
+  P15_MenuMode = m;   /* v2.35: = G6_005FE9BC (one cell) in native */
 }
 void P100_PadMenuInit(void) {
   int32_t base = -1;

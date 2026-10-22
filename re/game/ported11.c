@@ -610,9 +610,10 @@ void InitXform_005263FE(void) {
 void InitVec_00526582(void) {
   P11_005507d0 = 0; P11_005507d4 = 0; P11_005507d8 = 0; /* float 1.0f set below */
   { uint32_t one = 0x3f800000; memcpy(&P11_005507d8, &one, 4); }
+#ifdef RE_HOOK_BUILD
   P11_00bdc28c = ADDR(P11_011f4080);
-#ifndef RE_HOOK_BUILD
-  P44_MatPtr = (float *)P44_ViewMat;   /* native: 00bdc28c — родной указатель P44_MatPtr (его читает P44_Xform 00528982), 32-битный P11_00bdc28c — отдельный объект */
+#else
+  P44_MatPtr = (float *)P44_ViewMat;   /* native: 00bdc28c — родной указатель P44_MatPtr (его читает P44_Xform 00528982); P11_00bdc28c — его представление (v2.35) */
 #endif
   Call00528982(ADDR(P11_005507d0));
 }

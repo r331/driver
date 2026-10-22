@@ -760,7 +760,11 @@ void P12_Fn004AAE34(void) {
   if (g_00b5a778 == 0) {
     if (g_00553850 != 0) Call004C0C6F(0);
     if ((g_00d118c0 & 1) == 0) {
+#ifdef RE_HOOK_BUILD
       g_00bdc28c = 0x011effa0;
+#else
+      P44_MatPtr = (float *)P44_ViewMatT;   /* 00bdc28c = 011effa0; v2.35: before, native wrote a separate 32-bit object */
+#endif
       Call004BA31B(); Call004B9AEC(); Call004B9D79(); P12_Fn004B9933();
       g_011237b8 = (g_011237b8 + 1) & 0xf;
       Call004911D9();

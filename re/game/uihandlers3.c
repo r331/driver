@@ -36,7 +36,9 @@ int32_t G00575F40;
 #pragma pop_macro("G00575F40") /*gvi*/
 #pragma pop_macro("G00575F40")
 #endif
+#ifdef RE_HOOK_BUILD   /* v2.35: native — a view of P58_S5FE9B8 (uihandlers3.h) */
 GAME_VAR_DEF(uint8_t *, UiPtr005FE9B8, 0x005fe9b8)
+#endif
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("G005FEA54")
 #undef G005FEA54
@@ -224,7 +226,9 @@ int32_t G01145934;
 #pragma pop_macro("G01145934") /*gvi*/
 #pragma pop_macro("G01145934")
 #endif
+#ifdef RE_HOOK_BUILD   /* v2.35: native — P59_CarsTab (uihandlers3.h) */
 GAME_VAR_DEF(uint8_t *, G0113A6C4, 0x0113a6c4)
+#endif
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("G0112B284")
 #undef G0112B284
@@ -499,10 +503,9 @@ void Ui00426CC6(void) {
 #ifdef RE_HOOK_BUILD
     UiCall004D8F30(UiVar00B1C280); UiVar00B1C280 = 0;
 #else
-    /* native: 00b1c280 — таблица P56_EulerTab (DebugMalloc, ported56.c), родной указатель; 32-битный псевдоним UiVar00B1C280
-       в native отдельный объект (всегда 0) — освобождается сама таблица, как в P137_LevelEnd */
+    /* native: 00b1c280 — таблица P56_EulerTab (DebugMalloc, ported56.c), родной указатель; UiVar00B1C280 — её 32-битный
+       адрес (v2.35: представление того же объекта, uihandlers2.h) — освобождается сама таблица, как в P137_LevelEnd */
     if (P56_EulerTab != NULL) { P98_DebugFree(P56_EulerTab); P56_EulerTab = NULL; }
-    UiVar00B1C280 = 0;
 #endif
 }
 /* Reset0042D2B0 — Game.exe 0042d2b0.  01159d74 = 0 and rewinds the pointer 0115a13c to 0115a140. */

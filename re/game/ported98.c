@@ -819,7 +819,7 @@ void P98_DebugFree(void *p) {
    the event models. */
 void P98_ScriptFreeAll(void) {
   uint8_t *n = P15_ListHead;
-  P15_ListHead = NULL;
+  P15_SetListHead(NULL);
   while (n != NULL) {
     uint8_t *next = link(n + 0x20);
     uint8_t *o = link(n + 0x1c);
@@ -1367,6 +1367,13 @@ void P98_ScriptRange(void) {
           int32_t dx = P59_PosX - P11_00ba52d0;
           P11_00ba52d0 = fround(rdf(c + 8));
           int32_t dz = P59_PosZ - P11_00ba52d0;
+#ifndef RE_HOOK_BUILD
+          { static int dbg = -1; if (dbg < 0) dbg = getenv("RE_RANGEDBG") != NULL;   /* v2.35: RE_RANGEDBG — trace of 004f5012 (native only) */
+            if (dbg && (P98_Range[k] < dist8(dx, dz) || (P62_Frame % 250) == 0))
+              fprintf(stderr, "[range] f=%d obj %d id %d range %d dist %d node f%04x ctx (%.0f, %.0f) player (%d, %d)%s\n", (int)P62_Frame, (int)k,
+                      (int)rd32(o + 0xc), (int)P98_Range[k], (int)dist8(dx, dz), (unsigned)rdu16(n), rdf(c), rdf(c + 8), (int)P59_PosX, (int)P59_PosZ,
+                      P98_Range[k] < dist8(dx, dz) ? " → цель потеряна" : ""); }
+#endif
           if (P98_Range[k] < dist8(dx, dz)) { P14_00c810c4 = 0xff0; P14_00c810e8 = 3; P14_00c81100 = 0x5a; }
         }
         break;

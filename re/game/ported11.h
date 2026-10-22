@@ -503,3 +503,11 @@ void Zoom_00425E9E(void);
 #define P11_011effa0 (*(uint8_t *)re_gvar(0x011effa0u, sizeof(uint8_t), (void *)&P11_011effa0))
 #endif
 /* gvar-img v2.03 end */
+/* v2.35: 00bdc28c — one object: the native pointer P44_MatPtr (current transform for P44_Xform*); P11_00bdc28c is a
+   read-only view (its 32-bit address).  The image cell is no longer used. */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#include "reptr.h"
+extern float *P44_MatPtr;
+#undef P11_00bdc28c
+#define P11_00bdc28c ((int32_t)re_addr_known(P44_MatPtr))
+#endif

@@ -206,3 +206,13 @@ extern g2_camarr_t G2_011F40E0;
 #define G2_ARR_01145940 (*(g2_ints_t *)re_gvar(0x01145940u, sizeof(g2_ints_t), (void *)&G2_ARR_01145940))
 #endif
 /* gvar-img v2.03 end */
+/* v2.35: 00b203a0 — one object: the debug memory table P27_MemTab (data image, {address, size, log string} × 0x1000);
+   ClearSlots004D8C23 (004d8c23) clears its first word per entry.  Before v2.35 G2_00B203A0 was a separate native object. */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#pragma push_macro("P27_MemTab")
+#undef P27_MemTab
+extern uint32_t P27_MemTab[0x1000 * 3];
+#pragma pop_macro("P27_MemTab")
+#undef G2_00B203A0
+#define G2_00B203A0 (*(g2_slot_t *)re_gvar(0x00b203a0u, sizeof(g2_slot_t), (void *)&P27_MemTab))
+#endif

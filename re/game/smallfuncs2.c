@@ -154,7 +154,9 @@ GAME_VAR_DEF(uint8_t*, G2_011F4064, 0x011f4064)
 g2_pair_t G2_005603BC;
 #pragma pop_macro("G2_005603BC")
 #endif
+#ifdef RE_HOOK_BUILD   /* v2.35: native — P27_MemTab (smallfuncs2.h) */
 GAME_VAR_DEF(g2_slot_t, G2_00B203A0, 0x00b203a0)
+#endif
 GAME_VAR_DEF(g2_camarr_t, G2_011F40E0, 0x011f40e0)
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("G2_TABLE_00550ACC")
@@ -188,7 +190,7 @@ int32_t ScriptStackPop004CB9BA(void) { return ScriptStackPop004CB982(); }
 /* Pushes v onto the script value stack (no overflow check, as the original). */
 void ScriptStackPush004CB9F2(int32_t v) { int32_t* s = G2_ScriptStack; s[0]--; s[s[0] + 1] = v; }
 /* Advances the script program counter S_00D12414 by 0x10 bytes (skips one instruction); returns 1. */
-int32_t ScriptSkip16_004D14D8(void) { S_00D12414 += 0x10; return 1; }
+int32_t ScriptSkip16_004D14D8(void) { SF_SCRIPT_IP_ADD(0x10); return 1; }
 /* Adds d to G2_00D11A5C, clamped above at 0xfff; returns the old value.  TODO(RE): unsure what the value is. */
 int32_t AddClamp4095_004D2ADE(int32_t d) { int32_t o = G2_00D11A5C; G2_00D11A5C += d; if (G2_00D11A5C > 0xfff) G2_00D11A5C = 0xfff; return o; }
 /* Writes three range parameters depending on G2_00D11A5C (< 0x2aa: 4000, 12500, 0x200; else 8000, 25000,

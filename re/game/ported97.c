@@ -683,7 +683,17 @@ void P97_ScriptEachP(const float *a, uint8_t *b, int32_t c) {
       wr32(tmp + 4, m);
       memcpy(tmp + 8, o, 16);
       wr32(tmp + 0x18, (int16_t)rdu16(o + 0x12));
+#ifdef RE_HOOK_BUILD
       P129_ObjBoxes(tmp, a, b, c, (uint32_t)P28_EventModels[m], 0);
+#else
+      /* v2.35: P28_EventModels holds re_addr addresses of event models (P79_EventAlloc, inside the arena D_00c98ed0), while
+         P129_ObjBoxes takes an arena reference (P79_PTR) like the map model table — convert.  Unreachable before v2.35:
+         the script list (P15_ListHead) was an empty split alias. */
+      if (m >= sizeof(P28_EventModels) / sizeof(P28_EventModels[0])) continue;
+      const uint8_t *mp = (const uint8_t *)re_ptr(P28_EventModels[m]);
+      if (mp == NULL) continue;
+      P129_ObjBoxes(tmp, a, b, c, P79_OFF(mp), 0);
+#endif
     }
   }
 }

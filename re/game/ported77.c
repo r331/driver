@@ -276,7 +276,14 @@ void P77_ResetTables(void) {
 int32_t P77_ListAdd(int32_t size) {
   void **arr = DebugMalloc((P77_ListN + 1) * (int)sizeof(void *), "D:\\Driver\\Game\\MScript.c", 0xb3f);
   if (arr == NULL) return 3;
+#ifdef RE_HOOK_BUILD
   void *blk = DebugMalloc(size, "D:\\Driver\\Game\\MScript.c", 0xb43);
+#else
+  /* v2.35: +4 — P146_ScriptCmd reads the first argument p[1] of every command, also of 4-byte commands without
+     arguments; in Game.exe that word is the debug tag after the block, here it was a heap over-read (ASan) */
+  void *blk = DebugMalloc(size + 4, "D:\\Driver\\Game\\MScript.c", 0xb43);
+  if (blk != NULL) memset((uint8_t *)blk + size, 0, 4);
+#endif
   if (blk == NULL) { DebugFree(arr); return 3; }
   int32_t i;
   for (i = 0; i < P77_ListN; i++) arr[i] = P77_List[i];

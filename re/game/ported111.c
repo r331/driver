@@ -311,7 +311,11 @@ static int32_t car_rd(uint32_t off) {   /* поле записи игрока S_
   return rd32((const uint8_t *)&P99_Cars[S_00D11878] + off);
 }
 static void set_ctx(uint8_t *c) { P10_ScriptCtx = c; S_00D1240C = c; }
+#ifdef RE_HOOK_BUILD
 static void set_sp(uint8_t *p) { P10_ScriptPtr = p; S_00D12414 = (int32_t)re_addr(p); }
+#else
+static void set_sp(uint8_t *p) { P10_ScriptPtr = p; }   /* v2.35: S_00D12414 is a view of P10_ScriptPtr */
+#endif
 /* P111_ScriptTick — Game.exe 004cf2cf.  One tick of the current event-script record S_00D12410 (not during replays,
    G6_00B5A778).  The record runs only while the player is in its map cell (flag 0x4) or within its circle (no flag
    0x8: centre +0x14/+0x18, squared radius +0x10); otherwise its "active" flag 0x2 is cleared.  For each context in

@@ -4097,7 +4097,7 @@ static int test_p98(void) {
     P98_DebugFree(p); CK(slot >= 0 && P27_MemTab[slot * 3] == 0 && P27_MemFreed == f0 + 10); }
   { uint8_t *n = (uint8_t *)DebugMalloc(0x24, "t", 1), *o = (uint8_t *)DebugMalloc(0x60, "t", 2), *base = (uint8_t *)DebugMalloc(8, "t", 3);   /* 004d0102 */
     memset(n, 0, 0x24); memset(o, 0, 0x60); re_wr_ptr(n + 0x1c, o); re_wr_ptr(o + 0x50, base);
-    P15_ListHead = n; P28_EventCount = 0; P98_ScriptFreeAll(); CK(P15_ListHead == NULL && P28_EventCount == 0); }
+    P15_SetListHead(n); P28_EventCount = 0; P98_ScriptFreeAll(); CK(P15_ListHead == NULL && P28_EventCount == 0); }
   { P98_CreditsInit();   /* 004a9850 */
     CK(P98_Credits[0].y == 0x1e0 && P98_Credits[1].y == 0x1e0 + 74 && P98_Credits[2].y == 0x1e0 + 74 + 54 && P98_Faces[2].id == 0xffff && P98_FaceCur == 0);
     CK(strcmp((const char *)re_ptr(P98_FaceNames[0]), "MARTIN") == 0 && strcmp((const char *)re_ptr(P98_FaceNames[3]), "STEVEB") == 0);
@@ -4241,13 +4241,13 @@ static int test_p99(void) {
     P99_MarkerReset(); CK(P98_MrkSrc[0] == 20.0f && P98_MrkSrc[2] == 300.0f && P99_Mrk2660 == 900 && P99_Cars[0].ang[0] == 0 && P99_Cars[0].ang[2] == 0);
     P15_State = st; }
   { uint8_t *n = (uint8_t *)DebugMalloc(0x24, "t", 1); memset(n, 0, 0x24);   /* 004a4340 */
-    uint8_t *h = P15_ListHead; P15_ListHead = n; *(uint16_t *)(n + 6) = 9; P99_EvId = 0x22;
+    uint8_t *h = P15_ListHead; P15_SetListHead(n); *(uint16_t *)(n + 6) = 9; P99_EvId = 0x22;
     P99_EventAdd(0);
     uint8_t *e = (uint8_t *)re_rd_ptr(n + 0x20);
     CK(e != NULL && *(uint16_t *)e == 0x28 && *(uint16_t *)(e + 4) == 1 && *(uint16_t *)(e + 6) == 0x22 && *(uint16_t *)(e + 8) == 9 && (*(uint16_t *)n & 0x10) != 0);
     uint8_t *o = e ? (uint8_t *)re_rd_ptr(e + 0x1c) : NULL; CK(o != NULL);
     if (o != NULL) re_wr_ptr(o + 0x50, DebugMalloc(8, "t", 2));
-    P98_ScriptFreeAll(); CK(P15_ListHead == NULL); P15_ListHead = h; }
+    P98_ScriptFreeAll(); CK(P15_ListHead == NULL); P15_SetListHead(h); }
   memcpy(P99_Cars, sv, sizeof sv);
   return f;
 }
@@ -4349,7 +4349,7 @@ static int test_p97(void) {
     v = ao + 0x60; memcpy(nodes[1] + 0x1c, &v, 4); v = ao + 0xc0; memcpy(objs[1] + 0x58, &v, 4);
     float x = 10.6f, z = -3.5f; memcpy(objs[0], &x, 4); memcpy(objs[0] + 8, &z, 4);
     for (int i = 0; i < 3; i++) { int32_t b = 0x100 * (i + 1), p = b + 0x10; memcpy(objs[i] + 0x50, &b, 4); memcpy(objs[i] + 0x54, &p, 4); }
-    P15_ListHead = nodes[0];
+    P15_SetListHead(nodes[0]);
     static uint8_t buf[0x24 * 2 + 0x60 * 3]; CK(P97_ScriptSave(buf) == (int32_t)sizeof buf);   /* 004cf6b2 */
     int32_t o54; memcpy(&o54, buf + 0x24 + 0x54, 4); CK(o54 == 0x10);
     memcpy(&o54, objs[2] + 0x54, 4); CK(o54 == 0x310);
@@ -4364,7 +4364,7 @@ static int test_p97(void) {
     memcpy(&o54, objs[2] + 0x54, 4); CK(o54 == 0x300 && (nodes[1][0] & 2) && objs[1][0] == 0);
     uint8_t prog[8] = {0, 0, 0, 0}; uint8_t *sp = P10_ScriptPtr; P10_ScriptPtr = prog; P15_ListCur = nodes[1];   /* 004d156a */
     CK(P97_ScriptOpNext() == 1 && P10_ScriptPtr == prog + 4);
-    P10_ScriptPtr = sp; P15_ListHead = sh; P15_ListCur = sc; re_ptr_unregister(nodes); re_ptr_unregister(objs); }
+    P10_ScriptPtr = sp; P15_SetListHead(sh); P15_ListCur = sc; re_ptr_unregister(nodes); re_ptr_unregister(objs); }
   { static uint8_t rec[0x80], lnk[0x20]; memset(rec, 0, sizeof rec); memset(lnk, 0, sizeof lnk);   /* 0050bc2b */
     uint32_t al = re_ptr_register_dyn(lnk, sizeof lnk); memcpy(rec + 0x60, &al, 4); int32_t one = 1, sk = P77_C65DA4; memcpy(rec + 0x14, &one, 4);
     P77_C65DA4 = 1; lnk[0x1e] = 1; memset(P77_C62E60, 0, sizeof P77_C62E60); P97_MarkCells(rec);
@@ -5204,7 +5204,7 @@ static int test_p112(void) {
   P10_ScriptPtr = scr; CK(P112_OpMoveCur() == 1); CK(P10_ScriptPtr == scr + 2);   /* уже в цели */
   P10_ScriptPtr = sp; P10_ScriptCtx = sc;
   CK(re_fn(0x004d09fdu) == (re_fn_t)P112_OpMoveTo && re_fn(0x004d0734u) == (re_fn_t)P112_OpMoveCurve);
-  { uint8_t *h = P15_ListHead; P15_ListHead = NULL; P112_ScriptTriggers(); P112_ScriptRunId(3); CK(P15_ListCur == NULL || 1); P15_ListHead = h; }
+  { uint8_t *h = P15_ListHead; P15_SetListHead(NULL); P112_ScriptTriggers(); P112_ScriptRunId(3); CK(P15_ListCur == NULL || 1); P15_SetListHead(h); }
   P112_FaceIcon(scr, -0x40);   /* выше экрана — ничего */
 #undef CK
   return f;

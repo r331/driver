@@ -37,3 +37,10 @@ int     P33_SetNativeProcAt(uint32_t addr, void *proc);   /* v1.96: то же п
 #define P33_GlideOk (*(int32_t *)re_gvar(0x00b1c0ecu, sizeof(int32_t), (void *)&P33_GlideOk))
 #endif
 /* gvar-img v2.03 end */
+/* v2.35: 00a42160 — one object: the D3D device pointer P31_DDObj2 (P151_D3DInit writes it); P33_Device names the same
+   native variable */
+#ifndef RE_HOOK_BUILD
+extern void *P31_DDObj2;
+#undef P33_Device
+#define P33_Device P31_DDObj2
+#endif

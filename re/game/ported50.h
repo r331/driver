@@ -36,3 +36,10 @@ void    P50_EaxSetDefault(void *ps);     /* 0048cba4: Set(EAX-свойство 1
 int32_t P50_EaxEnable(void);             /* 0048cbd3: если Get/Set поддерживаются (маска 3) — включить; 1 — успех */
 int32_t P50_CreateDummyBuf(void);        /* 0048ccdd: пустой 3D-буфер (11050 Гц, 16 бит, моно) для получения IKsPropertySet; 1 — успех */
 int32_t P50_CreateKsProps(void);         /* 0048cc64: + QueryInterface(IKsPropertySet); 1 — успех */
+/* v2.35: 00b1c83c — one object: the second movie stream P38_Mms2 (P150_OpenAudio writes it); P50_FmvFlag names the same
+   native variable */
+#ifndef RE_HOOK_BUILD
+extern void *P38_Mms2;
+#undef P50_FmvFlag
+#define P50_FmvFlag P38_Mms2
+#endif
