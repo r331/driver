@@ -1,7 +1,13 @@
+/* 50 routines around cars, traffic and cops: car lights, traffic placement and collisions,
+   mission HUD bars, the cop "can see the player" tick and cop paths, director free camera and
+   menu nodes, CONFIG.DAT snapshot, car reset, road-cell scanning and dust, lamp colours,
+   radar walls, ghost trail, box contacts and clipping, road side, tyre tracks.
+   English headers below summarise the Russian notes at each function. */
 /* v1.47: 23 функции (см. ported102.h). Стандарт указателей v1.42: адреса узлов пути копа (+0xc60, узел +0 следующий),
    ссылка копа на машину (+0xcd0), адреса переменных скрипта полос HUD, ссылки моделей (P79_PTR) — uint32_t + re_ptr/re_addr;
    глобальные скалярные указатели (P56_Sprite, P100_RadarIcon, P44_MatPtr) — родные. Узлы дороги — P11_00bf1c40 (nodetab.h). */
 #include "ported102.h"
+#include "carfields.h"
 #include "nodetab.h"
 #include "cartab.h"
 #include "director.h"
@@ -425,15 +431,24 @@ int32_t P102_ObjBKey;
 #pragma pop_macro("P102_ObjBKey")
 #endif
 
+#define RE_MEMRW_LOCAL16   /* keep the local 16-bit helpers below (hook object identity, see memrw.h) */
 #include "memrw.h"
+/* rd16s — Unaligned int16 read. */
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
+/* wr16 — Unaligned uint16 write. */
 static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
+/* wrf — Store a float (bit copy). */
 static void wrf(void *p, float v) { memcpy(p, &v, 4); }
+/* rdf_ — Unaligned float read. */
 static float rdf_(const void *p) { float v; memcpy(&v, p, 4); return v; }
+/* fbits — Bit pattern of a float. */
 static uint32_t fbits(float v) { uint32_t u; memcpy(&u, &v, 4); return u; }
+/* mul — int32 multiply with 32-bit wrap-around (imul). */
 static int32_t mul(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b); }   /* imul с переполнением */
+/* carp — Car record i of P99_Cars. */
 static uint8_t *carp(int32_t i) { return (uint8_t *)&P99_Cars[i]; }
 /* запись модели машины m (00d0cc60 + m*0x16c); в native — в пределах S_00D0CC60 (0x4000 байт), иначе нули */
+/* carmodel — Car model record m (00d0cc60 + m * 0x16c).  Native: zero record when m is outside the image. */
 static const uint8_t *carmodel(uint32_t m) {
 #ifndef RE_HOOK_BUILD
   static const uint8_t zero[0x16c];
@@ -442,12 +457,14 @@ static const uint8_t *carmodel(uint32_t m) {
   return S_00D0CC60 + m * 0x16c;
 }
 /* машина трафика i по указателю 0113a6c4 (в Game.exe — 00d07908 = запись 1); в native, если указатель не задан, — P99_Cars[1 + i] */
+/* tcar — Traffic car i (record i + 1) via pointer 0113a6c4.  Native: falls back to P99_Cars when unset. */
 static uint8_t *tcar(int32_t i) {
 #ifndef RE_HOOK_BUILD
   if (P59_CarsTab == NULL) return (i + 1 >= 0 && i + 1 < P99_CARS_N) ? carp(i + 1) : carp(P99_CARS_N - 1);
 #endif
   return P59_CarsTab + (uint32_t)i * 0x148;
 }
+/* trec — Traffic record i (TREC_* in trafficrec.h).  Native: a zeroed dummy outside 0..0x3f. */
 static uint8_t *trec(int32_t i) {
 #ifndef RE_HOOK_BUILD
   if (i < 0 || i >= 0x40) { static uint8_t dummy[0x54]; memset(dummy, 0, sizeof dummy); return dummy; }
@@ -456,6 +473,8 @@ static uint8_t *trec(int32_t i) {
 }
 
 /* ---- 004aef57: фары машины car (side 0 — передние, 1 — задние, 2 — обе), пока счётчики повреждений < 500 ---- */
+/* P102_CarLights — Game.exe 004aef57, cdecl.  Head- / tail-lights of car `car` (side 0 front, 1 rear, 2 both), drawn only while the damage
+   counters of that side are below 500. */
 void P102_CarLights(int32_t car, int32_t side) {
 #ifndef RE_HOOK_BUILD
   if (car < 0 || car >= 65) return;
@@ -474,6 +493,8 @@ void P102_CarLights(int32_t car, int32_t side) {
 }
 
 /* ---- 00496372: можно ли поставить машину трафика в (x, z): узел дороги, далеко от игрока и от машин хозяина owner ---- */
+/* P102_TrafficRoom — Game.exe 00496372, cdecl.  May a traffic car be placed at (x, z)?  Needs a road node there, distance from the player, and
+   no car of `owner` nearby. */
 int32_t P102_TrafficRoom(int32_t x, int32_t z, int32_t owner, uint32_t flags) {
   int32_t side = Round1024(P99_Cars[0].heading);
   if ((int16_t)P101_RoadNode(x, z, (int8_t)side) != 0) return 0;
@@ -490,6 +511,8 @@ int32_t P102_TrafficRoom(int32_t x, int32_t z, int32_t owner, uint32_t flags) {
 }
 
 /* коробка машины c для P101_BoxHit: оси (матрица +4), центр (+0x18), размеры модели (+0x164..+0x168) */
+/* car_box — Collision box of car c for P101_BoxHit: axes from the orientation matrix (CAR_MAT), centre
+   CAR_POS2, half sizes from the car model (+0x164..+0x168). */
 static void car_box(int32_t *o, const uint8_t *c, const uint8_t *other) {
   o[0] = rd16s(c + 4); o[1] = rd16s(c + 10); o[2] = rd16s(c + 0x10);
   o[8] = rd16s(c + 6); o[9] = rd16s(c + 0xc); o[10] = rd16s(c + 0x12);
@@ -502,6 +525,7 @@ static void car_box(int32_t *o, const uint8_t *c, const uint8_t *other) {
   o[0x12] = rd16s(m + 0x166);
 }
 /* ---- 00499bb2: столкновение машин a и b (коробки): глубина, точка, нормаль, ось ---- */
+/* P102_CarsHit — Game.exe 00499bb2, cdecl.  Box collision test of cars a and b: penetration depth, contact point, normal and axis. */
 int32_t P102_CarsHit(const uint8_t *a, const uint8_t *b, int32_t *depth, int32_t *p, int32_t *n, int32_t *q) {
   int32_t ba[0x20], bb[0x20], best[10];
   memset(ba, 0, sizeof ba); memset(bb, 0, sizeof bb); memset(best, 0, sizeof best);
@@ -519,6 +543,8 @@ int32_t P102_CarsHit(const uint8_t *a, const uint8_t *b, int32_t *depth, int32_t
 }
 
 /* ---- 00492b98: новая машина трафика в (x, z) с курсом heading (parked ≠ 0 — стоящая); номер или -1 ---- */
+/* P102_TrafficAdd — Game.exe 00492b98, cdecl.  Create a traffic car at (x, z) with heading `heading` (parked != 0: standing still).  Returns
+   its index or -1. */
 int32_t P102_TrafficAdd(int32_t x, int32_t y, int32_t z, int32_t heading, int32_t parked) {
   (void)y;
   int32_t i = PopIndex00493E9B();
@@ -565,10 +591,13 @@ int32_t P102_TrafficAdd(int32_t x, int32_t y, int32_t z, int32_t heading, int32_
 }
 
 /* ---- 00501c63: полосы HUD миссии (повреждения, розыск, соперник), значки карты MAP_X / DOT ---- */
+/* var_addr — Game.exe address of a mission script variable used by the HUD bars. */
 static uint32_t var_addr(const char *name) {
   int32_t i = P42_FindVar(name);
   return i < 0 ? 0u : re_addr(&P42_Vars[i]);
 }
+/* P102_HudInit — Game.exe 00501c63, cdecl.  Mission HUD bars (damage, wanted level, opponent) from the mission script variables and the map
+   icons MAP_X / DOT. */
 void P102_HudInit(void) {
   P102_B52A3C = 0;
   P102_HudF4 = 0;
@@ -605,6 +634,8 @@ void P102_HudInit(void) {
 }
 
 /* поле обзора копов 00d11a40: 3 × int16 (в native — P95_SndRate (2 слова) и P97_D11A44) */
+/* cop_view_fill — Cop field-of-view parameters 00d11a40 (3 x int16).  Native: assembled from the variables that
+   alias those bytes (P95_SndRate, P97_D11A44). */
 static void cop_view_fill(int16_t *v) {
 #ifdef RE_HOOK_BUILD
   (void)v;
@@ -618,6 +649,8 @@ static void cop_view_fill(int16_t *v) {
 #ifndef RE_HOOK_BUILD
 /* v2.11: RE_COPNEAR=K[:кадр] — отладка погони: один раз (по умолчанию на кадре 1000) первая патрульная машина ставится
    перед машиной игрока (машина + K/1000 · (машина − камера) по XZ, как RE_PEDNEAR) — дальше её ведёт обычный ИИ копов. */
+/* cop_near_dbg — Native debug RE_COPNEAR=K[:frame]: once (frame 1000 by default) put the first patrol car in front
+   of the player (car + K/1000 * (car - camera) on XZ); the normal cop AI drives it from there. */
 static void cop_near_dbg(void) {
   static int on = -1, done = 0, at = 1000; static float kk;
   if (on < 0) { const char *e = getenv("RE_COPNEAR"); on = e != NULL;
@@ -639,6 +672,11 @@ static void cop_near_dbg(void) {
   }
 }
 #endif
+/* P102_CopsTick — Game.exe 004a6403, cdecl.  Do the cops see the player?  Unless option 00bdfa58 is set: for each active cop-AI slot, the
+   player is seen when the slot is forced (+0x333) or the cop is in the player's cell box and
+   P99_CopsNear (view cone) says so.  Seen resets the lost-timer 0112b280; after 0x200 unseen
+   ticks the chase is lost (P95_AmbN = -1, event 0x800a).  Cops outside the box for more than 100
+   ticks drop from TRF_COP back to TRF_DRIVE. */
 void P102_CopsTick(void) {
 #ifndef RE_HOOK_BUILD
   cop_near_dbg();
@@ -698,6 +736,7 @@ void P102_CopsTick(void) {
 }
 
 /* ---- 004c2d73: свободная камера режиссёра — сдвиг клавишами (1/2 — вбок, 4/8 — вперёд/назад, 0x20/0x40 — вверх/вниз, 0x80 — быстро) ---- */
+/* P102_DirFreeCam — Game.exe 004c2d73, cdecl.  Director free camera: move with keys (1/2 sideways, 4/8 forward/back, 0x20/0x40 up/down, 0x80 fast). */
 void P102_DirFreeCam(uint32_t keys) {
   uint8_t *cam = (uint8_t *)&DirectorCam;
   if ((keys & 0x10) == 0) P29_Flag94 = 0;
@@ -730,11 +769,13 @@ void P102_DirFreeCam(uint32_t keys) {
 }
 
 /* ---- 004a7aa7: точка пути копа (список +0xc60: узел +0 следующий, +8/+0xc точка, +0x1c номер) на расстоянии dist ---- */
+/* oct_len — Octagonal length approximation (max + min/2) of (dx, dz). */
 static int32_t oct_len(int32_t dx, int32_t dz) {
   int32_t ax = iabs(dx), az = iabs(dz), hi = ax, lo = az;
   if (ax < az) { hi = az; lo = ax; }
   return hi + (lo * 0xd >> 5);
 }
+/* P102_CopPathPoint — Game.exe 004a7aa7, cdecl.  Point at distance `dist` along a cop's path list (+0xc60: node +0 = next, +8/+0xc = point, +0x1c = number). */
 void P102_CopPathPoint(uint8_t *cop, int32_t dist, int32_t *out) {
   uint8_t *n = (uint8_t *)re_rd_ptr(cop + 0xc60);
   if (n == NULL) { wr32(cop + 0xcb8, 0); return; }
@@ -766,6 +807,7 @@ void P102_CopPathPoint(uint8_t *cop, int32_t dist, int32_t *out) {
 }
 
 /* ---- 00406875: снимок настроек для CONFIG.DAT (0x10c байт, 0x43 слова) ---- */
+/* P102_ConfigSnap — Game.exe 00406875, cdecl.  Snapshot of the settings for CONFIG.DAT (0x10c bytes, 0x43 words). */
 void P102_ConfigSnap(uint32_t *cfg) {
   memset(cfg, 0, 0x10c);
   cfg[0] = (uint32_t)P55_V57B6FC;
@@ -822,6 +864,7 @@ void P102_ConfigSnap(uint32_t *cfg) {
 }
 
 /* ---- 004dd7ec: сброс таблицы машин перед заездом (номера, модели, положение игрока на дороге) ---- */
+/* P102_ResetCars — Game.exe 004dd7ec, cdecl.  Reset the car table before a level: indices, models and the player's road position. */
 void P102_ResetCars(void) {
   int32_t q[4] = { 0, 0, 0, 0 };
   P14_00d0778c = 0;
@@ -865,6 +908,8 @@ void P102_ResetCars(void) {
 }
 
 /* ---- 004902a8: клетки вокруг игрока по таблице направлений: дорожные — места трафика (P75_Spawn), пустые — точки пыли ---- */
+/* P102_ScanCells — Game.exe 004902a8, cdecl.  Scan the map cells around the player via the direction table: road cells become traffic spawn
+   points (P75_Spawn), empty cells dust points. */
 void P102_ScanCells(void) {
   P75_43CC = 0;
   P102_DustN = 0;
@@ -880,11 +925,23 @@ void P102_ScanCells(void) {
   if (n <= 0) return;
 #endif
   uint8_t *sp = P75_Spawn, *dp = P102_DustPts;
+#ifndef RE_HOOK_BUILD
+  static int dbg = -1, calls; int st_oob = 0, st_null = 0, st_empty = 0, st_road = 0;
+  if (dbg < 0) dbg = getenv("RE_PEDSPAWN") != NULL;
+#endif
   for (int32_t k = 0; k < P94_DirCnt; k++) {
 #ifndef RE_HOOK_BUILD
     if (k >= 128) break;
+    if (dbg && (k == P94_DirCnt - 1 || k == 127) && (calls++ % 100) == 0)
+      fprintf(stderr, "[pedscan] frame %d dirs %d ring0 %d,%d oob %d null %d empty %d road %d (of %d so far)\n", P62_Frame, P94_DirCnt,
+              P94_DirTab[0][0], P94_DirTab[0][1], st_oob, st_null, st_empty, st_road, k);
 #endif
     int32_t cx = px + P94_DirTab[k][0], cz = pz + P94_DirTab[k][1];
+#ifndef RE_HOOK_BUILD
+    if (dbg) { if (cx < 0 || P62_MapW <= cx || cz < 0 || P62_MapH <= cz) st_oob++;
+      else { int32_t nn = n, ux2 = cx / nn, uz2 = (P72_Rows - 1) - cz / nn; const int16_t *t2 = (const int16_t *)P54_RoadA[(ux2 & 1) + (uz2 & 1) * 2];
+        if (t2 == NULL) st_null++; else if (t2[(cz - (cz / nn) * nn) * nn + (cx - ux2 * nn)] == -0x8000) st_empty++; else st_road++; } }
+#endif
     if (cx < 0 || P62_MapW <= cx || cz < 0 || P62_MapH <= cz) continue;
     uint32_t ux = (uint32_t)(cx / n), uz = (uint32_t)((P72_Rows - 1) - cz / n);
     int32_t fx = cx - (int32_t)ux * n, fz = cz - (cz / n) * n;
@@ -926,6 +983,8 @@ void P102_ScanCells(void) {
 }
 
 /* ---- 00493b51: подвод машины трафика к цели по x (+0x40, mode 0/2) или z (+0x44, mode 1/3); 1 — на месте ---- */
+/* align_axis — Move a traffic car toward its target along x (velocity +0x40, mode 0/2) or z (+0x44, mode 1/3);
+   returns 1 when in place. */
 static int32_t align_axis(uint8_t *r, uint8_t *c, uint32_t toff, uint32_t coff, int32_t neg_dir) {
   int32_t d = rd32(r + toff) - rd32(c + coff);
   if (iabs(d) < 0x21) {
@@ -941,6 +1000,7 @@ static int32_t align_axis(uint8_t *r, uint8_t *c, uint32_t toff, uint32_t coff, 
   wr32(c + 0xfc, rd32(r + 0x24) == neg_dir ? -v : v);
   return 0;
 }
+/* P102_TrafficAlign — Game.exe 00493b51, cdecl.  Align a traffic car with its lane (called by P103_TrafficTick when nearly on the road direction). */
 int32_t P102_TrafficAlign(uint8_t *rec, int32_t a, int32_t b, int8_t mode) {
   (void)a; (void)b;
   uint8_t *c = tcar(rec[0]);
@@ -962,6 +1022,8 @@ static const uint32_t k_six[72] = {
   0xf50, 5, 0xd16, 600, 0xa07, 0xfa, 0x41500000, 0x41700000, 0x400, 0x40800000, 0x3f0ccccd, 0x5a,
   0xed8, 5, 0xe10, 600, 0x400, 300, 0x41200000, 0x41a00000, 2000, 0x41400000, 0x3ee66666, 0x69 };
 _Static_assert(sizeof k_six == sizeof(p98_six_t), "k_six");
+/* P102_SixInit — Game.exe 004aba7c, cdecl.  In game state 2 load the six-entry parameter table k_six into P98_Six and clear P102_SixFlag.
+   TODO(RE): unsure what the six entries configure (cop / AI tuning?). */
 void P102_SixInit(void) {
   if (D_00b87e30 != 2) return;
   P102_SixFlag = 0;
@@ -969,12 +1031,18 @@ void P102_SixInit(void) {
 }
 
 /* ---- 005259c8: реплики копов по скорости/заносу/ударам игрока (P12_Fn00525CB7(номер)) ---- */
+/* P102_CopTalk — Game.exe 005259c8, cdecl.  Police radio / commentary triggers (speech 00525cb7(n)) from the player's driving: high speed,
+   spinning (yaw rate CAR_ANGVEL y above 0x12d / 0xfb, the latter with the handbrake), damage
+   jumps of more than 0x1e (and an external hit flag 00b31ea0), sustained speed, braking at speed,
+   handbrake (pad bit 0x20) or burnout (0x40) above speed 0x32; each with its own cool-down
+   counter.  Also records the maximum speed and yaw rate.  keys = PAD_* bits (ported36.c).
+   The state variables (00b93ccc..00b93e00) are the ones P44_ResetState clears. */
 void P102_CopTalk(uint32_t keys) {
   int32_t sp = P99_Cars[0].f10c >> 0xc;
   P44_Rst_B93DF4 = sp < 0 ? 1 : 0;
   if (sp < 0) sp = -sp;
   if (P44_Rst_B93CE8 < sp) P44_Rst_B93CE8 = sp;
-  int32_t sl = rd32(carp(0) + 0x50) >> 0xc;
+  int32_t sl = rd32(carp(0) + CAR_ANGVEL + 4) >> 0xc;   /* yaw rate */
   if (sl < 0) sl = -sl;
   if (P44_Rst_B93CD8 < sl) P44_Rst_B93CD8 = sl;
   int32_t dmg = Get138(carp(0)) >> 3;
@@ -1003,6 +1071,7 @@ void P102_CopTalk(uint32_t keys) {
 }
 
 /* ---- 004fe869: цвет моделей фонарей LAMP/LAMP2/LAMP3/DLAMP/DLAMP2 и их потомков (on=1 — горят) ---- */
+/* lamp_ops — Apply the lamp colour to one lamp model and its children. */
 static void lamp_ops(uint32_t ref, int32_t second, float r, float g, float b) {
 #ifndef RE_HOOK_BUILD
   if (ref == 0) return;
@@ -1019,6 +1088,7 @@ static void lamp_ops(uint32_t ref, int32_t second, float r, float g, float b) {
     p += G2_TABLE_00550ACC[*p];
   }
 }
+/* P102_LampColor — Game.exe 004fe869, cdecl.  Colour of the lamp models LAMP / LAMP2 / LAMP3 / DLAMP / DLAMP2 and their children (on = 1: lit). */
 void P102_LampColor(int32_t on) {
   static const char *const names[5] = { "LAMP", "LAMP2", "LAMP3", "DLAMP", "DLAMP2" };   /* .data 0057380c.. */
   float r, g, b;
@@ -1040,7 +1110,10 @@ void P102_LampColor(int32_t on) {
   }
 }
 
-/* ---- 0051329b: частицы пыли в точках пустых клеток (P102_DustPts), пока есть свободные слоты (0x40, A_00C56780 по 0xb4) ---- */
+/* P102_SpawnDust — Game.exe 0051329b, cdecl.  Spawns PEDESTRIANS (not dust; see ported71.c) at the spawn points
+   P102_DustPts while fewer than the "Pedestrian Density" option (P60_PartLimit = 005759a4) are active: each new
+   record of the pool A_00C56780 is first offered a chair (P99_PartOnChair — a sitting pedestrian), else becomes a
+   walker (P60_SpawnParticle), else is freed again.  Names kept (address aliases / existing users). */
 void P102_SpawnDust(void) {
   const uint8_t *pt = P102_DustPts;
   for (int32_t k = P102_DustN; k != 0 && G6_00C56764 < P60_PartLimit; k--, pt += 0xc) {
@@ -1068,10 +1141,20 @@ void P102_SpawnDust(void) {
     int32_t ok = P99_PartOnChair(p, cnt);
     if (ok == 0 && (ok = P60_SpawnParticle(p, cnt)) == 0) P43_FreeSlot(p);
     if (ok != 0) wr32(p + 8, iabs((int32_t)Rand_004D9078() % 5));
+#ifndef RE_HOOK_BUILD
+    /* RE_PEDSPAWN=1 (debug, native only): one line per spawn attempt — point and resulting distance to the player */
+    { static int on = -1; if (on < 0) on = getenv("RE_PEDSPAWN") != NULL;
+      if (on) { float dx = (float)rd32(pt + 4) - (float)P99_Cars[0].pos[0], dz = (float)rd32(pt + 8) - (float)P99_Cars[0].pos[2];
+        float qx = f[0] - (float)P99_Cars[0].pos[0], qz = f[2] - (float)P99_Cars[0].pos[2];
+        fprintf(stderr, "[pedspawn] frame %d ok %d type %d near %d point %.0f ped %.0f\n", P62_Frame, ok, ok ? (int)rd16s(p) : -1, cnt,
+                sqrtf(dx * dx + dz * dz), ok ? sqrtf(qx * qx + qz * qz) : -1.0f); } }
+#endif
   }
 }
 
 /* ---- 0051d51c: матрица машины игрока (P98_CarMat[0]) и 4 угла днища на дороге (P102_Corners: x, высота, z) ---- */
+/* P102_PlayerCorners — Game.exe 0051d51c, cdecl.  Player car matrix (P98_CarMat[0]) and the four underbody corners on the road (P102_Corners: x,
+   height, z). */
 void P102_PlayerCorners(void) {
   const float k = 1.0f / 4096.0f;   /* .rdata 00546134 */
   const int16_t *mt = P99_Cars[0].mat;
@@ -1099,12 +1182,14 @@ void P102_PlayerCorners(void) {
 }
 
 /* ---- 00509e64: нет ли стены (0x1e) в сетке радара 55×55 (P77_C5FE00) на отрезке от игрока до pos; 1 — свободно ---- */
+/* grid_wall — 1 if radar grid cell (x, y) of the 55 x 55 grid P77_C5FE00 is a wall (0x1e). */
 static int32_t grid_wall(int32_t idx) {
 #ifndef RE_HOOK_BUILD
   if (idx < 0 || (uint32_t)(idx + 1) * 4 > sizeof P77_C5FE00) return 0;
 #endif
   return rd32(&P77_C5FE00[idx * 4]) == 0x1e;
 }
+/* P102_RadarClear — Game.exe 00509e64, cdecl.  1 if no wall cell lies on the segment from the player to pos in the radar grid. */
 int32_t P102_RadarClear(const int32_t *pos, int32_t dx, int32_t dz) {
   P11_00ba52d0 = fround((float)(P99_Cars[0].pos[0] + 0x2ee + P62_MapC64) * P63_Scale);
   int32_t x0 = P11_00ba52d0 + dx;
@@ -1142,6 +1227,8 @@ int32_t P102_RadarClear(const int32_t *pos, int32_t dx, int32_t dz) {
 
 /* ---- 004d0439: пересекает ли прямоугольник (x, z, курс ang, полуширина half, длина len) какую-либо машину;
         оригинал возвращает начало таблицы машин (00d077c0), а не найденную запись ---- */
+/* P102_BoxAnyCar — Game.exe 004d0439, cdecl.  Does the rectangle (x, z, heading ang, half width `half`, length `len`) overlap any car?  The
+   original returns the start of the car table (00d077c0) rather than the car found — kept. */
 uint8_t *P102_BoxAnyCar(int32_t x, int32_t z, int32_t ang, int32_t half, int32_t len) {
   int32_t x0 = 0, x1 = 0, z1 = 0, z0 = 0;   /* в оригинале при ang вне четырёх секторов — неинициализированные */
   if (ang < 0xfe1 && 0x1f < ang) {
@@ -1167,6 +1254,7 @@ uint8_t *P102_BoxAnyCar(int32_t x, int32_t z, int32_t ang, int32_t half, int32_t
 }
 
 /* ---- 004e6c92: след призрака — 40 пар точек за машиной 0x41 (P56_GhostBuf по 0x48), затухание цвета ---- */
+/* ghost_pt — One point pair of the ghost trail. */
 static void ghost_pt(uint8_t *e, float sx) {
   float v[4] = { sx, 0.0f, -200.0f, 0.0f };
   P44_XformT(v);
@@ -1175,6 +1263,7 @@ static void ghost_pt(uint8_t *e, float sx) {
   float y = (float)-P100_RoadHeightF(v) - 10.0f;   /* .rdata 0054612c */
   wrf(e, v[0]); wrf(e + 4, y); wrf(e + 8, v[2]); wrf(e + 0xc, v[3]);
 }
+/* P102_GhostTrail — Game.exe 004e6c92, cdecl.  Ghost trail: 40 point pairs behind car 0x41 (P56_GhostBuf, 0x48 bytes each) with fading colour. */
 void P102_GhostTrail(void) {
   if (G6_00B5A778 != 0 || (G6_00B87EA0 == 0 && P45_Mode != 0xc9) || (G6_00B87EA0 != 0 && P88_Mode575 != 1)) return;
   for (int32_t k = 0; k < 0x28; k++) {
@@ -1201,6 +1290,8 @@ void P102_GhostTrail(void) {
 
 /* ---- 0049a21d: точка контакта двух коробок (запись 0x60 на коробку, P100_BoxFace) → out[0], out[2], нормаль out[4..6], глубина out[8] ---- */
 #define BX(u, off) (box[((uint32_t)(u) * 0x60 + (off)) / 4])
+/* P102_BoxContact — Game.exe 0049a21d, cdecl.  Contact of two collision boxes (0x60 bytes each, P100_BoxFace): picks the face with the
+   smallest penetration; out[0]/out[2] = contact x/z, out[4..6] = normal (y = 0), out[8] = depth. */
 void P102_BoxContact(const int32_t *box, int32_t *out) {
   int32_t best = box[0x15] + 1, bj = 0, sg = 0;
   uint32_t bu = 0;
@@ -1228,6 +1319,8 @@ void P102_BoxContact(const int32_t *box, int32_t *out) {
 
 /* отсечение ребра a–b ближней (P95_Near, z точки = 50) или дальней (Q01270C24) плоскостью; n атрибутов → slot[];
    у второй вершины (b внутри, a снаружи) оригинал пишет только первые n2 атрибутов */
+/* clip_attr2 — Clip edge a-b against the near (P95_Near, point z = 50) or far (01270c24) plane, interpolating n
+   attributes into slot[]; for the second vertex the original writes only the first n2 attributes. */
 static void clip_attr2(const uint8_t *a, const uint8_t *b, int32_t far, const float *ua, const float *ub, const uint8_t *slot, int32_t n, int32_t n2) {
   float P = far ? Q01270C24 : P95_Near, zc = far ? Q01270C24 : 50.0f;
   float za, zb; memcpy(&za, a + 0x14, 4); memcpy(&zb, b + 0x14, 4);
@@ -1274,6 +1367,7 @@ void P102_ClipFar5(const uint8_t *a, const uint8_t *b, float ua0, float ua1, flo
 }
 
 /* ---- 0051a750: сторона дороги в точке (x, z): 0..3 (бит 1 — полоса закрыта по маске узла), -1 — не дорога ---- */
+/* P102_RoadSide — Game.exe 0051a750, cdecl.  Road side at (x, z): 0..3 (bit 1 = lane closed by the node mask), -1 = not a road. */
 int32_t P102_RoadSide(float x, float z) {
   if (P11_00b5a8e8 == 0) return -1;
   P11_00ba52d0 = fround(x);
@@ -1321,6 +1415,8 @@ int32_t P102_RoadSide(float x, float z) {
 }
 
 /* ---- 0048f899: столкновение машин a и b (0 — игрок, 0x41 — соперник): трафик сворачивает, сирена/звук удара ---- */
+/* P102_CarsCollide — Game.exe 0048f899, cdecl.  Collision reaction between cars a and b (0 = player, 0x41 = opponent): traffic swerves; siren /
+   crash sound. */
 void P102_CarsCollide(int32_t a, int32_t b, int32_t force) {
   uint8_t *ra = trec(a - 1), *rb = trec(b - 1);
   uint8_t a_c = a == 0 ? ((const uint8_t *)P12_01144340)[0x58] : ra[0xc];   /* при a = 0 оригинал читает «запись -1» (01144398) */
@@ -1349,6 +1445,8 @@ void P102_CarsCollide(int32_t a, int32_t b, int32_t force) {
 }
 
 /* ---- 005158cf: 4 плоскости коробки машины по направлению скорости (out: 4 × {nx, —, nz, d}); dist — сдвиг передней ---- */
+/* P102_CarPlanes — Game.exe 005158cf, cdecl.  Four planes of a car's box oriented along its velocity (out: 4 x {nx, -, nz, d}); dist moves the
+   front plane. */
 void P102_CarPlanes(const uint8_t *car, float *out, int32_t dist) {
   float fx = (float)rd32(car + 0xc8), fz = (float)rd32(car + 0xd0);
   uint32_t u = (uint32_t)-P44_Atan2(rd32(car + 0x40) >> 8, rd32(car + 0x48) >> 8) & 0xfff;
@@ -1373,6 +1471,7 @@ void P102_CarPlanes(const uint8_t *car, float *out, int32_t dist) {
 }
 
 /* ---- 0049521e: машина трафика впереди на той же полосе (+0x28 дорога, +0x24 направление, +9 полоса) не дальше dist; номер или -1 ---- */
+/* rec_cell — Map cell of a traffic record. */
 static void rec_cell(uint8_t *r) {
   const uint8_t *c = tcar(r[0]);
   wr32(r + 0x48, rd32(c + 0xc8) + 0x2ee);
@@ -1380,6 +1479,8 @@ static void rec_cell(uint8_t *r) {
   P11_00ba52d0 = fround((float)rd32(r + 0x48) * P63_Scale); wr32(r + 0x48, P11_00ba52d0);
   P11_00ba52d0 = fround((float)rd32(r + 0x4c) * P63_Scale); wr32(r + 0x4c, P11_00ba52d0);
 }
+/* P102_TrafficAhead — Game.exe 0049521e, cdecl.  Traffic car ahead in the same lane (TREC_NEXT_NODE road, TREC_ROAD_DIR direction, byte 9 lane)
+   within dist; returns its index or -1. */
 int32_t P102_TrafficAhead(uint8_t *rec, int32_t dist, int32_t parked) {
   int32_t d = 1000;
   if (rec[0x10] != 0) return -1;
@@ -1416,6 +1517,8 @@ int32_t P102_TrafficAhead(uint8_t *rec, int32_t dist, int32_t parked) {
 }
 
 /* ---- 004c4ef9: доступность пунктов меню режиссёра (узлы 1..0x23) по кадру, режиму и камерам; метка __fastcall ложная ---- */
+/* P102_DirMenuNodes — Game.exe 004c4ef9, cdecl.  Which director menu entries (nodes 1..0x23) are available, by frame, mode and cameras.  The
+   __fastcall label in Ghidra is wrong. */
 void P102_DirMenuNodes(void) {
   for (int32_t id = 1; id <= 0x23; id++) SetNodeEnabled(id, 1);
   if (DirectorUnk6C < 3) SetNodeEnabled(5, 0);
@@ -1432,8 +1535,11 @@ void P102_DirMenuNodes(void) {
 }
 
 /* флаг 00b201dc «рисовать объекты B» (читает P96_AddObjB) — все псевдонимы */
+/* set_b201dc — Write 00b201dc ("draw B objects", read by P96_AddObjB) and all its aliases. */
 static void set_b201dc(int32_t v) { P13_00b201dc = v; G00B201DC = v; MenuVarB201DC = v; }
 /* ---- 004af2fd: отметка (тень/след) объекта obj по смещению (x, y, z) в его системе: запись C (G01105D80) + объект B ---- */
+/* P102_ObjMark — Game.exe 004af2fd, cdecl.  Mark (shadow / track) for object obj at offset (x, y, z) in its own frame: a C record
+   (01105d80) plus a B object. */
 void P102_ObjMark(const uint8_t *obj, float x, float y, float z, int16_t kind) {
   int32_t sv = P13_00b201dc;
   if (P52_Ones3 != 0) {
@@ -1473,6 +1579,8 @@ void P102_ObjMark(const uint8_t *obj, float x, float y, float z, int16_t kind) {
 }
 
 /* ---- 004af619: следы шин машины car (8 точек: 4 × 2 стороны) объектами B, если скорость ≥ 0.01 и машина на земле ---- */
+/* P102_CarTracks — Game.exe 004af619, cdecl.  Tyre tracks of car `car`: 8 points (4 x 2 sides) as B objects when its speed >= 0.01 and it is
+   on the ground. */
 void P102_CarTracks(int32_t car, const int16_t *phase, float speed) {
   static const float k_off[4] = { 48.0f, 68.0f, 90.0f, 112.0f };   /* .data 005539f8 */
   int32_t sv = P13_00b201dc;

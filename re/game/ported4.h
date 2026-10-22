@@ -777,7 +777,6 @@ void LoadShort3FromPtr(const int16_t* p);
 void StopTimer4086EA(void);
 void InitMapState4D3426(void);
 void DrainStackC200F(void);
-void FillOnes4EF997(uint8_t* p);
 void ReleaseSlot4A2C5B(int32_t idx);
 void TickTimer4F5D67(void);
 /* gvar-img v2.03 begin (tools/gen_gvar_img.py) */

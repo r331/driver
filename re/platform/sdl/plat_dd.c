@@ -1,5 +1,11 @@
 /* SDL-вариант объектов DirectDraw/Direct3D: учётные записи без устройства.
    Игровой код (game/ported24.c) работает с дескрипторами; реальное окно/буфер даёт plat_render.c. */
+/* plat_dd.c (English overview) — native stand-ins for the DirectDraw / Direct3D / DirectSound /
+   DirectShow COM objects the game creates.  Objects are small tagged records (dd_obj).  In the game
+   (g_game_present) surfaces own pixel memory with a synthetic 32-bit address for lpSurface, textures are
+   converted to RGBA and uploaded to GL on use, the back buffer's LFB writes are overlaid at Flip, and
+   DirectSound buffers are forwarded to the software mixer (plat_dsmix.c, DSG()).  Without the game
+   (selftest) every call is only recorded so tests can inspect the last call ("stub stats"). */
 #include "../plat.h"
 #include "plat_texpack.h"
 #include <stdio.h>
@@ -40,6 +46,7 @@ static void *mk(uint32_t tag) { dd_obj *o = (dd_obj *)calloc(1, sizeof *o); if (
    цветовой ключ — альфа 0) и загрузка в GL (plat_tex_update), затем plat_tex_bind. Первичная/задняя поверхность: 3D рисуется
    прямо в GL-кадр; запись в заднюю через Lock (LFB) накладывается на кадр при Flip (пиксель 0 — прозрачный), память затем
    обнуляется; Blt COLORFILL задней — очистка прямоугольника GL. */
+/* --- (en) In-memory DirectDraw surfaces (game only): pixel format, RGBA conversion, GL upload, present. --- */
 enum { ROLE_TEX = 0, ROLE_PRIMARY = 1, ROLE_BACK = 2, ROLE_Z = 3 };
 static int g_scr_w = 640, g_scr_h = 480;
 static const uint32_t k_pf565[8] = { 0x20, 0x40, 0, 16, 0xf800, 0x7e0, 0x1f, 0 };
@@ -225,11 +232,13 @@ void *plat_stub_last_texture(int *stage) { if (stage) *stage = g_tex_stage; retu
 int plat_stub_pal_stats(int *a, int *b) { *a = g_pal_entries; *b = g_pal_changed; return 1; }
 int plat_dd_stub_last_desc(uint32_t *d) { if (!g_desc_n) return 0; memcpy(d, g_desc, sizeof g_desc); return g_desc_n; }
 /* --- создание DirectDraw и режим экрана --- */
+/* --- (en) DirectDraw creation and display mode. --- */
 static uint32_t g_disp_flags = 0x40; static int g_disp_fail_create, g_disp_fail_mode;
 void *plat_dd_create(const void *guid) { (void)guid; return g_disp_fail_create ? NULL : mk(0); }
 int32_t plat_dd_get_display_flags(void *dd, uint32_t *f) { if (!dd || g_disp_fail_mode) return -1; *f = g_disp_flags; return 0; }
 void plat_dd_stub_display(uint32_t f, int fc, int fm) { g_disp_flags = f; g_disp_fail_create = fc; g_disp_fail_mode = fm; }
 /* --- FMV / DirectSound: учётные записи --- */
+/* --- (en) FMV / DirectSound bookkeeping. --- */
 static uint32_t g_fmv_fail; static int g_ms_state = -1, g_upd, g_blts, g_fills; static int32_t g_blt_rc[4]; static uint32_t g_fill_all_px, g_spk; static uint8_t g_fmt[18];
 int32_t plat_mms_set_state(void *m, int st) { if (!m || (g_fmv_fail & 1)) return -1; g_ms_state = st; return 0; }
 int32_t plat_sample_update(void *s) { if (!s || (g_fmv_fail & 2)) return -1; g_upd++; return 0; }
@@ -241,6 +250,7 @@ void plat_fmv_stub_fail(uint32_t m) { g_fmv_fail = m; }
 int plat_fmv_stub_stats(int *st, int *u, int32_t *r, int *b, uint32_t *fp, int *f, uint8_t *fmt, uint32_t *spk) {
     *st = g_ms_state; *u = g_upd; memcpy(r, g_blt_rc, sizeof g_blt_rc); *b = g_blts; *fp = g_fill_all_px; *f = g_fills; memcpy(fmt, g_fmt, 18); *spk = g_spk; return 1; }
 /* --- блокировка, формат пикселей, показ кадра --- */
+/* --- (en) Lock, pixel format, frame present (Flip / Blt). --- */
 static int g_lk_fail, g_pf_fail, g_locks, g_unlocks, g_flips, g_blts_rc, g_clip_sets, g_rects_n; static uint32_t g_pf_bits, g_pf_m[3], g_flip_flags; static int32_t g_flip_hr, g_drc[4], g_src_rc[4];
 static uint8_t g_lock_mem[64];
 int32_t plat_dd_lock(void *s, void *d) {
@@ -276,6 +286,7 @@ void plat_dd_stub_surface(int lf, int pff, uint32_t bits, uint32_t r, uint32_t g
 int plat_dd_stub_surface_stats(int *lk, int *ul, int *fl, uint32_t *ff, int *bl, int32_t *dr, int32_t *sr, int *cs) {
     *lk = g_locks; *ul = g_unlocks; *fl = g_flips; *ff = g_flip_flags; *bl = g_blts_rc; memcpy(dr, g_drc, sizeof g_drc); memcpy(sr, g_src_rc, sizeof g_src_rc); *cs = g_clip_sets; return 1; }
 /* --- DirectSound 3D: учётные записи (последний вызов) --- */
+/* --- (en) DirectSound 3D listener / buffer calls: forwarded to the mixer in the game, last call recorded for tests. --- */
 static int g_ds3_op; static float g_ds3_v[6]; static uint32_t g_ds3_u;
 static int32_t ds3_rec(void *o, int op, float a, float b, float c, uint32_t u) {
     if (!o) return -1;
@@ -317,6 +328,7 @@ int32_t plat_ds_prop_set(void *ps, const void *g, uint32_t id, const void *d, ui
 int32_t plat_ds_prop_support(void *ps, const void *g, uint32_t id, uint32_t *sup) {
     (void)g; (void)id; if (!ps || (g_dsx_fail & 4)) return -1; *sup = g_game_present ? 0 : g_dsx_support; return 0; }   /* v2.09: в игре EAX нет */
 /* --- v1.93: DirectSound — создание/перечисление/дубликат/Lock (заглушки для тестов; память Lock — буфер 64 КБ) --- */
+/* --- (en) DirectSound create / enumerate / duplicate / Lock (test stubs; game buffers live in plat_dsmix.c). --- */
 static int g_dsd_n = 1; static uint8_t g_dsd_g[8][16]; static const char *g_dsd_name[8] = { "Primary Sound Driver" }; static int g_dsd_null[8] = { 1 };
 static uint32_t g_dsd_caps, g_dsd_fail, g_dsd_split; static int g_dsd_cr, g_dsd_coop, g_dsd_dup, g_dsd_lk, g_dsd_ul, g_dsd_rs;
 static uint8_t g_dsd_mem[0x10000];
@@ -355,6 +367,8 @@ int plat_ds_stub_prop(uint8_t *g, uint32_t *id, uint32_t *len, uint32_t *d0, int
 /* --- v1.94: перечисление DirectDraw/Direct3D — тестовые заглушки (SDL не перечисляет адаптеры DirectDraw):
    драйвер 0 — основной (guid NULL) «Primary Display Driver», остальные с guid {i}; устройства — «SDL HAL i»
    (D3DDEVICEDESC: dwSize 0xfc, dwFlags 0, dcmColorModel = 2 у HAL, 0 у последнего при n_dev > 1) --- */
+/* --- (en) DirectDraw / Direct3D enumeration: one fake primary driver; in the game the GL device is reported as a
+   HAL device with full blend caps (without them the game's blend check rejected additive smoke). --- */
 static int g_dde_n = 1, g_d3de_n = 1; static uint32_t g_dde_fail;
 void plat_dd_stub_enum(int n_dd, int n_dev, uint32_t fm) { g_dde_n = n_dd; g_d3de_n = n_dev; g_dde_fail = fm; g_game_present = (fm & 0x100) != 0;
     if (g_game_present) plat_set_render_state(15, 0); }   /* v2.01: игра — умолчание D3D ALPHATESTENABLE = FALSE (тесты рендера — прежнее 1) */
@@ -387,6 +401,8 @@ int32_t plat_d3d_enum_devices(void *d3d, plat_d3d_dev_cb cb, void *ctx) {
    (E_NOTIMPL), и игра пропускает ролик, как при отсутствии DirectShow. Тестовый режим (plat_fmv_stub_open(1, …)) —
    учётные объекты с форматом w×h и длительностью. Окно: UpdateWindow/SetForegroundWindow — счётчики (+ SDL_RaiseWindow
    в plat_sys.c не нужен: окно SDL одно и всегда сверху у игры). --- */
+/* --- (en) DirectShow FMV: not decoded natively — CoCreateInstance fails by default and the game skips the
+   movie; a test mode returns bookkeeping objects. --- */
 static int g_fo_ok, g_fo_cr, g_fo_open, g_fo_smp, g_fo_fg, g_fo_upd; static uint32_t g_fo_fail; static int32_t g_fo_w = 320, g_fo_h = 200, g_fo_rc[4];
 static double g_fo_dur = 1.0; static char g_fo_path[64];
 #define FO_FAIL(b) (!g_fo_ok || (g_fo_fail & (1u << (b))))
@@ -416,6 +432,7 @@ void plat_window_update(void *h) { (void)h; g_fo_upd++; }
 void plat_window_foreground(void *h) { (void)h; g_fo_fg++; }
 /* --- v1.96: GetCaps, EnumTextureFormats / EnumZBufferFormats — учётные: форматы, которые реально умеет plat_render
    (ARGB1555, RGB565, PAL8 через палитру в шейдере; Z 16 бит) --- */
+/* --- (en) GetCaps, texture / z-buffer format enumeration: the formats the GL renderer really supports. --- */
 static uint32_t g_caps_fail, g_caps2;
 void plat_dd_stub_caps(uint32_t m, uint32_t c2) { g_caps_fail = m; g_caps2 = c2; }
 int32_t plat_dd_get_caps(void *dd, void *hal, void *hel) {

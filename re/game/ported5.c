@@ -1,3 +1,6 @@
+/* ported5.c — table-like batch of small menu helpers from Game.exe (names carry the address):
+   key-binding picks, highlight colours, icon selection, float sliders, player-car selection, option
+   toggles and one-line forwarders.  The behaviour of each is its one or two lines of code. */
 #include "ported139.h"
 #include "ported5.h"
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -423,6 +426,10 @@ float Q01270C24;
 #pragma pop_macro("Q01270C24") /*gvi*/
 #pragma pop_macro("Q01270C24")
 #endif
+/* MenuPickXXXXXXXX (12) — controls menu: start redefining one key binding.  Sets the "waiting for a key"
+   mode (Q00B87F00 = 1), the target byte inside the key table P19_Keys1 (00d04a70 + n, n = 0..11) and the
+   menu row Q005FE768 to highlight, reads input once, repaints the rows white and remembers the row in
+   MenuI005FE770 (MenuI005FE774 = -1: no second row).  Return 0. */
 int32_t MenuPick0040FEA0(void) {
     Q00B87F00 = 1; Q005FE764 = 0x00d04a70; Q005FE768 = 2;
     Call004E3391(); MenuHiliteWhite0041074D();
@@ -483,6 +490,9 @@ int32_t MenuPick0041069E(void) {
     Call004E3391(); MenuHiliteWhite0041074D();
     MenuI005FE770 = Q005FE768; MenuI005FE774 = -1; return 0;
 }
+/* MenuHiliteWhite / MenuHiliteRed — set the colour bytes (+0xc..+0xe of 16-byte text entries) of the
+   remembered row(s) to white (ff ff ff) or red (ff 00 00): 0041074D / 004106E1 for the table at
+   0054c03c, 00411A9D / 00411A31 for the table at 0054c35c. */
 void MenuHiliteWhite0041074D(void) {
     Q0054C03C[MenuI005FE770 * 0x10] = 0xff; Q0054C03D[MenuI005FE770 * 0x10] = 255; Q0054C03E[MenuI005FE770 * 0x10] = 255;
     if (MenuI005FE774 != -1) { Q0054C03C[MenuI005FE774 * 0x10] = 0xff; Q0054C03D[MenuI005FE774 * 0x10] = 255; Q0054C03E[MenuI005FE774 * 0x10] = 255; }
@@ -499,6 +509,9 @@ void MenuHiliteWhite00411A9D(void) {
     Q0054C35C[MenuI005FE798 * 0x10] = 0xff; Q0054C35D[MenuI005FE798 * 0x10] = 255; Q0054C35E[MenuI005FE798 * 0x10] = 255;
     if (MenuI005FE79C != -1) { Q0054C35C[MenuI005FE79C * 0x10] = 0xff; Q0054C35D[MenuI005FE79C * 0x10] = 255; Q0054C35E[MenuI005FE79C * 0x10] = 255; }
 }
+/* SetIconIdxXXXXXXXX (8) — store one picture address (0054cdf0 + 0x18 * k) into its menu slot and the
+   matching loaded icon into Q0054CC58; reset == 0 also restarts the menu counter.  Quirk kept:
+   00412D0F writes the same slot as 00412CA1 (WU0054CC28). */
 void SetIconIdx00412A0D(int32_t reset) {
     WU0054CBB0 = 0x54cdf0; Q0054CC58 = Q00C5585C; if (reset == 0) MenuCounter5D577C = 0;
 }
@@ -523,6 +536,10 @@ void SetIconIdx00412CA1(int32_t reset) {
 void SetIconIdx00412D0F(int32_t reset) {
     WU0054CC28 = 0x54ce98; Q0054CC58 = Q00C55860; if (reset == 0) MenuCounter5D577C = 0;
 }
+/* FloatStep (4) — option sliders: raise / lower Q01270C24 (00409A91 / 00409ACA) or Q0125F3F8 (00409B03 /
+   00409B3C) by the step Q0054604C within the .rdata limits, then request a menu redraw.
+   Per ported126.c's debug keys these are the draw distance 01270c24 (15000..45000) and 0125f3f8
+   ("mirror", up to 42000), stepped by 3000.  TODO(RE): confirm 0125f3f8. */
 void FloatStep00409A91(void) {
     if (Q01270C24 < Q00546030) { Q01270C24 = Q01270C24 + Q0054604C; MenuVar575EF8 = 4; MenuRedraw(); }
 }
@@ -535,6 +552,8 @@ void FloatStep00409B03(void) {
 void FloatStep00409B3C(void) {
     if (Q0054602C < Q0125F3F8) { Q0125F3F8 = Q0125F3F8 - Q0054604C; MenuVar575EF8 = 4; MenuRedraw(); }
 }
+/* PrevPcar / NextPcar — cycle the player-car choice Q0057B56C over 0..0x11 skipping 0xf, then
+   SetPcarName0040479B formats its label (sprintf of 00549ac0 with number + 1 into 0057b560). */
 void PrevPcar00404721(void) {
     Q0057B56C = Q0057B56C - 1;
     if (Q0057B56C < 0) Q0057B56C = 0x11;
@@ -552,6 +571,8 @@ void SetPcarName0040479B(void) {
     Call0052A910(0x57b560, 0x549ac0, Q0057B56C + 1);
     Q00549A34 = 0x57b560;
 }
+/* SetupMenuTable00412087 / 00412487 — fill the header words of two menu tables (icon + two state word
+   addresses) and run their setup calls (used by P57_Menu411FD0 / P57_Menu4123D0). */
 void SetupMenuTable00412087(void) {
     Q0054C6D8 = Q00C559F8; G0054C6E8 = 0x5fe858; G0054C6F8 = 0x5fe85c;
     Call0041219E();
@@ -560,6 +581,9 @@ void SetupMenuTable00412487(void) {
     Q0054C948 = Q00C559FC; G0054C958 = 0x5fe934; G0054C968 = 0x5fe938;
     Call004125B9();
 }
+/* ToggleOpt004154CD — toggles Q00B87E94 (passed to P48_SndPause; also gates the Doppler velocity calls in
+   P115_SndUpdate) and redraws.  ToggleOpt0041542A — toggles CD music Q00B87E90; switching it off stops
+   and closes the CD.  Both return 0. */
 int32_t ToggleOpt004154CD(void) {
     Q00B87E94 ^= 1; Call0052369B(Q00B87E94); Call00414D1F(); return 0;
 }
@@ -568,10 +592,14 @@ int32_t ToggleOpt0041542A(void) {
     if (Q00B87E90 == 0) { Call00524873(); Call00524763(); }
     Call00414D1F(); return 0;
 }
+/* SetupMiami00416040 — entry 1 of the progress-gated menu (see P19_Sel2): hint 0054e104, size
+   0x147 x 0xb6, enable flag, id 0x2e into 00b87e38. */
 void SetupMiami00416040(void) {
     Q0054DF9C = 0x54e104; Q0054DF98 = 0x147; Q0054DF9A = 0xb6;
     MenuB0054DFD4 = 1; UiVar00B87E38 = 0x2e;
 }
+/* LoadArrowIcons / LoadSliderIcons — load the LEFTARRO / RIGHTARR and SLIDER / SLIDERBA icons
+   (the latter then calls 00408770 and returns -1). */
 void LoadArrowIcons00417353(void) {
     Q005FEA0C = LoadIconByName("LEFTARRO");
     Q005FEA10 = LoadIconByName("RIGHTARR");
@@ -581,6 +609,7 @@ int32_t LoadSliderIcons00417620(void) {
     Q005FEA24 = LoadIconByName("SLIDER"); Q005FEA20 = LoadIconByName("SLIDERBA");
     Call00408770(); return -1;
 }
+/* ToggleVar00407636 — if Q0057B72C: toggles Q00B87EF0 (forced to 0 when Q00B31E2C == 0) and redraws. */
 int32_t ToggleVar00407636(void) {
     if (Q0057B72C != 0) {
         if (Q00B31E2C == 0) Q00B87EF0 = 0; else Q00B87EF0 ^= 1;
@@ -588,17 +617,19 @@ int32_t ToggleVar00407636(void) {
     }
     return 0;
 }
+/* StartTimer004086B4 — (re)starts the 1000 ms periodic menu timer (P25_TimerStart, callback 00408710)
+   into slot D_0054a144 and clears the menu counter. */
 void StartTimer004086B4(void) {
     if (D_0054a144 != -1) StopTimer4086EA();
     MenuCounter5D577C = 0;
     D_0054a144 = Call00528221(1000, 1, 0x408710);
 }
+/* Remaining one-liners: Call3_0040C455 (three menu calls, a == 0 clears 00b87e38), Chain004D5FFC (stop all sound + 0052436a), PlayTrack004D7B60
+   (replay the current CD track), Pack565Bytes, Fwd* (forwarders), Copy400 (copy 0x400 bytes from a to
+   01271a80), LoadTrail* (load TRAIL.DAT). */
 void Call3_0040C455(int32_t a, int32_t b) {
     Call0040C165(); if (a == 0) UiVar00B87E38 = 0;
     Call0040C20B(b); Call0040BF50();
-}
-void Chain0048AC0D(void) {
-    Call0048B65D(); Call0048B568();
 }
 void Chain004D5FFC(void) {
     Call005237B1(); Call0052436A();
@@ -611,9 +642,6 @@ void Pack565Bytes004BF452(uint8_t r, uint8_t g, uint8_t b) {
 }
 void Fwd004D262C(int32_t a) {
     Call004D28A3(a);
-}
-void Fwd004EAFCF(int32_t a) {
-    Call004EAFE0(a);
 }
 void Fwd00513CF9(int32_t a) {
     Call00514A47(a);

@@ -1,3 +1,9 @@
+/* ported150.c — full-motion video playback (English overview; detailed Russian notes follow).
+   The motel cut-scenes FMVDATA\RENDERnn.MPG are played with DirectShow's multimedia streams onto a DirectDraw
+   primary surface: P150_FmvDDInit sets up DirectDraw, P150_OpenVideo the video stream and an off-screen
+   sample surface, P150_OpenAudio an audio-only stream (for speech), P150_PlayFmv runs a whole cut-scene and
+   restores the game display.  P150_FlushTris (unrelated) draws the queued car-shine triangles.
+   COM/DirectShow calls go through plat_com_* / plat_mms_* / plat_ddms_*. */
 /* v1.95: ported150 — см. ported150.h.
    0048ac1c — DirectDrawCreate(NULL) → 00b1c814; QI IDirectDraw4 → 00b1c818; SetCooperativeLevel(hwnd, 00bdf9c8 ? 0x11 : 8);
      при 00bdf9c8 ≠ 0 SetDisplayMode 640x480 с 32, 24, 16 бит (все отказали → 0); CreateSurface (IDirectDraw 1, 0x6c:
@@ -19,6 +25,11 @@
    0042d384 — при непустой очереди: состояние 3,1,0,1,0 (01270c34 = 4), текстура блеска машины (байт +8 записи
      011b6140) в TMU 0, смешивание 4,4,0,0 (0125f3e4 = 3); записи 0xb8 с 0115a140: тег 0 — 01270e30/01270e08,
      иначе 01270d9c/01270dfc (по 00bdfa18), вершины +4/+0x40/+0x7c. */
+#if defined(__GNUC__) && !defined(__clang__)
+/* Paths here are built with bounded snprintf into fixed buffers (Game.exe used unbounded sprintf); an over-long
+   name is truncated on purpose.  The warning is silenced rather than the buffers resized, so the code is unchanged. */
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
 #include "ported151.h"
 #include "ported150.h"
 #include "ported6.h"
@@ -111,6 +122,10 @@ static uint32_t rd32le(const uint8_t *p) { uint32_t v; memcpy(&v, p, 4); return 
 static void wr32le(uint8_t *p, uint32_t v) { memcpy(p, &v, 4); }
 
 /* ---- 0048ac1c ---- */
+/* P150_FmvDDInit — Game.exe 0048ac1c.  Creates DirectDraw (IDirectDraw4), sets the cooperative level
+   (normal in a window, exclusive fullscreen otherwise, where 640x480 is tried at 32, 24 and 16 bpp), creates
+   the primary surface P38_Dest and a clipper bound to hwnd.  Returns 1 on success, 0 on the first failure
+   (objects created so far are released later by P38_FmvRelease). */
 int32_t P150_FmvDDInit(void *hwnd) {
   P38_Obj814 = plat_dd_create(NULL);
   if (P38_Obj814 == NULL) return 0;
@@ -131,6 +146,10 @@ int32_t P150_FmvDDInit(void *hwnd) {
 }
 
 /* ---- 0048af23 OpenVideo ---- */
+/* P150_OpenVideo — Game.exe 0048af23.  Opens `path` as an AMMultiMediaStream with the primary video stream
+   (rendered through our DirectDraw object) and the default audio renderer (an audio failure is only logged),
+   reads the video format (P150_VidFmt; P38_Letter = its height), creates an off-screen surface P38_Src of the
+   video size in the screen's pixel format and a stream sample P38_Sample on it.  Returns 1 / 0. */
 int32_t P150_OpenVideo(const char *path) {
   if (plat_com_create(k_clsid_amms, k_iid_amms, &P50_Fmv82C) != 0) return 0;
   if (plat_mms_initialize(P50_Fmv82C, 0, 1, NULL) != 0) return 0;              /* STREAMTYPE_READ, AMMSF_NOGRAPHTHREAD */
@@ -158,6 +177,8 @@ int32_t P150_OpenVideo(const char *path) {
 }
 
 /* ---- 0048b3e8 ---- */
+/* P150_OpenAudio — Game.exe 0048b3e8.  Opens `path` as an audio-only multimedia stream on a filter graph
+   (IGraphBuilder + IMediaPosition) and stores its duration in P108_FmvLen.  Returns 1 / 0. */
 int32_t P150_OpenAudio(const char *path) {
   if (plat_com_create(k_clsid_graph, k_iid_graph, &P50_FmvB) != 0) return 0;
   if (plat_com_query_interface(P50_FmvB, k_iid_mpos, &P50_FmvC) != 0) return 0;
@@ -169,6 +190,7 @@ int32_t P150_OpenAudio(const char *path) {
   return plat_media_get_duration(P50_FmvC, &P108_FmvLen) == 0 ? 1 : 0;
 }
 
+/* Pumps window messages, polls input and returns 1 when key/action 1 is pressed (skips the cut-scene). */
 static int32_t key_pressed(void) {
   Call00522323();
   P36_PollInput();
@@ -176,6 +198,12 @@ static int32_t key_pressed(void) {
 }
 
 /* ---- 0048a940 ---- */
+/* P150_PlayFmv — Game.exe 0048a940.  Plays cut-scene n (FMVDATA\RENDERnn.MPG from the game folder, else from
+   the CD), unless n == -1, FMV is disabled (G00575F48 == 0) or P150_FmvOff.  Shuts the game sound down,
+   shows frames until the end or a key press, then — when not skipped and ans != -1 — plays the answer speech
+   AUDIO\MOTEL\ANSnnn.WAV until it ends or a key is pressed.  Afterwards re-creates the game display (up to 10
+   tries 500 ms apart, else a fatal "Can't reallocate display hardware") and re-initialises sound.
+   In: hwnd_i — main window handle as an int, n — cut-scene number, ans — answer speech number or -1. */
 void P150_PlayFmv(int32_t hwnd_i, int32_t n, int32_t ans) {
   void *hwnd = (void *)(intptr_t)hwnd_i;
   char name[0x104];
@@ -215,7 +243,7 @@ void P150_PlayFmv(int32_t hwnd_i, int32_t n, int32_t ans) {
         if (P38_TimerFlag != 0 || G00551134 != 0) break;                     /* 00551134 (два имени) */
         if (key_pressed()) break;
       }
-      Chain0048AC0D();
+      P50_FmvStopRelease();
     }
   }
   P38_FmvRelease();
@@ -232,6 +260,10 @@ void P150_PlayFmv(int32_t hwnd_i, int32_t n, int32_t ans) {
 }
 
 /* ---- 0042d384 ---- */
+/* P150_FlushTris — Game.exe 0042d384.  Draws the queued triangles (G01159D74 records of 0xb8 bytes from
+   G0115A140: +0 tag, three raster vertices at +4/+0x40/+0x7c) with the car shine texture (P28_CarShine) in
+   TMU 0, raster state 4 and blend mode 3; tag 0 selects the first rasteriser of the pair, and P55_BDFA18
+   chooses between the P115 and P85 rasterisers.  TODO(RE): meaning of the tag and of P55_BDFA18 unsure. */
 void P150_FlushTris(void) {
   if (G01159D74 == 0) return;
   if (P85_StateDirty != 4) {

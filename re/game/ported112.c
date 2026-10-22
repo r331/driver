@@ -1,3 +1,6 @@
+/* ported112 — event-script movement opcodes, emulated Glide texture download, credits face icon, the cop-chase tick
+   (wanted level), event-script triggering, scaled HUD icons and the replay-director camera timeline (Game.exe).
+   Original note: */
 /* v1.57 (см. ported112.h). */
 #include <stdlib.h>
 #include <stdio.h>
@@ -59,12 +62,18 @@ int32_t P112_Wanted;
 #  define P112_STD
 #endif
 #include "memrw.h"
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
 static const float K_ZERO = 0.0f;      /* .rdata 00546024 */
 static const float K_NEAR = 0.3f;      /* .rdata 00546164 */
 
+/* Event-script context flags (+0x48, u16) used by the move opcodes. */
+#define CTX_MOVING   0x40    /* keep moving along the heading (see P111_ScriptTick) */
+#define CTX_ARRIVED  0x80    /* reached the target of the last move */
+#define CTX_CURVE    0x100   /* curve move started: +0x5c holds 1 / initial distance */
+#define WANTED_MAX   0xfff   /* wanted level G2_00D11A5C is 0..0xfff */
+#include "dircam.h"     /* DIRCAM_* camera types (director timeline colours) */
+
+/* Glide export by decorated name, or NULL. */
 static void *glide_proc(const char *name) {
   for (int i = 0; i < P33_GlideCount(); i++)
     if (strcmp(P33_GlideName(i), name) == 0) return P33_GlideProc(i);
@@ -83,6 +92,8 @@ static void alpha_test(int32_t a) {   /* 01270d68 */
    +0x44 скорость, +0x48 флаги, +0x5c 1/длина), поток P10_ScriptPtr. 0 — остаться на опкоде, 1 — дальше. ---- */
 /* замедление у машины: если коробка контекста задевает машину — скорость × (расстояние до игрока / длина); в оригинале
    обе разности считаются от x игрока (00d07888) — так и оставлено */
+/* Slows a scripted object down near cars: if its box (+0x3c width, +0x3e length) oriented along (dx, dz) touches any
+   car, speed is scaled by distance / length (0 below 0.3).  Both differences use the player's x (original bug kept). */
 static float near_car_speed(const uint8_t *c, float sp, float dx, float dz) {
   int16_t bw = (int16_t)rd16(c + 0x3c), bl = (int16_t)rd16(c + 0x3e);
   if (bw == 0 || bl == 0) return sp;
@@ -99,6 +110,10 @@ static float near_car_speed(const uint8_t *c, float sp, float dx, float dz) {
   }
   return sp;
 }
+/* P112_OpMoveTo — Game.exe 004d09fd.  Event-script opcode "move to (x, y, z)" (operands: 3 floats after the u16
+   opcode, 0xe bytes in total).  Sets the target; with zero speed completes at once.  Otherwise steps towards it by
+   the (car-limited) speed and stays on this opcode (returns 0, stream pointer rewound) until the step would pass
+   the target, then snaps to it, sets CTX_ARRIVED and returns 1. */
 int32_t P112_OpMoveTo(void) {
   uint8_t *c = P10_ScriptCtx, *s = P10_ScriptPtr;
 #ifndef RE_HOOK_BUILD
@@ -123,6 +138,9 @@ int32_t P112_OpMoveTo(void) {
   wr16(c + 0x48, (uint16_t)(rd16(c + 0x48) | 0x80));
   return 1;
 }
+/* P112_OpMoveCur — Game.exe 004d1765.  Opcode "move to the current target" (2 bytes): sets CTX_MOVING (the tick then
+   moves along the heading) and waits until the target is within one step, then snaps to it and sets CTX_ARRIVED;
+   clears CTX_MOVING on completion. */
 int32_t P112_OpMoveCur(void) {
   uint8_t *c = P10_ScriptCtx, *s = P10_ScriptPtr;
 #ifndef RE_HOOK_BUILD
@@ -143,6 +161,10 @@ int32_t P112_OpMoveCur(void) {
   wr16(c + 0x48, (uint16_t)(rd16(c + 0x48) & 0xffbf));
   return 1;
 }
+/* P112_OpMoveCurve — Game.exe 004d0734.  Opcode "move to (x, z) with eased speed" (0x14 bytes: u16 flags, x, z, v0, v1).
+   Progress t = 2048 * (1 - distance / initial distance) (angle units, 0..2048 = 0..180 deg); flag 1 eases in over
+   the first quarter, flag 2 eases out over the last; otherwise t = 1024 (sin = 1, full speed v1).  speed =
+   v0 + (v1 - v0) * sin(t).  Completes like P112_OpMoveTo (in x/z only) and clears CTX_CURVE. */
 int32_t P112_OpMoveCurve(void) {
   uint8_t *c = P10_ScriptCtx, *s = P10_ScriptPtr;
 #ifndef RE_HOOK_BUILD
@@ -183,6 +205,10 @@ int32_t P112_OpMoveCurve(void) {
 }
 
 /* ---- 0041f4a1: загрузка эмулируемой текстуры: info — GrTexInfo (+4 largeLod, +0xc формат, +0x10 адрес данных) ---- */
+/* P112_TexDownload — Game.exe 0041f4a1 (stdcall).  Emulated grTexDownloadMipMap for the D3D renderer: info is a
+   GrTexInfo (+4 largeLod, +0xc format, +0x10 data).  Format 5 (8-bit palettised, TODO(RE): confirm the Glide
+   format id) uploads into slot addr >> 16, other formats (16-bit) into the even slot (addr >> 17) * 2; only
+   LOD 0 and slots 0..0x1f are accepted.  The slot's cached handle list is invalidated.  tmu / evenOdd unused. */
 void P112_TexDownload(int32_t tmu, uint32_t addr, int32_t evenOdd, const uint8_t *info) {
   (void)tmu; (void)evenOdd;
   if (P22_DevReady == 0) return;
@@ -207,6 +233,8 @@ void P112_TexDownload(int32_t tmu, uint32_t addr, int32_t evenOdd, const uint8_t
 }
 
 /* ---- 004a9bb0: лицо в титрах — значок записи P98_Faces[rec+2] с рамкой, по центру x = 480 ---- */
+/* P112_FaceIcon — Game.exe 004a9bb0.  Credits: draws the face picture of credits line rec (face index +2, 0..2) framed
+   and centred at x = 480 at height y (skipped above y = -0x21 or when the line has no face).  Icon size 0 = 256. */
 void P112_FaceIcon(uint8_t *rec, int32_t y) {
   if (y <= -0x21 || P98_CreditsFace(rec) == 0) return;
   uint16_t k = rd16(rec + 2);
@@ -224,10 +252,17 @@ void P112_FaceIcon(uint8_t *rec, int32_t y) {
 }
 
 /* ---- 004a77b0: такт погони — уровень розыска 00d11a5c (0..0xfff), копы, музыка погони, трафик ---- */
+/* Wanted level is written to both native aliases of 00d11a5c. */
 static void set_wanted(int32_t v) { G2_00D11A5C = v; P14_00d11a5c = (uint32_t)v; }
+/* P112_ChaseTick — Game.exe 004a77b0.  Per-tick cop chase update.  P62_BusyB clears the wanted level, P62_BusyE maxes
+   it (and sets a 300-tick timer / music limit).  When cops are disabled (P47_Flag == 0) or one of the pause / cut-
+   scene flags is set, ambient chase state is reset and nothing else happens.  Otherwise: cop AI tick, chase music,
+   Dec145934 (countdown 01145934), desired number of cops = 1 below wanted 0x2aa, else (wanted - 0x2aa) / 0x355 + 1 capped at
+   P62_Max; when fewer cops are alive (G0112B284) than desired for longer than P95_B87E3C ticks, request a spawn
+   (P62_I14428C = 1).  Radar grid redraw when P77_C7D850.  RE_COPDBG=n prints the gating flags every n ticks. */
 void P112_ChaseTick(void) {
   if (P62_BusyB != 0) set_wanted(0);
-  if (P62_BusyE != 0) { set_wanted(0xfff); P104_12B26C = 300; P105_MusLimit = 0; }
+  if (P62_BusyE != 0) { set_wanted(WANTED_MAX); P104_12B26C = 300; P105_MusLimit = 0; }
 #ifndef RE_HOOK_BUILD
   { static int k; const char *e = getenv("RE_COPDBG"); if (e && (k++ % (atoi(e) > 0 ? atoi(e) : 50)) == 0)
       fprintf(stderr, "[chase] flag %d eb4 %d eac %d eb0 %d hudoff %d\n", (int)P47_Flag, (int)P95_B87EB4, (int)G6_00B87EAC,
@@ -237,7 +272,7 @@ void P112_ChaseTick(void) {
     P95_AmbN = 0; P95_SndReady = 0; P62_I14428C = 0;
     return;
   }
-  if (G2_00D11A5C == 0xfff) P112_Wanted = 1;
+  if (G2_00D11A5C == WANTED_MAX) P112_Wanted = 1;   /* reached maximum wanted level at least once */
   P102_CopsTick();
   P105_ChaseMusic((int32_t *)(void *)P97_D11980);
   Dec145934();
@@ -253,19 +288,30 @@ void P112_ChaseTick(void) {
   if (P77_C7D850 != 0) P110_RadarGrid();
 }
 
-/* ---- записи скрипта: список с P15_ListHead, следующая — адрес +0x20; текущая пишется в оба псевдонима 00d12410 ---- */
+/* ---- записи скрипта: список с P15_ListHead, следующая — адрес +0x20; текущая — 00d12410 (v2.35: в native один объект) ---- */
+/* Current event-script record (00d12410; P15_ListCur and S_00D12410 name one native object since v2.35) and running it. */
 static void set_cur(uint8_t *r) { P15_ListCur = r; S_00D12410 = (uint16_t *)(void *)r; }
 static void run_cur(void) { P97_ScriptResetCur(); P111_ScriptTick(); }
+/* P112_ScriptRunId — Game.exe 004cfe69.  Runs every event-script record with id id (+6) that is externally
+   triggered (flag 0x8) and not already active (no flag 0x2), saving and restoring the script interpreter state
+   around it so it can be called from inside a script. */
 void P112_ScriptRunId(uint16_t id) {
   uint8_t *sp = P10_ScriptPtr, *sc = P10_ScriptCtx, *cur = P15_ListCur;
+#ifdef RE_HOOK_BUILD
   int32_t sp2 = S_00D12414; uint8_t *sc2 = S_00D1240C; uint16_t *cur2 = S_00D12410;
+#endif
   for (set_cur(P15_ListHead); P15_ListCur != NULL; set_cur((uint8_t *)re_rd_ptr(P15_ListCur + 0x20))) {
     uint16_t f = rd16(P15_ListCur);
     if ((f & 8) != 0 && (f & 2) == 0 && rd16(P15_ListCur + 6) == id) run_cur();
   }
   P10_ScriptPtr = sp; P10_ScriptCtx = sc; P15_ListCur = cur;
+#ifdef RE_HOOK_BUILD   /* native (v2.35): S_00D1240C/S_00D12410/S_00D12414 are the same objects as the three above */
   S_00D12414 = sp2; S_00D1240C = sc2; S_00D12410 = cur2;
+#endif
 }
+/* P112_ScriptTriggers — Game.exe 004cf123.  Per tick: active records (flag 0x2) are ticked; inactive ones start when
+   the player enters their map cell (flag 0x4) or their circle (no flag 0x8; centre +0x14/+0x18, squared radius
+   +0x10). */
 void P112_ScriptTriggers(void) {
   for (set_cur(P15_ListHead); P15_ListCur != NULL; set_cur((uint8_t *)re_rd_ptr(P15_ListCur + 0x20))) {
     uint8_t *r = P15_ListCur;
@@ -287,13 +333,17 @@ void P112_ScriptTriggers(void) {
 }
 
 /* ---- значок в масштабе экрана: ic — запись значка (+8 страница, +9..+0xc u, v, ширина, высота) ---- */
+/* Draws icon ic (+8 page, +9/+0xa u/v, +0xb width, +0xc height) at screen (x, y) scaled by (sx, sy), texture width tw,
+   with alpha combine / alpha test switched to the sprite state for the call (state cached in P62_I252B78). */
 static void icon_draw(const uint8_t *ic, float x, float y, float sx, float sy, float tw) {
   uint8_t rgb[3] = { 0xff, 0xff, 0xff };
   if (P62_I252B78 != 1) { alpha_combine(3, 8, 0, 1, 1); alpha_test(4); P62_I252B78 = 1; }
   P109_IconDraw(x, y, sx, sy, (float)ic[9], (float)ic[10], tw, (float)ic[0xc], ic[8], rgb);
   if (P62_I252B78 != 0) { alpha_combine(3, 8, 0, 2, 1); alpha_test(7); P62_I252B78 = 0; }
 }
+/* Pixels per 640x480 unit of the current screen. */
 static float screen_k(void) { return (P19_Scale * (float)P19_ScrW) / P19_DivW; }
+/* P112_IconScaled — Game.exe 004e7755.  Draws icon ic at 640x480 position (x, y) scaled by (sw, sh). */
 void P112_IconScaled(const uint8_t *ic, float x, float y, float sw, float sh) {
 #ifndef RE_HOOK_BUILD
   if (ic == NULL) return;
@@ -301,6 +351,7 @@ void P112_IconScaled(const uint8_t *ic, float x, float y, float sw, float sh) {
   float fx = P19_ScaleX(x), fy = P19_ScaleY(y), k = screen_k();
   icon_draw(ic, fx, fy, sw * k, sh * k, (float)ic[0xb]);
 }
+/* P112_IconBar — Game.exe 004e7613.  Draws the left num / den part of icon ic (a bar gauge), height x 1.1. */
 void P112_IconBar(const uint8_t *ic, float x, float y, int32_t num, int32_t den) {
 #ifndef RE_HOOK_BUILD
   if (ic == NULL) return;
@@ -311,6 +362,10 @@ void P112_IconBar(const uint8_t *ic, float x, float y, int32_t num, int32_t den)
 }
 
 /* ---- 004c68a7: шкала камер режиссёра (окно ±304 кадра вокруг frame) — полосы по типу камеры, рамка, засечки ---- */
+/* P112_DirTimeline — Game.exe 004c68a7.  Replay director timeline at the bottom of the screen (x 16..624, y 432..464):
+   one gradient bar per camera over its frame range, clipped to +-304 frames around frame, coloured by camera type
+   (chase red, in-car green, static yellow, watch-car cyan, flying none), a centre line at x = 320, a frame and
+   tick marks every 50 frames.  Only when P29_FlagB0 is set. */
 void P112_DirTimeline(int32_t frame) {
   if (P29_FlagB0 == 0) return;
   int32_t sv = DrvSetMode0042655A(0);
@@ -327,10 +382,10 @@ void P112_DirTimeline(int32_t frame) {
     if (f + 304.0f < b) b = f + 304.0f;
     uint32_t c30 = 0, c34 = 0, c24 = 0, c28 = 0;
     switch (cam->unk00) {
-    case 0:    c30 = 0xff0000; c34 = 0x7f0000; c24 = 0x3f0000; c28 = 0x7f0000; break;
-    case 2:    c30 = 0xff00;   c34 = 0x7f00;   c24 = 0x3f00;   c28 = 0x7f00;   break;
-    case 0x10: c30 = 0xffff00; c34 = 0x7f7f00; c24 = 0x3f3f00; c28 = 0x7f7f00; break;
-    case 0x11: c30 = 0x46ffff; c34 = 0x237f7f; c24 = 0x113f3f; c28 = 0x237f7f; break;
+    case DIRCAM_CHASE:    c30 = 0xff0000; c34 = 0x7f0000; c24 = 0x3f0000; c28 = 0x7f0000; break;
+    case DIRCAM_INCAR:    c30 = 0xff00;   c34 = 0x7f00;   c24 = 0x3f00;   c28 = 0x7f00;   break;
+    case DIRCAM_STATIC:   c30 = 0xffff00; c34 = 0x7f7f00; c24 = 0x3f3f00; c28 = 0x7f7f00; break;
+    case DIRCAM_WATCHCAR: c30 = 0x46ffff; c34 = 0x237f7f; c24 = 0x113f3f; c28 = 0x237f7f; break;
     default: break;
     }
     float x0 = (a - (f - 304.0f)) + 16.0f;

@@ -6,18 +6,28 @@
    IDirectSound3DBuffer (позиция, режим 0 NORMAL / 1 HEADRELATIVE / 2 DISABLE): ослабление DS3D
    min/(min + rolloff·(d − min)) при MinDistance 1 (умолчание DirectSound), панорама по проекции на ось right = top × front.
    Доплер не моделируется. Микширование — dsm_mix() из plat_snd_mix (44100 Гц, стерео S16). */
+/* English summary: a small software DirectSound for the native build.
+   - Every DirectSound object the game creates (primary buffer, secondary PCM buffers, the 3D listener,
+     per-buffer 3D interfaces) is a dsm_buf tagged DSM_TAG, registered in g_bufs[].
+   - dsm_mix() is called from the SDL audio callback (plat_snd_mix, 44100 Hz stereo S16) and mixes all
+     playing secondary buffers with linear-interpolated resampling, DirectSound volume (hundredths of
+     a dB), DS3D distance attenuation and a simple pan, then the CD-audio emulation, then a soft limiter.
+   - Locking: every change the game makes to a playing buffer happens under plat_snd_lockdev().
+   Not modelled: Doppler, cones, the primary buffer format (output is always 44.1 kHz stereo). */
 #include "../plat.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
-#define DSM_TAG 0x44534246u
-enum { K_PRIMARY = 1, K_SEC = 2, K_LISTENER = 3, K_3D = 4 };
-typedef struct { uint8_t *data; uint32_t bytes; int refs; } dsm_pcm;
+#define DSM_TAG 0x44534246u   /* "FBSD": marks objects that belong to this mixer (dsm_is) */
+enum { K_PRIMARY = 1, K_SEC = 2, K_LISTENER = 3, K_3D = 4 };   /* object kinds */
+typedef struct { uint8_t *data; uint32_t bytes; int refs; } dsm_pcm;   /* PCM shared by duplicated buffers */
 typedef struct dsm_buf {
-  uint32_t tag; int kind; dsm_pcm *pcm; int rate, ch, bits;
-  int playing, loop; double pos; int32_t vol; uint32_t freq;
-  int mode3d; float x, y, z; struct dsm_buf *owner, *b3d; int live;
+  uint32_t tag; int kind; dsm_pcm *pcm; int rate, ch, bits;   /* format from WAVEFORMATEX */
+  int playing, loop; double pos;                              /* pos: play cursor in frames (fractional) */
+  int32_t vol; uint32_t freq;                                 /* vol: 0..-10000 (1/100 dB); freq: Hz, 0 = rate */
+  int mode3d; float x, y, z;                                  /* K_3D only: 0 NORMAL, 1 HEADRELATIVE, 2 DISABLE */
+  struct dsm_buf *owner, *b3d; int live;                      /* K_3D -> its secondary buffer, and back */
 } dsm_buf;
 #define DSM_MAX 512
 static dsm_buf *g_bufs[DSM_MAX];
@@ -110,33 +120,39 @@ void dsm_listener_pos(float x, float y, float z) { g_lp[0] = x; g_lp[1] = y; g_l
 void dsm_listener_orient(const float *s) { memcpy(g_lf, s, 12); memcpy(g_lt, s + 3, 12); }
 void dsm_listener_factors(int which, float v) { if (which == 0) g_distf = v; else if (which == 1) g_dopf = v; else g_roll = v; }
 
+/* DirectSound volume (hundredths of a dB, 0 = full, -10000 = silent) -> linear gain 10^(h/2000). */
 static float db_gain(int32_t h) { if (h >= 0) return 1.0f; if (h <= -10000) return 0.0f; return powf(10.0f, (float)h / 2000.0f); }
+/* Sample of channel c at frame fr as -1..1 (mono buffers return channel 0 for both). */
 static float smp(const dsm_buf *b, int64_t fr, int c) {
   int i = (int)(fr * b->ch + (c < b->ch ? c : 0));
   if (b->bits == 8) return (b->pcm->data[i] - 128) / 128.0f;
   int16_t v; memcpy(&v, b->pcm->data + 2 * i, 2); return v / 32768.0f;
 }
+/* Left/right gains of buffer b from its 3D interface (1, 1 when it has none or 3D is disabled).
+   Attenuation: DS3D inverse-distance law min / (min + rolloff * (dist - min)) with MinDistance 1.
+   Pan: cosine between the source direction and the listener's right axis (top x front); the far
+   side is reduced by up to 70 %. */
 static void gains3d(const dsm_buf *b, float *gl, float *gr) {
   *gl = *gr = 1.0f;
   const dsm_buf *d = b->b3d;
   if (!d || d->mode3d == 2) return;
-  float v[3] = { d->x, d->y, d->z };
-  if (d->mode3d != 1) { v[0] -= g_lp[0]; v[1] -= g_lp[1]; v[2] -= g_lp[2]; }
-  float dist = sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+  float rel[3] = { d->x, d->y, d->z };   /* source relative to the listener */
+  if (d->mode3d != 1) { rel[0] -= g_lp[0]; rel[1] -= g_lp[1]; rel[2] -= g_lp[2]; }
+  float dist = sqrtf(rel[0] * rel[0] + rel[1] * rel[1] + rel[2] * rel[2]);
   const float mind = 1.0f;
   float g = dist <= mind ? 1.0f : mind / (mind + g_roll * (dist - mind));
-  float p = 0.0f;
+  float pan = 0.0f;   /* -1 = fully left, +1 = fully right */
   if (dist > 1e-3f) {
     float r[3] = { g_lt[1] * g_lf[2] - g_lt[2] * g_lf[1], g_lt[2] * g_lf[0] - g_lt[0] * g_lf[2], g_lt[0] * g_lf[1] - g_lt[1] * g_lf[0] };
     float rl = sqrtf(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
-    if (rl > 1e-6f) p = (v[0] * r[0] + v[1] * r[1] + v[2] * r[2]) / (rl * dist);
+    if (rl > 1e-6f) pan = (rel[0] * r[0] + rel[1] * r[1] + rel[2] * r[2]) / (rl * dist);
   }
-  if (d->mode3d == 1 && dist <= 1e-3f) p = 0.0f;
+  if (d->mode3d == 1 && dist <= 1e-3f) pan = 0.0f;
   { static int dbg = -1, n; if (dbg < 0) dbg = getenv("RE_3DDBG") ? atoi(getenv("RE_3DDBG")) : 0;   /* v2.12: отладка 3D-ослабления */
     if (dbg > 0 && b->vol > -10000 && (n++ % dbg) == 0) fprintf(stderr, "[3d] buf %p pcm %u mode %d src %.0f %.0f %.0f lis %.0f %.0f %.0f dist %.1f roll %.2f distf %.3f g %.4f vol %d\n",
       (const void *)b, b->pcm ? b->pcm->bytes : 0, d->mode3d, d->x, d->y, d->z, g_lp[0], g_lp[1], g_lp[2], dist, g_roll, g_distf, g, b->vol); }
-  *gl = g * (p > 0 ? 1.0f - 0.7f * p : 1.0f);
-  *gr = g * (p < 0 ? 1.0f + 0.7f * p : 1.0f);
+  *gl = g * (pan > 0 ? 1.0f - 0.7f * pan : 1.0f);
+  *gr = g * (pan < 0 ? 1.0f + 0.7f * pan : 1.0f);
 }
 /* v2.10: мягкий ограничитель — голоса суммируются в float (нормировано к 1.0), до порога DSM_KNEE сигнал не меняется,
    выше — tanh-колено: y = K + (1 − K)·tanh((x − K)/(1 − K)) — непрерывно, гладко (производная 1 на пороге) и |y| < 1,
@@ -149,6 +165,8 @@ static float dsm_soft(float x) {
   return x < 0 ? -y : y;
 }
 float dsm_soft_limit(float x) { return dsm_soft(x); }   /* для теста */
+/* Mix all playing secondary buffers into out (frames x stereo S16, already holding what plat_snd mixed),
+   in chunks of CH frames: accumulate in float, add CD audio, soft-limit, convert back. */
 void dsm_mix(int16_t *out, int frames) {
   enum { CH = 1024 };
   static float acc[2 * CH];
@@ -159,14 +177,14 @@ void dsm_mix(int16_t *out, int frames) {
     for (int h = 0; h < DSM_MAX; h++) {
       dsm_buf *b = g_bufs[h];
       if (!b || b->kind != K_SEC || !b->playing || !b->pcm) continue;
-      int fb = b->ch * (b->bits / 8); int64_t total = b->pcm->bytes / (uint32_t)fb;
+      int fb = b->ch * (b->bits / 8); int64_t total = b->pcm->bytes / (uint32_t)fb;   /* bytes per frame, frames in buffer */
       if (total < 1) { b->playing = 0; continue; }
-      double step = (double)(b->freq ? b->freq : (uint32_t)b->rate) / 44100.0;
+      double step = (double)(b->freq ? b->freq : (uint32_t)b->rate) / 44100.0;   /* source frames per output frame */
       float g = db_gain(b->vol), g3l, g3r; gains3d(b, &g3l, &g3r);
       float gl = g * g3l, gr = g * g3r;
       for (int f = 0; f < n; f++) {
         int64_t i0 = (int64_t)b->pos; if (i0 >= total) i0 = total - 1;
-        float fr = (float)(b->pos - (double)i0); int64_t i1 = i0 + 1;
+        float fr = (float)(b->pos - (double)i0); int64_t i1 = i0 + 1;   /* linear interpolation between i0 and i1 */
         if (i1 >= total) i1 = b->loop ? 0 : i0;
         float l = smp(b, i0, 0) * (1 - fr) + smp(b, i1, 0) * fr, r = b->ch > 1 ? smp(b, i0, 1) * (1 - fr) + smp(b, i1, 1) * fr : l;
         acc[2 * f] += l * gl; acc[2 * f + 1] += r * gr;

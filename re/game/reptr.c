@@ -1,4 +1,20 @@
-/* Реестр «адрес Game.exe ↔ native-объект» (v1.42). См. reptr.h. */
+/* Реестр «адрес Game.exe ↔ native-объект» (v1.42). См. reptr.h.
+
+   English summary.  Game data structures store 32-bit Game.exe addresses (pointers inside tables, lists,
+   records).  In the hook build those are real pointers, so every function here is the identity.  In the
+   native build they are translated through this registry:
+     re_ptr(addr)  -> native pointer, searched in this order:
+                      1. the car table 00d077c0 (always the native P99_Cars array),
+                      2. GAME_VARs that live inside the .data image (gvar_img_tab.c ranges),
+                      3. dynamic registrations (re_ptr_register / re_ptr_register_dyn),
+                      4. static regions k_regions (GAME_VAR arrays referenced by address),
+                      5. the .rdata/.data/.bss image of Game.exe (data_image.c, game mode only).
+     re_addr(p)    -> the address for a native pointer (the reverse); unknown pointers get a synthetic
+                      address via re_ptr_register_dyn so they round-trip.
+     re_fn(addr)   -> ported function for a Game.exe code address: runtime registrations, k_fns,
+                      fn_table.c (generated from the hook install list), then incremental-link thunks
+                      (jmp rel32 at 00401005..00402aea, thunk_table.c) followed to their target.
+   The lookup order is behaviour: changing it changes which alias a write lands in. */
 #define RE_GVAR_PLAIN   /* v2.03: k_regions — константные адреса native-объектов */
 #include <stdlib.h>
 #include <string.h>
@@ -85,7 +101,7 @@ static const re_region_t k_regions[] = {
   { 0x00574710u, P127_PauseMenu, sizeof P127_PauseMenu },       /* v1.72: .data меню паузы 00574710..00574f08 (game/p127_data.h) */
   { 0x0054cf80u, P127_NameMenu, sizeof P127_NameMenu },         /* v1.72: .data экрана ввода имени */
   { 0x005fe97cu, P127_Cursor, sizeof P127_Cursor },             /* v1.72: строка курсора (адрес в P127_NameMenu) */
-  { 0x00b5a48cu, P125_FpsStr, sizeof P125_FpsStr },             /* v1.70: строка fps/языка меню управления (адрес в P117_MenuB) */
+  { 0x00b5a48cu, (uint8_t *)P125_FpsStr, sizeof P125_FpsStr },             /* v1.70: строка fps/языка меню управления (адрес в P117_MenuB) */
   { 0x00b5c950u, P116_SkidRecA, sizeof P116_SkidRecA },         /* v1.62: таблицы следов шин (адреса записей в P117_SkidLastA/B) */
   { 0x00b6e950u, P116_SkidRecB, sizeof P116_SkidRecB },
   { 0x010f5160u, P95_ObjA, sizeof P95_ObjA },
@@ -168,10 +184,10 @@ static const re_fnent_t k_fns[] = {
   { 0x0041ed98u, (re_fn_t)P151_WinOpen },
   /* v1.58: обработчики таблицы меню опций 0057b5a8 (004048dd) */
   { 0x00404e52u, (re_fn_t)MenuRowsTo3_00404E52 },  { 0x00404e7eu, (re_fn_t)MenuRowsIf0To2_00404E7E },
-  { 0x00404eb0u, (re_fn_t)ToggleBDFA44_Call40500D }, { 0x00404ec9u, (re_fn_t)ToggleBDFA48_Call40500D },
-  { 0x00404ee2u, (re_fn_t)ToggleBDFA4C_Call40500D }, { 0x00404efbu, (re_fn_t)ToggleBDFA50_Call40500D },
-  { 0x00404f14u, (re_fn_t)ToggleBDFA54_Call40500D }, { 0x00404f2du, (re_fn_t)ToggleB87E9C_Call40500D },
-  { 0x00404f46u, (re_fn_t)ToggleBDFA58_Call40500D }, { 0x00404f5fu, (re_fn_t)Set575EF0_4Ret0 },
+  { 0x00404eb0u, (re_fn_t)MenuToggleOptBDFA44 }, { 0x00404ec9u, (re_fn_t)MenuToggleOptBDFA48 },
+  { 0x00404ee2u, (re_fn_t)MenuToggleOptBDFA4C }, { 0x00404efbu, (re_fn_t)MenuToggleOptBDFA50 },
+  { 0x00404f14u, (re_fn_t)MenuToggleOptBDFA54 }, { 0x00404f2du, (re_fn_t)MenuToggleOptB87E9C },
+  { 0x00404f46u, (re_fn_t)MenuToggleOptBDFA58 }, { 0x00404f5fu, (re_fn_t)MenuStateSetFour },
   { 0x00404f70u, (re_fn_t)P12_Fn00404F70 },        { 0x00404faeu, (re_fn_t)P12_Fn00404FAE },
   { 0x00404ffeu, (re_fn_t)MenuCallAction40CD17 },
   { 0x0048bcc0u, (re_fn_t)P50_SoundShutdown }, { 0x0048bd3bu, (re_fn_t)NoopFn0048bd3b },
@@ -258,6 +274,17 @@ uint32_t re_addr(const void *pv) {
     if (p >= k_regions[i].p && p < k_regions[i].p + k_regions[i].size) return k_regions[i].addr + (uint32_t)(p - k_regions[i].p);
   if (g_img != NULL && p >= g_img && p < g_img + g_img_size) return g_img_base + (uint32_t)(p - g_img);   /* v2.02 */
   return re_ptr_register_dyn((void *)(uintptr_t)p, 1);
+}
+/* v2.35: re_addr без регистрации — 0, если указатель вне известных областей (список 00cfe760 в ported87.c) */
+uint32_t re_addr_known(const void *pv) {
+  const uint8_t *p = (const uint8_t *)pv;
+  if (p == NULL) return 0;
+  for (uint32_t i = 0; i < g_ndyn; i++)
+    if (p >= g_dyn[i].p && p < g_dyn[i].p + g_dyn[i].size) return g_dyn[i].addr + (uint32_t)(p - g_dyn[i].p);
+  for (size_t i = 0; i < sizeof k_regions / sizeof k_regions[0]; i++)
+    if (p >= k_regions[i].p && p < k_regions[i].p + k_regions[i].size) return k_regions[i].addr + (uint32_t)(p - k_regions[i].p);
+  if (g_img != NULL && p >= g_img && p < g_img + g_img_size) return g_img_base + (uint32_t)(p - g_img);
+  return 0;
 }
 void re_ptr_register(uint32_t addr, void *native, uint32_t size) {
   if (native == NULL || size == 0) return;

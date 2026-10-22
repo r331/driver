@@ -1,3 +1,6 @@
+/* ported127.c — replay auto-camera, traffic lane change, map window, player skid sound, pedestrian spawn points,
+   distant debris, street lamp lights, the pause menu, the per-frame mission script step and name entry
+   (English overview; detailed Russian notes follow).  All cdecl. */
 /* v1.72: ported127 — восстановлено из Game.exe. Все функции cdecl (work/rets.py: ret без операнда).
    004c582f — CreateNewAutoCamera: запись камеры 0x8c (int32 поля), точка за GetWaypointAfterFrame, тип по rand & 7
      (0 — вокруг игрока, 2 — за машиной трафика P60_NextTrafficCar, 0x11 — середина отрезка путевых точек).
@@ -18,6 +21,7 @@
      __ftol — (int32_t)(ширина / 2.0) + 0x141; возвращаемое значение — мусор eax 004133b4 (void). */
 #include "ported129.h"
 #include "ported127.h"
+#include "carfields.h"
 #include "ported146.h"
 #include "p127_data.h"
 #include "unported.h"
@@ -275,6 +279,7 @@ p127_f16_t P127_GoalPause;
 #endif
 #endif
 
+#define RE_MEMRW_LOCAL16   /* keep the local 16-bit helpers below (hook object identity, see memrw.h) */
 #include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
 static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
@@ -298,6 +303,9 @@ static uint8_t *tcar(int32_t i) {
 #endif
   return P59_CarsTab + (uint32_t)i * 0x148;
 }
+/* Mission state value of 00c810c4 meaning "mission failed" (set_fail; the script loop stops on it). */
+#include "missionstate.h"
+#define MISSION_FAILED MSTATE_FAILED
 /* 00c810c4 — флаги скрипта: несколько native-псевдонимов (P14_00c810c4, P16_IdleMode, P56_Blk84[1]) */
 static void set_c4(int32_t v) {
   P14_00c810c4 = v;
@@ -305,8 +313,8 @@ static void set_c4(int32_t v) {
   P16_IdleMode = v; P127_BLK(0x00c810c4u) = v;
 #endif
 }
-static void set_fail(void) {   /* 0xff0 — провал: 00c810e8 = 2, 00c81100 = 0x5a */
-  set_c4(0xff0);
+static void set_fail(void) {   /* MSTATE_FAILED, reason MREASON_FAILED (2), result screen after 0x5a ticks */
+  set_c4(MISSION_FAILED);
   P14_00c810e8 = 2; P14_00c81100 = 0x5a;
 #ifndef RE_HOOK_BUILD
   P127_BLK(0x00c810e8u) = 2; P127_BLK(0x00c81100u) = 0x5a;
@@ -314,6 +322,9 @@ static void set_fail(void) {   /* 0xff0 — провал: 00c810e8 = 2, 00c81100
 }
 
 /* ---- 004c582f ---- */
+/* P127_AutoCamera — Game.exe 004c582f (CreateNewAutoCamera).  Fills replay camera record cam (0x8c bytes) for the
+   next waypoint frame with a random type (rand & 7): around the player, following a nearby cop car
+   (P60_NextTrafficCar) or tripod at the middle of the waypoint segment. */
 void P127_AutoCamera(void *cam) {
   int32_t *c = (int32_t *)cam;
   P14_Fn0048DB65(c, 0x8c);
@@ -365,6 +376,8 @@ void P127_AutoCamera(void *cam) {
 }
 
 /* ---- 00494e01 ---- */
+/* P127_TrafficLane — Game.exe 00494e01.  Lane change of traffic record t: new position from P75_TrafficPos, its map
+   cell, and a check of the neighbouring traffic records for room. */
 void P127_TrafficLane(uint8_t *t) {
   if ((t[0x13] & 9) != 0 || (Rand_004D9078() & 3) != 0) return;
   P75_TrafficPos(rd32(t + 0x28), rd32(t + 0x24), 0, 2, 0xff);
@@ -395,6 +408,8 @@ void P127_TrafficLane(uint8_t *t) {
 }
 
 /* ---- 0050b957 ---- */
+/* map_row: copies one row of the road map; P127_MapWindow — Game.exe 0050b957: builds the 0x37 x 0x37 cell window
+   of the road map around (x, y) for the overhead map / radar, then the cell tables P77_C7D8C0 / P110_CellTab. */
 static void map_row(int32_t sel, int32_t off, uint8_t *dst, int32_t n) {
   const uint8_t *src = (const uint8_t *)P54_RoadB[sel & 3];
   if (src == NULL || n <= 0) return;                       /* защита: карта не загружена */
@@ -431,6 +446,8 @@ void P127_MapWindow(int32_t x, int32_t y, uint32_t arg) {
 }
 
 /* ---- 004de381 ---- */
+/* skid_off: ends all four skid marks.  P127_PlayerSkid — Game.exe 004de381: tyre squeal of the player (voice 4)
+   and skid marks per wheel (P117_SkidRecA); who = car index.  (A block Ghidra removed as unreachable is not ported.) */
 static void skid_off(void) { for (int i = 0; i < 4; i++) P102_D0DDD0[i] = -1; }
 void P127_PlayerSkid(int32_t who) {
   if (G6_00B5A778 != 0) return;
@@ -472,6 +489,8 @@ void P127_PlayerSkid(int32_t who) {
 }
 
 /* ---- 004f1a19 ---- */
+/* P127_SpawnTick — Game.exe 004f1a19.  Steps the pedestrian spawn points P126_Spawn: advances their motion-capture
+   animation (P54_Tab4[kind - 1], frame stride nodes * 0x14 + 0x10) and draws them (P100_DrawPartsB) when draw != 0. */
 void P127_SpawnTick(int32_t draw) {
   if (P127_SpawnRst != 0) {
     P43_ScaleA = 384.0f;
@@ -551,6 +570,8 @@ void P127_SpawnTick(int32_t draw) {
 }
 
 /* ---- 004ad3b5 ---- */
+/* P127_FarDebris — Game.exe 004ad3b5.  Debris bursts (P125_DebrisBurst) at the objects listed in 00cfe760
+   (P104_Buf760, Game.exe addresses), relative to the camera. */
 void P127_FarDebris(void) {
   int32_t sp = rd32(P127_CAR(0) + 0x10c);
   if (P13_00553850 == 0 || P62_HudOff2 != 0 || !(99999 < sp || sp < -99999)) return;
@@ -579,6 +600,9 @@ void P127_FarDebris(void) {
 }
 
 /* ---- 004eac70 ---- */
+/* lamp_light: adds one lamp record as a point light.  P127_LampLights — Game.exe 004eac70: street lamp lights from
+   the lamp grid (P58_ListB31EC4, width P78_LampHdr[2]; records 0x28 = {type, radius float, x, y, z, -, r, g, b}) plus
+   the 5 script lamps at 00c818c0 (enable flags 00c80f80). */
 static void lamp_light(const uint8_t *r) {
   P82_AddLight((const float *)(const void *)(r + 8), (int32_t)rdf(r + 4), rd32(r + 0x18), rd32(r + 0x1c), rd32(r + 0x20));
 }
@@ -624,6 +648,9 @@ void P127_LampLights(void) {
 }
 
 /* ---- 0050ee00 ---- */
+/* set_menu: current menu page 00b5a730 (all aliases); mode10_menu: page for game mode 10.
+   P127_Pause — Game.exe 0050ee00: pause menu handling; picks the menu page (.data 00574710..00574ea0, native
+   P127_PauseMenu) by game state and handles mission failure. */
 static void set_menu(uint32_t a) {   /* 00b5a730 — во все псевдонимы */
   P17_PtrA = a;
 #ifndef RE_HOOK_BUILD
@@ -675,7 +702,7 @@ void P127_Pause(void) {
   G00575550 = 1; P11_00575550 = 1; P8_00575550 = 1;
 #endif
   int32_t mode = MenuMode1271060;
-  if (P14_00c810c4 == 0xff0) {
+  if (P14_00c810c4 == MISSION_FAILED) {
     if (mode == 1) { P8_012710a0 = 1; set_c4(0x8000); }
     else if (mode == 3 || mode == 7) {
       const int32_t *src = (const int32_t *)re_ptr(P113_MrkRec);
@@ -684,7 +711,7 @@ void P127_Pause(void) {
     }
   }
   if (P12_00d17b90 != 0) { set_menu(0x00574ea0u); P8_00b5a764 = 1; return; }
-  if (P14_00c810c4 == 0xff0) {
+  if (P14_00c810c4 == MISSION_FAILED) {
     switch (mode) {
     case 6: set_menu(0x00574c90u); break;
     case 9: set_menu(P127_BLK(0x00c81280u) == 0 ? 0x00574a40u : 0x00574ad0u); break;
@@ -722,17 +749,21 @@ void P127_Pause(void) {
 }
 
 /* ---- 004f472b ---- */
+/* P127_ScriptTick — Game.exe 004f472b.  Per-frame mission script step: copies the player damage, heading and 00d11a5c into
+   the script goal record, updates script objects, keeps the replay goal position, then runs script commands
+   (P146_ScriptCmd) from P127_ScrPos until one returns 0xd (wait) or the mission fails; afterwards target, timer,
+   goal and chase steps, and failure when the damage exceeds the limit (flag 4 of 00c810d8). */
 static void goal_u(int i, int32_t v) { memcpy(&P127_Goal[i], &v, 4); }
 void P127_ScriptTick(void) {
   if (P97_ScrObjOn == 0) return;
   const uint8_t *me = P127_CAR(0);
-  for (int i = 0; i < 6; i++) goal_u(7 + i, rd32(me + 0x11c + 4 * i));
-  goal_u(13, rd32(me + 0x138));
-  goal_u(15, rd32(me + 0x100));
+  for (int i = 0; i < 6; i++) goal_u(7 + i, rd32(me + CAR_DAMAGE + 4 * i));
+  goal_u(13, rd32(me + CAR_DAMAGE_SUM));
+  goal_u(15, rd32(me + CAR_HEADING));
   goal_u(14, P14_00d11a5c);
   P97_ObjsFromScript();
   if (P14_00d14ee4 != 0) P14_Fn004CAC86();
-  if (P14_00c810c4 != 0xff0) P98_ScriptRange();
+  if (P14_00c810c4 != MISSION_FAILED) P98_ScriptRange();
   if (G6_00B87EB0 == 0) {
     P127_Goal[0] = (float)PlayerPosX; P127_Goal[2] = (float)PlayerPosZ;
   } else if (P75_E4 == 0) {
@@ -748,11 +779,11 @@ void P127_ScriptTick(void) {
     }
   }
   if (P77_List == NULL || P77_ListN == 0 || G6_00B5A778 != 0) {
-    if (P14_00c810c4 == 0xff0) P47_ResetPick();
+    if (P14_00c810c4 == MISSION_FAILED) P47_ResetPick();
     else if (P102_DmgMax < G00BDF984) { set_fail(); P47_Limit = 0; }
     return;
   }
-  while (P127_ScrPos < P77_ListN && P14_00c810c4 != 0xff0) {
+  while (P127_ScrPos < P77_ListN && P14_00c810c4 != MISSION_FAILED) {
     int32_t pos = P127_ScrPos;
 #ifndef RE_HOOK_BUILD
     { /* v2.29: RE_MISSDBG=1 — журнал команд скрипта миссии (номер, код, первый аргумент) при смене номера */
@@ -766,20 +797,22 @@ void P127_ScriptTick(void) {
     if (P127_ScrPos == pos) break;                         /* защита: заглушка 004f8e0c не двигает позицию */
 #endif
   }
-  if (P14_00c810c4 != 0xff0) {
+  if (P14_00c810c4 != MISSION_FAILED) {
     P115_TargetTick((uint8_t *)re_ptr((uint32_t)P127_BLK(0x00c812b8u)));
     P114_Timer((int32_t *)re_ptr(P113_MrkRec));
     P101_GoalTick((uint8_t *)P56_Blk84);
     if ((P14_00c810c4 & 0x8000) != 0) P56_ChaseTick();
     if (P99_CamDelay != 0) P99_CamDelay--;
     if ((P127_BLK(0x00c810d8u) & 4) != 0 && P102_DmgMax < G00BDF984) set_fail();
-    if (P14_00c810c4 == 0xff0) P47_Limit = 0;
+    if (P14_00c810c4 == MISSION_FAILED) P47_Limit = 0;
   }
-  if (P14_00c810c4 == 0xff0) P47_ResetPick();
+  if (P14_00c810c4 == MISSION_FAILED) P47_ResetPick();
   TickTimer4F5D67();
 }
 
 /* ---- 004131a0 ---- */
+/* P127_NameEntry — Game.exe 004131a0.  Name entry screen editing buf (max maxlen characters) with the cursor
+   P127_Cursor; the original returns garbage in eax (void here). */
 void P127_NameEntry(char *buf, int32_t maxlen) {
   int run = 1;
   P127_NM32(0x0054cfa0u) = (int32_t)P97_StrAddr[0x78];      /* 00c55a00 */

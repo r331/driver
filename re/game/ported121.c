@@ -1,3 +1,7 @@
+/* ported121 — mission HUD messages, camera/event script line parser, flat-coloured textured model records, dust
+   particles, near/far-plane clipped polygons, player wheel dust, sound device cycling, traffic-slot position sync
+   and per-tick camera sounds (Game.exe, all cdecl).  The Russian list below gives each function's address.
+   Original note: */
 /* v1.66: ported121 — восстановлено из Game.exe. Все функции cdecl (ret без операнда; work/rets.py).
    004f4a33 — сообщения миссии по P56_Blk84[1] == 0xff0 и режиму P56_Blk84[10] (переменные скрипта P42_Vars), часы записи P113_MrkRec;
    004a4a5f — разбор строки сценария камеры (32 команды, .data 00551c30/00551b72/00551bb0 — таблицы в модуле);
@@ -18,6 +22,7 @@
 #endif
 #include "cartab.h"
 #include "unported.h"
+#include "ported125.h"   /* P125_ObjABurst (004b955c) */
 #include "smallfuncs.h"
 #include "smallfuncs2.h"
 #include "ported6.h"
@@ -78,10 +83,10 @@ uint32_t P121_CamW;
 #endif
 
 #include "memrw.h"
+#include "carfields.h"
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, int16_t v) { memcpy(p, &v, 2); }
-static uint32_t bits(float f) { uint32_t u; memcpy(&u, &f, 4); return u; }
 
+/* 1/w for view depth z from the RE_OOW table (native: 0 out of range). */
 static float oow_at(float z) {
   long zi = lrintf(z);
 #ifndef RE_HOOK_BUILD
@@ -89,6 +94,7 @@ static float oow_at(float z) {
 #endif
   return RE_OOW(zi);
 }
+/* Selects texture page tex unless already current. */
 static void tex_page(uint32_t tex) {
   if (tex != (uint32_t)P86_CurTex) {
     P86_CurTex = (int32_t)tex;
@@ -98,12 +104,20 @@ static void tex_page(uint32_t tex) {
 static void raster_b(const p85_rv *a, const p85_rv *b, const p85_rv *c) { if (P85_RasterB) P85_RasterB(a, b, c); }
 
 /* ---- 004f4a33 ---- */
+/* Script variable index of fail message name; also stops the speech sample playing in slot (slot -> -1). */
 static int32_t fail_msg(const char *name, int32_t slot) {
   int32_t v = P42_FindVar(name);
   if (P47_Slots[slot] != -1) MenuClick004F8ACC(P47_Slots[slot] + 0xf000);
   P47_Slots[slot] = -1;
   return v;
 }
+/* Mission end reasons in P56_Blk84[10] (= P16_IdleArg1, 00c810e8) when the mission failed (P56_Blk84[1] == 0xff0). */
+enum { FAIL_GENERIC = 1, FAIL_SMASHED = 2, FAIL_OUTOFRANGE = 3, FAIL_CARGOTAWAY = 4 };
+
+/* P121_ScriptHud — Game.exe 004f4a33.  Mission HUD text: debug info, the stopwatch of the marker record (flag 4), and
+   either the fail message for the end reason (script variables FAILEDMESSAGE, SMASHEDMESSAGE, OUTOFRANGEMESSAGE,
+   CARGOTAWAYMESSAGE) or the regular script messages; when nothing was shown and a camera delay runs, the line at
+   00c81168; then the banner.  Only when script objects are on. */
 void P121_ScriptHud(void) {
   uint32_t rec = P113_MrkRec;
   int32_t shown = 0;
@@ -115,13 +129,13 @@ void P121_ScriptHud(void) {
     const uint8_t *r = (const uint8_t *)re_ptr(rec);
     if (r != NULL && (rd32(r + 4) & 4) != 0) P96_ClockText(r);
   }
-  if ((int32_t)P56_Blk84[1] == 0xff0) {   /* 00c810c4 */
+  if ((int32_t)P56_Blk84[1] == 0xff0) {   /* 00c810c4: mission failed */
     int32_t v;
     switch ((int32_t)P56_Blk84[10]) {     /* 00c810e8 */
-    case 1: v = fail_msg("FAILEDMESSAGE", 0); break;
-    case 2: v = fail_msg("SMASHEDMESSAGE", 1); break;
-    case 3: v = fail_msg("OUTOFRANGEMESSAGE", 2); break;
-    case 4: v = fail_msg("CARGOTAWAYMESSAGE", 3); break;
+    case FAIL_GENERIC: v = fail_msg("FAILEDMESSAGE", 0); break;
+    case FAIL_SMASHED: v = fail_msg("SMASHEDMESSAGE", 1); break;
+    case FAIL_OUTOFRANGE: v = fail_msg("OUTOFRANGEMESSAGE", 2); break;
+    case FAIL_CARGOTAWAY: v = fail_msg("CARGOTAWAYMESSAGE", 3); break;
     default: v = -1;
     }
 #ifndef RE_HOOK_BUILD
@@ -149,9 +163,17 @@ static const int16_t k_argc[33] = {   /* .data 00551b72 + 2*u */
 static const char *const k_fmt[33] = {   /* .data 00551bb0 + 4*u (пустые строки — .bss 00b1ff6c..) */
   "", "fff", "ii", "i", "ifff", "iii", "fff", "", "fff", "ffff", "", "f", "ff", "ff", "i", "", "", "ii", "ifff", "", "", "i",
   "i", "i", "ii", "", "", "", "i", "fi", "iffff", "iii", "" };
+/* Result of P121_ParseCamLine for a comment line. */
+#define CAMLINE_COMMENT 0x32
+
+/* P121_ParseCamLine — Game.exe 004a4a5f.  Parses one line of an event script (the "camera scenario" of the original
+   port note; the keywords are the event-script commands TRIGGER_RADIUS .. COLLISIONSOFF): keyword -> command 1..32,
+   then its arguments by format ('f' float, 'i' integer, comma-separated) into the argument buffers.  Returns the
+   command, 0x32 for a comment line (# or //), 0 on an unknown keyword or a syntax error (reported for missing
+   commas and junk after the arguments).  The first matching keyword wins (both LOOP entries -> 20). */
 uint16_t P121_ParseCamLine(char *s) {
-  if (*s == '#' || (s[0] == '/' && s[1] == '/')) return 0x32;
-  uint16_t u = 0;
+  if (*s == '#' || (s[0] == '/' && s[1] == '/')) return CAMLINE_COMMENT;
+  uint16_t u = 0;   /* command */
   for (int32_t k = 0; k < 0x20; k++)
     if (P21_MatchPrefix((const uint8_t *)s, (const uint8_t *)k_cmd[k + 1]) != 0) { u = (uint16_t)(k + 1); break; }
   if (u == 0) return 0;
@@ -160,7 +182,7 @@ uint16_t P121_ParseCamLine(char *s) {
   int32_t sp = 0;
   for (; *s == ' '; s++) sp++;
   if (sp == 0 && *s != '\0') return 0;
-  int32_t nf = 0, ni = 0;
+  int32_t nf = 0, ni = 0;   /* float / integer arguments parsed */
   const char *f = k_fmt[u];
   for (;;) {
     if (*f == '\0') return u;
@@ -185,6 +207,9 @@ uint16_t P121_ParseCamLine(char *s) {
 }
 
 /* ---- 00431016 ---- */
+/* P121_TexQuadFlat — Game.exe 00431016.  Model record 0x44 bytes: textured quad with the record's own colour (no
+   lighting): +2 texture page, +8..+0x14 vertex indices, +0x18..+0x34 four (u, v) pairs, +0x38 r, g, b floats.
+   Drawn as triangles (0, 2, 1) and (0, 2, 3); arg = blend mode.  Advances the record pointer. */
 void P121_TexQuadFlat(uint32_t arg) {
   const uint8_t *rec = G2_011F4064;
   int32_t i0 = rd32(rec + 8), i1 = rd32(rec + 0xc), i2 = rd32(rec + 0x10), i3 = rd32(rec + 0x14);
@@ -211,6 +236,7 @@ void P121_TexQuadFlat(uint32_t arg) {
 /* ---- 00430b13 (v2.20): запись модели 0x38 (тип 4/36) — текстурный треугольник с цветом записи, без освещения.
    Треугольный вариант 00431016 (Ghidra функцией не опознала — по дизассемблеру): индексы +8/+0xc/+0x10, uv +0x14..+0x28
    (вершины 0, 1, 2), цвет +0x2c/+0x30/+0x34; порядок вершин растеризатора — 0, 1, 2 (у четырёхугольника 0, 2, 1). ---- */
+/* P121_TexTriFlat — Game.exe 00430b13.  Triangle variant (record 0x38 bytes; see the note above). */
 void P121_TexTriFlat(uint32_t arg) {
   const uint8_t *rec = G2_011F4064;
   int32_t i0 = rd32(rec + 8), i1 = rd32(rec + 0xc), i2 = rd32(rec + 0x10);
@@ -232,6 +258,7 @@ void P121_TexTriFlat(uint32_t arg) {
 }
 
 /* ---- 004b2c4b ---- */
+/* Restores alpha combine / depth function after sprite drawing (state cached in P62_I252B78). */
 static void dust_end(void) {
   if (P62_I252B78 != 0) {
     if (P97_GrAlpha) P97_GrAlpha(3, 8, 0, 2, 1);
@@ -239,6 +266,10 @@ static void dust_end(void) {
     P62_I252B78 = 0;
   }
 }
+/* P121_DustDraw — Game.exe 004b2c4b.  Draws the live dust particles (0x24-byte records like the particles of ported16:
+   +0 position, +0x20 life, +0x22 frame) as 80x40 sprites (frame < 4: SWBIRD2 icon, else SWBIRD1 — TODO(RE): the
+   icon names suggest birds; unsure).  A particle outside 224 .. far / 2 is killed and drawing stops for this frame
+   (the original returns there). */
 void P121_DustDraw(void) {
   if (P62_I252B78 != 1) {
     if (P97_GrAlpha) P97_GrAlpha(3, 8, 0, 1, 1);
@@ -282,6 +313,7 @@ void P121_DustDraw(void) {
 }
 
 /* ---- 00447753 / 0043a5be: четырёхугольник с отсечением плоскостью ---- */
+/* Cached view-space vertex idx of the current model, transformed with the biased matrix (P44_XformBias). */
 static p85_vtx *prep_bias(int32_t idx) {
   p85_vtx *c = &P85_VCache[idx];
   if (!P85_VC_VALID(c, P85_FMT_PROJ)) {
@@ -292,35 +324,38 @@ static p85_vtx *prep_bias(int32_t idx) {
   }
   return c;
 }
+/* Trivial screen reject using sign bits: 1 when all vertices are left of / above the screen (AND of sign bits) or all
+   right of / below it (OR of sign bits of x - max is clear).  Leaves the mask in P85_Clip.  Hor+ widens x by the
+   extra side margin. */
 static int clip_reject(const float *xs, const float *ys, int n) {
   uint32_t a = 0x80000000u;
 #ifndef RE_HOOK_BUILD
   const float ex = (float)re_view_extra();   /* v2.15 Hor+: экран по x — [−S, 639 + S] */
   if (ex > 0.0f) {
-    for (int i = 0; i < n; i++) a &= bits(xs[i] + ex);
+    for (int i = 0; i < n; i++) a &= fbits(xs[i] + ex);
     P85_Clip = a; if (a) return 1;
     a = 0x80000000u;
-    for (int i = 0; i < n; i++) a &= bits(ys[i]);
+    for (int i = 0; i < n; i++) a &= fbits(ys[i]);
     P85_Clip = a; if (a) return 1;
     uint32_t o = 0;
-    for (int i = 0; i < n; i++) o |= bits(xs[i] - (P85_MaxX + ex));
+    for (int i = 0; i < n; i++) o |= fbits(xs[i] - (P85_MaxX + ex));
     P85_Clip = o; if (o == 0) return 1;
     o = 0;
-    for (int i = 0; i < n; i++) o |= bits(ys[i] - P85_MaxY);
+    for (int i = 0; i < n; i++) o |= fbits(ys[i] - P85_MaxY);
     P85_Clip = o; if (o == 0) return 1;
     return 0;
   }
 #endif
-  for (int i = 0; i < n; i++) a &= bits(xs[i]);
+  for (int i = 0; i < n; i++) a &= fbits(xs[i]);
   P85_Clip = a; if (a) return 1;
   a = 0x80000000u;
-  for (int i = 0; i < n; i++) a &= bits(ys[i]);
+  for (int i = 0; i < n; i++) a &= fbits(ys[i]);
   P85_Clip = a; if (a) return 1;
   uint32_t o = 0;
-  for (int i = 0; i < n; i++) o |= bits(xs[i] - P85_MaxX);
+  for (int i = 0; i < n; i++) o |= fbits(xs[i] - P85_MaxX);
   P85_Clip = o; if (o == 0) return 1;
   o = 0;
-  for (int i = 0; i < n; i++) o |= bits(ys[i] - P85_MaxY);
+  for (int i = 0; i < n; i++) o |= fbits(ys[i] - P85_MaxY);
   P85_Clip = o; if (o == 0) return 1;
   return 0;
 }
@@ -328,6 +363,8 @@ static int clip_reject(const float *xs, const float *ys, int n) {
    nv = 3 — 00439b42 (v2.20): текстурный треугольник 0x38 (тип 4 набора с ближней плоскостью 00550cfc+0x1c0): индексы +8..+0x10,
    uv +0x14..+0x28, цвет +0x2c; та же схема — отсечение рёбер 0x401514 (P101_ClipNearUV), 3 вершины — (0,1,2), 4 — (0,2,1),(0,2,3).
    До v2.20 вместо него стоял обработчик без отсечения: у полигонов неба/земли, пересекающих ближнюю плоскость, — пропуски. */
+/* Shared body of the clipped polygon handlers: clip the nv-gon against the plane into P121_ClipBuf (3..5 vertices),
+   project, reject, then draw as a triangle fan.  tex = textured (near plane, UVs) vs flat (far plane). */
 static void clip_poly(uint32_t arg, int tex, int nv) {
   const uint8_t *rec = G2_011F4064;
   int32_t ix[4] = { rd32(rec + 8), rd32(rec + 0xc), rd32(rec + 0x10), nv == 4 ? rd32(rec + 0x14) : 0 };
@@ -387,26 +424,34 @@ static void clip_poly(uint32_t arg, int tex, int nv) {
     raster_b(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
   }
 }
+/* 00447753 / 0043a5be / 00439b42 — see clip_poly. */
 void P121_ClipQuad(uint32_t arg) { clip_poly(arg, 0, 4); }
 void P121_ClipTexQuad(uint32_t arg) { clip_poly(arg, 1, 4); }
 void P121_ClipTexTri(uint32_t arg) { clip_poly(arg, 1, 3); }
 
 /* ---- 0051dc18 ---- */
+/* P121_WheelDust — Game.exe 0051dc18.  Kicks up dust behind the player's wheels 0 and 2 while CAR_BURNOUT is set (16
+   particles each): for a wheel whose neighbour wheel (k - 1) & 3 reports surface 0, only P102_5624A4 = 1;
+   otherwise emits from the body corner k (raised by 0x32) with the car's velocity / 4096 and an upward speed
+   of 16 * -0x27a.  TODO(RE): unsure — the surface byte indexing (k - 1) & 3 is kept literally. */
 void P121_WheelDust(void) {
   const uint8_t *c = (const uint8_t *)&P99_Cars[0];
-  int32_t n = (rd32(c + 0x108) != 0) ? 0x10 : 0;   /* 00d078c8 */
+  int32_t n = (rd32(c + CAR_BURNOUT) != 0) ? 0x10 : 0;   /* 00d078c8 */
   if (n == 0) return;
   for (int32_t k = 0; k < 4; k++) {
     if (k != 0 && k != 2) continue;
-    if (c[0x7a + ((uint32_t)(k - 1) & 3) * 4] == 0) { P102_5624A4 = 1; continue; }   /* 00d0783a */
+    if (c[CAR_WHEEL + WHEEL_SURFACE + ((uint32_t)(k - 1) & 3) * CAR_WHEEL_SIZE] == 0) { P102_5624A4 = 1; continue; }   /* 00d0783a */
     P102_5624A4 = 0;
     int32_t a[4] = { P102_Corners[k * 4], P102_Corners[k * 4 + 1] - 0x32, P102_Corners[k * 4 + 2], P102_Corners[k * 4 + 3] };
-    int32_t b[3] = { rd32(c + 0x40) / 0x1000, n * -0x27a, rd32(c + 0x48) / 0x1000 };   /* 00d07800 / 00d07808 */
-    P121_Fn4B955C(a, b, n, 2);
+    int32_t b[3] = { rd32(c + CAR_VEL) / 0x1000, n * -0x27a, rd32(c + CAR_VEL + 8) / 0x1000 };   /* 00d07800 / 00d07808 */
+    P125_ObjABurst(a, b, n, 2);
   }
 }
 
 /* ---- 00415014 ---- */
+/* P121_SndNextDev — Game.exe 00415014.  Settings menu: switches to the next sound device that initialises (wrapping;
+   device 0 when there is only one), then reloads the sound bank (TITLE.DSS, or MOTEL.DSS when G6_00B87EEC) and
+   refreshes the menu (00414D1F).  Returns 0. */
 int32_t P121_SndNextDev(void) {
   if (G6_00B91D2C == 0) return 0;
   G6Call00523628();
@@ -438,6 +483,10 @@ int32_t P121_SndNextDev(void) {
 }
 
 /* ---- 004a7d80 ---- */
+/* P121_CopSync — Game.exe 004a7d80.  Copies the position (x, z), speed and heading of traffic record p's car into its
+   car object slot (0xcd8 bytes = 0x336 words at P12_0112da00, slot p[5] - 1) and refreshes its map position every 8th
+   frame (staggered by slot).  When the wanted level is above 0x2a9 and chase ambience is active the record is put
+   into state 4 (TODO(RE): unsure — pursuit?) and nothing is copied. */
 void P121_CopSync(uint8_t *p) {
   if (0x2a9 < G2_00D11A5C && 0 < P95_AmbN) p[1] = 4;
   if (p[1] == 4) return;
@@ -452,10 +501,10 @@ void P121_CopSync(uint8_t *p) {
   if (p[0] >= P99_CARS_N - 1) return;
 #endif
   const uint8_t *car = base + (uint32_t)p[0] * 0x148;
-  r[0x319] = (uint32_t)rd32(car + 200);    /* 0112e664 */
-  r[0x31b] = (uint32_t)rd32(car + 0xd0);   /* 0112e66c */
-  r[0xa] = (uint32_t)rd32(car + 0x110);    /* 0112da28 */
-  r[3] = (uint32_t)rd32(car + 0x100);      /* 0112da0c */
+  r[0x319] = (uint32_t)rd32(car + CAR_POS_X);    /* 0112e664 */
+  r[0x31b] = (uint32_t)rd32(car + CAR_POS_Z);    /* 0112e66c */
+  r[0xa] = (uint32_t)rd32(car + CAR_SPEED);      /* 0112da28 */
+  r[3] = (uint32_t)rd32(car + CAR_HEADING);      /* 0112da0c */
   r[0x32f] = 0;                            /* 0112e6bc */
   if (P62_Frame % 8 == (int32_t)p[5] - 1) {
     int32_t a = 0, b = 0;
@@ -464,6 +513,9 @@ void P121_CopSync(uint8_t *p) {
 }
 
 /* ---- 004d602e ---- */
+/* P121_CamSounds — Game.exe 004d602e.  Per-tick sound update around the camera: switches the ambience bank (1 / 6)
+   when the camera enters or leaves a model zone (P128_ModelHit), engine revs / car voice for the player (0x41 =
+   all cars?) depending on game state, traffic sounds, bounds, loops and the pitch-jitter sample. */
 void P121_CamSounds(void) {
   int32_t r = P128_ModelHit(P44_CamX, P44_CamY, P44_CamZ, P121_CamW);
   if (r == 0) { if (P116_SndB2035C != 0) Call0052360D(1); }

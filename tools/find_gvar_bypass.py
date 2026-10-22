@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """v2.11: ищет обращения к переменным образа данных (gvar_img_tab.c) в обход re_gvar — после препроцессора каждого game/*.c."""
 import re, glob, os, subprocess, sys
-R = '/workspace/projects/ce1b1d6d-abf1-4bda-ab0c-56fb1670a4a3/re'
+R = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 're')   # v2.35: каталог re/ (по умолчанию — рядом с tools/)
 tab = open(R + '/game/gvar_img_tab.c').read()
 names = {}
 for m in re.finditer(r'\{ 0x([0-9a-f]+)u, \(uint32_t\)sizeof\(([^)]*)\) \},\s*/\* (\w+) \*/', tab):

@@ -1,3 +1,6 @@
+/* Leaf routines: identifier parsing, PSX-style fixed-point maths (spring step, quaternion to
+   matrix, curve tables), view cone test, direction table, frustum row spans, radar/map
+   projection, view limits, finish fade and icon quad.  32-bit wrap-around arithmetic is kept. */
 /* Пачка листовых функций — восстановлено из Game.exe (004a522a, 004e0fd4, 004dab80, 004da76a, 004da5e0, 00496569, 00490591,
    004f2f2a, 004f4c3d, 004b9835, 005061c9, 004094e3, 004e5284, 004ab95c, 00507672). */
 #include "ported94.h"
@@ -203,13 +206,19 @@ int32_t P94_WobC = 5;    /* 00553a1c */
 #endif
 
 /* умножение и сдвиг как у 32-битного imul/sar (с переполнением по модулю 2^32) */
+/* mul — int32 multiply with 32-bit wrap-around (imul). */
 static int32_t mul(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b); }
+/* fx — 20.12 fixed-point multiply with rounding: (a * b + 0x800) >> 12, wrap-around kept. */
 static int32_t fx(int32_t a, int32_t b) { return (int32_t)((uint32_t)mul(a, b) + 0x800u) >> 12; }
 #include "memrw.h"
+#include "carfields.h"
+#include "fixmath.h"
+/* rd16 — Unaligned int16 read. */
 static int16_t rd16(const uint8_t *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wrf(uint32_t *p, float v) { memcpy(p, &v, 4); }
+/* wrf — Store a float into a uint32 slot (bit copy). */
 
-/* 004a522a */
+/* P94_ReadIdent — Game.exe 004a522a, cdecl.  Copy an identifier [A-Z0-9_] from src to dst (NUL-terminated), upper-casing src in place.
+   Returns the first character after it; an identifier may not start with a digit (dst = ""). */
 uint8_t *P94_ReadIdent(uint8_t *src, uint8_t *dst) {
   if (*src >= '0' && *src <= '9') { *dst = 0; return src; }   /* имя не может начинаться с цифры */
   for (; *src != 0; src++) {
@@ -223,6 +232,11 @@ uint8_t *P94_ReadIdent(uint8_t *src, uint8_t *dst) {
 }
 
 /* 004e0fd4: obj +8/+0xe/+0x14 — нормаль (int16, шаг 6), st +0x30/+0x40/+0x50 — векторы int32, +0x60 — режим */
+/* P94_SpringStep — Game.exe 004e0fd4, cdecl.  One damped spring step of a body against a surface: obj int16 normal at +8/+0xe/+0x14 (stride
+   6), st int32 vectors +0x30 (position), +0x40 (offset), +0x50 (velocity), +0x60 mode.
+   Velocity = vel * 0x6e + (normal * (dot(normal, vel) * 0x1b8) - offset << 7) >> 12; mode 1 also
+   subtracts offset / 8.  Writes the force/position copies to obj +0x68 / +0x58 (CAR_DANGVEL_PEND /
+   CAR_DVEL_PEND for car records).  TODO(RE): unsure of the physical meaning of the constants. */
 void P94_SpringStep(uint8_t *obj, uint8_t *st) {
   int32_t dot = mul(rd16(obj + 8), rd32(st + 0x50)) + mul(rd16(obj + 0xe), rd32(st + 0x54)) + mul(rd16(obj + 0x14), rd32(st + 0x58));
   int32_t d = mul((int32_t)((uint32_t)dot + 0x800u) >> 12, 0x1b8);
@@ -237,6 +251,8 @@ void P94_SpringStep(uint8_t *obj, uint8_t *st) {
 }
 
 /* 004dab80: положение (>>8) и угловая скорость, повёрнутая кватернионом src+0xc..0x18 */
+/* P94_PackState — Game.exe 004dab80, cdecl.  Pack a rigid-body state for replay/network: position >> 8, the angular vector (rounded >> 13)
+   rotated by the quaternion src+0xc..0x18 as a quaternion product; out[7..12] = 0. */
 void P94_PackState(const uint8_t *src, int32_t *out) {
   out[0] = rd32(src + 0x1c) >> 8;
   out[1] = rd32(src + 0x20) >> 8;
@@ -252,7 +268,8 @@ void P94_PackState(const uint8_t *src, int32_t *out) {
   for (int i = 7; i < 13; i++) out[i] = 0;
 }
 
-/* 004da76a */
+/* P94_QuatToMat — Game.exe 004da76a, cdecl.  Quaternion (x, y, z, w in 1.12) -> 3x3 int16 rotation matrix (4096 = 1.0); products rounded >> 11
+   (i.e. 2*q*q in 20.12). */
 void P94_QuatToMat(const int32_t *q, int16_t *m) {
   #define QQ(a, b) ((int16_t)((int32_t)((uint32_t)mul(q[a], q[b]) + 0x400u) >> 11))
   int16_t yy = QQ(1, 1), zz = QQ(2, 2), xx = QQ(0, 0);
@@ -269,7 +286,8 @@ void P94_QuatToMat(const int32_t *q, int16_t *m) {
   m[8] = (int16_t)(0x1000 - (int16_t)(xx + yy));
 }
 
-/* 004da5e0 */
+/* P94_InitCurves — Game.exe 004da5e0, cdecl.  Build three lookup curves: P94_CurveA[i] = (i/4096)^6 (0..0x1003), and for 160 angle steps
+   P94_CurveB (a modulated sine) and P94_CurveC = CurveB^5.  TODO(RE): unsure what uses them. */
 void P94_InitCurves(void) {
   for (int32_t i = 0; i < 0x1004; i++) {
     int32_t t = fx(i, i);
@@ -291,10 +309,12 @@ void P94_InitCurves(void) {
 }
 
 /* 00496569: машина впереди игрока в секторе ±60° (по курсу P94_HeadingI) и ближе 5000 по осям */
+/* P94_InViewCone — Game.exe 00496569, cdecl.  1 if `car` is in front of the player within +-60 degrees of heading P94_HeadingI, within 5000 on
+   both axes and inside three half-planes (front and the two cone sides); else 0. */
 int32_t P94_InViewCone(const uint8_t *car) {
-  uint32_t da = (uint32_t)(P94_HeadingI - rd32(car + 0x100)) & 0xfff;
+  uint32_t da = (uint32_t)(P94_HeadingI - rd32(car + CAR_HEADING)) & ANG_MASK;
   if (da < 0x69c || da > 0x964) return 0;
-  int32_t dx = rd32(car + 0xc8) - P59_PosX, dz = rd32(car + 0xd0) - P59_PosZ;
+  int32_t dx = rd32(car + CAR_POS_X) - P59_PosX, dz = rd32(car + CAR_POS_Z) - P59_PosZ;
   if (dx < -5000 || dx > 5000 || dz < -5000 || dz > 5000) return 0;
   int32_t h = P94_HeadingI;
   if (mul(dx, P59_Sin[h & 0xfff]) + mul(dz, P59_Sin[(h + 0x400) & 0xfff]) < -0x384000) return 0;
@@ -304,6 +324,8 @@ int32_t P94_InViewCone(const uint8_t *car) {
 }
 
 /* 00490591: различные смещения клетки (sin·23/4096, cos·23/4096) по 128 направлениям */
+/* P94_BuildDirTab — Game.exe 00490591, cdecl.  Build the distinct map-cell offsets (sin * 23 / 4096, cos * 23 / 4096) of 128 headings into
+   P94_DirTab {dx, dz, dx + dz * map width}; P94_DirCnt = count. */
 void P94_BuildDirTab(void) {
   int32_t tmp[240 * 2];
   P94_DirCnt = 0;
@@ -323,6 +345,8 @@ void P94_BuildDirTab(void) {
 
 /* 004f2f2a: формат строк FRUSTRUM.DAT: out[0] — первая непустая строка (−1), out[1] — число непустых строк,
    out[2+2r] — первый ненулевой столбец строки r (−1), out[3+2r] — число ненулевых клеток от него до конца строки */
+/* P94_RowSpans — Game.exe 004f2f2a, cdecl.  Convert the 31x31 FRUSTRUM.DAT mask into row spans: out[0] first non-empty row (-1), out[1]
+   number of non-empty rows, then per row {first set column (-1), set cells from there to the end}. */
 void P94_RowSpans(int16_t *out, const uint8_t *grid) {
   out[1] = 0; out[0] = -1;
   int16_t *p = out;
@@ -343,6 +367,8 @@ void P94_RowSpans(int16_t *out, const uint8_t *grid) {
 }
 
 /* 004f4c3d: октагональное расстояние от игрока до ближайшего активного объекта радара (10 записей по 0x34) */
+/* P94_NearestObjDist — Game.exe 004f4c3d, cdecl.  Octagonal distance (max + min/2) from the player to the nearest active of the 10 radar
+   objects (P58_Objs, flag bit 0); 0x7fffffff if none. */
 int32_t P94_NearestObjDist(void) {
   int32_t best = 0x7fffffff;
   for (int i = 0; i < 10; i++) {
@@ -358,6 +384,8 @@ int32_t P94_NearestObjDist(void) {
 }
 
 /* 004b9835: смещение «качания» по трём фазам таблицы синусов */
+/* P94_Wobble — Game.exe 004b9835, cdecl.  Camera wobble offset from three sine phases (advanced by 3, 5, 7 when step != 0): x/z sums of two
+   cos/sin terms scaled by 10 * sin(phase C); y = 0. */
 void P94_Wobble(float *out, int32_t step) {
   if (step != 0) {
     P94_WobA = (P94_WobA + 3) & 0xfff;
@@ -372,6 +400,9 @@ void P94_Wobble(float *out, int32_t step) {
 }
 
 /* 005061c9: мировые x,z → экран радара (поворот по курсу игрока, если не включён «север вверху» 00bdfa54) */
+/* P94_RadarXY — Game.exe 005061c9, cdecl.  World (x, z) -> radar screen position: relative to the player (half-cell bias 750 cancels out
+   except for rounding), rotated by the player heading unless "north up" (00bdfa54) is set, scaled
+   by P63_Scale * P94_RadarK around the radar centre. */
 void P94_RadarXY(float x, float z, float *ox, float *oy) {
   uint32_t i = (uint32_t)(-(int32_t)P94_Heading) & 0xfff;
   float s = P43_Sin[i], c = P43_Sin[i + 0x400];
@@ -384,6 +415,8 @@ void P94_RadarXY(float x, float z, float *ox, float *oy) {
 }
 
 /* 004094e3: пределы числа частиц (0..64) и дальностей прорисовки (15000..45000, 15000..42000) */
+/* P94_ClampView — Game.exe 004094e3, cdecl.  Clamp the particle limit to 0..64 and the far distances 01270c24 to 15000..45000 and 0125f3f8
+   to 15000..42000 (the detail preset ranges). */
 void P94_ClampView(void) {
   int32_t n = P60_PartLimit < 0x41 ? P60_PartLimit : 0x40;
   P60_PartLimit = n < 0 ? 0 : n;
@@ -394,6 +427,9 @@ void P94_ClampView(void) {
 }
 
 /* 004e5284: мигание (0..255 шагом 12) и проезд камеры финиша, затем переход в состояние 3 */
+/* P94_FadeStep — Game.exe 004e5284, cdecl.  Finish-line effect in the interview city (state 4, 00d04654 == 1): flash value 0..255 in steps
+   of 12 while the camera position P94_FadePos passes 3072..4096, then end the sequence
+   (00d118a8 = 1, 00d04654 = 3). */
 void P94_FadeStep(void) {
   if (G2_00D04654 != 1 || G6_00B5A778 != 0 || D_00b87e30 != 4) return;
   if (P94_FadeDir == 0) {
@@ -416,6 +452,9 @@ void P94_FadeStep(void) {
 }
 
 /* 004ab95c: четырёхугольник значка из записи P94_IconRec (+8 страница, +9 u, +10 v, +0xb ширина, +0xc высота) */
+/* P94_IconQuad — Game.exe 004ab95c, cdecl.  Build the screen quad of icon record P94_IconRec (+8 page, +9 u, +0xa v, +0xb width, +0xc
+   height): corner indices, UV floats and colour 255, 255, 255.  Native: skipped while the record
+   is not set. */
 void P94_IconQuad(void) {
   const uint8_t *r = (const uint8_t *)re_ptr(P94_IconRec);
   if (r == NULL) return;                                /* охранная проверка: в native запись ставит ещё не перенесённый код */
@@ -433,6 +472,9 @@ void P94_IconQuad(void) {
 }
 
 /* 00507672: координаты карты → экран с учётом ориентации карты (D_00b87e30: 1 — отражение, 0/3 — поворот на 90°) */
+/* P94_MapToScreen — Game.exe 00507672, cdecl.  Map (x, y) -> screen: flip (orientation 1) or rotate by 90 degrees (orientations 0 / 3) around the
+   map centre, then scale from the map window (P94_MapX0/Y0, W/H; 640x480 reference) by the view
+   scale 0125f3e0 to the current resolution. */
 void P94_MapToScreen(float *x, float *y) {
   float u, v;
   if (D_00b87e30 == 1) {

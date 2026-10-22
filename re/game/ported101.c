@@ -1,3 +1,8 @@
+/* ported101 — 26+ assorted Game.exe functions (cdecl): mission goal tick, debris / drips / particles, replay start,
+   car ground contact, free-cell picking, box overlap, road bounds and the road node lookup under a point, traffic
+   engine sounds, effect objects (lights, skid marks), sky model setup and its native UV fix, vertex projection,
+   palette blits and attribute-interpolating near/far clipping.  English summaries precede each function's
+   original Russian line.  Original note: */
 /* v1.46: 26 функций (см. ported101.h). Стандарт указателей v1.42: адреса объектов капель, записей объектов B/C (01105d60,
    0110b24c), буфера маски зеркала (00b31efc) и текстурных страниц — uint32_t + re_ptr/re_addr; глобальные скалярные указатели —
    родные. Узлы дороги/слоты читаются из P11_00bf1c40/P11_00c12c60/P11_00c1ed80 (game/nodetab.h). */
@@ -347,12 +352,10 @@ p101_pal_t P101_PalLfb;
 #include "memrw.h"
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
-static uint32_t fbits(float v) { uint32_t u; memcpy(&u, &v, 4); return u; }
 static int32_t fx12(int32_t a, int32_t b) { return (int32_t)((uint32_t)a * (uint32_t)b + 0x800u) >> 12; }
 static uint8_t *texpage(uint32_t slot) { return (uint8_t *)re_ptr((uint32_t)rd32(&g_01145a60[slot * 0x10 + 4])); }
 /* запись модели машины m (00d0cc60 + m*0x16c); в native — в пределах S_00D0CC60 (0x4000 байт), иначе нули */
+/* Car model record m (stride 0x16c). */
 static const uint8_t *carmodel(uint32_t m) {
 #ifndef RE_HOOK_BUILD
   static const uint8_t zero[0x16c];
@@ -371,6 +374,7 @@ static const uint8_t *rec(const uint8_t *tab, uint32_t sz, int32_t i, uint32_t s
   return tab + (uint32_t)i * st;
 }
 
+/* Mission goal tick by goal state (+4): scare, rival, reach object, traffic car, ... */
 /* ---- 004f51b4: шаг цели скрипта (состояние +4: 4 — напугать, 5 — соперник, 6 — доехать до объекта, 8 — машина трафика) ---- */
 void P101_GoalTick(uint8_t *g) {
   P100_GoalsCheck(g);
@@ -438,6 +442,7 @@ void P101_GoalTick(uint8_t *g) {
   }
 }
 
+/* Debris piece step with bounce off the road (int x, y, z at +0; velocity +0x10; timer +0x20; index +0x24). */
 /* ---- 004b998b: шаг обломка с отскоком от дороги (int x,y,z +0; скорость +0x10; таймер int16 +0x20; номер +0x24) ---- */
 void P101_DebrisBounce(int32_t *p) {
   uint8_t *b = (uint8_t *)p;
@@ -459,6 +464,7 @@ void P101_DebrisBounce(int32_t *p) {
   }
 }
 
+/* Replay start: snapshots of the player / cameras (keep = keep the current ones), recording pointers reset. */
 /* ---- 00518953: начало воспроизведения — снимки игрока/камер (keep: сохранить текущие), сброс указателей записи, машина 0x41 ---- */
 void P101_ReplayBegin(int32_t keep) {
   P100_RecKeys = 0x10100000;
@@ -492,6 +498,7 @@ void P101_ReplayBegin(int32_t keep) {
   P101_RecState = 1;
 }
 
+/* Six drips (0x1c-byte records) fall until they reach the road. */
 /* ---- 00522d02: 6 капель (запись 0x1c: +0xc x, +0x10/+0x12/+0x14 скорости int16, +0x18 адрес объекта) падают до дороги ---- */
 void P101_Drips(void) {
   if (G6_00B5A778 != 0) return;
@@ -518,6 +525,7 @@ void P101_Drips(void) {
   }
 }
 
+/* Car on the road: height from the ground minus the model clearance (+0xe2), wheels in contact. */
 /* ---- 004dea35: машина на дороге — высота по земле минус клиренс модели (+0xe2), колёса в контакте, out[0x14] = 1 ---- */
 void P101_CarGround(p99_car_t *car, uint8_t *out) {
   const p99_car_t *ref = (G6_00B87EAC == 0 && G6_00B87EB0 == 0) ? &P99_Cars[0] : &P99_Cars[0x41];
@@ -554,6 +562,7 @@ static uint32_t rand_bit(uint32_t m, uint32_t n) {
   return m & bit;
 }
 
+/* Neighbouring free map cell (want preferred): cell centre into out[0] / out[2], road height into out[1]. */
 /* ---- 005139d7: соседняя свободная клетка (предпочтительно want) — центр клетки в out[0]/out[2], высота дороги в out[1] ---- */
 uint32_t P101_PickCell(uint32_t want, int32_t x, int32_t z, float *out) {
   uint32_t n, m = free_nbr(&n);
@@ -572,6 +581,7 @@ uint32_t P101_PickCell(uint32_t want, int32_t x, int32_t z, float *out) {
   return m;
 }
 
+/* Separating-axis overlap test of two oriented boxes; 1 when no separating face exists (best = contact). */
 /* ---- 004997a0: пересечение двух коробок (оси +0.., полуразмеры +0x40, оси×размер → +0x4c) — 1, если нет разделяющей грани ---- */
 int32_t P101_BoxHit(int32_t *a, int32_t *b, int32_t *best) {
   *best = 0x40000000;
@@ -592,6 +602,7 @@ int32_t P101_BoxHit(int32_t *a, int32_t *b, int32_t *best) {
   return 1;
 }
 
+/* Road bounds on the 4 sides of each road segment record (0x24 bytes: lengths +0..3, points +4..+0x20). */
 /* ---- 0051c07a: границы дорог по 4 сторонам (P59_C39DC0, запись 0x24: длины +0..3, точки +4..+0x20) ---- */
 void P101_RoadBounds(void) {
   uint8_t *r = P59_C39DC0;
@@ -615,6 +626,7 @@ void P101_RoadBounds(void) {
   }
 }
 
+/* Falling particle (position +0x84, velocity +0x74, flags +0x10: 0x10 animate, 0x20 falling). */
 /* ---- 00513d0a: падение частицы (позиция +0x84, скорость +0x74, флаги +0x10: 0x10 — кадры, 0x20 — падение) ---- */
 void P101_PartFall(uint8_t *p) {
   wrf(p + 0x84, rdf(p + 0x84) + rdf(p + 0x74));
@@ -644,6 +656,7 @@ void P101_PartFall(uint8_t *p) {
   if (55.0f < rdf(p + 0x78)) wr32(p + 0x78, 0x425c0000);    /* .rdata 00546a78 = 55 */
 }
 
+/* Turns a ground particle into the next cell (direction +0x38: 1 / 2 / 4 / 8) or frees its slot. */
 /* ---- 0051500c: поворот частицы на соседнюю клетку (направление +0x38: 1/2/4/8), иначе освободить слот ---- */
 void P101_PartTurn(uint8_t *p) {
   float *pv = (float *)(p + 0x94);
@@ -709,6 +722,7 @@ static int32_t near_voice(int32_t n, int32_t slot) {
   return 1;
 }
 
+/* Engine sounds of the two nearest traffic cars (voices 5..8). */
 /* ---- 004d63bc: звуки двух ближайших машин трафика (голоса 5..8) ---- */
 void P101_TrafficSounds(void) {
   if ((P62_Frame & 0x3f) == 0) {
@@ -724,6 +738,7 @@ void P101_TrafficSounds(void) {
   else { P100_CarRevs(P95_Near2); P75_CarVoice(P95_Near2, 6, -1); P48_SetVoiceVolume(6, 0); }
 }
 
+/* Adds effect object B at (x, y, z) in the frame of object src (+8 position, +0x18 heading). */
 /* ---- 004b0256: объект B (01105d60) у точки (x,y,z) в системе объекта src (+8 позиция, +0x18 курс) ---- */
 void P101_AddObjB(const uint8_t *src, float x, float y, float z, int16_t kind, int16_t b, int16_t val) {
   int32_t sv = P13_00b201dc;
@@ -771,6 +786,7 @@ static void car_to_view(float *r, int32_t car) {
   P44_Xform(r);
 }
 
+/* Head / tail light of car as effect object C when it faces the camera (|angle| <= 900). */
 /* ---- 004af076: фара/огонь машины car — объект C (0110b24c), если повёрнут к камере (|угол| ≤ 900) ---- */
 void P101_CarLight(int32_t car, const float *v, int32_t flags) {
 #ifndef RE_HOOK_BUILD
@@ -800,6 +816,7 @@ void P101_CarLight(int32_t car, const float *v, int32_t flags) {
   }
 }
 
+/* Flight of the 100 debris pieces around the player: wobble and fall to the road. */
 /* ---- 004b9aec: полёт 100 обломков (P97_Debris, 0x3c) около игрока: покачивание, падение до дороги ---- */
 void P101_DebrisFly(void) {
   uint8_t *r = P97_Debris;
@@ -835,6 +852,7 @@ void P101_DebrisFly(void) {
   }
 }
 
+/* Four wheel contact points of a car on the road from its matrix and the model wheel offsets (+0xe0, 8 bytes each). */
 /* ---- 0051d97e: 4 точки колёс машины на дороге: матрица машины (P98_MrkMat), смещения колёс модели (+0xe0, шаг 8) ---- */
 void P101_WheelsGround(const uint8_t *car, float *out) {
   const float k = 1.0f / 4096.0f;   /* .rdata 00546134 */
@@ -888,6 +906,7 @@ static const char *const SKYTAB[44] = {
 #define SKY_RINGS 16
 int32_t P101_SkyUvFixed;   /* сколько координат v изменено при последней загрузке уровня (тесты) */
 static int sky_rec_n(const uint8_t *r) { return r[0] == 4 ? 3 : r[0] == 5 ? 4 : 0; }
+/* P101_SkyUvFix — native only (v2.27): equalises the sky dome ring v coordinates (see the note above). */
 void P101_SkyUvFix(void) {
   P101_SkyUvFixed = 0;
   { const char *e = getenv("RE_SKYFIX"); if (e && e[0] == '0') return; }
@@ -928,6 +947,7 @@ void P101_SkyUvFix(void) {
   }
 }
 #endif
+/* Sky setup: sky models scaled x1.7, the weather / time-of-day sky texture copied over the day one. */
 /* ---- 004ef3cd: масштаб моделей неба ×1.7, копия текстуры неба по погоде/времени на место дневной ---- */
 /* v2.20: в native ссылка модели — смещение в арене карты, и первая модель уровня (небо, P79_ModelTab[0]) лежит по смещению 0.
    Прежняя проверка «ссылка == 0 → пропуск» (как пустой указатель оригинала) пропускала её: четверть купола оставалась в масштабе
@@ -973,6 +993,7 @@ void P101_SkyInit(void) {
   if (cnt != 0) P12_Fn0048A46B((int32_t)dslot, rd32(&g_01145a60[dslot * 0x10 + 4]));
 }
 
+/* Road node under point (x, z) on side side: -1 = no road, 1 = junction, 0 = road (result in P101_Rd*). */
 /* ---- 0051b974: узел дороги под точкой (x,z) со стороны side: −1 — нет дороги, 1 — перекрёсток (P101_RdNode),
    0 — участок: узел/полоса/расстояния в 00c1cca0..00c1ccb8, P72_Id/P72_Low ---- */
 int32_t P101_RoadNode(int32_t x, int32_t z, int8_t side) {
@@ -1023,6 +1044,7 @@ int32_t P101_RoadNode(int32_t x, int32_t z, int8_t side) {
   return 0;
 }
 
+/* Mirror mask of radius r (buffer 00b31efc). */
 /* ---- 004f29f7: маска зеркала радиуса r (буфер 00b31efc — адрес DebugMalloc) ---- */
 void P101_MirrorMaskR(float r) {
   const int32_t N = 0x1f;
@@ -1052,6 +1074,7 @@ void P101_MirrorMaskR(float r) {
   P11_00c823d0 = 1;
 }
 
+/* Two tyre skid marks for car as effect objects C (flag 0x100), while there are fewer than 201. */
 /* ---- 004aecb1: два следа шин машины car (объекты C, флаг 0x100), пока их меньше 201 ---- */
 void P101_CarSkids(int32_t car) {
 #ifndef RE_HOOK_BUILD
@@ -1091,6 +1114,7 @@ static float zinv(float z) {
   return RE_OOW(P85_ZI);
 }
 
+/* Vertex projection with the transposed matrix (see the Russian line for the slots). */
 /* ---- 00528bb7: v[3..5] → вид по транспонированной матрице + смещение; x,y → v[6],v[7]; z → v[5]; экран → v[3],v[4] ---- */
 void P101_ProjT(float *v) {
   const float *M = P44_MatPtr;
@@ -1111,6 +1135,7 @@ void P101_ProjT(float *v) {
   v[4] = py + P101_ScrY0;
 }
 
+/* Vertex transform with bias, frame stamp in v[0]. */
 /* ---- 00528c91: v[3..5] = M·v[3..5] + смещение, v[0] = метка кадра ---- */
 void P101_XformBias2(float *v) {
   const float *M = P44_MatPtr;
@@ -1122,6 +1147,7 @@ void P101_XformBias2(float *v) {
   memcpy(&v[0], &tag, 4);
 }
 
+/* Vertex transform + projection to screen, 1/z in v[1]. */
 /* ---- 00528d17: v[3..5] = M·v + смещение → экран (P43_OffX/OffY − 0.5) в v[3],v[4], z в v[5], 1/z в v[1] ---- */
 void P101_Proj(float *v) {
   const float *M = P44_MatPtr;
@@ -1141,14 +1167,9 @@ void P101_Proj(float *v) {
   v[4] = py + P43_OffY - P43_Half;
 }
 
-/* ---- 005291ed: заливка rows строк (шаг 640 байт) по w байт блоками 32 байтом c ---- */
-void P101_FillRows(uint8_t *dst, int32_t w, int32_t rows, uint8_t c) {
-  uint32_t v = (uint32_t)c * 0x01010101u;
-  for (; rows > 0; rows--, dst += 0x280)
-    for (int32_t x = 0; x < w; x += 0x20)
-      for (int32_t j = 0; j < 8; j++) memcpy(dst + x + j * 4, &v, 4);
-}
+/* 005291ed (row fill) is ported once, as P152_FillRows (ported152.c). */
 
+/* Converts rows of 640 palette indices to 16-bit pixels. */
 /* ---- 00529253: строки 640 индексов → 16-битные пиксели по P101_PalLfb (шаг строки P100_LfbPitch) ---- */
 void P101_Pal16(const uint8_t *src, uint8_t *dst, int32_t unused, int32_t rows) {
   (void)unused;
@@ -1165,6 +1186,7 @@ void P101_Pal16(const uint8_t *src, uint8_t *dst, int32_t unused, int32_t rows) 
   } while (--rows != 0);
 }
 
+/* Converts rows of 640 palette indices to 32-bit pixels. */
 /* ---- 005292d1: строки 640 индексов → 32-битные пиксели по P101_PalLfb ---- */
 void P101_Pal32(const uint8_t *src, uint8_t *dst, int32_t unused, int32_t rows) {
   (void)unused;
@@ -1180,6 +1202,8 @@ void P101_Pal32(const uint8_t *src, uint8_t *dst, int32_t unused, int32_t rows) 
 
 /* отсечение ребра a–b (вершины вида: x +0xc, y +0x10, z +0x14) ближней (P95_Near, z точки = 50) или дальней (01270c24)
    плоскостью с n атрибутами ua/ub → поля slot[] выходных вершин (12 float, P100_ClipOut, счётчик P100_ClipN) */
+/* Shared edge clipper: emits the intersection of edge a -> b with the near (far = 0) or far plane, interpolating n
+   attributes ua -> ub into the clip-buffer slots listed in slot. */
 static void clip_attr(const uint8_t *a, const uint8_t *b, int32_t far, const float *ua, const float *ub, const uint8_t *slot, int32_t n) {
   float P = far ? Q01270C24 : P95_Near, zc = far ? Q01270C24 : 50.0f;
   float za = rdf(a + 0x14), zb = rdf(b + 0x14);
@@ -1220,6 +1244,7 @@ static void clip_attr(const uint8_t *a, const uint8_t *b, int32_t far, const flo
 static const uint8_t k_s45[] = { 4, 5 }, k_s456[] = { 4, 5, 6 }, k_s789[] = { 7, 8, 9 };
 static const uint8_t k_s5a[] = { 4, 5, 10, 11, 6 }, k_s5b[] = { 7, 8, 9, 4, 5 };
 
+/* Near / far plane clipping with 2 interpolated attributes (u, v). */
 /* ---- 0042da16 / 0042f124: ближняя / дальняя плоскость, 2 атрибута (u, v → [4], [5]) ---- */
 void P101_ClipNearUV(const uint8_t *a, const uint8_t *b, float ua0, float ua1, float ub0, float ub1) {
   const float ua[2] = { ua0, ua1 }, ub[2] = { ub0, ub1 };
@@ -1229,22 +1254,26 @@ void P101_ClipFarUV(const uint8_t *a, const uint8_t *b, float ua0, float ua1, fl
   const float ua[2] = { ua0, ua1 }, ub[2] = { ub0, ub1 };
   clip_attr(a, b, 1, ua, ub, k_s45, 2);
 }
+/* Near plane clipping with 3 attributes. */
 /* ---- 0042dce8: ближняя, 3 атрибута → [4], [5], [6] ---- */
 void P101_ClipNearUVW(const uint8_t *a, const uint8_t *b, float ua0, float ua1, float ua2, float ub0, float ub1, float ub2) {
   const float ua[3] = { ua0, ua1, ua2 }, ub[3] = { ub0, ub1, ub2 };
   clip_attr(a, b, 0, ua, ub, k_s456, 3);
 }
+/* Near plane clipping with 3 colour attributes. */
 /* ---- 0042e3c7: ближняя, 3 атрибута (цвет) → [7], [8], [9] ---- */
 void P101_ClipNearRGB(const uint8_t *a, const uint8_t *b, float ua0, float ua1, float ua2, float ub0, float ub1, float ub2) {
   const float ua[3] = { ua0, ua1, ua2 }, ub[3] = { ub0, ub1, ub2 };
   clip_attr(a, b, 0, ua, ub, k_s789, 3);
 }
+/* Near plane clipping with 5 attributes. */
 /* ---- 0042e007: ближняя, 5 атрибутов → [4], [5], [10], [11], [6] ---- */
 void P101_ClipNear5A(const uint8_t *a, const uint8_t *b, float ua0, float ua1, float ua2, float ua3, float ua4,
                      float ub0, float ub1, float ub2, float ub3, float ub4) {
   const float ua[5] = { ua0, ua1, ua2, ua3, ua4 }, ub[5] = { ub0, ub1, ub2, ub3, ub4 };
   clip_attr(a, b, 0, ua, ub, k_s5a, 5);
 }
+/* Near plane clipping with 5 attributes (colour + u, v). */
 /* ---- 0042e6e6: ближняя, 5 атрибутов (цвет + u, v) → [7], [8], [9], [4], [5] ---- */
 void P101_ClipNear5B(const uint8_t *a, const uint8_t *b, float ua0, float ua1, float ua2, float ua3, float ua4,
                      float ub0, float ub1, float ub2, float ub3, float ub4) {

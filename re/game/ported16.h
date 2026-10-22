@@ -44,3 +44,20 @@ void P16_FillHudRect(uint32_t *p, uint32_t a, uint32_t rgb, uint32_t b, int c, i
 #undef P16_IdleArg2
 #define P16_IdleArg2 (*(int32_t *)re_gvar(0x00c81100u, sizeof(int32_t), (void *)&P16_IdleArg2))
 #endif
+/* v2.35: split aliases 0110e160 / 011171a0 merged (native): the dust particles stepped by P16_StepParticles (004b9d79) are the
+   data-image table P96_Dust and its count P96_DustN (P96_SpawnDust writes them, P121_DustDraw draws them).  Before v2.35
+   P16_ParticleBase / P16_ParticleCount were separate native objects (a 1-byte base and a zero count): dust was never moved
+   or aged in native. */
+#if !defined(RE_HOOK_BUILD) && !defined(RE_GVAR_PLAIN)
+#pragma push_macro("P96_Dust")
+#undef P96_Dust
+#pragma push_macro("P96_DustN")
+#undef P96_DustN
+extern uint8_t P96_Dust[1024 * 0x24]; extern int32_t P96_DustN;
+#pragma pop_macro("P96_DustN")
+#pragma pop_macro("P96_Dust")
+#undef P16_ParticleBase
+#define P16_ParticleBase  (*(uint8_t *)re_gvar(0x0110e160u, 1024 * 0x24, (void *)P96_Dust))
+#undef P16_ParticleCount
+#define P16_ParticleCount (*(int32_t *)re_gvar(0x011171a0u, sizeof(int32_t), (void *)&P96_DustN))
+#endif

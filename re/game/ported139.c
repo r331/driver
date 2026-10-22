@@ -1,3 +1,6 @@
+/* ported139 — mission script compile, Trailblazer data, script labels, effect object drawing, replay config / pads /
+   pings saving, the two key-binding menus and the mission ladder (DATA\MLADDER.DML) compiler (Game.exe, cdecl).
+   Original note: */
 /* v1.84: ported139 — см. ported139.h.
    004f4596 — компиляция скрипта миссии: обнуление 00c810c0 (0x210, вместе с native-псевдонимами), 00c818a0 (0x18), 011342a0 (0x48),
      00c818c0 (200), 00c80f80 (0x14); 00c812b8 ← адрес 011342a0, 00c812bc ← адрес 00c818a0; 004f638d, 004f892a; строка 0x400
@@ -23,6 +26,11 @@
      004f8b0a — массив/запись/имя — синтетические адреса re_ptr_register_dyn, освобождение снимает регистрацию; 0040fa60/00410c30 — таблицы
      0054c1e0/0054c530 и пункты 0054c030/0054c350 читаются через re_ptr/re_fn (нет области — обработчик/мигание пропускаются);
      00519408 — буферы 00c4d720 — uint32-адреса (re_ptr + re_ptr_unregister). */
+#if defined(__GNUC__) && !defined(__clang__)
+/* Paths here are built with bounded snprintf into fixed buffers (Game.exe used unbounded sprintf); an over-long
+   name is truncated on purpose.  The warning is silenced rather than the buffers resized, so the code is unchanged. */
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
 #include "ported139.h"
 #include "ported141.h"
 #include <string.h>
@@ -289,6 +297,7 @@ static const char k_ms_c[] = "D:\\Driver\\Game\\MScript.c";
 #include "memrw.h"
 
 /* адрес Game.exe области модуля (в native — один раз в реестр re_ptr) */
+/* Game.exe address of a module-owned area (native: registered with re_ptr once). */
 static uint32_t area(uint32_t addr, void *p, uint32_t size, int *done) {
 #ifndef RE_HOOK_BUILD
   if (!*done) { re_ptr_register(addr, p, size); *done = 1; }
@@ -299,6 +308,7 @@ static uint32_t area(uint32_t addr, void *p, uint32_t size, int *done) {
   return (uint32_t)(uintptr_t)p;
 #endif
 }
+/* 32-bit handle of a heap block (native: synthetic address via re_ptr_register_dyn); dyn_free releases both. */
 static uint32_t dyn(void *p, uint32_t size) {
 #ifndef RE_HOOK_BUILD
   return re_ptr_register_dyn(p, size);
@@ -317,6 +327,16 @@ static void dyn_free(uint32_t a) {
 
 /* ---- 004f4596 ---- */
 static int g_reg818a0, g_regmsg;
+/* Results of P139_CompileScript besides a line parser error code. */
+#define MSC_NOMEM   3
+#define MSC_EOF     4      /* the whole file was compiled */
+#define MSC_NOFILE  5
+#define MSC_LINE_OK_10 10  /* line result that does not stop compilation (besides 0); TODO(RE): unsure what 10 means */
+
+/* P139_CompileScript — Game.exe 004f4596.  Compiles a mission script (MScript): clears the mission state blocks, links
+   the message block and marker record into P56_Blk84, frees the previous script, initialises the variables, then
+   feeds every line (1 KiB buffer) to the line compiler.  Returns 4 at end of file (success), 3 no memory, 5 no file,
+   or the first line error. */
 int32_t P139_CompileScript(const char *path) {
   P138_Blk84Clear();
   memset(P139_C818A0, 0, sizeof(p139_u6_t));
@@ -331,22 +351,25 @@ int32_t P139_CompileScript(const char *path) {
   P138_C8168C = 0;
   P127_SpawnCnt = 0;
   P65_Line = (char *)P98_DebugMalloc(0x400, k_ms_c, 0x149);
-  if (P65_Line == NULL) return 3;
+  if (P65_Line == NULL) return MSC_NOMEM;
   void *f = g_fopen(path, "rt");
-  if (f == NULL) return 5;
+  if (f == NULL) return MSC_NOFILE;
   (void)P51_FileSize(f);
   P127_ScrPos = 0;
   P139_LineNo = 0;
   while (g_fgets(P65_Line, 0x400, f) != NULL) {
     int32_t r = P131_ScriptLine();
-    if (r != 0 && r != 10) { g_fclose(f); return r; }
+    if (r != 0 && r != MSC_LINE_OK_10) { g_fclose(f); return r; }
     P139_LineNo++;
   }
   g_fclose(f);
-  return 4;
+  return MSC_EOF;
 }
 
 /* ---- 004fbbfc ---- */
+/* P139_TrailLoad — Game.exe 004fbbfc.  Loads a Trailblazer route file: (size - 4) / 12 points of three int32 x, y, z,
+   stored as 0x14-byte records {index, x, y, z, 0} in G6_00C80C50 (count in 00c81108); replaces old data and resets
+   the trail progress / pick state.  1 on success.  (The 4-byte remainder of the file is not read.) */
 int32_t P139_TrailLoad(const char *path) {
   char msg[0x80];
   snprintf(msg, sizeof msg, "Attempting to read Trailblazer data file: \"%s\"", path);
@@ -385,6 +408,8 @@ int32_t P139_TrailLoad(const char *path) {
 }
 
 /* ---- 004f8b0a ---- */
+/* P139_AddLabel — Game.exe 004f8b0a.  Appends label {uppercase copy of name, val} to list = {count, address of an array
+   of record addresses}, reallocating the array.  1 on success, 0 (logged) when out of memory. */
 int32_t P139_AddLabel(const char *name, int32_t val, int32_t *list) {
   static const char k_err[] = "Error: Unable to add label, out of memory.";
   int32_t n = list[0] + 1;
@@ -409,30 +434,50 @@ int32_t P139_AddLabel(const char *name, int32_t val, int32_t *list) {
 }
 
 /* ---- 004aaf3a ---- */
+/* Effect object kinds by the first matching flag in +0x68 (dispatch order of P139_Effects). */
+#define FX_SMOKEOBJ 0x4
+#define FX_SPARK    0x8
+#define FX_LAMP     0x20
+#define FX_GLOWC    0x40
+#define FX_GLOWB    0x80
+#define FX_GLOWA    0x100
+#define FX_SMOKEB   0x1000
+#define FX_SMOKEA   0x8000
+#define FX_FLAG     0x20000
+#define FX_FLARE    0x40000
+
+/* P139_Effects — Game.exe 004aaf3a.  Draws the effect objects of the list G010FFB40 (next at +0x74) with additive-style
+   blending (grAlphaBlendFunction(4, 4, 0, 0)) and texture colour combine, dispatching on flags +0x68 (first match
+   wins, in the order below).  Restores the driver mode afterwards. */
 void P139_Effects(void) {
   if (P85_StateDirty != 4) { if (P85_StateFn) P85_StateFn(3, 1, 0, 1, 0); P85_StateDirty = 4; }
   if (P85_BlendCur != 3) { if (P85_BlendFn) P85_BlendFn(4, 4, 0, 0); P85_BlendCur = 3; }
   int32_t m = DrvSetMode0042655A(0);
   for (uint8_t *o = P95_ObjPtr((uint32_t)G010FFB40); o != NULL; o = P95_ObjPtr((uint32_t)rd32(o + 0x74))) {
     uint32_t fl = (uint32_t)rd32(o + 0x68);
-    if (fl & 4) P135_SmokeObj(o);
-    else if (fl & 0x20000) P144_FlagFx(o);
-    else if (fl & 0x40000) P111_Flare((const float *)o);
-    else if (fl & 0x80) P110_GlowB(o);
-    else if (fl & 0x100) P110_GlowA(o);
-    else if (fl & 0x20) P143_LampGlow(o);
-    else if (fl & 0x40) P110_GlowC(o);
-    else if (fl & 8) P135_SparkQuad(o);
-    else if (fl & 0x8000) P108_SmokeA(o);
-    else if (fl & 0x1000) P108_SmokeB(o);
+    if (fl & FX_SMOKEOBJ) P135_SmokeObj(o);
+    else if (fl & FX_FLAG) P144_FlagFx(o);
+    else if (fl & FX_FLARE) P111_Flare((const float *)o);
+    else if (fl & FX_GLOWB) P110_GlowB(o);
+    else if (fl & FX_GLOWA) P110_GlowA(o);
+    else if (fl & FX_LAMP) P143_LampGlow(o);
+    else if (fl & FX_GLOWC) P110_GlowC(o);
+    else if (fl & FX_SPARK) P135_SparkQuad(o);
+    else if (fl & FX_SMOKEA) P108_SmokeA(o);
+    else if (fl & FX_SMOKEB) P108_SmokeB(o);
   }
   DrvSetMode0042655A(m);
   P52_ResetB = P59_Mode1137324;
 }
 
 /* ---- 00519647 ---- */
+/* Word at offset o of the 0x88-byte replay config block P103_C54EE0. */
 static void cfg_w(int o, int32_t v) { wr32(P103_C54EE0 + o, v); }
 static int32_t rnd(float v) { return (int32_t)(v < 0 ? v - 0.5f : v + 0.5f); }   /* fistp, округление к ближайшему */
+/* P139_SaveCfg — Game.exe 00519647.  Captures the game setup a replay needs into the 0x88-byte config block (menu
+   options, HUD / effect switches, the goal of the current mission when one is set, level / mission ids, player car
+   model, recording frame count, mode 0 = level, 1 = mission, 2 = chase) and writes ReplayData\User\$TEMP$.CFG.
+   TODO(RE): unsure about several individual fields. */
 void P139_SaveCfg(void) {
   memset(P103_C54EE0, 0, 0x88);
   cfg_w(0x6c, P12_00bdfa40); cfg_w(0x70, MenuOptBDFA44); cfg_w(0x74, MenuOptBDFA48); cfg_w(0x78, MenuOptBDFA4C);
@@ -465,6 +510,10 @@ void P139_SaveCfg(void) {
 }
 
 /* ---- 00519408 ---- */
+/* P139_ReplayEnd — Game.exe 00519408.  Ends replay recording: stores the frame count; if recording was on, saves the
+   config, the end-of-input marker and (unless playing back) the pad log — $TEMP$.PADS, or Chase\<name>.PADS plus the
+   pursuer pings Chase\<name>.PINGS (0x1a4 bytes each) in chase-recording mode.  Frees the recording buffers and
+   clears the chase / pad modes. */
 void P139_ReplayEnd(void) {
   { int32_t v = P62_Frame; memcpy(P56_PathPings + 0x40, &v, 4); }   /* 00c4d660 ← 00d118c0 */
   if (P74_B5A894 != 0) {
@@ -507,17 +556,23 @@ void P139_ReplayEnd(void) {
 }
 
 /* ---- 0040fa60 / 00410c30 ---- */
+/* One key-binding menu: item handler table, wait arguments, item list, state / previous / blink counters, variant B. */
 typedef struct { uint32_t tbl, wa, wb, items; int32_t *st, *pr, *blink; int b; } keymenu_t;
+/* Calls the handler of menu item i (table entries of 0x10 bytes, handler address first). */
 static void call_item(uint32_t tbl, int32_t i, int32_t arg) {
   const uint8_t *e = (const uint8_t *)re_ptr(tbl + (uint32_t)i * 0x10u);
   if (e == NULL) return;
   void (*fn)(int32_t) = (void (*)(int32_t))re_fn((uint32_t)rd32(e));
   if (fn) fn(arg);
 }
+/* Shared loop of the two key menus (frontend, or in-motel when G6_00B87EEC): navigate items; leaving requires the
+   bindings to be unique (else a warning sound); while an item waits for a key its label blinks every 10 frames,
+   Esc cancels, a pressed key (A: >= 0, B: > 0) is stored into the item's binding byte.  B also copies its five
+   bindings into the active key config on exit.  Returns the menu step result (0 after a "back"). */
 static int32_t keymenu(const keymenu_t *m) {
-  int32_t *edit = m->b ? &WI005FE78C : &Q00B87F00;
-  uint32_t *dst = m->b ? &WU005FE788 : &Q005FE764;
-  int32_t *idx = m->b ? &WI005FE790 : &Q005FE768;
+  int32_t *edit = m->b ? &WI005FE78C : &Q00B87F00;    /* waiting for a key */
+  uint32_t *dst = m->b ? &WU005FE788 : &Q005FE764;    /* address of the binding byte being edited */
+  int32_t *idx = m->b ? &WI005FE790 : &Q005FE768;     /* item whose label blinks */
   int32_t lc = 0;
   P97_MenuCall0(m->tbl, 0);
   if (G6_00B87EEC == 0) P45_Wait(m->wa, m->wb);
@@ -566,12 +621,15 @@ static int32_t keymenu(const keymenu_t *m) {
     else { if (m->b) MenuHiliteRed00411A31(); else MenuHiliteRed004106E1(); P66_ScreenFrame(m->items, 0); }
   }
 }
+/* P139_KeyMenuA — Game.exe 0040fa60.  Key-binding menu A (table 0054c1e0): joystick bindings (opened by
+   P12_Fn00407563 when the input mode Q0057B72C != 0). */
 int32_t P139_KeyMenuA(void) {
   const keymenu_t m = { 0x0054c1e0u, 0x0054c018u, 0x0054c030u, 0x0054c030u, &P139_KeyStA, &P139_KeyPrA, &P139_BlinkA, 0 };
   P97_KeyMenuAInit();
   P139_KeyStA = 0; MenuI005FE770 = 1; MenuI005FE774 = 2;
   return keymenu(&m);
 }
+/* P139_KeyMenuB — Game.exe 00410c30.  Key-binding menu B (table 0054c530): keyboard bindings (input mode 0). */
 int32_t P139_KeyMenuB(void) {
   const keymenu_t m = { 0x0054c530u, 0x0054c338u, 0x0054c350u, 0x0054c350u, &P139_KeyStB, &P139_KeyPrB, &P139_BlinkB, 1 };
   P97_KeyMenuBInit();
@@ -581,6 +639,9 @@ int32_t P139_KeyMenuB(void) {
 
 /* ---- 0041b1c0 ---- */
 static int g_reglad, g_regstr;
+/* P139_LadderLoad — Game.exe 0041b1c0.  Compiles DATA\MLADDER.DML (the mission ladder / campaign order) line by line
+   into the ladder buffer and its string pool, appends the terminator record {8, 0, 0, 0} and points the intro /
+   campaign cursor at the start.  1 on success, 0 when the file is missing or a line fails. */
 int32_t P139_LadderLoad(void) {
   char line[0x80];
   memset(P139_Ladder, 0, sizeof(p139_b1000_t)); memset(P139_LadStr, 0, sizeof(p139_b400_t));

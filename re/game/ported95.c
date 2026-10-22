@@ -1,3 +1,6 @@
+/* Assorted routines: depth-sorted object lists, engine/ambient sound channels, race reset, input
+   sequence (cheat) matcher, map block lookup, debris init, car-pool icon, map rotation, view
+   from quaternion, nearby traffic, default options, Glide lines and a script turn opcode. */
 /* Пачка простых/листовых функций — восстановлено из Game.exe (004d2500, 004d29e1, 00405450, 004e5d64, 004ba57a, 004ba64d, 004ba457,
    004c5f69, 004d6ef2, 004c08bb, 004ab808, 0040b0fe, 00507de2, 0049f418, 0048f6c1, 004d65fa, 00405abe, 00509d27, 004d0f28, 00507310). */
 #include "ported95.h"
@@ -488,17 +491,25 @@ p95_i6_t P95_CrossTab = { -2, -3, 2, 3, 2, -3 };                     /* 00573f50
 #endif
 
 #include "memrw.h"
-static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
+#include "trafficrec.h"
+/* wrf — Store a float at p (bit copy). */
+/* wrfu — Store a float into a uint32 slot. */
 static void wrfu(uint32_t *p, float v) { memcpy(p, &v, 4); }
+/* ftol — __ftol: truncate toward zero. */
 static int32_t ftol(double v) { return (int32_t)v; }   /* __ftol: усечение к нулю */
+/* Abs — |v| (int32). */
 static int32_t Abs(int32_t v) { return v < 0 ? -v : v; }
 
 /* ---- ссылки списка глубины ---- */
 /* v1.42: частный случай общего реестра re_ptr/re_addr (game/reptr.c; массивы P95_ObjA/B/C там в статических областях) */
+/* P95_ObjPtr — Native pointer of a depth-list reference (Game.exe address via re_ptr). */
 uint8_t *P95_ObjPtr(uint32_t ref) { return (uint8_t *)re_ptr(ref); }
+/* P95_ObjRef — Depth-list reference (Game.exe address) of a record. */
 uint32_t P95_ObjRef(const uint8_t *rec) { return re_addr(rec); }
 
 /* вставка записи в список 010ffb40 по убыванию z (+zoff): после первого, у которого следующего нет или z не больше */
+/* Insert — Insert record p into the depth list 010ffb40 (links +0x70 prev, +0x74 next), sorted by
+   decreasing float z at p + zoff. */
 static void Insert(uint8_t *p, int zoff) {
   wr32(p + 0x74, 0); wr32(p + 0x70, 0);
   if (G010FFB40 == 0) { G010FFB40 = (int32_t)P95_ObjRef(p); return; }
@@ -510,6 +521,8 @@ static void Insert(uint8_t *p, int zoff) {
 }
 
 /* 004d2500: tab — 11 каналов по 8 байт {активен, значение}, +0x58 — пары громкостей, +0xb0 — флаг */
+/* P95_SndInit — Game.exe 004d2500, cdecl.  Reset the 11 engine-sound channels of tab (8 bytes {active, value} each, default values
+   P95_ChanDef, volume pairs at +0x58) and the channel state; tab+0xb0 = 1. */
 void P95_SndInit(uint8_t *tab) {
   P68_D11A48 = 0; D_00d1193c = 0; P95_D1197C = 0; P95_ChanLast = -1; G2_00D11A5C = 0; P95_112D9D4 = 0;
   for (int32_t i = 0; i < 0xb; i++) {
@@ -522,7 +535,8 @@ void P95_SndInit(uint8_t *tab) {
   wr32(tab + 0xb0, 1);
 }
 
-/* 004d29e1 */
+/* P95_SndTrigger — Game.exe 004d29e1, cdecl.  Start channel ch of tab (if idle and sound is on): value from its default, volume scaled by vol
+   (volume pair chosen by the 8000 Hz rate); channels 4 and 3 also raise events 0x8009 / 0x800b. */
 void P95_SndTrigger(uint8_t *tab, int32_t ch, int32_t vol) {
   uint32_t c = (uint8_t)ch;
   if (P62_BusyB == 0 && P95_SndOn != 0 && rd32(tab + c * 8) == 0 && P95_SndReady != 0) {
@@ -536,6 +550,8 @@ void P95_SndTrigger(uint8_t *tab, int32_t ch, int32_t vol) {
 }
 
 /* 00405450: сброс флагов заезда/интерфейса */
+/* P95_ResetRace — Game.exe 00405450, cdecl.  Clear the race/game-mode flags before a level (chase, training, interview, replay modes ...);
+   in normal play (GameMode 0) also the effect flags. */
 void P95_ResetRace(void) {
   P95_BDF9D4 = 0; P95_BDF9D0 = 0; P95_B87E14 = 0; P95_BDFA14 = 0; P95_B87E34 = 0; P95_B87E3C = 0; P52_FogOn = 0;
   G6_00B87EA0 = 0; P95_B87EA4 = 0; P56_B87EA8 = 0; G6_00B87EAC = 0; P58_SB87EB0 = 0; P95_B87EB4 = 0; P95_B87EBC = 0;
@@ -547,7 +563,10 @@ void P95_ResetRace(void) {
 }
 
 /* 004e5d64: есть ли в кольцевом списке s->list (вперёд или назад) подряд больше n совпадений с историей 00d044e0 */
+/* Hist — Entry i of the input history 00d044e0 (newest first). */
 static int32_t Hist(int32_t i) { int32_t v; memcpy(&v, &A_00D044E0[(size_t)i * 4], 4); return v; }
+/* P95_SeqMatch — Game.exe 004e5d64, cdecl.  1 if the newest input history entries match more than s->n consecutive entries of the circular
+   list s->list, read forwards or backwards (used for cheat sequences, inferred). */
 int32_t P95_SeqMatch(const p95_seq_t *s) {
   const int32_t n = s->n;
   if (s->list == NULL) return 0;
@@ -566,16 +585,20 @@ int32_t P95_SeqMatch(const p95_seq_t *s) {
 }
 
 /* 004ba57a / 004ba64d: записи ближе P95_Near по z (+8) пропускаются, остальные — в список глубины */
+/* P95_SortObjC — Game.exe 004ba57a, cdecl.  Insert the objects of list C with z >= P95_Near into the depth list. */
 void P95_SortObjC(void) {
   uint8_t *p = P95_ObjC;
   for (int32_t n = G010FFA20; n != 0; n--, p += 0x78) if (P95_Near <= rdf(p + 8)) Insert(p, 8);
 }
+/* P95_SortObjB — Game.exe 004ba64d, cdecl.  Insert the objects of list B with z >= P95_Near into the depth list. */
 void P95_SortObjB(void) {
   uint8_t *p = P95_ObjB;
   for (int32_t n = G010FFD04; n != 0; n--, p += 0x78) if (P95_Near <= rdf(p + 8)) Insert(p, 8);
 }
 
 /* 004ba457: 200 записей; у отмеченных (флаг 2 в +0x68) — положение в системе камеры (+0x10), затем в список по z (+0x18) */
+/* P95_SortObjA — Game.exe 004ba457, cdecl.  For the 200 objects of list A with flag 2: transform their position into camera space (+0x10)
+   and insert those with z >= P95_Near into the depth list. */
 void P95_SortObjA(void) {
   uint8_t *p = P95_ObjA;
   P44_MatPtr = (float *)P44_ViewMatT;
@@ -589,6 +612,8 @@ void P95_SortObjA(void) {
 }
 
 /* 004c5f69: если в точке есть дорога — номер блока карты + 1, когда блок загружен в один из 4 слотов, иначе 0 */
+/* P95_SlotAt — Game.exe 004c5f69, cdecl.  If there is a road at world (x, z), return the map block index + 1 when that block is loaded in
+   one of the four slots, else 0. */
 int32_t P95_SlotAt(int32_t x, int32_t z) {
   if (P72_RoadLookup(x, z) == 0) return 0;
   if ((int16_t)P72_Id == 0) return 0;
@@ -600,6 +625,8 @@ int32_t P95_SlotAt(int32_t x, int32_t z) {
 }
 
 /* 004d6ef2: фоновые звуки — случайная пауза, затем дорожка из таблицы 00b20310 (по кадру), не чаще паузы */
+/* P95_AmbientTick — Game.exe 004d6ef2, cdecl.  Ambient sounds: after a random pause (200.. / 750.. ticks) play a track from table 00b20310
+   chosen by frame, not more often than its own pause.  Needs 00d11a5c >= 0x2aa. */
 void P95_AmbientTick(void) {
   if (G6_00B20364 == 0) return;
   if ((int32_t)G2_00D11A5C < 0x2aa || P95_AmbN < 1 || G6_00B20368 < 1) { G8_00B2034C = 0; return; }
@@ -622,7 +649,7 @@ void P95_AmbientTick(void) {
   }
 }
 
-/* 004c08bb */
+/* P95_InitDebris — Game.exe 004c08bb, cdecl.  Random seeds for debris and the four corner positions (+-205, 20, 290 / -275). */
 void P95_InitDebris(void) {
   P95_Deb0 = (int32_t)(Rand_004D9078() & 0x7ff);
   P95_Deb1 = 0;
@@ -634,6 +661,7 @@ void P95_InitDebris(void) {
 }
 
 /* 004ab808: значок CARPOOL6 → страница и прямоугольник (4 индекса, 8 uv) */
+/* P95_PoolIconInit — Game.exe 004ab808, cdecl.  Look up icon CARPOOL6 and build its quad (page, 4 indices, 8 UV floats). */
 void P95_PoolIconInit(void) {
   const uint8_t *r = P93_FindIcon("CARPOOL6");
   P95_PoolIcon = re_addr(r);
@@ -651,9 +679,12 @@ void P95_PoolIconInit(void) {
 }
 
 /* 0040b0fe: ширина строки текущим шрифтом меню (00b5d77c1) — то же, что 0040b1cc */
+/* P95_TextWidthCur — Game.exe 0040b0fe, cdecl.  Width of string s in the current menu font. */
 float P95_TextWidthCur(const uint8_t *s) { return P58_TextWidth(s, (int32_t)MenuByte5D77C1); }
 
 /* 00507de2: поворот точек (x, —, z, —) на угол ang (при 00bdfa54 — без поворота), масштаб 0125f3e0 и сдвиг ofs */
+/* P95_MapRotate — Game.exe 00507de2, cdecl.  Rotate n points (x, -, z, -) by angle ang (no rotation with "north up" 00bdfa54), scale by the
+   view scale and offset by ofs; results truncated to int. */
 void P95_MapRotate(const int32_t *src, int32_t *dst, int32_t n, const float *ofs, int32_t ang) {
   float sn = P43_Sin[ang], cs = P43_Sin[ang + 0x400];
   if (MenuOptBDFA54 != 0) { sn = P43_Sin[0]; cs = P43_Sin[0x400]; }
@@ -667,6 +698,7 @@ void P95_MapRotate(const int32_t *src, int32_t *dst, int32_t n, const float *ofs
 }
 
 /* 0049f418: матрица вида из кватерниона, курс P59_AngB = atan2 по третьей строке, транспонат */
+/* P95_CamFromQuat — Game.exe 0049f418, cdecl.  View matrix from quaternion q, camera heading P59_AngB = atan2 of the third row, and transpose. */
 void P95_CamFromQuat(const float *q) {
   P43_QuatToMat(q, P44_ViewMat);
   int32_t a = ftol((double)P44_ViewMat[8] * 100000.0), b = ftol((double)-P44_ViewMat[6] * 100000.0);
@@ -675,7 +707,10 @@ void P95_CamFromQuat(const float *q) {
 }
 
 /* 0048f6c1: сколько активных записей трафика в квадрате r вокруг точки; ближайшее манхэттенское расстояние — в 011443c8 */
+/* RoundMul — round-to-nearest-even(v * P63_Scale) as x87 fistp. */
 static int32_t RoundMul(int32_t v) { return (int32_t)lrintl((long double)(float)v * (long double)P63_Scale); }
+/* P95_CountNear — Game.exe 0048f6c1, cdecl.  Number of active traffic cars within r scaled cells of world (x, z); the nearest Manhattan
+   distance goes to P63_Near (starting at 0x400). */
 int32_t P95_CountNear(int32_t x, int32_t z, int32_t r) {
   const uint8_t *p = (const uint8_t *)TrafficRecs;
   int32_t cnt = 0;
@@ -683,15 +718,17 @@ int32_t P95_CountNear(int32_t x, int32_t z, int32_t r) {
   int32_t px = P11_00ba52d0;
   P11_00ba52d0 = RoundMul(z - 0x2ee);
   P63_Near = 0x400;
-  for (int32_t i = 0; i < P51_TrafficN && i < 0x40; i++, p += 0x54) {
-    if (p[1] == 0 || (p[1] == 1 && p[2] == 0)) continue;
-    int32_t dx = Abs(rd32(p + 0x48) - px), dz = Abs(rd32(p + 0x4c) - P11_00ba52d0);
+  for (int32_t i = 0; i < P51_TrafficN && i < 0x40; i++, p += TREC_SIZE) {
+    if (p[TREC_STATE] == 0 || (p[TREC_STATE] == 1 && p[TREC_SUBSTATE] == 0)) continue;
+    int32_t dx = Abs(rd32(p + TREC_CELL_X) - px), dz = Abs(rd32(p + TREC_CELL_Z) - P11_00ba52d0);
     if (dx < r && dz < r) { if (dx + dz < P63_Near) P63_Near = dx + dz; cnt++; }
   }
   return cnt;
 }
 
 /* 004d65fa: две ближайшие к камере записи трафика типа 4 (не в состоянии 2) — номера+1 в 0056038c/00560390 */
+/* P95_NearestTwo — Game.exe 004d65fa, cdecl.  The two cop cars (state TRF_COP, byte 0xc != 2) nearest the camera (Manhattan, map cells);
+   their record index + 1 in P95_Near1 / P95_Near2 (-1 if none). */
 void P95_NearestTwo(void) {
   const uint8_t *p = (const uint8_t *)TrafficRecs;
   int32_t best = 10000, second = 10000;
@@ -699,15 +736,17 @@ void P95_NearestTwo(void) {
   P11_00ba52d0 = (int32_t)lrintf(P44_CamX);
   int32_t cx = P11_00ba52d0 / 0x5dc;
   P11_00ba52d0 = (int32_t)lrintf(P44_CamZ);
-  for (int32_t i = 0; i < 0x40; i++, p += 0x54) {
-    if (p[1] != 4 || p[0xc] == 2) continue;
-    int32_t d = Abs(rd32(p + 0x48) - cx) + Abs(rd32(p + 0x4c) - P11_00ba52d0 / 0x5dc);
+  for (int32_t i = 0; i < 0x40; i++, p += TREC_SIZE) {
+    if (p[TREC_STATE] != 4 /* TRF_COP */ || p[0xc] == 2) continue;
+    int32_t d = Abs(rd32(p + TREC_CELL_X) - cx) + Abs(rd32(p + TREC_CELL_Z) - P11_00ba52d0 / 0x5dc);
     if (d < best) { P95_Near2 = P95_Near1; P95_Near1 = i + 1; second = best; best = d; }
     else if (d < second) { P95_Near2 = i + 1; second = d; }
   }
 }
 
 /* 00405abe: настройки по умолчанию (режим 640×480, раскладка, громкости 1.0, звук 22050/16 бит) */
+/* P95_DefaultOptions — Game.exe 00405abe, cdecl.  Default settings: 640x480 mode, default key layout, sound and music on, volumes 1.0, 8-bit
+   22050 Hz sound, detail preset 1. */
 void P95_DefaultOptions(void) {
   P95_ModeSel = 2;
   P68_ModeW = (int32_t)P95_ModeTab[P95_ModeSel * 7];
@@ -719,11 +758,13 @@ void P95_DefaultOptions(void) {
   G00575F40 = 1; Q00B87E90 = 1; Q00B87E94 = 1;
   WF00575F14 = 1.0f; WF00575F18 = 1.0f;
   MenuState575EF0 = 2; P19_Scale = 1.0f; Q00B87EF0 = 0; P21_FrameMin = 1; G00575F48 = 1; G00575F24 = 1; WI00B87E2C = 1;
-  P21_FrameFlagB = 1; P21_FrameFlagA = 1; G6_00575F00 = 8; G6_00575F04 = 0x5622; G6_00B87E50 = 0;
+  P21_FrameFlagB = 1; P21_FrameFlagA = 1; G6_00575F00 = 8; G6_00575F04 = 0x5622 /* 22050 Hz */; G6_00B87E50 = 0;
   P13_Fn004064B4(1, 1);
 }
 
 /* 00509d27: линия Glide цветом 0xRRGGBB (оба конца +2 пикселя), состояние и смешивание сбрасываются как в 0042... */
+/* P95_DrawLineRGB — Game.exe 00509d27, cdecl.  Draw a 2D Glide line in colour 0xRRGGBB (both ends +2 pixels), resetting render state and
+   blending as needed.  Native: zero-fills the vertex fields the original left uninitialised. */
 void P95_DrawLineRGB(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t rgb) {
   float a[16], b[16];
   memset(a, 0, sizeof a); memset(b, 0, sizeof b);   /* z, ooz, a в оригинале не заданы (стек) */
@@ -741,6 +782,9 @@ void P95_DrawLineRGB(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t rg
 }
 
 /* 004d0f28: шаг поворота угла (ось из скрипта: 0 — +0x10, 1 — +0x12, 2 — +0x14 контекста) к цели; при достижении — следующая команда */
+/* P95_ScriptTurn — Game.exe 004d0f28, cdecl.  Script opcode: turn angle `axis` (0..2 at context +0x10/+0x12/+0x14) by `step` toward `target`;
+   when within one step, snap, advance the script by 8 bytes and return 1, else 0.
+   Native: rejects an invalid axis. */
 int32_t P95_ScriptTurn(void) {
   const uint8_t *s = P10_ScriptPtr;
   int16_t axis; uint16_t step, target; memcpy(&axis, s + 2, 2); memcpy(&step, s + 4, 2); memcpy(&target, s + 6, 2);
@@ -756,6 +800,7 @@ int32_t P95_ScriptTurn(void) {
 }
 
 /* 00507310: три отрезка ломаной (крестик) вокруг pos (x, —, z) — линии Glide через вершины 00b32988/00b329c8 */
+/* P95_DrawCross — Game.exe 00507310, cdecl.  Draw a 3-segment polyline marker (P95_CrossTab, scaled) around map position pos (x, -, z). */
 void P95_DrawCross(const float *pos) {
   int32_t x = ftol((double)(float)P95_CrossOfs[0] + pos[0]);
   int32_t y = ftol((double)(float)P95_CrossOfs[1] + pos[2]);

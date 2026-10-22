@@ -201,13 +201,10 @@
     V(Call0040C165, 0x0040c165, (void), ()) \
     V(Call0040C20B, 0x0040c20b, (int32_t a0), (a0)) \
     V(Call0040BF50, 0x0040bf50, (void), ()) \
-    V(Call0048B65D, 0x0048b65d, (void), ()) \
-    V(Call0048B568, 0x0048b568, (void), ()) \
     V(Call005237B1, 0x005237b1, (void), ()) \
     V(Call0052436A, 0x0052436a, (void), ()) \
     V(Call0052479E, 0x0052479e, (int32_t a0), (a0)) \
     V(Call004D28A3, 0x004d28a3, (int32_t a0), (a0)) \
-    V(Call004EAFE0, 0x004eafe0, (int32_t a0), (a0)) \
     V(Call00514A47, 0x00514a47, (int32_t a0), (a0)) \
     V(Call005283B5, 0x005283b5, (uint32_t a0, int32_t a1, int32_t a2), (a0, a1, a2)) \
     R(int32_t, Call0052ADB0, 0x0052adb0, (uint32_t a0, uint32_t a1), (a0, a1)) \
@@ -293,7 +290,6 @@
     V(G6Call0050E940, 0x0050e940, (int32_t a0), (a0)) \
     V(G6Call00418119, 0x00418119, (int32_t a0), (a0)) \
     V(G6Call00417CBB, 0x00417cbb, (void), ()) \
-    V(G6Call004A2B70, 0x004a2b70, (void), ()) \
     V(G6Call004BA457, 0x004ba457, (void), ()) \
     V(G6Call004BA57A, 0x004ba57a, (void), ()) \
     V(G6Call004BA64D, 0x004ba64d, (void), ()) \
@@ -356,7 +352,6 @@
     V(P74_Fn41CE90, 0x0041ce90, (void), ()) \
     V(P74_Fn424B70, 0x00424b70, (void), ()) \
     V(P74_Fn4A4D84, 0x004a4d84, (char **pp, int32_t a, int32_t b), (pp, a, b)) \
-    V(P121_Fn4B955C, 0x004b955c, (int32_t *a, int32_t *b, int32_t n, int32_t kind), (a, b, n, kind)) \
 
 #ifdef RE_HOOK_BUILD
 #  define UNPORTED_V(name, addr, params, args) \

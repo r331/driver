@@ -1,3 +1,6 @@
+/* plat_gfx.c (native only) — graphics settings (driver.cfg parser, RE_* environment overrides, presets, clamping)
+   and GL-free texture processing (alpha dilation, coverage-preserving mipmaps).  No Game.exe addresses here.
+   Original note: */
 /* v2.16: настройки графики (driver.cfg, RE_*) и обработка текстур без GL — см. plat_gfx.h */
 #include "plat_gfx.h"
 #include <stdio.h>
@@ -6,9 +9,12 @@
 #include <ctype.h>
 #include <math.h>
 
+/* Bounded string copy (NULL source -> ""); case-insensitive ASCII equality. */
 static void scpy(char *d, const char *s, size_t n) { if (n) snprintf(d, n, "%s", s ? s : ""); }
 static int ieq(const char *a, const char *b) { for (; *a && *b; a++, b++) if (tolower((unsigned char)*a) != tolower((unsigned char)*b)) return 0; return !*a && !*b; }
 
+/* Applies preset name ("enhanced" = default/NULL, "original", "safe" = original without FBO) to c, keeping the
+   window, aspect, config source, music and game-resolution settings.  Returns 0, or -1 for an unknown preset. */
 int re_gfx_preset(re_gfx_cfg *c, const char *name) {
     re_gfx_cfg k; memset(&k, 0, sizeof k);
     k.render_scale = 1.0; k.gamma = 1.0; k.brightness = 1.0; k.vsync = RE_VSYNC_ON; k.fullscreen = -1; k.hud_filter = RE_HUD_SHARP; k.fbo = 1;
@@ -30,8 +36,10 @@ int re_gfx_preset(re_gfx_cfg *c, const char *name) {
     k.game_res = c->game_res;                              /* v2.26: и разрешение кадра игры */
     *c = k; return 0;
 }
+/* Default settings: the enhanced preset, fullscreen and dynamic music "auto" (-1). */
 void re_gfx_defaults(re_gfx_cfg *c) { memset(c, 0, sizeof *c); c->fullscreen = -1; c->music_dynamic = -1; re_gfx_preset(c, "enhanced"); }
 
+/* Value parsers: 0 = ok, -2 = bad value.  pint accepts a trailing "x" (e.g. "4x"). */
 static int pbool(const char *v, int *o) {
     if (ieq(v, "1") || ieq(v, "on") || ieq(v, "yes") || ieq(v, "true")) { *o = 1; return 0; }
     if (ieq(v, "0") || ieq(v, "off") || ieq(v, "no") || ieq(v, "false")) { *o = 0; return 0; }
@@ -40,6 +48,7 @@ static int pbool(const char *v, int *o) {
 static int pint(const char *v, int *o) { char *e; long x = strtol(v, &e, 10); if (e == v) return -2; while (*e == 'x' || *e == 'X' || isspace((unsigned char)*e)) e++; if (*e) return -2; *o = (int)x; return 0; }
 static int pdbl(const char *v, double *o) { char *e; double x = strtod(v, &e); if (e == v || *e) return -2; *o = x; return 0; }
 
+/* Sets one key = value.  Returns 0, -1 for an unknown key, -2 for a bad value.  No clamping here. */
 int re_gfx_set(re_gfx_cfg *c, const char *k, const char *v) {
     int b;
     if (ieq(k, "preset")) return re_gfx_preset(c, v) ? -2 : 0;
@@ -98,12 +107,16 @@ int re_gfx_set(re_gfx_cfg *c, const char *k, const char *v) {
     return -1;
 }
 
+/* Strips surrounding whitespace and one pair of double quotes, in place. */
 static void trim(char *s) {
     char *p = s; while (isspace((unsigned char)*p)) p++;
     memmove(s, p, strlen(p) + 1);
     size_t n = strlen(s); while (n && isspace((unsigned char)s[n - 1])) s[--n] = 0;
     if (n >= 2 && s[0] == '"' && s[n - 1] == '"') { memmove(s, s + 1, n - 2); s[n - 2] = 0; }
 }
+/* Parses driver.cfg text: "key = value" lines, # or ; comments, [section] lines ignored.  Two passes, so
+   "preset" applies first and the other keys override it regardless of order.  Errors are reported through err
+   (Russian messages, line numbers are 1-based) and counted; the result is clamped.  Returns the error count. */
 int re_gfx_parse(re_gfx_cfg *c, const char *text, void (*err)(const char *msg)) {
     int errs = 0;
     if (!text) return 0;
@@ -129,6 +142,7 @@ int re_gfx_parse(re_gfx_cfg *c, const char *text, void (*err)(const char *msg)) 
     re_gfx_clamp(c);
     return errs;
 }
+/* Applies RE_PRESET, then the RE_* overrides listed in map, read through g (getenv); clamps.  Returns errors. */
 int re_gfx_env(re_gfx_cfg *c, const char *(*g)(const char *)) {
     static const char *map[][2] = { { "RE_MSAA", "msaa" }, { "RE_A2C", "a2c" }, { "RE_FXAA", "fxaa" }, { "RE_ANISO", "aniso" },
         { "RE_MIPMAPS", "mipmaps" }, { "RE_DILATE", "dilate" }, { "RE_FILTER", "filter" }, { "RE_HUD_FILTER", "hud_filter" },
@@ -142,6 +156,8 @@ int re_gfx_env(re_gfx_cfg *c, const char *(*g)(const char *)) {
     re_gfx_clamp(c);
     return errs;
 }
+/* Forces every setting into its supported range (msaa 0/2/4/8, aniso 1..16, render_scale 0.5..2, gamma 0.5..2.5,
+   draw_distance 1..4, ...); NaN / non-positive values fall back to the default. */
 void re_gfx_clamp(re_gfx_cfg *c) {
     int m = c->msaa; c->msaa = m >= 8 ? 8 : m >= 4 ? 4 : m >= 2 ? 2 : 0;
     if (c->aniso < 1) c->aniso = 1;
@@ -165,6 +181,7 @@ void re_gfx_clamp(re_gfx_cfg *c) {
     if (c->draw_distance > 4.0) c->draw_distance = 4.0;
     c->a2c = c->a2c != 0; c->fxaa = c->fxaa != 0; c->mipmaps = c->mipmaps != 0; c->dilate = c->dilate != 0;
 }
+/* One-line description of the settings into b (for driver_gfx.log); returns b. */
 const char *re_gfx_describe(const re_gfx_cfg *c, char *b, int n) {
     static const char *fl[] = { "nearest", "linear", "trilinear" }, *hf[] = { "nearest", "linear", "sharp" };
     snprintf(b, (size_t)n, "preset %s: msaa %d a2c %d fxaa %d aniso %d mipmaps %d dilate %d filter %s hud_filter %s render_scale %.2f vsync %s fps_limit %d gamma %.2f brightness %.2f sharpen %.2f draw_distance %.2f fbo %d game_res %s aspect %s fullscreen %d windowed_res %dx%d texpack %s cfg %s",
@@ -175,13 +192,17 @@ const char *re_gfx_describe(const re_gfx_cfg *c, char *b, int n) {
 }
 
 static re_gfx_cfg g_cfg; static int g_cfg_init;
+/* The process-wide settings, initialised to defaults on first use. */
 re_gfx_cfg *re_gfx(void) { if (!g_cfg_init) { re_gfx_defaults(&g_cfg); g_cfg_init = 1; } return &g_cfg; }
 static const char *env_get(const char *n) { return getenv(n); }
+/* Reads up to 64 KiB of a file as a NUL-terminated string (caller frees), or NULL. */
 static char *slurp(const char *path) {
     FILE *f = fopen(path, "rb"); if (!f) return NULL;
     char *b = (char *)malloc(65537); if (!b) { fclose(f); return NULL; }
     size_t n = fread(b, 1, 65536, f); fclose(f); b[n] = 0; return b;
 }
+/* Loads the first of RE_CFG, <exe_dir>/driver.cfg, <user_dir>/driver.cfg that exists, then the RE_* overrides.
+   Returns the total error count. */
 int re_gfx_load(const char *exe_dir, const char *user_dir, void (*err)(const char *msg)) {
     re_gfx_cfg *c = re_gfx(); char path[512]; char *text = NULL; int errs = 0;
     const char *e = getenv("RE_CFG");
@@ -194,7 +215,11 @@ int re_gfx_load(const char *exe_dir, const char *user_dir, void (*err)(const cha
 }
 
 /* ===== текстуры ===== */
+/* ===== textures (pixels are 0xAABBGGRR) ===== */
 #define CA(p) ((p) >> 24)
+/* Fills the colour of fully transparent pixels from their opaque neighbours (8-neighbour average per pass, up to
+   max_pass passes), the rest with the average opaque colour, so filtering / mipmapping does not bleed black.
+   Alpha is unchanged.  Returns the number of pixels filled. */
 int re_gfx_dilate(uint32_t *px, int w, int h, int max_pass) {
     if (!px || w <= 0 || h <= 0) return 0;
     size_t n = (size_t)w * h; int filled = 0;
@@ -230,15 +255,20 @@ int re_gfx_dilate(uint32_t *px, int w, int h, int max_pass) {
     }
     free(known); free(nk); free(out); return filled;
 }
+/* Fraction of pixels with alpha >= ref. */
 double re_gfx_coverage(const uint32_t *px, int w, int h, int ref) {
     size_t n = (size_t)w * h, k = 0; if (!n) return 0;
     for (size_t i = 0; i < n; i++) k += (int)CA(px[i]) >= ref;
     return (double)k / n;
 }
+/* 1 if any pixel is not fully opaque. */
 int re_gfx_has_partial_alpha(const uint32_t *px, int w, int h) {
     size_t n = (size_t)w * h; for (size_t i = 0; i < n; i++) if (CA(px[i]) != 255) return 1;
     return 0;
 }
+/* Next mip level (2x2 box, edge pixels clamped) with alpha-weighted colour.  With cov >= 0 the alpha is rescaled
+   so that the share of pixels with alpha >= ref stays close to cov (binary search of the multiplier, 16 steps;
+   ties pick the larger one) — keeps alpha-tested foliage / fences from thinning out at a distance. */
 void re_gfx_mip_next(const uint32_t *s, int w, int h, uint32_t *d, double cov, int ref) {
     int nw = w > 1 ? w / 2 : 1, nh = h > 1 ? h / 2 : 1;
     unsigned char *al = (unsigned char *)malloc((size_t)nw * nh);
@@ -269,6 +299,7 @@ void re_gfx_mip_next(const uint32_t *s, int w, int h, uint32_t *d, double cov, i
     }
     free(al);
 }
+/* Plain 2x2 box-filtered mip level of all four channels, rounded. */
 void re_gfx_mip_box(const uint32_t *s, int w, int h, uint32_t *d) {
     int nw = w > 1 ? w / 2 : 1, nh = h > 1 ? h / 2 : 1;
     for (int y = 0; y < nh; y++) for (int x = 0; x < nw; x++) {

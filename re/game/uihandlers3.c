@@ -1,6 +1,10 @@
+/* uihandlers3.c — a batch of tiny Game.exe functions: menu toggles and slot setters, Glide device
+   wrappers, and one-line getters/setters (English overview).  Names carry the Game.exe address or the
+   global they touch; do not rename them (hook lists / fn_table.c refer to them). */
 #include "uihandlers3.h"
 #include "ported149.h"
 #include "ported118.h"
+#include "carfields.h"
 #ifndef RE_HOOK_BUILD
 #include "ported92.h"
 #include "ported93.h"
@@ -32,7 +36,9 @@ int32_t G00575F40;
 #pragma pop_macro("G00575F40") /*gvi*/
 #pragma pop_macro("G00575F40")
 #endif
+#ifdef RE_HOOK_BUILD   /* v2.35: native — a view of P58_S5FE9B8 (uihandlers3.h) */
 GAME_VAR_DEF(uint8_t *, UiPtr005FE9B8, 0x005fe9b8)
+#endif
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("G005FEA54")
 #undef G005FEA54
@@ -220,7 +226,9 @@ int32_t G01145934;
 #pragma pop_macro("G01145934") /*gvi*/
 #pragma pop_macro("G01145934")
 #endif
+#ifdef RE_HOOK_BUILD   /* v2.35: native — P59_CarsTab (uihandlers3.h) */
 GAME_VAR_DEF(uint8_t *, G0113A6C4, 0x0113a6c4)
+#endif
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("G0112B284")
 #undef G0112B284
@@ -338,6 +346,10 @@ int32_t G00D044C8;
 #pragma pop_macro("G00D044C8") /*gvi*/
 #pragma pop_macro("G00D044C8")
 #endif
+/* MenuToggle* — Game.exe 0040e970, 0040ea57, 00419c50, 00419d25, 0041539a.  Flip option flag 00575f24 / 00575f48
+   / 00575f40 and redraw the screen they belong to (0040ea70, 00419b35, 00414d1f).  Return 0.
+   RE_PROBE menu walk: 00575f24 = "Auto Handbrake", 00575f48 = "FMV" (Gameplay menu 0054ad60, page 0040ea70),
+   00575f40 = sound "Effects" On/Off (Sound menu 0054dd10, page 00414d1f). */
 int32_t MenuToggle575F24Call40EA70(void) {
     G00575F24 ^= 1; Call0040EA70(); return 0;
 }
@@ -353,6 +365,8 @@ int32_t MenuToggle575F48Call419B35(void) {
 int32_t MenuToggle575F40Call414D1F(void) {
     G00575F40 ^= 1; Call00414D1F(); return 0;
 }
+/* UiSetSlot* — Game.exe 004142e8, 004143fa, 0041450c, 00414621.  On normal entry (arg 0) set the state byte of
+   item 1..4 (+0x24, +0x44, +0x64, +0x84 of the menu table 005fe9b8) to 2. */
 void UiSetSlot004142E8(int32_t a0) {
     if (a0 == 0) UiPtr005FE9B8[0x24] = 2;
 }
@@ -365,18 +379,23 @@ void UiSetSlot0041450C(int32_t a0) {
 void UiSetSlot00414621(int32_t a0) {
     if (a0 == 0) UiPtr005FE9B8[0x84] = 2;
 }
+/* Ui00418119 — Game.exe 00418119.  Sets 005fea54 = 1 and starts camera route a0 (P118_CamRoute). */
 void Ui00418119(int32_t a0) {
     G005FEA54 = 1; P118_CamRoute((uint32_t)a0);
 }
+/* Ui004184DE — Game.exe 004184de.  005fea5c = a0, 005fea60 = 1. */
 void Ui004184DE(int32_t a0) {
     G005FEA5C = a0; G005FEA60 = 1;
 }
+/* Ui004197F8 — Game.exe 004197f8.  Saves the driver mode (0042655a(0)) in 0054e540 and calls 01270e80(0) if set. */
 void Ui004197F8(void) {
     G0054E540 = Call0042655A(0); if (FnPtr01270E80) FnPtr01270E80(0);   /* v2.10: NULL в native */
 }
+/* Ui0041A1EC — Game.exe 0041a1ec.  005feb00 = a0. */
 void Ui0041A1EC(int32_t a0) {
     G005FEB00 = a0;
 }
+/* UiSetMode005FEEEC_0..7 — Game.exe 0041ae2f ... 0041aebb.  Select entry 0..7 (005feeec) of a list menu. */
 void UiSetMode005FEEEC_0(void) {
     G005FEEEC = 0; NoopFn0041b054();
 }
@@ -401,52 +420,71 @@ void UiSetMode005FEEEC_6(void) {
 void UiSetMode005FEEEC_7(void) {
     G005FEEEC = 7; NoopFn0041b054();
 }
+/* Ui0041B059 — Game.exe 0041b059.  Calls 0041af29 with 2 * selected entry + 1. */
 void Ui0041B059(void) {
     UiCall0041AF29(G005FEEEC * 2 + 1);
 }
+/* FlagSet0127104C — Game.exe 0041b790.  Sets bit `bit` (mod 32) of 0127104c. */
 void FlagSet0127104C(uint8_t bit) {
     G0127104C |= 1u << (bit & 31);
 }
+/* SetScale54EF38 — Game.exe 0041d8cd.  0054ef38 = v, 0054ef3c = v * constant 0054603c. */
 void SetScale54EF38(float v) {
     G0054EF38 = v; G0054EF3C = v * G0054603C;
 }
+/* Ui0041ED53 — Game.exe 0041ed53.  Forwards to GameCall00424661 (grSstQueryHardware). */
 void Ui0041ED53(int32_t a0) {
     GameCall00424661(a0);
 }
+/* GetVarA421A8 / GetVarA421A4 / GetVarB1C0D8 — Game.exe 0041ed68 / 0041ed72 / 004245e2.  Return the global.
+   (00b1c0d8 is the renderer kind: 0 = Glide, 1 = Direct3D emulation.) */
 int32_t GetVarA421A8(void) {
     return G00A421A8;
 }
 int32_t GetVarA421A4(void) {
     return G00A421A4;
 }
+/* Ret1FFFF8IfZero — Game.exe 0041f734.  0x1ffff8 if a0 == 0, else 0.  TODO(RE): unsure (looks like a Glide
+   texture-memory query stub). */
 int32_t Ret1FFFF8IfZero(int32_t a0) {
     return a0 == 0 ? 0x1ffff8 : 0;
 }
+/* RetZero0041FA36 — Game.exe 0041fa36.  Returns 0. */
 uint16_t RetZero0041FA36(void) {
     return 0;
 }
 int32_t GetVarB1C0D8(void) {
     return G00B1C0D8;
 }
+/* Dev00424633 / Dev00424647 / Dev004246BD — Game.exe 00424633 / 00424647 / 004246bd.  When Glide is in use
+   (00b1c0d4) call the Glide entry points stored at 01270e54 / 01271020 + 01270eb0 / 01271020.
+   TODO(RE): which Glide functions these pointers hold. */
 void Dev00424633(void) {
     if (G00B1C0D4 != 0) FnPtr01270E54();
 }
 void Dev00424647(void) {
     if (G00B1C0D4 != 0) { FnPtr01271020(); FnPtr01270EB0(); }
 }
+/* GameCall00424661 — Game.exe 00424661.  grSstQueryHardware(a0) through 01270e50 when Glide is in use, else 0.
+   Native: the GrHwConfiguration pointer is passed as intptr_t (64-bit). */
 int32_t GameCall00424661(intptr_t a0) {
     /* v2.00: grSstQueryHardware(GrHwConfiguration *) — указатель не режется до int32 в native (64 бит) */
-    return G00B1C0D4 == 0 ? 0 : ((int32_t (*)(intptr_t))FnPtr01270E50)(a0);
+    return G00B1C0D4 == 0 ? 0 : ((int32_t (*)(intptr_t))(void (*)(void))FnPtr01270E50)(a0);
 }
 void Dev004246BD(void) {
     if (G00B1C0D4 != 0) FnPtr01271020();
 }
+/* Dev0042480D — Game.exe 0042480d.  01270eac(1, a0) when Glide is in use, else 0 (called after frame-buffer
+   writes with a0 = 1; TODO(RE): likely grLfbUnlock(GR_LFB_WRITE_ONLY, buffer)). */
 int32_t Dev0042480D(int32_t a0) {
     return G00B1C0D4 == 0 ? 0 : FnPtr01270EAC(1, a0);
 }
+/* Dev00424858 — Game.exe 00424858.  On the Direct3D path frees the emulated textures (P149_EmulFreeAll). */
 void Dev00424858(void) {
     if (GetVarB1C0D8() == 1) P149_EmulFreeAll();
 }
+/* Ui00426CAF — Game.exe 00426caf.  Looks up the "SEA" icon used by the rotating-texture models
+   (P92_DrawSpin).  Native: stored in P92_SpinTex (a native pointer does not fit G012085F4). */
 void Ui00426CAF(void) {
 #ifdef RE_HOOK_BUILD
     G012085F4 = LoadIconByName((const char *)&G00550808);
@@ -457,12 +495,25 @@ void Ui00426CAF(void) {
     G012085F4 = 0;
 #endif
 }
+/* Ui00426CC6 — Game.exe 00426cc6.  Calls 004d8f30(00b1c280) and clears 00b1c280. */
+#ifndef RE_HOOK_BUILD
+extern uint8_t *P56_EulerTab; void P98_DebugFree(void *p);
+#endif
 void Ui00426CC6(void) {
+#ifdef RE_HOOK_BUILD
     UiCall004D8F30(UiVar00B1C280); UiVar00B1C280 = 0;
+#else
+    /* native: 00b1c280 — таблица P56_EulerTab (DebugMalloc, ported56.c), родной указатель; UiVar00B1C280 — её 32-битный
+       адрес (v2.35: представление того же объекта, uihandlers2.h) — освобождается сама таблица, как в P137_LevelEnd */
+    if (P56_EulerTab != NULL) { P98_DebugFree(P56_EulerTab); P56_EulerTab = NULL; }
+#endif
 }
+/* Reset0042D2B0 — Game.exe 0042d2b0.  01159d74 = 0 and rewinds the pointer 0115a13c to 0115a140. */
 void Reset0042D2B0(void) {
     G01159D74 = 0; G0115A13C = G0115A140;
 }
+/* Set551134 / Ret1 / Dec145934 / Inc0B1FFBC / Clear110E180 / Clear2C3B8 / SetD11804 / CopyBDF984 / GetB31E18 /
+   Set0D044C8 / Set560388 — one-line setters/getters (Game.exe addresses in the hook lists); see each body. */
 void Set551134(void) {
     G00551134 = 1;
 }
@@ -472,9 +523,11 @@ int32_t Ret1(void) {
 void Dec145934(void) {
     if (G01145934 != 0) G01145934--;
 }
+/* Get138Entry148 — Game.exe 004a1d31.  Total damage (CAR_DAMAGE_SUM) of car i of the car table at 0113a6c4. */
 int32_t Get138Entry148(int32_t i) {
-    return *(int32_t *)(G0113A6C4 + 0x138 + i * 0x148);
+    return *(int32_t *)(G0113A6C4 + CAR_DAMAGE_SUM + i * 0x148);   /* car table 0113a6c4, 0x148 bytes per car */
 }
+/* IsVar112B284Lt8 — Game.exe 004a66d8.  1 if 0112b284 < 8. */
 int32_t IsVar112B284Lt8(void) {
     return G0112B284 < 8;
 }
@@ -484,18 +537,23 @@ void Inc0B1FFBC(void) {
 void Clear110E180(void) {
     G0110E180 = 0;
 }
+/* Call004BF485 — Game.exe 004bf485.  Debug print 004d90f4(a0) unless 00b87e7c suppresses debug output. */
 void Call004BF485(int32_t a0) {
     if (G00B87E7C == 0) Call004D90F4(a0);
 }
+/* CopyWords8000 — Game.exe 004c16c1.  Copies 0x8000 words (128 KB, one 16-bit 256x256 texture page) src -> dst. */
 void CopyWords8000(uint32_t *src, uint32_t *dst) {
     for (int i = 0; i < 0x8000; i++) dst[i] = src[i];
 }
+/* Call004D2D85 — Game.exe 004d2d85.  004d611b(a0) when 00575f08 is set. */
 void Call004D2D85(int32_t a0) {
     if (G00575F08 != 0) Call004D611B(a0);
 }
 void Set560388(int32_t a0) {
     G00560388 = a0 + 0xf;
 }
+/* Round1024 — Game.exe 004d9013.  Heading (4096 = 360 deg) rounded to the nearest quarter turn: 0..3
+   (N / E / S / W in P47_DirText). */
 int32_t Round1024(int32_t a0) {
     return (int32_t)((uint32_t)(a0 + 0x200) & 0xfff) >> 10;
 }
@@ -511,15 +569,20 @@ void CopyBDF984(void) {
 int32_t GetB31E18(void) {
     return G00B31E18;
 }
+/* SetB31E00 — Game.exe 004e3b20.  Sets the force-feedback engine level 00b31e00 and marks it changed
+   (00b31e0c, sent by P35_UpdateForce).  Returns 1. */
 int32_t SetB31E00(int32_t a0) {
     G00B31E00 = a0; G00B31E0C = 1; return 1;
 }
+/* Get138 — Game.exe 004e5f4d.  Total damage of car record p (CAR_DAMAGE_SUM). */
 int32_t Get138(uint8_t *p) {
-    return *(int32_t *)(p + 0x138);
+    return *(int32_t *)(p + CAR_DAMAGE_SUM);
 }
 void Set0D044C8(void) {
     G00D044C8 = 0xb4;
 }
+/* Call004A2C08 / Call004BF476 / Call004C020E — Game.exe 004a2c08 / 004bf476 / 004c020e.  Forwarders to 004a2c98 /
+   004d9478 / 004c1b46. */
 void Call004A2C08(void) {
     Call004A2C98();
 }

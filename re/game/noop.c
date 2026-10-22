@@ -1,3 +1,7 @@
+/* noop.c — empty Game.exe functions (English overview).
+   Each NoopFnXXXXXXXX stands for a function at Game.exe address XXXXXXXX whose body is a bare "ret"
+   (compiled-out debug hooks / stubs in the release build).  They exist so callers and the hook/native
+   function tables can reference them; they intentionally do nothing. */
 #include "noop.h"
 void NoopFn0041b054(void) {}
 void NoopFn0041b3a6(void) {}
@@ -58,7 +62,6 @@ void NoopFn0041fab4(void) {}
 void NoopFn0042243f(void) {}
 void NoopFn0048a4e1(void) {}
 void NoopFn0048bd3b(void) {}
-void NoopFn0048cc5f(void) {}
 void NoopFn00493f95(void) {}
 void NoopFn004946d0(void) {}
 void NoopFn004946d5(void) {}

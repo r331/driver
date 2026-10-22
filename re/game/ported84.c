@@ -1,3 +1,12 @@
+/* ported84.c — the model renderer (English overview).  A model = header (+2 flags, +0x16 record count,
+   +0x18 normal count, +0x20 vertices, +0x24 planes, +0x28 normals, +0x2c record list) + records (polygons) of
+   56 types; each record is drawn by a handler from the active table (P84_Tab0/1/2 = draw modes 0 = no
+   clipping, 1 = near-plane clipping, 2 = other).  Records with flag 8 are back-face culled against their plane;
+   others reuse the cached visibility of their plane (P84_Vis).  Lit models (flag 1) get per-normal and
+   per-plane light = ambient + max(0, n.L), clamped to 1.  Entry points: P84_DrawModel (00428b69, any matrix),
+   P84_DrawModelIdx (00429143, cached orientation matrix), P84_DrawModelC (0042b7cb, constant light),
+   P84_DrawCar (0042a9f1, car body with the environment shine).  Flag 0x4000 = billboard facing the camera
+   heading.  Native: handler tables are built from Game.exe's own .data tables (init_game_handlers). */
 #include <stdio.h>
 #include "ported84.h"
 #include "ported8.h"
@@ -142,6 +151,9 @@ void P84_InitConsts(void) {
    адрес → перенос (re_fn); неперенесённый обработчик — P85_SkipRecord (запись пропускается, как было бы без рисования).
    До v2.05 в native-игре таблицы были нулевыми — P84 не рисовал ни одной записи (чёрный кадр уровня). */
 int P84_HandMissing, P84_HandSubst, P84_HandNoClip;
+/* Native: fills P84_Handlers[6][56] from the handler addresses of Game.exe (.data 0055082c = D3D set,
+   00550cfc = Glide set), substituting the Glide or no-clipping handler where a port is missing, else
+   P85_SkipRecord; counts are printed once. */
 static void init_game_handlers(void) {
   static int done;
   if (done || !re_ptr_has_image()) return;
@@ -170,6 +182,7 @@ static void init_game_handlers(void) {
   fprintf(stderr, "[p84] обработчики записей из .data Game.exe: из Glide-набора %d, без отсечения %d, неперенесённых %d (P85_SkipRecord)\n", P84_HandSubst, P84_HandNoClip, P84_HandMissing);
 }
 /* 011effe0/01209660/011f4060 ← таблицы набора (режимы 0, 1, другой) */
+/* P84_SelectTables — native: makes P84_Tab0/1/2 point at the D3D (alt = 0) or Glide (alt = 1) handler set. */
 void P84_SelectTables(int32_t alt) {
   init_game_handlers();
   if (re_ptr_has_image()) fprintf(stderr, "[p84] набор таблиц %s\n", alt ? "аппаратный 00550cfc" : "программный 0055082c");
@@ -182,6 +195,7 @@ void P84_InitConsts(void) {}
 #endif
 
 typedef long double ld;
+/* Sign bit of a float (as the original tests it; -0.0 counts as negative). */
 static int neg(float f) { uint32_t u; memcpy(&u, &f, 4); return (int)(u >> 31); }
 /* (a·x + b·y) + c·z в расширенной точности, затем во float, как fld/fmul/faddp/fstp */
 static float dot3(const float *a, float x, float y, float z) {
@@ -191,6 +205,7 @@ static float dot3(const float *a, float x, float y, float z) {
   return (float)r;
 }
 /* освещение: dot < 0 (знаковый бит) → фон; иначе фон + dot, не больше 1.0 (сравнение как целых) */
+/* Light value: ambient P19_Out68 when n.L is negative, else ambient + n.L clamped to 1.0 (integer compare). */
 static float shade(float d) {
   float amb = P19_Out68;
   if (neg(d)) return amb;
@@ -198,6 +213,7 @@ static float shade(float d) {
   { int32_t u; memcpy(&u, &d, 4); if (u > 0x3f800000) d = 1.0f; }
   return d;
 }
+/* Calls the handler for record `type` with its argument byte P84_Arg[type] (native diagnostics around it). */
 static void call_h(const uintptr_t *tab, uint32_t type) {
   uintptr_t f = tab ? tab[type] : 0;
   RE_DBG(9);
@@ -302,10 +318,13 @@ static void draw_core(uint8_t *mdl, const float *modmat, const float *viewm, con
 #endif
 }
 
+/* Handler table for draw mode (low byte): 0 -> P84_Tab0, 1 -> P84_Tab1, else P84_Tab2. */
 static const uintptr_t *pick_tab(int32_t mode) {
   uint8_t m = (uint8_t)mode;
   return m == 1 ? P84_Tab1 : (m == 0 ? P84_Tab0 : P84_Tab2);
 }
+/* Common start of every entry point: light spheres touching the model, transform bias = pos (x negated in
+   the mirror), model vertices and planes. */
 static void prologue(uint8_t *mdl, uint32_t mref, const float *pos) {
   if (G2_011F43B0 == 0) P63_SphN = 0; else P63_SphereHits(pos, (const uint8_t *)mdl);
   (void)mref;
@@ -317,6 +336,8 @@ static void prologue(uint8_t *mdl, uint32_t mref, const float *pos) {
 }
 
 /* 00428b69 */
+/* P84_DrawModel — Game.exe 00428b69, cdecl.  Draws model mref with orientation matrix mat at world position pos
+   in draw mode `mode` (see pick_tab).  Billboards (flag 0x4000) use the matrix for the camera heading instead. */
 void P84_DrawModel(uint32_t mref, const float *mat, const float *pos, int32_t mode) {
   uint8_t *mdl = (uint8_t *)P79_PTR(mref);
   float view[16];
@@ -330,6 +351,8 @@ void P84_DrawModel(uint32_t mref, const float *mat, const float *pos, int32_t mo
 }
 
 /* 00429143 */
+/* P84_DrawModelIdx — Game.exe 00429143, cdecl.  As P84_DrawModel with orientation idx into P56_EulerTab; the
+   view x orientation product is cached per frame in P84_MatCache[idx] (valid while P84_MatFlag == P47_SwapCnt). */
 void P84_DrawModelIdx(uint32_t mref, int32_t idx, const float *pos, int32_t mode) {
   uint8_t *mdl = (uint8_t *)P79_PTR(mref);
   const uintptr_t *tab = pick_tab(mode);
@@ -373,6 +396,7 @@ static void tex_filter(int32_t a, int32_t b, int32_t c) {   /* (*01270d6c) = grT
       return;
     }
 }
+/* fistp: round to nearest with the FPU default mode. */
 static int32_t fist(ld v) { return (int32_t)lrintl(v); }    /* fistp, округление к ближайшему */
 
 /* 0042a9f1: кузов машины car (00d077c0 + car·0x148). Пролог как 00428b69; один раз grTexFilterMode(0,1,1) (флаг 01252bc0);
@@ -384,6 +408,12 @@ static int32_t fist(ld v) { return (int32_t)lrintl(v); }    /* fistp, округ
    Отступления native: shine ≠ 0 или запись ≥ 0x170 — байт 0; NULL значка / нулевые размеры — обычный режим не меняется, UV = 0;
    car вне 0..0x41 — выход. a7 (в оригинале a7 >> 2 в неиспользуемой локали) не читается. */
 static float g_view[16];   /* остаётся в P44_MatPtr после возврата (в оригинале — стек) */
+/* P84_DrawCar — Game.exe 0042a9f1, cdecl.  Draws the body of car `car` (model mref, matrix mat, position pos):
+   every record is culled against its own plane (no visibility cache), normals are always lit.  When the shine
+   is enabled (P28_ShineFlag and shk != 0) or for the ghost car (0x41 while P62_HudOff1), environment-map UVs
+   are computed per normal from columns 0 and 2 of the car's world matrix into the CARSHINE icon (scrolling with
+   the car position / 256), and per record P28_Dst2 selects plain (Detail 0) or shiny (Detail 1, strength
+   shk * 50; ghost: Detail 2, 100) drawing.  a7 is unused.  See the Russian notes above for native deviations. */
 void P84_DrawCar(uint32_t mref, const float *mat, const float *pos, int32_t mode, int32_t car, int32_t shine, int32_t a7, float shk) {
   uint8_t *mdl = (uint8_t *)P79_PTR(mref);
   const uintptr_t *tab = pick_tab(mode);

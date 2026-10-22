@@ -1,4 +1,9 @@
 /* v1.60 (см. ported115.h). */
+/* ported115.c (English overview) — HUD icon drawing through Glide vertex lists (640x480 design
+   coordinates scaled to the screen), the road-side arrow marker, the flat / Gouraud triangle and quad
+   handlers of the second model rasteriser set (P115_RasterC / D), the sound driver per-frame update
+   (fade, 3D listener and voice positions), the mission target object tick and the interview "paper"
+   HUD.  Existing Russian per-function notes are kept; English headers are added next to them. */
 #include "ported115.h"
 #include "cartab.h"
 #include "reptr.h"
@@ -60,7 +65,6 @@ p115_i4_t P115_Tgt;
 #endif
 
 #include "memrw.h"
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static float f_of(int32_t i) { float f; memcpy(&f, &i, 4); return f; }
 static int32_t i_of(float f) { int32_t i; memcpy(&i, &f, 4); return i; }
 #ifdef RE_HOOK_BUILD
@@ -68,25 +72,30 @@ static int32_t i_of(float f) { int32_t i; memcpy(&i, &f, 4); return i; }
 #else
 #  define P115_STD
 #endif
+/* Glide export by decorated name (NULL in native, where there is no Glide). */
 static void *glide_proc(const char *name) {
   for (int i = 0; i < P33_GlideCount(); i++)
     if (strcmp(P33_GlideName(i), name) == 0) return P33_GlideProc(i);
   return NULL;
 }
+/* grDrawPolygonVertexList(n, v). */
 static void poly_list(int32_t n, const void *v) {
   void (P115_STD *f)(int32_t, const void *) = (void (P115_STD *)(int32_t, const void *))glide_proc("_grDrawPolygonVertexList@8");
   if (f != NULL) f(n, v);
 }
+/* Selects render state 4 (textured icon combine) once; P85_StateDirty caches the current state. */
 static void state4(void) {
   if (P85_StateDirty != 4) { if (P85_StateFn) P85_StateFn(3, 1, 0, 1, 0); P85_StateDirty = 4; }
 }
 /* смешивание значков: режим 3 — (4,4,0,0), в отличие от P85_SetBlend */
+/* Icon blend modes 0..3 (cached in P85_BlendCur; values > 3 ignored). */
 static void blend_icon(uint8_t m) {
   static const int32_t t[4][4] = { { 4, 0, 4, 0 }, { 0, 5, 4, 0 }, { 0, 6, 4, 0 }, { 4, 4, 0, 0 } };
   if (m > 3 || P85_BlendCur == m) return;
   if (P85_BlendFn) P85_BlendFn(t[m][0], t[m][1], t[m][2], t[m][3]);
   P85_BlendCur = m;
 }
+/* Binds texture page tex (cached in P86_CurTex) from the page table P12_01145a60 (16 bytes per page). */
 static void tex_page(int32_t tex) {
   if (tex != P86_CurTex) {
     P86_CurTex = tex;
@@ -98,11 +107,14 @@ static void tex_page(int32_t tex) {
 }
 /* четыре GrVertex по 60 байт: x,y,z,r,g,b,ooz,a,oow,s,t */
 typedef float p115_gv[15];
+/* Fills one Glide vertex (z and ooz left as they are). */
 static void put_v(float *v, float x, float y, float r, float g, float b, float a, float oow, float s, float t) {
   v[0] = x; v[1] = y; v[3] = r; v[4] = g; v[5] = b; v[7] = a; v[8] = oow; v[9] = s; v[10] = t;
 }
 
 /* ---- 00418e70: значок в координатах 640×480 × P110_IconKX/KY, uv × oow; flip — зеркально по u ---- */
+/* P115_IconAt — Game.exe 00418e70.  Draws icon (Game.exe address of an icon record) at 640x480
+   position (x, y) scaled by P110_IconKX / KY, colour r, g, b, mirrored in u when flip, blend `mode`. */
 void P115_IconAt(float x, float y, uint32_t icon, int32_t r, int32_t g, int32_t b, int32_t flip, int32_t mode) {
   const uint8_t *ic = (const uint8_t *)re_ptr(icon);
 #ifndef RE_HOOK_BUILD
@@ -131,12 +143,15 @@ void P115_IconAt(float x, float y, uint32_t icon, int32_t r, int32_t g, int32_t 
 }
 
 /* экранные координаты: (x·ScrW/640 − ScrW/2)·Scale + ScrW/2 */
+/* Design -> screen coordinates (same formula as P19_ScaleX / P19_ScaleY) and the per-axis scale. */
 static void scr_xy(float x, float y, float *sx, float *sy, float *kx, float *ky) {
   *kx = (float)P19_ScrW / P19_DivW;
   *ky = (float)P19_ScrH / P19_DivH;
   *sx = (x * *kx - (float)(P19_ScrW >> 1)) * P19_Scale + (float)(P19_ScrW >> 1);
   *sy = (y * *ky - (float)(P19_ScrH >> 1)) * P19_Scale + (float)(P19_ScrH >> 1);
 }
+/* Shared body of P115_IconScaled / P115_IconFlip: icon quad at screen-mapped (x, y), size multiplied by
+   mx, my, uv in texels, oow = 1. */
 static void icon_scr(float x, float y, float mx, float my, const uint8_t *ic, int32_t r, int32_t g, int32_t b, int32_t flip, int32_t mode) {
   float kx, ky, sx, sy;
   scr_xy(x, y, &sx, &sy, &kx, &ky);
@@ -161,6 +176,7 @@ static void icon_scr(float x, float y, float mx, float my, const uint8_t *ic, in
   poly_list(4, v);
 }
 /* ---- 00510e1d: значок в масштабе экрана с множителями размера sx, sy (oow = 1, uv в текселях) ---- */
+/* P115_IconScaled — Game.exe 00510e1d.  Icon at design (x, y) mapped to the screen, size x sx, sy. */
 void P115_IconScaled(float x, float y, float sx, float sy, uint32_t icon, int32_t r, int32_t g, int32_t b, int32_t mode) {
   const uint8_t *ic = (const uint8_t *)re_ptr(icon);
 #ifndef RE_HOOK_BUILD
@@ -169,6 +185,7 @@ void P115_IconScaled(float x, float y, float sx, float sy, uint32_t icon, int32_
   icon_scr(x, y, sx, sy, ic, r, g, b, 0, mode);
 }
 /* ---- 0051084d: то же без масштаба, flip — зеркально по u ---- */
+/* P115_IconFlip — Game.exe 0051084d.  As P115_IconScaled at size 1, optionally mirrored in u. */
 void P115_IconFlip(float x, float y, uint32_t icon, int32_t r, int32_t g, int32_t b, int32_t flip, int32_t mode) {
   const uint8_t *ic = (const uint8_t *)re_ptr(icon);
 #ifndef RE_HOOK_BUILD
@@ -178,6 +195,8 @@ void P115_IconFlip(float x, float y, uint32_t icon, int32_t r, int32_t g, int32_
 }
 
 /* ---- 0048d4e0: стрелка стороны дороги в точке pos (−5 по y, 750/300 по сторонам), пурпурная, P85_RasterB ---- */
+/* P115_RoadArrow — Game.exe 0048d4e0.  Debug-style magenta arrow at world point pos showing the road
+   side (5 units up, 750 / 300 units to the sides), drawn with P85_RasterB.  TODO(RE): unsure who calls it. */
 void P115_RoadArrow(const float *pos) {
   if (P85_StateDirty != 0) { if (P85_StateFn) P85_StateFn(1, 0, 0, 2, 0); P85_StateDirty = 0; }
   if (P85_BlendCur != 0) { if (P85_BlendFn) P85_BlendFn(4, 0, 4, 0); P85_BlendCur = 0; }
@@ -220,6 +239,8 @@ void P115_RoadArrow(const float *pos) {
 }
 
 /* ---- записи модели с растеризатором 01270e30 / 01270d9c ---- */
+/* Vertex idx of the current model (P84_VertRef) from the vertex cache, projected with P101_ProjT on first
+   use (cache format P85_FMT_PROJ).  Native: out-of-table z marked like P85_Project does. */
 static p85_vtx *prep(int32_t idx) {
   p85_vtx *c = &P85_VCache[idx];
   if (!P85_VC_VALID(c, P85_FMT_BIAS)) {
@@ -239,6 +260,7 @@ static p85_vtx *prep(int32_t idx) {
    обработчики режима 0 — вершины за камерой (метки P85_OOW_NEAR / oow 0, экран (0,0) / (320,240)) уходили в растеризатор как есть:
    треугольник от левого верхнего угла/центра на дальней плоскости — серый полигон поверх неба (виден там, где ничего ближе нет).
    Теперь — как P85_CallRaster: целиком за камерой — пропуск, пересекающий z = 1 — отсечение (P85_CallRasterWith). */
+/* Rasterise P85_RV[0..2] with set C (no edge clipping) or D (P82_Edge set); native also clips at z = 1. */
 static void raster_c(void) {
 #ifndef RE_HOOK_BUILD
   P85_CallRasterWith(P115_RasterC, P115_RasterD);
@@ -247,6 +269,7 @@ static void raster_c(void) {
   if (f) f(&P85_RV[0], &P85_RV[1], &P85_RV[2]);
 #endif
 }
+/* Copy a projected vertex into a raster vertex / three colour floats into it. */
 static void put_xyz(p85_rv *r, const p85_vtx *v) {
   r->x = v->x; r->y = v->y; r->z = v->z; r->oow = v->oow;
 #ifndef RE_HOOK_BUILD
@@ -254,6 +277,10 @@ static void put_xyz(p85_rv *r, const p85_vtx *v) {
 #endif
 }
 static void put_rgb(p85_rv *r, const uint8_t *c) { r->r = rdf(c); r->g = rdf(c + 4); r->b = rdf(c + 8); }
+/* Model record handlers: rec +8.. vertex indices, colours at +0x14 (tri) / +0x18 (quad), one per vertex
+   when gouraud; the record pointer G2_011F4064 advances by `size`.  Quads are split (v0, v2, v1) +
+   (v0, v2, v3) and the 4th vertex colour is unused.  arg = blend mode byte (P85_BlendForce overrides
+   non-zero modes when no blend function is installed).  Native: vertex index guard (< 0x2000). */
 static void tri_c(uint32_t arg, uint32_t size, int gouraud) {
   const uint8_t *rec = G2_011F4064;
   int32_t i0 = rd32(rec + 8), i1 = rd32(rec + 0xc), i2 = rd32(rec + 0x10);
@@ -286,6 +313,8 @@ static void quad_c(uint32_t arg, uint32_t size, int gouraud) {
   put_xyz(&P85_RV[2], v3);
   raster_c();
 }
+/* P115_FlatTriC 00452327 (record 0x20), P115_GouraudTriC 00452d3e (0x38), P115_FlatQuadC 004527ac (0x24),
+   P115_GouraudQuadC 004531c5 (0x48) — Game.exe handlers of the C/D rasteriser set. */
 void P115_FlatTriC(uint32_t arg) { tri_c(arg, 0x20, 0); }
 void P115_GouraudTriC(uint32_t arg) { tri_c(arg, 0x38, 1); }
 void P115_FlatQuadC(uint32_t arg) { quad_c(arg, 0x24, 0); }
@@ -293,6 +322,10 @@ void P115_GouraudQuadC(uint32_t arg) { quad_c(arg, 0x48, 1); }
 
 /* ---- 0040b286: значок (u,v, tw×th текселей) в (x,y) с масштабом sx,sy; смешивание по 005d77c0: 4 — режим 3, 8 — альфа 128
         (вершина 0) + grAlphaCombine, 0x10 — режим 2, иначе 0; без 3D (005f7e58) — спрайт в буфер (__ftol — усечение) ---- */
+/* P115_IconDraw — Game.exe 0040b286.  Draws a tw x th texel rectangle (u, vv) of texture page `page` at
+   (x, y) scaled by sx, sy, colour rgb; the blend comes from flags G005D77C0 (4 = mode 3, 8 = alpha 128
+   + alpha combine, 0x10 = mode 2, else 0).  Software mode (P56_F7E58): copies the sprite into the
+   frame buffer (keyed, or blended when flag 8), coordinates truncated. */
 void P115_IconDraw(float x, float y, float sx, float sy, float u, float vv, float tw, float th, int32_t page, const uint8_t *rgb) {
   if (P56_F7E58 != 0) {
     if ((G005D77C0 & 8) == 0) P65_SpriteKeyed((int32_t)x, (int32_t)y, page, (int32_t)u, (int32_t)vv, (int32_t)tw, (int32_t)th);
@@ -332,6 +365,17 @@ typedef void (*p115_fi3)(int32_t, float, float, float);
 typedef void (*p115_fii)(int32_t, int32_t);
 typedef int32_t (*p115_rii)(int32_t, int32_t);
 typedef void (*p115_fip)(int32_t, uint32_t *);
+/* P115_SndUpdate — Game.exe 00523829.  Per-frame sound driver update (only when sound is on and enabled):
+     fade step: P43_FadeA moves toward the target P43_FadeB (float bits) by P43_FadeStep, snapping on the
+       last step, and becomes the master volume;
+     listener: orientation from the view matrix (driver E), position = camera (driver D), velocity =
+       position delta (driver 38, only when Q00B87E94 = the "Doppler Effect" entry of the Sound menu, ToggleOpt004154CD);
+     for each of the 20 voice slots (flags byte +0): bit 0 playing -> free it if the driver says it
+       stopped; 0x20 tracks an object: new position from the int32 xyz at Game.exe address +0x1c (y
+       negated), sets bit 1; 4 -> frequency +0x28 (driver I); 8 -> volume +0x2e (driver H);
+       2 -> position +4 (driver J) and velocity (driver 54); 0x10 -> start sample +0x20 (driver F),
+       which makes it playing or frees it.
+   Finally driver calls 0C and 08 (commit).  Native: RE_HORNDBG trace of voice 2. */
 void P115_SndUpdate(void) {
   if (G6_00B91CF4 == 0 || G00575F40 == 0) return;
   if (P43_FadeOn != 0) {
@@ -397,6 +441,11 @@ void P115_SndUpdate(void) {
 }
 
 /* ---- 004a3808: такт объекта-цели ---- */
+/* P115_TargetTick — Game.exe 004a3808.  Per-frame step of a mission target object o: publishes its
+   position (+0x20..) to P115_Tgt / P115_TgtOn when flag 0x200 is set, runs its timer (+0x30) and frame
+   counter (+0xc); kind 1 (+0x14) only flashes.  When the player (P59_PosX/Z) gets inside the radius
+   (squared, +0x1c; quick reject at 500 per axis) of a not-yet-reached target: marks it reached (+8 bit
+   0x80), clears 0x200 and the counter, and if P14_00c810c4 == 1 sets it (and its aliases) to 0x7fff. */
 void P115_TargetTick(uint8_t *o) {
 #ifndef RE_HOOK_BUILD
   if (o == NULL) return;
@@ -423,6 +472,10 @@ void P115_TargetTick(uint8_t *o) {
 }
 
 /* ---- 004e5b78: HUD «бумаги»: значок ELPAPEL у правого края, отметки, затем P98_M4660 крестов/значков CROSS ---- */
+/* P115_PaperHud — Game.exe 004e5b78.  Interview HUD: the ELPAPEL icon at the right screen edge (alpha
+   blended), a mark for each completed task (P114_PaperMark), then P98_M4660 red crosses (or CROSS icons
+   at half size when loaded) in a row starting 11 px into the paper.  TODO(RE): unsure — the crosses are
+   presumably the failed attempts. */
 void P115_PaperHud(void) {
   const uint8_t *paper = (const uint8_t *)re_ptr((uint32_t)P55_Paper0);
   if (P55_Paper0 == 0) return;

@@ -1,7 +1,19 @@
 #ifndef PLAT_H
 #define PLAT_H
 #include <stdint.h>
-/* Platform interface: game code in game/ calls only this. */
+/* Platform interface: game code in game/ calls only this.
+   One header, two implementations:
+     platform/sdl/       — native build: SDL2 + OpenGL 3.3 (window, input, render emulating DirectDraw /
+                           Direct3D / Glide, software DirectSound mixer plat_dsmix.c, CD-audio emulation
+                           plat_cdaudio.c, HD texture pack, facade detail meshes);
+     platform/win32/     — hook build inside the original Game.exe: thin wrappers over WinAPI/DirectX or
+                           calls back into Game.exe.
+   In the native self-tests (no game data) several functions only record their calls; the *_last() and
+   *_trap() functions below exist for those tests.
+   Conventions: functions named after a Win32/DirectX call behave like it (HRESULT-style int32 returns,
+   0 = success, for the DirectX wrappers); game paths use '\\' and are resolved case-insensitively by
+   plat_fopen_game; times are milliseconds unless stated.  Many comments below are in Russian (project
+   history); new comments are in English. */
 /* --- system --- */
 uint32_t plat_time_ms(void);
 void     plat_vt_poll(void);   /* v2.08: RE_FIXED_DT — шаг виртуальных часов в циклах ожидания (native; win32 — пусто) */

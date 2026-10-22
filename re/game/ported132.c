@@ -74,6 +74,7 @@
 #include "ported130.h"
 #include "ported131.h"
 #include "ported14.h"
+#include "ported16.h"
 #include "ported15.h"
 #include "ported18.h"
 #include "ported19.h"
@@ -120,10 +121,7 @@
 #include "ported143.h"
 #include "redbg.h"
 
-static void wrf(uint8_t *p, float v) { memcpy(p, &v, 4); }
 #include "memrw.h"
-static void wr16(uint8_t *p, uint16_t v) { memcpy(p, &v, 2); }
-static uint16_t rd16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 
 #ifndef RE_HOOK_BUILD
 int plat_frame_no(void);   /* v2.29: номер показанного кадра — для журналов отладки */
@@ -186,6 +184,19 @@ int32_t P132_MenuLoop(uint32_t tab) {
 }
 
 /* ---- 004d4bfb ---- */
+/* P132_GameLogic — Game.exe 004d4bfb, cdecl, no arguments.  One 20 ms logic tick of the in-game loop.
+   Order (kept from the original — later steps read what earlier ones wrote this tick):
+     input (P36_PollInput) and debug keys / replay director; when paused (G6_00B5A778) only the
+     camera, map streaming, replay script and sound are updated;
+     controls -> P100_RecKeys (recorded for replays; forced to "brake/steer" codes 0x20..0x22 during
+     cutscenes and scripted control);
+     end-of-mission countdown (P14_00c81100; 0 -> pause with the result screen);
+     spawning, camera, view frustum, map streaming, dawn/dusk, mission triggers, effects;
+     traffic / chase / car sounds (live play only), skid marks, the car physics step
+     (P142_CarsStep), scripts, pickups, frame counter P62_Frame (only while no scripted camera runs).
+   "live" = no scripted camera (P14_00b87ee4 == 0) or the frame-0 priming pass (P131_Skip).
+   The #ifndef RE_HOOK_BUILD blocks are native-only debug output (RE_MISSDBG, RE_END_EXIT,
+   RE_AUTOCONT, RE_CHAIN) and do nothing unless those variables are set. */
 void P132_GameLogic(void) {
   P18_ClearFlag();
   P36_PollInput();
@@ -193,7 +204,7 @@ void P132_GameLogic(void) {
     if (P62_Frame > 1) P126_DebugKeys(0);
     P124_HandleDirector();
   }
-  if (G6_00B5A778 != 0) {
+  if (G6_00B5A778 != 0) {   /* paused: keep camera, streaming, replay script and sound alive */
     P66_Scene = 0x00cb8f20u;
     P133_CamUpdate(0);
     P82_FrustumSetup3D();
@@ -209,13 +220,15 @@ void P132_GameLogic(void) {
   if ((P14_00d118a8 | G2_00D118A8) == 0 && (hud1 != 0 || P36_PadMode != 2)) {
     uint32_t k = (uint32_t)P100_RecKeys; P36_GetPadButtons(&k); P100_RecKeys = (int32_t)k;
   }
+  /* Controls taken away (cutscene 00d118a8, scripted driving 01143720/011426fc/P75_E4): record a fixed
+     key code instead — 0x20, plus 1/2 by the sign of P97_D078CC.  TODO(RE): unsure what the bits mean. */
   if ((P14_00d118a8 | G2_00D118A8) != 0 || P100_143720 != 0 || P100_1426FC != 0 || P75_E4 != 0) {
     P100_RecKeys = 0x20;
     if (P97_D078CC >= 1) P100_RecKeys = 0x21;
     else if (P97_D078CC < 0) P100_RecKeys = 0x22;
   }
   P66_Scene = 0x00cb8f20u;
-  G6_00D0DDC0 = 0;
+  G6_00D0DDC0 = 0;   /* active-car list is rebuilt this tick (P142_CarsStep walks G6_00B2F30C[0..n)) */
 #ifndef RE_HOOK_BUILD
   { /* v2.29: RE_MISSDBG=1 — отсчёт конца миссии 00c81100 (каждые 25 кадров) и ожидание речи 004d6209 */
     static int dbg = -1; if (dbg < 0) dbg = getenv("RE_MISSDBG") != NULL;
@@ -223,6 +236,8 @@ void P132_GameLogic(void) {
       fprintf(stderr, "[end] w=%d f=%d t=%d e8=%d c4=%x hud2=%d речь=%d\n", plat_frame_no(), (int)P62_Frame, (int)P14_00c81100, (int)P14_00c810e8,
               (unsigned)P14_00c810c4, (int)P62_HudOff2, (int)P42_ActionBound()); }
 #endif
+  /* End-of-mission countdown (frames).  At 0 the game pauses on the result screen, unless speech is
+     still playing during a cutscene — then wait another 50 frames.  Result code: P14_00c810e8. */
   if (P14_00c81100 != 0) {
     P14_00c81100--;
     if (P14_00c81100 == 0) {
@@ -261,7 +276,9 @@ void P132_GameLogic(void) {
   if (P95_C818B8 != 0) P140_MrkFly();
   if (live) { Call004A2C08(); P106_PartTick(); P12_Fn0048EBC8(); }
   if (P26_FxC != 0) { P130_SnowSpawn(); P130_SnowStep(); }
-  P103_D118E0 = (P103_D118E0 + 0x3c) & 0xfff;
+  P103_D118E0 = (P103_D118E0 + 0x3c) & 0xfff;   /* global animation angle, +0x3c per tick (4096 = 360 deg) */
+  /* Timed sequence (00d11920 on): count G6_00D11928 down and rotate P61_V18; when it runs out the
+     mission ends with result 5 after 100 frames.  TODO(RE): unsure which game event this is. */
   if (P95_D11920 != 0 && P14_00c810c4 != 0xff0) {
     G6_00D11928--;
     P61_V18 = (P61_V18 - 0x16) & 0xfff;
@@ -281,7 +298,7 @@ void P132_GameLogic(void) {
   if ((G6_00B87EAC | G8_00B87EAC) != 0 || (P58_SB87EB0 | G6_00B87EB0 | G8_00B87EB0) != 0) P119_CarSkids(0x41);
   RE_DBG_SET(11, P100_RecKeys); RE_DBG_SET(12, P36_PadMode); RE_DBG_SET(13, P36_KeyCfg[6] | P36_KeyCfg[4] << 8 | P36_KeyCfg[5] << 16); RE_DBG_SET(14, (P14_00d118a8 | G2_00D118A8) * 1000 + hud1 * 10 + (P100_143720 != 0) + (P100_1426FC != 0) * 2 + (P75_E4 != 0) * 4);
   if (live) { RE_DBG(10); P142_CarsStep(); } else P35_PadX = 0;
-  P14_Fn004E12E4();
+  P16_IdleTimer();
   DrainStackC200F();
   CopyBDF984();
   P74_ShiftRows();
@@ -292,7 +309,7 @@ void P132_GameLogic(void) {
   P12_Fn0050229C();
   if (P95_B87EE0 != 0) P120_ConeRec();
   P15_RaiseLimits();
-  if (P14_00b87ee4 == 0) { P62_Frame++; G8_00D118C0 = P62_Frame; }
+  if (P14_00b87ee4 == 0) { P62_Frame++; G8_00D118C0 = P62_Frame; }   /* logic frame counter (stops during scripted cameras) */
   P121_CamSounds();
   P115_SndUpdate();
   P12_Fn0050E963();
@@ -306,6 +323,15 @@ static const char *const k_felony[11] = {
 static void grd40(int32_t v) { if (P98_GrD40) P98_GrD40(v); }
 #define P132_BLK(a) (P56_Blk84[((a) - 0x00c810c0u) / 4])
 
+/* P132_GameDraw — Game.exe 004d4fc5, cdecl, no arguments.  Renders one in-game frame.
+   Unless rendering is suppressed (S_00B5A77C): camera, frustum, lights; the city map (P89_DrawMap),
+   the player's car, skid marks, traffic, event/script models, shadows, sky, weather (rain / snow /
+   fog via P26_Fx*), car glows, sun flare, rear-view mirror and the HUD.  Then the pause menu, the
+   credits, and the on-screen debug text (felony rating etc., only when 00b87e7c is clear).
+   Native-only additions (#ifndef RE_HOOK_BUILD): Hor+ view setup, draw_distance (the far plane is
+   scaled only for the 3D pass and restored before the sun flare), facade detail meshes, and the
+   RE_GSTAT / RE_COPDBG debug prints.  P26_FxD ("fog"?) toggles some Glide state around the
+   transparent passes (grd40 0/2).  TODO(RE): unsure what FxD is in the original. */
 void P132_GameDraw(void) {
   char buf[256];
   RE_DBG(1);
@@ -474,8 +500,8 @@ void P132_Smoke(const float *pos, const float *vel, int32_t a, int32_t b, int32_
   wr32(r + 0x58, c);
   int32_t q = (b - a) / (step != 0 ? step : 1);
   wr16(r + 0x64, (uint16_t)(q < 0 ? -q : q));
-  wr16(r + 0x66, (uint16_t)((int32_t)rd16(r + 0x64) >> 1));
-  int32_t d = (int32_t)rd16(r + 0x64); if (d == 0) d = 1;
+  wr16(r + 0x66, (uint16_t)((int32_t)rdu16(r + 0x64) >> 1));
+  int32_t d = (int32_t)rdu16(r + 0x64); if (d == 0) d = 1;
   wr32(r + 0x68, mode == 1 ? 0x80006 : 0x100006);
   wr32(r + 0x5c, (c << 4) / d);
   (void)rd32; (void)rdf;
@@ -501,11 +527,12 @@ void P132_Lights(void) {
   G00D14EF4 = 0;
   int32_t eac = G6_00B87EAC | G8_00B87EAC;
   if (G00D17B08 != 0) {
-    int32_t vx = P99_Cars[0].vel[0], vy = P99_Cars[0].vel[1];
-    if (eac != 0) { vx = 0; vy = 0; }
-    if (vx < 1000 || vy < 1000) {
+    /* player light: brightness by how many of damage zones 0 / 1 are below 1000 (inferred: the two headlights) */
+    int32_t dmg0 = P99_Cars[0].damage[0], dmg1 = P99_Cars[0].damage[1];
+    if (eac != 0) { dmg0 = 0; dmg1 = 0; }
+    if (dmg0 < 1000 || dmg1 < 1000) {
       const p99_car_t *c = eac != 0 ? &P99_Cars[0x41] : &P99_Cars[0];
-      int32_t k = ((vx < 1000) + (vy < 1000)) * 0x80 - 1;
+      int32_t k = ((dmg0 < 1000) + (dmg1 < 1000)) * 0x80 - 1;
       uint32_t h = (uint32_t)c->heading;
       p[1] = (float)-c->pos[1];
       p[0] = (float)c->pos[0] + (float)sin_div(P59_Sin[h & 0xfff]);

@@ -1,3 +1,8 @@
+/* ported100 — 30 assorted Game.exe functions (cdecl): replay / pad menu setup, hierarchical part drawing, debris reset,
+   goal checks, player car sounds and engine revs, replay input recording / playback, radar map, road rectangles and
+   height, car hit damage zones, LFB format, RIFF resources, near/far edge clipping, ghost path, oriented-box overlap,
+   director free-camera keys, particle step, markers, billboards, mirror mask, traffic spawn slot, LFB icon blit.
+   English summaries precede each function's original Russian line.  Original note: */
 /* v1.45: 30 функций (см. ported100.h). Стандарт указателей v1.42: адреса таблиц меню, буферов повтора и текстурных страниц —
    uint32_t + re_ptr; глобальные скалярные указатели (значки, буфер записи, вывод отсечения, маска зеркала) — родные. */
 #include "ported100.h"
@@ -413,12 +418,12 @@ GAME_VAR_DEF(uint8_t *, P100_Mirror, 0x00b31f00)
 #define K_4096 4096.0f    /* 005461ec */
 
 #include "memrw.h"
+#include "carfields.h"
 static uint16_t rd16(const void *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 static int16_t rd16s(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static uint8_t *texpage(uint32_t slot) { return (uint8_t *)re_ptr((uint32_t)rd32(&g_01145a60[slot * 0x10 + 4])); }
 
+/* Replay menu: FFWD / PLAY / ACCEPT icons, number of visible items, playback speed of the item with flag 8. */
 /* ---- 00416605: меню повтора — значки FFWD/PLAY/ACCEPT8B, число видимых пунктов, скорость по пункту с флагом 8 ---- */
 void P100_ReplayMenuInit(void) {
   P100_IconFfwd = P93_FindIcon("FFWD");
@@ -448,24 +453,16 @@ void P100_ReplayMenuInit(void) {
   SelectByDifficulty_00416D17();
 }
 
+/* Wheel / joystick settings screen: item and text tables by menu mode (01271060) and device (00575ef0). */
 /* ---- 00413e37: экран руля/джойстика — таблицы пунктов по режиму 01271060 и устройству 00575ef0 ---- */
 static void menu_items(uint32_t a) {
-  P58_S5FE9B8 = a;
-#ifndef RE_HOOK_BUILD
-  P15_MenuItems = UiPtr005FE9B8 = (uint8_t *)re_ptr(a);   /* псевдонимы 005fe9b8 в native */
-#endif
+  P58_S5FE9B8 = a;   /* v2.35: P15_MenuItems / UiPtr005FE9B8 — views of this cell in native */
 }
 static void menu_text(uint32_t a) {
-  P58_S5FE9B0 = a;
-#ifndef RE_HOOK_BUILD
-  P15_MenuText = (uint8_t *)re_ptr(a);
-#endif
+  P58_S5FE9B0 = a;   /* v2.35: P15_MenuText — a view of this cell in native */
 }
 static void menu_mode(int32_t m) {
-  P15_MenuMode = m;
-#ifndef RE_HOOK_BUILD
-  G6_005FE9BC = m;
-#endif
+  P15_MenuMode = m;   /* v2.35: = G6_005FE9BC (one cell) in native */
 }
 void P100_PadMenuInit(void) {
   int32_t base = -1;
@@ -503,6 +500,8 @@ void P100_PadMenuInit(void) {
   for (int32_t k = 0; k < n; k++) wr32(it + 0x18 + k * 0x10, (int32_t)P97_StrAddr[base + k]);
 }
 
+/* Draws a hierarchical object (node: [0] model, [1] child count or 0xff = leaf, [2..] children) with per-part
+   quaternions. */
 /* ---- 004f3c74 / 004f1325: иерархия деталей (узел: [0] модель, [1] число детей или 0xff — лист, [2..] дети) ---- */
 static void part_xform_leaf(const float *pos, const float *q, float *m44, float *v) {
   v[0] = (pos[0] - P44_CamX) + P100_PartBase[0];
@@ -560,6 +559,7 @@ void P100_DrawPartsB(const float *quats, const uint8_t *node, const float *q, co
   }
 }
 
+/* Debris reset: 0x100 rotated triangles and 100 debris records. */
 /* ---- 004ab500: сброс обломков — 0x100 повёрнутых треугольников, 100 записей обломков ---- */
 void P100_DebrisInit(void) {
   P14_Fn0048DB65(P97_Debris, 6000);
@@ -585,6 +585,7 @@ void P100_DebrisInit(void) {
   S_010FFA24 = 0;
 }
 
+/* Checks the goal against the 10 mission objects (0x34-byte records at 00c80ce0). */
 /* ---- 004f556c: проверка целей по 10 объектам 00c80ce0 (шаг 0x34) ---- */
 void P100_GoalsCheck(uint8_t *goal) {
   for (int32_t k = 0; k < 10; k++) {
@@ -599,6 +600,7 @@ void P100_GoalsCheck(uint8_t *goal) {
   }
 }
 
+/* Player car sounds from the road under it (junction warning), skids at speed and the handbrake. */
 /* ---- 004d28a3: звуки машины игрока по дороге/скорости ---- */
 void P100_CarSounds(uint8_t *tab) {
   uint8_t h = (uint8_t)Round1024(P94_HeadingI);
@@ -610,11 +612,12 @@ void P100_CarSounds(uint8_t *tab) {
     if (P99_JunctionBlock(w) != 0) P95_SndTrigger(tab, 3, 0x1000);
     P99_RoadPick = (int16_t)w;
   }
-  if (P14_00b87e84 != 0 && 1000 < P99_Cars[0].vel[0] && 1000 < P99_Cars[0].vel[1]) P95_SndTrigger(tab, 9, 0x1000);
+  if (P14_00b87e84 != 0 && 1000 < P99_Cars[0].damage[0] && 1000 < P99_Cars[0].damage[1]) P95_SndTrigger(tab, 9, 0x1000);
   if (P99_Cars[0].f104 != 0 || P98_D078C8 != 0) P95_SndTrigger(tab, 10, 0x1000);
   if (200 < P62_Spd) P95_SndTrigger(tab, 2, 0x1000);
 }
 
+/* Engine revs (+0x144, eased towards the gearbox target, max +800 / -720 per tick) and engine load (+0x146). */
 /* ---- 004d6740: обороты двигателя (+0x144) и нагрузка (+0x146) машины ---- */
 void P100_CarRevs(int32_t car) {
   p99_car_t *c = &P99_Cars[car];
@@ -637,6 +640,7 @@ void P100_CarRevs(int32_t car) {
   }
 }
 
+/* Records player input into the replay buffer (5-byte records: repeat count, keys, steering x, y). */
 /* ---- 00518d32: запись ввода игрока pad в буфер повтора (записи по 5 байт: повтор, клавиши, руль x, y) ---- */
 static void rec_put(uint8_t rep, int32_t keys, int32_t x, int32_t y) {
   uint8_t *b = P100_RecBuf;
@@ -668,6 +672,7 @@ void P100_RecInput(int32_t p) {
   P74_C54D08++;
 }
 
+/* Reads player input back from the replay; 0x20 = no data. */
 /* ---- 00518f44: чтение ввода игрока pad из повтора; 0x20 — нет данных ---- */
 static int32_t rec_mine(int32_t p) { return p == 0 || (P88_Mode575 == 2 && G6_00B87EA0 != 0); }
 int32_t P100_RecRead(int32_t p) {
@@ -706,6 +711,7 @@ int32_t P100_RecRead(int32_t p) {
   return P100_RecVal[p];
 }
 
+/* Radar map: copies the 128 x 128 map window around the player (or object 00d0cbd0) into the radar icon texture. */
 /* ---- 00504479: окно карты радара 128×128 вокруг игрока (или объекта 00d0cbd0) в текстуру значка 00c8088c ---- */
 void P100_RadarMap(int32_t force) {
   int32_t cx, cz;
@@ -734,6 +740,7 @@ void P100_RadarMap(int32_t force) {
   }
 }
 
+/* Cell rectangle of road node node on side side (into 00c1cd00), relative or absolute. */
 /* ---- 0051acc5 / 0051aee6: прямоугольник клеток узла дороги node со стороны side → 00c1cd00 ---- */
 static int32_t road_rect(int32_t node, int32_t side, int32_t ox, int32_t oz) {
 #ifndef RE_HOOK_BUILD
@@ -758,6 +765,7 @@ static int32_t road_rect(int32_t node, int32_t side, int32_t ox, int32_t oz) {
 int32_t P100_RoadRect(int32_t node, int32_t side) { return road_rect(node, side, 0, 0); }
 void P100_RoadRectAbs(int32_t node, int32_t side) { road_rect(node, side, P62_Map1C0C, P62_MapCC90); }
 
+/* Road surface height at (x, z); outside the road polygons the cell level is subtracted. */
 /* ---- 004dd039 / 004dc91b: высота поверхности дороги в точке (x, z) (минус уровень клетки, если вне многоугольников) ---- */
 static int32_t road_height(int32_t x, int32_t z) {
   if (P72_RoadLookup(x, z) == 0) return 0;
@@ -796,6 +804,8 @@ int32_t P100_RoadHeightF(const float *pos) {
   return road_height(x, P11_00ba52d0);
 }
 
+/* Car hit: damage zone (0..5) from the impact direction relative to the car axes and half width; adds damage,
+   updates the bonus score for scored hits and (native) rumble. */
 /* ---- 0049ae98: удар по машине — зона повреждения по направлению, очки ---- */
 static int32_t hit_scored(const uint8_t *car) {
   if (car[0] == 0 || (G6_01136920 & 1) == 0) return 0;
@@ -818,16 +828,17 @@ void P100_CarHit(uint8_t *car, const int32_t *a, const int32_t *b, int32_t force
   else zone = hw < side ? 1 : (side <= -(int32_t)hw) + 2;
   force /= 300;
   if (force > 0x800) force = 0x800;
-  uint8_t *z = car + 0x11c + zone * 4;
+  uint8_t *z = car + CAR_DAMAGE + zone * 4;
   if (hit_scored(car)) P69_Bonus -= rd32(z);
+  /* zone damage combines like probabilities in 0..0xfff: d = 1 - (1 - force)(1 - d) */
   wr32(z, 0xfff - (((0xfff - force) * (0xfff - rd32(z)) + 0x800) >> 12));
-  wr32(car + 0x138, rd32(car + 0x138) + force / 2);
-  int32_t h = rd32(z) / 2;
+  wr32(car + CAR_DAMAGE_SUM, rd32(car + CAR_DAMAGE_SUM) + force / 2);
+  int32_t h = rd32(z) / 2;   /* the neighbouring zone of the same end gets at least half of it */
   switch (zone) {
-  case 0: if (rd32(car + 0x120) < h) wr32(car + 0x120, h); break;
-  case 1: if (rd32(car + 0x11c) < h) wr32(car + 0x11c, h); break;
-  case 3: if (rd32(car + 0x12c) < h) wr32(car + 0x12c, h); break;
-  case 4: if (rd32(car + 0x128) < h) wr32(car + 0x128, h); break;
+  case 0: if (rd32(car + CAR_DAMAGE + 4) < h) wr32(car + CAR_DAMAGE + 4, h); break;
+  case 1: if (rd32(car + CAR_DAMAGE) < h) wr32(car + CAR_DAMAGE, h); break;
+  case 3: if (rd32(car + CAR_DAMAGE + 16) < h) wr32(car + CAR_DAMAGE + 16, h); break;
+  case 4: if (rd32(car + CAR_DAMAGE + 12) < h) wr32(car + CAR_DAMAGE + 12, h); break;
   }
   if (hit_scored(car)) { P69_Bonus += rd32(z); P69_AddScore(0xff00); }
 #ifndef RE_HOOK_BUILD
@@ -835,6 +846,7 @@ void P100_CarHit(uint8_t *car, const int32_t *a, const int32_t *b, int32_t force
 #endif
 }
 
+/* LFB pixel format query (LfbLock(1)): row pitch, format bytes +0x14..+0x1a, pixel writer by depth. */
 /* ---- 004078d0: формат LFB (LfbLock(1)): шаг строки и байты формата +0x14..+0x1a, функция пикселя по глубине ---- */
 int32_t P100_LfbFormat(void) {
   uint8_t info[0x1c];
@@ -848,11 +860,14 @@ int32_t P100_LfbFormat(void) {
   return 1;
 }
 
+/* Locates the format / data of a RIFF wave resource. */
 /* ---- 0048c43c: RIFF-звук из ресурса ---- */
 int32_t P100_RiffFromRes(void *res, const void **fmt, const void **data, uint32_t *size) {
   return P98_RiffFind(plat_lock_resource(res), fmt, data, size) != 0;
 }
 
+/* Clips edge a -> b against the far (01270c24) / near (0054609c) plane into the clip buffer (vertex x / y / z at
+   +0xc / +0x10 / +0x14), interpolating UVs for the near version. */
 /* ---- 0042eee6 / 0042d797: отсечение ребра a→b дальней (01270c24) / ближней (0054609c) плоскостью; вершины +0xc x, +0x10 y, +0x14 z ---- */
 static void clip_emit(float x, float y, float z) {
   float *o = P100_ClipOut;
@@ -913,6 +928,7 @@ void P100_ClipNear(const uint8_t *a, const uint8_t *b, float ua, float ub) {
   }
 }
 
+/* Nearest point of the ghost car path (40 records of 0x48 bytes at 00d03920). */
 /* ---- 004e6f90: ближайшая точка пути призрака (40 записей 0x48 в 00d03920) ---- */
 void P100_GhostNear(void) {
   int32_t best = 99999999, n;
@@ -941,6 +957,7 @@ void P100_GhostNear(void) {
   }
 }
 
+/* Separating-axis distance from face k of box a to box b (4.12 fixed); keeps the best in best. */
 /* ---- 00499951: расстояние от грани k коробки a до коробки b (fixed 4.12), лучшее — в best ---- */
 void P100_BoxFace(const int32_t *a, const int32_t *b, int32_t k, int32_t *best, int32_t sgn) {
   int32_t nx = a[k * 4], ny = a[k * 4 + 1], nz = a[k * 4 + 2];
@@ -965,6 +982,7 @@ void P100_BoxFace(const int32_t *a, const int32_t *b, int32_t k, int32_t *best, 
   }
 }
 
+/* Overlap test of two oriented rectangles (records of 0x18 words); fills the contact data on overlap. */
 /* ---- 00499fb0: пересечение двух повёрнутых прямоугольников (записи по 0x18 слов) ---- */
 int32_t P100_BoxOverlap(int32_t *p) {
   int32_t s1 = P59_Sin[((uint32_t)(p[0x28] - p[0x10]) + 0x400u) & 0x7ff];
@@ -990,6 +1008,7 @@ int32_t P100_BoxOverlap(int32_t *p) {
   return 1;
 }
 
+/* Director free camera around the car by key bits (rotate, distance, height). */
 /* ---- 004c3048: свободная камера режиссёра вокруг машины (клавиши: 1/2 — поворот, 4/8 — дальше/ближе, 0x20/0x40 — выше/ниже) ---- */
 void P100_FreeCamKeys(uint32_t keys) {
   int32_t *cam = (int32_t *)&DirectorCam;
@@ -1022,6 +1041,7 @@ void P100_FreeCamKeys(uint32_t keys) {
   cam[7] = (int32_t)(ang & 0xfff);
 }
 
+/* Particle step (float record: +0 position, +0x20 velocity, +0x30 acceleration, +0x64 life). */
 /* ---- 004ba093: шаг частицы (float-запись: +0 позиция, +0x20 скорость, +0x30 ускорение, +0x50.. int, +0x64 жизнь) ---- */
 static int32_t fi(const float *p, int32_t i) { return rd32(p + i); }
 static void fiw(float *p, int32_t i, int32_t v) { wr32(p + i, v); }
@@ -1053,6 +1073,7 @@ void P100_PartStep(float *p) {
   part_tail(p);
 }
 
+/* Spawns marker k (0..3) at its point on the player car (010de230 + k * 0x10) with the car matrix. */
 /* ---- 004c09e6: маркер k (0..3) у машины игрока — точка 010de230 + k*0x10 в мир, матрица маркера ---- */
 static int32_t *mark_flag(int32_t k) {
   switch (k) { case 0: return &G010DE220; case 1: return &G010DE224; case 2: return &G010DE228; default: return &G010DE22C; }
@@ -1086,6 +1107,7 @@ void P100_MarkerSpawn(int32_t k) {
   wr32(b + 0xf4, 100);
 }
 
+/* Billboard colours BILBRD1..7 on / off. */
 /* ---- 004feb59: цвета рекламных щитов BILBRD1..7 (on=1 — включены) ---- */
 void P100_Billboards(int32_t on) {
   static const char *const names[7] = { "BILBRD1", "BILBRD2", "BILBRD3", "BILBRD4", "BILBRD5", "BILBRD6", "BILBRD7" };
@@ -1110,6 +1132,7 @@ void P100_Billboards(int32_t on) {
   }
 }
 
+/* Mirror mask: 0x100 rows of 0x80, spots of 00cb8f20 inside the circle of radius 01270c24. */
 /* ---- 004f2c9a: маска зеркала — 0x100 строк по 0x80: пятна 00cb8f20 в круге радиуса 01270c24 ---- */
 void P100_MirrorMask(void) {
   const int32_t N = 0x1f;
@@ -1140,6 +1163,7 @@ void P100_MirrorMask(void) {
   }
 }
 
+/* Traffic car record takes the spawn lane slot if no other car is near. */
 /* ---- 00494701: машина трафика car (запись 0x54) занимает полосу появления, если рядом нет других ---- */
 void P100_TrafficSlot(uint8_t *car) {
   if ((car[0x13] & 9) != 0 || (Rand_004D9078() & 7) != 0) return;
@@ -1174,6 +1198,7 @@ void P100_TrafficSlot(uint8_t *car) {
   car[0x13] |= 0x11;
 }
 
+/* Blits icon name pixel-doubled into an LFB at (centred x, row y) with palette 012710c0. */
 /* ---- 00407e2f: значок name в LFB dst с удвоением (по центру x, строка y), палитра 012710c0 ---- */
 void P100_IconLfb2x(uint8_t *dst, int32_t x, uint32_t y, const char *name) {
   const uint8_t *ic = P93_FindIcon(name);

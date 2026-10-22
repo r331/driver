@@ -1,3 +1,6 @@
+/* ported104 — graphics-options menu init, mission start reset, player traffic-turn setup, debris tables and the car
+   damage -> dent texture / damaged-model update (Game.exe, cdecl).  The Russian notes above each function are the
+   original port notes; English headers summarise them.  Original file note: */
 /* v1.49 (см. ported104.h). Стандарт указателей v1.42: адреса строк в таблице 0054a170 и P97_StrAddr — uint32 (re_ptr);
    ссылки текстур вмятин P27_DentTex — адреса Game.exe (re_ptr); ссылки моделей машин — P79_PTR. */
 #include "ported104.h"
@@ -186,13 +189,14 @@ int32_t P104_139A28;
 #endif
 
 #include "memrw.h"
-static void wr16(void *p, uint16_t v) { memcpy(p, &v, 2); }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
+#include "carfields.h"
+/* Accessors for Game.exe .data addresses through re_ptr (unmapped address: reads 0, writes are dropped). */
 static int32_t gd32(uint32_t a) { const void *p = re_ptr(a); return p ? rd32(p) : 0; }
 static void gw32(uint32_t a, uint32_t v) { void *p = re_ptr(a); if (p) wr32(p, (int32_t)v); }
 static void gw16(uint32_t a, uint16_t v) { void *p = re_ptr(a); if (p) wr16(p, v); }
 static float gdf(uint32_t a) { const void *p = re_ptr(a); return p ? rdf(p) : 0.0f; }
 static void gwf(uint32_t a, float v) { void *p = re_ptr(a); if (p) wrf(p, v); }
+/* Address of string i of the localised string table P97_StrAddr (native: 0 outside 0..0x15d). */
 static uint32_t str_at(int32_t i) {
 #ifndef RE_HOOK_BUILD
   if (i < 0 || i >= 0x15e) return 0;
@@ -201,16 +205,22 @@ static uint32_t str_at(int32_t i) {
 }
 /* индекс строки из таблицы int32 base[i] (.data 0054a640..); в native вне зарегистрированной таблицы — 0 */
 static uint32_t str_tab(uint32_t base, int32_t i) { return str_at(gd32(base + (uint32_t)i * 4)); }
+/* x87 fistp: round to nearest even in the current (default) rounding mode. */
 static int32_t fistp(long double v) { return (int32_t)llrintl(v); }
 
 /* ---- 00409622: экран графики — подписи пунктов (адреса строк P97_StrAddr в поля +8 записей 0x20 таблицы 0054a250..),
    значения переключателей (индексы строк 0054a640.. по текущим настройкам) и положения пяти ползунков (float 0054a680..690,
    координата x = round(доля·116) + 0x1d5 в +0x14 записей 0054a170..) ---- */
+/* Slider: stores fraction frac (0..1) at fa and the knob x = round(frac * 116) + 0x1d5 at xa (int16). */
 static void slider(uint32_t fa, uint32_t xa, float frac) {
   gwf(fa, frac);
   P11_00ba52d0 = fistp((long double)gdf(fa) * 116.0L);              /* 00546044 = 116.0 */
   gw16(xa, (uint16_t)((int16_t)P11_00ba52d0 + 0x1d5));
 }
+/* P104_GfxMenuInit — Game.exe 00409622.  Fills the graphics-options menu: 19 item labels, the current value string
+   of each switch (string-index tables at .data 0054a640..), and five sliders (two distances mapped from
+   15000..42000 / 15000..45000, one 0..64, one 16..64, one 0..3).  c / t / s are three-way settings derived from
+   pairs of flags (TODO(RE): unsure which options they are). */
 void P104_GfxMenuInit(void) {
   int32_t c = P13_00575ef4 == 0 ? 0 : (P13_00b87e74 == 0 ? 1 : 2);
   int32_t t = P13_00575ec0 == 0 ? 0 : (P13_00575ebc == 0 ? 1 : 2);
@@ -243,6 +253,9 @@ void P104_GfxMenuInit(void) {
 
 /* ---- 004e4bdc: сброс состояния миссии перед стартом: 004e49c0, обнуление счётчиков/таймеров, значок STOPWATCH,
    машины миссии 4 (004e4d35), бумага/призрак, банк звуков BANK0.DSS в слот 0xf000 ---- */
+/* P104_MissionInit — Game.exe 004e4bdc.  Resets the per-mission state before a mission starts: mission counters and
+   timers, fade state, the STOPWATCH icon, mission-4 cars, newspaper and ghost, and loads sound bank BANK0.DSS into
+   slot 0xf000.  Several values are written through two aliases of one Game.exe address (native split names). */
 void P104_MissionInit(void) {
   P98_ResetMission();
   P98_M38F8 = 0; P98_M4460 = 0; P98_M4480 = 0; P59_S44CC = 0; P59_S4790 = 0; P59_S3904 = 0; P98_M4468 = 0;
@@ -267,6 +280,7 @@ void P104_MissionInit(void) {
 
 /* ---- 0049565b: начало поворота трафика у игрока: клетка карты под игроком (0051b111), узел дороги (не перекрёсток,
    длина ≥ 0x14, сторона по биту 0 dir), длины четырёх сторон узла (P59_C39DC0) и соседнего узла (0051b208) ---- */
+/* Record i (stride st) of a table of sz bytes; native: an all-zero record when out of range. */
 static const uint8_t *rec(const uint8_t *tab, uint32_t sz, int32_t i, uint32_t st) {
 #ifndef RE_HOOK_BUILD
   static const uint8_t zero[0x100];
@@ -276,11 +290,16 @@ static const uint8_t *rec(const uint8_t *tab, uint32_t sz, int32_t i, uint32_t s
 #endif
   return tab + (uint32_t)i * st;
 }
+/* P104_TrafficTurn — Game.exe 0049565b.  Starts a traffic "turn" event at the player's map cell in direction dir
+   (0..3, bit 0 = which side of the road): rejected (0) when one is already active (G01145934 / G011426F8), the cell
+   is a junction (road word bits 0xc000), the road is shorter than 0x14 or the side does not match.  Otherwise sums
+   the lengths of the node's two sides along dir plus those of the neighbouring node, stores node / direction /
+   lengths in the traffic globals and returns 1.  TODO(RE): unsure what the event is used for. */
 int32_t P104_TrafficTurn(uint32_t dir) {
   int32_t px = P59_PosX, pz = P59_PosZ;
   if (G01145934 != 0) return 0;
   if (G011426F8 != -1) return 0;
-  uint16_t w = (uint16_t)P72_RoadWord(px, pz);
+  uint16_t w = (uint16_t)P72_RoadWord(px, pz);   /* road word of the cell: node index, bits 0xc000 = junction */
   if ((w & 0xc000) != 0) return 0;
   int16_t len; memcpy(&len, rec(P11_00bf1c40, sizeof P11_00bf1c40, w, 0x42) + 8, 2);   /* 00bf1c48 */
   if (len < 0x14) return 0;
@@ -310,10 +329,14 @@ int32_t P104_TrafficTurn(uint32_t dir) {
 
 /* ---- 004ab127: таблицы обломков: очистка 0110b260 (200 × 0x3c) и 010faf40 (400 байт), буфер 00cfe760,
    номера записей; 256 поворотов (углы 01123200 += 0x10/0x60) трёх наборов вершин 010ffd20/01102d20/0111a400 ---- */
+/* Copies a 3-vertex debris shape (float[3] each) into three float[4] slots and rotates them by P44_MatPtr. */
 static void deb_set(float *v, const float *src) {
   for (int k = 0; k < 3; k++) { v[k * 4] = src[k * 3]; v[k * 4 + 1] = src[k * 3 + 1]; v[k * 4 + 2] = src[k * 3 + 2]; }
   P44_Xform(v); P44_Xform(v + 4); P44_Xform(v + 8);
 }
+/* P104_DebrisTabs — Game.exe 004ab127.  Clears the 200 debris records (0x3c bytes) and the free list, numbers the
+   records, and precomputes 256 rotated copies of three triangle shapes (two small, one large) by stepping Euler
+   angles (+0x10, +0x60, 0 per copy). */
 void P104_DebrisTabs(void) {
   P14_Fn0048DB65(P12_0110b260, 12000);
   P14_Fn0048DB65(S_010FAF40, 400);
@@ -350,12 +373,19 @@ static const uint8_t k_face[] = P104_FACE_INIT;   /* 0055b834: по типу м�
 #else
 #define TEXP(i) ((uint8_t *)P65_Texs[(i)].p)
 #endif
+/* P104_CarDents — Game.exe 004c1c23.  Updates the visible damage of car (skipped while P95_B87ED0).
+   Player (car 0): dent level per body zone = damage * 6 >> 12, max 5; for each changed zone the dent texture
+   pieces of that level (table 00554fc4 per player car) are blitted into the car's texture page D_00d17ec8, which
+   is then re-uploaded.
+   Other cars: zone flags from damage thresholds (front pair / rear pair >= 0x52c, single zones > 1000); every draw
+   record of the clean model whose face (table 0055b834 per car kind) is flagged is replaced by the damaged model's
+   record.  Stops when the two models' records stop matching in kind / size. */
 void P104_CarDents(int32_t car) {
   if (P95_B87ED0 != 0) return;
   if (car == 0) {
     int changed = 0;
     for (int32_t side = 5; side >= 0; side--) {
-      int32_t lv = (int32_t)((uint32_t)rd32((const uint8_t *)&P99_Cars[0] + 0x11c + side * 4) * 6u) >> 12;   /* imul, sar */
+      int32_t lv = (int32_t)((uint32_t)rd32((const uint8_t *)&P99_Cars[0] + CAR_DAMAGE + side * 4) * 6u) >> 12;   /* imul, sar */
       if (lv > 5) lv = 5;
       if (P99_D17ECC[side] == (uint8_t)lv) continue;
       for (int32_t k = 0; k < 3; k++) {
@@ -390,10 +420,11 @@ void P104_CarDents(int32_t car) {
   uint32_t kind = TrafficRecs[(car - 1) * 0x54 + 0xc];
   const uint8_t *cr = (const uint8_t *)&P99_Cars[car];
   uint32_t fl[7];
-  fl[1] = fl[2] = (rd32(cr + 0x11c) < 0x52c && rd32(cr + 0x120) < 0x52c) ? 0u : 1u;
-  fl[3] = 1000 < rd32(cr + 0x124);
-  fl[4] = fl[5] = (rd32(cr + 0x128) < 0x52c && rd32(cr + 0x12c) < 0x52c) ? 0u : 1u;
-  fl[6] = 1000 < rd32(cr + 0x130);
+  /* fl[0] = record count, fl[1..6] = "zone damaged" per face id (TODO(RE): unsure which zone is front/rear) */
+  fl[1] = fl[2] = (rd32(cr + CAR_DAMAGE + 0) < 0x52c && rd32(cr + CAR_DAMAGE + 4) < 0x52c) ? 0u : 1u;
+  fl[3] = 1000 < rd32(cr + CAR_DAMAGE + 8);
+  fl[4] = fl[5] = (rd32(cr + CAR_DAMAGE + 12) < 0x52c && rd32(cr + CAR_DAMAGE + 16) < 0x52c) ? 0u : 1u;
+  fl[6] = 1000 < rd32(cr + CAR_DAMAGE + 20);
   if (P28_CarDam[kind] == 0 || P28_CarClean[kind] == 0) return;     /* native: модели не загружены */
   const uint8_t *md = (const uint8_t *)P79_PTR(P28_CarDam[kind]);
   const uint8_t *mc = (const uint8_t *)P79_PTR(P28_CarClean[kind]);

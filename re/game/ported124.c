@@ -1,3 +1,6 @@
+/* ported124 — motel screen (answering machine samples, keys, entry), car selection, 640x480 BMP loading, debug.log,
+   the watch-variable display and the replay director's menu navigation and per-frame handler (Game.exe, cdecl).
+   Original note (addresses and thunks): */
 /* v1.69: ported124 — восстановлено из Game.exe. Все функции cdecl (work/rets.py: ret без операнда).
    00416794 — клавиши мотеля: Ghidra видит __fastcall(param_1), но ECX нигде не читается (push ecx — резерв локала,
      IsKeyDown 004e383a берёт один аргумент); native-версия принимает мусорный аргумент и игнорирует его, вызывать с 0.
@@ -102,60 +105,75 @@ int32_t P124_LogOn = 1;                      /* .data 00553bbc */
 
 #include "memrw.h"
 
+#include "dik.h"   /* DirectInput scan codes */
+
+/* Motel answering-machine item flags (+0 u16). */
+#define MITEM_MISSION 0x02   /* selecting it starts a mission (P67_Res51C = item) */
+#define MITEM_JOKE    0x04   /* JOKE%03d sample */
+#define MITEM_CAR     0x08   /* CAR%03d sample; selecting it opens the car selection for row +2 */
+#define MITEM_PLAYED  0x10   /* set once its sample was played */
+
+/* Answering-machine buttons (P9_005fe9f0, cycled with Left / Right, activated with Enter). */
+enum { MBTN_PREV = 0, MBTN_PLAY = 1, MBTN_NEXT = 2, MBTN_SELECT = 3 };
+
 /* запись пункта меню мотеля (шаг 8): +0 флаги uint16, +2 номер uint16 */
 static uint8_t *motel_item(void) {
   uint8_t *t = (uint8_t *)re_ptr(P100_ItemTab);
   return t ? t + P100_ItemSel * 8 : NULL;
 }
-static uint16_t rd16(const uint8_t *p) { uint16_t v; memcpy(&v, p, 2); return v; }
 
 /* ---- 00416d6d ---- */
 static char s_snd_name[32];                  /* в оригинале — локальный буфер; static, чтобы адрес прошёл через ChangeSample */
+/* P124_MotelSample — Game.exe 00416d6d.  Plays the message of the selected answering-machine item into sample slot 7:
+   AUDIO\MOTEL\ANS<n>.WAV, CAR<min(n,2)+1>.WAV (car item) or JOKE<min(n,3)>.WAV (joke item); marks it as played. */
 void P124_MotelSample(void) {
   P48_FreeVoice(10);
   uint8_t *it = motel_item();
   if (it == NULL) return;                    /* native: таблица пунктов вне известных областей */
-  uint16_t fl = (uint16_t)(rd16(it) | 0x10); memcpy(it, &fl, 2);
-  uint32_t n = rd16(it + 2);
-  if ((fl & 4) == 0) {
-    if ((fl & 8) == 0) snprintf(s_snd_name, sizeof s_snd_name, "AUDIO\\MOTEL\\ANS%03d.WAV", (int)n);
+  uint16_t fl = (uint16_t)(rdu16(it) | MITEM_PLAYED); memcpy(it, &fl, 2);
+  uint32_t n = rdu16(it + 2);
+  if ((fl & MITEM_JOKE) == 0) {
+    if ((fl & MITEM_CAR) == 0) snprintf(s_snd_name, sizeof s_snd_name, "AUDIO\\MOTEL\\ANS%03d.WAV", (int)n);
     else snprintf(s_snd_name, sizeof s_snd_name, "AUDIO\\MOTEL\\CAR%03d.WAV", (int)((n < 3 ? n : 2) + 1));
   } else snprintf(s_snd_name, sizeof s_snd_name, "AUDIO\\MOTEL\\JOKE%03d.WAV", (int)(n < 4 ? n : 3));
   if (P68_ChangeSample((int32_t)re_addr(s_snd_name), 7) != 0) SoundPlay00523E50(7, 10, 0x5622);
 }
 
 /* ---- 00416794 ---- */
+/* P124_MotelKeys — Game.exe 00416794.  Answering-machine keys: Esc -> -1 (leave); Left / Right cycle the four buttons;
+   Enter activates: previous / replay / next message, or select — a mission item returns 1 (mission chosen), a car
+   item runs the car selection and returns to the motel.  Otherwise 0.  junk is the unused ECX of the original. */
 int32_t P124_MotelKeys(int32_t junk) {
   (void)junk;
-  if (IsKeyDown(1)) { Ui00418886(); return -1; }
-  if (IsKeyDown(0xcb)) {
+  if (IsKeyDown(DIK_ESCAPE)) { Ui00418886(); return -1; }
+  if (IsKeyDown(DIK_LEFT)) {
     Ui00418886(); if (--P9_005fe9f0 < 0) P9_005fe9f0 = 3; SelectByDifficulty_00416D17(); return 0;
   }
-  if (IsKeyDown(0xcd)) {
+  if (IsKeyDown(DIK_RIGHT)) {
     Ui00418886(); if (3 < ++P9_005fe9f0) P9_005fe9f0 = 0; SelectByDifficulty_00416D17(); return 0;
   }
-  if (!IsKeyDown(0x1c)) return 0;
+  if (!IsKeyDown(DIK_RETURN)) return 0;
   Ui00418886();
 #ifndef RE_HOOK_BUILD
   if (getenv("RE_MOTELDBG")) {               /* v2.12: отладка автоответчика */
     uint8_t *it = motel_item();
     fprintf(stderr, "[motel] Enter: кнопка %d пункт %d/%d флаги %04x номер %d (таблица %08x)\n", (int)P9_005fe9f0, (int)P100_ItemSel,
-            (int)P100_ItemN, it ? rd16(it) : 0xffff, it ? rd16(it + 2) : -1, (unsigned)P100_ItemTab);
+            (int)P100_ItemN, it ? rdu16(it) : 0xffff, it ? rdu16(it + 2) : -1, (unsigned)P100_ItemTab);
   }
 #endif
   switch (P9_005fe9f0) {
-  case 0: if (--P100_ItemSel < 0) P100_ItemSel = P100_ItemN - 1; P124_MotelSample(); break;
-  case 1: P124_MotelSample(); break;
-  case 2: if (P100_ItemN <= ++P100_ItemSel) P100_ItemSel = 0; P124_MotelSample(); break;
-  case 3: {
+  case MBTN_PREV: if (--P100_ItemSel < 0) P100_ItemSel = P100_ItemN - 1; P124_MotelSample(); break;
+  case MBTN_PLAY: P124_MotelSample(); break;
+  case MBTN_NEXT: if (P100_ItemN <= ++P100_ItemSel) P100_ItemSel = 0; P124_MotelSample(); break;
+  case MBTN_SELECT: {
     uint8_t *it = motel_item();
     if (it == NULL) break;
-    uint16_t fl = rd16(it);
-    if (fl & 2) { P12_Fn00418433(0x0054e250u, 0x004169afu); P67_Res51C = P100_ItemSel; return 1; }
-    if (fl & 8) {
+    uint16_t fl = rdu16(it);
+    if (fl & MITEM_MISSION) { P12_Fn00418433(0x0054e250u, 0x004169afu); P67_Res51C = P100_ItemSel; return 1; }
+    if (fl & MITEM_CAR) {
       P12_Fn00418433(0x0054e250u, 0x004169afu);
       P48_FreeVoice(10);
-      P124_CarSelect((int32_t)rd16(it + 2));
+      P124_CarSelect((int32_t)rdu16(it + 2));
       Ui0041A1EC(4);
       P118_CamRoute(9);
       Ui004183E8();
@@ -169,17 +187,25 @@ int32_t P124_MotelKeys(int32_t junk) {
 }
 
 /* ---- 0040d6e8 ---- */
+/* BMP header checks of P124_ReadBmp: "BM", 640 x 480, 24 bpp, BI_RGB. */
+#define BMP_MAGIC   0x4d42
+#define BMP_HDR     0x36
+#define SCREEN_W    0x280
+#define SCREEN_H    0x1e0
+
+/* P124_ReadBmp — Game.exe 0040d6e8.  Loads an uncompressed 640x480 24-bit BMP into dst as 4-byte pixels (B, G, R
+   stored at +2, +1, +0; byte +3 untouched), flipping the bottom-up rows.  Returns 1, or 0 for a missing / other file. */
 int32_t P124_ReadBmp(const char *name, uint8_t *dst) {
   int32_t ok = 0;
   void *f = g_fopen(name, "rb");
   if (f == NULL) return 0;
-  uint8_t h[0x36];
+  uint8_t h[BMP_HDR];
   memset(h, 0, sizeof h);
-  g_fread(h, 1, 0x36, f);
+  g_fread(h, 1, BMP_HDR, f);
   int32_t w = rd32(h + 0x12), hh = rd32(h + 0x16);
   int16_t bpp; memcpy(&bpp, h + 0x1c, 2);
-  if (rd16(h) == 0x4d42 && w == 0x280 && hh == 0x1e0 && bpp == 0x18 && rd32(h + 0x1e) == 0) {
-    for (int32_t y = 0x1e0 - 1; y >= 0; y--)
+  if (rdu16(h) == BMP_MAGIC && w == SCREEN_W && hh == SCREEN_H && bpp == 0x18 && rd32(h + 0x1e) == 0) {
+    for (int32_t y = SCREEN_H - 1; y >= 0; y--)
       for (int32_t x = 0; x < w; x++) {
         uint8_t *p = dst + (y * w + x) * 4;
         p[2] = (uint8_t)g_fgetc(f);
@@ -193,9 +219,11 @@ int32_t P124_ReadBmp(const char *name, uint8_t *dst) {
 }
 
 /* ---- 0040c610 ---- */
+/* P124_ShowBmp — Game.exe 0040c610.  Shows a 640x480 BMP full screen (blitted 4 times — once per buffer of the swap
+   chain, presumably) and with wait != 0 waits for all keys up, then any key down. */
 void P124_ShowBmp(const char *name, int32_t wait) {
   if (P117_ClipFn) P117_ClipFn(0, 0, P19_ScrW, P19_ScrH);
-  uint8_t *buf = (uint8_t *)P98_DebugMalloc(0x12c000, "D:\\Driver\\Game\\frontend\\frontend.c", 0x1d5);
+  uint8_t *buf = (uint8_t *)P98_DebugMalloc(0x12c000,   /* 640 * 480 * 4 */ "D:\\Driver\\Game\\frontend\\frontend.c", 0x1d5);
   if (buf == NULL) return;
   if (P124_ReadBmp(name, buf) != 0) {
     P105_BlitScaled(buf); P105_BlitScaled(buf); P105_BlitScaled(buf); P105_BlitScaled(buf);
@@ -223,6 +251,8 @@ static void tex_filter(int32_t a, int32_t b, int32_t c) {
 }
 
 /* ---- 004182b0 ---- */
+/* P124_MotelInit — Game.exe 004182b0.  Enters the motel: flags, icon scale, the motel flyby of the current city, level
+   load, MOTEL.DSS bank, screen state (perspective scale 384, bilinear filtering), CD track 3 when CD audio is on. */
 void P124_MotelInit(void) {
   G6_00B87EEC = 1;
   G6_00B87EFC = 1;
@@ -247,6 +277,9 @@ void P124_MotelInit(void) {
 }
 
 /* ---- 004171f0 ---- */
+/* P124_CarSelect — Game.exe 004171f0.  Car selection screen for row 0..2 (CARSEL<row>.FBD flyby, row table
+   0054e320/28/30): runs its own frame loop until P119_CarSelKey returns non-zero, then reloads the city's FLAT<n>.FBD
+   and returns that result.  Missing files are fatal. */
 int32_t P124_CarSelect(int32_t row) {
   char name[32];
   LoadArrowIcons00417353();
@@ -279,6 +312,8 @@ int32_t P124_CarSelect(int32_t row) {
 }
 
 /* ---- 004bf2a0 ---- */
+/* P124_DebugLog — Game.exe 004bf2a0.  Appends msg + "\n" to debug.log; the first write of a run truncates an existing
+   file ("wt"), later writes append (P124_LogSize = file size after the last write).  Off when P124_LogOn == 0. */
 void P124_DebugLog(const char *msg) {
   if (P124_LogOn == 0) return;
   void *f = g_fopen("debug.log", "r+t");
@@ -297,6 +332,9 @@ void P124_DebugLog(const char *msg) {
 }
 
 /* ---- 004bf4a1 ---- */
+/* P124_WatchShow — Game.exe 004bf4a1.  Debug overlay: for each of 32 watch entries (0xc bytes: name address, variable
+   address, type, size code 0/1/2 = 8/16/32 bit) prints "name: value" — type 0 hex, 1 "binary" (prints the literal
+   "0bb", as MSVC did), 2 unsigned, 3 signed, 4 float, 5 string. */
 void P124_WatchShow(void) {
   char *buf = (char *)&A_010EA620[0x200];   /* 010ea820 — буфер строки (0x80 до 010ea8a0) */
   CursorSet004D94B7(0, 0);
@@ -326,7 +364,7 @@ void P124_WatchShow(void) {
     case 2:
       if (!show) break;
       if (sz == 0) snprintf(buf, 0x80, "%u", (unsigned)v[0]);
-      else if (sz == 1) snprintf(buf, 0x80, "%u", (unsigned)rd16(v));
+      else if (sz == 1) snprintf(buf, 0x80, "%u", (unsigned)rdu16(v));
       else snprintf(buf, 0x80, "%u", (unsigned)rd32(v));
       P96_LogLine(buf);
       break;
@@ -355,6 +393,10 @@ void P124_WatchShow(void) {
 }
 
 /* ---- 004c38e2 ---- */
+/* P124_ReplayMenu — Game.exe 004c38e2 (ReplayMenuHandler).  Moves the replay menu selection DirectorUnk7C through the
+   node graph by input bits dir: 1 / 2 follow link1 backwards / forwards, 4 / 8 link2, skipping nodes with flag 4
+   (special wrap between nodes 1 and 8); 0x10 activates the node (P125_ReplayNodeAction).  Moving between nodes
+   6 <-> 9 and 7 <-> 0xd saves / restores the camera state.  TODO(RE): unsure which bits are up/down/left/right. */
 void P124_ReplayMenu(int32_t dir) {
   int more = 1;
   P124_ReplayPrev = DirectorUnk7C;
@@ -416,11 +458,17 @@ void P124_ReplayMenu(int32_t dir) {
 }
 
 /* ---- 004c813d ---- */
-static int dir_playing(void) { return DirectorUnk6C < DirectorLastFrame && IsKeyDown(1) == 0; }
+/* Playback continues: frames left and Esc not pressed. */
+static int dir_playing(void) { return DirectorUnk6C < DirectorLastFrame && IsKeyDown(DIK_ESCAPE) == 0; }
 static void dir_quit(int32_t sub) { FreeCameraList(); FreeDirectorBuffer(); SetDirectorMode(0, sub, 0); }
+/* P124_HandleDirector — Game.exe 004c813d (HandleDirector).  Per-frame replay director: syncs the frame counter,
+   '.' toggles P29_Flag48, then runs the behaviour of the current mode (see SetDirectorMode in ported29.c: record
+   waypoints, menu, playback variants, camera editors; at the end of playback saves $TEMP$.CAMS and returns to mode 0
+   or the menu), animates the selection colour (blink, or a pulsing yellow when P29_FlagA4), checks the camera
+   distance, restores the camera state and refreshes the menu nodes. */
 void P124_HandleDirector(void) {
   DirectorUnk6C = P62_Frame;
-  if (IsKeyDown(0x34)) P29_Flag48 = (P29_Flag48 == 0);
+  if (IsKeyDown(DIK_PERIOD)) P29_Flag48 = (P29_Flag48 == 0);
   if (CamBackupValid != 0) P61_StoreCamState((uint8_t *)&DirectorCam);
   uint32_t keys = ReadDirectorKeys();
   int32_t prev = DirectorUnk7C;

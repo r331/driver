@@ -347,7 +347,6 @@ void CopyTable_004D6E9F(void);
 uint32_t Rand_004D9078(void);
 int32_t AnyKeyHeld_004E3871(void);
 void PushHistory_004E5938(int32_t v);
-void SetObjState_00514C72(uint8_t *p, uint16_t a, uint32_t c, uint32_t d, uint32_t e);
 void InitObjState_00514BC7(uint8_t *p, int32_t mode, uint32_t arg);
 void ResetObjState_00514E99(uint8_t *p);
 void InitSoundVolumes_00523C56(void);

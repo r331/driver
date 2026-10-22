@@ -4,6 +4,7 @@
 #include "ported52.h"
 #include "ported135.h"
 #include "ported33.h"
+#include "ported50.h"
 #include <string.h>
 #ifdef RE_HOOK_BUILD
 #  define P52_STD __attribute__((stdcall))
@@ -155,19 +156,37 @@ p52_colors_t P52_ColorTab;
 #pragma pop_macro("P52_ColorTab")
 #endif
 
+/* ported52.c — small functions: Glide 3dfx wrappers (fog table / fog mode / mipmap download, resolved by
+   name from the Glide export list P33_*), the frame-step debug toggle, slot-table reset, the HUD
+   dispatcher for interview / mode 5, FMV start, a coloured menu label and a menu record reload.
+   All cdecl; Glide entry points are stdcall (P52_STD). */
+
+#define GLIDE_FOG_COLOR_GREY  0xaaaaaau   /* fog colour when fog is off or already initialised */
+#define GLIDE_CLEAR_DEPTH     0xffff      /* grBufferClear depth value: clear depth to the far plane */
+#define GR_FOGMODE_DISABLE    0
+#define GR_FOGMODE_WITH_TABLE 2           /* GR_FOG_WITH_TABLE_ON_Q in Glide 3 headers */
+#define MODE_INTERVIEW        4           /* D_00b87e30 values */
+#define MODE_5                5           /* TODO(RE): unsure which game mode 5 is (ghost trail shown) */
+
+/* Address of a Glide export by its decorated name, or NULL (native: no Glide, so always NULL). */
 static void *glide_proc(const char *name) {
   for (int i = 0; i < P33_GlideCount(); i++)
     if (strcmp(P33_GlideName(i), name) == 0) return P33_GlideProc(i);
   return NULL;
 }
+/* Float from its IEEE bit pattern (literal constants copied from the original's immediates). */
 static float bits_f(uint32_t u) { float f; memcpy(&f, &u, 4); return f; }
 
+/* P52_GlideFogSetup — Game.exe 0042626e.  Builds the Glide exponential fog table P52_FogTab (64 entries)
+   and installs it.  Fog off (P52_FogOn == 0) or already set up (P26_FxD != 0): grey fog colour, density
+   1.2e-4 (bits 0x38fba882).  Otherwise: black fog, density 1.0e-4 (0x38d1b717), and P26_FxD = 1.
+   TODO(RE): unsure about the meaning of P26_FxD beyond "fog initialised". */
 void P52_GlideFogSetup(void) {
   void (P52_STD *fogcolor)(uint32_t) = (void (P52_STD *)(uint32_t))glide_proc("_grFogColorValue@4");
   void (P52_STD *genexp)(void *, float) = (void (P52_STD *)(void *, float))glide_proc("_guFogGenerateExp@8");
   void (P52_STD *fogtable)(void *) = (void (P52_STD *)(void *))glide_proc("_grFogTable@4");
   if (P52_FogOn == 0 || P26_FxD != 0) {
-    if (fogcolor) fogcolor(0xaaaaaau);
+    if (fogcolor) fogcolor(GLIDE_FOG_COLOR_GREY);
     if (genexp) genexp(&P52_FogTab, bits_f(0x38fba882u));
   } else {
     if (fogcolor) fogcolor(0);
@@ -177,16 +196,22 @@ void P52_GlideFogSetup(void) {
   if (fogtable) fogtable(&P52_FogTab);
 }
 
+/* P52_GlideFogMode — Game.exe 004264bd.  Sets the Glide fog mode (table fog when P26_FxD != 0, else
+   off), then clears the depth buffer; unless P52_NoTrail is set, colour writes are masked off around the
+   clear so the colour buffer keeps the last frame. */
 void P52_GlideFogMode(void) {
   void (P52_STD *fogmode)(int32_t) = (void (P52_STD *)(int32_t))glide_proc("_grFogMode@4");
   void (P52_STD *colormask)(int32_t, int32_t) = (void (P52_STD *)(int32_t, int32_t))glide_proc("_grColorMask@8");
   void (P52_STD *clear)(int32_t, int32_t, int32_t) = (void (P52_STD *)(int32_t, int32_t, int32_t))glide_proc("_grBufferClear@12");
-  if (fogmode) fogmode(P26_FxD == 0 ? 0 : 2);
+  if (fogmode) fogmode(P26_FxD == 0 ? GR_FOGMODE_DISABLE : GR_FOGMODE_WITH_TABLE);
   if (P52_NoTrail == 0 && colormask) colormask(0, 0);
-  if (clear) clear(0, 0, 0xffff);
+  if (clear) clear(0, 0, GLIDE_CLEAR_DEPTH);   /* colour 0, alpha 0, depth 0xffff */
   if (P52_NoTrail == 0 && colormask) colormask(1, 0);
 }
 
+/* P52_TexDownloadMipMap — Game.exe 0042486b.  Texture download through the active 3D API: nothing unless
+   D_00b1c0d4 (TODO(RE): unsure — "3D card present"); D_00b1c0d8 == 0 -> grTexDownloadMipMap(a, b, c, d)
+   (Glide), == 1 -> P52_Fn41D53C(a..e) (TODO(RE): unsure — the Direct3D path). */
 void P52_TexDownloadMipMap(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e) {
   if (D_00b1c0d4 == 0) return;
   if (D_00b1c0d8 == 0) {
@@ -197,6 +222,10 @@ void P52_TexDownloadMipMap(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e
   }
 }
 
+/* P52_MenuStepToggle — Game.exe 00510084.  Cycles the frame-step state P21_FrameFlagB / FlagA / FrameMin
+   on each call: off -> on with FrameMin 1 -> FrameMin 2..5 -> FlagA = 1 -> off.  Then sets
+   MenuVar575EF8 = 4 and refreshes the menu (Call0050FBF4).  TODO(RE): unsure what the frame flags
+   control (a frame-rate limiter option?). */
 void P52_MenuStepToggle(void) {
   if (P21_FrameFlagB == 0) {
     P21_FrameFlagB = 1; P21_FrameFlagA = 0; P21_FrameMin = 1;
@@ -211,16 +240,23 @@ void P52_MenuStepToggle(void) {
   Call0050FBF4();
 }
 
+/* P52_HudDispatch — Game.exe 004e59b9.  Per-frame extra HUD by game mode: interview (4) — ghost trail
+   when P11_00b87e38 == 0xc9, the interview HUD (P52_Fn4E5A1A + paper bars P115_PaperHud) and, when
+   P12_00d044d0 is set, the text line at 00d04680; mode 5 — ghost trail if G6_00B87EA0.  The second
+   D_00b87e30 == 4 test is redundant but kept (it is in the original). */
 void P52_HudDispatch(void) {
-  if (D_00b87e30 == 4) {
+  if (D_00b87e30 == MODE_INTERVIEW) {
     if (P11_00b87e38 == 0xc9) P135_GhostTrail();
-    if (D_00b87e30 == 4) { P52_Fn4E5A1A(); P115_PaperHud(); }
+    if (D_00b87e30 == MODE_INTERVIEW) { P52_Fn4E5A1A(); P115_PaperHud(); }
     if (P12_00d044d0 != 0) DrawTextLine004FBBC5(0x00d04680);
-  } else if (D_00b87e30 == 5 && G6_00B87EA0 != 0) {
+  } else if (D_00b87e30 == MODE_5 && G6_00B87EA0 != 0) {
     P135_GhostTrail();
   }
 }
 
+/* P52_ResetSlots — Game.exe 004aad65.  Clears three counters, runs the table-reset routines of the
+   004ab0df..004aba7c group and P12_Fn005229F0 in the original order, then sets four flags to 1.
+   TODO(RE): unsure what the reset tables hold (called at level start). */
 void P52_ResetSlots(void) {
   P52_ResetA = 0; P52_ResetB = 0; P52_ResetC = 0;
   P52_Fn4ABD69();
@@ -236,13 +272,19 @@ void P52_ResetSlots(void) {
   P52_Ones0 = 1; P52_Ones1 = 1; P52_Ones2 = 1; P52_Ones3 = 1;
 }
 
+/* P52_FmvStart — Game.exe 0048abdc.  Stops any FMV (P50_FmvStopRelease), opens the movie
+   file a (P150_OpenAudio) and starts it (P52_Fn48B5E3).  Returns 1 on success; on failure stops again
+   and returns 0. */
 int32_t P52_FmvStart(const char *a) {
-  Chain0048AC0D();
+  P50_FmvStopRelease();
   if (P150_OpenAudio(a) != 0 && P52_Fn48B5E3() != 0) return 1;
-  Chain0048AC0D();
+  P50_FmvStopRelease();
   return 0;
 }
 
+/* P52_DrawLabel — Game.exe 004a9e0a.  Draws menu text a at x = 480.0, y = b in colour c (RGB from
+   P52_ColorTab, 4 bytes per colour), unless b is above the top limit 0x60 - ScanSlot_0040AAE2(0).
+   P52_Fn5173D7 is P73_Text. */
 void P52_DrawLabel(int32_t a, int32_t b, int32_t c) {
   int32_t top = 0x60 - (int32_t)ScanSlot_0040AAE2(0);
   if (b < top) return;
@@ -250,6 +292,9 @@ void P52_DrawLabel(int32_t a, int32_t b, int32_t c) {
   P52_Fn5173D7(bits_f(0x43f00000u), (float)b, a, 0, 1);
 }
 
+/* P52_MenuReload — Game.exe 00510728.  Clears three menu counters, ends a running replay when GameMode
+   is 0, reloads menu record P52_MenuCnt (name table P52_NameTab, 0x11 bytes per entry; on failure
+   GlobalSet00511378) and calls Call00510784. */
 void P52_MenuReload(void) {
   P52_MenuA = 0; P52_MenuB = 0; P52_MenuC = 0;
   if (GameMode == 0) P139_ReplayEnd();

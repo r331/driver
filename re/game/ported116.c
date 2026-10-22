@@ -1,3 +1,5 @@
+/* ported116.c — front-end sliders, pause menu, radar icon, level sound start, bitmap-font text, skid marks and
+   wet-road light reflections (English overview; a Russian line per function follows each "---- address"). */
 /* v1.61 (см. ported116.h). */
 #include "aspect.h"
 #include "ported116.h"
@@ -113,7 +115,6 @@ int32_t P116_SndB2035C;
 
 #include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 static int32_t f2b(float f) { int32_t v; memcpy(&v, &f, 4); return v; }
 static const float SNAP = 1048576.0f;     /* .rdata 0054607c */
 static const float NEAR_Z = 50.0f;        /* .rdata 0054609c */
@@ -136,6 +137,8 @@ static void tex_select(uint32_t page) {
 static void raster(const p85_rv *a, const p85_rv *b, const p85_rv *c) { if (P85_RasterB) P85_RasterB(a, b, c); }
 
 /* ---- 004159e5: ползунки экрана настроек (467,381) и (467,406); выбранный пункт 0x12 / 0x13 — красный ---- */
+/* P116_Sliders2 — Game.exe 004159e5.  Draws the two sliders of the options screen at (467, 381) / (467, 406);
+   the selected item (0x12 / 0x13) is drawn red. */
 void P116_Sliders2(void) {
   if (G6_00B87EEC == 0) return;
   int32_t g1 = 0xff, g2 = 0xff;
@@ -152,6 +155,8 @@ void P116_Sliders2(void) {
 }
 
 /* ---- 00417651: пять ползунков экрана графики (x 467, y 310..406 шагом 24): уровни c, b, a, d, e ---- */
+/* P116_Sliders5 — Game.exe 00417651.  Five sliders of the graphics screen (x 467, y 310..406 step 24) showing the
+   levels c, b, a, d, e; sel = selected row. */
 void P116_Sliders5(float a, float b, float c, float d, float e, int32_t sel) {
   static const float ys[5] = { 310.0f, 334.0f, 358.0f, 382.0f, 406.0f };
   const float lv[5] = { c, b, a, d, e };
@@ -166,6 +171,7 @@ void P116_Sliders5(float a, float b, float c, float d, float e, int32_t sel) {
 }
 
 /* ---- 0050eaaa: меню паузы / ввода имени ---- */
+/* P116_PauseMenu — Game.exe 0050eaaa.  Draws the pause / name-entry menu. */
 void P116_PauseMenu(void) {
   uint32_t m = (uint32_t)G00B5A730;
   if (m == 0 || P29_Mode != 0) return;
@@ -220,6 +226,8 @@ void P116_PauseMenu(void) {
 }
 
 /* ---- 00506c96: значок объекта на радаре (если в пределах 62 клеток) ---- */
+/* P116_RadarIcon — Game.exe 00506c96.  Radar icon of an object at world pos in colour (r, g, b) and size scale,
+   when within 62 cells of the player; `unused` is not read. */
 void P116_RadarIcon(const int32_t *pos, int32_t unused, uint8_t r, uint8_t g, uint8_t b, float scale) {
   (void)unused;
   if (P56_Sprite == NULL) return;
@@ -260,6 +268,11 @@ void P116_RadarIcon(const int32_t *pos, int32_t unused, uint8_t r, uint8_t g, ui
 }
 
 /* ---- 004d5ce0: звуки уровня ---- */
+/* P116_SndLevelStart — Game.exe 004d5ce0.  Starts the looping sounds of a level on fixed voices, all silent
+   (-10000) until the per-frame update raises them: engine voices 0/1 at the player car (car 0x41 while
+   recording a replay), voices 4..6, voices 7/8 unless the HUD/ghost mode is on, the rain loop (sample 0x15 on
+   voice 0xb) when it rains, voice 2 (sample 7 for car model 10, else 10) following the player car; then resets
+   the sound state tables and runs one sound update.  TODO(RE): which sound each voice carries. */
 void P116_SndLevelStart(void) {
   int32_t c = 0;
   Chain004D5FFC();
@@ -316,6 +329,8 @@ void P116_SndLevelStart(void) {
 }
 
 /* ---- 0040abac: строка шрифтом (позиция/масштаб/флаги — 005d77c0.., 0054aa24.., цвет 0054aa2c) ---- */
+/* Bitmap-font text (0040abac): position/scale/flags from 005d77c0.. / 0054aa24.., colour 0054aa2c.
+   font_tab = glyph table of font f, text_width = width of s in pixels at scale sx. */
 static const uint8_t *font_tab(uint32_t f) {
 #ifndef RE_HOOK_BUILD
   if (f >= 8) return NULL;
@@ -336,6 +351,7 @@ static float text_width(const uint8_t *s, uint32_t f, float sx) {
   }
   return w;
 }
+/* P116_Text — Game.exe 0040abac.  Draws string txt (Game.exe address) with the current font settings. */
 void P116_Text(uint32_t txt) {
   const uint8_t *s = (const uint8_t *)re_ptr(txt);
 #ifndef RE_HOOK_BUILD
@@ -384,6 +400,8 @@ void P116_Text(uint32_t txt) {
 
 /* ---- 0051e65e / 0051f376: следы шин ---- */
 static float skid_mat[16];
+/* Skid marks (0051e65e / 0051f376): helpers to project a camera-space point, index the 1/z table, range-test
+   against SKID_R, take a record point relative to the camera and set the vertex colour. */
 static void proj(p85_rv *v, const float *c, float w) {
   v->x = (c[0] * w * P43_ScaleA + P43_OffX) - SNAP;
   v->y = (c[1] * w * P43_ScaleA + P43_OffY) - SNAP;
@@ -403,6 +421,7 @@ static void skid_cols(p85_rv *v, int on, uint8_t lit) {
   if (lit == 0) skid_col(v, 25.0f);
   else { v->r = 54.0f; v->g = 76.0f; v->b = 93.0f; }
 }
+/* Draws the skid-mark ring `tab` (counts cnt, start indices start) as quads between consecutive points. */
 static void skids(uint8_t *tab, const int32_t *cnt, const int32_t *start) {
   const uint8_t *sk = P74_Skid;
 #ifndef RE_HOOK_BUILD
@@ -490,11 +509,14 @@ static void skids(uint8_t *tab, const int32_t *cnt, const int32_t *start) {
   }
   DrvSetMode0042655A(saved);
 }
+/* P116_SkidsA — Game.exe 0051e65e; P116_SkidsB — Game.exe 0051f376: the two skid mark record sets
+   (P116_SkidRecA / P116_SkidRecB). */
 void P116_SkidsA(void) { skids(&P116_SkidRecA[0], P74_SkidD, P74_SkidB); }
 void P116_SkidsB(void) { skids(&P116_SkidRecB[0], P74_SkidC, P74_SkidA); }
 
 /* ---- 004cc801: отражения фонарей (записи 0x48 в 00d132c0; +0x44 — адрес следующей в Game.exe) ---- */
 #define REFL_ADDR 0x00d132c0u
+/* Native: reflection record for a Game.exe address inside A_00D132C0 (100 records of 0x48), else NULL. */
 static uint8_t *refl_rec(uint32_t a) {
   if (a == 0) return NULL;
 #ifndef RE_HOOK_BUILD
@@ -503,6 +525,10 @@ static uint8_t *refl_rec(uint32_t a) {
   return &A_00D132C0[a - REFL_ADDR];
 }
 static const int32_t k_flare[P111_FLARE_N][7] = P111_FLARE_INIT;   /* .data 00553870 */
+/* P116_Reflections — Game.exe 004cc801.  Draws the reflections of lights on the wet road (records queued by
+   PushEntry_004CC784 while it rains at night): for each record a vertical streak below the light at road height,
+   sized by the light's height and fading with depth (k = 0.7 - z / 8000, at least 0.3), coloured from the flare
+   table row of the light type. */
 void P116_Reflections(void) {
   const uint8_t *ic = G00D14EF0;
   if (ic == NULL) return;

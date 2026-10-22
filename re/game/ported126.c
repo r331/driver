@@ -15,6 +15,14 @@
    004e10e3 — колёса +0x78 (4 байта через 4): при отрыве — 0x32 кадров дыма P125_SmokePuffs (вид 5, 3 частицы).
    004ad244 — обломки P125_DebrisBurst у края дороги (P72_RoadWord = −1, P72_RoadLookup ≠ 0, модель без флага 0x80);
      третий аргумент 1 — остаток push 1 перед rand (по ассемблеру: add esp,0xc). */
+/* ported126.c (English overview of the notes above) — FLAT.D3D palette-list loading, the player start
+   position (incl. CHASE replays), water drops near cell objects, BMP screenshots, debug keys, spawn
+   points, a fading full-screen bitmap, wheel smoke when a wheel leaves the ground, and kerb debris. */
+#if defined(__GNUC__) && !defined(__clang__)
+/* Paths here are built with bounded snprintf into fixed buffers (Game.exe used unbounded sprintf); an over-long
+   name is truncated on purpose.  The warning is silenced rather than the buffers resized, so the code is unchanged. */
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
 #include "ported126.h"
 #include "unported.h"
 #include "engine.h"
@@ -184,11 +192,12 @@ float P126_SideW;
 
 #include "memrw.h"
 static int16_t rd16(const void *p) { int16_t v; memcpy(&v, p, 2); return v; }
-static void wrf(void *p, float v) { memcpy(p, &v, 4); }
 #define P126_BLK(off) (*(int32_t *)&P56_Blk84[((off) - 0x00c810c0) / 4])   /* поля внутри P56_Blk84 */
 #define P126_CAR(i)   ((uint8_t *)&P99_Cars[(i)])
 
 /* ---- 004efafd ---- */
+/* P126_ReadMapPals — Game.exe 004efafd.  Reads LEVELS\FLAT.D3D: record count, then per record {slot u32,
+   n u32, n x u32} into P58_Tab4EFC03 (native pointers, freed by 004efc03). */
 void P126_ReadMapPals(const char *name) {
   void *f = g_fopen(name, "rb");
   if (f == NULL) return;
@@ -209,6 +218,11 @@ void P126_ReadMapPals(const char *name) {
 }
 
 /* ---- 004906f9 ---- */
+/* P126_PlayerStart — Game.exe 004906f9.  Chooses the player's start: mode 00b87eec -> P48_PosToInts;
+   CHASE (00b87e98, mission 0xc9 or flags 00b87eac/eb0 without "replay 2") -> ReplayData\Chase\%s.LEADER
+   (fallback car 0x41) and .PLAYER (car 0); otherwise the path file P56_PathStart or the start in
+   P56_Blk84 (00c812c0..c8, heading 00c810fc).  Camera 400 units above the point; car fields
+   +0x11c..+0x138 are initialised. */
 static void read_rec(uint8_t *dst, const char *name) {
   void *f = g_fopen(name, "rb");
   if (f == NULL) return;                                  /* защита: в оригинале fread(NULL) */
@@ -284,6 +298,7 @@ void P126_PlayerStart(void) {
 }
 
 /* ---- 004e9006 ---- */
+/* P126_DropsAt — Game.exe 004e9006.  Drops at the objects of one map cell whose model has flag +8 & 0x400. */
 void P126_DropsAt(const float *pos) {
   int32_t x = fround(((float)P42_CellX + pos[0]) * P42_CellScale);
   int32_t z = fround(((float)P42_CellY + pos[2]) * P42_CellScale);
@@ -312,6 +327,8 @@ void P126_DropsAt(const float *pos) {
 }
 
 /* ---- 004e919d ---- */
+/* P126_DropScan — Game.exe 004e919d.  Walks the cells around the camera in a 1500-unit square (row 0x3c
+   offset by 3000) calling P126_DropsAt.  TODO(RE): unsure what the "drops" are (rain splashes?). */
 void P126_DropScan(int32_t unused) {
   (void)unused;
   float *p = (float *)&P76_ColObj;   /* +0 x, +8 z */
@@ -339,6 +356,9 @@ void P126_DropScan(int32_t unused) {
 }
 
 /* ---- 004d9951 ---- */
+/* P126_ScreenShot — Game.exe 004d9951.  Saves the frame as a numbered BMP (header = copy of .data
+   0056046c, 0x36 bytes, with width/height patched).  "%#04d" of the original is written "%04d" ('#'
+   has no effect on %d in MSVC and glibc). */
 static const uint8_t k_bmphdr[0x36] = {   /* .data 0056046c */
   0x42,0x4d,0x36,0x60,0x00,0x00,0x00,0x00,0x00,0x00,0x36,0x00,0x00,0x00,0x28,0x00,0x00,0x00,0x80,0x00,0x00,0x00,0x40,0x00,
   0x00,0x00,0x01,0x00,0x18,0x00,0x00,0x00,0x00,0x00,0x00,0x60,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -377,6 +397,9 @@ void P126_ScreenShot(void) {
 }
 
 /* ---- 004d74e0 ---- */
+/* P126_DebugKeys — Game.exe 004d74e0.  Debug keys: 0x0c/0x0d zoom, 0x58 (F12) screenshot, 1 (Esc) pause;
+   P36_KeyCfg[0..3] adjust the draw distance 01270c24 (15000..45000) and 0125f3f8 (up to 42000) in steps
+   of 3000; with 00575f4c also 0x1e, 0x22, 0x21 (damage -100), 0x18 (front). */
 void P126_DebugKeys(int32_t unused) {
   (void)unused;
   if (P34_Keys[0x0c] != 0) Zoom_00425E9E();
@@ -417,6 +440,8 @@ void P126_DebugKeys(int32_t unused) {
 }
 
 /* ---- 004f1745 ---- */
+/* P126_SpawnInit — Game.exe 004f1745.  Spawn points: P123_SideDist, up to 4 records of 0x18 bytes at
+   00c82440, camera point +-800 along the player's heading. */
 void P126_SpawnInit(void) {
   uint8_t *r = P126_Spawn;
   int16_t delay = 0;
@@ -459,6 +484,8 @@ void P126_SpawnInit(void) {
 }
 
 /* ---- 0040c6bb ---- */
+/* P126_ShowBmpFade — Game.exe 0040c6bb.  Like P124_ShowBmp (0040c610) but through P12_Fn0040DA56 +
+   P76_TileFill (darkening); waits on the menu counter 005d577c. */
 void P126_ShowBmpFade(const char *name, int32_t wait) {
   if (P117_ClipFn) P117_ClipFn(0, 0, P19_ScrW, P19_ScrH);
   uint8_t *buf = (uint8_t *)P98_DebugMalloc(0x12c000, "D:\\Driver\\Game\\frontend\\frontend.c", 0x1f7);
@@ -477,6 +504,8 @@ void P126_ShowBmpFade(const char *name, int32_t wait) {
 }
 
 /* ---- 004e10e3 ---- */
+/* P126_WheelSmoke — Game.exe 004e10e3.  For the car's 4 wheel bytes (+0x78, CAR_WHEEL): when a wheel
+   leaves the ground, 0x32 frames of smoke (P125_SmokePuffs, kind 5, 3 particles). */
 void P126_WheelSmoke(uint8_t *car) {
   for (int i = 0; i < 4; i++)
     if (car[0x78 + i * 4] != 0) { P102_D06A00 = 0; P102_D0DD84 = 1; return; }
@@ -500,6 +529,9 @@ void P126_WheelSmoke(uint8_t *car) {
 }
 
 /* ---- 004ad244 ---- */
+/* P126_KerbDebris — Game.exe 004ad244.  Debris burst (P125_DebrisBurst) at the road edge (P72_RoadWord
+   == -1, P72_RoadLookup != 0, model without flag 0x80).  The 3rd argument 1 is the leftover push before
+   rand in the original (add esp, 0xc). */
 void P126_KerbDebris(uint8_t *car) {
   if (P62_HudOff2 != 0 || S_010FFA24 >= 0x50) return;
   uint32_t a = (uint32_t)(((P62_Frame & 2) == 0) ? rd16(car + 0xea) - 100 : rd16(car + 0xea) + 100) & 0xfffu;

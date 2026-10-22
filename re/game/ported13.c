@@ -1,3 +1,4 @@
+/* Graphics detail presets, memcpy wrapper and MScript compiler error strings. */
 #include "ported13.h"
 #include <string.h>
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -180,9 +181,19 @@ int32_t P13_01270c24;
 #pragma pop_macro("P13_01270c24") /*gvi*/
 #pragma pop_macro("P13_01270c24")
 #endif
-void P13_Fn004064B4(int32_t param_1, int32_t param_2)
+#define FAR_15000 0x466a6000   /* 15000.0f */
+#define FAR_30000 0x46ea6000   /* 30000.0f */
+#define FAR_42000 0x47241000   /* 42000.0f */
+#define FAR_45000 0x472fc800   /* 45000.0f */
+
+/* P13_Fn004064B4 — Game.exe 004064b4, cdecl.  Apply graphics detail preset `detail` (0 = lowest .. 3 = highest): sets the ~16 effect
+   enable flags, the far distance 01270c24 (15000 / 30000 / 45000 / 45000) and 0125f3f8
+   (15000 / 15000 / 30000 / 42000) as float bits, and — when keep_limits == 0 — the two count
+   limits 005759a4 (8/16/32/64) and 00575ee4 (16/32/48/64).
+   TODO(RE): unsure which effect each flag enables and what the two limits count. */
+void P13_Fn004064B4(int32_t detail, int32_t keep_limits)
 {
-  switch(param_1) {
+  switch(detail) {
   case 0:
     P13_00d11880 = 1;
     P13_00575f20 = 0;
@@ -200,9 +211,9 @@ void P13_Fn004064B4(int32_t param_1, int32_t param_2)
     P13_00d118c8 = 1;
     P13_00575f3c = 0;
     P13_00575ee8 = 0;
-    P13_0125f3f8 = 0x466a6000;
-    P13_01270c24 = 0x466a6000;
-    if (param_2 == 0) {
+    P13_0125f3f8 = FAR_15000;
+    P13_01270c24 = FAR_15000;
+    if (keep_limits == 0) {
       P13_005759a4 = 8;
       P13_00575ee4 = 0x10;
     }
@@ -224,9 +235,9 @@ void P13_Fn004064B4(int32_t param_1, int32_t param_2)
     P13_00d118c8 = 1;
     P13_00575f3c = 0;
     P13_00575ee8 = 0;
-    P13_0125f3f8 = 0x466a6000;
-    P13_01270c24 = 0x46ea6000;
-    if (param_2 == 0) {
+    P13_0125f3f8 = FAR_15000;
+    P13_01270c24 = FAR_30000;
+    if (keep_limits == 0) {
       P13_005759a4 = 0x10;
       P13_00575ee4 = 0x20;
     }
@@ -248,9 +259,9 @@ void P13_Fn004064B4(int32_t param_1, int32_t param_2)
     P13_00d118c8 = 1;
     P13_00575f3c = 1;
     P13_00575ee8 = 1;
-    P13_0125f3f8 = 0x46ea6000;
-    P13_01270c24 = 0x472fc800;
-    if (param_2 == 0) {
+    P13_0125f3f8 = FAR_30000;
+    P13_01270c24 = FAR_45000;
+    if (keep_limits == 0) {
       P13_005759a4 = 0x20;
       P13_00575ee4 = 0x30;
     }
@@ -272,16 +283,19 @@ void P13_Fn004064B4(int32_t param_1, int32_t param_2)
     P13_00d118c8 = 1;
     P13_00575f3c = 1;
     P13_00575ee8 = 1;
-    P13_0125f3f8 = 0x47241000;
-    P13_01270c24 = 0x472fc800;
-    if (param_2 == 0) {
+    P13_0125f3f8 = FAR_42000;
+    P13_01270c24 = FAR_45000;
+    if (keep_limits == 0) {
       P13_005759a4 = 0x40;
       P13_00575ee4 = 0x40;
     }
   }
   }
 
+/* P13_Fn00422AC0 — Game.exe 00422ac0, cdecl.  memcpy(dst, src, n). */
 void P13_Fn00422AC0(void *dst, const void *src, uint32_t n) { memcpy(dst, src, n); }
+/* P13_Fn004F8735 — Game.exe 004f8735, cdecl.  Text for an MScript compiler result code (0 = no errors, 3 = out of memory, 10 = end of line,
+   11 = compiled, 12 = illegal parameter, ...); "Unknown error code" otherwise. */
 const char *P13_Fn004F8735(int32_t code) {
   switch (code) {
   case 0: return "No errors found";

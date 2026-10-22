@@ -169,7 +169,8 @@ void re_diag_request(void) {
     if (!capturing) requested = 1;
 }
 static void state_file(int frame) {
-    char path[2304]; snprintf(path, sizeof path, "%s/state.txt", capture);
+    /* path buffers hold the capture directory plus the longest suffix ("/screenshot.png") */
+    char path[sizeof capture + 32]; snprintf(path, sizeof path, "%s/state.txt", capture);
     FILE *f = fopen(path, "w"); if (!f) return;
     char settings[2048]; re_gfx_describe(re_gfx(), settings, sizeof settings);
     fprintf(f, "build=%s\nframe=%d\nlevel=%s\n%s\n", RE_BUILD_REV, frame, P77_CurLevelPath, settings);
@@ -190,7 +191,7 @@ static void finish_capture(int frame) {
     if (draws) { fclose(draws); draws = NULL; }
     if (records) { fclose(records); records = NULL; }
     if (clipping) { fclose(clipping); clipping = NULL; }
-    char path[2304]; snprintf(path, sizeof path, "%s/frames.csv", capture);
+    char path[sizeof capture + 32]; snprintf(path, sizeof path, "%s/frames.csv", capture);
     FILE *f = fopen(path, "w");
     if (f) { fputs(csv_header, f); unsigned first = (history_next + HISTORY - history_count) % HISTORY;
         for (unsigned i = 0; i < history_count; i++) fputs(history[(first + i) % HISTORY], f);

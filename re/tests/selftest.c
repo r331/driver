@@ -370,11 +370,12 @@ static int test_ui3(void) {
     return 0;
 }
 static int test_ui4(void) {
-    G005759A4 = 0x3f;
-    Inc5759A4Max40(); CHECK(G005759A4 == 0x40); Inc5759A4Max40(); CHECK(G005759A4 == 0x40);
-    G005759A4 = 1; Dec5759A4Min0(); Dec5759A4Min0(); CHECK(G005759A4 == 0);
-    G0054A90C = 5; Clear54A90C_IfZero(1); CHECK(G0054A90C == 5); Clear54A90C_IfZero(0); CHECK(G0054A90C == 0);
-    Select54A94C_Mode7(); CHECK(G0054A94C == 1 && G01271060 == 7);
+    /* 0040a625.. handlers: one implementation in menustate.c (the uihandlers4.c copies were removed) */
+    MenuVar5759A4 = 0x3f;
+    MenuIncVar5759A4(); CHECK(MenuVar5759A4 == 0x40); MenuIncVar5759A4(); CHECK(MenuVar5759A4 == 0x40);
+    MenuVar5759A4 = 1; MenuDecVar5759A4(); MenuDecVar5759A4(); CHECK(MenuVar5759A4 == 0);
+    MenuFlag54A90C = 5; MenuLeaveMode2(1); CHECK(MenuFlag54A90C == 5); MenuLeaveMode2(0); CHECK(MenuFlag54A90C == 0);
+    MenuEnterMode7(); CHECK(MenuFlag54A94C == 1 && MenuMode1271060 == 7);
     return 0;
 }
 static int test_ui(void) {
@@ -589,7 +590,7 @@ static int test_ported19(void) {
   if (P19_Cur != 1.0f || P19_Active != 0 || P19_OutC != 1.0f) f++;
   { char s[16] = "  ab cd"; char o[16]; int e = P19_TakeToken(s, o); if (e || strcmp(o, "ab") || strcmp(s, "cd")) f++; }
   { char s[8] = ""; char o[8]; if (!P19_TakeToken(s, o)) f++; }
-  P19_Level = 1; P19_Sel2(0); /* Level<2 → Fn00416040 (stub) */
+  P19_Level = 1; P19_Sel2(0); /* Level<2 → Fn00416040 (links.c → SetupMiami00416040) */
   P19_Level = 4; P19_Sel4(0); if (P19_Cond != 0x31 || P19_Wd != 0x147 || P19_F3 != 1) f++;
   P19_ScrW = 640; P19_DivW = 640; P19_DivC = 2; P19_Scale = 1;
   if (P19_ScaleX(1) != 1 * 1.0f - 320 + 320) f++;
@@ -609,7 +610,7 @@ static int test_p21(void) {
   if (P21_MatchPrefix((const uint8_t*)"abc1", (const uint8_t*)"abc") != 3) f++;
   if (P21_MatchPrefix((const uint8_t*)"abcD", (const uint8_t*)"abc") != 0) f++;
   if (P21_MatchPrefix((const uint8_t*)"abx", (const uint8_t*)"abc") != 0) f++;
-  P21_EntryCount = 2; memset(P21_Entries, 0, sizeof P21_Entries);
+  P21_EntryCount = 2; memset(P21_Entries, 0, 0x40 * 0x54);   /* whole table (P21_Entries is a pointer macro) */
   P21_Entries[1] = 1; int32_t o = 9; memcpy(P21_Entries + 0x28, &o, 4);
   P21_Entries[0x54 + 0x13] = 8; memcpy(P21_Entries + 0x54 + 0x28, &o, 4);
   if (P21_CountActiveEntries(9) != 2 || P21_CountActiveEntries(1) != 0) f++;
@@ -2519,7 +2520,7 @@ static int test_p62(void) {
   { uint8_t p[0x100]; memset(p, 0, sizeof p); P62_ParticleSet(p, 3, 9, 0x400, 1);
     CK(rd_i32(p, 0x24) == 9 && rd_i32(p, 0x40) == 1 && rd_i32(p, 0xc) == 0x480 && p[4] == 3);
     memset(p, 0, sizeof p); P62_Alt = 0; int32_t fl = 0xfffff7ff; memcpy(p + 0xc, &fl, 4); P62_ParticleInit(p, t62_car);
-    CK(p[0] == 1 && rd_i32(p, 0xc) == (int32_t)(0xfffff7ffu & 0xfffffbffu | 0x80) && p[4] == 3 && rd_i32(p, 0x40) == 1);
+    CK(p[0] == 1 && rd_i32(p, 0xc) == (int32_t)((0xfffff7ffu & 0xfffffbffu) | 0x80) && p[4] == 3 && rd_i32(p, 0x40) == 1);
     memset(p, 0, sizeof p); P62_Alt = 1; P62_ParticleInit(p, t62_car);
     float fa, fb; memcpy(&fa, p + 0x74, 4); memcpy(&fb, p + 0x7c, 4);
     CK((rd_i32(p, 0xc) & 0x800) && fa == (float)(P59_Sin[0x400] >> 7) && fb == (float)(P59_Sin[0x800] >> 7) && rd_i32(p, 0x78) == (int32_t)0xc25c0000); }
@@ -2529,6 +2530,7 @@ static int test_p62(void) {
 /* ported65 */
 static int test_p65(void) {
   int f = 0;
+#undef CK
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p65 fail line %d\n",__LINE__); } } while (0)
   /* токены */
   char line[64] = "  foo, 12;bar\n";
@@ -2605,7 +2607,8 @@ void P66_Fn523829(void) { if (!re_selftest_on) { P115_SndUpdate(); return; } t66
 void P66_Fn427EEA(void) { if (!re_selftest_on) { P82_FrustumSetup3D(); return; } t66_fn++; }
 void P66_Fn4169AF(void) { t66_cb++; }
 static int t66_a, t66_b;
-void P66_Fn4C3BC7(void) { t66_a++; }
+void DrawDirectorMenu(void);
+void P66_Fn4C3BC7(void) { if (!re_selftest_on) { DrawDirectorMenu(); return; } t66_a++; }
 void P66_Fn4C68A7(int32_t a) { if (!re_selftest_on) { P112_DirTimeline(a); return; } t66_b += a; }
 static int test_p66(void) {
   int f = 0;
@@ -3955,10 +3958,9 @@ static int test_p87(void) {
     memcpy(&st, o, 4); memcpy(&m, o + 4, 4); memcpy(&x, o + 8, 4); memcpy(&y, o + 12, 4); memcpy(&z, o + 16, 4); memcpy(&ang, o + 0x18, 4); memcpy(&fl, o + 0x1c, 4);
     CK(st == 77 && m == 5 && x == 10 && y == -20 && z == 30 && ang == -3 && fl == 1); }
   CK(P87_SlotLump[2] == 0 && P87_SlotLumpA[2] == 0);
-  /* плитка вне диапазона не трогает слот; DrawCells без модели ничего не рисует */
+  /* плитка вне диапазона не трогает слот; объект без модели ничего не рисует */
   P87_LoadTile(5, 1); CK(P87_SlotLumpA[1] != 5);
   { uint8_t obj[0x20]; memset(obj, 0, sizeof obj); int32_t mi = 5; memcpy(obj + 4, &mi, 4); P79_ModelTab[5] = 0; P87_DrawObjA(obj); P87_DrawObjB(obj); }
-  CK(P87_DrawCells(0, 0, 1) == 0);
   free(G6_00CE0F20); free(G6_00D01268); free(G6_00D00208);
   G6_00CE0F20 = s_nodes; G6_00D01268 = s_heads; G6_00D00208 = s_objs; P54_GridN = s_n; P54_Cnt1E0 = s_c; P76_NumSlots = s_ns; P80_Cols = s_cols; P72_Rows = s_rows; P80_LumpTab[0] = s_lump;
   P54_RoadA[2] = s_ra; P54_RoadB[2] = s_rb;
@@ -4097,7 +4099,7 @@ static int test_p98(void) {
     P98_DebugFree(p); CK(slot >= 0 && P27_MemTab[slot * 3] == 0 && P27_MemFreed == f0 + 10); }
   { uint8_t *n = (uint8_t *)DebugMalloc(0x24, "t", 1), *o = (uint8_t *)DebugMalloc(0x60, "t", 2), *base = (uint8_t *)DebugMalloc(8, "t", 3);   /* 004d0102 */
     memset(n, 0, 0x24); memset(o, 0, 0x60); re_wr_ptr(n + 0x1c, o); re_wr_ptr(o + 0x50, base);
-    P15_ListHead = n; P28_EventCount = 0; P98_ScriptFreeAll(); CK(P15_ListHead == NULL && P28_EventCount == 0); }
+    P15_SetListHead(n); P28_EventCount = 0; P98_ScriptFreeAll(); CK(P15_ListHead == NULL && P28_EventCount == 0); }
   { P98_CreditsInit();   /* 004a9850 */
     CK(P98_Credits[0].y == 0x1e0 && P98_Credits[1].y == 0x1e0 + 74 && P98_Credits[2].y == 0x1e0 + 74 + 54 && P98_Faces[2].id == 0xffff && P98_FaceCur == 0);
     CK(strcmp((const char *)re_ptr(P98_FaceNames[0]), "MARTIN") == 0 && strcmp((const char *)re_ptr(P98_FaceNames[3]), "STEVEB") == 0);
@@ -4241,13 +4243,13 @@ static int test_p99(void) {
     P99_MarkerReset(); CK(P98_MrkSrc[0] == 20.0f && P98_MrkSrc[2] == 300.0f && P99_Mrk2660 == 900 && P99_Cars[0].ang[0] == 0 && P99_Cars[0].ang[2] == 0);
     P15_State = st; }
   { uint8_t *n = (uint8_t *)DebugMalloc(0x24, "t", 1); memset(n, 0, 0x24);   /* 004a4340 */
-    uint8_t *h = P15_ListHead; P15_ListHead = n; *(uint16_t *)(n + 6) = 9; P99_EvId = 0x22;
+    uint8_t *h = P15_ListHead; P15_SetListHead(n); *(uint16_t *)(n + 6) = 9; P99_EvId = 0x22;
     P99_EventAdd(0);
     uint8_t *e = (uint8_t *)re_rd_ptr(n + 0x20);
     CK(e != NULL && *(uint16_t *)e == 0x28 && *(uint16_t *)(e + 4) == 1 && *(uint16_t *)(e + 6) == 0x22 && *(uint16_t *)(e + 8) == 9 && (*(uint16_t *)n & 0x10) != 0);
     uint8_t *o = e ? (uint8_t *)re_rd_ptr(e + 0x1c) : NULL; CK(o != NULL);
     if (o != NULL) re_wr_ptr(o + 0x50, DebugMalloc(8, "t", 2));
-    P98_ScriptFreeAll(); CK(P15_ListHead == NULL); P15_ListHead = h; }
+    P98_ScriptFreeAll(); CK(P15_ListHead == NULL); P15_SetListHead(h); }
   memcpy(P99_Cars, sv, sizeof sv);
   return f;
 }
@@ -4338,7 +4340,7 @@ static int test_p97(void) {
   { P48_F0 d0 = P48_Drv00, d8 = P48_Drv08, dc = P48_Drv0C; P48_F1 d2c = P48_Drv2C, d40 = P48_Drv40; P48_F3 d38 = P48_Drv38; P48_F4 d54 = P48_Drv54;   /* 0048bbd5 */
     FnV2 g14 = G6_00BDCB14; FnV1 g18 = G6_00BDCB18, g20 = G6_00BDCB20; P68_FLoad dl = P68_DrvLoad;
     P97_SndDrvInit();
-    CK(P48_Drv00 == (P48_F0)P50_SoundShutdown && P48_Drv54 == (P48_F4)P49_SetVel3D && P97_DrvL == (re_fn_t)P49_GetStatus && P68_DrvLoad == NULL);
+    CK(P48_Drv00 == (P48_F0)P50_SoundShutdown && P48_Drv54 == (P48_F4)(void (*)(void))P49_SetVel3D && P97_DrvL == (re_fn_t)P49_GetStatus && P68_DrvLoad == NULL);
     P48_Drv00 = d0; P48_Drv08 = d8; P48_Drv0C = dc; P48_Drv2C = d2c; P48_Drv40 = d40; P48_Drv38 = d38; P48_Drv54 = d54;
     G6_00BDCB14 = g14; G6_00BDCB18 = g18; G6_00BDCB20 = g20; P68_DrvLoad = dl; }
   { static uint8_t nodes[2][0x24], objs[3][0x60]; uint8_t *sh = P15_ListHead, *sc = P15_ListCur;   /* список скрипта */
@@ -4349,7 +4351,7 @@ static int test_p97(void) {
     v = ao + 0x60; memcpy(nodes[1] + 0x1c, &v, 4); v = ao + 0xc0; memcpy(objs[1] + 0x58, &v, 4);
     float x = 10.6f, z = -3.5f; memcpy(objs[0], &x, 4); memcpy(objs[0] + 8, &z, 4);
     for (int i = 0; i < 3; i++) { int32_t b = 0x100 * (i + 1), p = b + 0x10; memcpy(objs[i] + 0x50, &b, 4); memcpy(objs[i] + 0x54, &p, 4); }
-    P15_ListHead = nodes[0];
+    P15_SetListHead(nodes[0]);
     static uint8_t buf[0x24 * 2 + 0x60 * 3]; CK(P97_ScriptSave(buf) == (int32_t)sizeof buf);   /* 004cf6b2 */
     int32_t o54; memcpy(&o54, buf + 0x24 + 0x54, 4); CK(o54 == 0x10);
     memcpy(&o54, objs[2] + 0x54, 4); CK(o54 == 0x310);
@@ -4364,7 +4366,7 @@ static int test_p97(void) {
     memcpy(&o54, objs[2] + 0x54, 4); CK(o54 == 0x300 && (nodes[1][0] & 2) && objs[1][0] == 0);
     uint8_t prog[8] = {0, 0, 0, 0}; uint8_t *sp = P10_ScriptPtr; P10_ScriptPtr = prog; P15_ListCur = nodes[1];   /* 004d156a */
     CK(P97_ScriptOpNext() == 1 && P10_ScriptPtr == prog + 4);
-    P10_ScriptPtr = sp; P15_ListHead = sh; P15_ListCur = sc; re_ptr_unregister(nodes); re_ptr_unregister(objs); }
+    P10_ScriptPtr = sp; P15_SetListHead(sh); P15_ListCur = sc; re_ptr_unregister(nodes); re_ptr_unregister(objs); }
   { static uint8_t rec[0x80], lnk[0x20]; memset(rec, 0, sizeof rec); memset(lnk, 0, sizeof lnk);   /* 0050bc2b */
     uint32_t al = re_ptr_register_dyn(lnk, sizeof lnk); memcpy(rec + 0x60, &al, 4); int32_t one = 1, sk = P77_C65DA4; memcpy(rec + 0x14, &one, 4);
     P77_C65DA4 = 1; lnk[0x1e] = 1; memset(P77_C62E60, 0, sizeof P77_C62E60); P97_MarkCells(rec);
@@ -4603,8 +4605,7 @@ static int test_p101(void) {
     P101_ClipNearRGB((const uint8_t *)vb, (const uint8_t *)va, 1.0f, 2.0f, 3.0f, 0.0f, 0.0f, 0.0f);
     CK(P100_ClipN == 1 && buf[7] == 0.5f && buf[8] == 1.0f && buf[9] == 1.5f && buf[2] == 50.0f);
     P100_ClipOut = so; P100_ClipN = sn; P95_Near = sf; }
-  { static uint8_t px[0x280 * 2]; memset(px, 0, sizeof px);   /* 005291ed */
-    P101_FillRows(px, 0x40, 2, 0xab); CK(px[0] == 0xab && px[0x3f] == 0xab && px[0x40] == 0 && px[0x280 + 0x3f] == 0xab); }
+  /* 005291ed (row fill): single port P152_FillRows, covered by test_p152 */
   { static uint8_t src[640], dst[0x500]; memset(src, 0, sizeof src);   /* 00529253 */
     uint32_t p1 = P101_PalLfb[1], p2 = P101_PalLfb[2]; int32_t pitch = P100_LfbPitch;
     P101_PalLfb[1] = 0x1234; P101_PalLfb[2] = 0x5678; P100_LfbPitch = 0x500; src[0] = 1; src[1] = 2;
@@ -4783,6 +4784,7 @@ static int test_p109(void) {
 
 static int test_p110(void) {
   int f = 0;
+#undef CK
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p110 fail line %d\n",__LINE__); } } while (0)
   CK(P110_CellTab[0] == 7 && P110_CellTab[30] == 0x1000 && P110_SelRep == 10 && P110_IconKX == 1.0f);
   P110_RadarGrid();
@@ -4977,6 +4979,7 @@ static int t111_n;
 static void t111_r(const p85_rv *a, const p85_rv *b, const p85_rv *c) { (void)a; (void)b; (void)c; t111_n++; }
 static int test_p117(void) {
   int f = 0;
+#undef CK
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p117 fail line %d\n",__LINE__); } } while (0)
   /* .data меню паузы зарегистрирована: P97_SndMenu внутри P117_MenuA, пункт 0 меню звука — строка 156 */
   CK(re_ptr(0x00574f38u) == (void *)P97_SndMenu && re_ptr(0x00575370u) == (void *)&P117_MenuC[0] && re_addr(&P117_MenuB[0x14]) == 0x0057509cu);
@@ -5180,7 +5183,7 @@ static int test_p113(void) {
     CK(P54_SelTab[0] == 1 && P54_SelTab[1] == 7 && P54_SelTab[2] == -1);
     CK(P57_OPT_NAV(0, 2) == 1 && P57_OPT_NAV(0, 3) == 1 && P57_OPT_NAV(1, 2) == 0 && P57_OPT_NAV(1, 3) == 0);
     CK(P54_Out[4] == P97_StrAddr[0xf2] && P54_Out[12] == P97_StrAddr[0x64] && P54_Out[20] == 0);
-    CK(re_fn(P57_OPT_FN(1, 2)) == (re_fn_t)Set575EF0_4Ret0);
+    CK(re_fn(P57_OPT_FN(1, 2)) == (re_fn_t)MenuStateSetFour);
     P102_BDF9E0[1] = 0; P102_BDF9E0[6] = 0; P113_MenuOpts();
     CK(P57_OPT_FN(0, 2) == 0x00404ffeu && P54_SelTab[0] == -1 && P57_OPT_FN(1, 2) == 0);
     for (int i = 0; i < 11; i++) P102_BDF9E0[i] = sv[i]; }
@@ -5203,7 +5206,7 @@ static int test_p112(void) {
   P10_ScriptPtr = scr; CK(P112_OpMoveCur() == 1); CK(P10_ScriptPtr == scr + 2);   /* уже в цели */
   P10_ScriptPtr = sp; P10_ScriptCtx = sc;
   CK(re_fn(0x004d09fdu) == (re_fn_t)P112_OpMoveTo && re_fn(0x004d0734u) == (re_fn_t)P112_OpMoveCurve);
-  { uint8_t *h = P15_ListHead; P15_ListHead = NULL; P112_ScriptTriggers(); P112_ScriptRunId(3); CK(P15_ListCur == NULL || 1); P15_ListHead = h; }
+  { uint8_t *h = P15_ListHead; P15_SetListHead(NULL); P112_ScriptTriggers(); P112_ScriptRunId(3); CK(P15_ListCur == NULL || 1); P15_SetListHead(h); }
   P112_FaceIcon(scr, -0x40);   /* выше экрана — ничего */
 #undef CK
   return f;
@@ -6096,7 +6099,7 @@ static int test_p142(void) {
     c[0x331] = 0; P142_CopNoDmg = 0; for (int i = 0; i < 6; i++) { int32_t d = 2000; memcpy(car + 0x11c + i * 4, &d, 4); }
     v = 77; memcpy(car + 0xf8, &v, 4); P142_CopDrive(rec);
     memcpy(&v, car + 0xf8, 4); CK(v == 0 && c[0x331] == 1 && c[0x10] == 12000);
-    P142_CopDrive(NULL == rec ? rec : (rec[5] = 9, rec)); /* rec[5] вне 1..8 — выход */
+    rec[5] = 9; P142_CopDrive(rec); /* rec[5] вне 1..8 — выход */
     memcpy(car, save, 0x148); memcpy(c, csave, sizeof csave); P56_B268 = b268; P98_C824A0 = c824; P142_CopNoDmg = nd; }
   /* 004dacee: без объектов — только счётчик 00d0dd7c */
   { int32_t n = G6_00D0DDC0, k = P102_D0DD7C; uint8_t e14 = P95_B87E14;
@@ -6488,7 +6491,7 @@ static int test_p151(void) {
     if (strcmp(P33_GlideName(i), "_grSstWinOpen@28") == 0) wo = P33_GlideProc(i);
     if (strcmp(P33_GlideName(i), "_grSstSelect@4") == 0) sel = P33_GlideProc(i); }
   CK151(clr == (void *)P54_ClearBuffers && wo == (void *)P151_WinOpen && sel == (void *)NoopFn0041ed7c);
-  CK151(P85_BlendFn == (p85_blend_fn)P23_SetBlendMode && P86_TexSrc == (p86_texsrc_fn)P53_SetTexSource && P115_RasterD == (p85_raster_fn)P76_TriB2);
+  CK151(P85_BlendFn == (p85_blend_fn)(void (*)(void))P23_SetBlendMode && P86_TexSrc == (p86_texsrc_fn)(void (*)(void))P53_SetTexSource && P115_RasterD == (p85_raster_fn)P76_TriB2);
   CK151(FnPtr01270E80 == NULL);                            /* метка 0041e3b0 — не функция, в native не зарегистрирована */
   t151_restore(&z);
   /* 00420038: устройство HAL, все проверки проходят; объекты освобождены */
@@ -6646,8 +6649,10 @@ static int test_real_level(void) {
     for (int t = 0; t < 64; t++) if (hist[t]) fprintf(stderr, " %d:%ld", t, hist[t]);
     fprintf(stderr, "\n");
   }
-  int real_map = getenv("RE_REAL_MAP") != NULL;   /* v1.35: город через P89_DrawMap (004ee8f4) — обход клеток вокруг камеры по FRUSTRUM.DAT */
-  if ((getenv("RE_REAL_CITY") || real_map) && getenv("RE_REAL_PNG") && gl_ok) {   /* город: плитки карты вокруг выбранной клетки → P87_DrawCells / P89_DrawMap → PNG */
+  /* v1.35: город через P89_DrawMap (004ee8f4) — обход клеток вокруг камеры по FRUSTRUM.DAT.  cleanup/round2: RE_REAL_CITY
+     (раньше — упрощённый обход P87_DrawCells без адреса в Game.exe) теперь синоним RE_REAL_MAP. */
+  int real_map = getenv("RE_REAL_MAP") != NULL || getenv("RE_REAL_CITY") != NULL;
+  if (real_map && getenv("RE_REAL_PNG") && gl_ok) {   /* город: блок карты вокруг выбранной клетки → P89_DrawMap → PNG */
     static uint32_t px[640 * 480];
     int32_t N = P54_GridN, cols = P80_Cols, bestl = -1, bestc = -1;
     for (int32_t l = 0; l < P76_NumSlots && l < 1024; l++) {
@@ -6659,11 +6664,6 @@ static int test_real_level(void) {
     int32_t tx = bestl % cols, ty = bestl / cols;
     fprintf(stderr, "city: N=%d cols=%d rows=%d lump %d (tile %d,%d) instances %d\n", (int)N, (int)cols, (int)P72_Rows, (int)bestl, (int)tx, (int)ty, (int)bestc);
     int32_t ccx = tx * N + N / 2, ccy = ty * N + N / 2;              /* клетка в середине плитки */
-    if (!real_map) for (int dy = -1; dy <= 1; dy++) for (int dx = -1; dx <= 1; dx++) {
-      int32_t ax = tx + dx, ay = ty + dy; if (ax < 0 || ay < 0 || ax >= cols || ay >= P72_Rows) continue;
-      if (dx > 0 || dy > 0) { if (dx > 0 && dy > 0) continue; }
-      P87_LoadTile(ay * cols + ax, (ax & 1) + (ay & 1) * 2);
-    }
     { uint8_t *ob = (uint8_t *)G6_00D00208 + (size_t)(P54_Cnt1E0 + ((tx & 1) + (ty & 1) * 2) * 0x2000) * 0x20; float mn[3] = { 1e30f, 1e30f, 1e30f }, mx[3] = { -1e30f, -1e30f, -1e30f };
       for (int i = 0; i < bestc; i++, ob += 0x20) { float v[3]; memcpy(v, ob + 8, 12); for (int k = 0; k < 3; k++) { if (v[k] < mn[k]) mn[k] = v[k]; if (v[k] > mx[k]) mx[k] = v[k]; } }
       fprintf(stderr, "city: tile instances x %g..%g y %g..%g z %g..%g; CellX=%d CellY=%d Cell=%d\n", mn[0], mx[0], mn[1], mx[1], mn[2], mx[2], (int)P42_CellX, (int)P42_CellY, (int)P80_Cell); }
@@ -6696,7 +6696,7 @@ static int test_real_level(void) {
     int32_t ex = (int32_t)floorf((camx + (float)P42_CellX) / (float)P80_Cell), ey = (int32_t)floorf((camz + (float)P42_CellY) / (float)P80_Cell);
     fprintf(stderr, "city: cam %g %g %g -> cell %d,%d (tile centre cell %d,%d)\n", camx, camy, camz, (int)ex, (int)ey, (int)ccx, (int)ccy);
     int32_t drawn = 0;
-    if (real_map) {
+    {
       /* как в игре: клетка камеры (004edd08) → её блок карты в слот → 004ee8f4(0) подгружает соседей у границы и считает маску
          видимости → 004ee8f4(1) обходит клетки сектора FRUSTRUM.DAT по курсу P59_AngB → таблицы A/B (004ef309/004ef364) */
       int32_t fr = P55_LoadFrustum();
@@ -6724,11 +6724,11 @@ static int test_real_level(void) {
       fprintf(stderr, "map: DrawMap triangles %d, tables A %d B %d -> +%d, four %d seven %d shadow %d\n", (int)(t1 - t0), (int)na, (int)nb, (int)(P85_Tris - t1), (int)P89_CntFour, (int)P89_CntSeven, (int)P89_CntShadow);
       drawn = t1 - t0 + na + nb;
       if (re_dd_on) { re_dd_on = 0; re_oow_n = 0xdbba; P11_01270c24 = dd_far0; Q01270C24 = dd_q0; re_gfx()->draw_distance = 1.0; }
-    } else drawn = P87_DrawCells(ex, ey, getenv("RE_REAL_R") ? atoi(getenv("RE_REAL_R")) : 4);
+    }
     fprintf(stderr, "city: objects drawn %d, triangles %d (blend 0/1/2/3: %d/%d/%d/%d)\n", (int)drawn, (int)P85_Tris, (int)P85_TrisBy[0], (int)P85_TrisBy[1], (int)P85_TrisBy[2], (int)P85_TrisBy[3]);
     if (plat_render_readback(px) == 0) png_write_rgba(getenv("RE_REAL_PNG"), px, 640, 480);
   }
-  if (getenv("RE_REAL_PNG") && !getenv("RE_REAL_CITY") && !real_map && P20_Count > 0) {   /* самая «плотная» модель уровня → P84_DrawModel → текстуры страниц LEV → PNG */
+  if (getenv("RE_REAL_PNG") && !real_map && P20_Count > 0) {   /* самая «плотная» модель уровня → P84_DrawModel → текстуры страниц LEV → PNG */
     int best = -1, bn = 0;
     for (int i = 0; i < P20_Count && i < 1126; i++) {
       uint32_t ref = P79_ModelTab[i]; if (!ref) continue;
@@ -6771,7 +6771,7 @@ static int test_real_level(void) {
     fprintf(stderr, "objects %d pos %g %g %g .. %g %g %g\n", (int)P54_Cnt1E0, mn[0], mn[1], mn[2], mx[0], mx[1], mx[2]);
     for (int b = 0; b < 16; b++) fprintf(stderr, " f%d:%d", b, fl[b]);
     fprintf(stderr, "\n");
-    ent = (uint8_t *)G6_00D00208; for (int i = 0; i < 5; i++, ent += 0x20) { uint32_t w[8]; memcpy(w, ent, 32); fprintf(stderr, "ent%d: %u %u %g %g %g %g %u %u\n", i, w[0], w[1], *(float*)&w[2], *(float*)&w[3], *(float*)&w[4], *(float*)&w[5], w[6], w[7]); }
+    ent = (uint8_t *)G6_00D00208; for (int i = 0; i < 5; i++, ent += 0x20) { uint32_t w[8]; float wf[4]; memcpy(w, ent, 32); memcpy(wf, ent + 8, 16); fprintf(stderr, "ent%d: %u %u %g %g %g %g %u %u\n", i, w[0], w[1], wf[0], wf[1], wf[2], wf[3], w[6], w[7]); }
   }
   if (P20_Count > 0) { float *b = P80_Boxes[0]; fprintf(stderr, "model0 box: %g %g %g .. %g %g %g\n", b[0], b[1], b[2], b[3], b[4], b[5]); }
   return r == 1 && bad == 0 && P20_Count > 0 ? 0 : 1;

@@ -1,3 +1,13 @@
+/* Facade detail meshes (native only, v2.31): extra 3D geometry (balconies, awnings, ...) drawn over
+   flat building walls.  A per-level detail.json (in <pack>/<level>/detail/ or $DRIVER_DETAIL_DIR)
+   lists entries keyed by (level, texture page, palette slot, UV rectangle in 256-texel units) with a
+   .glb mesh.  While the game draws a frame, every textured triangle whose UVs fall inside an
+   entry's rectangle is captured (re_detail_tri); at the end of the frame one mesh instance is
+   placed per distinct wall plane, using the triangle's UV -> camera-space mapping, and drawn
+   after the world batches.  Visual only: game logic and collisions are unaffected.
+   Switches: DRIVER_DETAIL=0 off, DRIVER_DETAIL_LOG=1..3, DRIVER_DETAIL_LOD (distance factor),
+   DRIVER_DETAIL_ZOFF / _POFS (depth offsets passed to the shader), DRIVER_DETAIL_PARTIAL=0
+   (skip instances whose wall is only partly covered). */
 /* v2.31: детальные 3D-меши фасадов — см. plat_detail.h. glTF: cgltf (MIT, third_party/cgltf.h), JSON записи — jsmn из cgltf. */
 #include "plat_detail.h"
 #include "plat_texpack.h"
@@ -62,24 +72,29 @@ static long g_st_tri, g_st_pal, g_st_drawn, g_st_partial, g_st_far;
 static double g_lodk = 1.0, g_zoff = 0.08, g_pofs = 2.0;
 static int g_partial_mode = 1;
 
+/* env_on — DRIVER_DETAIL is not "0"/"off". */
 static int env_on(void) { const char *e = getenv("DRIVER_DETAIL"); return !(e && (e[0] == '0' || !strcmp(e, "off"))); }
 
 /* ---------- JSON (jsmn из cgltf) ---------- */
+/* tskip — JSON (jsmn tokens): index of the token after the subtree starting at token i. */
 static int tskip(const jsmntok_t *t, int i) {   /* индекс токена после поддерева i */
     int n = t[i].size, j = i + 1;
     if (t[i].type == JSMN_OBJECT) { for (int k = 0; k < n; k++) { j = tskip(t, j); j = tskip(t, j); } }
     else if (t[i].type == JSMN_ARRAY) { for (int k = 0; k < n; k++) j = tskip(t, j); }
     return j;
 }
+/* teq — 1 if token t is the string s. */
 static int teq(const char *js, const jsmntok_t *t, const char *s) {
     int n = (int)(t->end - t->start); return t->type == JSMN_STRING && (int)strlen(s) == n && !strncmp(js + t->start, s, (size_t)n);
 }
+/* tfind — Value token of `key` in object token obj, or -1. */
 static int tfind(const char *js, const jsmntok_t *t, int obj, const char *key) {   /* значение ключа в объекте или −1 */
     if (obj < 0 || t[obj].type != JSMN_OBJECT) return -1;
     int j = obj + 1;
     for (int k = 0; k < t[obj].size; k++) { if (teq(js, &t[j], key)) return j + 1; j = tskip(t, j + 1); }
     return -1;
 }
+/* tnum — Numeric value of token i ("null", missing or unparsable -> def). */
 static double tnum(const char *js, const jsmntok_t *t, int i, double def) {
     if (i < 0 || (t[i].type != JSMN_PRIMITIVE && t[i].type != JSMN_STRING)) return def;
     char b[64]; int n = (int)(t[i].end - t[i].start); if (n <= 0 || n > 63) return def;
@@ -87,17 +102,22 @@ static double tnum(const char *js, const jsmntok_t *t, int i, double def) {
     if (!strcmp(b, "null")) return def;
     char *e; double v = strtod(b, &e); return e == b ? def : v;
 }
+/* tstr — Copy string token i to out (truncated to cap - 1); empty if not a string. */
 static void tstr(const char *js, const jsmntok_t *t, int i, char *out, int cap) {
     out[0] = 0; if (i < 0 || t[i].type != JSMN_STRING) return;
     int n = (int)(t[i].end - t[i].start); if (n >= cap) n = cap - 1; memcpy(out, js + t[i].start, (size_t)n); out[n] = 0;
 }
 /* поле записи: сначала в "key", затем в самой записи */
+/* efind — Entry field: looked up in the entry's "key" object first, then in the entry itself. */
 static int efind(const char *js, const jsmntok_t *t, int ent, const char *key) {
     int k = tfind(js, t, ent, "key"), v = tfind(js, t, k, key);
     return v >= 0 ? v : tfind(js, t, ent, key);
 }
 
 /* ---------- glb ---------- */
+/* load_glb — Load e->glb into one GPU mesh: all triangle primitives of all meshes merged (positions,
+   normals, UV0), texture = base colour of the first textured material.  Fills e->w / e->h from
+   the mesh's max x / y when not given.  Returns the plat_mesh id, or 0 on error. */
 static int load_glb(dent_t *e) {
     cgltf_options opt; memset(&opt, 0, sizeof opt);
     cgltf_data *d = NULL;
@@ -146,6 +166,7 @@ static int load_glb(dent_t *e) {
 }
 
 /* ---------- detail.json ---------- */
+/* read_file — Read a whole file into a NUL-terminated malloc'ed buffer; *len = size.  NULL on error. */
 static char *read_file(const char *path, long *len) {
     FILE *f = fopen(path, "rb"); if (!f) return NULL;
     fseek(f, 0, SEEK_END); long n = ftell(f); fseek(f, 0, SEEK_SET);
@@ -159,6 +180,10 @@ static char *read_file(const char *path, long *len) {
 static int flat_facade_surface(const char *level, int page) {
     return !strcasecmp(level, "LA_01") && (page == 61 || page == 62);
 }
+/* parse_entry — Parse one detail.json entry for `level` (entries for other levels are ignored): page
+   (page_index or page_file "pNNN[_cKKKK]"), palette slot (-1 = any), uv_rect_256, LOD distance
+   (default 80 m), mesh size in metres (mesh_size_m, facade_width/height_m or mesh_space, else
+   from the glb) and the mesh file; loads the mesh and adds the entry to g_ent / g_pagemask. */
 static void parse_entry(const char *js, const jsmntok_t *t, int ent, const char *dir, const char *level) {
     if (g_nent >= DMAX_ENT || t[ent].type != JSMN_OBJECT) return;
     dent_t e; memset(&e, 0, sizeof e);
@@ -195,10 +220,14 @@ static void parse_entry(const char *js, const jsmntok_t *t, int ent, const char 
     g_ent[g_nent++] = e; g_pagemask[e.page] = 1;
     plat_log("[detail] запись %d: p%03d палитра %d uv %.0f,%.0f..%.0f,%.0f lod %.0f м\n", g_nent - 1, e.page, e.pal, e.u0, e.v0, e.u1, e.v1, e.lod);
 }
+/* unload — Free all entry meshes and clear the page mask. */
 static void unload(void) {
     for (int i = 0; i < g_nent; i++) plat_mesh_free(g_ent[i].mesh);
     g_nent = 0; memset(g_pagemask, 0, sizeof g_pagemask);
 }
+/* load_level — (Re)load the entries of `level` from $DRIVER_DETAIL_DIR/detail.json or the pack's
+   <level>/detail/detail.json (level name as given, lower case, upper case).  Accepts a top-level
+   array, an object with entries/details/items/meshes, or a single entry object. */
 static void load_level(const char *level) {
     unload();
     char dir[1024]; dir[0] = 0;
@@ -230,6 +259,9 @@ static void load_level(const char *level) {
 }
 
 /* ---------- кадр ---------- */
+/* re_detail_frame_begin — Start of a frame: read the switches once, reload entries when the level changed, clear the
+   instance list and enable capture when entries exist (only with a texture pack or
+   DRIVER_DETAIL_DIR). */
 void re_detail_frame_begin(void) {
     re_detail_capture = 0;
     if (g_state < 0) {
@@ -249,7 +281,9 @@ void re_detail_frame_begin(void) {
     g_ninst = 0;
     re_detail_capture = g_nent > 0;
 }
+/* dot3 — 3-vector dot product. */
 static double dot3(const double *a, const double *b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+/* len3 — 3-vector length. */
 static double len3(const double *a) { return sqrt(dot3(a, a)); }
 
 /* Exercise matching with a synthetic facade, including the stale page/UVs
@@ -305,6 +339,12 @@ int re_detail_selftest(void) {
     return failed != 0;
 }
 
+/* re_detail_tri — Capture hook for one textured triangle (projected vertices pa, pb, pc of type p85_rv) on the
+   current texture page P86_CurTex.  If all UVs lie inside an entry's rectangle (+/- 1 texel) and
+   the palette matches, solves P(u, v) = A + u*Eu + v*Ev in camera space and derives the entry's
+   origin (u0, v1) and per-metre axes X, Y; rejects degenerate or strongly skewed mappings.
+   Triangles of the same entry with the same origin (3 cm) and X direction are merged into one
+   instance, which accumulates UV coverage, vertex colour and triangle count. */
 void re_detail_tri(const void *pa, const void *pb, const void *pc) {
     /* Flat/Gouraud polygons retain the last texture page and per-vertex UVs.
        They cannot identify a facade, even when those stale values match it. */
@@ -378,6 +418,11 @@ void re_detail_tri(const void *pa, const void *pb, const void *pc) {
         return;
     }
 }
+/* re_detail_frame_end — End of a frame: flush the world batches (so the z-buffer holds the world), then draw every
+   captured instance: clip the mesh to the covered part of the UV rectangle (3.5-texel tolerance),
+   orient the normal towards the camera, skip instances beyond LOD, tint by the average vertex
+   colour (doubled under MODULATE2X) and draw with the game's projection and z mapping.
+   Logs statistics when DRIVER_DETAIL_LOG is set. */
 void re_detail_frame_end(void) {
     int was = re_detail_capture;
     re_detail_capture = 0;
