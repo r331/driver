@@ -99,6 +99,8 @@ const char *re_texpack_overlay_hud(const char *dir, char *out, int n) { return o
    shapes on purpose (its pages differ from the original more than an upscale does), so it gets RE_TEXPACK_HUD_MAX_ERR. */
 static double g_last_tol = RE_TEXPACK_MAX_ERR;
 double re_texpack_last_tol(void) { return g_last_tol; }
+/* re_texpack_last_hud — 1 when the file last returned by re_texpack_load / load8 came from the HUD overlay (v2.36). */
+int re_texpack_last_hud(void) { return g_last_tol == RE_TEXPACK_HUD_MAX_ERR; }
 static uint32_t *load_one(const char *dir, const char *level, int idx, int pal, int *w, int *h);
 /* load_any — Load page idx (palette slot pal, -1 for 16-bit pages): the HUD overlay, the sky overlay, then the pack.
    hud.txt / sky.txt are re-read on every call (cheap, a few hundred pages per level). */
@@ -192,11 +194,17 @@ void re_texpack_compare_rgba(const uint32_t *hd, int w, int h, const uint32_t *r
    merged; 0 (and *err = -1 for a bad size) otherwise. */
 int re_texpack_merge(const uint32_t *orig, uint32_t *hd, int w, double *err) { return re_texpack_merge_tol(orig, hd, w, RE_TEXPACK_MAX_ERR, err); }
 /* re_texpack_merge_tol — re_texpack_merge with the error limit `tol` (re_texpack_last_tol() of the attached file). */
-int re_texpack_merge_tol(const uint32_t *orig, uint32_t *hd, int w, double tol, double *err) {
+int re_texpack_merge_tol(const uint32_t *orig, uint32_t *hd, int w, double tol, double *err) { return re_texpack_merge_ex(orig, hd, w, tol, 0, err); }
+/* re_texpack_merge_ex — re_texpack_merge_tol; keep_alpha (v2.36, files of the HUD overlay): the HD file's own alpha is kept
+   (a smooth silhouette drawn at 4x — the alpha test then cuts a clean edge instead of the original's 4x4 steps) when, averaged
+   back to 256, it disagrees with the original's alpha on at most RE_TEXPACK_MAX_AMIS of the texels; otherwise, and always
+   without keep_alpha, the alpha is replaced by the original's (nearest texel). */
+int re_texpack_merge_ex(const uint32_t *orig, uint32_t *hd, int w, double tol, int keep_alpha, double *err) {
     if (!orig || !hd || w < 256 || w > 1024 || (w & (w - 1))) { if (err) *err = -1; return 0; }
-    double e = 0; re_texpack_compare_rgba(hd, w, w, orig, &e, NULL);
+    double e = 0, am = 1; re_texpack_compare_rgba(hd, w, w, orig, &e, &am);
     if (err) *err = e;
     if (e > tol) return 0;
+    if (keep_alpha && am <= RE_TEXPACK_MAX_AMIS) return 1;   /* своя альфа файла HUD (гладкий силуэт) */
     int s = w / 256;
     for (int y = 0; y < w; y++) for (int x = 0; x < w; x++) {
         uint32_t *p = &hd[(size_t)y * w + x];

@@ -7772,7 +7772,15 @@ static int test_texpack8(void) {
       double e6 = 0, a6 = 0; re_texpack_compare_rgba(hd, HW, HW, r6, &e6, &a6);
       uint32_t *m = (uint32_t *)malloc((size_t)HW * HW * 4); CHECK(m);
       memcpy(m, hd, (size_t)HW * HW * 4); CHECK(re_texpack_merge_tol(r6, m, HW, e6 + 1.0, &err) == 1);
-      memcpy(m, hd, (size_t)HW * HW * 4); CHECK(re_texpack_merge_tol(r6, m, HW, e6 - 1.0, &err) == 0); free(m); }
+      memcpy(m, hd, (size_t)HW * HW * 4); CHECK(re_texpack_merge_tol(r6, m, HW, e6 - 1.0, &err) == 0);
+      /* своя альфа файла HUD: гладкий край (пиксель 1 из 16 в блоке другой) остаётся; не совпадающая альфа — замена оригинальной */
+      memcpy(m, hd, (size_t)HW * HW * 4); m[1] = (m[1] & 0x00FFFFFFu) | 0x40000000u;
+      CHECK(re_texpack_merge_ex(ref, m, HW, RE_TEXPACK_HUD_MAX_ERR, 1, &err) == 1 && (m[1] >> 24) == 0x40);
+      memcpy(m, hd, (size_t)HW * HW * 4); m[1] = (m[1] & 0x00FFFFFFu) | 0x40000000u;
+      CHECK(re_texpack_merge_ex(ref, m, HW, RE_TEXPACK_HUD_MAX_ERR, 0, &err) == 1 && (m[1] >> 24) == 0xFF);
+      memcpy(m, hd, (size_t)HW * HW * 4); for (size_t i = 0; i < (size_t)HW * HW / 8; i++) m[i] &= 0x00FFFFFFu;   /* 1/8 страницы прозрачна */
+      CHECK(re_texpack_merge_ex(ref, m, HW, RE_TEXPACK_HUD_MAX_ERR, 1, &err) == 1 && (m[5] >> 24) == 0xFF);
+      free(m); }
     remove("texpack_test/hud.txt"); remove("texpack_test/sky.txt");
     remove("texpack_test/hud_t/tptest/p210_c0005.png"); remove("texpack_test/hud_t/tptest"); remove("texpack_test/hud_t");
     remove("texpack_test/sky_t/tptest/p210_c0005.png"); remove("texpack_test/sky_t/tptest"); remove("texpack_test/sky_t");
