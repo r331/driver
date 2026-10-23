@@ -30,7 +30,15 @@ void re_texpack_compare_rgba(const uint32_t *hd, int w, int h, const uint32_t *r
 int re_texpack_merge(const uint32_t *orig, uint32_t *hd, int w, double *err);
 /* v2.27: оверлей неба: $RE_TEXPACK_SKY или первое слово <dir>/sky.txt → полный путь в out; NULL — нет оверлея */
 const char *re_texpack_overlay(const char *dir, char *out, int n);
+/* v2.36: оверлей HUD (перерисованные цифры часов миссии): $RE_TEXPACK_HUD или первое слово <dir>/hud.txt; ищется раньше неба */
+const char *re_texpack_overlay_hud(const char *dir, char *out, int n);
+/* порог сверки для файла, который последним вернули re_texpack_load/load8: RE_TEXPACK_HUD_MAX_ERR — из оверлея HUD, иначе RE_TEXPACK_MAX_ERR */
+double re_texpack_last_tol(void);
+/* re_texpack_merge с порогом tol */
+int re_texpack_merge_tol(const uint32_t *orig, uint32_t *hd, int w, double tol, double *err);
 /* порог: страница принимается, если err <= RE_TEXPACK_MAX_ERR и amis <= RE_TEXPACK_MAX_AMIS (иначе — перепутан индекс) */
 #define RE_TEXPACK_MAX_ERR  24.0
 #define RE_TEXPACK_MAX_AMIS 0.02
+/* v2.36: оверлей HUD меняет форму глифов (цифры перерисованы, ~38% страницы шрифта) — порог шире; альфа-порог тот же */
+#define RE_TEXPACK_HUD_MAX_ERR 48.0
 #endif

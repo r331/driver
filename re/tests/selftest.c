@@ -7752,6 +7752,31 @@ static int test_texpack8(void) {
     hd[0] = px4;
     remove("texpack_test/sky.txt"); remove("texpack_test/sky_t/tptest/p210_c0005.png"); remove("texpack_test/sky_t/tptest"); remove("texpack_test/sky_t");
     lo = re_texpack_load8("texpack_test", "TPTEST", 210, 5, &w, &h); CHECK(lo && lo[0] == px4); free(lo); }
+  { /* v2.36: оверлей HUD — <пак>/hud.txt, важнее неба; порог сверки его файлов шире (RE_TEXPACK_HUD_MAX_ERR); RE_TEXPACK_HUD=0 — выкл. */
+    char od[256]; CHECK(re_texpack_overlay_hud("texpack_test", od, sizeof od) == NULL);
+    mkdir("texpack_test/sky_t", 0777); mkdir("texpack_test/sky_t/tptest", 0777);
+    mkdir("texpack_test/hud_t", 0777); mkdir("texpack_test/hud_t/tptest", 0777);
+    uint32_t px4 = hd[0]; hd[0] = 0xFF654321u;
+    CHECK(png_write_rgba("texpack_test/hud_t/tptest/p210_c0005.png", hd, HW, HW) == 0);
+    hd[0] = 0xFF123456u; CHECK(png_write_rgba("texpack_test/sky_t/tptest/p210_c0005.png", hd, HW, HW) == 0); hd[0] = px4;
+    FILE *sf = fopen("texpack_test/sky.txt", "wb"); CHECK(sf); fputs("sky_t\n", sf); fclose(sf);
+    sf = fopen("texpack_test/hud.txt", "wb"); CHECK(sf); fputs("hud_t\n", sf); fclose(sf);
+    CHECK(re_texpack_overlay_hud("texpack_test", od, sizeof od) && !strcmp(od, "texpack_test/hud_t"));
+    uint32_t *lo = re_texpack_load8("texpack_test", "TPTEST", 210, 5, &w, &h);
+    CHECK(lo && lo[0] == 0xFF654321u && re_texpack_last_tol() == RE_TEXPACK_HUD_MAX_ERR); free(lo);   /* HUD важнее неба */
+    lo = re_texpack_load8("texpack_test", "TPTEST", 210, 6, &w, &h); CHECK(lo && lo[0] == px4 && re_texpack_last_tol() == RE_TEXPACK_MAX_ERR); free(lo);
+    setenv("RE_TEXPACK_HUD", "0", 1); CHECK(re_texpack_overlay_hud("texpack_test", od, sizeof od) == NULL);
+    lo = re_texpack_load8("texpack_test", "TPTEST", 210, 5, &w, &h); CHECK(lo && lo[0] == 0xFF123456u && re_texpack_last_tol() == RE_TEXPACK_MAX_ERR); free(lo);   /* без HUD — небо */
+    unsetenv("RE_TEXPACK_HUD");
+    { static uint32_t r6[256 * 256]; re_texpack_pal8_rgba(pa, &P14_01252be0[6 * 0x400], r6);   /* чужая палитра: ошибка между порогами? */
+      double e6 = 0, a6 = 0; re_texpack_compare_rgba(hd, HW, HW, r6, &e6, &a6);
+      uint32_t *m = (uint32_t *)malloc((size_t)HW * HW * 4); CHECK(m);
+      memcpy(m, hd, (size_t)HW * HW * 4); CHECK(re_texpack_merge_tol(r6, m, HW, e6 + 1.0, &err) == 1);
+      memcpy(m, hd, (size_t)HW * HW * 4); CHECK(re_texpack_merge_tol(r6, m, HW, e6 - 1.0, &err) == 0); free(m); }
+    remove("texpack_test/hud.txt"); remove("texpack_test/sky.txt");
+    remove("texpack_test/hud_t/tptest/p210_c0005.png"); remove("texpack_test/hud_t/tptest"); remove("texpack_test/hud_t");
+    remove("texpack_test/sky_t/tptest/p210_c0005.png"); remove("texpack_test/sky_t/tptest"); remove("texpack_test/sky_t");
+    lo = re_texpack_load8("texpack_test", "TPTEST", 210, 5, &w, &h); CHECK(lo && lo[0] == px4); free(lo); }
   if (!getenv("RE_TEXPACK") && plat_render_offscreen(640, 480) == 0) {
     re_gfx_cfg *c = re_gfx(); char keep[512]; memcpy(keep, c->texpack, sizeof keep);
     char lp[256]; memcpy(lp, P77_CurLevelPath, sizeof lp);

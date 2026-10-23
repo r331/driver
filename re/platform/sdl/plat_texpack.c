@@ -68,18 +68,20 @@ static void level_case(const char *in, char *out, int n, int mode) {   /* 0 — 
 }
 /* v2.27: вариант неба — оверлей пака: $RE_TEXPACK_SKY (подкаталог пака или полный путь; «0»/пусто — выкл.), иначе первое слово
    файла <пак>/sky.txt (напр. «sky_cc0»). Файлы оверлея (<пак>/<оверлей>/<уровень>/pNNN[_cKKKK].png) ищутся раньше основного
-   пака и проходят ту же сверку со страницей. */
-/* re_texpack_overlay — Overlay directory (v2.27 sky variants): $RE_TEXPACK_SKY (sub-directory of the pack or an
-   absolute path; empty or "0" disables), else the first word of <pack>/sky.txt.  Writes the
-   full path to out and returns it, or NULL when there is no overlay. */
-const char *re_texpack_overlay(const char *dir, char *out, int n) {
+   пака и проходят ту же сверку со страницей.
+   v2.36: второй оверлей того же устройства — HUD (перерисованные цифры часов миссии): $RE_TEXPACK_HUD или <пак>/hud.txt
+   (напр. «hud_hd»); ищется раньше неба. */
+/* overlay_named — Overlay directory named by environment variable `env` (sub-directory of the pack or an absolute
+   path; empty or "0" disables), else by the first word of <pack>/<file>.  Writes the full path to out and returns
+   it, or NULL when there is no overlay. */
+static const char *overlay_named(const char *dir, const char *env, const char *file, char *out, int n) {
     if (!out || n <= 0) return NULL;
     out[0] = 0; if (!dir || !*dir) return NULL;
     char name[256] = { 0 };
-    const char *e = getenv("RE_TEXPACK_SKY");
+    const char *e = getenv(env);
     if (e) { if (!*e || !strcmp(e, "0")) return NULL; snprintf(name, sizeof name, "%s", e); }
     else {
-        char fn[1024]; snprintf(fn, sizeof fn, "%s%ssky.txt", dir, dir[strlen(dir) - 1] != '/' ? "/" : "");
+        char fn[1024]; snprintf(fn, sizeof fn, "%s%s%s", dir, dir[strlen(dir) - 1] != '/' ? "/" : "", file);
         FILE *f = fopen(fn, "rb"); if (!f) return NULL;
         if (fscanf(f, "%255s", name) != 1) name[0] = 0;
         fclose(f);
@@ -89,11 +91,24 @@ const char *re_texpack_overlay(const char *dir, char *out, int n) {
     else snprintf(out, (size_t)n, "%s%s%s", dir, dir[strlen(dir) - 1] != '/' ? "/" : "", name);
     return out;
 }
+/* re_texpack_overlay — Overlay directory (v2.27 sky variants): $RE_TEXPACK_SKY, else the first word of <pack>/sky.txt. */
+const char *re_texpack_overlay(const char *dir, char *out, int n) { return overlay_named(dir, "RE_TEXPACK_SKY", "sky.txt", out, n); }
+/* re_texpack_overlay_hud — Overlay directory (v2.36 HUD variant): $RE_TEXPACK_HUD, else the first word of <pack>/hud.txt. */
+const char *re_texpack_overlay_hud(const char *dir, char *out, int n) { return overlay_named(dir, "RE_TEXPACK_HUD", "hud.txt", out, n); }
+/* Tolerance of the page check for the file last returned by re_texpack_load / load8: the HUD overlay redraws glyph
+   shapes on purpose (its pages differ from the original more than an upscale does), so it gets RE_TEXPACK_HUD_MAX_ERR. */
+static double g_last_tol = RE_TEXPACK_MAX_ERR;
+double re_texpack_last_tol(void) { return g_last_tol; }
 static uint32_t *load_one(const char *dir, const char *level, int idx, int pal, int *w, int *h);
-/* load_any — Load page idx (palette slot pal, -1 for 16-bit pages): the overlay first, then the pack.
-   sky.txt is re-read on every call (cheap, a few hundred pages per level). */
+/* load_any — Load page idx (palette slot pal, -1 for 16-bit pages): the HUD overlay, the sky overlay, then the pack.
+   hud.txt / sky.txt are re-read on every call (cheap, a few hundred pages per level). */
 static uint32_t *load_any(const char *dir, const char *level, int idx, int pal, int *w, int *h) {
-    char odir[1024];   /* sky.txt читается при каждой загрузке страницы (их сотни за уровень, файл крошечный) */
+    char odir[1024];   /* hud.txt / sky.txt читаются при каждой загрузке страницы (их сотни за уровень, файлы крошечные) */
+    if (re_texpack_overlay_hud(dir, odir, sizeof odir)) {
+        uint32_t *px = load_one(odir, level, idx, pal, w, h);
+        if (px) { g_last_tol = RE_TEXPACK_HUD_MAX_ERR; return px; }
+    }
+    g_last_tol = RE_TEXPACK_MAX_ERR;
     if (re_texpack_overlay(dir, odir, sizeof odir)) { uint32_t *px = load_one(odir, level, idx, pal, w, h); if (px) return px; }
     return load_one(dir, level, idx, pal, w, h);
 }
@@ -175,11 +190,13 @@ void re_texpack_compare_rgba(const uint32_t *hd, int w, int h, const uint32_t *r
 /* re_texpack_merge — Check an HD image (w x w) against the original RGBA page and, if the error is at most
    RE_TEXPACK_MAX_ERR, replace its alpha with the original's (nearest texel).  Returns 1 when
    merged; 0 (and *err = -1 for a bad size) otherwise. */
-int re_texpack_merge(const uint32_t *orig, uint32_t *hd, int w, double *err) {
+int re_texpack_merge(const uint32_t *orig, uint32_t *hd, int w, double *err) { return re_texpack_merge_tol(orig, hd, w, RE_TEXPACK_MAX_ERR, err); }
+/* re_texpack_merge_tol — re_texpack_merge with the error limit `tol` (re_texpack_last_tol() of the attached file). */
+int re_texpack_merge_tol(const uint32_t *orig, uint32_t *hd, int w, double tol, double *err) {
     if (!orig || !hd || w < 256 || w > 1024 || (w & (w - 1))) { if (err) *err = -1; return 0; }
     double e = 0; re_texpack_compare_rgba(hd, w, w, orig, &e, NULL);
     if (err) *err = e;
-    if (e > RE_TEXPACK_MAX_ERR) return 0;
+    if (e > tol) return 0;
     int s = w / 256;
     for (int y = 0; y < w; y++) for (int x = 0; x < w; x++) {
         uint32_t *p = &hd[(size_t)y * w + x];
