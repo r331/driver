@@ -28,3 +28,8 @@ Build a personal installer (from the repository root):
 
 A bare app built without packaged data still supports --data /path/to/Data_Files,
 or Data_Files inside Contents/Resources. That developer mode writes into the selected data folder.
+
+HD stopwatch and mission timer digits (v2.36):
+  The texture pack includes the hud_hd variant for the garage stopwatch and Miami mission timer digits.
+  It is enabled by hud.txt containing hud_hd in the texture-pack directory.
+  To restore the previous upscale, use RE_TEXPACK_HUD=0 or remove hud.txt.

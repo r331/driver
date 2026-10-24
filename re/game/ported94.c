@@ -270,6 +270,7 @@ void P94_PackState(const uint8_t *src, int32_t *out) {
 
 /* P94_QuatToMat — Game.exe 004da76a, cdecl.  Quaternion (x, y, z, w in 1.12) -> 3x3 int16 rotation matrix (4096 = 1.0); products rounded >> 11
    (i.e. 2*q*q in 20.12). */
+/* PS1: LongQuaternion2Matrix @ 0x0001B380 (olink9/driver1-decomp@5bb6cda, high) */
 void P94_QuatToMat(const int32_t *q, int16_t *m) {
   #define QQ(a, b) ((int16_t)((int32_t)((uint32_t)mul(q[a], q[b]) + 0x400u) >> 11))
   int16_t yy = QQ(1, 1), zz = QQ(2, 2), xx = QQ(0, 0);

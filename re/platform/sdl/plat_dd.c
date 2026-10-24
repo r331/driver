@@ -15,7 +15,7 @@ typedef struct dd_obj { uint32_t tag; int32_t lost; int32_t attached; int32_t cl
     /* v2.01: игра (g_game_present) — поверхность с памятью пикселей */
     uint8_t *px; int32_t pitch, bpp; uint32_t pf[8]; uint32_t addr; int gltex, dirty, role; uint32_t caps;
     struct dd_obj *surf; struct dd_obj *pal; uint8_t pal_rgba[256 * 4]; uint32_t ck_lo, ck_hi; int has_ck;
-    uint32_t *hd; int hdw, hd_page, hd_pal;     /* v2.18: HD-картинка страницы из пака (plat_dd_attach_hd), 16 бит */
+    uint32_t *hd; int hdw, hd_page, hd_pal; double hd_tol; int hd_hud;     /* v2.18: HD-картинка страницы из пака (plat_dd_attach_hd), 16 бит */
     int page8; uint64_t page8_key; } dd_obj;      /* v2.18: поверхность PAL8 со страницей уровня (plat_dd_tag_page8), -1 — нет */
 static int g_game_present;   /* v2.00: 1 — игра (plat_dd_stub_enum с 0x100): Flip показывает кадр GL; v2.01: поверхности с памятью */
 /* v2.01: адрес памяти поверхности для 32-битного поля lpSurface (game/reptr.c — синтетический адрес 0x80000000+) */
@@ -100,7 +100,7 @@ void plat_dd_attach_hd(void *v, uint32_t *rgba, int w, int page, int pal) {
     dd_obj *o = (dd_obj *)v;
     if (!is_surf(v)) { free(rgba); return; }
     if (!rgba) { if (o->hd) { free(o->hd); o->hd = NULL; o->dirty = 1; } return; }   /* снять (в слоте другая страница) */
-    free(o->hd); o->hd = rgba; o->hdw = w; o->hd_page = page; o->hd_pal = pal; o->dirty = 1; g_hd_att++;
+    free(o->hd); o->hd = rgba; o->hdw = w; o->hd_page = page; o->hd_pal = pal; o->hd_tol = re_texpack_last_tol(); o->hd_hud = re_texpack_last_hud(); o->dirty = 1; g_hd_att++;   /* v2.36: порог сверки файла (HUD шире) */
 }
 void plat_dd_tag_page8(void *v, int page, uint64_t key) { dd_obj *o = (dd_obj *)v; if (!is_surf(v) || o->bpp != 8) return; o->page8 = page; o->page8_key = key; }
 void plat_dd_hd_stats(int *att, int *up, int *rej, int *pal8) { if (att) *att = g_hd_att; if (up) *up = g_hd_up; if (rej) *rej = g_hd_rej; if (pal8) *pal8 = g_pal8_bind; }
@@ -112,7 +112,7 @@ static void gs_upload(dd_obj *o, int overlay) {
         TR("upload %p %dx%d bpp %d nz %d pal %p palnz %d rgba0 %08x mid %08x\n", (void *)o, o->w, o->h, o->bpp, nz, (void *)o->pal, pz, rgba[0], rgba[o->w * o->h / 2 + o->w / 2]); }
     if (o->hd && o->w == 256 && o->h == 256 && !overlay) {   /* v2.18: HD из пака — если память поверхности всё ещё та страница */
         double e = 0;
-        if (re_texpack_merge(rgba, o->hd, o->hdw, &e)) {
+        if (re_texpack_merge_ex(rgba, o->hd, o->hdw, o->hd_tol, o->hd_hud, &e)) {   /* v2.36: файл HUD — своя гладкая альфа */
             if (o->gltex) plat_tex_update(o->gltex, o->hdw, o->hdw, o->hd); else o->gltex = plat_tex_create(o->hdw, o->hdw, o->hd);
             g_hd_up++; free(rgba); o->dirty = 0; return;
         }

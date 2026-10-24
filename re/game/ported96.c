@@ -262,6 +262,9 @@ p96_parttab_t P96_PartTab;
 #define LOG_BASE 0x00d0fe40u
 
 static int32_t rd32(const uint8_t *p, int o) { int32_t v; memcpy(&v, p + o, 4); return v; }
+#ifndef RE_HOOK_BUILD
+static uint16_t rd16(const uint8_t *p, int o) { uint16_t v; memcpy(&v, p + o, 2); return v; }
+#endif
 static void wr32(uint8_t *p, int o, int32_t v) { memcpy(p + o, &v, 4); }
 static void wrf(uint8_t *p, int o, float v) { memcpy(p + o, &v, 4); }
 static void wr16(uint8_t *p, int o, int16_t v) { memcpy(p + o, &v, 2); }
@@ -537,8 +540,28 @@ void P96_AddObjB(const float *pos, const int32_t *uv, int16_t a, int16_t b, uint
 
 /* Mission stopwatch text from a timer record (+0xc hundredths, +0x10 seconds, +0x14 minutes). */
 /* 004fba23 */
+#ifndef RE_HOOK_BUILD
+/* v2.36 (native only): RE_FONTDUMP=1 — log once the glyph records of fonts 0 and 1 (the mission clock's fonts) for
+   "0123456789:.": page, u, v, w, h — the texture-pack HUD variant (RE_TEXPACK_HUD) is cut to these cells. */
+static void clock_font_dump(void) {
+  static int done; const char *e = getenv("RE_FONTDUMP");
+  if (done || !e || !*e || *e == '0') return;
+  done = 1;
+  for (int f = 0; f < 2; f++) {
+    const uint8_t *t = &P58_Font[0] + f * 0x806;
+    plat_log("[font] шрифт %d: +8=%d +a=%d +c=%d\n", f, rd16(t, 8), (int16_t)rd16(t, 0xa), rd16(t, 0xc));
+    for (const char *c = "0123456789:."; *c; c++) {
+      const uint8_t *g = t + 0xe + (uint8_t)*c * 8;
+      plat_log("[font] шрифт %d '%c': есть %d страница %d u %d v %d w %d h %d\n", f, *c, rd16(g, 0), rd16(g, 2), g[4], g[5], g[6], g[7]);
+    }
+  }
+}
+#endif
 void P96_ClockText(const uint8_t *t) {
   char buf[20];
+#ifndef RE_HOOK_BUILD
+  clock_font_dump();
+#endif
   if (P29_Mode != 0) return;
   if (P13_00b31f04 == 0) {
     snprintf(buf, sizeof buf, "%02d:%02d", rd32(t, 0x14), rd32(t, 0x10));

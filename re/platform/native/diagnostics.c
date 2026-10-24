@@ -110,7 +110,7 @@ void re_diag_start(void) {
                 RE_BUILD_REV, __DATE__, __TIME__, SDL_GetPlatform(), (unsigned)(sizeof(void *) * 8));
     re_diag_log("Session: %s; last 600 frames per capture; max 10 captures, 150000 vertices/capture, 16 MiB session log\n", directory);
     /* Explicit whitelist: do not collect unrelated environment variables or credentials. */
-    static const char *const names[] = { "RE_PRESET", "RE_DRAW_DIST", "RE_TEXPACK", "RE_TEXPACK_SKY", "RE_SKYFIX",
+    static const char *const names[] = { "RE_PRESET", "RE_DRAW_DIST", "RE_TEXPACK", "RE_TEXPACK_SKY", "RE_TEXPACK_HUD", "RE_SKYFIX",
         "RE_NO_FBO", "RE_FBO", "RE_ASPECT", "RE_WINDOWED", "RE_FULLSCREEN", "RE_RES", "RE_GAME_RES", "RE_CFG",
         "RE_MSAA", "RE_A2C", "RE_FXAA", "RE_MIPMAPS", "RE_FILTER", "RE_ANISO", "RE_RENDER_SCALE", "RE_VSYNC",
         "RE_FIXED_DT", "RE_KEYS", "RE_TELEPORT", "RE_DIAG_CAPTURE_FRAME", "RE_GAMEPAD", "RE_RUMBLE", "RE_INPUTDBG",

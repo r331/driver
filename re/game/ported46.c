@@ -65,6 +65,7 @@ void P46_SetBounds(int32_t a, int32_t b, int32_t c, int32_t d) {
 }
 /* P46_UpdateObjects — Game.exe 004defd1.  Runs the wheel physics (P142_WheelPhys, 004df024) for every object
    in the list G6_00B2F30C[0 .. G6_00D0DDC0-1]; the second argument is (object byte +3 == 1). */
+/* PS1: StepCars @ 0x0001D648 (olink9/driver1-decomp@5bb6cda, high) */
 void P46_UpdateObjects(void) {
   for (int32_t i = 0; i < G6_00D0DDC0; i++) {
     uint8_t *obj = G6_00B2F30C[i];

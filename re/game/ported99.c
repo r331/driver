@@ -218,6 +218,7 @@ void P99_RadarXform(const int32_t *src, int32_t *dst, int32_t n) {
 /* P99_GearBox — Game.exe 004d6ae7.  Picks car `car`'s gear (0..3) from rpm = |forward speed| / 2048 using the shift
    table P99_GearTab {down (coasting), down (throttle), up, ratio, ratio when coasting}; reverse uses gear 0.
    Returns ratio * rpm (used as the engine pitch).  TODO(RE): column meanings inferred from use. */
+/* PS1: GetEngineRevs @ 0x0004C610 (olink9/driver1-decomp@5bb6cda, high) */
 int32_t P99_GearBox(int32_t car) {
   p99_car_t *c = CAR(car);
   int32_t gear = c->gear;

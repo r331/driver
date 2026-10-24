@@ -343,6 +343,7 @@ int32_t P125_AddDashMessage(const char *msg, int32_t lim) {
 /* ---- 004b8d49: клубы в пуле 0110b260 (записи 0x3c) ---- */
 /* P125_SmokePuffs — Game.exe 004b8d49.  Emits n smoke puffs of kind `kind` at pos with velocity vel into the pool
    0110b260 (0x3c-byte records); blue != 0 selects the bluish colour (colours from .data 00553630). */
+/* PS1: Setup_Debris @ 0x00047824 (olink9/driver1-decomp@5bb6cda, high) */
 void P125_SmokePuffs(const int32_t *pos, const int32_t *vel, int32_t n, uint32_t kind, int32_t blue) {
   if (G6_00B5A778 != 0 || P69_OvlOn == 0) return;
   for (int32_t k = 0; k < n; k++) {

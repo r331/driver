@@ -288,7 +288,7 @@ static int texpack_try(int32_t slot, const uint16_t *page) {
   if (!hd) return 0;
   double err = 0, am = 0;
   re_texpack_compare(hd, w, h, page, &err, &am);
-  if (err > RE_TEXPACK_MAX_ERR || am > RE_TEXPACK_MAX_AMIS) {
+  if (err > re_texpack_last_tol() || am > RE_TEXPACK_MAX_AMIS) {
     plat_log("[texpack] %s/p%03d.png отклонён: не похож на страницу %d (ошибка %.1f, альфа %.2f%%)\n", lv, (int)slot, (int)slot, err, am * 100.0);
     free(hd); P86_TexpackRejected++; return 0;
   }
@@ -312,7 +312,7 @@ static int pal8_hd(int slot, int pal, const uint32_t *px) {
   double err = 0, am = 0;
   re_texpack_compare_rgba(hd, w, h, px, &err, &am);
   int t = 0;
-  if (err > RE_TEXPACK_MAX_ERR || am > RE_TEXPACK_MAX_AMIS) {
+  if (err > re_texpack_last_tol() || am > RE_TEXPACK_MAX_AMIS) {
     plat_log("[texpack] %s/p%03d_c%04d.png отклонён: не похож на страницу %d с палитрой %d (ошибка %.1f, альфа %.2f%%)\n", lv, slot, pal, slot, pal, err, am * 100.0);
     P86_TexpackRejected++; g_miss8[slot][pal] = 1;
   } else if ((t = plat_tex_create(w, h, hd))) {
