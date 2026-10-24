@@ -18,7 +18,7 @@
    Громкость — auxSetVolume устройства CD (aux 0): L/R 0..0xffff, линейно (RE_MUSIC_VOL — множитель 0..4).
    Смешивание — cda_mix() из dsm_mix (plat_dsmix.c) до мягкого ограничителя, 44100 Гц стерео.
    v2.33: динамическая музыка (PS-стиль) для дорожек 4..7 — набор <каталог>/dynamic/ (16 файлов: город × день/ночь × Drive/Chase),
-   см. раздел «динамическая музыка» ниже и README «CD-музыка». */
+   см. раздел «динамическая музыка» ниже и README.ru.md «CD-музыка». */
 /* plat_cdaudio.c (English overview) — CD audio emulation for the native build (MCI cdaudio, TMSF time
    format).  The game (game/ported25.c) only calls plat_cd_* / plat_aux_*; here tracks come from files:
    directory RE_MUSIC_DIR / music_dir in driver.cfg / ./Music; track N = TrackNN.wav / .flac / .ogg / .mp3
