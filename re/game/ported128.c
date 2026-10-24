@@ -32,6 +32,7 @@
      rect {x0, y0, x1, y1} (Сазерленд — Ходжмен: x ≥ x0, x ≤ x1, y ≥ y0, y ≤ y1; при входе в область — повтор шага от
      точки пересечения), формула площади Гаусса /2 по модулю. Списки на стеке оригинала — массивы в native. */
 #include "ported128.h"
+#include "reprof.h"
 #include "p128_data.h"
 #include "ported127.h"
 #include "unported.h"
@@ -588,7 +589,7 @@ int32_t P128_CopPath(uint8_t *rec) {
     else {
 #ifndef RE_HOOK_BUILD
       { int32_t dx = (int32_t)(rd32(nx + 8) - rd32(p + 8)), dz = (int32_t)(rd32(nx + 0xc) - rd32(p + 0xc));
-        if (getenv("RE_COPDBG") && (dx > 0x1fffff || dx < -0x1fffff || dz > 0x1fffff || dz < -0x1fffff))
+        if (RE_GETENV_ONCE("RE_COPDBG") && (dx > 0x1fffff || dx < -0x1fffff || dz > 0x1fffff || dz < -0x1fffff))
           fprintf(stderr, "[copath] большой шаг: p %d %d → nx %d %d (узлы %p %p)\n", (int)rd32(p + 8), (int)rd32(p + 0xc),
                   (int)rd32(nx + 8), (int)rd32(nx + 0xc), (void *)p, (void *)nx); }
 #endif

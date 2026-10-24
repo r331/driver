@@ -18,6 +18,7 @@
      −900) в клетках радара; клетки 0x37×0x37 с площадью пересечения (P128_ClipAreaN) > 50000 получают биты 0x22/24/28/30
      в P77_C5FE00. Многоугольник 00c7d820 оригинала (список со ссылками) — локальный массив точек в native. */
 #include "ported129.h"
+#include "reprof.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "ported128.h"
@@ -307,7 +308,7 @@ void P129_ObjBoxes(uint8_t *obj, const float *pos, uint8_t *car, int32_t idx, ui
   int32_t dx = (int32_t)fabs((double)(rdf(obj + 8) - pos[0]));
   int32_t dz = (int32_t)fabs((double)(rdf(obj + 0x10) - pos[2]));
 #ifndef RE_HOOK_BUILD
-  { static int k; if (getenv("RE_COLDBG2") && k++ < 60) fprintf(stderr, "[colb] obj %d mdl %08x L %08x n %d rad %d r %d dx %d dz %d opos %.0f %.0f %.0f ang %d\n", rdu16(obj + 4), mdl,
+  { static int k; if (RE_GETENV_ONCE("RE_COLDBG2") && k++ < 60) fprintf(stderr, "[colb] obj %d mdl %08x L %08x n %d rad %d r %d dx %d dz %d opos %.0f %.0f %.0f ang %d\n", rdu16(obj + 4), mdl,
       (unsigned)rd32(m + 0x34), rd32(L), fround(rdf(m + 0x10)), r, dx, dz, rdf(obj + 8), rdf(obj + 0xc), rdf(obj + 0x10), rd32(obj + 0x18)); }
 #endif
   if (!(M(dx, dx) + M(dz, dz) < M(r, r))) return;

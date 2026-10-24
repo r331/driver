@@ -245,10 +245,90 @@ void re_ptr_set_image(uint32_t base, void *p, uint32_t size) {
 typedef struct { uint32_t addr, size; } re_gvar_range_t;
 extern const re_gvar_range_t re_gvar_ranges[] __attribute__((weak));
 extern const uint32_t re_gvar_ranges_n __attribute__((weak));
+/* v2.38 (performance, docs/PERFORMANCE.md): the ~2400 ranges were scanned linearly on every re_ptr of a data-image
+   address (thousands of calls per frame, e.g. the depth-sort Insert of particles).  They are now merged once into
+   sorted disjoint intervals and binary-searched: "address inside any range" gives exactly the same answer.
+   RE_PTR_LINEAR=1 restores the linear scans (for comparison runs). */
+typedef struct { uint32_t lo; uint64_t hi; } re_ival_t;   /* [lo, hi) */
+static re_ival_t *g_gv_iv; static uint32_t g_gv_n; static int g_gv_built, g_ptr_linear = -1;
+static int ptr_linear(void) { if (g_ptr_linear < 0) { const char *e = getenv("RE_PTR_LINEAR"); g_ptr_linear = e && *e && *e != '0'; } return g_ptr_linear; }
+static int ival_cmp(const void *a, const void *b) { uint32_t x = ((const re_ival_t *)a)->lo, y = ((const re_ival_t *)b)->lo; return x < y ? -1 : x > y; }
+static void gv_build(void) {
+  g_gv_built = 1;
+  uint32_t n = re_gvar_ranges_n; if (n == 0) return;
+  re_ival_t *v = (re_ival_t *)malloc(n * sizeof *v); if (v == NULL) return;
+  uint32_t k = 0;
+  for (uint32_t i = 0; i < n; i++) if (re_gvar_ranges[i].size != 0) { v[k].lo = re_gvar_ranges[i].addr; v[k].hi = (uint64_t)re_gvar_ranges[i].addr + re_gvar_ranges[i].size; k++; }
+  qsort(v, k, sizeof *v, ival_cmp);
+  uint32_t m = 0;
+  for (uint32_t i = 0; i < k; i++) {
+    if (m > 0 && v[i].lo <= v[m - 1].hi) { if (v[i].hi > v[m - 1].hi) v[m - 1].hi = v[i].hi; }   /* overlapping / touching: union */
+    else v[m++] = v[i];
+  }
+  g_gv_iv = v; g_gv_n = m;
+}
 static int in_gvar_range(uint32_t a) {
   if (&re_gvar_ranges_n == NULL) return 0;
-  for (uint32_t i = 0; i < re_gvar_ranges_n; i++) if (a >= re_gvar_ranges[i].addr && a - re_gvar_ranges[i].addr < re_gvar_ranges[i].size) return 1;
-  return 0;
+  if (ptr_linear()) {
+    for (uint32_t i = 0; i < re_gvar_ranges_n; i++) if (a >= re_gvar_ranges[i].addr && a - re_gvar_ranges[i].addr < re_gvar_ranges[i].size) return 1;
+    return 0;
+  }
+  if (!g_gv_built) gv_build();
+  if (g_gv_iv == NULL) {   /* out of memory: the original scan */
+    for (uint32_t i = 0; i < re_gvar_ranges_n; i++) if (a >= re_gvar_ranges[i].addr && a - re_gvar_ranges[i].addr < re_gvar_ranges[i].size) return 1;
+    return 0;
+  }
+  uint32_t lo = 0, hi = g_gv_n;   /* first interval with lo > a, then check the one before it */
+  while (lo < hi) { uint32_t m = (lo + hi) / 2; if (g_gv_iv[m].lo <= a) lo = m + 1; else hi = m; }
+  return lo > 0 && (uint64_t)a < g_gv_iv[lo - 1].hi;
+}
+/* v2.38: sorted indexes of the dynamic registry g_dyn, by game address and by native pointer.  The linear scans
+   return the FIRST matching entry; when no two entries overlap (checked at every rebuild) at most one entry
+   matches, and the binary search finds that one.  If entries overlap, the original linear scan is used.  The
+   index is rebuilt lazily after any change of g_dyn (registration, re-registration, removal). */
+static uint16_t g_ix_a[RE_DYN_MAX], g_ix_p[RE_DYN_MAX];
+static uint32_t g_dyn_gen = 1, g_ix_gen, g_ix_n; static int g_ix_a_ok, g_ix_p_ok;
+static int ix_cmp_a(const void *x, const void *y) { uint32_t a = g_dyn[*(const uint16_t *)x].addr, b = g_dyn[*(const uint16_t *)y].addr; return a < b ? -1 : a > b; }
+static int ix_cmp_p(const void *x, const void *y) { uintptr_t a = (uintptr_t)g_dyn[*(const uint16_t *)x].p, b = (uintptr_t)g_dyn[*(const uint16_t *)y].p; return a < b ? -1 : a > b; }
+static void ix_build(void) {
+  g_ix_gen = g_dyn_gen; g_ix_n = g_ndyn;
+  for (uint32_t i = 0; i < g_ndyn; i++) { g_ix_a[i] = (uint16_t)i; g_ix_p[i] = (uint16_t)i; }
+  qsort(g_ix_a, g_ndyn, sizeof g_ix_a[0], ix_cmp_a);
+  qsort(g_ix_p, g_ndyn, sizeof g_ix_p[0], ix_cmp_p);
+  g_ix_a_ok = g_ix_p_ok = 1;
+  for (uint32_t k = 0; k + 1 < g_ndyn; k++) {
+    const re_region_t *a = &g_dyn[g_ix_a[k]], *b = &g_dyn[g_ix_a[k + 1]];
+    if ((uint64_t)a->addr + a->size > b->addr) g_ix_a_ok = 0;
+    const re_region_t *c = &g_dyn[g_ix_p[k]], *d = &g_dyn[g_ix_p[k + 1]];
+    if ((uintptr_t)c->p + c->size > (uintptr_t)d->p) g_ix_p_ok = 0;
+  }
+}
+/* dyn_find_addr / dyn_find_ptr — index of the g_dyn entry holding addr / p, -1 if none (same as the first-match scans). */
+static int dyn_find_addr(uint32_t addr) {
+  if (!ptr_linear()) {
+    if (g_ix_gen != g_dyn_gen) ix_build();
+    if (g_ix_a_ok) {
+      uint32_t lo = 0, hi = g_ix_n;
+      while (lo < hi) { uint32_t m = (lo + hi) / 2; if (g_dyn[g_ix_a[m]].addr <= addr) lo = m + 1; else hi = m; }
+      if (lo > 0) { const re_region_t *r = &g_dyn[g_ix_a[lo - 1]]; if (addr - r->addr < r->size) return g_ix_a[lo - 1]; }
+      return -1;
+    }
+  }
+  for (uint32_t i = 0; i < g_ndyn; i++) if (addr >= g_dyn[i].addr && addr - g_dyn[i].addr < g_dyn[i].size) return (int)i;
+  return -1;
+}
+static int dyn_find_ptr(const uint8_t *p) {
+  if (!ptr_linear()) {
+    if (g_ix_gen != g_dyn_gen) ix_build();
+    if (g_ix_p_ok) {
+      uint32_t lo = 0, hi = g_ix_n;
+      while (lo < hi) { uint32_t m = (lo + hi) / 2; if ((uintptr_t)g_dyn[g_ix_p[m]].p <= (uintptr_t)p) lo = m + 1; else hi = m; }
+      if (lo > 0) { const re_region_t *r = &g_dyn[g_ix_p[lo - 1]]; if (p >= r->p && p < r->p + r->size) return g_ix_p[lo - 1]; }
+      return -1;
+    }
+  }
+  for (uint32_t i = 0; i < g_ndyn; i++) if (p >= g_dyn[i].p && p < g_dyn[i].p + g_dyn[i].size) return (int)i;
+  return -1;
 }
 void *re_ptr(uint32_t addr) {
   if (addr == 0) return NULL;
@@ -258,8 +338,7 @@ void *re_ptr(uint32_t addr) {
      машина копа из слота +0xcd0 (P102_CopsTick/ИИ читали пустую запись). Поэтому эта область — до проверки образа. */
   if (addr >= P99_CARS_ADDR && addr - P99_CARS_ADDR < (uint32_t)sizeof P99_Cars) return (uint8_t *)P99_Cars + (addr - P99_CARS_ADDR);
   if (re_gvar_img != NULL && addr >= g_img_base && addr - g_img_base < g_img_size && in_gvar_range(addr)) return g_img + (addr - g_img_base);   /* v2.03 */
-  for (uint32_t i = 0; i < g_ndyn; i++)
-    if (addr >= g_dyn[i].addr && addr - g_dyn[i].addr < g_dyn[i].size) return g_dyn[i].p + (addr - g_dyn[i].addr);
+  { int i = dyn_find_addr(addr); if (i >= 0) return g_dyn[i].p + (addr - g_dyn[i].addr); }
   for (size_t i = 0; i < sizeof k_regions / sizeof k_regions[0]; i++)
     if (addr >= k_regions[i].addr && addr - k_regions[i].addr < k_regions[i].size) return k_regions[i].p + (addr - k_regions[i].addr);
   if (g_img != NULL && addr >= g_img_base && addr - g_img_base < g_img_size) return g_img + (addr - g_img_base);   /* v2.02 */
@@ -268,8 +347,7 @@ void *re_ptr(uint32_t addr) {
 uint32_t re_addr(const void *pv) {
   const uint8_t *p = (const uint8_t *)pv;
   if (p == NULL) return 0;
-  for (uint32_t i = 0; i < g_ndyn; i++)
-    if (p >= g_dyn[i].p && p < g_dyn[i].p + g_dyn[i].size) return g_dyn[i].addr + (uint32_t)(p - g_dyn[i].p);
+  { int i = dyn_find_ptr(p); if (i >= 0) return g_dyn[i].addr + (uint32_t)(p - g_dyn[i].p); }
   for (size_t i = 0; i < sizeof k_regions / sizeof k_regions[0]; i++)
     if (p >= k_regions[i].p && p < k_regions[i].p + k_regions[i].size) return k_regions[i].addr + (uint32_t)(p - k_regions[i].p);
   if (g_img != NULL && p >= g_img && p < g_img + g_img_size) return g_img_base + (uint32_t)(p - g_img);   /* v2.02 */
@@ -279,8 +357,7 @@ uint32_t re_addr(const void *pv) {
 uint32_t re_addr_known(const void *pv) {
   const uint8_t *p = (const uint8_t *)pv;
   if (p == NULL) return 0;
-  for (uint32_t i = 0; i < g_ndyn; i++)
-    if (p >= g_dyn[i].p && p < g_dyn[i].p + g_dyn[i].size) return g_dyn[i].addr + (uint32_t)(p - g_dyn[i].p);
+  { int i = dyn_find_ptr(p); if (i >= 0) return g_dyn[i].addr + (uint32_t)(p - g_dyn[i].p); }
   for (size_t i = 0; i < sizeof k_regions / sizeof k_regions[0]; i++)
     if (p >= k_regions[i].p && p < k_regions[i].p + k_regions[i].size) return k_regions[i].addr + (uint32_t)(p - k_regions[i].p);
   if (g_img != NULL && p >= g_img && p < g_img + g_img_size) return g_img_base + (uint32_t)(p - g_img);
@@ -289,8 +366,8 @@ uint32_t re_addr_known(const void *pv) {
 void re_ptr_register(uint32_t addr, void *native, uint32_t size) {
   if (native == NULL || size == 0) return;
   for (uint32_t i = 0; i < g_ndyn; i++)
-    if (g_dyn[i].p == native) { g_dyn[i].addr = addr; g_dyn[i].size = size; return; }
-  if (g_ndyn < RE_DYN_MAX) { g_dyn[g_ndyn].addr = addr; g_dyn[g_ndyn].p = (uint8_t *)native; g_dyn[g_ndyn].size = size; g_ndyn++; }
+    if (g_dyn[i].p == native) { g_dyn[i].addr = addr; g_dyn[i].size = size; g_dyn_gen++; return; }
+  if (g_ndyn < RE_DYN_MAX) { g_dyn[g_ndyn].addr = addr; g_dyn[g_ndyn].p = (uint8_t *)native; g_dyn[g_ndyn].size = size; g_ndyn++; g_dyn_gen++; }
 }
 uint32_t re_ptr_register_dyn(void *native, uint32_t size) {
   if (native == NULL || g_ndyn >= RE_DYN_MAX) return 0;
@@ -301,7 +378,7 @@ uint32_t re_ptr_register_dyn(void *native, uint32_t size) {
 }
 void re_ptr_unregister(const void *native) {
   for (uint32_t i = 0; i < g_ndyn; i++)
-    if (g_dyn[i].p == native) { g_dyn[i] = g_dyn[--g_ndyn]; return; }
+    if (g_dyn[i].p == native) { g_dyn[i] = g_dyn[--g_ndyn]; g_dyn_gen++; return; }
 }
 /* v2.03: platform/native/fn_table.c (tools/gen_fn_table.py, из re_hook install.c) — только в игре (образ .data задан) */
 extern const re_fnent_t re_fn_table[] __attribute__((weak));

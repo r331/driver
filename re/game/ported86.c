@@ -7,6 +7,7 @@
    texture-pack attachment helpers (P86_Game*) are used. */
 /* Текстурные и гуро-обработчики записей модели (набор 1, режим 0) — восстановлено из Game.exe. */
 #include "ported86.h"
+#include "reprof.h"
 #include "ported12.h"
 #include "ported14.h"
 #include "smallfuncs2.h"
@@ -303,9 +304,16 @@ static int texpack_try(int32_t slot, const uint16_t *page) {
 /* HD-текстура пары (страница, палитра) из пака pNNN_cKKKK.png со сверкой с той же страницей в той же палитре; 0 — нет/отклонён */
 /* pal8_hd — v2.18: HD texture for (page, palette) from pNNN_cKKKK.png, verified against the page in that
    palette.  Returns the texture or 0 (missing / rejected, remembered in g_miss8). */
+static int pal8_hd_load(int slot, int pal, const uint32_t *px, const char *dir);
 static int pal8_hd(int slot, int pal, const uint32_t *px) {
   const char *dir = re_texpack_dir();
   if (!dir || pal >= 0x32 || g_miss8[slot][pal]) return 0;
+  RP_BEGIN(RP_HD_LOAD); RP_COUNT(RC_HD_LOADS, 1);
+  int t = pal8_hd_load(slot, pal, px, dir);
+  RP_END(RP_HD_LOAD);
+  return t;
+}
+static int pal8_hd_load(int slot, int pal, const uint32_t *px, const char *dir) {
   char lv[128]; re_texpack_level_name(P77_CurLevelPath, lv, sizeof lv);
   int w = 0, h = 0;
   uint32_t *hd = re_texpack_load8(dir, lv, slot, pal, &w, &h);
@@ -338,6 +346,7 @@ static int pal8_make(int slot, int pal) {
 /* pal_changed_check — drops the cached textures of palette slot pal when its contents changed. */
 static void pal_changed_check(int pal) {
   if (pal < 0x32 && g_palhave[pal] && memcmp(g_palcopy[pal], &P14_01252be0[pal * 0x400], 0x400) != 0) {
+    RP_COUNT(RC_PAL_INVAL, 1);
     for (int s = 0; s < 256; s++) if (g_ptex[s][pal]) { plat_tex_free(g_ptex[s][pal]); g_ptex[s][pal] = 0; g_ptexw[s][pal] = 0; }
     for (int s = 0; s < 256; s++) g_miss8[s][pal] = 0;
     g_palhave[pal] = 0;   /* содержимое слота палитры сменилось — текстуры этой палитры пересоздаются */
@@ -407,6 +416,29 @@ static int game_pal8_tex(int page, uint64_t key, const uint8_t *pal_rgba) {
   if (t) P86_GameAttachN++;
   return t;
 }
+/* game_preload8 — v2.38 (performance, docs/PERFORMANCE.md), off by default: RE_TEXPACK_PRELOAD=1 creates the HD
+   textures of 8-bit page `page` for every palette its LEVELS\*.D3D list names (the same list the render-check path
+   preloads) while the level loads, exactly as game_pal8_tex would on the first draw of that pair (same palette-change
+   check, same file, same comparison), so a car or object seen for the first time no longer stalls the frame for a
+   PNG decode + upload (~40-80 ms per pair measured).  Costs level-load time and texture memory (up to ~5 MB per pair). */
+static void game_preload8(int page) {
+  static int on = -1; if (on < 0) { const char *e = getenv("RE_TEXPACK_PRELOAD"); on = e && *e && *e != '0'; }
+  if (!on || page < 0 || page >= 256 || !g_raw8[page] || !re_texpack_dir()) return;
+  const p58_rec_t *rec = P58_Tab4EFC03;
+  static uint32_t px[256 * 256];
+  for (int i = 0; rec && i < P58_Cnt4EFC03; i++) if (rec[i].a == page && rec[i].p) {
+    const int32_t *l = (const int32_t *)rec[i].p;
+    for (int j = 0; j < rec[i].c; j++) {
+      int k = l[j];
+      if (k < 0 || k >= 0x32 || !P12_01252aa0[k]) continue;
+      pal_changed_check(k);
+      if (g_ptex[page][k] || g_miss8[page][k]) continue;
+      memcpy(g_palcopy[k], &P14_01252be0[k * 0x400], 0x400); g_palhave[k] = 1;
+      re_texpack_pal8_rgba(g_raw8[page], &P14_01252be0[k * 0x400], px);
+      if (pal8_hd(page, k, px)) P86_GameAttachN++;
+    }
+  }
+}
 /* P86_GameTag8 / P86_GameAttachEmul8 / P86_GameAttach16 — game path: tag a hardware PAL8 surface with its
    page index, or attach the HD image to an emulated (page, palette) surface / a 16-bit page surface
    found by content hash; the GL upload compares it with the surface (re_texpack_merge). */
@@ -453,6 +485,7 @@ void P86_NativeCapture(int32_t slot, int pair, const void *page0, const void *pa
       if (!g_raw8[sl]) continue;
       memcpy(g_raw8[sl], h ? page1 : page0, 0x10000);
       g_hash8[sl] = fnv64(g_raw8[sl], 0x10000);
+      game_preload8(sl);   /* v2.38: RE_TEXPACK_PRELOAD=1 — HD pairs now instead of at first draw */
     }
     return;
   }

@@ -19,6 +19,7 @@
      как отсутствие имени. Вызовы 0040c20b/0040bf50/00501770 из перенесённого кода остаются через V-строки (Call0040C20B, Call0040BF50,
      P77_Fn501770 — заглушки, на которые рассчитывает селфтест; --skip). */
 #include "ported136.h"
+#include "reprof.h"
 #include <string.h>
 #include <stdio.h>
 #include "crt.h"
@@ -194,7 +195,7 @@ void P136_DrawWheels(int32_t car, const float *mat, int32_t mode) {
     if (car == 0 && ((const int32_t *)(const void *)P98_CarBufC)[3 - i] == 0) m = P26_ModelDam;
     else m = (i & 1) ? mr : mf;
 #ifndef RE_HOOK_BUILD
-    { static int k; if (getenv("RE_WHEELDBG") && k++ < 16) fprintf(stderr, "[wheel] car %d i %d m %08x hub %08x clean %08x fast %08x dam %08x off %u mode %d\n", car, i, (unsigned)m,
+    { static int k; if (RE_GETENV_ONCE("RE_WHEELDBG") && k++ < 16) fprintf(stderr, "[wheel] car %d i %d m %08x hub %08x clean %08x fast %08x dam %08x off %u mode %d\n", car, i, (unsigned)m,
         (unsigned)P26_ModelHubcap, (unsigned)P26_ModelClean, (unsigned)P26_ModelFast, (unsigned)P26_ModelDam, off, mode); }
 #endif
     if (m == 0 || off + 6 > sizeof(S_00D0CC60)) continue;
@@ -208,7 +209,7 @@ void P136_DrawWheels(int32_t car, const float *mat, int32_t mode) {
     P44_MatPtr = P44_ViewMatT;
     P44_Xform(p);
 #ifndef RE_HOOK_BUILD
-    { static int k; if (getenv("RE_WHEELDBG") && k++ < 8) fprintf(stderr, "[wheel] sin %f %f rot %d i %u w %d %d %d f78 %d p %.1f %.1f %.1f cam %.0f %.0f %.0f car %d %d %d\n", P43_Sin[256], P43_Sin[1024], (int)P136_WheelRot[car], i, wx, wy, wz, (int)c->f78[i][0], p[0], p[1], p[2],
+    { static int k; if (RE_GETENV_ONCE("RE_WHEELDBG") && k++ < 8) fprintf(stderr, "[wheel] sin %f %f rot %d i %u w %d %d %d f78 %d p %.1f %.1f %.1f cam %.0f %.0f %.0f car %d %d %d\n", P43_Sin[256], P43_Sin[1024], (int)P136_WheelRot[car], i, wx, wy, wz, (int)c->f78[i][0], p[0], p[1], p[2],
         P44_CamX, P44_CamY, P44_CamZ, (int)c->pos[0], (int)c->pos[1], (int)c->pos[2]); }
 #endif
     {

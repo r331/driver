@@ -13,6 +13,7 @@
 #include "../../game/aspect.h"
 #include "../native/diagnostics.h"
 #include "plat_gfx.h"
+#include "../../game/reprof.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,7 +25,7 @@ typedef int GLint, GLsizei;
 typedef unsigned char GLboolean;
 typedef char GLchar;
 typedef float GLfloat;
-typedef ptrdiff_t GLsizeiptr;
+typedef ptrdiff_t GLsizeiptr; typedef ptrdiff_t GLintptr;
 enum {
     GL_DEPTH_TEST = 0x0B71, GL_BLEND = 0x0BE2, GL_CULL_FACE = 0x0B44, GL_TEXTURE_2D = 0x0DE1, GL_LEQUAL = 0x0203, GL_ALWAYS = 0x0207,
     GL_COLOR_BUFFER_BIT = 0x4000, GL_DEPTH_BUFFER_BIT = 0x0100, GL_RGBA = 0x1908, GL_UNSIGNED_BYTE = 0x1401, GL_FLOAT = 0x1406,
@@ -48,7 +49,7 @@ enum {
  X(void, Enable, (GLenum)) X(void, Disable, (GLenum)) X(void, BlendFunc, (GLenum, GLenum)) X(void, DepthFunc, (GLenum)) \
  X(void, DepthMask, (GLboolean)) X(void, ClearColor, (GLfloat, GLfloat, GLfloat, GLfloat)) X(void, Clear, (GLbitfield)) \
  X(void, Viewport, (GLint, GLint, GLsizei, GLsizei)) X(void, Scissor, (GLint, GLint, GLsizei, GLsizei)) X(void, ReadPixels, (GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, void *)) \
- X(void, PixelStorei, (GLenum, GLint)) X(void, Finish, (void)) X(const unsigned char *, GetString, (GLenum)) \
+ X(void, BufferSubData, (GLenum, GLintptr, GLsizeiptr, const void *)) X(void, PixelStorei, (GLenum, GLint)) X(void, Finish, (void)) X(const unsigned char *, GetString, (GLenum)) \
  X(void, GenTextures, (GLsizei, GLuint *)) X(void, DeleteTextures, (GLsizei, const GLuint *)) X(void, BindTexture, (GLenum, GLuint)) \
  X(void, TexImage2D, (GLenum, GLint, GLint, GLsizei, GLsizei, GLint, GLenum, GLenum, const void *)) X(void, TexParameteri, (GLenum, GLenum, GLint)) \
  X(void, ActiveTexture, (GLenum)) \
@@ -159,6 +160,8 @@ typedef struct { int w, h; unsigned id; unsigned var[3]; uint32_t *src; unsigned
 static tex_t g_tex[MAX_TEX];
 static int g_ok, g_w, g_h, g_cur;
 static unsigned g_prog, g_vao, g_vbo, g_white;
+static void use_prog(unsigned p);   /* v2.38: glUseProgram only on change (see draw) */
+static void gl_cache_reset(void);
 static int g_uShift, g_uAlphaTest, g_at = 1, g_uView, g_uTex, g_zt = 1, g_zw = 1, g_blend, g_bs = 5, g_bd = 6;
 static int g_zf = 4, g_vp[4], g_vpset, g_rs[64], g_tss[8][32], g_uCOp, g_uAOp, g_uAFunc, g_uARef, g_af, g_aref;
 static void (*g_swap)(void);
@@ -400,7 +403,7 @@ static void compose(void) {
         glBlitFramebuffer(0, 0, g_tw, g_th, 0, 0, g_tw, g_th, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0); glViewport(0, 0, g_dw, g_dh);
-    glUseProgram(g_pprog);
+    use_prog(g_pprog);
     glUniform1i(g_pu[0], 0); glUniform2f(g_pu[1], 1.f / g_tw, 1.f / g_th); glUniform2f(g_pu[2], (float)g_dw, (float)g_dh);
     glUniform1i(g_pu[3], c->fxaa); glUniform1f(g_pu[4], (float)c->gamma); glUniform1f(g_pu[5], (float)c->brightness); glUniform1f(g_pu[6], (float)c->sharpen);
     glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, g_ctex);
@@ -509,6 +512,7 @@ void plat_mesh_free(int m) {
 /* plat_mesh_draw — draws mesh m with model matrix m16 and the game's projection; clip = the part of the mesh
    rectangle covered by the wall polygons (or NULL). */
 void plat_mesh_draw(int m, const float *m16, const float *proj, const float *zp, const float *tint, const float *clip, float zoff, float poly_ofs) {
+    RP_COUNT(RC_DETAIL_DRAWS, 1);
     if (!g_ok || !g_dprog || m <= 0 || m >= MAX_DMESH || !g_dm[m].vao) return;
     int zt = g_zt, zw = g_zw, zf = g_zf, bl = g_blend;
     g_zt = 1; g_zw = 1; g_zf = 4; g_blend = 0;
@@ -516,7 +520,7 @@ void plat_mesh_draw(int m, const float *m16, const float *proj, const float *zp,
     g_zt = zt; g_zw = zw; g_zf = zf; g_blend = bl;
     glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
     if (poly_ofs != 0.0f) { glEnable(GL_POLYGON_OFFSET_FILL); glPolygonOffset(-1.0f, -poly_ofs); }
-    glUseProgram(g_dprog);
+    use_prog(g_dprog);
     glUniformMatrix4fv(g_du[0], 1, 0, m16);
     glUniform4f(g_du[1], proj[0], proj[1], proj[2], proj[3]);
     glUniform4f(g_du[2], zp[0], zp[1], zp[2], zp[3]);
@@ -542,6 +546,7 @@ int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int 
     GLint ok = 0; glGetProgramiv(g_prog, GL_LINK_STATUS, &ok);
     if (!ok) { char log[1024]; log[0] = 0; glGetProgramInfoLog(g_prog, sizeof log, NULL, log); plat_gfx_logf("[gfx] ошибка линковки шейдеров: %s\n", log); return -3; }
     g_uView = glGetUniformLocation(g_prog, "uView"); g_uShift = glGetUniformLocation(g_prog, "uShift"); g_uTex = glGetUniformLocation(g_prog, "uTex"); g_uAlphaTest = glGetUniformLocation(g_prog, "uAlphaTest");
+    gl_cache_reset();   /* v2.38: new context / program — nothing cached */
     g_uCOp = glGetUniformLocation(g_prog, "uCOp"); g_uAOp = glGetUniformLocation(g_prog, "uAOp");
     g_uAFunc = glGetUniformLocation(g_prog, "uAFunc"); g_uARef = glGetUniformLocation(g_prog, "uARef");
     glGenVertexArrays(1, &g_vao); glBindVertexArray(g_vao);
@@ -646,10 +651,11 @@ static void tex_vars_free(tex_t *t) {
 static void tex_upload(tex_t *t, int w, int h, const uint32_t *rgba) {
     int pow2 = !(w & (w - 1)) && !(h & (h - 1)) && w <= 1024 && h <= 1024;
     g_up_n++; g_up_px += w * h;
+    RP_BEGIN(RP_TEX_UPLOAD); RP_COUNT(RC_TEX_UPLOADS, 1); RP_COUNT(RC_TEX_PIXELS, w * h);
     tex_vars_free(t);
     if (!rgba || !pow2 || !g_tex_proc) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0); return;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0); RP_END(RP_TEX_UPLOAD); return;
     }
     t->partial = (unsigned char)re_gfx_has_partial_alpha(rgba, w, h); t->binary = 1;
     if (t->partial) {
@@ -657,6 +663,7 @@ static void tex_upload(tex_t *t, int w, int h, const uint32_t *rgba) {
         if ((t->src = (uint32_t *)malloc((size_t)w * h * 4))) memcpy(t->src, rgba, (size_t)w * h * 4);
     }
     upload_variant(w, h, rgba, 0, t->binary);
+    RP_END(RP_TEX_UPLOAD);
 }
 /* текстура для рисования: вариант по семантике альфа-теста (0 — исходная) */
 static unsigned tex_variant(int i, int v) {
@@ -664,7 +671,9 @@ static unsigned tex_variant(int i, int v) {
     if (!v || !t->partial || !t->src) return t->id;
     if (!t->var[v]) {
         glGenTextures(1, &t->var[v]); glBindTexture(GL_TEXTURE_2D, t->var[v]);
+        RP_BEGIN(RP_TEX_UPLOAD); RP_COUNT(RC_TEX_VARIANTS, 1);
         upload_variant(t->w, t->h, t->src, v, t->binary); g_var_n++;
+        RP_END(RP_TEX_UPLOAD);
     }
     return t->var[v];
 }
@@ -714,7 +723,7 @@ void plat_scene_end(void) {}
 void plat_set_render_state(int state, uint32_t value) {
     if (state < 0 || state >= 64) return;
     g_rs[state] = (int)value;
-    { static int n; if (getenv("RE_TRACE_DD") && n < 80) { n++; fprintf(stderr, "[gl] rs %d = %u\n", state, value); } }
+    { static int n, tr = -1; if (tr < 0) tr = getenv("RE_TRACE_DD") != NULL; if (tr && n < 80) { n++; fprintf(stderr, "[gl] rs %d = %u\n", state, value); } }
     switch (state) {
     case 7: g_zt = value != 0; break;
     case 14: g_zw = value != 0; break;
@@ -743,28 +752,56 @@ uint32_t plat_get_tex_stage(int stage, int type) {
     return 0;
 }
 static int g_dp_calls, g_dp_type, g_dp_count;
+/* v2.38 (performance): the debug variables are read once — getenv walks the whole environment and was called
+   four times per draw call and once per render-state change. */
+static int g_env_trace = -1, g_env_at = -1, g_env_z = -1;
+static int env_flag(int *c, const char *name) { if (*c < 0) *c = getenv(name) != NULL; return *c; }
 static void draw(const plat_vertex *v, int count, unsigned mode);
 /* plat_draw_prim / plat_draw_prim_last — D3D-style DrawPrimitive: type 4 (D3DPT_TRIANGLELIST) and 2 (D3DPT_LINELIST)
    are drawn, others ignored; the last call is remembered for tests.  RE_TRACE_DD / RE_ATDBG / RE_ZDBG print traces. */
 void plat_draw_prim(int ptype, const plat_vertex *v, int count) {
     g_dp_calls++; g_dp_type = ptype; g_dp_count = count; { extern int g_re_dbg[16]; g_re_dbg[3]++; g_re_dbg[4] += count; }
-    if (getenv("RE_TRACE_DD") && g_dp_calls < 60 && v && count >= 3) fprintf(stderr, "[gl] v1 %.1f %.1f uv %.5f %.5f v2 %.1f %.1f uv %.5f %.5f\n", v[1].x, v[1].y, v[1].u, v[1].v, v[2].x, v[2].y, v[2].u, v[2].v);
-    if (getenv("RE_TRACE_DD") && g_dp_calls < 60) fprintf(stderr, "[gl] draw_prim %d n=%d tex %d v0 %.1f %.1f %.3f %.3f col %08x uv %.3f %.3f zt %d zf %d bl %d %d %d at %d vp %d %d %d %d %d tss %d %d %d %d\n", ptype, count, g_cur,
+    if (env_flag(&g_env_trace, "RE_TRACE_DD") && g_dp_calls < 60 && v && count >= 3) fprintf(stderr, "[gl] v1 %.1f %.1f uv %.5f %.5f v2 %.1f %.1f uv %.5f %.5f\n", v[1].x, v[1].y, v[1].u, v[1].v, v[2].x, v[2].y, v[2].u, v[2].v);
+    if (env_flag(&g_env_trace, "RE_TRACE_DD") && g_dp_calls < 60) fprintf(stderr, "[gl] draw_prim %d n=%d tex %d v0 %.1f %.1f %.3f %.3f col %08x uv %.3f %.3f zt %d zf %d bl %d %d %d at %d vp %d %d %d %d %d tss %d %d %d %d\n", ptype, count, g_cur,
         v ? v[0].x : 0, v ? v[0].y : 0, v ? v[0].z : 0, v ? v[0].rhw : 0, v ? v[0].color : 0, v ? v[0].u : 0, v ? v[0].v : 0, g_zt, g_zf, g_blend, g_bs, g_bd, g_at, g_vpset, g_vp[0], g_vp[1], g_vp[2], g_vp[3], g_tss[0][1], g_tss[0][2], g_tss[0][3], g_tss[0][4]);
-    { static int k; if (getenv("RE_ATDBG") && g_at && g_af == 2 && k++ < 6 && v && count) fprintf(stderr, "[at] z %f rhw %f xy %.0f %.0f bl %d %d %d zt %d zw %d zf %d n %d tex %d col %08x aref %d tss c %d %d %d a %d %d %d\n", v[0].z, v[0].rhw, v[0].x, v[0].y, g_blend, g_bs, g_bd, g_zt, g_zw, g_zf, count, g_cur, v[0].color, g_aref,
+    { static int k; if (env_flag(&g_env_at, "RE_ATDBG") && g_at && g_af == 2 && k++ < 6 && v && count) fprintf(stderr, "[at] z %f rhw %f xy %.0f %.0f bl %d %d %d zt %d zw %d zf %d n %d tex %d col %08x aref %d tss c %d %d %d a %d %d %d\n", v[0].z, v[0].rhw, v[0].x, v[0].y, g_blend, g_bs, g_bd, g_zt, g_zw, g_zf, count, g_cur, v[0].color, g_aref,
         g_tss[0][1], g_tss[0][2], g_tss[0][3], g_tss[0][4], g_tss[0][5], g_tss[0][6]); }
-    { static int k; static int armed; if (g_at && g_af == 2) armed = 1; if (getenv("RE_ZDBG") && armed && k++ < 40 && v && count) fprintf(stderr, "[z] n %d tex %d z %f rhw %f xy %.0f %.0f zt %d zf %d at %d af %d\n", count, g_cur, v[0].z, v[0].rhw, v[0].x, v[0].y, g_zt, g_zf, g_at, g_af); }
+    { static int k; static int armed; if (g_at && g_af == 2) armed = 1; if (env_flag(&g_env_z, "RE_ZDBG") && armed && k++ < 40 && v && count) fprintf(stderr, "[z] n %d tex %d z %f rhw %f xy %.0f %.0f zt %d zf %d at %d af %d\n", count, g_cur, v[0].z, v[0].rhw, v[0].x, v[0].y, g_zt, g_zf, g_at, g_af); }
     if (ptype == 4) plat_draw_tris(v, count);
     else if (ptype == 2) plat_draw_lines(v, count);
 }
 int plat_draw_prim_last(int *ptype, int *count) { if (ptype) *ptype = g_dp_type; if (count) *count = g_dp_count; return g_dp_calls; }
+/* v2.38 (performance, docs/PERFORMANCE.md).  Uniforms are program-object state, and only draw() sets g_prog's, so a
+   value equal to the one last set is skipped; glUseProgram goes through use_prog (compose / detail meshes switch
+   programs).  The image is the same: GL keeps the skipped values.  RE_GL_CACHE=0 sets everything every draw (old).
+   RE_GL_RING=1 (experimental, off by default): vertices are appended to one 4 MiB stream buffer (orphaned when
+   full and at the first draw of each frame) instead of a glBufferData orphan per draw call. */
+static struct { int valid; float view[2], shift, aref, texsz[2], pxs; int tex, at, cop[3], aop[3], afunc, sharp, a2c; } g_uc;
+static unsigned g_cur_prog;   /* 0 — unknown (after attach) */
+static int g_gl_cache = -1, g_gl_ring = -1;
+static long g_ring_pos = -1;   /* vertices used in the stream buffer; -1 — orphan before the next draw */
+#define RING_VERTS (4L * 1024 * 1024 / (long)sizeof(plat_vertex))
+static void use_prog(unsigned p) {
+    if (g_gl_cache < 0) { const char *e = getenv("RE_GL_CACHE"); g_gl_cache = !(e && *e == '0'); }
+    if (!g_gl_cache || g_cur_prog != p) { glUseProgram(p); g_cur_prog = p; }
+}
+static void gl_cache_reset(void) { memset(&g_uc, 0, sizeof g_uc); g_cur_prog = 0; g_ring_pos = -1; }
+#define UC_SET1(field, val, call) do { if (!g_gl_cache || !g_uc.valid || g_uc.field != (val)) { g_uc.field = (val); call; } } while (0)
 /* draw — uploads count vertices, applies the state and the current texture variant, and issues the GL draw. */
 static void draw(const plat_vertex *v, int count, unsigned mode) {
+    RP_BEGIN(RP_GL_DRAW); RP_COUNT(RC_DRAWS, 1); RP_COUNT(RC_VERTS, count);
     re_diag_draw(v, count, mode, g_cur, g_zt, g_zw, g_zf, g_blend, g_bs, g_bd, g_at, g_af, g_aref);
     apply_state();
-    glUseProgram(g_prog); glUniform2f(g_uView, (float)g_ew, (float)g_h); glUniform1f(g_uShift, (float)g_shift); glUniform1i(g_uTex, 0); glUniform1i(g_uAlphaTest, g_at);
-    glUniform3i(g_uCOp, g_tss[0][1], g_tss[0][2], g_tss[0][3]); glUniform3i(g_uAOp, g_tss[0][4], g_tss[0][5], g_tss[0][6]);
-    glUniform1i(g_uAFunc, g_af >= 1 && g_af <= 8 ? g_af : 0); glUniform1f(g_uARef, (float)g_aref / 255.f);
+    use_prog(g_prog);
+    { float vw = (float)g_ew, vh = (float)g_h;
+      if (!g_gl_cache || !g_uc.valid || g_uc.view[0] != vw || g_uc.view[1] != vh) { g_uc.view[0] = vw; g_uc.view[1] = vh; glUniform2f(g_uView, vw, vh); } }
+    UC_SET1(shift, (float)g_shift, glUniform1f(g_uShift, (float)g_shift));
+    UC_SET1(tex, 0, glUniform1i(g_uTex, 0));
+    UC_SET1(at, g_at, glUniform1i(g_uAlphaTest, g_at));
+    if (!g_gl_cache || !g_uc.valid || memcmp(g_uc.cop, &g_tss[0][1], sizeof g_uc.cop) != 0) { memcpy(g_uc.cop, &g_tss[0][1], sizeof g_uc.cop); glUniform3i(g_uCOp, g_tss[0][1], g_tss[0][2], g_tss[0][3]); }
+    if (!g_gl_cache || !g_uc.valid || memcmp(g_uc.aop, &g_tss[0][4], sizeof g_uc.aop) != 0) { memcpy(g_uc.aop, &g_tss[0][4], sizeof g_uc.aop); glUniform3i(g_uAOp, g_tss[0][4], g_tss[0][5], g_tss[0][6]); }
+    { int af = g_af >= 1 && g_af <= 8 ? g_af : 0; UC_SET1(afunc, af, glUniform1i(g_uAFunc, af)); }
+    { float ar = (float)g_aref / 255.f; UC_SET1(aref, ar, glUniform1f(g_uARef, ar)); }
     /* v2.16: вариант текстуры по альфа-тесту: 1 — видно при высокой альфе (умолчание, GREATER, GEQUAL), 2 — при низкой (LESS, LESSEQUAL) */
     int avar = !g_at ? 0 : (g_af == 0 || g_af == 5 || g_af == 7) ? 1 : (g_af == 2 || g_af == 4) ? 2 : 0;
     glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, g_cur ? tex_variant(g_cur, avar) : g_white);
@@ -774,14 +811,31 @@ static void draw(const plat_vertex *v, int count, unsigned mode) {
     const re_gfx_cfg *gc = re_gfx();
     glBindSampler(0, g_cur ? (is2d ? g_s2d : g_s3d) : 0);
     int sharp = is2d && g_cur && gc->hud_filter == RE_HUD_SHARP;
-    glUniform1i(g_uSharp, sharp);
-    if (sharp) { glUniform2f(g_uTexSize, (float)g_tex[g_cur].w, (float)g_tex[g_cur].h); glUniform1f(g_uPxScale, (float)(g_scy > 1.0 ? g_scy : 1.0)); }
+    UC_SET1(sharp, sharp, glUniform1i(g_uSharp, sharp));
+    if (sharp) {
+        float tw = (float)g_tex[g_cur].w, th = (float)g_tex[g_cur].h, ps = (float)(g_scy > 1.0 ? g_scy : 1.0);
+        if (!g_gl_cache || !g_uc.valid || g_uc.texsz[0] != tw || g_uc.texsz[1] != th) { g_uc.texsz[0] = tw; g_uc.texsz[1] = th; glUniform2f(g_uTexSize, tw, th); }
+        UC_SET1(pxs, ps, glUniform1f(g_uPxScale, ps));
+    }
     int a2c = (g_a2c && avar && !g_blend && !is2d) ? avar : 0;
-    glUniform1i(g_uA2C, a2c);
+    UC_SET1(a2c, a2c, glUniform1i(g_uA2C, a2c));
+    g_uc.valid = 1;
     if (a2c) glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE); else glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
     glBindVertexArray(g_vao); glBindBuffer(GL_ARRAY_BUFFER, g_vbo);
-    glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)count * sizeof(plat_vertex), v, GL_STREAM_DRAW);
-    glDrawArrays(mode, 0, count);
+    if (g_gl_ring < 0) { const char *e = getenv("RE_GL_RING"); g_gl_ring = e && *e && *e != '0'; }
+    if (g_gl_ring && count <= RING_VERTS) {
+        if (g_ring_pos < 0 || g_ring_pos + count > RING_VERTS) {   /* new storage: draws already queued keep the old one */
+            glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(RING_VERTS * (long)sizeof(plat_vertex)), NULL, GL_STREAM_DRAW); g_ring_pos = 0;
+        }
+        glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(g_ring_pos * (long)sizeof(plat_vertex)), (GLsizeiptr)count * sizeof(plat_vertex), v);
+        glDrawArrays(mode, (GLint)g_ring_pos, count);
+        g_ring_pos += count;
+    } else {
+        glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)count * sizeof(plat_vertex), v, GL_STREAM_DRAW);
+        glDrawArrays(mode, 0, count);
+        g_ring_pos = -1;   /* the buffer was replaced by a small one */
+    }
+    RP_END(RP_GL_DRAW);
 }
 /* plat_draw_tris / plat_draw_lines — draw whole triangles / lines from a vertex array. */
 void plat_draw_tris(const plat_vertex *v, int count) { if (g_ok && v && count >= 3) draw(v, count - count % 3, GL_TRIANGLES); }
@@ -860,6 +914,7 @@ int plat_render_fbo_on(void) { return g_fbo != 0; }
 /* plat_flip — presents the frame: compose, swap, clear the bars, run the periodic self-check. */
 void plat_flip(void) {
     plat_snd_pump(); if (!g_ok) return;
+    RP_BEGIN(RP_SWAP);
     if (g_swap) compose();   /* v2.16: resolve + пост-проход в буфер окна до снимка/показа */
     /* v2.24: проверка — на 3-м показе, затем каждые 30, пока не будет кадра с изображением (заставки бывают чёрными), до 6000 показов */
     if (g_swap) { g_chk_flips++; if (g_fbo && ((!g_chk_ok && g_chk_flips <= 6000 && (g_chk_flips == 3 || g_chk_flips % 30 == 0)) || (plat_gfx_dbg() && g_chk_flips % 600 == 0))) plat_render_selfcheck(NULL, NULL); }
@@ -881,6 +936,8 @@ void plat_flip(void) {
            and can miss the next vblank without changing the image. */
         glFinish();
     }
+    g_ring_pos = -1;   /* v2.38: RE_GL_RING — fresh stream storage each frame */
+    RP_END(RP_SWAP); if (re_prof_on) re_prof_frame();
 }
 /* plat_render_uploads — texture upload counter (count, pixels) for statistics. */
 int plat_render_uploads(int *pixels) { if (pixels) *pixels = g_up_px; return g_up_n; }   /* v2.16: счётчик загрузок текстур (статистика) */

@@ -37,6 +37,7 @@
 #include "ported139.h"
 #include "ported138.h"
 #include "ported137.h"
+#include "reprof.h"
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
@@ -420,6 +421,7 @@ static int p137_ref_ok(const void *p) {
    model's vertex/plane/record pointers temporarily redirected to the car's deformed copies; farther away the
    LOW model.  Traffic record bytes used: [5] cop slot, [0xc] car model kind (index into P28_CarClean). */
 void P137_DrawCar(int32_t car, int32_t rec) {
+  RP_COUNT(RC_CARS_DRAWN, 1);
   float pos[3];
   if (car < 0 || car >= P99_CARS_N) return;
   if (rec == -1 && P59_Mode1137324 == 8) return;
@@ -477,7 +479,7 @@ void P137_DrawCar(int32_t car, int32_t rec) {
   }
   int dskip = 0;
 #ifndef RE_HOOK_BUILD
-  { const char *e = getenv("RE_CARSKIP"); dskip = e ? atoi(e) : 0; }   /* v2.06: отладка — 1 тень, 2 пятна фар, 4 колёса, 8 дым, 16 задние огни */
+  { const char *e = RE_GETENV_ONCE("RE_CARSKIP"); dskip = e ? atoi(e) : 0; }   /* v2.06: отладка — 1 тень, 2 пятна фар, 4 колёса, 8 дым, 16 задние огни */
 #endif
   if (P95_D11920 == 0 || rec != -1) {
     if (!(dskip & 1)) P138_CarShadow(car);

@@ -10,6 +10,7 @@
    (skip instances whose wall is only partly covered). */
 /* v2.31: детальные 3D-меши фасадов — см. plat_detail.h. glTF: cgltf (MIT, third_party/cgltf.h), JSON записи — jsmn из cgltf. */
 #include "plat_detail.h"
+#include "../../game/reprof.h"
 #include "plat_texpack.h"
 #include "plat_gfx.h"
 #include "../plat.h"
@@ -228,7 +229,9 @@ static void unload(void) {
 /* load_level — (Re)load the entries of `level` from $DRIVER_DETAIL_DIR/detail.json or the pack's
    <level>/detail/detail.json (level name as given, lower case, upper case).  Accepts a top-level
    array, an object with entries/details/items/meshes, or a single entry object. */
-static void load_level(const char *level) {
+static void load_level_(const char *level);
+static void load_level(const char *level) { RP_BEGIN(RP_DETAIL_LOAD); load_level_(level); RP_END(RP_DETAIL_LOAD); }   /* RE_PROFILE */
+static void load_level_(const char *level) {
     unload();
     char dir[1024]; dir[0] = 0;
     const char *ov = getenv("DRIVER_DETAIL_DIR"), *pack = re_texpack_dir();
