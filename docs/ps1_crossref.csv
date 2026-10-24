@@ -1,0 +1,57 @@
+our_address,our_name,file,ps1_name,ps1_address,confidence,rationale
+00499fb0,P100_BoxOverlap,re/game/ported100.c,bcollided2d,0x0003F2E0,high,"2D OBB overlap leaf; callers exactly {CarBuildingCollision, bFindCollisionTime} <-> {P129_ObjHit, P103_BoxContactTime}"
+0049a21d,P102_BoxContact,re/game/ported102.c,bFindCollisionPoint,0x0003F658,high,"third helper of CarBuildingCollision, leaf, contact point/normal after collision time"
+0049a520,P103_BoxContactTime,re/game/ported103.c,bFindCollisionTime,0x0003F88C,high,"calls only bcollided2d (<->P100_BoxOverlap), called only by CarBuildingCollision (<->P129_ObjHit)"
+0049b14d,P129_ObjHit,re/game/ported129.c,CarBuildingCollision,0x0003FF0C,high,"same car-vs-building box collision: bcollided2d -> bFindCollisionTime -> bFindCollisionPoint chain (PC 00499fb0/0049a520/0049a21d), damage, sparks/debris, lamp/object damage"
+004a1d4c,P136_DrawWheels,re/game/ported136.c,DrawCarWheels,0x0003B208,high,"same wheel spin: wheel_speed/256 front and back, back wheels -700 while wheelspinning, clean/fast wheel model switch; shared constants 700, 0xf4, 0x88"
+004ad3b5,P127_FarDebris,re/game/ported127.c,AddGroundDebris,0x000426B4,high,"same logic: only when |speed|>99999, walks the nearby-object list, distance ring (PS1 7000..9000, PC 12000..15000), debris cap (PS1 40, PC 80), random offset + road lookup for y"
+004b8d49,P125_SmokePuffs,re/game/ported125.c,Setup_Debris,0x00047824,high,"identical velocity formula ((r&0x7f00)*n*2, ((r&0x7f)-64)*n<<10, (r&0x7fff)-0x4000), type>=8 branch grey 60/60/60; our name ""SmokePuffs"" is misleading"
+004b8f4e,P118_SkidFx,re/game/ported118.c,Setup_Smoke,0x00047A90,high,"distinctive shared constants 800000 (0xc3500), 0x10006/0x4006/0x2006 (smoke type flags), pool 0x3c/0x50; our name P118_SkidFx is narrower than the real role"
+004c032a,P128_CarDeform,re/game/ported128.c,DentCar,0x0003E6A0,high,"same algorithm: per-zone damage (6 zones, up to 50 vertex indices, 0xff terminator) weights each vertex, vertex = clean + (damaged-clean)*w>>12, then damaged polys; PC P128_CarDeform"
+004c582f,P127_AutoCamera,re/game/ported127.c,DoAutoDirect,0x0005B784,high,"auto camera director; distinctive shared constants 2023 (0x7e7), 1000, 70, 0x3ff; calls MapHeight<->P100_RoadHeight"
+004c5c5d,P60_NextTrafficCar,re/game/ported60.c,SelectCameraCar,0x0005BC04,high,"same scan: cars i+1.. of state 4 (cops) near the player, returns index or 0; PS1 box |dx|,|dz|<8000, PC squared distance"
+004d6ae7,P99_GearBox,re/game/ported99.c,GetEngineRevs,0x0004C610,high,"identical gear-selection loop: gear clamped 0..3, ws>>11 (=/2048), down/up thresholds per gear (low_ws / lowidl_ws when coasting, hi_ws), reverse -> gear 0; PC P99_GearBox"
+004da76a,P94_QuatToMat,re/game/ported94.c,LongQuaternion2Matrix,0x0001B380,high,"quaternion->3x3 matrix; constant set identical (score 1.0), leaf called from body sync like GlobalTimeStep"
+004dacee,P142_CarsStep,re/game/ported142.c,GlobalTimeStep,0x0001BAC0,high,"physics step: calls StepCars, CheckCarToCarCollisions, quaternion->matrix, debris/sparks/3D-sound/damage in the same roles"
+004dd039,P100_RoadHeight,re/game/ported100.c,MapHeight,0x0001F5B0,high,"ground height at pos: same 1500-unit cell grid with 750 offset (0x5dc/0x2ee) and road-cell lookup; shared callers (auto camera, hubcap/debris bounce)"
+004deb99,P103_CarsOverlap,re/game/ported103.c,CheckCarToCarCollisions,0x0001FAFC,high,"same broad-phase algorithm: AABB from orientation + velocity/8, y +-2400 (0x960), /16, pairwise overlap sets mayBeColliding (PC +0x13c)"
+004defd1,P46_UpdateObjects,re/game/ported46.c,StepCars,0x0001D648,high,"thin loop calling StepOneCar for every car; sole callee P142_WheelPhys, sole caller GlobalTimeStep<->P142_CarsStep"
+004df024,P142_WheelPhys,re/game/ported142.c,StepOneCar,0x0001D6E4,high,"same role (per-car wheel/suspension forces), same car-record offsets (vel 0x40, wheels 0x78, contacts 0x88), largest shared-constant score (1352), only caller = StepCars<->P46_UpdateObjects"
+004e10e3,P126_WheelSmoke,re/game/ported126.c,jump_debris,0x00020844,high,"same logic: any wheel touching -> reset; airborne landing timer, random +-256 (0x1ff) position, y 200 above, emits Setup_Debris; timer differs (PS1 80/<75, PC 50/<45)"
+00502787,P110_Gauge,re/game/ported110.c,DrawPercentageBar,0x00056BDC,high,"same PERCENTAGE_BAR record (active, x, y, w, h, position, max, colour, label, flags): clamp position<=max, fill direction by flags, frame + label; PC P110_Gauge (D3D)"
+0051b65a,P72_RoadLookup,re/game/ported72.c,ROADS_GetRouteData,0x000217C8,high,"same road-cell decode: id=(v>>16)&0x3ff, low 16 bits, direction from v>>30; PC inlines the cell lookup (1500-unit cells, +750)"
+0049cad4,P134_CamCollide,re/game/ported134.c,CameraCollisionCheck,0x0003C998,medium,camera vs collision boxes of map objects in the camera's cell (sphere vs box); PC P134_CamCollide (float rewrite)
+004aae34,P12_Fn004AAE34,re/game/ported12.c,HandleDebris,0x00048660,medium,per-frame debris/hubcap/particle update (calls MoveHubcap<->P119_Hubcap); PC splits update (P12_Fn004AAE34) from drawing (P69_SceneFrame)
+004ac779,P122_CarGlow,re/game/ported122.c,PlacePoolForCar,0x00040BAC,medium,headlight pool quad on the road in front of a car (D2 DEBRIS.C PlacePoolForCar); PC P122_CarGlow
+004b05ea,P111_DebrisIcon,re/game/ported111.c,DisplayDebris,0x000481C8,medium,"draws one debris piece (rotation index into shape tables, colour, leaf kind); PC P111_DebrisIcon is the D3D version"
+004b418d,P143_SunFlare,re/game/ported143.c,DrawLensFlare,0x00046E44,medium,"sun lens-flare ghosts with on-screen visibility test of the sun pixels (PS1 StoreImage, PC LFB read); PC P143_SunFlare"
+004b6deb,P111_Flare,re/game/ported111.c,ShowFlare,0x00045718,medium,single light flare sprite with depth bias; PC P111_Flare (D3D)
+004b955c,P125_ObjABurst,re/game/ported125.c,func_00047FA4 (Setup_Sparks in PS1 comment),0x00047FA4,medium,"PS1 comment calls it Setup_Sparks (D2 name, not applied in PS1 symbols); same caller set (StepOneCar, CarBuildingCollision, GlobalTimeStep), spark pool emitter"
+004b955c,P125_ObjABurst,re/game/ported125.c,func_00047FA4 (Setup_Sparks in PS1 comment),0x00047FA4,medium,"PS1 comment calls it Setup_Sparks (D2 name, not applied in PS1 symbols); same call sites (StepOneCar, CarBuildingCollision, GlobalTimeStep)"
+004c0c6f,P119_Hubcap,re/game/ported119.c,MoveHubcap,0x0003F01C,medium,flying hubcap of the player car with road bounces (MapHeight); PC P119_Hubcap merges LoseHubcap + MoveHubcap + draw (draw flag)
+004c0c6f,P119_Hubcap,re/game/ported119.c,LoseHubcap,0x0003ED78,medium,"hubcap detach logic, only called from MoveHubcap in PS1; in PC merged into P119_Hubcap"
+004cadb5,P130_Lightning,re/game/ported130.c,DoLightning,0x0004A654,medium,unique role: lightning flash in storms; PC P130_Lightning (rendering rewritten)
+004cc801,P116_Reflections,re/game/ported116.c,DisplayLightReflections,0x0004A398,medium,unique role: reflections of lights on the wet road at night (D2 DEBRIS.C); PC version is a D3D rewrite (P116_Reflections)
+004dacee,P142_CarsStep,re/game/ported142.c,SetShadowPoints,0x0001D3EC,medium,computes the 4 ground points under the car via FindSurface; in PC this is inlined into P142_CarsStep / P142_WheelPhys (writes CAR_GROUND_PT 0x88)
+004dd262,P103_GroundAt,re/game/ported103.c,func_0001EEB4 (FindSurface in PS1 comment),0x0001EEB4,medium,PS1 comment: FindSurface; PC P103_GroundAt — ground probe called from StepOneCar<->WheelPhys
+004e3b19,ReturnZero004E3B19,re/game/smallfuncs.c,func_00035B50 (SetPadVibration-like in PS1 comment),0x00035B50,medium,"PS1 comment: SetPadVibration-like; PC slot returns 0 (no vibration), same call sites in StepOneCar/CarBuildingCollision"
+004ec336,P62_LoadMapHeader,re/game/ported62.c,ProcessMapLump,0x0002DFEC,medium,"map header lump: cells across/down -> world size, half sizes; PC P62_LoadMapHeader (PS1 also derives regions for CD streaming)"
+004ee8f4,P89_DrawMap,re/game/ported89.c,DrawMapPSX,0x0002C8FC,medium,"main city draw: walks visible cells, builds per-yaw matrices; best constant match among all PC functions; PC P89_DrawMap"
+00504cad,P117_Radar,re/game/ported117.c,DrawOverheadMap,0x0005474C,medium,in-game radar/overhead map; both call the compass (DrawCompass<->P107_Compass) and the map-tile upload (LoadMapTile<->P100_RadarMap); PC P117_Radar
+00506fa0,P107_Compass,re/game/ported107.c,DrawCompass,0x00053E54,medium,compass needle drawn by the overhead map / radar; PC P107_Compass
+00520278,P138_CarShadow,re/game/ported138.c,PlaceShadowForCar,0x0002ADEC,medium,car shadow over the four ground points; PC P138_CarShadow (D3D grid instead of GTE subdivision)
+00523cda,P97_SndStart,re/game/ported97.c,Start3DSoundVolPitch,0x0004D7E4,medium,3D positional sound start called from the same physics/collision sites; PC sound API differs (DirectSound)
+0040a8b0,P122_FontIcons,re/game/ported122.c,LoadFont,0x0005C99C,low,builds the font glyph table; PC P122_FontIcons — role only
+0040abac,P116_Text,re/game/ported116.c,PrintString,0x0005CC68,low,draws a string with the current font; PC P116_Text — role only
+0040b1cc,P58_TextWidth,re/game/ported58.c,StringWidth,0x0005C7EC,low,text width in a font; PC P58_TextWidth — role only
+004a32e9,P96_PickChair,re/game/ported96.c,FindSeated,0x00060E4C,low,"seated pedestrians (D2 SEATED) correspond to PC ""chairs"" (P78_LoadChairs/P99_ChairHit); picking algorithm differs (PS1 cyclic near player, PC random per cell)"
+004b10ce,P135_SmokeObj,re/game/ported135.c,DisplaySmoke,0x00048E88,low,draws one smoke puff sprite; PC P135_SmokeObj — role only
+004b23f8,P135_SparkQuad,re/game/ported135.c,DisplaySpark,0x00045CEC,low,draws a spark streak between old and new position; PC P135_SparkQuad — role only
+004c61b2,FindCameraForFrame,re/game/director.c,FindNextChange,0x00058D70,low,"finds the replay camera for a frame; PS1 fixed 60-slot array, PC sorted malloc list (FindCameraForFrame)"
+004c813d,P124_HandleDirector,re/game/ported124.c,ControlReplay,0x00059D94,low,"per-frame replay/director control; PC director UI is redesigned (node menu), P124_HandleDirector — role only"
+004cbc1e,P131_RainDraw,re/game/ported131.c,DrawRainDrops,0x00049590,low,draws rain drops; PC P131_RainDraw — role only
+004cc008,P130_RainSpawn,re/game/ported130.c,AddRainDrops,0x00049DB8,low,spawns rain drops around the camera; PC P130_RainSpawn — role only
+004cc1a2,P131_Splash,re/game/ported131.c,DisplaySplashes,0x0004A064,low,rain splashes on the road; PC P131_Splash — role only
+004d35b2,P125_LevelLoad,re/game/ported125.c,ShowLoadingScreen,0x000508B0,low,shows the loading picture before a level; PC P125_LevelLoad (LOADING.BMP) — role only
+004d38b7,P145_LevelLoad,re/game/ported145.c,LoadGameLevel,0x0002258C,low,loads and initialises the level; PC P145_LevelLoad — role only
+00504479,P100_RadarMap,re/game/ported100.c,LoadMapTile,0x00056278,low,copies the map tile around the player into the radar texture; PC P100_RadarMap (different storage)

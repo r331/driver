@@ -1292,6 +1292,7 @@ void P102_GhostTrail(void) {
 #define BX(u, off) (box[((uint32_t)(u) * 0x60 + (off)) / 4])
 /* P102_BoxContact — Game.exe 0049a21d, cdecl.  Contact of two collision boxes (0x60 bytes each, P100_BoxFace): picks the face with the
    smallest penetration; out[0]/out[2] = contact x/z, out[4..6] = normal (y = 0), out[8] = depth. */
+/* PS1: bFindCollisionPoint @ 0x0003F658 (olink9/driver1-decomp@5bb6cda, high) */
 void P102_BoxContact(const int32_t *box, int32_t *out) {
   int32_t best = box[0x15] + 1, bj = 0, sg = 0;
   uint32_t bu = 0;

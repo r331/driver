@@ -537,6 +537,7 @@ enum {
         applied at the wheel position (force and r x F torque); (5) forward speed and FFB.
    Native deviations (see file header): traffic byte for object 0 reads 0; model type outside the
    00d0cc60 table gives zero points; divisions by zero give 0. */
+/* PS1: StepOneCar @ 0x0001D6E4 (olink9/driver1-decomp@5bb6cda, high) */
 void P142_WheelPhys(uint8_t *obj, int32_t drive) {
   int32_t st[ST_INTS];
   memset(st, 0, sizeof st);
@@ -881,6 +882,7 @@ static void body_pt(const uint8_t *p, const int32_t *arm, int32_t *o) {   /* p: 
    environment variables (RE_CARDBG log line, RE_TELEPORT, RE_AUTOTARGET, RE_AUTORAM); they do not run
    unless the variable is set.  RE_CARDBG output is the reference for the deterministic regression run,
    so its format must not change. */
+/* PS1: GlobalTimeStep @ 0x0001BAC0 (olink9/driver1-decomp@5bb6cda, high) */
 void P142_CarsStep(void) {
   int32_t n = G6_00D0DDC0;
 #ifndef RE_HOOK_BUILD

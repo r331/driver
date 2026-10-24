@@ -149,6 +149,7 @@ static void glide_off(void) {
 }
 
 /* ---- 004a1d4c ---- */
+/* PS1: DrawCarWheels @ 0x0003B208 (olink9/driver1-decomp@5bb6cda, high) */
 void P136_DrawWheels(int32_t car, const float *mat, int32_t mode) {
   p99_car_t *c;
   int32_t sf, sr, mf, mr;

@@ -104,6 +104,7 @@ int32_t P72_RoadDword(int32_t x, int32_t z) {
    P72_Dir (bits 30..31 -> heading from P72_DirTab); returns 0 outside the map, without a bank or
    for an empty entry.  P72_Low is cleared first in every case.
    TODO(RE): unsure what P72_Low means (likely a node/segment index). */
+/* PS1: ROADS_GetRouteData @ 0x000217C8 (olink9/driver1-decomp@5bb6cda, high) */
 int32_t P72_RoadLookup(int32_t x, int32_t z) {
   P72_Low = 0;
   int32_t tx, tz, w;

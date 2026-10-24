@@ -176,6 +176,7 @@ static void snd_at(uint32_t smp, int32_t voice, const int32_t *o) { P97_SndStart
    divided by the effective mass term and applied to the linear velocity and the angular accumulator, with
    time-of-impact correction tt.  Returns 1 when the boxes touched.  TODO(RE): unsure — +0x68..0x70 receives the
    angular impulse (CAR_DANGVEL_PEND in carfields.h). */
+/* PS1: CarBuildingCollision @ 0x0003FF0C (olink9/driver1-decomp@5bb6cda, high) */
 int32_t P129_ObjHit(uint8_t *c, int32_t *box, uint8_t *obj) {
   if (c == NULL || box == NULL || obj == NULL) return 0;                               /* защита */
   int32_t mi = rd32(obj + 4);

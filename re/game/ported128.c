@@ -297,6 +297,7 @@ int32_t P128_ModelHit(float x, float y, float z, uint32_t w) {
 /* P128_CarDeform — Game.exe 004c032a.  Applies the damage of car idx + 1 to its mesh: per-zone damage weights each
    vertex's dent offset (clean -> damaged delta, P28_CarDelta) to build the deformed vertices, recomputes face
    normals, updates dents / damaged faces (P104_CarDents) and sets a refresh timer 50 - max / 64 (>= 0). */
+/* PS1: DentCar @ 0x0003E6A0 (olink9/driver1-decomp@5bb6cda, high) */
 void P128_CarDeform(int32_t idx) {
   int32_t car = idx + 1, mx = 0;
 #ifndef RE_HOOK_BUILD

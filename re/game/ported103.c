@@ -1126,6 +1126,7 @@ int32_t P103_TrafficCanGo(uint8_t *r) {
 static int32_t half_ext(int16_t m, int16_t a) {          /* |a * (m*9/8)| */
   return iabs(mul(a, mul(m, 9) / 8));
 }
+/* PS1: CheckCarToCarCollisions @ 0x0001FAFC (olink9/driver1-decomp@5bb6cda, high) */
 void P103_CarsOverlap(void) {
   if (P95_B87E14 != 0 || G6_00B87EA0 != 0) return;
   int32_t n = (P58_SB87EB0 == 0 && G6_00B87EAC == 0) ? 0x41 : 0x42;
@@ -1169,6 +1170,7 @@ static void box_step(int32_t *p, int32_t sgn) {
     else         { b[0] -= b[0xc]; b[2] -= b[0xe]; b[0x10] -= b[0x17]; }
   }
 }
+/* PS1: bFindCollisionTime @ 0x0003F88C (olink9/driver1-decomp@5bb6cda, high) */
 int32_t P103_BoxContactTime(int32_t *p, uint8_t *out) {
   int32_t hit = 1, first = 1, t = 0x1000, step = 0x800;
   int32_t sx[2], sz[2], sy[2];

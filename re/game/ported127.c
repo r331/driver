@@ -325,6 +325,7 @@ static void set_fail(void) {   /* MSTATE_FAILED, reason MREASON_FAILED (2), resu
 /* P127_AutoCamera — Game.exe 004c582f (CreateNewAutoCamera).  Fills replay camera record cam (0x8c bytes) for the
    next waypoint frame with a random type (rand & 7): around the player, following a nearby cop car
    (P60_NextTrafficCar) or tripod at the middle of the waypoint segment. */
+/* PS1: DoAutoDirect @ 0x0005B784 (olink9/driver1-decomp@5bb6cda, high) */
 void P127_AutoCamera(void *cam) {
   int32_t *c = (int32_t *)cam;
   P14_Fn0048DB65(c, 0x8c);
@@ -572,6 +573,7 @@ void P127_SpawnTick(int32_t draw) {
 /* ---- 004ad3b5 ---- */
 /* P127_FarDebris — Game.exe 004ad3b5.  Debris bursts (P125_DebrisBurst) at the objects listed in 00cfe760
    (P104_Buf760, Game.exe addresses), relative to the camera. */
+/* PS1: AddGroundDebris @ 0x000426B4 (olink9/driver1-decomp@5bb6cda, high) */
 void P127_FarDebris(void) {
   int32_t sp = rd32(P127_CAR(0) + 0x10c);
   if (P13_00553850 == 0 || P62_HudOff2 != 0 || !(99999 < sp || sp < -99999)) return;

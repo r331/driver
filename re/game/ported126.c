@@ -506,6 +506,7 @@ void P126_ShowBmpFade(const char *name, int32_t wait) {
 /* ---- 004e10e3 ---- */
 /* P126_WheelSmoke — Game.exe 004e10e3.  For the car's 4 wheel bytes (+0x78, CAR_WHEEL): when a wheel
    leaves the ground, 0x32 frames of smoke (P125_SmokePuffs, kind 5, 3 particles). */
+/* PS1: jump_debris @ 0x00020844 (olink9/driver1-decomp@5bb6cda, high) */
 void P126_WheelSmoke(uint8_t *car) {
   for (int i = 0; i < 4; i++)
     if (car[0x78 + i * 4] != 0) { P102_D06A00 = 0; P102_D0DD84 = 1; return; }

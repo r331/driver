@@ -796,6 +796,7 @@ static int32_t road_height(int32_t x, int32_t z) {
   }
   return -P72_Low;
 }
+/* PS1: MapHeight @ 0x0001F5B0 (olink9/driver1-decomp@5bb6cda, high) */
 int32_t P100_RoadHeight(const int32_t *pos) { return road_height(pos[0], pos[2]); }
 int32_t P100_RoadHeightF(const float *pos) {
   P11_00ba52d0 = fround(pos[0]);
@@ -984,6 +985,7 @@ void P100_BoxFace(const int32_t *a, const int32_t *b, int32_t k, int32_t *best, 
 
 /* Overlap test of two oriented rectangles (records of 0x18 words); fills the contact data on overlap. */
 /* ---- 00499fb0: пересечение двух повёрнутых прямоугольников (записи по 0x18 слов) ---- */
+/* PS1: bcollided2d @ 0x0003F2E0 (olink9/driver1-decomp@5bb6cda, high) */
 int32_t P100_BoxOverlap(int32_t *p) {
   int32_t s1 = P59_Sin[((uint32_t)(p[0x28] - p[0x10]) + 0x400u) & 0x7ff];
   int32_t s2 = P59_Sin[(uint32_t)(p[0x28] - p[0x10]) & 0x7ffu];

@@ -438,6 +438,7 @@ int32_t P118_TrafficBlocked(uint8_t *p) {
    type 2 = smoke (spark == 0) or sparks (spark != 0, kind 0x4000), other = smoke (kind 0x10000).
    Velocity vel and a per-step change vel * P8_00546020 / (countdown / 2).  Not while paused
    (G6_00B5A778), when effects are off (MenuVar55384C == 0) or on odd frames. */
+/* PS1: Setup_Smoke @ 0x00047A90 (olink9/driver1-decomp@5bb6cda, high) */
 void P118_SkidFx(const float *pos, int32_t a, int32_t b, int32_t type, int32_t dist, const float *vel, int32_t spark) {
   if (G6_00B5A778 != 0 || MenuVar55384C == 0 || (P62_Frame & 1) != 0) return;
   int32_t i = PoolPop004AC6D0();

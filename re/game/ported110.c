@@ -340,6 +340,7 @@ void P110_RadarGrid(void) {
 /* P110_Gauge — Game.exe 00502787.  Draws a bar gauge record p (+0 x, +4 y, +8 w, +0xc h in 640x480, +0x10 value,
    +0x14 max, +0x18.. colour, +0x24 label, +0x28 flags 1 = vertical / 2 = right-to-left, +0x2c enabled):
    grey frame, dark background, filled part with a darker bottom, shadowed label. */
+/* PS1: DrawPercentageBar @ 0x00056BDC (olink9/driver1-decomp@5bb6cda, high) */
 void P110_Gauge(uint8_t *p) {
 #ifndef RE_HOOK_BUILD
   if (p == NULL) return;
