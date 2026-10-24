@@ -17,6 +17,7 @@
 #include "aspect.h"
 #include "drawdist.h"
 #include "../platform/plat.h"
+#include "missionstate.h"
 #include "ported150.h"
 #include "ported140.h"
 #include "ported142.h"
@@ -230,6 +231,19 @@ void P132_GameLogic(void) {
   P66_Scene = 0x00cb8f20u;
   G6_00D0DDC0 = 0;   /* active-car list is rebuilt this tick (P142_CarsStep walks G6_00B2F30C[0..n)) */
 #ifndef RE_HOOK_BUILD
+  if (RE_LOG_ON(mission, RE_LV_INFO)) {   /* v2.37: RE_LOG mission — смены состояния 00c810c4 и причины 00c810e8 (только чтение) */
+    static int32_t lc4 = -1, le8 = -1;
+    if (P14_00c810c4 != lc4 || P14_00c810e8 != le8) {
+      int32_t c4 = P14_00c810c4, e8 = P14_00c810e8;
+      const char *st = c4 == MSTATE_NONE ? "нет цели" : c4 == MSTATE_OBJECTIVE ? "цель активна" : c4 == MSTATE_RACE ? "гонка" : c4 == MSTATE_FAILED ? "ПРОВАЛ" :
+                       c4 == MSTATE_OBJ_DONE ? "цель достигнута" : c4 == MSTATE_RACE_DONE ? "гонка завершена" : (c4 & MSTATE_PASSED_BIT) ? "миссия пройдена" : "значение не описано в missionstate.h";
+      const char *why = e8 == MREASON_NONE ? "" : e8 == MREASON_TIME_OUT ? ", причина: время вышло" : e8 == MREASON_FAILED ? ", причина: машина разбита/перевёрнута или провал по скрипту" :
+                        e8 == MREASON_LOST ? ", причина: цель потеряна" : e8 == MREASON_SEQUENCE ? ", причина: истекла последовательность" : ", причина: ?";
+      if (c4 == MSTATE_FAILED) RE_LOGW(mission, "миссия %d: состояние 0x%x (%s)%s, кадр игры %d", (int)P11_00b87e38, (unsigned)c4, st, why, (int)P62_Frame);
+      else RE_LOGI(mission, "миссия %d: состояние 0x%x (%s)%s, кадр игры %d", (int)P11_00b87e38, (unsigned)c4, st, why, (int)P62_Frame);
+      lc4 = c4; le8 = e8;
+    }
+  }
   { /* v2.29: RE_MISSDBG=1 — отсчёт конца миссии 00c81100 (каждые 25 кадров) и ожидание речи 004d6209 */
     static int dbg = -1; if (dbg < 0) dbg = getenv("RE_MISSDBG") != NULL;
     if (dbg && P14_00c81100 != 0 && (P14_00c81100 % 25) == 1)
@@ -247,6 +261,10 @@ void P132_GameLogic(void) {
 #ifndef RE_HOOK_BUILD
         { /* v2.29: RE_MISSDBG — итог миссии (00c810e8: 0 — успех, 2 — провал, 3 — цель потеряна (004f5012/004d4f5c)); RE_END_EXIT=N — выход через N кадров окна (снимок итога) */
           extern void plat_exit_after(int n); const char *e = getenv("RE_END_EXIT");
+          if (P14_00c810e8 == 0) RE_LOGI(mission, "ИТОГ миссии %d: УСПЕХ (состояние 0x%x), кадр игры %d", (int)P11_00b87e38, (unsigned)P14_00c810c4, (int)P62_Frame);
+          else RE_LOGW(mission, "ИТОГ миссии %d: ПРОВАЛ, причина %d (%s), кадр игры %d", (int)P11_00b87e38, (int)P14_00c810e8,
+                       P14_00c810e8 == MREASON_TIME_OUT ? "время вышло" : P14_00c810e8 == MREASON_FAILED ? "машина разбита / провал по скрипту" :
+                       P14_00c810e8 == MREASON_LOST ? "цель потеряна" : P14_00c810e8 == MREASON_SEQUENCE ? "последовательность" : "?", (int)P62_Frame);
           if (getenv("RE_MISSDBG")) fprintf(stderr, "[end] w=%d f=%d итог миссии: %s (e8=%d c4=%x)\n", plat_frame_no(), (int)P62_Frame,
                                             P14_00c810e8 == 0 ? "успех" : P14_00c810e8 == 3 ? "ПРОВАЛ (цель потеряна)" : "ПРОВАЛ", (int)P14_00c810e8, (unsigned)P14_00c810c4);
           /* v2.30: RE_AUTOCONT="кадр:клавиша,…" — после успеха нажать (кадры от итога; Continue → следующая подмиссия/мотель),

@@ -326,4 +326,6 @@ void   *plat_current_process(void);                                           /*
 void   *plat_load_accelerators(void *hinst, const char *name);                /* LoadAcceleratorsA; SDL — NULL (таблиц ускорителей нет) */
 void    plat_dd_stub_caps(uint32_t fail_mask, uint32_t caps2);                /* тесты (SDL): bit0 GetCaps, bit1 EnumTextureFormats, bit2 EnumZBuffer; dwCaps2 HAL */
 int     plat_win_moves(int32_t *last5);                                       /* тесты (SDL): число MoveWindow и последний x,y,w,h,repaint; hook — 0 */
+/* v2.37: RE_LOG — единый отладочный журнал (каналы/уровни, выкл. по умолчанию; в hook-сборке макросы пустые) */
+#include "plat_log.h"
 #endif

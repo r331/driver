@@ -743,12 +743,13 @@ int32_t P58_SaveSlot(int32_t slot, char *dst) {
   char name[32];
   snprintf(name, sizeof name, "SAVES\\GAME%d.BIN", slot + 1);
   void *f = g_fopen(name, "rb");
-  if (f == NULL) return 0;
+  if (f == NULL) { RE_LOGD(save, "слот %d: %s нет (пустой слот)", (int)slot + 1, name); return 0; }
   g_fread(P56_SaveHdr, 1, 8, f);
   g_fread(P56_SaveBuf, 1, SAVE_NAME_BYTES, f);
   g_fclose(f);
-  if (P56_SaveHdr[0] != SAVE_MAGIC) return 0;
-  if (P56_Fn40682D(P56_SaveBuf, SAVE_NAME_BYTES) != (int32_t)P56_SaveHdr[1]) return 0;   /* byte checksum */
+  if (P56_SaveHdr[0] != SAVE_MAGIC) { RE_LOGW(save, "слот %d: %s — неверная подпись 0x%08x (ожидается 0x%08x), слот игнорируется", (int)slot + 1, name, (unsigned)P56_SaveHdr[0], (unsigned)SAVE_MAGIC); return 0; }
+  if (P56_Fn40682D(P56_SaveBuf, SAVE_NAME_BYTES) != (int32_t)P56_SaveHdr[1]) { RE_LOGW(save, "слот %d: %s — контрольная сумма не сошлась, слот игнорируется", (int)slot + 1, name); return 0; }   /* byte checksum */
+  RE_LOGI(save, "слот %d: %s прочитан, имя «%.15s»", (int)slot + 1, name, (const char *)P56_SaveBuf);
   int i = 0;
   while (i < SAVE_NAME_BYTES && P56_SaveBuf[i] != 0) { dst[i] = (char)P56_SaveBuf[i]; i++; }
   dst[i] = 0;
@@ -768,7 +769,8 @@ void P58_SaveConfig(void) {
     g_fwrite(P58_CfgHdr, 1, 8, f);
     g_fwrite(P58_Cfg, 1, CONFIG_BYTES, f);
     g_fclose(f);
-  }
+    RE_LOGD(save, "config.dat записан (%d байт настроек, сумма 0x%08x)", (int)CONFIG_BYTES, (unsigned)sum);
+  } else RE_LOGW(save, "config.dat не открыт на запись — настройки не сохранены");
 }
 
 /* 0040b1cc: ширина строки шрифтом font (запись глифа 8 байт, таблица 0x806 на шрифт). */

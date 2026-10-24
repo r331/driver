@@ -312,6 +312,7 @@ void P136_GameLoop(int32_t replay) {
   GameMode = replay ? 4 : 0;
   P58_CfgLock = replay != 0;
   set_aa44(-1);
+  RE_LOGI(game, "игровой цикл: старт (%s), экран %dx%d", replay ? "повтор" : "игра", (int)P68_ModeW, (int)P68_ModeH);
   while (done == 0) {
     set_e54(1);
     G6_00B87E20 = 1;
@@ -323,6 +324,11 @@ void P136_GameLoop(int32_t replay) {
       Call00522323();
     }
     P137_LevelEnd();
+#ifndef RE_HOOK_BUILD
+    { static const char *const k_end[] = { "?", "?", "выход в меню", "заново", "повтор (сохранить TEMP)", "повтор 2", "тренировка" };
+      int32_t c = G005F7E54;
+      RE_LOGI(game, "уровень завершён: код %d (%s), кадр игры %d", (int)c, (c >= 0 && c < 7) ? k_end[c] : "?", (int)P62_Frame); }
+#endif
     GameMode = G005F7E54;
     switch (G005F7E54) {
     case LEVEL_END_QUIT: done = 1; break;
@@ -348,6 +354,7 @@ void P136_GameLoop(int32_t replay) {
   P58_CfgLock = 0;
   P133_LoadConfig();
   P58_SaveConfig();
+  RE_LOGI(game, "игровой цикл: выход во фронтенд");
 }
 
 /* ---- 0040bf50 ---- */
@@ -364,7 +371,8 @@ int32_t P136_FrontInit(void) {
   if (P100_LfbFormat() == 0) P30_FatalError("Failed to allocate display");
   G6_00B87EFC = 1;
   P56_F7E58 = 1;
-  if (P137_LoadTsd("DATA\\FRONTEND.TSD") == 0) return 0;
+  if (P137_LoadTsd("DATA\\FRONTEND.TSD") == 0) { RE_LOGE(load, "фронтенд: DATA\\FRONTEND.TSD не загружен"); return 0; }
+  RE_LOGI(game, "фронтенд: инициализация (FRONTEND.TSD, шрифты, TITLE.DSS, CD-трек 2)");
   P125_BlendTable(P136_TsdPalB, P100_Pal32, 0x71, 0xff);
   P125_BlendTable(P136_TsdPalA, P136_Pal16, 0x71, 0xff);
   _Static_assert(sizeof(P101_PalLfb) == 0x400 && sizeof(P136_Pal16) == 0x400, "pal16");
@@ -398,6 +406,8 @@ void P136_OverlayMap(void) {
   if (P99_C80880 != NULL) { P98_DebugFree(P99_C80880); P99_C80880 = NULL; }
   if (nm == NULL) { P99_C80880 = NULL; map_none(); return; }
   f = P136_MapName[0] == 0 ? g_fopen(nm, "rb") : g_fopen(P136_MapName, "rb");
+  if (f == NULL) RE_LOGW(load, "карта-оверлей %s не открыта", P136_MapName[0] == 0 ? nm : (const char *)P136_MapName);
+  else RE_LOGD(load, "карта-оверлей %s", P136_MapName[0] == 0 ? nm : (const char *)P136_MapName);
   if (f == NULL) map_none();
   else {
     int32_t w, h, bpp;

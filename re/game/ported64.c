@@ -70,7 +70,7 @@ int32_t P64_SaveReplay(int32_t slot) {
   char name[32];
   snprintf(name, sizeof name, "SAVES\\REPLAY%d.BIN", slot + 1);
   void *f = g_fopen(name, "wb");
-  if (f == NULL) return 0;
+  if (f == NULL) { RE_LOGE(save, "повтор: %s не открыт на запись", name); return 0; }
   g_fwrite(P59_Hdr, 1, 8, f);
   g_fwrite(P59_Rep57B6B8, 1, 0x38, f);
   if (P64_SaveChunk(f, "REPLAYDATA\\USER\\$TEMP$.CFG", CHUNK_CFG) != 0) {
@@ -78,11 +78,13 @@ int32_t P64_SaveReplay(int32_t slot) {
     if (P64_SaveChunk(f, "REPLAYDATA\\USER\\$TEMP$.CAMS", CHUNK_CAMS) != 0 &&
         P64_SaveChunk(f, "REPLAYDATA\\USER\\$TEMP$.PADS", CHUNK_PADS) != 0) {
       g_fclose(f);
+      RE_LOGI(save, "повтор сохранён: %s (слот %d)", name, (int)slot + 1);
       return 1;
     }
   }
   g_fclose(f);
   g_remove(name);
+  RE_LOGW(save, "повтор: %s не сохранён (нет частей REPLAYDATA\\USER\\$TEMP$.CFG/CAMS/PADS) — файл удалён", name);
   return 0;
 }
 

@@ -102,9 +102,10 @@ int32_t P25_InitCDAudio(void) {
   if (r == 0) { DebugLog("InitCDAudio: Open CD device failed"); return 0; }
   if (r < 0) { DebugLog("InitCDAudio: Set time format failed"); return 0; }
   P25_CdOpen = 1;
-  if (P25_GetCDTOC() == 0) { plat_cd_close(); return 0; }   /* флаг «открыто» остаётся 1, как в оригинале */
+  if (P25_GetCDTOC() == 0) { RE_LOGW(audio, "CD-audio: оглавление диска не прочитано"); plat_cd_close(); return 0; }   /* флаг «открыто» остаётся 1, как в оригинале */
   int dev = plat_aux_find_cd();
   if (dev >= 0) P25_AuxDev = dev;
+  RE_LOGI(audio, "CD-audio открыт: дорожек %d, aux-устройство %d", (int)P25_CdTracks, dev);
   return 1;
 }
 /* P25_CDStop — Game.exe 00524873 (identical copy at 005248a0).  Stops CD playback (MCI_STOP; the
@@ -133,8 +134,9 @@ void P25_PlayCDTrack(int32_t track) {
   uint32_t from = g_tocPos[track];
   g_curEnd = g_tocEnd[track];
   P25_CdTrack = track;
+  RE_LOGI(audio, "музыка: CD-трек %d (из %d)", (int)track, (int)P25_CdTracks);
   if (plat_cd_play_range(MAIN_HWND, from, g_curEnd)) P25_CdPlaying = 1;
-  else { P25_CDClose(); Q00B87E90 = 0; }
+  else { RE_LOGW(audio, "музыка: CD-трек %d не запущен — CD-audio закрыт, музыка выключена", (int)track); P25_CDClose(); Q00B87E90 = 0; }
 }
 /* P25_CDResume — Game.exe 005248cd.  Resumes a paused track: plays from the current position to g_curEnd. */
 void P25_CDResume(void) {

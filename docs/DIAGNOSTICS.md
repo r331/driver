@@ -262,3 +262,75 @@ including a damage value of 1944 (60000/45000 motor levels for 220 ms) and light
 hits producing shorter/weaker pulses. Both automated suites pass with SDL3-compat
 and the installed SDL2 Classic runtime. Physical vibration feedback is awaiting
 user confirmation.
+
+## RE_LOG — unified debug log (v2.37)
+
+One opt-in log for the whole native build (`re/platform/plat_log.h/.c`, plain C, no SDL). **Off by default**: without
+`RE_LOG` (and without `log =` in `driver.cfg`) nothing is opened, no handler is installed and every log call is a single
+byte compare that skips the call — the deterministic `RE_CARDBG` run is byte-identical and the frame time does not change.
+In the hook build (`DINPUT.dll` inside the original `Game.exe`) the macros compile to nothing.
+
+### Turning it on
+
+```sh
+RE_LOG=all:info ./driver --data Data_Files                       # everything that matters, no per-frame lines
+RE_LOG=all:info,render:debug,audio:off ./driver --data Data_Files # per channel
+RE_LOG=game,mission:debug,load:warn ./driver …                    # a bare channel name = that channel at info
+RE_LOG=debug RE_LOG_STDERR=1 ./driver …                           # every channel at debug, copy to the terminal
+RE_LOG=1 …                                                        # same as all:info
+```
+
+or in `driver.cfg` (the environment variable wins): `log = all:info,render:debug`.
+
+| Variable | Meaning |
+|---|---|
+| `RE_LOG=spec` | comma/semicolon separated `channel:level` (also `channel=level`); `all` / `*` = every channel; a bare level (`debug`) applies to all, a bare channel (`game`) turns it on at info; later items override earlier ones |
+| `RE_LOG_FILE=path` | log file; `-` or `stderr` — no file, stderr only. Default: **macOS** `~/Library/Logs/Driver/driver.log`; elsewhere `driver.log` next to the executable (falls back to the current = data directory, then stderr). The chosen path is printed once to stderr: `[log] RE_LOG: журнал …` |
+| `RE_LOG_STDERR=1` | copy every line to stderr |
+| `RE_LOG_RATE=N` | at most N lines per second from one call site (one format string), default 200; the rest are counted and reported as `(ограничение частоты: подавлено N строк «format»)`; `0` — unlimited |
+| `RE_LOG_MAX_MB=N` | size limit (default 64 MiB); when exceeded the file is renamed to `driver.log.1` and a new one is started |
+
+Levels: `off`, `error` (`e`, 1), `warn` (`w`, 2), `info` (`i`, 3), `debug` (`d`, 4), `trace` (`t`, 5). Per-frame
+information is only ever written at **trace**; info/debug lines are written when something changes (state, file,
+device, menu table, mission state).
+
+### Channels
+
+| Channel | What is logged |
+|---|---|
+| `sys` | version, build revision, platform, SDL and compiler; command line, working directory; every `RE_*` variable; `driver.cfg` (path, parse errors as warn, effective settings); `plat_log` lines; MessageBox (error/warn); `plat_exit`, window close, `RE_MAX_FRAMES` / `RE_MAX_PUMPS` exit; fatal errors of the game; signals (SIGSEGV/SIGBUS/SIGFPE/SIGABRT/SIGINT/SIGTERM — one line and a flush); calls of not-yet-ported stubs (warn, via `DebugLog`) |
+| `load` | data directory; every game file open (`plat_fopen_game`: success debug — `debug.log` and `.WAV` samples at trace —, failure warn with errno), removals; level file open/blocks/unknown block types; game `debug.log` lines mirrored (`debug.log: …`, ERROR/Can't/failed → warn); HD texture pack: per level summary (applied / 8-bit pairs / rejected, game-path attach/upload/reject counters), each rejected page with the error and threshold (warn), broken PNG files (warn); facade detail meshes; replay configs; key names; overlay map; loading pictures |
+| `game` | WinMain start/end, front end init and main menu (quit asked / confirmed / cancelled), menu table changes (info) and item changes/results (debug), MLADDER campaign records (debug) with city / interview / credits (info), game loop start and level end code, level load start (city, mission, GameMode, demo) and ready (level file, day/night, CD track); engine `DebugLog` lines |
+| `mission` | mission script load (file, result code, compile errors with line), free ride, state word 00c810c4 changes with the failure reason 00c810e8 (info, failure as warn), **mission result** (success / failure + reason), script command changes (debug), campaign mission start/end |
+| `render` | SDL video driver, window size/mode, fullscreen toggles, game display mode, every `driver_gfx.log` line (`[gfx]`, errors/fallbacks as warn), GL vendor/renderer/version (info) and the extension list (debug), first frame, screenshots, HD pack totals at exit, texture table full (warn), DirectDraw surface problems; each shown frame at trace |
+| `audio` | SDL audio driver/device/format/buffer (info), output devices (debug), no device → null device (warn), WAV capture, game sound driver open/failure, sound banks (file, number of sounds, parse problems), WAV samples (trace), DirectSound buffer problems, timers (trace, failures warn), CD audio: open, track table, MCI play/stop/resume, track ends, dynamic music choice and Drive/Chase switches (all `[cd]`/`[music]` lines), music track requests of the game; the SDL audio callback at trace (from the audio thread, marked `[t1]`) |
+| `input` | DirectInput devices (debug), `RE_KEYS` script (info, bad items warn), gamepad subsystem (SDL version), controller connected/disconnected (name, vendor:product, type Xbox/PS4/PS5/Switch…, rumble yes/no), mapping (debug), rumble unavailable (warn), window focus (debug), every `RE_INPUTDBG` line (debug), key presses and controller buttons (trace) |
+| `mem` | `NULL` from allocators (error): `DebugMalloc` (with the game's file:line), sound buffers, DirectDraw surfaces, screenshots, texture pack; allocations ≥ 1 MiB (debug), every `DebugMalloc`/`DebugFree` (trace) |
+| `save` | `SAVES\GAMEn.BIN` write (slot, name, checksum) and slot reads (empty / bad magic / bad checksum as warn), `config.dat` read/write (missing → defaults, bad magic/checksum as warn), high scores, replays `SAVES\REPLAYn.BIN` save/load, director data |
+
+### Line format
+
+```
+# Driver RE_LOG v2.37, 2026-10-24 18:01:47, pid 9264, RE_LOG="all:debug" -> sys:DEBUG,load:DEBUG,…
+   17748 ms f670    game    INFO  загрузка уровня: город 0 (Miami), миссия 46, GameMode 0, повтор 0
+   18170 ms f674    load    INFO  файл уровня Levels/MIAMI_01.LEV открыт
+     398 ms f2      audio   WARN  нет звукового устройства (…) — пустое устройство по часам игры, без вывода
+```
+
+Columns: milliseconds since start (monotonic clock — not the game clock, so `RE_FIXED_DT` runs stay reproducible),
+`f<number>` — the last shown frame (`plat_frame_no`), channel, level, ` [tN]` for a thread other than the first one
+(the SDL audio callback), message. Identical consecutive lines collapse into `(предыдущая строка повторена ещё N раз)`.
+
+### Guarantees
+
+- Thread safe: each line is formatted outside and written whole under one mutex (POSIX mutex / Windows SRW lock).
+- error and warn lines are flushed at once, others at least once a second, at `plat_exit`, window close, `RE_MAX_FRAMES`
+  and at process exit (`atexit`); a crash signal writes one line and flushes without waiting for the lock.
+- Log calls never change the game: arguments are plain reads (no `plat_time_ms`, which advances the virtual clock of
+  `RE_FIXED_DT`); with the log on, `RE_CARDBG` output is still identical.
+- The older debug switches keep their own files and formats (`driver_gfx.log`, `driver_input.log`, `RE_CARDBG`,
+  `RE_MISSDBG`, `RE_IVDBG`, `RE_FONTDUMP`, `RE_DIAG`, `RE_PROBE`, `debug.log` …); `driver_gfx.log`, `RE_INPUTDBG`, `plat_log`
+  and the game's `debug.log` are additionally copied into the matching channel.
+
+For a bug report: `RE_LOG=all:debug` (add `,render:trace` or `,input:trace` only when asked — trace writes per frame) and
+attach `driver.log` together with `driver_gfx.log`.

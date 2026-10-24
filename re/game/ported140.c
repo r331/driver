@@ -217,7 +217,8 @@ void P140_SaveGame(int32_t slot, const char *name) {
     g_fwrite(P56_SaveHdr, 1, 8, f);
     g_fwrite(P56_SaveBuf, 1, 0x38, f);
     g_fclose(f);
-  }
+    RE_LOGI(save, "сохранение игры: слот %d (%s), имя «%.15s», контрольная сумма 0x%08x", (int)slot + 1, path, name ? name : "", (unsigned)sum);
+  } else RE_LOGE(save, "сохранение игры: %s не открыт на запись — слот %d НЕ сохранён", path, (int)slot + 1);
 }
 
 /* ---- 0040ec30 ---- */
@@ -239,7 +240,8 @@ void P140_KeysLoad(void) {
   if (P55_Lang < 0 || 5 < P55_Lang) { P55_Lang = 0; P58_LangNo = 0; }
   snprintf(path, sizeof path, "KEYS.%s", k_lang[P55_Lang]);
   void *f = g_fopen(path, "r");
-  if (f == NULL) return;
+  if (f == NULL) { RE_LOGW(load, "имена клавиш: %s не открыт", path); return; }
+  RE_LOGD(load, "имена клавиш: %s (язык %d)", path, (int)P55_Lang);
   g_fseek(f, 0, 2);
   len = (int32_t)g_ftell(f);
   g_fseek(f, 0, 0);
@@ -304,7 +306,8 @@ void P140_Frontend(int32_t unused) {
   P54_ClearSwap(4);
   P126_ShowBmpFade("DATA\\REFLECT.BMP", 5);
   P150_PlayFmv(G6_00BDF9C0, 0, -1);
-  if (P136_FrontInit() == 0) { P56_ResetFrontend(); return; }
+  if (P136_FrontInit() == 0) { RE_LOGE(game, "фронтенд не инициализирован — выход из главного меню"); P56_ResetFrontend(); return; }
+  RE_LOGI(game, "главное меню (фронтенд)");
   set_menu_mode(0);
   P140_FrSelA = 0;
   P97_MenuCall0(0x0054cc90u, 0);
@@ -317,6 +320,7 @@ void P140_Frontend(int32_t unused) {
     if (P140_FrQuit == 0) {
       int32_t r = P114_MenuStep(0x0054cc90u, &P140_FrSelA);
       if (r == -1) {
+        RE_LOGI(game, "главное меню: запрос выхода (меню подтверждения)");
         P140_FrQuit = 1; P140_FrSelB = 0;
         P99_MenuDim(1);
         P97_MenuCall0(0x0054cd20u, P140_FrSelB);
@@ -325,8 +329,8 @@ void P140_Frontend(int32_t unused) {
       }
     } else {
       int32_t r = P114_MenuStep(0x0054cd20u, &P140_FrSelB);
-      if (r == 1) { P57_MenuDone(); P56_ResetFrontend(); P58_SaveConfig(); return; }
-      if (r == -1) { P140_FrQuit = 0; P99_MenuDim(0); P97_MenuCall0(0x0054cc90u, P140_FrSelA); }
+      if (r == 1) { RE_LOGI(game, "главное меню: выход из игры подтверждён"); P57_MenuDone(); P56_ResetFrontend(); P58_SaveConfig(); return; }
+      if (r == -1) { RE_LOGI(game, "главное меню: выход отменён"); P140_FrQuit = 0; P99_MenuDim(0); P97_MenuCall0(0x0054cc90u, P140_FrSelA); }
     }
     set_menu_mode(0);
     P119_MenuFrame();
@@ -361,12 +365,19 @@ static void set_c4(int32_t v) {
    Stops on a NULL/unregistered record address, an unknown code, or when GameMode becomes 1
    (quit).  Native: RE_SKIP_INTERVIEW=1 acts like the skip-interview cheat. */
 void P140_LadderRun(void) {
+  RE_LOGI(game, "кампания (MLADDER): старт с записи 0x%08x", (unsigned)P68_IntroCur);
   for (;;) {
     const uint8_t *rec = (const uint8_t *)re_ptr(P68_IntroCur);
-    if (rec == NULL) return;
+    if (rec == NULL) { RE_LOGI(game, "кампания (MLADDER): запись 0x%08x пуста/вне образа — возврат в меню", (unsigned)P68_IntroCur); return; }
     uint32_t a = rd32(rec + 4);
+#ifndef RE_HOOK_BUILD
+    { static const char *const k_lad[] = { "SETCITY", "ROOM", "MISSION", "RENDER", "TRIGGER", "IF", "IFOK", "ENDIF", "?", "QUITONFAIL", "?", "INTERVIEW", "END" };
+      uint32_t code = rd32(rec);
+      RE_LOGD(game, "MLADDER 0x%08x: %s (код %u) a=%u", (unsigned)P68_IntroCur, code < 13 ? k_lad[code] : "?", (unsigned)code, (unsigned)a); }
+#endif
     switch (rd32(rec)) {
     case LAD_SETCITY:
+      RE_LOGI(game, "кампания: город %u", (unsigned)a);
       P68_IntroA = (int32_t)a;
       if (P19_Level < P68_IntroA + 1) { set_level(P68_IntroA + 1); P58_SaveConfig(); }
       P68_IntroCur = rd32(rec + 8);
@@ -382,7 +393,9 @@ void P140_LadderRun(void) {
       D_00b87e30 = P68_IntroA;
       set_e38((int32_t)a);
       set_menu_mode(9);
+      RE_LOGI(mission, "кампания: миссия %u (город %d)", (unsigned)a, (int)P68_IntroA);
       P136_GameLoop(0);
+      RE_LOGI(mission, "кампания: миссия %u закончена, состояние 0x%x, причина %d%s", (unsigned)a, (unsigned)P14_00c810c4, (int)P14_00c810e8, GameMode == 1 ? " — выход из игры" : "");
       if (GameMode == 1) return;
       rec = (const uint8_t *)re_ptr(P68_IntroCur);
       if (rec == NULL) return;
@@ -414,6 +427,7 @@ void P140_LadderRun(void) {
       /* v2.11: RE_SKIP_INTERVIEW=1 — отладка: как чит 00b87e9c (пункт 5 меню Cheats, при 00bdf9fc ≠ 0) — интервью пропускается */
       if (getenv("RE_SKIP_INTERVIEW") != NULL) MenuOptB87E9C = 1;
 #endif
+      RE_LOGI(mission, "кампания: интервью в гараже%s", MenuOptB87E9C ? " пропущено (чит/RE_SKIP_INTERVIEW)" : "");
       if (MenuOptB87E9C == 0) {
         D_00b87e30 = 4; set_e38(0); set_ea0(0); P62_HudOff2 = 1; set_1dc(1); P14_00b87e84 = 1;
         P136_GameLoop(0);
@@ -428,6 +442,7 @@ void P140_LadderRun(void) {
       P68_IntroCur = rd32(rec + 8);
       break;
     case LAD_END:
+      RE_LOGI(game, "кампания: финал — титры");
       P12_00b87ef8 = 1; set_e5c(1);
       P138_ReplayCfg("CREDITS");
       P136_GameLoop(1);
@@ -439,6 +454,7 @@ void P140_LadderRun(void) {
       P68_IntroCur = rd32(rec + 8);
       break;
     default:
+      RE_LOGW(game, "кампания (MLADDER): неизвестный код %u в записи 0x%08x — возврат в меню", (unsigned)rd32(rec), (unsigned)P68_IntroCur);
       return;
     }
   }
@@ -450,9 +466,10 @@ void P140_LadderRun(void) {
    (nAvgBytesPerSec, used as the sample's frequency field), or -1 on error / no DirectSound. */
 int32_t P140_SndLoadWav(int32_t n, const char *path) {
   uint8_t hdr[0x14];
-  if (P38_Ds == NULL) return -1;
+  if (P38_Ds == NULL) { RE_LOGD(audio, "WAV %s (голос %d) пропущен — нет DirectSound", path, (int)n); return -1; }
   void *f = g_fopen(path, "rb");
-  if (f == NULL) return -1;
+  if (f == NULL) { RE_LOGW(audio, "WAV %s (голос %d) не открыт", path, (int)n); return -1; }
+  RE_LOGT(audio, "WAV %s → голос %d", path, (int)n);
   g_fseek(f, 0, 2);
   int32_t size = (int32_t)g_ftell(f);
   if (size == -1) { g_fclose(f); return -1; }
@@ -484,7 +501,7 @@ int32_t P140_SndLoadWav(int32_t n, const char *path) {
    when the hardware cannot be opened. */
 int32_t P140_SndInit(int32_t drv, int32_t arg, int32_t eax) {
   if (G6_00B91CF4 != 0) P48_SndShutdown();
-  if (drv < 0 || G6_00B91D2C <= drv) return 0;
+  if (drv < 0 || G6_00B91D2C <= drv) { RE_LOGW(audio, "звук игры: драйвер %d вне 0..%d — звук выключен", (int)drv, (int)G6_00B91D2C - 1); return 0; }
   P43_FadeLen = 1.0f;
   P48_B91D30 = eax;
   P43_FadeSteps = 0; P43_FadeA = 0.0f; P43_FadeB = 0; P43_FadeStep = 0.0f;
@@ -507,10 +524,12 @@ int32_t P140_SndInit(int32_t drv, int32_t arg, int32_t eax) {
   if (P148_SndOpen(drv, arg, G6_00BDF9C0) == 0) {
     G6_00B91CF4 = 0; G8_00B91CF4 = 0;
     P124_DebugLog("=> Error allocating sound hardware <=");
+    RE_LOGE(audio, "звук игры: устройство DirectSound %d не открыто", (int)drv);
     return 0;
   }
   if (P97_DrvB != NULL) ((void (*)(float))P97_DrvB)(0.15f);
   G6_00B91CF4 = 1; G8_00B91CF4 = 1;
+  RE_LOGI(audio, "звук игры: драйвер %d открыт (EAX %d)", (int)drv, (int)eax);
   return 1;
 }
 

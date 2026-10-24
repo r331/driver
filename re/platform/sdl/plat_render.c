@@ -577,7 +577,16 @@ int plat_render_attach(void *(*get_proc)(const char *), void (*swap)(void), int 
       GLint mt = 0, mr = 0, vp[2] = { 0, 0 }; glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mt); glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &mr); glGetIntegerv(GL_MAX_VIEWPORT_DIMS, vp);
       plat_log("GL %s (%s)\n", vv ? vv : "?", re ? re : "?");
       plat_gfx_logf("[gfx] GL_VENDOR %s | GL_RENDERER %s | GL_VERSION %s | GLSL %s | MAX_TEXTURE %d MAX_RENDERBUFFER %d MAX_VIEWPORT %dx%d MAX_SAMPLES %d\n",
-                    ve ? ve : "?", re ? re : "?", vv ? vv : "?", sl ? sl : "?", mt, mr, vp[0], vp[1], g_maxs); }
+                    ve ? ve : "?", re ? re : "?", vv ? vv : "?", sl ? sl : "?", mt, mr, vp[0], vp[1], g_maxs);
+      if (RE_LOG_ON(render, RE_LV_DEBUG)) {   /* v2.37: расширения GL — одной строкой на десяток */
+          GLint ne = 0; glGetIntegerv(GL_NUM_EXTENSIONS, &ne);
+          RE_LOGD(render, "GL: расширений %d", (int)ne);
+          char b[960]; int o = 0, k = 0;
+          for (GLint i = 0; i < ne; i++) { const char *e = (const char *)glGetStringi(GL_EXTENSIONS, (GLuint)i); if (!e) continue;
+              o += snprintf(b + o, sizeof b - (size_t)o, "%s%s", k ? " " : "", e); k++;
+              if (o > (int)sizeof b - 64 || i == ne - 1) { RE_LOGD(render, "GL ext: %s", b); o = 0; k = 0; b[0] = 0; } }
+          glGetError();
+      } }
     detail_init();
     glerr("инициализация");
     { char b[512], b2[256]; plat_gfx_logf("[gfx] %s\n[gfx] %s\n", re_gfx_describe(re_gfx(), b, sizeof b), plat_render_gfx_info(b2, sizeof b2)); }
@@ -668,8 +677,11 @@ int plat_tex_create(int w, int h, const uint32_t *rgba) {
         g_tex[i].w = w; g_tex[i].h = h; tex_upload(&g_tex[i], w, h, rgba);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        g_tex[i].w = w; g_tex[i].h = h; tex_dump(i, w, h, rgba); return i;
+        g_tex[i].w = w; g_tex[i].h = h; tex_dump(i, w, h, rgba);
+        RE_LOGT(render, "текстура %d создана: %dx%d", i, w, h);
+        return i;
     }
+    if (g_ok && w > 0 && h > 0) RE_LOGW(render, "plat_tex_create %dx%d: таблица текстур полна (%d) — текстура не создана", w, h, MAX_TEX - 1);
     return 0;
 }
 void plat_tex_update(int tex, int w, int h, const uint32_t *rgba) {   /* v2.01: новая картинка той же текстуры */

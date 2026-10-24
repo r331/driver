@@ -253,8 +253,14 @@ static void set_c8198c(int32_t v) {
    recording, and starts CD track city + 4.  Logs "Interview .., Training .." to debug.log.
    Returns 1, or 0 if a replay config or the level file cannot be loaded.
    Native: v2.33 dynamic-music hint before the CD track request. */
+/* v2.37: RE_LOG — имя города по P15_State (city.h) */
+static const char *city_name(int32_t c) {
+  static const char *const n[7] = { "Miami", "San Francisco", "Los Angeles", "New York", "интервью (гараж)", "тренировка", "Newcastle" };
+  return (c >= 0 && c < 7) ? n[c] : "?";
+}
 int32_t P145_LevelLoad(void) {
   const char *demo = NULL;
+  RE_LOGI(game, "загрузка уровня: город %d (%s), миссия %d, GameMode %d, повтор %d", (int)P15_State, city_name(P15_State), (int)P11_00b87e38, (int)GameMode, (int)P58_SB87EB0);
   if (GameMode == 0) DeleteWaypointFile();
   if (G6_00B87EAC != 0 && (P15_State == CITY_IVIEW || P15_State == CITY_TRAIN)) set_ea0(1);
   P110_FullClip = 1;
@@ -269,8 +275,8 @@ int32_t P145_LevelLoad(void) {
   case 0xfc: demo = "DESERTDEMO3"; break;
   default: set_d11934(0); break;
   }
-  if (demo != NULL) { set_d11934(1); set_ea0(1); GameMode = 4; }
-  if (P11_00d11934 != 0 && P138_ReplayCfg(demo) == 0) return 0;
+  if (demo != NULL) { set_d11934(1); set_ea0(1); GameMode = 4; RE_LOGI(game, "демо-режим %s (GameMode 4)", demo); }
+  if (P11_00d11934 != 0 && P138_ReplayCfg(demo) == 0) { RE_LOGE(game, "загрузка уровня прервана: нет конфигурации демо %s", demo ? demo : "(null)"); return 0; }
   ResetDirectorState();
   if (P12_005f7e5c == 0) {
     if (GameMode == 4) {
@@ -295,7 +301,7 @@ int32_t P145_LevelLoad(void) {
   P71_ScoreSetup();
   P102_D06A04 = 0;
   P103_ReplayReset();
-  if (P145_B20308 != 0 && P138_ReplayCfg(P145_CfgName) == 0) return 0;
+  if (P145_B20308 != 0 && P138_ReplayCfg(P145_CfgName) == 0) { RE_LOGE(game, "загрузка уровня прервана: нет конфигурации повтора %s", P145_CfgName); return 0; }
   int32_t sv14 = G00C8198C, svc = P17_Src, sv18 = G00C81988;
   P138_LoadMission(P11_00b87e38);
   if (G6_00B87EAC != 0 && (P15_State == CITY_IVIEW || P15_State == CITY_TRAIN)) set_ea0(1);
@@ -303,6 +309,7 @@ int32_t P145_LevelLoad(void) {
   if (P15_State == CITY_LA || P15_State == CITY_IVIEW) P14_00b87e84 = 1;
   P145_BankMain = P77_LoadBank("master.dss", 0);
   P145_BankCops = P77_LoadBank("cops.dss", 0x8000);
+  RE_LOGD(audio, "звуковые банки уровня: master.dss -> %d, cops.dss -> %d", (int)P145_BankMain, (int)P145_BankCops);
   SoundSetVolB0052360D(1);
   P58_FreeRecs();
   switch (P15_State) {
@@ -372,7 +379,7 @@ int32_t P145_LevelLoad(void) {
   P55_LoadFrustum();
   AllocMapBuffer300000();
   P54_AllocRoadbits();
-  if (P77_LoadLevel() == 0) return 0;
+  if (P77_LoadLevel() == 0) { RE_LOGE(load, "файл уровня не загружен (город %d, %s) — загрузка уровня прервана", (int)P15_State, city_name(P15_State)); return 0; }
   ClearDirectorTables();
   Pack565Bytes004BF452(0xf0, 0xf0, 0xa0);
   NoopFn004bf471();
@@ -485,5 +492,10 @@ int32_t P145_LevelLoad(void) {
   char msg[256];
   snprintf(msg, sizeof msg, "Interview %d, Training %d, mode %d, chaseHQmode %d", P62_HudOff2, G6_00B87EA0, P88_Mode575, P95_B87F08);
   P124_DebugLog(msg);
+#ifndef RE_HOOK_BUILD
+  RE_LOGI(game, "уровень готов: %s, город %d (%s), миссия %d, %s, GameMode %d, интервью %d, тренировка %d, режиссёр %d, CD-трек %d",
+          P77_CurLevelPath, (int)P15_State, city_name(P15_State), (int)P11_00b87e38, P14_00b87e84 ? "ночь" : "день", (int)GameMode,
+          (int)P62_HudOff2, (int)G6_00B87EA0, (int)P12_005f7e5c, Q00B87E90 ? (int)P15_State + 4 : 0);
+#endif
   return 1;
 }

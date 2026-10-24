@@ -5,6 +5,7 @@
 /* v2.17: HD-пак текстур — загрузка PNG (stb_image, public domain, только PNG) и сверка со страницей игры. */
 #include "plat_texpack.h"
 #include "plat_gfx.h"
+#include "../plat_log.h"   /* v2.37: RE_LOG load */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -152,17 +153,18 @@ void re_texpack_pal8_rgba(const uint8_t *idx, const uint8_t *pal, uint32_t *out)
    pixels wide are accepted. */
 static uint32_t *load_file(const char *path, int *w, int *h) {
     FILE *f = fopen(path, "rb");
-    if (!f) return NULL;
+    if (!f) { RE_LOGT(load, "HD-пак: нет файла %s", path); return NULL; }
     fseek(f, 0, SEEK_END); long n = ftell(f); fseek(f, 0, SEEK_SET);
-    if (n <= 0 || n > (64L << 20)) { fclose(f); return NULL; }
+    if (n <= 0 || n > (64L << 20)) { RE_LOGW(load, "HD-пак: %s — размер %ld байт вне 1..64 МиБ, пропущен", path, n); fclose(f); return NULL; }
     unsigned char *b = (unsigned char *)malloc((size_t)n);
-    if (!b || fread(b, 1, (size_t)n, f) != (size_t)n) { fclose(f); free(b); return NULL; }
+    if (!b || fread(b, 1, (size_t)n, f) != (size_t)n) { if (!b) RE_LOGE(mem, "HD-пак: malloc(%ld) для %s — NULL", n, path); else RE_LOGW(load, "HD-пак: %s — ошибка чтения", path); fclose(f); free(b); return NULL; }
     fclose(f);
     int x = 0, y = 0;
     uint32_t *px = re_texpack_decode_png(b, (int)n, &x, &y);
     free(b);
-    if (!px) return NULL;
-    if (x != y || x < 256 || x > 1024 || (x & (x - 1))) { free(px); return NULL; }
+    if (!px) { RE_LOGW(load, "HD-пак: %s — PNG не декодируется (%s), пропущен", path, stbi_failure_reason() ? stbi_failure_reason() : "?"); return NULL; }
+    if (x != y || x < 256 || x > 1024 || (x & (x - 1))) { RE_LOGW(load, "HD-пак: %s — %dx%d, нужен квадрат 256/512/1024, пропущен", path, x, y); free(px); return NULL; }
+    RE_LOGT(load, "HD-пак: %s %dx%d загружен", path, x, y);
     *w = x; *h = y;
     return px;
 }

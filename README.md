@@ -26,7 +26,7 @@ To count:
 python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv')) if x['module']!='CRT']; print(sum(x['status']=='ported' for x in r), 'из', len(r))"
 ```
 
-**Native as a game — v2.36** (verified with `RE_KEYS` scripts and a real X11 keyboard (xdotool) under Xvfb, Linux arm64; build, selftest and inputtest on macOS arm64 in CI):
+**Native as a game — v2.37** (verified with `RE_KEYS` scripts and a real X11 keyboard (xdotool) under Xvfb, Linux arm64; build, selftest and inputtest on macOS arm64 in CI):
 - working: intro screens and the main menu, **Take A Ride** mode in Miami — driving around the city (map block streaming), traffic, collisions, HUD (Damage/Felony, radar, speedometer);
 - car controls: throttle, brake/reverse, handbrake, hard steering, camera switching (bonnet view), Esc pause with a menu (Continue / Restart / Sound Setup / Gfx Details / Film Director / Quick Replay / Show Map / Exit) — see "Controls";
 - sound: DirectSound is emulated by our own mixer (SDL_audio or WAV capture), engine and ambient noises are audible, soft limiter — no clipping; music — CD-audio emulation (v2.22, tracks from files ripped from your disc — see "CD music");
@@ -46,6 +46,7 @@ python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv'))
 - v2.23: fixed a grey polygon over the sky (usually top left) — flat/Gouraud polygons of the near set are clipped at z = 1, vertices behind the camera no longer fly off into a screen corner;
 - v2.35: all split aliases of the data image have been merged (0 left): every Game.exe address has a single object in native. Event-script checks that were previously missing now work: "You lost your target" by distance from the target (004f5012), freeing the event list between missions, script advancement for six commands, dust, menu item highlighting; Take A Ride and Survival are unchanged (byte for byte) — see docs/NATIVE_GAPS.md, section «Исправлено в v2.35» ("Fixed in v2.35");
 - v2.36: the garage interview stopwatch (dial and case) and the mission clock digits (Miami) in the HD pack have been redrawn by a neural network — crisp, with a smooth edge; the `hud_hd` pack variant, off with `RE_TEXPACK_HUD=0` — see "HD textures";
+- v2.37: a unified debug log `RE_LOG` (off by default): `RE_LOG=all:info` → `driver.log` (macOS — `~/Library/Logs/Driver/driver.log`) — startup and settings, files and levels, menus and missions (outcome and failure reason), saves, sound, gamepads, errors; channels and levels — see docs/DIAGNOSTICS.md "RE_LOG";
 - not verified / not working: night and the other cities (SF, LA, NY); FMV cutscenes are skipped.
 
 Details: [docs/NATIVE_GAPS.md](docs/NATIVE_GAPS.md) (native gaps, debug switches), [docs/PLATFORM_PLAN.md](docs/PLATFORM_PLAN.md) (step-by-step porting log),
@@ -522,6 +523,7 @@ Menus: arrow keys, Enter to select. Gamepad (the first SDL GameController): D-pa
 | `RE_FIXED_DT=1` | virtual clock (20 ms per frame) — reproducible runs independent of the computer's speed |
 | `RE_NO_MSGBOX=1` | MessageBox messages go only to stderr (under Xvfb a message box blocks) |
 | `RE_WATCHDOG=N` | after N seconds print a stack trace and exit with code 3 |
+| `RE_LOG=all:info[,channel:level…]` | v2.37: unified debug log `driver.log` (next to the binary; macOS — `~/Library/Logs/Driver/`), channels `sys load game mission render audio input mem save`, levels `error warn info debug trace`; `RE_LOG_FILE`, `RE_LOG_STDERR=1`, `RE_LOG_RATE`, `RE_LOG_MAX_MB`; same as `log = …` in `driver.cfg`. See docs/DIAGNOSTICS.md "RE_LOG" |
 | `RE_INPUTDBG=1` | v2.14: input log `driver_input.log` (macOS — `~/Library/Logs/`, otherwise next to the binary or in the current directory) |
 | `RE_WINDOWED=1` / `RE_FULLSCREEN=1` | v2.14: window / fullscreen (default: fullscreen on macOS, windowed elsewhere) |
 | `RE_RES=WxH` | v2.14: window size (default — the largest integer multiple of 640×480 within 85% of the screen); the `RE_SHOT_PNG` snapshot is at the window buffer size |

@@ -493,6 +493,14 @@ int32_t P114_MenuStep(uint32_t tbl, int32_t *cur) {
       fprintf(stderr, "[menu] MenuStep %08x: пункт %u → %d, ret=%d, 7e4c=%d keys cd=%02x/%02x 1c=%02x/%02x\n", tbl, was, *cur, ret,
               (int)D_005f7e4c, P34_Keys[0xcd], P34_KeysPrev[0xcd], P34_Keys[0x1c], P34_KeysPrev[0x1c]); }
   re_probe_menu(tbl, *cur);   /* RE_PROBE (reprobe.h): read-only, returns at once when unset */
+  if (RE_LOG_ON(game, RE_LV_DEBUG)) {   /* v2.37: RE_LOG game — смена таблицы меню (info) / пункта (debug) / выбор (debug) */
+    static uint32_t ltbl; static int32_t lcur = -1;
+    if (tbl != ltbl) { RE_LOGI(game, "меню: таблица 0x%08x (было 0x%08x), пункт %d", (unsigned)tbl, (unsigned)ltbl, (int)*cur); ltbl = tbl; lcur = *cur; }
+    else if (*cur != lcur) { RE_LOGD(game, "меню 0x%08x: пункт %d → %d", (unsigned)tbl, (int)lcur, (int)*cur); lcur = *cur; }
+    if (ret != 0) RE_LOGD(game, "меню 0x%08x: результат %d (пункт %d)", (unsigned)tbl, (int)ret, (int)*cur);
+  } else if (RE_LOG_ON(game, RE_LV_INFO)) {
+    static uint32_t ltbl2; if (tbl != ltbl2) { RE_LOGI(game, "меню: таблица 0x%08x, пункт %d", (unsigned)tbl, (int)*cur); ltbl2 = tbl; }
+  }
 #endif
   return ret;
 }

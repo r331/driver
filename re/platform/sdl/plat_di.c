@@ -69,8 +69,8 @@ void plat_di_stub_fail_enum(int on) { g_enum_fail = on; }
 static void *tok(void) { return g_ntok < 64 ? &g_tok[g_ntok++] : NULL; }
 void plat_di_stub_setup(int joysticks, uint32_t caps_flags, uint32_t fail_mask) { g_njoy = joysticks; g_caps = caps_flags; g_fmask = fail_mask; g_ndev = g_ncoop = g_nprop = g_nqry = 0; g_ntok = 0; }
 int plat_di_stub_init_stats(int *dv, int *co, int *pr, int *qy) { *dv = g_ndev; *co = g_ncoop; *pr = g_nprop; *qy = g_nqry; return 1; }
-void *plat_di_create(void *hinst, uint32_t version) { (void)hinst; (void)version; return FAIL(0) ? NULL : tok(); }
-void *plat_di_create_sys_device(void *di, int kind) { (void)kind; if (!di || FAIL(1)) return NULL; g_ndev++; return tok(); }
+void *plat_di_create(void *hinst, uint32_t version) { (void)hinst; RE_LOGD(input, "DirectInputCreate(версия 0x%x)%s", version, FAIL(0) ? " — отказ (тест)" : ""); return FAIL(0) ? NULL : tok(); }
+void *plat_di_create_sys_device(void *di, int kind) { RE_LOGD(input, "DirectInput: системное устройство %s%s", kind ? "мышь" : "клавиатура", (!di || FAIL(1)) ? " — отказ" : ""); if (!di || FAIL(1)) return NULL; g_ndev++; return tok(); }
 void *plat_di_create_device(void *di, const void *guid) { if (!di || !guid || FAIL(2)) return NULL; g_ndev++; return tok(); }
 void *plat_di_query_device2(void *dev) { if (!dev || FAIL(3)) return NULL; g_nqry++; return tok(); }
 int32_t plat_di_set_coop(void *dev, void *hwnd, uint32_t flags) { (void)hwnd; (void)flags; if (!dev || FAIL(4)) return -1; g_ncoop++; return 0; }
@@ -159,20 +159,22 @@ static void script_load(void) {
     const char *s = getenv("RE_KEYS"); if (!s) return;
     char buf[4096]; snprintf(buf, sizeof buf, "%s", s);
     for (char *tk = strtok(buf, ", "); tk && g_nscr < MAX_SCRIPT; tk = strtok(NULL, ", ")) {
-        char *c = strchr(tk, ':'); if (!c) { fprintf(stderr, "[keys] RE_KEYS: пропуск «%s» (нужно кадр:клавиша)\n", tk); continue; }
+        char *c = strchr(tk, ':'); if (!c) { RE_LOGW(input, "RE_KEYS: пропуск «%s» (нужно кадр:клавиша)", tk); fprintf(stderr, "[keys] RE_KEYS: пропуск «%s» (нужно кадр:клавиша)\n", tk); continue; }
         *c = 0; char *c2 = strchr(c + 1, ':'); int hold = 0; if (c2) { *c2 = 0; hold = atoi(c2 + 1); }
         int d = plat_key_dik(c + 1);
-        if (d < 0) { fprintf(stderr, "[keys] RE_KEYS: неизвестная клавиша «%s»\n", c + 1); continue; }
+        if (d < 0) { RE_LOGW(input, "RE_KEYS: неизвестная клавиша «%s»", c + 1); fprintf(stderr, "[keys] RE_KEYS: неизвестная клавиша «%s»\n", c + 1); continue; }
         g_scr[g_nscr].frame = atoi(tk); g_scr[g_nscr].hold = hold; g_scr[g_nscr].dik = (uint8_t)d; g_scr[g_nscr].logged = 0; g_nscr++;
     }
     fprintf(stderr, "[keys] сценарий RE_KEYS: %d нажатий, удержание %d кадр.\n", g_nscr, g_hold);
+    RE_LOGI(input, "сценарий RE_KEYS: %d нажатий, удержание %d кадр.", g_nscr, g_hold);
 }
 /* v2.30: отладка — нажатие через rel кадров от текущего (RE_AUTOCONT: выбор Continue после итога миссии); 0 — принято */
 /* plat_keys_push — Debug: queue a key press `rel` frames from now.  Returns 0, or -1 for an unknown key / full script. */
 int plat_keys_push(int rel, const char *name) {
     if (g_nscr < 0) script_load();
     int d = plat_key_dik(name);
-    if (d < 0 || g_nscr >= MAX_SCRIPT) return -1;
+    if (d < 0 || g_nscr >= MAX_SCRIPT) { RE_LOGW(input, "plat_keys_push(%d, %s): %s", rel, name ? name : "-", d < 0 ? "неизвестная клавиша" : "сценарий полон"); return -1; }
+    RE_LOGD(input, "клавиша %s (DIK 0x%02x) в очередь на кадр %d", name, d, plat_frame_no() + rel);
     g_scr[g_nscr].frame = plat_frame_no() + rel; g_scr[g_nscr].hold = 0; g_scr[g_nscr].dik = (uint8_t)d; g_scr[g_nscr].logged = 0; g_nscr++;
     return 0;
 }
@@ -197,6 +199,7 @@ static void gamepad_close(void) {
         gamepad_stop_rumble();
         re_diag_log("Gamepad disconnected: %s\n", SDL_GameControllerName(g_pad));
         fprintf(stderr, "[gamepad] disconnected: %s\n", SDL_GameControllerName(g_pad));
+        RE_LOGI(input, "геймпад отключён: %s", SDL_GameControllerName(g_pad) ? SDL_GameControllerName(g_pad) : "?");
         SDL_GameControllerClose(g_pad); g_pad = NULL;
     }
     g_pad_latch = g_pad_blocked = 0; g_pad_menu = -1; g_rumble_failed = 0;
@@ -206,11 +209,20 @@ static void gamepad_close(void) {
 void plat_input_pad_event(const void *event) {
     const SDL_Event *e = event;
     if (e->type == SDL_WINDOWEVENT) {
+        if (e->window.event == SDL_WINDOWEVENT_FOCUS_LOST || e->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+            RE_LOGD(input, "окно %s фокус ввода", e->window.event == SDL_WINDOWEVENT_FOCUS_GAINED ? "получило" : "потеряло");
         if (e->window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
             g_pad_focus = 0; g_pad_latch = 0; gamepad_stop_rumble();
         }
         if (e->window.event == SDL_WINDOWEVENT_FOCUS_GAINED) g_pad_focus = 1;
     }
+    if (e->type == SDL_CONTROLLERDEVICEADDED || e->type == SDL_CONTROLLERDEVICEREMOVED)   /* v2.37: подключение/отключение */
+        RE_LOGI(input, "SDL: геймпад %s (индекс/экземпляр %d)%s", e->type == SDL_CONTROLLERDEVICEADDED ? "подключён" : "отключён", (int)e->cdevice.which,
+                e->type == SDL_CONTROLLERDEVICEADDED && SDL_IsGameController(e->cdevice.which) && SDL_GameControllerNameForIndex(e->cdevice.which) ? SDL_GameControllerNameForIndex(e->cdevice.which) : "");
+    else if (e->type == SDL_JOYDEVICEADDED || e->type == SDL_JOYDEVICEREMOVED)
+        RE_LOGD(input, "SDL: джойстик %s (индекс/экземпляр %d)", e->type == SDL_JOYDEVICEADDED ? "подключён" : "отключён", (int)e->jdevice.which);
+    else if (e->type == SDL_CONTROLLERBUTTONDOWN || e->type == SDL_CONTROLLERBUTTONUP)
+        RE_LOGT(input, "геймпад: кнопка %d %s", e->cbutton.button, e->type == SDL_CONTROLLERBUTTONDOWN ? "нажата" : "отпущена");
     if (g_in_on && g_pad_focus && g_pad && e->type == SDL_CONTROLLERBUTTONDOWN &&
         e->cbutton.which == SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(g_pad)) && e->cbutton.button < 32)
         g_pad_latch |= 1u << e->cbutton.button;
@@ -227,6 +239,7 @@ static int gamepad_ready(void) {
         SDL_SetHint(SDL_HINT_JOYSTICK_HIDAPI_STEAM, "1");
         if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) != 0) {
             g_pad_init_failed = 1;
+            RE_LOGW(input, "геймпад: SDL_InitSubSystem(GAMECONTROLLER): %s — геймпады отключены", SDL_GetError());
             fprintf(stderr, "[gamepad] initialization failed: %s\n", SDL_GetError()); return 0;
         }
         /* v2.32: какая библиотека SDL реально загружена (sdl2-compat нумеруется с 2.32.50) —
@@ -237,6 +250,7 @@ static int gamepad_ready(void) {
                 compat ? "sdl2-compat/SDL3" : "SDL2 Classic", SDL_GetRevision());
         re_diag_log("Gamepad SDL library: %d.%d.%d %s (%s)\n", v.major, v.minor, v.patch,
                     compat ? "sdl2-compat" : "classic", SDL_GetRevision());
+        RE_LOGI(input, "геймпады: SDL %d.%d.%d (%s), джойстиков сейчас %d", v.major, v.minor, v.patch, compat ? "sdl2-compat/SDL3" : "SDL2 Classic", SDL_NumJoysticks());
     }
     SDL_GameControllerUpdate();
     if (g_pad && !SDL_GameControllerGetAttached(g_pad)) gamepad_close();
@@ -246,7 +260,28 @@ static int gamepad_ready(void) {
                 SDL_GameControllerGetVendor(g_pad), SDL_GameControllerGetProduct(g_pad));
         re_diag_log("Gamepad connected: %s vendor=%04x product=%04x\n", SDL_GameControllerName(g_pad),
                     SDL_GameControllerGetVendor(g_pad), SDL_GameControllerGetProduct(g_pad));
+        {   /* v2.37: тип контроллера и вибрация */
+            const char *ty = "?";
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+            switch (SDL_GameControllerGetType(g_pad)) {
+            case SDL_CONTROLLER_TYPE_XBOX360: ty = "Xbox 360"; break; case SDL_CONTROLLER_TYPE_XBOXONE: ty = "Xbox One/Series"; break;
+            case SDL_CONTROLLER_TYPE_PS3: ty = "PS3"; break; case SDL_CONTROLLER_TYPE_PS4: ty = "PS4"; break;
+            case SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO: ty = "Switch Pro"; break;
+#if SDL_VERSION_ATLEAST(2, 0, 14)
+            case SDL_CONTROLLER_TYPE_PS5: ty = "PS5"; break; case SDL_CONTROLLER_TYPE_VIRTUAL: ty = "виртуальный"; break;
+#endif
+            default: ty = "другой/неизвестный"; break;
+            }
+#endif
+            int rumble = -1;
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+            rumble = SDL_GameControllerHasRumble(g_pad) ? 1 : 0;
+#endif
+            RE_LOGI(input, "геймпад подключён: %s (%04x:%04x), тип %s, вибрация %s, индекс %d", SDL_GameControllerName(g_pad) ? SDL_GameControllerName(g_pad) : "?",
+                    SDL_GameControllerGetVendor(g_pad), SDL_GameControllerGetProduct(g_pad), ty, rumble < 0 ? "?" : rumble ? "есть" : "нет", j);
+        }
         char *mapping = SDL_GameControllerMapping(g_pad);
+        RE_LOGD(input, "геймпад: раскладка SDL %s", mapping ? mapping : "-");
         plat_input_dbg("gamepad %s mapping=%s", SDL_GameControllerName(g_pad), mapping ? mapping : "-");
         SDL_free(mapping); break;
     }
@@ -271,6 +306,7 @@ int plat_gamepad_damage(int damage) {
     if (SDL_GameControllerRumble(g_pad, low, high, duration) != 0) {
         g_rumble_failed = 1;
         re_diag_log("Gamepad rumble unavailable: %s (%s)\n", SDL_GameControllerName(g_pad), SDL_GetError());
+        RE_LOGW(input, "геймпад: вибрация недоступна (%s): %s", SDL_GameControllerName(g_pad) ? SDL_GameControllerName(g_pad) : "?", SDL_GetError());
         plat_input_dbg("gamepad rumble unavailable: %s", SDL_GetError());
         return -1;
     }
@@ -340,6 +376,7 @@ static uint8_t g_latch[256];
 void plat_input_key_event(int scancode, int down, int repeat) {
     if (!g_in_on || !down || repeat) return;
     uint8_t d = sc_to_dik((SDL_Scancode)scancode);
+    RE_LOGT(input, "клавиша: scancode %d (%s) → DIK 0x%02x%s", scancode, SDL_GetScancodeName((SDL_Scancode)scancode), d, d ? "" : " (игре не передаётся)");
     if (d) g_latch[d] = 1;
 }
 /* plat_input_fill_keys — Build the 256 DIK bytes the game sees: autopilot keys, RE_KEYS script, latched taps, current
@@ -414,6 +451,7 @@ static FILE *idbg(void) {
 }
 /* plat_input_dbg — printf-style line to driver_input.log with time and frame number (no-op when disabled). */
 void plat_input_dbg(const char *fmt, ...) {
+    if (RE_LOG_ON(input, RE_LV_DEBUG)) { va_list b; va_start(b, fmt); re_logv(RE_LC_input, RE_LV_DEBUG, fmt, b); va_end(b); }   /* v2.37: копия в RE_LOG input */
     FILE *f = idbg(); if (!f) return;
     va_list a; va_start(a, fmt);
     fprintf(f, "[%6u ms, кадр %d] ", SDL_GetTicks(), plat_frame_no()); vfprintf(f, fmt, a); fputc('\n', f); fflush(f);

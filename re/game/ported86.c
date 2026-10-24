@@ -290,6 +290,7 @@ static int texpack_try(int32_t slot, const uint16_t *page) {
   re_texpack_compare(hd, w, h, page, &err, &am);
   if (err > re_texpack_last_tol() || am > RE_TEXPACK_MAX_AMIS) {
     plat_log("[texpack] %s/p%03d.png отклонён: не похож на страницу %d (ошибка %.1f, альфа %.2f%%)\n", lv, (int)slot, (int)slot, err, am * 100.0);
+    RE_LOGW(load, "HD-пак: %s/p%03d.png отклонён — ошибка %.1f (порог %.1f), расхождение альфы %.2f%%", lv, (int)slot, err, re_texpack_last_tol(), am * 100.0);
     free(hd); P86_TexpackRejected++; return 0;
   }
   if (g_tex[slot]) plat_tex_free(g_tex[slot]);
@@ -314,6 +315,7 @@ static int pal8_hd(int slot, int pal, const uint32_t *px) {
   int t = 0;
   if (err > re_texpack_last_tol() || am > RE_TEXPACK_MAX_AMIS) {
     plat_log("[texpack] %s/p%03d_c%04d.png отклонён: не похож на страницу %d с палитрой %d (ошибка %.1f, альфа %.2f%%)\n", lv, slot, pal, slot, pal, err, am * 100.0);
+    RE_LOGW(load, "HD-пак: %s/p%03d_c%04d.png отклонён — ошибка %.1f (порог %.1f), расхождение альфы %.2f%%", lv, slot, pal, err, re_texpack_last_tol(), am * 100.0);
     P86_TexpackRejected++; g_miss8[slot][pal] = 1;
   } else if ((t = plat_tex_create(w, h, hd))) {
     g_ptex[slot][pal] = t; g_ptexw[slot][pal] = w; P86_TexpackN++; P86_Texpack8N++; P86_Pal8Tex++;
@@ -353,8 +355,11 @@ static int pal8_handle(int slot, int pal) {
 /* P86_NativeCaptureEnd — logs the texture-pack summary after a level's pages are loaded. */
 void P86_NativeCaptureEnd(void) {
   const char *dir = re_texpack_dir();
-  if (!dir) return;
+  if (!dir) { RE_LOGD(load, "HD-пак не задан (RE_TEXPACK / texpack в driver.cfg) — оригинальные текстуры уровня %s", P77_CurLevelPath); return; }
   char lv[128]; re_texpack_level_name(P77_CurLevelPath, lv, sizeof lv);
+  { int a = 0, u = 0, r = 0, p8 = 0; plat_dd_hd_stats(&a, &u, &r, &p8);
+    RE_LOGI(load, "HD-пак %s/%s: %s; страниц применено %d (8-бит пар %d), отклонено %d; путь игры: прикреплено %d, в GL %d, отклонено при сверке %d, PAL8-привязок %d",
+            dir, lv, game_path() ? "подмена при загрузке в GL" : "подмена при загрузке страниц", (int)P86_TexpackN, (int)P86_Texpack8N, (int)P86_TexpackRejected, a, u, r, p8); }
   if (game_path()) plat_log("[texpack] игра: HD-пак %s/%s — страницы подменяются при загрузке в GL (сверка с памятью поверхности)\n", dir, lv);
   else plat_log("[texpack] загружено %d страниц, из них 8-битных пар (страница, палитра) %d (%s/%s, отклонено %d)\n", (int)P86_TexpackN, (int)P86_Texpack8N, dir, lv, (int)P86_TexpackRejected);
 }

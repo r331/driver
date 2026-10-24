@@ -123,13 +123,14 @@ static void grd40(int32_t v) { if (P98_GrD40) P98_GrD40(v); }
 int32_t P133_LoadConfig(void) {
   if (P58_CfgOn == 0 || P58_CfgLock != 0) return 1;
   void *f = g_fopen("config.dat", "rb");
-  if (f == NULL) { P95_DefaultOptions(); return 0; }
+  if (f == NULL) { RE_LOGI(save, "config.dat нет — настройки по умолчанию"); P95_DefaultOptions(); return 0; }
   P58_CfgHdr[0] = 0; P58_CfgHdr[1] = 0;
   g_fread(P58_CfgHdr, 1, 8, f);
-  if (P58_CfgHdr[0] != 0x93587031u) { g_fclose(f); P95_DefaultOptions(); return 0; }
+  if (P58_CfgHdr[0] != 0x93587031u) { RE_LOGW(save, "config.dat: неверная подпись 0x%08x — настройки по умолчанию", (unsigned)P58_CfgHdr[0]); g_fclose(f); P95_DefaultOptions(); return 0; }
   g_fread(P58_Cfg, 1, 0x10c, f);
   g_fclose(f);
-  if (SumBytes(P58_Cfg, 0x10c) != (int32_t)P58_CfgHdr[1]) { P95_DefaultOptions(); return 0; }
+  if (SumBytes(P58_Cfg, 0x10c) != (int32_t)P58_CfgHdr[1]) { RE_LOGW(save, "config.dat: контрольная сумма не сошлась — настройки по умолчанию"); P95_DefaultOptions(); return 0; }
+  RE_LOGD(save, "config.dat прочитан");
   uint32_t c[0x43]; memcpy(c, P58_Cfg, sizeof c);
   P55_V57B6FC = (int32_t)c[0];
   P95_ModeSel = (int32_t)c[1];

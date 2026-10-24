@@ -29,6 +29,8 @@
    software mixer (plat_dsmix.c) before its soft limiter.  v2.33 adds optional PlayStation-style dynamic
    music for tracks 4..7 (dynamic/ set: city x day/night x drive/chase). */
 #include "../plat.h"
+/* v2.37: сообщения [cd]/[music] — в stderr, как раньше, и в канал RE_LOG audio */
+#define cd_say(lv, ...) do { fprintf(stderr, __VA_ARGS__); RE_LOG_AT(audio, lv, __VA_ARGS__); } while (0)
 #include "plat_cdaudio.h"
 #include "plat_gfx.h"
 #include "plat_texpack.h"
@@ -379,7 +381,7 @@ static void scan(void) {
   }
   for (int n = 1; n < MAXT; n++) {   /* длины файлов дорожек */
     trk_t *t = &g_trk[n]; if (!t->kind) continue;
-    src_t s; if (src_open(&s, t, n) || s.frames <= 0) { fprintf(stderr, "[cd] %s: не читается (%s) — пропущен\n", t->path, kname(t->kind)); if (!src_open(&s, t, n)) src_close(&s); t->kind = 0; continue; }
+    src_t s; if (src_open(&s, t, n) || s.frames <= 0) { cd_say(RE_LV_WARN, "[cd] %s: не читается (%s) — пропущен\n", t->path, kname(t->kind)); if (!src_open(&s, t, n)) src_close(&s); t->kind = 0; continue; }
     t->frames = s.frames; t->rate = s.rate; t->ch = s.ch; src_close(&s);
     t->frames44 = (int64_t)((double)t->frames * OUT_RATE / t->rate);
   }
@@ -388,20 +390,20 @@ static void scan(void) {
     if (f) { fseek(f, 0, SEEK_END); sz = ftell(f); fseek(f, 0, SEEK_SET); txt = (char *)malloc((size_t)sz + 1); if (txt) { sz = (long)fread(txt, 1, (size_t)sz, f); txt[sz] = 0; } fclose(f); }
     static cda_cue c;
     int r = txt ? cda_cue_parse(txt, &c) : -1; free(txt);
-    if (r) fprintf(stderr, "[cd] %s: ошибка разбора (%d) — не используется\n", g_cue, r);
+    if (r) cd_say(RE_LV_WARN, "[cd] %s: ошибка разбора (%d) — не используется\n", g_cue, r);
     else {
       char cdir[1024]; snprintf(cdir, sizeof cdir, "%s", g_cue); char *sl2 = strrchr(cdir, '/'); if (sl2) *sl2 = 0; else snprintf(cdir, sizeof cdir, ".");
       static char fpath[CDA_CUE_MAX][1024]; int64_t fbytes[CDA_CUE_MAX], foff[CDA_CUE_MAX];
       for (int i = 0; i < c.nfiles; i++) {
         fbytes[i] = -1; foff[i] = 0;
-        if (find_ci(cdir, c.files[i], fpath[i], sizeof fpath[i])) { fprintf(stderr, "[cd] %s: нет файла '%s'\n", g_cue, c.files[i]); continue; }
+        if (find_ci(cdir, c.files[i], fpath[i], sizeof fpath[i])) { cd_say(RE_LV_WARN, "[cd] %s: нет файла '%s'\n", g_cue, c.files[i]); continue; }
         if (c.ftype[i] == 2) {
           FILE *w = fopen(fpath[i], "rb"); int rate = 0, ch = 0, bits = 0; int64_t off = 0, bytes = 0;
           if (w && !wav_probe(w, &rate, &ch, &bits, &off, &bytes) && rate == OUT_RATE && ch == 2 && bits == 16) { fbytes[i] = bytes; foff[i] = off; }
-          else fprintf(stderr, "[cd] %s: '%s' — WAVE не 44100 Гц/стерео/16 бит\n", g_cue, c.files[i]);
+          else cd_say(RE_LV_WARN, "[cd] %s: '%s' — WAVE не 44100 Гц/стерео/16 бит\n", g_cue, c.files[i]);
           if (w) fclose(w);
         } else if (c.ftype[i] >= 0) fbytes[i] = fsize(fpath[i]);
-        else fprintf(stderr, "[cd] %s: тип файла '%s' не поддержан (нужен BINARY/MOTOROLA/WAVE)\n", g_cue, c.files[i]);
+        else cd_say(RE_LV_WARN, "[cd] %s: тип файла '%s' не поддержан (нужен BINARY/MOTOROLA/WAVE)\n", g_cue, c.files[i]);
       }
       cda_cue_resolve(&c, fbytes);
       for (int i = 0; i < c.ntracks; i++) {
@@ -426,7 +428,7 @@ static void scan(void) {
   for (int n = 2; n <= g_ntracks && o < (int)sizeof sum - 32; n++)
     o += snprintf(sum + o, sizeof sum - (size_t)o, " %d=%s", n, kname(g_trk[n].kind));
   const char *m = envs("RE_MUSIC_STUB");
-  fprintf(stderr, "[cd] эмуляция CD-audio: каталог '%s' (%s)%s%s, дорожек %d:%s; заглушка — %s, %.0f с\n", dir, g_dir_why,
+  cd_say(RE_LV_INFO, "[cd] эмуляция CD-audio: каталог '%s' (%s)%s%s, дорожек %d:%s; заглушка — %s, %.0f с\n", dir, g_dir_why,
           g_cue[0] ? ", cue " : "", g_cue[0] ? g_cue : "", g_ntracks, sum, m && !strcmp(m, "tone") ? "тон" : "тишина", g_stub_len);
 }
 int cda_track_source(int track, const char **path, int64_t *frames44) {
@@ -538,19 +540,19 @@ static void dyn_scan(const char *dir) {
   if (d) { while ((e = readdir(d))) { char lo[256]; lower(lo, e->d_name, sizeof lo); int s = cda_dyn_classify(e->d_name, 0), k = ext_kind(lo); if (s >= 0 && k) dyn_add(s, dir, e->d_name, k, 1); } closedir(d); }
   for (int i = 0; i < CDA_DYN_N; i++) {
     trk_t *t = &g_dyn[i]; if (!t->kind) continue;
-    src_t s; if (src_open(&s, t, 0) || s.frames <= 0) { fprintf(stderr, "[music] %s: не читается (%s) — пропущен\n", t->path, kname(t->kind)); if (!src_open(&s, t, 0)) src_close(&s); t->kind = 0; continue; }
+    src_t s; if (src_open(&s, t, 0) || s.frames <= 0) { cd_say(RE_LV_WARN, "[music] %s: не читается (%s) — пропущен\n", t->path, kname(t->kind)); if (!src_open(&s, t, 0)) src_close(&s); t->kind = 0; continue; }
     t->frames = s.frames; t->rate = s.rate; t->ch = s.ch; src_close(&s);
     t->frames44 = (int64_t)((double)t->frames * OUT_RATE / t->rate);
     g_dyn_nfound++;
   }
   if (!g_dyn_nfound) return;
-  fprintf(stderr, "[music] динамический набор: %d из 16 (%s%s%s)\n", g_dyn_nfound, g_dyn_dir[0] ? g_dyn_dir : dir, g_dyn_dir[0] ? "" : ", по именам", "");
+  cd_say(RE_LV_INFO, "[music] динамический набор: %d из 16 (%s%s%s)\n", g_dyn_nfound, g_dyn_dir[0] ? g_dyn_dir : dir, g_dyn_dir[0] ? "" : ", по именам", "");
   for (int c = 0; c < 4; c++) {
     char b[1200]; int o = snprintf(b, sizeof b, "[music]   %s:", k_dyn_city[c]);
     for (int k = 0; k < 4; k++) { const trk_t *t = &g_dyn[c * 4 + k]; const char *bn = t->kind ? strrchr(t->path, '/') : NULL;
       o += snprintf(b + o, sizeof b - (size_t)(o < (int)sizeof b ? o : (int)sizeof b - 1), " %s=%s%s", k_dyn_kind[k], t->kind ? "" : "—", t->kind ? (bn ? bn + 1 : t->path) : "");
       if (o >= (int)sizeof b) break; }
-    fprintf(stderr, "%s\n", b);
+    cd_say(RE_LV_INFO, "%s\n", b);
   }
 }
 int cda_dyn_source(int slot, const char **path, int64_t *frames44) {
@@ -598,7 +600,7 @@ static double envd(const char *n, double def, double lo, double hi) {
 }
 static int dv_open(dvoice_t *v, int slot) {
   memset(v, 0, sizeof *v);
-  if (src_open(&v->s, &g_dyn[slot], 0)) { fprintf(stderr, "[music] '%s' не открылся\n", g_dyn[slot].path); return -1; }
+  if (src_open(&v->s, &g_dyn[slot], 0)) { cd_say(RE_LV_WARN, "[music] '%s' не открылся\n", g_dyn[slot].path); return -1; }
   v->used = 1; v->slot = slot; v->step = (double)v->s.rate / OUT_RATE; v->loop44 = g_dyn[slot].frames44;
   src_next(&v->s, v->f0); src_next(&v->s, v->f1);
   return 0;
@@ -622,7 +624,7 @@ static int dyn_open_pair(int city, int night, dvoice_t *out, int *sync) {
     if (*sync) out[0].loop44 = out[1].loop44 = a < b ? a : b;
   }
   const char *bd = strrchr(g_dyn[sd].path, '/'), *bc = out[1].used ? strrchr(g_dyn[sc].path, '/') : NULL;
-  fprintf(stderr, "[music] %s, %s: Drive = %s (%s)%s, Chase = %s%s%s\n", k_dyn_city[city], night ? "ночь" : "день",
+  cd_say(RE_LV_INFO, "[music] %s, %s: Drive = %s (%s)%s, Chase = %s%s%s\n", k_dyn_city[city], night ? "ночь" : "день",
           bd ? bd + 1 : g_dyn[sd].path, k_dyn_kind[sd & 3], (sd & 3) != (night ? 2 : 0) ? " — замена" : "",
           out[1].used ? (bc ? bc + 1 : g_dyn[sc].path) : "нет (играет Drive)",
           out[1].used && (sc & 3) != (night ? 3 : 1) ? " — замена" : "",
@@ -657,7 +659,7 @@ static int dyn_start(void *hwnd, int track) {
   g_d.on = 1;
   g_p.track = track; g_p.pos44 = 0; g_p.end44 = INT64_MAX / 2; g_p.notify = 0; g_p.hwnd = hwnd; g_p.on = 1;
   plat_snd_lockdev(0);
-  fprintf(stderr, "[cd] MCI_PLAY: дорожка %d → динамический набор (%s), старт — %s\n", track, k_dyn_city[city], g_d.ctl.chase_on ? "Chase" : "Drive");
+  cd_say(RE_LV_INFO, "[cd] MCI_PLAY: дорожка %d → динамический набор (%s), старт — %s\n", track, k_dyn_city[city], g_d.ctl.chase_on ? "Chase" : "Drive");
   return 1;
 }
 /* смена дня/ночи во время уровня (рассвет/закат миссии): новая пара с нуля, старая уходит кроссфейдом */
@@ -675,7 +677,7 @@ static void dyn_swap_night(int night) {
   g_d.night = night; g_d.sync = sync;
   plat_snd_lockdev(0);
   dv_close(&old[0]); dv_close(&old[1]);
-  fprintf(stderr, "[music] смена времени суток → %s (кроссфейд %.2g с)\n", night ? "ночь" : "день", (double)g_d.fade44 / OUT_RATE);
+  cd_say(RE_LV_INFO, "[music] смена времени суток → %s (кроссфейд %.2g с)\n", night ? "ночь" : "день", (double)g_d.fade44 / OUT_RATE);
 }
 /* смешивание набора (под блокировкой устройства, из cda_mix) */
 static void dyn_mix(float *acc, int frames, float gl, float gr) {
@@ -718,8 +720,8 @@ void plat_music_hint(int night, int chase) {
   plat_snd_lockdev(0);
   if (ev != g_d.ev_shown) {
     g_d.ev_shown = ev;
-    if (st) fprintf(stderr, "[music] → Chase (погоня), кроссфейд %.2g с; звук набора %.1f с\n", (double)g_d.fade44 / OUT_RATE, (double)clk / OUT_RATE);
-    else fprintf(stderr, "[music] → Drive (погони нет %.1f с), кроссфейд %.2g с; звук набора %.1f с\n", (double)g_d.ctl.hold44 / OUT_RATE, (double)g_d.fade44 / OUT_RATE, (double)clk / OUT_RATE);
+    if (st) cd_say(RE_LV_INFO, "[music] → Chase (погоня), кроссфейд %.2g с; звук набора %.1f с\n", (double)g_d.fade44 / OUT_RATE, (double)clk / OUT_RATE);
+    else cd_say(RE_LV_INFO, "[music] → Drive (погони нет %.1f с), кроссфейд %.2g с; звук набора %.1f с\n", (double)g_d.ctl.hold44 / OUT_RATE, (double)g_d.fade44 / OUT_RATE, (double)clk / OUT_RATE);
   }
   if (g_hint_night != g_d.night) {   /* смена дня/ночи — если держится 3 с звука */
     if (g_d.pend_night != g_hint_night) { g_d.pend_night = g_hint_night; g_d.pend_since = clk; }
@@ -781,7 +783,7 @@ int plat_cd_take_notify(void **hwnd, uint32_t *wp, int32_t *lp) {
   if (hwnd) *hwnd = h;
   if (wp) *wp = 1;        /* MCI_NOTIFY_SUCCESSFUL */
   if (lp) *lp = 1;        /* id устройства MCI */
-  fprintf(stderr, "[cd] дорожка %d закончилась → MM_MCINOTIFY(SUCCESSFUL)\n", g_p.track);
+  cd_say(RE_LV_INFO, "[cd] дорожка %d закончилась → MM_MCINOTIFY(SUCCESSFUL)\n", g_p.track);
   return 1;
 }
 
@@ -794,9 +796,10 @@ int plat_cd_open(void *hwnd) {
   (void)hwnd;
   if (g_test) { if (g_cdn <= 0) return 0; g_open = 1; return 1; }
   const char *m = envs("RE_MUSIC");
-  if (m && (!strcmp(m, "off") || !strcmp(m, "0"))) return 0;
+  if (m && (!strcmp(m, "off") || !strcmp(m, "0"))) { RE_LOGI(audio, "CD-audio: RE_MUSIC=%s — привод «не открыт», музыки нет", m); return 0; }
   if (!g_scanned) scan();
   g_open = 1;
+  RE_LOGD(audio, "CD-audio: MCI open, дорожек %d", g_ntracks);
   return 1;
 }
 static void stop_play(void) {
@@ -834,14 +837,14 @@ static int64_t end_of(int track, uint32_t to) {
     return e < len ? e : len;
   }
   static int warned;
-  if (!warned) { warned = 1; fprintf(stderr, "[cd] MCI_TO %08x вне дорожки %d: переход через границу дорожек не эмулируется — до конца дорожки\n", (unsigned)to, track); }
+  if (!warned) { warned = 1; cd_say(RE_LV_WARN, "[cd] MCI_TO %08x вне дорожки %d: переход через границу дорожек не эмулируется — до конца дорожки\n", (unsigned)to, track); }
   return len;
 }
 static int start_at(void *hwnd, int track, int64_t at44, int64_t end44, int notify, const char *why) {
   if (g_d.on) dyn_stop_all();   /* v2.33 */
   src_t ns;
   if (src_open(&ns, &g_trk[track], track)) {
-    fprintf(stderr, "[cd] дорожка %d: '%s' не открылась — заглушка\n", track, g_trk[track].path);
+    cd_say(RE_LV_WARN, "[cd] дорожка %d: '%s' не открылась — заглушка\n", track, g_trk[track].path);
     trk_t stub = g_trk[track]; stub.kind = 0; src_open(&ns, &stub, track);
   }
   src_seek(&ns, (int64_t)((double)at44 * ns.rate / OUT_RATE));
@@ -854,7 +857,7 @@ static int start_at(void *hwnd, int track, int64_t at44, int64_t end44, int noti
   plat_snd_lockdev(0);
   src_close(&old);
   int s0 = (int)(at44 / OUT_RATE), s1 = (int)(end44 / OUT_RATE);
-  fprintf(stderr, "[cd] %s: дорожка %d (%s%s%s) %d:%02d → %d:%02d%s\n", why, track, kname(g_trk[track].kind),
+  cd_say(RE_LV_INFO, "[cd] %s: дорожка %d (%s%s%s) %d:%02d → %d:%02d%s\n", why, track, kname(g_trk[track].kind),
           g_trk[track].kind ? " " : "", g_trk[track].kind ? g_trk[track].path : "", s0 / 60, s0 % 60, s1 / 60, s1 % 60, notify ? ", с уведомлением" : "");
   return 1;
 }
@@ -862,7 +865,7 @@ int plat_cd_play_range(void *hwnd, uint32_t from, uint32_t to) {
   if (g_test) { if (!g_open) return 0; g_cdfrom = from; g_cdto = to; g_tplay = 1; return 1; }
   if (!g_open) return 0;
   int track = (int)(from & 0xff);
-  if (track < 1 || track > g_ntracks) return 0;   /* MCIERR_OUTOFRANGE */
+  if (track < 1 || track > g_ntracks) { RE_LOGW(audio, "CD-audio MCI_PLAY: дорожка %d вне 1..%d (MCIERR_OUTOFRANGE)", track, g_ntracks); return 0; }   /* MCIERR_OUTOFRANGE */
   g_cdfrom = from; g_cdto = to;
   if (track >= 4 && track <= 7 && g_dyn_nfound && dyn_enabled() && dyn_start(hwnd, track)) return 1;   /* v2.33 */
   int64_t at = ((int64_t)((from >> 8) & 0xff) * 60 * 75 + (int64_t)((from >> 16) & 0xff) * 75 + (int64_t)(from >> 24)) * FR_PER_SECTOR;
@@ -876,7 +879,7 @@ int plat_cd_play_to(uint32_t to) {
   g_cdto = to;
   if (g_d.on) {   /* v2.33: набор — продолжить с того же места */
     plat_snd_lockdev(1); g_p.on = 1; plat_snd_lockdev(0);
-    fprintf(stderr, "[cd] MCI_PLAY (продолжить): дорожка %d — динамический набор\n", g_p.track);
+    cd_say(RE_LV_INFO, "[cd] MCI_PLAY (продолжить): дорожка %d — динамический набор\n", g_p.track);
     return 1;
   }
   if (!g_p.track || !g_p.s.frames) {   /* ещё ничего не играло — с начала первой звуковой (2) */
@@ -887,13 +890,13 @@ int plat_cd_play_to(uint32_t to) {
   g_p.end44 = end_of(g_p.track, to); g_p.notify = 0; g_p.on = g_p.pos44 < g_p.end44;
   int tr = g_p.track; int64_t at = g_p.pos44;
   plat_snd_lockdev(0);
-  fprintf(stderr, "[cd] MCI_PLAY (продолжить): дорожка %d с %d:%02d\n", tr, (int)(at / OUT_RATE) / 60, (int)(at / OUT_RATE) % 60);
+  cd_say(RE_LV_INFO, "[cd] MCI_PLAY (продолжить): дорожка %d с %d:%02d\n", tr, (int)(at / OUT_RATE) / 60, (int)(at / OUT_RATE) % 60);
   return 1;
 }
 void plat_cd_pause(void) {   /* MCI_STOP: позиция сохраняется, ожидание уведомления снимается (ABORTED игре не нужен) */
   if (g_test) { g_tplay = 0; return; }
   plat_snd_lockdev(1); int was = g_p.on; g_p.on = 0; g_p.notify = 0; plat_snd_lockdev(0);
-  if (was) fprintf(stderr, "[cd] MCI_STOP: дорожка %d\n", g_p.track);
+  if (was) cd_say(RE_LV_INFO, "[cd] MCI_STOP: дорожка %d\n", g_p.track);
 }
 int plat_aux_find_cd(void) { return g_test ? g_cdaux : 0; }
 void plat_aux_set_volume(int dev, uint32_t lr) {

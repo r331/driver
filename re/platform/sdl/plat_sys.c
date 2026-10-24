@@ -22,6 +22,7 @@
 #include <sys/stat.h>
 #include <limits.h>
 #include <time.h>
+#include <errno.h>
 int plat_frame_no(void);
 static SDL_Window *g_win; static SDL_GLContext g_gl;
 static void update_drawable(void);
@@ -66,14 +67,24 @@ static FILE *glog(void) {
     }
     return g_glog;
 }
+/* v2.37: копия строки журнала графики в RE_LOG render: «ошибка/ОТКАТ/нет функции/не готов/не собран/не создано/ВНИМАНИЕ» — warn,
+   остальное — info (строки пишутся при смене состояния, не покадрово) */
+static void gfx_to_relog(const char *fmt, va_list a) {
+    char b[1024]; vsnprintf(b, sizeof b, fmt, a);
+    static const char *const bad[] = { "ошибка", "ОШИБКА", "ОТКАТ", "нет функции", "не готов", "не собран", "не создан", "ВНИМАНИЕ", "недоступен", "не запущен" };
+    int lv = RE_LV_INFO;
+    for (unsigned i = 0; i < sizeof bad / sizeof bad[0]; i++) if (strstr(b, bad[i])) { lv = RE_LV_WARN; break; }
+    if (re_log_level_of[RE_LC_render] >= lv) re_log(RE_LC_render, lv, "%s", b);
+}
 void plat_gfx_logf(const char *fmt, ...) {   /* в stderr и в driver_gfx.log */
     va_list a; va_start(a, fmt); vfprintf(stderr, fmt, a); va_end(a);
+    if (RE_LOG_ON(render, RE_LV_WARN)) { va_start(a, fmt); gfx_to_relog(fmt, a); va_end(a); }
     va_start(a, fmt); re_diag_logv(fmt, a); va_end(a);
     FILE *f = glog(); if (!f) return;
     fprintf(f, "[%6u ms, кадр %d] ", SDL_WasInit(SDL_INIT_TIMER) ? SDL_GetTicks() : 0u, plat_frame_no());
     va_start(a, fmt); vfprintf(f, fmt, a); va_end(a); fflush(f);
 }
-void plat_gfx_err(const char *m) { plat_gfx_logf("[gfx] %s\n", m); }
+void plat_gfx_err(const char *m) { RE_LOGW(sys, "%s", m); plat_gfx_logf("[gfx] %s\n", m); }   /* v2.37: ошибки разбора driver.cfg — warn */
 static void swap_win(void){ SDL_GL_SwapWindow(g_win); fps_wait(); update_drawable(); }   /* v2.14: размер буфера мог измениться (окно, полный экран, Retina) */
 /* v2.08: RE_FIXED_DT=1 — виртуальное время для воспроизводимых прогонов: каждый вызов plat_time_ms +1 мс, каждый показанный
    кадр (plat_flip) — не меньше кадр·20 мс (такт логики P21_FrameTicks = 20 мс → один такт на кадр), plat_sleep_ms только
@@ -86,6 +97,7 @@ uint32_t plat_time_ms(void){ if (!plat_fixed_dt()) return SDL_GetTicks(); vt_adv
 void plat_vt_poll(void){ if (plat_fixed_dt()) vt_advance(g_vt + 1); }
 void plat_sleep_ms(uint32_t ms){ if (!plat_fixed_dt()) { SDL_Delay(ms); return; } vt_advance(g_vt + ms); }
 void plat_log(const char *f, ...){ va_list a; va_start(a,f); vfprintf(stderr,f,a); va_end(a);
+    if (RE_LOG_ON(sys, RE_LV_INFO)) { va_start(a,f); re_logv(RE_LC_sys, RE_LV_INFO, f, a); va_end(a); }   /* v2.37: копия в RE_LOG sys */
     va_start(a,f); re_diag_logv(f,a); va_end(a); }
 void *plat_file_open(const char *path, const char *mode){
     FILE *f = fopen(path, mode); if (f) return f;
@@ -143,6 +155,7 @@ void plat_input_dbg(const char *fmt, ...);   /* plat_di.c */
 void plat_toggle_fullscreen(void) {
     if (!g_win) return;
     g_fs_on = !g_fs_on;
+    RE_LOGI(render, "переключение: %s", g_fs_on ? "полный экран" : "окно");
     if (SDL_SetWindowFullscreen(g_win, g_fs_on ? fs_flag(g_fs_mode) : 0) != 0) plat_gfx_logf("[gfx] SDL_SetWindowFullscreen: %s\n", SDL_GetError());
     SDL_GL_MakeCurrent(g_win, g_gl);   /* v2.24: контекст — снова текущий после смены режима */
     update_drawable();
@@ -152,7 +165,8 @@ int plat_window_open(const char *t,int w,int h,int fs){
 #ifdef SDL_HINT_MAC_BACKGROUND_APP
     SDL_SetHint(SDL_HINT_MAC_BACKGROUND_APP, "0");     /* v2.14: обычное приложение с окном/Dock — получает клавиатуру */
 #endif
-    if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER)) return -1;
+    if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER)) { RE_LOGE(render, "SDL_Init(VIDEO|TIMER): %s", SDL_GetError()); return -1; }
+    RE_LOGI(render, "SDL видео: драйвер %s, дисплеев %d", SDL_GetCurrentVideoDriver() ? SDL_GetCurrentVideoDriver() : "-", SDL_GetNumVideoDisplays());
     /* v2.16: driver.cfg — RE_CFG, рядом с бинарником, затем каталог пользователя (macOS: ~/Library/Application Support/Driver,
        Linux: $XDG_CONFIG_HOME/driver или ~/.config/driver); переменные RE_* важнее файла */
     {   char ud[PATH_MAX] = ""; const char *home = getenv("HOME");
@@ -169,6 +183,11 @@ int plat_window_open(const char *t,int w,int h,int fs){
         if (bp) SDL_free(bp);
         if (errs) plat_log("[gfx] driver.cfg/RE_*: %d ошибок разбора (строки пропущены)\n", errs);
         const re_gfx_cfg *gc = re_gfx();
+        if (gc->log[0]) { int le = re_log_cfg(gc->log); if (le) plat_log("[log] driver.cfg log = %s: %d неразобранных элементов\n", gc->log, le); }   /* v2.37 */
+        if (RE_LOG_ON(sys, RE_LV_INFO)) { char d[2048];
+            RE_LOGI(sys, "driver.cfg: %s; каталог пользователя %s; ошибок разбора %d", gc->source[0] ? gc->source : "не найден (настройки по умолчанию + RE_*)", ud[0] ? ud : "-", errs);
+            RE_LOGI(sys, "настройки: %s", re_gfx_describe(gc, d, sizeof d));
+            RE_LOGI(sys, "RE_LOG: %s", gc->log[0] && !getenv("RE_LOG") ? "из driver.cfg (log = …)" : getenv("RE_LOG") ? "из переменной RE_LOG" : "выкл."); }
         if (gc->aspect[0] && !getenv("RE_ASPECT")) plat_render_set_aspect(gc->aspect);
     }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3); SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -201,6 +220,8 @@ int plat_window_open(const char *t,int w,int h,int fs){
         if (f && *f) { if (!strcmp(f, "exclusive")) { full = 1; g_fs_mode = 2; } else if (!strcmp(f, "desktop") || env_on("RE_FULLSCREEN")) { full = 1; g_fs_mode = 1; } else full = 0; }
     }
     g_fs_on = full;
+    RE_LOGI(render, "окно: %dx%d точек, %s, кадр игры %dx%d%s", ww, wh, full ? (g_fs_mode == 2 ? "полный экран (эксклюзивный)" : "полный экран (рабочий стол)") : "в окне", w, h,
+            res && *res ? " (RE_RES)" : "");
     if (g_fake_k > 1) plat_gfx_logf("[gfx] RE_FAKE_HIDPI=%d: окно %dx%d точек = %dx%d пикселей X11\n", g_fake_k, ww, wh, ww * g_fake_k, wh * g_fake_k);
     g_win = SDL_CreateWindow(t, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, ww * g_fake_k, wh * g_fake_k,
                              SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE | (full ? fs_flag(g_fs_mode) : 0));
@@ -235,6 +256,7 @@ int plat_message_box(void *hwnd,const char *text,const char *title,unsigned flag
     (void)hwnd; g_mb_count++;
     snprintf(g_mb_text,sizeof g_mb_text,"%s",text?text:""); snprintf(g_mb_title,sizeof g_mb_title,"%s",title?title:"");
     fprintf(stderr,"[%s] %s\n",g_mb_title,g_mb_text);
+    if((flags&0x10)) RE_LOGE(sys,"MessageBox «%s»: %s",g_mb_title,g_mb_text); else RE_LOGW(sys,"MessageBox «%s» (флаги 0x%x): %s",g_mb_title,flags,g_mb_text);
     if(!getenv("RE_NO_MSGBOX")) SDL_ShowSimpleMessageBox((flags&0x10)?SDL_MESSAGEBOX_ERROR:((flags&0x30)==0x30?SDL_MESSAGEBOX_WARNING:SDL_MESSAGEBOX_INFORMATION),g_mb_title,g_mb_text,g_win);
     return 1;
 }
@@ -261,7 +283,8 @@ static int g_exit_trap, g_exit_last, g_saver = 1;
 static void (*g_crash)(void);
 void plat_exit_trap(int on){ g_exit_trap=on; }
 int plat_exit_last(void){ return g_exit_last; }
-void plat_exit(int code){ g_exit_last=code; if(g_exit_trap) return; exit(code); }
+void plat_exit(int code){ g_exit_last=code; if(g_exit_trap) return;
+    RE_LOGI(sys,"plat_exit(%d): выход из игры (кадр %d)",code,plat_frame_no()); re_log_flush(); exit(code); }
 int plat_screensaver_get(void){ return g_saver; }
 void plat_screensaver_set(int on){
     g_saver = on?1:0;
@@ -282,6 +305,7 @@ void plat_screensaver_set(int on){
 /* v2.03: RE_CRASH_BT=1 — стек в stderr перед обработчиком игры (glibc backtrace; адреса — addr2line -f -e driver) */
 static void crash_sig(int sig, siginfo_t *si, void *uc){
     signal(sig,SIG_DFL);
+    re_log_crash(sig);   /* v2.37: строка и сброс RE_LOG (без блокировок) */
 #if defined(__GLIBC__) || defined(__APPLE__)
     if (getenv("RE_CRASH_BT") || getenv("RE_DIAG")) {
         void *bt[48]; int n = backtrace(bt, 48); uintptr_t pc = 0, lr = 0;
@@ -356,7 +380,7 @@ static void drain_events(void) {
         plat_input_pad_event(&e);
         if (e.type == SDL_QUIT) {
             g_wquit = 1;
-            if (!g_wtrap) { fprintf(stderr, "[window] закрытие окна — выход\n"); fflush(NULL); exit(0); }   /* v2.14: Cmd+Q / закрытие окна */
+            if (!g_wtrap) { fprintf(stderr, "[window] закрытие окна — выход\n"); RE_LOGI(sys, "SDL_QUIT (закрытие окна / Cmd+Q) — выход, кадр %d", plat_frame_no()); re_log_flush(); fflush(NULL); exit(0); }   /* v2.14: Cmd+Q / закрытие окна */
         } else if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP) {
             int sc = e.key.keysym.scancode, mod = e.key.keysym.mod;
             if (sc == SDL_SCANCODE_D && (mod & KMOD_SHIFT) && (mod & (KMOD_GUI | KMOD_CTRL))) {
@@ -422,7 +446,7 @@ static void flip_events(void) {   /* из plat_frame_tick("flip") */
     g_pumped = 0;
 }
 void plat_set_priority(int level){
-    g_wprio=level;
+    g_wprio=level; RE_LOGD(sys,"приоритет процесса игры: %d",level);
     SDL_SetThreadPriority(level>0?SDL_THREAD_PRIORITY_HIGH:SDL_THREAD_PRIORITY_NORMAL);
 }
 void plat_post_quit(int code){ (void)code; g_wquit=1; }
@@ -516,6 +540,13 @@ void *plat_fopen_game(const char *path, const char *mode) {
            Перевод в каталог или плоское имя ломает selftest (SIGSEGV позже в тестах — не выяснено, см. NATIVE_GAPS.md). */
         f = fopen(path, mode);
     }
+    /* v2.37: RE_LOG load — открытие файла игры: успех debug, ошибка warn (с errno) */
+    if (f) {   /* успех — debug; debug.log игры (2 открытия на строку) и сэмплы .WAV банков — trace, чтобы не забивать журнал */
+        size_t pl = strlen(path);
+        int bulk = !strcasecmp(path, "debug.log") || (pl > 4 && !strcasecmp(path + pl - 4, ".wav"));
+        if (bulk) RE_LOGT(load, "fopen «%s» (%s) -> %s", path, mode, np); else RE_LOGD(load, "fopen «%s» (%s) -> %s", path, mode, np);
+    }
+    else if (RE_LOG_ON(load, RE_LV_WARN)) { int en = errno; RE_LOGW(load, "fopen «%s» (%s) -> %s: %s", path, mode, np, strerror(en)); }
     return f;
 }
 
@@ -524,8 +555,10 @@ void *plat_fopen_game(const char *path, const char *mode) {
 int plat_remove_game(const char *path) {
     if (!path) return -1;
     char np[PATH_MAX]; plat_path_native(path, np, sizeof np);
-    if (remove(np) == 0) return 0;
-    return remove(path);   /* как раньше: путь как есть */
+    if (remove(np) == 0) { RE_LOGD(load, "удалён файл «%s» (%s)", path, np); return 0; }
+    int r = remove(path);   /* как раньше: путь как есть */
+    if (r == 0) RE_LOGD(load, "удалён файл «%s»", path); else RE_LOGD(load, "удаление «%s» (%s): %s", path, np, strerror(errno));
+    return r;
 }
 
 /* --- v2.00: кадры запуска игры: RE_MAX_FRAMES=N — после N-го plat_flip выход 0; RE_SHOT_PNG=путь — снимок кадра N
@@ -541,8 +574,8 @@ static void frame_shot(void) {
     if (!png || !*png || !g_win) return;
     SDL_GL_GetDrawableSize(g_win, &w, &h);
     if (w <= 0 || h <= 0) return;
-    uint32_t *px = malloc((size_t)w * h * 4); if (!px) return;
-    if (plat_render_readback(px) == 0 && png_write_rgba(png, px, w, h) == 0) { fprintf(stderr, "[frame] снимок %s (%dx%d), кадр %d\n", png, w, h, g_frames); g_shot_done = 1; }
+    uint32_t *px = malloc((size_t)w * h * 4); if (!px) { RE_LOGE(mem, "снимок RE_SHOT_PNG: malloc(%dx%dx4) — NULL", w, h); return; }
+    if (plat_render_readback(px) == 0 && png_write_rgba(png, px, w, h) == 0) { RE_LOGI(render, "снимок %s (%dx%d), кадр %d", png, w, h, g_frames); fprintf(stderr, "[frame] снимок %s (%dx%d), кадр %d\n", png, w, h, g_frames); g_shot_done = 1; }
     free(px);
 }
 /* v2.16: RE_FRAMESTAT=N — время кадра (стенные часы между plat_flip: логика игры + рендер + показ) с кадра N; итог при выходе */
@@ -582,7 +615,8 @@ void plat_frame_tick(const char *where) {
         flip_events();
         re_diag_frame(g_frames);
         if (plat_fixed_dt()) vt_advance((uint32_t)g_frames * 20u);   /* v2.08: RE_FIXED_DT */
-        if (g_frames == 1) fprintf(stderr, "[frame] первый кадр (plat_flip)\n");
+        if (g_frames == 1) { fprintf(stderr, "[frame] первый кадр (plat_flip)\n"); RE_LOGI(render, "первый кадр показан (plat_flip)"); }
+        RE_LOGT(render, "кадр %d показан", g_frames);
         { /* v2.20: RE_SHOT_EVERY=N [RE_SHOT_FROM=K] — серия снимков RE_SHOT_PNG без .png + _NNNNN.png каждые N кадров (с кадра K) */
           static int ev = -2, from = 0; if (ev == -2) { const char *e = getenv("RE_SHOT_EVERY"); ev = e ? atoi(e) : 0; e = getenv("RE_SHOT_FROM"); from = e ? atoi(e) : 0; }
           const char *png = getenv("RE_SHOT_PNG");
@@ -607,11 +641,14 @@ void plat_frame_tick(const char *where) {
             { extern void P86_NativeStatFlush(void); P86_NativeStatFlush(); }   /* v2.18: RE_TEXLOG перед _Exit */
             { int a = 0, u = 0, r = 0, p8 = 0; plat_dd_hd_stats(&a, &u, &r, &p8);
               if (a || p8) fprintf(stderr, "[texpack] игра: 16 бит — прикреплено %d, загрузок в GL %d, отклонено %d; PAL8 — привязок текстуры пары %d\n", a, u, r, p8); }
-            fprintf(stderr, "[frame] RE_MAX_FRAMES=%d достигнут — выход\n", maxf); fflush(NULL); _Exit(0);
+            fprintf(stderr, "[frame] RE_MAX_FRAMES=%d достигнут — выход\n", maxf);
+            { int a = 0, u = 0, r = 0, p8 = 0; plat_dd_hd_stats(&a, &u, &r, &p8);
+              RE_LOGI(render, "HD-пак за прогон: 16 бит — прикреплено %d, загрузок в GL %d, отклонено %d; PAL8 — привязок %d", a, u, r, p8); }
+            RE_LOGI(sys, "RE_MAX_FRAMES=%d достигнут (кадр %d) — выход", maxf, g_frames); re_log_shutdown("RE_MAX_FRAMES"); fflush(NULL); _Exit(0);
         }
     } else {
         g_pumps++;
         if (plat_fixed_dt()) vt_advance(g_vt + 1);   /* v2.08: цикл сообщений без кадров тоже двигает часы/таймеры */
-        if (maxp > 0 && g_pumps >= maxp) { fprintf(stderr, "[frame] RE_MAX_PUMPS=%d (кадров %d) — выход\n", maxp, g_frames); fflush(NULL); _Exit(0); }
+        if (maxp > 0 && g_pumps >= maxp) { fprintf(stderr, "[frame] RE_MAX_PUMPS=%d (кадров %d) — выход\n", maxp, g_frames); RE_LOGI(sys, "RE_MAX_PUMPS=%d (кадров %d) — выход", maxp, g_frames); re_log_shutdown("RE_MAX_PUMPS"); fflush(NULL); _Exit(0); }
     }
 }

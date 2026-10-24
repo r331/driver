@@ -26,7 +26,7 @@
 python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv')) if x['module']!='CRT']; print(sum(x['status']=='ported' for x in r), 'из', len(r))"
 ```
 
-**Native как игра — v2.36** (проверено сценариями `RE_KEYS` и настоящей клавиатурой X11 (xdotool) под Xvfb, Linux arm64; сборка, selftest и inputtest — на macOS arm64 в CI):
+**Native как игра — v2.37** (проверено сценариями `RE_KEYS` и настоящей клавиатурой X11 (xdotool) под Xvfb, Linux arm64; сборка, selftest и inputtest — на macOS arm64 в CI):
 - работает: заставки и главное меню, режим **Take A Ride** в Майами — езда по городу (стриминг блоков карты), трафик, столкновения, HUD (Damage/Felony, радар, спидометр);
 - управление машиной: газ, тормоз/задний ход, ручник, резкий руль, смена камеры (вид с капота), пауза по Esc с меню (Continue / Restart / Sound Setup / Gfx Details / Film Director / Quick Replay / Show Map / Exit) — см. «Управление»;
 - звук: DirectSound эмулируется собственным микшером (SDL_audio или запись в WAV), двигатель и шумы слышны, мягкий ограничитель — без клиппинга; музыка — эмуляция CD-audio (v2.22, дорожки из файлов вашего диска — см. «CD-музыка»);
@@ -46,6 +46,7 @@ python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv'))
 - v2.23: исправлен серый полигон поверх неба (чаще слева вверху) — плоские/гуро-полигоны ближнего набора отсекаются по z = 1, вершины за камерой больше не уходят в угол экрана;
 - v2.35: слиты все расщеплённые псевдонимы образа данных (осталось 0): у каждого адреса Game.exe в native один объект. Заработали проверки скрипта событий, которых раньше не было: «You lost your target» по удалению от цели (004f5012), освобождение списка событий между миссиями, продвижение скрипта у шести команд, пыль, подсветка пункта меню; Take A Ride и Survival не изменились (побайтно) — см. docs/NATIVE_GAPS.md «Исправлено в v2.35»;
 - v2.36: секундомер интервью в гараже (циферблат и корпус) и цифры часов миссии (Майами) в HD-паке перерисованы нейросетью — чёткие, с гладким краем; вариант `hud_hd` пака, выкл. `RE_TEXPACK_HUD=0` — см. «HD-текстуры»;
+- v2.37: единый отладочный журнал `RE_LOG` (выключен по умолчанию): `RE_LOG=all:info` → `driver.log` (macOS — `~/Library/Logs/Driver/driver.log`) — старт и настройки, файлы и уровни, меню и миссии (итог и причина провала), сейвы, звук, геймпады, ошибки; каналы и уровни — см. docs/DIAGNOSTICS.md «RE_LOG»;
 - не проверены/не работают: ночь и другие города (SF, LA, NY); FMV-ролики пропускаются.
 
 Подробно: [docs/NATIVE_GAPS.md](docs/NATIVE_GAPS.md) (разрывы native, переключатели отладки), [docs/PLATFORM_PLAN.md](docs/PLATFORM_PLAN.md) (журнал переноса по шагам),
@@ -522,6 +523,7 @@ RE_KEYS="300:LEFT,340:LEFT,380:LEFT,460:RETURN,560:RETURN,660:RETURN,700:APOSTRO
 | `RE_FIXED_DT=1` | виртуальные часы (20 мс на кадр) — воспроизводимые прогоны, не зависят от скорости компьютера |
 | `RE_NO_MSGBOX=1` | сообщения MessageBox только в stderr (под Xvfb окно сообщения блокирует) |
 | `RE_WATCHDOG=N` | через N секунд печать стека и выход с кодом 3 |
+| `RE_LOG=all:info[,канал:уровень…]` | v2.37: единый отладочный журнал `driver.log` (рядом с бинарником; macOS — `~/Library/Logs/Driver/`), каналы `sys load game mission render audio input mem save`, уровни `error warn info debug trace`; `RE_LOG_FILE`, `RE_LOG_STDERR=1`, `RE_LOG_RATE`, `RE_LOG_MAX_MB`; то же — `log = …` в `driver.cfg`. См. docs/DIAGNOSTICS.md «RE_LOG» |
 | `RE_INPUTDBG=1` | v2.14: журнал ввода `driver_input.log` (macOS — `~/Library/Logs/`, иначе рядом с бинарником или в текущем каталоге) |
 | `RE_WINDOWED=1` / `RE_FULLSCREEN=1` | v2.14: окно / полный экран (по умолчанию: macOS — полный экран, остальные — окно) |
 | `RE_RES=WxH` | v2.14: размер окна (по умолчанию — наибольшее целое кратное 640×480 в 85% экрана); снимок `RE_SHOT_PNG` — в размере буфера окна |

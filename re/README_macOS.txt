@@ -33,3 +33,11 @@ HD stopwatch and mission timer digits (v2.36):
   The texture pack includes the hud_hd variant for the garage stopwatch and Miami mission timer digits.
   It is enabled by hud.txt containing hud_hd in the texture-pack directory.
   To restore the previous upscale, use RE_TEXPACK_HUD=0 or remove hud.txt.
+
+Debug log (v2.37):
+  Off by default. To record one for a bug report, start Driver from Terminal:
+    RE_LOG=all:debug /Applications/Driver.app/Contents/MacOS/Driver
+  or add the line  log = all:info  to ~/Library/Application Support/Driver/driver.cfg.
+  The log is written to ~/Library/Logs/Driver/driver.log (open it with Console.app or Finder > Go > Go to Folder...).
+  Graphics details stay in ~/Library/Logs/driver_gfx.log, input details (RE_INPUTDBG=1) in ~/Library/Logs/driver_input.log.
+  Channels and levels: docs/DIAGNOSTICS.md, section RE_LOG.

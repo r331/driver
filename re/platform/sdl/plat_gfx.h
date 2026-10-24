@@ -34,6 +34,7 @@ typedef struct {
     char   music_dir[512];  /* v2.22: каталог дорожек CD-музыки ("" — ./Music; RE_MUSIC_DIR важнее) */
     int    music_dynamic;   /* v2.33: динамическая музыка (Music/dynamic): -1 auto (вкл., если набор найден), 0 off, 1 on; RE_MUSIC_DYNAMIC важнее */
     int    game_res;        /* v2.26: 0 native — игра всегда считает кадр 640×480 (вывод — в разрешении окна, Hor+), 1 original — режим из настроек игры */
+    char   log[256];        /* v2.37: RE_LOG-спецификация из driver.cfg ("log = all:info,render:debug"; "" — выкл.; переменная RE_LOG важнее) */
 } re_gfx_cfg;
 
 void re_gfx_defaults(re_gfx_cfg *c);                         /* пресет enhanced */

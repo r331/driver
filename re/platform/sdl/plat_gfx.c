@@ -34,6 +34,7 @@ int re_gfx_preset(re_gfx_cfg *c, const char *name) {
     scpy(k.music_dir, c->music_dir, sizeof k.music_dir);   /* v2.22: и каталог музыки */
     k.music_dynamic = c->music_dynamic;                    /* v2.33: и динамическая музыка */
     k.game_res = c->game_res;                              /* v2.26: и разрешение кадра игры */
+    scpy(k.log, c->log, sizeof k.log);                     /* v2.37: и RE_LOG-спецификацию */
     *c = k; return 0;
 }
 /* Default settings: the enhanced preset, fullscreen and dynamic music "auto" (-1). */
@@ -85,6 +86,7 @@ int re_gfx_set(re_gfx_cfg *c, const char *k, const char *v) {
     if (ieq(k, "sharpen")) return pdbl(v, &c->sharpen);
     if (ieq(k, "music_dir")) { if (strlen(v) >= sizeof c->music_dir) return -2; scpy(c->music_dir, v, sizeof c->music_dir); return 0; }   /* v2.22 */
     if (ieq(k, "music_dynamic")) { if (ieq(v, "auto")) { c->music_dynamic = -1; return 0; } return pbool(v, &c->music_dynamic); }   /* v2.33 */
+    if (ieq(k, "log")) { if (strlen(v) >= sizeof c->log) return -2; scpy(c->log, v, sizeof c->log); return 0; }   /* v2.37: RE_LOG (plat_log.c) */
     if (ieq(k, "texpack")) { if (strlen(v) >= sizeof c->texpack) return -2; scpy(c->texpack, v, sizeof c->texpack); return 0; }
     if (ieq(k, "aspect")) { if (strlen(v) >= sizeof c->aspect) return -2; scpy(c->aspect, v, sizeof c->aspect); return 0; }
     if (ieq(k, "fbo")) { if (ieq(v, "auto")) { c->fbo = 1; return 0; } return pbool(v, &c->fbo); }   /* v2.24 */

@@ -790,6 +790,8 @@ void P127_ScriptTick(void) {
 #ifndef RE_HOOK_BUILD
     { /* v2.29: RE_MISSDBG=1 — журнал команд скрипта миссии (номер, код, первый аргумент) при смене номера */
       static int dbg = -1; static int32_t last = -1; if (dbg < 0) dbg = getenv("RE_MISSDBG") != NULL;
+      if (RE_LOG_ON(mission, RE_LV_DEBUG)) { static int32_t lpos = -1; if (pos != lpos) { const int32_t *q = (const int32_t *)P77_List[pos];   /* v2.37 */
+        RE_LOGD(mission, "скрипт: команда #%d код 0x%02x арг %d, состояние 0x%x", (int)pos, q ? (int)q[0] : -1, q ? (int)q[1] : 0, (unsigned)P14_00c810c4); lpos = pos; } }
       if (dbg && pos != last) { const int32_t *q = (const int32_t *)P77_List[pos];
         fprintf(stderr, "[mis] w=%d f=%d cmd#%d код 0x%02x a1=%d c4=%x\n", plat_frame_no(), (int)P62_Frame, (int)pos, q ? (int)q[0] : -1, q ? (int)q[1] : 0, (unsigned)P14_00c810c4); last = pos; } }
 #endif

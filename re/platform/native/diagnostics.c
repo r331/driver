@@ -67,6 +67,7 @@ static void copy_file(const char *from, const char *to) {
     }
     fclose(in);
 }
+const char *re_diag_build_rev(void) { return RE_BUILD_REV; }   /* v2.37: для шапки RE_LOG (main.c) */
 static void shutdown_diag(void) {
     if (log_lock) SDL_LockMutex(log_lock);
     enabled = 0;
@@ -82,15 +83,15 @@ void re_diag_start(void) {
     const char *e = getenv("RE_DIAG");
     if (!e || !*e || !strcmp(e, "0") || enabled) return;
     const char *root = getenv("RE_DIAG_DIR"); if (!root || !*root) root = "Diagnostics";
-    if (diag_mkdir(root) != 0 && errno != EEXIST) { fprintf(stderr, "[diag] cannot create %s: %s\n", root, strerror(errno)); return; }
+    if (diag_mkdir(root) != 0 && errno != EEXIST) { RE_LOGW(sys, "RE_DIAG: не создан каталог %s: %s", root, strerror(errno)); fprintf(stderr, "[diag] cannot create %s: %s\n", root, strerror(errno)); return; }
     time_t now = time(NULL); char stamp[64];
     strftime(stamp, sizeof stamp, "%Y%m%d-%H%M%S", localtime(&now));
     int n = snprintf(directory, sizeof directory, "%s/session-%s-%ld", root, stamp, (long)diag_pid());
     if (n < 0 || (size_t)n >= sizeof directory || diag_mkdir(directory) != 0) {
-        fprintf(stderr, "[diag] cannot create session directory\n"); return;
+        RE_LOGW(sys, "RE_DIAG: не создан каталог сессии в %s", root); fprintf(stderr, "[diag] cannot create session directory\n"); return;
     }
     char path[2304]; snprintf(path, sizeof path, "%s/session.log", directory);
-    session = fopen(path, "w"); if (!session) return;
+    session = fopen(path, "w"); if (!session) { RE_LOGW(sys, "RE_DIAG: fopen(%s): %s", path, strerror(errno)); return; }
     log_lock = SDL_CreateMutex();
     if (!log_lock) { fclose(session); session = NULL; return; }
     snprintf(path, sizeof path, "%s/timeline.csv", directory); timeline = fopen(path, "w");
@@ -105,6 +106,7 @@ void re_diag_start(void) {
         setenv("RE_GFXLOG", path, 0);
 #endif
     }
+    RE_LOGI(sys, "RE_DIAG: диагностика рендера включена, сессия %s", directory);
     fprintf(stderr, "[diag] saving diagnostics in %s\n[diag] capture: Cmd+Shift+D (Mac), Ctrl+Shift+D (Linux/Windows)\n", directory);
     re_diag_log("Driver diagnostics v1; build %s; compiled %s %s; platform %s; pointer bits %u\n",
                 RE_BUILD_REV, __DATE__, __TIME__, SDL_GetPlatform(), (unsigned)(sizeof(void *) * 8));
@@ -165,7 +167,7 @@ void re_diag_draw(const plat_vertex *v, int count, unsigned mode, int tex, int z
 }
 void re_diag_request(void) {
     if (!enabled) { fprintf(stderr, "[diag] enable diagnostics with RE_DIAG=1\n"); return; }
-    if (captures >= CAPTURE_LIMIT) { re_diag_log("Capture limit reached\n"); return; }
+    if (captures >= CAPTURE_LIMIT) { RE_LOGW(render, "RE_DIAG: лимит снимков (%d) исчерпан", CAPTURE_LIMIT); re_diag_log("Capture limit reached\n"); return; }
     if (!capturing) requested = 1;
 }
 static void state_file(int frame) {
@@ -207,11 +209,12 @@ static void finish_capture(int frame) {
     }
     re_diag_log("CAPTURE %d frame %d screenshot=%s path=%s\n", captures, frame, ok ? "ok" : "failed", capture);
     fprintf(stderr, "[diag] capture saved: %s (screenshot %s)\n", capture, ok ? "ok" : "failed");
+    RE_LOGI(render, "RE_DIAG: снимок состояния %d (кадр %d) сохранён в %s, скриншот %s", captures, frame, capture, ok ? "есть" : "НЕ сохранён");
     capturing = 0;
 }
 static void begin_capture(int frame) {
     snprintf(capture, sizeof capture, "%s/capture-%02d-frame-%06d", directory, ++captures, frame + 1);
-    if (diag_mkdir(capture) != 0) { re_diag_log("Cannot create capture: %s\n", strerror(errno)); return; }
+    if (diag_mkdir(capture) != 0) { RE_LOGW(render, "RE_DIAG: каталог снимка %s не создан: %s", capture, strerror(errno)); re_diag_log("Cannot create capture: %s\n", strerror(errno)); return; }
     char path[2400]; snprintf(path, sizeof path, "%s/draws.csv", capture); draws = fopen(path, "w");
     if (draws) fputs("draw,mode,model_offset,record_offset,record_type,texture,ztest,zwrite,zfunc,blend,src,dst,alpha_test,alpha_func,alpha_ref,vertex,x,y,depth,rhw,u,v,color\n", draws);
     snprintf(path, sizeof path, "%s/records.csv", capture); records = fopen(path, "w");

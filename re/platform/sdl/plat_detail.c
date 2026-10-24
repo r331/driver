@@ -121,8 +121,8 @@ static int efind(const char *js, const jsmntok_t *t, int ent, const char *key) {
 static int load_glb(dent_t *e) {
     cgltf_options opt; memset(&opt, 0, sizeof opt);
     cgltf_data *d = NULL;
-    if (cgltf_parse_file(&opt, e->glb, &d) != cgltf_result_success) { plat_log("[detail] %s: не glTF\n", e->glb); return 0; }
-    if (cgltf_load_buffers(&opt, d, e->glb) != cgltf_result_success) { plat_log("[detail] %s: буферы не прочитаны\n", e->glb); cgltf_free(d); return 0; }
+    if (cgltf_parse_file(&opt, e->glb, &d) != cgltf_result_success) { RE_LOGW(load, "3D-детали: %s — не glTF, пропущен", e->glb); plat_log("[detail] %s: не glTF\n", e->glb); return 0; }
+    if (cgltf_load_buffers(&opt, d, e->glb) != cgltf_result_success) { RE_LOGW(load, "3D-детали: %s — буферы glTF не прочитаны", e->glb); plat_log("[detail] %s: буферы не прочитаны\n", e->glb); cgltf_free(d); return 0; }
     /* все примитивы-треугольники всех мешей в одну сетку; текстура — baseColor первого материала с текстурой */
     size_t nv = 0, ni = 0;
     for (size_t m = 0; m < d->meshes_count; m++) for (size_t p = 0; p < d->meshes[m].primitives_count; p++) {
@@ -245,7 +245,7 @@ static void load_level(const char *level) {
     int nt = jsmn_parse(&p, js, (size_t)len, NULL, 0);
     jsmntok_t *t = nt > 0 ? (jsmntok_t *)calloc((size_t)nt + 1, sizeof(jsmntok_t)) : NULL;
     if (t) { jsmn_init(&p); nt = jsmn_parse(&p, js, (size_t)len, t, (size_t)nt); }
-    if (!t || nt <= 0) { plat_log("[detail] %s: ошибка JSON\n", path); free(t); free(js); return; }
+    if (!t || nt <= 0) { RE_LOGW(load, "3D-детали: %s — ошибка JSON", path); plat_log("[detail] %s: ошибка JSON\n", path); free(t); free(js); return; }
     int arr = -1;
     if (t[0].type == JSMN_ARRAY) arr = 0;
     else if (t[0].type == JSMN_OBJECT) {
@@ -255,6 +255,7 @@ static void load_level(const char *level) {
     }
     if (arr >= 0) { int j = arr + 1; for (int k = 0; k < t[arr].size; k++) { parse_entry(js, t, j, dir, level); j = tskip(t, j); } }
     plat_log("[detail] %s: %d записей из %s\n", level, g_nent, path);
+    RE_LOGI(load, "3D-детали фасадов %s: %d записей из %s", level, g_nent, path);
     free(t); free(js);
 }
 
