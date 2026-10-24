@@ -30,6 +30,8 @@ typedef struct {
     int    fbo;             /* v2.24: 1 — кадр через FBO (MSAA/FXAA/render_scale/гамма), 0 — прямо в окно (безопасный режим, как v2.15) */
     double draw_distance;   /* v2.19: множитель дальности прорисовки 1.0 (оригинал) .. 4.0; enhanced — 2.0 */
     char   texpack[512];    /* v2.17: каталог HD-пака текстур ("" — выкл.; RE_TEXPACK важнее) */
+    int    texpack_async;   /* v2.39: 1 — HD-пары грузятся в фоне (по умолчанию), 0 — синхронно при первом рисовании; RE_TEXPACK_ASYNC важнее */
+    double texpack_upload_ms; /* v2.39: бюджет загрузки готовых HD-текстур в GL, мс/кадр (по умолчанию 2; 0 — одна текстура за кадр); RE_TEXPACK_UPLOAD_MS важнее */
     char   source[512];     /* откуда прочитан driver.cfg ("" — файла нет) */
     char   music_dir[512];  /* v2.22: каталог дорожек CD-музыки ("" — ./Music; RE_MUSIC_DIR важнее) */
     int    music_dynamic;   /* v2.33: динамическая музыка (Music/dynamic): -1 auto (вкл., если набор найден), 0 off, 1 on; RE_MUSIC_DYNAMIC важнее */
@@ -43,7 +45,8 @@ int  re_gfx_preset(re_gfx_cfg *c, const char *name);         /* 0 — ok, -1 —
    возврат — число ошибок (неизвестный ключ/плохое значение — строка пропускается, в лог через err, если не NULL) */
 int  re_gfx_parse(re_gfx_cfg *c, const char *text, void (*err)(const char *msg));
 /* переопределения из окружения: getter(имя) → значение или NULL (в игре — getenv); RE_PRESET, RE_MSAA, RE_A2C, RE_FXAA,
-   RE_ANISO, RE_MIPMAPS, RE_DILATE, RE_FILTER, RE_HUD_FILTER, RE_RENDER_SCALE, RE_VSYNC, RE_FPS_LIMIT, RE_GAMMA, RE_BRIGHTNESS, RE_SHARPEN, RE_TEXPACK, RE_DRAW_DIST, RE_FBO (v2.24), RE_GAME_RES (v2.26) */
+   RE_ANISO, RE_MIPMAPS, RE_DILATE, RE_FILTER, RE_HUD_FILTER, RE_RENDER_SCALE, RE_VSYNC, RE_FPS_LIMIT, RE_GAMMA, RE_BRIGHTNESS, RE_SHARPEN, RE_TEXPACK, RE_DRAW_DIST, RE_FBO (v2.24), RE_GAME_RES (v2.26),
+   RE_TEXPACK_ASYNC, RE_TEXPACK_UPLOAD_MS (v2.39) */
 int  re_gfx_env(re_gfx_cfg *c, const char *(*getter)(const char *));
 void re_gfx_clamp(re_gfx_cfg *c);                            /* привести к допустимым значениям */
 int  re_gfx_set(re_gfx_cfg *c, const char *key, const char *val);   /* 0 ok, -1 ключ, -2 значение */

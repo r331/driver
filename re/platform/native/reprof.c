@@ -10,8 +10,8 @@ int re_prof_on;
 static int g_every, g_n, g_total, g_depth[RP_ZONES];
 static double g_t0[RP_ZONES], g_acc[RP_ZONES], g_win[RP_ZONES], g_frame_t0, g_worst, g_worst_acc[RP_ZONES];
 static long g_cnt[RC_COUNTERS], g_cwin[RC_COUNTERS], g_worst_cnt[RC_COUNTERS];
-static const char *k_zone[RP_ZONES] = { "frame", "logic", "l.cars", "l.traffic", "l.map", "draw", "d.map", "d.player", "d.traffic", "d.fx", "d.hud", "gl_draw", "tex_up", "swap", "hd_load", "detail_load" };
-static const char *k_cnt[RC_COUNTERS] = { "draws", "verts", "tex_up", "tex_px", "tex_var", "surf_up", "pal8", "detail", "ticks", "cars", "hd_loads", "pal_inval" };
+static const char *k_zone[RP_ZONES] = { "frame", "logic", "l.cars", "l.traffic", "l.map", "draw", "d.map", "d.player", "d.traffic", "d.fx", "d.hud", "gl_draw", "tex_up", "swap", "hd_load", "detail_load", "hd_up" };
+static const char *k_cnt[RC_COUNTERS] = { "draws", "verts", "tex_up", "tex_px", "tex_var", "surf_up", "pal8", "detail", "ticks", "cars", "hd_loads", "pal_inval", "hd_req", "hd_upn" };
 void plat_gfx_logf(const char *fmt, ...);
 
 static double now_ms(void) { struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts); return ts.tv_sec * 1e3 + ts.tv_nsec / 1e6; }

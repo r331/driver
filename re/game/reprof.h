@@ -19,13 +19,17 @@ enum {
   RP_GL_DRAW,     /* inside plat_render draw(): state + vertex upload + glDrawArrays (CPU side) */
   RP_TEX_UPLOAD,  /* texture uploads: surface conversion, mipmaps, glTexImage2D */
   RP_SWAP,        /* plat_flip: compose + swap (waits for the GPU) */
-  RP_HD_LOAD,     /* HD texture-pack PNG loads on first use of a (page, palette) pair, incl. compare + upload */
+  RP_HD_LOAD,     /* HD texture-pack PNG loads on first use of a (page, palette) pair, incl. compare + upload (synchronous
+                     path: RE_TEXPACK_ASYNC=0, preload); with async loading only the cheap enqueue */
   RP_DETAIL_LOAD, /* facade detail meshes (glb) of a level, loaded with the level */
+  RP_HD_UPLOAD,   /* v2.39: asynchronous HD pack — GL uploads of finished pairs (re_tpa_pump, after the swap) */
   RP_ZONES
 };
 enum {
   RC_DRAWS, RC_VERTS, RC_TEX_UPLOADS, RC_TEX_PIXELS, RC_TEX_VARIANTS, RC_SURF_UPLOADS, RC_PAL8_BINDS,
-  RC_DETAIL_DRAWS, RC_LOGIC_TICKS, RC_CARS_DRAWN, RC_HD_LOADS, RC_PAL_INVAL, RC_COUNTERS
+  RC_DETAIL_DRAWS, RC_LOGIC_TICKS, RC_CARS_DRAWN, RC_HD_LOADS, RC_PAL_INVAL,
+  RC_HD_REQUESTS, RC_HD_UPLOADS,   /* v2.39: asynchronous HD pack — pairs queued, pairs uploaded */
+  RC_COUNTERS
 };
 #ifndef RE_HOOK_BUILD
 #include <stdlib.h>

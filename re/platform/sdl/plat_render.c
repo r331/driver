@@ -14,6 +14,7 @@
 #include "../native/diagnostics.h"
 #include "plat_gfx.h"
 #include "../../game/reprof.h"
+#include "plat_texpack_async.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -699,6 +700,85 @@ void plat_tex_update(int tex, int w, int h, const uint32_t *rgba) {   /* v2.01: 
     g_tex[tex].w = w; g_tex[tex].h = h; tex_upload(&g_tex[tex], w, h, rgba);
     g_tex[tex].w = w; g_tex[tex].h = h; tex_dump(tex, w, h, rgba);
 }
+/* v2.39: asynchronous HD texture pack (plat_texpack_async.c).  plat_tex_prepare does on any thread, without GL, the CPU
+   part of tex_upload for a mode-0 texture (partial / binary alpha flags and the box-filtered mip chain of upload_variant),
+   so that plat_tex_create_prepared on the GL thread only has to glTexImage2D the levels.  The result is texel-identical to
+   plat_tex_create(w, h, rgba): same level-0 pixels, same re_gfx_mip_box chain, same flags.  The settings it depends on
+   (mipmaps, dilate) are recorded and re-checked at upload; if they changed in between, the plain path runs instead. */
+struct plat_tex_prep {
+    int w, h, nlev, proc, mipmaps, partial, binary;
+    uint32_t *lev[12];
+    int lw[12], lh[12];
+};
+/* plat_tex_prepare — takes ownership of rgba (malloc'ed, w x h); returns NULL (rgba freed) on allocation failure. */
+plat_tex_prep *plat_tex_prepare(int w, int h, uint32_t *rgba) {
+    if (!rgba || w <= 0 || h <= 0) { free(rgba); return NULL; }
+    plat_tex_prep *p = (plat_tex_prep *)calloc(1, sizeof *p);
+    if (!p) { free(rgba); return NULL; }
+    const re_gfx_cfg *c = re_gfx();
+    int pow2 = !(w & (w - 1)) && !(h & (h - 1)) && w <= 1024 && h <= 1024;
+    p->w = w; p->h = h; p->proc = (c->mipmaps || c->dilate) ? 1 : 0; p->mipmaps = c->mipmaps ? 1 : 0; p->binary = 1;
+    p->lev[0] = rgba; p->lw[0] = w; p->lh[0] = h; p->nlev = 1;
+    if (!pow2 || !p->proc) return p;
+    p->partial = re_gfx_has_partial_alpha(rgba, w, h);
+    if (p->partial) for (int i = 0; i < w * h && p->binary; i++) { unsigned a = rgba[i] >> 24; p->binary = a == 0 || a == 255; }
+    if (p->mipmaps) {   /* upload_variant(mode 0): re_gfx_mip_box level by level */
+        int cw = w, ch = h;
+        while ((cw > 1 || ch > 1) && p->nlev < 12) {
+            int nw = cw > 1 ? cw / 2 : 1, nh = ch > 1 ? ch / 2 : 1;
+            uint32_t *nx = (uint32_t *)malloc((size_t)(cw / 2 + 1) * (ch / 2 + 1) * 4);
+            if (!nx) { for (int i = 1; i < p->nlev; i++) free(p->lev[i]); p->nlev = 1; p->proc = -1; break; }   /* -1: upload the plain way */
+            re_gfx_mip_box(p->lev[p->nlev - 1], cw, ch, nx);
+            p->lev[p->nlev] = nx; p->lw[p->nlev] = nw; p->lh[p->nlev] = nh; p->nlev++;
+            cw = nw; ch = nh;
+        }
+    }
+    return p;
+}
+void plat_tex_prep_free(plat_tex_prep *p) {
+    if (!p) return;
+    for (int i = 0; i < p->nlev; i++) free(p->lev[i]);
+    free(p);
+}
+int plat_tex_prep_width(const plat_tex_prep *p) { return p ? p->w : 0; }
+/* plat_tex_create_prepared — GL thread: creates the texture from a prepared image and frees p (always). */
+int plat_tex_create_prepared(plat_tex_prep *p) {
+    if (!p) return 0;
+    const re_gfx_cfg *c = re_gfx();
+    int w = p->w, h = p->h, pow2 = !(w & (w - 1)) && !(h & (h - 1)) && w <= 1024 && h <= 1024;
+    int proc_now = (c->mipmaps || c->dilate) ? 1 : 0;
+    if (!g_ok) { plat_tex_prep_free(p); return 0; }
+    if (p->proc < 0 || proc_now != g_tex_proc || p->proc != g_tex_proc || p->mipmaps != (c->mipmaps ? 1 : 0)) {   /* settings changed: plain path */
+        int t = plat_tex_create(w, h, p->lev[0]); plat_tex_prep_free(p); return t;
+    }
+    for (int i = 1; i < MAX_TEX; i++) if (!g_tex[i].id) {
+        tex_t *t = &g_tex[i];
+        glGenTextures(1, &t->id); glBindTexture(GL_TEXTURE_2D, t->id);
+        t->w = w; t->h = h;
+        g_up_n++; g_up_px += w * h;
+        RP_BEGIN(RP_TEX_UPLOAD); RP_COUNT(RC_TEX_UPLOADS, 1); RP_COUNT(RC_TEX_PIXELS, w * h);
+        tex_vars_free(t);
+        if (!pow2 || !g_tex_proc) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, p->lev[0]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+        } else {
+            t->partial = (unsigned char)p->partial; t->binary = (unsigned char)p->binary;
+            for (int l = 0; l < p->nlev; l++) put_level(l, p->lw[l], p->lh[l], p->lev[l], 0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, p->nlev - 1);
+        }
+        RP_END(RP_TEX_UPLOAD);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        tex_dump(i, w, h, p->lev[0]);
+        if (t->partial && pow2 && g_tex_proc) { t->src = p->lev[0]; p->lev[0] = NULL; }   /* kept for the alpha-test variants (tex_variant) */
+        RE_LOGT(render, "текстура %d создана (подготовлена в фоне): %dx%d", i, w, h);
+        plat_tex_prep_free(p);
+        return i;
+    }
+    RE_LOGW(render, "plat_tex_create_prepared %dx%d: таблица текстур полна (%d) — текстура не создана", w, h, MAX_TEX - 1);
+    plat_tex_prep_free(p);
+    return 0;
+}
 /* plat_clear_rect — v2.01: colour fill of a rectangle of the back surface (DirectDraw Blt COLORFILL). */
 void plat_clear_rect(uint32_t c, int x, int y, int w, int h) {   /* v2.01: Blt COLORFILL задней поверхности */
     if (!g_ok || w <= 0 || h <= 0) return;
@@ -938,6 +1018,7 @@ void plat_flip(void) {
     }
     g_ring_pos = -1;   /* v2.38: RE_GL_RING — fresh stream storage each frame */
     RP_END(RP_SWAP); if (re_prof_on) re_prof_frame();
+    re_tpa_pump();   /* v2.39: upload finished asynchronous HD-pack textures (budget per frame), counted in the next frame */
 }
 /* plat_render_uploads — texture upload counter (count, pixels) for statistics. */
 int plat_render_uploads(int *pixels) { if (pixels) *pixels = g_up_px; return g_up_n; }   /* v2.16: счётчик загрузок текстур (статистика) */

@@ -35,10 +35,11 @@ int re_gfx_preset(re_gfx_cfg *c, const char *name) {
     k.music_dynamic = c->music_dynamic;                    /* v2.33: и динамическая музыка */
     k.game_res = c->game_res;                              /* v2.26: и разрешение кадра игры */
     scpy(k.log, c->log, sizeof k.log);                     /* v2.37: и RE_LOG-спецификацию */
+    k.texpack_async = c->texpack_async; k.texpack_upload_ms = c->texpack_upload_ms;   /* v2.39: и загрузку HD-пака */
     *c = k; return 0;
 }
-/* Default settings: the enhanced preset, fullscreen and dynamic music "auto" (-1). */
-void re_gfx_defaults(re_gfx_cfg *c) { memset(c, 0, sizeof *c); c->fullscreen = -1; c->music_dynamic = -1; re_gfx_preset(c, "enhanced"); }
+/* Default settings: the enhanced preset, fullscreen and dynamic music "auto" (-1), asynchronous HD pack with a 2 ms upload budget. */
+void re_gfx_defaults(re_gfx_cfg *c) { memset(c, 0, sizeof *c); c->fullscreen = -1; c->music_dynamic = -1; c->texpack_async = 1; c->texpack_upload_ms = 2.0; re_gfx_preset(c, "enhanced"); }
 
 /* Value parsers: 0 = ok, -2 = bad value.  pint accepts a trailing "x" (e.g. "4x"). */
 static int pbool(const char *v, int *o) {
@@ -88,6 +89,8 @@ int re_gfx_set(re_gfx_cfg *c, const char *k, const char *v) {
     if (ieq(k, "music_dynamic")) { if (ieq(v, "auto")) { c->music_dynamic = -1; return 0; } return pbool(v, &c->music_dynamic); }   /* v2.33 */
     if (ieq(k, "log")) { if (strlen(v) >= sizeof c->log) return -2; scpy(c->log, v, sizeof c->log); return 0; }   /* v2.37: RE_LOG (plat_log.c) */
     if (ieq(k, "texpack")) { if (strlen(v) >= sizeof c->texpack) return -2; scpy(c->texpack, v, sizeof c->texpack); return 0; }
+    if (ieq(k, "texpack_async")) return pbool(v, &c->texpack_async);          /* v2.39 */
+    if (ieq(k, "texpack_upload_ms")) return pdbl(v, &c->texpack_upload_ms);   /* v2.39 */
     if (ieq(k, "aspect")) { if (strlen(v) >= sizeof c->aspect) return -2; scpy(c->aspect, v, sizeof c->aspect); return 0; }
     if (ieq(k, "fbo")) { if (ieq(v, "auto")) { c->fbo = 1; return 0; } return pbool(v, &c->fbo); }   /* v2.24 */
     if (ieq(k, "game_res")) {   /* v2.26: native (640×480 внутри, по умолчанию) | original (режим из меню/config.dat игры) */
@@ -149,7 +152,8 @@ int re_gfx_env(re_gfx_cfg *c, const char *(*g)(const char *)) {
     static const char *map[][2] = { { "RE_MSAA", "msaa" }, { "RE_A2C", "a2c" }, { "RE_FXAA", "fxaa" }, { "RE_ANISO", "aniso" },
         { "RE_MIPMAPS", "mipmaps" }, { "RE_DILATE", "dilate" }, { "RE_FILTER", "filter" }, { "RE_HUD_FILTER", "hud_filter" },
         { "RE_RENDER_SCALE", "render_scale" }, { "RE_VSYNC", "vsync" }, { "RE_FPS_LIMIT", "fps_limit" }, { "RE_GAMMA", "gamma" },
-        { "RE_BRIGHTNESS", "brightness" }, { "RE_SHARPEN", "sharpen" }, { "RE_TEXPACK", "texpack" }, { "RE_DRAW_DIST", "draw_distance" }, { "RE_FBO", "fbo" }, { "RE_GAME_RES", "game_res" } };
+        { "RE_BRIGHTNESS", "brightness" }, { "RE_SHARPEN", "sharpen" }, { "RE_TEXPACK", "texpack" }, { "RE_DRAW_DIST", "draw_distance" }, { "RE_FBO", "fbo" }, { "RE_GAME_RES", "game_res" },
+        { "RE_TEXPACK_ASYNC", "texpack_async" }, { "RE_TEXPACK_UPLOAD_MS", "texpack_upload_ms" } };
     int errs = 0; const char *v;
     if (!g) return 0;
     if ((v = g("RE_PRESET")) && *v && re_gfx_preset(c, v)) errs++;
@@ -181,6 +185,9 @@ void re_gfx_clamp(re_gfx_cfg *c) {
     if (c->fullscreen < -1 || c->fullscreen > 2) c->fullscreen = 1;
     if (!(c->draw_distance >= 1.0)) c->draw_distance = 1.0;
     if (c->draw_distance > 4.0) c->draw_distance = 4.0;
+    c->texpack_async = c->texpack_async != 0;
+    if (!(c->texpack_upload_ms >= 0)) c->texpack_upload_ms = 2.0;
+    if (c->texpack_upload_ms > 100) c->texpack_upload_ms = 100;
     c->a2c = c->a2c != 0; c->fxaa = c->fxaa != 0; c->mipmaps = c->mipmaps != 0; c->dilate = c->dilate != 0;
 }
 /* One-line description of the settings into b (for driver_gfx.log); returns b. */

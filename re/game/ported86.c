@@ -18,6 +18,7 @@
 #include "ported58.h"
 #include "ported53.h"
 #include "../platform/sdl/plat_texpack.h"
+#include "../platform/sdl/plat_texpack_async.h"
 #include <stdio.h>
 #include <math.h>
 #endif
@@ -256,9 +257,15 @@ void P86_NativeStat(const float *xy) {
   int p = g_raw8[s] ? cur_pal() : P86_NPAL;
   g_stat[s][p].tris++; g_stat[s][p].area += clip_area(xy);
 }
-/* pal8_free — frees all palette variants of 8-bit page `slot`. */
+/* v2.39: asynchronous HD pack (platform/sdl/plat_texpack_async.c): g_pend8 — a request for the pair is in flight, g_ptag — its
+   tag.  A finished request is used only if the pair is still pending with the same tag; anything that invalidates the pair
+   (page freed or re-captured, palette contents changed, level reset) clears g_pend8, so a late result is dropped. */
+static unsigned char g_pend8[256][P86_NPAL];
+static unsigned g_ptag[256][P86_NPAL], g_tagseq;
+/* pal8_free — frees all palette variants of 8-bit page `slot` (v2.39: and forgets its pending HD requests). */
 static void pal8_free(int slot) {
   for (int p = 0; p < P86_NPAL; p++) { if (g_ptex[slot][p]) plat_tex_free(g_ptex[slot][p]); g_ptex[slot][p] = 0; g_ptexw[slot][p] = 0; }
+  memset(g_pend8[slot], 0, sizeof g_pend8[slot]);
 }
 /* путь игры: хэши страниц уровня (16 бит — 128 КБ, 8 бит — 64 КБ) и отметки «файла нет/отклонён» */
 static uint64_t g_hash16[256], g_hash8[256]; static unsigned char g_is16[256], g_miss16[256], g_miss8[256][P86_NPAL];
@@ -268,6 +275,7 @@ static uint64_t fnv64(const uint8_t *p, size_t n) { uint64_t h = 146959810393466
 /* P86_NativeReset — frees the previous level's textures, hashes and texture-pack state. */
 void P86_NativeReset(void) {
   if (g_stat) stat_dump();
+  re_tpa_cancel();   /* v2.39: drop the previous level's queued / finished HD requests (running ones are dropped when done) */
   for (int i = 0; i < 256; i++) { if (g_tex[i]) plat_tex_free(g_tex[i]); g_tex[i] = 0; g_texw[i] = 0; pal8_free(i); free(g_raw8[i]); g_raw8[i] = NULL; }
   memset(g_palhave, 0, sizeof g_palhave);
   memset(g_is16, 0, sizeof g_is16); memset(g_miss16, 0, sizeof g_miss16); memset(g_miss8, 0, sizeof g_miss8);
@@ -348,7 +356,7 @@ static void pal_changed_check(int pal) {
   if (pal < 0x32 && g_palhave[pal] && memcmp(g_palcopy[pal], &P14_01252be0[pal * 0x400], 0x400) != 0) {
     RP_COUNT(RC_PAL_INVAL, 1);
     for (int s = 0; s < 256; s++) if (g_ptex[s][pal]) { plat_tex_free(g_ptex[s][pal]); g_ptex[s][pal] = 0; g_ptexw[s][pal] = 0; }
-    for (int s = 0; s < 256; s++) g_miss8[s][pal] = 0;
+    for (int s = 0; s < 256; s++) { g_miss8[s][pal] = 0; g_pend8[s][pal] = 0; }   /* v2.39: in-flight results are stale */
     g_palhave[pal] = 0;   /* содержимое слота палитры сменилось — текстуры этой палитры пересоздаются */
     g_last_slot = -1;
   }
@@ -398,6 +406,27 @@ static int pal_match(int k, const uint8_t *rgba) {   /* записи палит�
   for (int i = 0; i < 256; i++) if (rgba[i * 4] != e[i * 4 + 2] || rgba[i * 4 + 1] != e[i * 4 + 1] || rgba[i * 4 + 2] != e[i * 4]) return 0;
   return 1;
 }
+/* pal8_async_done — v2.39, main thread (re_tpa_pump, once per frame after the swap): result of an asynchronous HD request.
+   Same bookkeeping as pal8_hd_load: missing / rejected pairs are remembered in g_miss8, an accepted one becomes the pair's
+   texture (uploaded here, on the GL thread).  Dropped if the pair is no longer pending with this tag. */
+static void pal8_async_done(re_tpa_result *r) {
+  int page = r->page, k = r->pal;
+  if (page < 0 || page >= 256 || k < 0 || k >= 0x32 || !g_pend8[page][k] || g_ptag[page][k] != r->tag || g_ptex[page][k]) {
+    plat_tex_prep_free(r->prep); r->prep = NULL; return;
+  }
+  g_pend8[page][k] = 0;
+  if (r->status == RE_TPA_MISSING) { g_miss8[page][k] = 1; return; }
+  if (r->status == RE_TPA_REJECTED) {
+    char lv[128]; re_texpack_level_name(P77_CurLevelPath, lv, sizeof lv);
+    plat_log("[texpack] %s/p%03d_c%04d.png отклонён: не похож на страницу %d с палитрой %d (ошибка %.1f, альфа %.2f%%)\n", lv, page, k, page, k, r->err, r->amis * 100.0);
+    RE_LOGW(load, "HD-пак: %s/p%03d_c%04d.png отклонён — ошибка %.1f (порог %.1f), расхождение альфы %.2f%%", lv, page, k, r->err, r->tol, r->amis * 100.0);
+    P86_TexpackRejected++; g_miss8[page][k] = 1; return;
+  }
+  if (r->status != RE_TPA_OK) return;   /* RE_TPA_FAILED (out of memory): asked again on a later draw */
+  int w = plat_tex_prep_width(r->prep);
+  int t = plat_tex_create_prepared(r->prep); r->prep = NULL;
+  if (t) { g_ptex[page][k] = t; g_ptexw[page][k] = w; P86_TexpackN++; P86_Texpack8N++; P86_Pal8Tex++; P86_GameAttachN++; }
+}
 static int game_pal8_tex(int page, uint64_t key, const uint8_t *pal_rgba) {
   if (page < 0 || page >= 256 || !g_raw8[page] || g_hash8[page] != key || !pal_rgba || !re_texpack_dir()) return 0;
   int k = P12_01252b74;
@@ -408,10 +437,18 @@ static int game_pal8_tex(int page, uint64_t key, const uint8_t *pal_rgba) {
   }
   pal_changed_check(k);
   if (g_ptex[page][k]) return g_ptex[page][k];
-  if (g_miss8[page][k]) return 0;
+  if (g_miss8[page][k] || g_pend8[page][k]) return 0;   /* v2.39: pending — the original texture is drawn meanwhile */
   static uint32_t px[256 * 256];
   memcpy(g_palcopy[k], &P14_01252be0[k * 0x400], 0x400); g_palhave[k] = 1;
   re_texpack_pal8_rgba(g_raw8[page], &P14_01252be0[k * 0x400], px);
+  if (re_tpa_on()) {   /* v2.39: asynchronous (default): queue it; RE_TEXPACK_ASYNC=0 / texpack_async = 0 — the old synchronous load */
+    char lv[128]; re_texpack_level_name(P77_CurLevelPath, lv, sizeof lv);
+    unsigned tag = ++g_tagseq;
+    int q = re_tpa_request(re_texpack_dir(), lv, page, k, tag, px, pal8_async_done);
+    if (q > 0) { g_pend8[page][k] = 1; g_ptag[page][k] = tag; RP_COUNT(RC_HD_REQUESTS, 1); return 0; }
+    if (q == 0) return 0;   /* queue full: asked again on a later draw */
+    /* q < 0: no worker threads — synchronous load below */
+  }
   int t = pal8_hd(page, k, px);
   if (t) P86_GameAttachN++;
   return t;

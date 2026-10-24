@@ -104,14 +104,16 @@ double re_texpack_last_tol(void) { return g_last_tol; }
 int re_texpack_last_hud(void) { return g_last_tol == RE_TEXPACK_HUD_MAX_ERR; }
 static uint32_t *load_one(const char *dir, const char *level, int idx, int pal, int *w, int *h);
 /* load_any — Load page idx (palette slot pal, -1 for 16-bit pages): the HUD overlay, the sky overlay, then the pack.
-   hud.txt / sky.txt are re-read on every call (cheap, a few hundred pages per level). */
-static uint32_t *load_any(const char *dir, const char *level, int idx, int pal, int *w, int *h) {
+   hud.txt / sky.txt are re-read on every call (cheap, a few hundred pages per level).
+   v2.39: the tolerance of the file found goes to *tol (no shared state), so the asynchronous loader
+   (plat_texpack_async.c) can call it from worker threads; the synchronous wrappers copy it to g_last_tol. */
+static uint32_t *load_any(const char *dir, const char *level, int idx, int pal, int *w, int *h, double *tol) {
     char odir[1024];   /* hud.txt / sky.txt читаются при каждой загрузке страницы (их сотни за уровень, файлы крошечные) */
     if (re_texpack_overlay_hud(dir, odir, sizeof odir)) {
         uint32_t *px = load_one(odir, level, idx, pal, w, h);
-        if (px) { g_last_tol = RE_TEXPACK_HUD_MAX_ERR; return px; }
+        if (px) { *tol = RE_TEXPACK_HUD_MAX_ERR; return px; }
     }
-    g_last_tol = RE_TEXPACK_MAX_ERR;
+    *tol = RE_TEXPACK_MAX_ERR;
     if (re_texpack_overlay(dir, odir, sizeof odir)) { uint32_t *px = load_one(odir, level, idx, pal, w, h); if (px) return px; }
     return load_one(dir, level, idx, pal, w, h);
 }
@@ -131,13 +133,21 @@ static uint32_t *load_one(const char *dir, const char *level, int idx, int pal, 
 /* re_texpack_load — HD replacement for 16-bit page idx of `level`, or NULL. */
 uint32_t *re_texpack_load(const char *dir, const char *level, int idx, int *w, int *h) {
     if (!dir || !level || !*level) return NULL;
-    return load_any(dir, level, idx, -1, w, h);
+    return load_any(dir, level, idx, -1, w, h, &g_last_tol);
 }
 /* v2.18: 8-битная страница с палитрой: <dir>/<level>/pNNN_cKKKK.png, KKKK — номер слота палитры уровня (0..49) */
 /* re_texpack_load8 — HD replacement for 8-bit page idx with palette slot pal (0..49), or NULL. */
 uint32_t *re_texpack_load8(const char *dir, const char *level, int idx, int pal, int *w, int *h) {
     if (!dir || !level || !*level || pal < 0) return NULL;
-    return load_any(dir, level, idx, pal, w, h);
+    return load_any(dir, level, idx, pal, w, h, &g_last_tol);
+}
+/* re_texpack_load8_tol — v2.39: re_texpack_load8 for any thread: the page-check tolerance of the file goes to *tol instead of
+   re_texpack_last_tol(). */
+uint32_t *re_texpack_load8_tol(const char *dir, const char *level, int idx, int pal, int *w, int *h, double *tol) {
+    double t = RE_TEXPACK_MAX_ERR;
+    uint32_t *px = (!dir || !level || !*level || pal < 0) ? NULL : load_any(dir, level, idx, pal, w, h, &t);
+    if (tol) *tol = t;
+    return px;
 }
 /* re_texpack_pal8_rgba — Expand an 8-bit 256x256 page to RGBA through a BGRA palette (grey ramp when pal is NULL);
    alpha is always 255 (GR_TEXFMT_P_8 has no transparent index). */

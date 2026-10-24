@@ -47,6 +47,7 @@ python3 -c "import csv; r=[x for x in csv.DictReader(open('docs/functions.csv'))
 - v2.35: all split aliases of the data image have been merged (0 left): every Game.exe address has a single object in native. Event-script checks that were previously missing now work: "You lost your target" by distance from the target (004f5012), freeing the event list between missions, script advancement for six commands, dust, menu item highlighting; Take A Ride and Survival are unchanged (byte for byte) — see docs/NATIVE_GAPS.md, section «Исправлено в v2.35» ("Fixed in v2.35");
 - v2.36: the garage interview stopwatch (dial and case) and the mission clock digits (Miami) in the HD pack have been redrawn by a neural network — crisp, with a smooth edge; the `hud_hd` pack variant, off with `RE_TEXPACK_HUD=0` — see "HD textures";
 - v2.37: a unified debug log `RE_LOG` (off by default): `RE_LOG=all:info` → `driver.log` (macOS — `~/Library/Logs/Driver/driver.log`) — startup and settings, files and levels, menus and missions (outcome and failure reason), saves, sound, gamepads, errors; channels and levels — see docs/DIAGNOSTICS.md "RE_LOG";
+- v2.39: HD textures load in the background: a car or object seen for the first time (e.g. cop cars at a roadblock) is drawn with its original texture for a few frames instead of stalling the frame while its PNG is decoded; `RE_TEXPACK_ASYNC=0` / `texpack_async = 0` restores the old synchronous loading — see "HD textures" and docs/PERFORMANCE.md;
 - not verified / not working: night and the other cities (SF, LA, NY); FMV cutscenes are skipped.
 
 Details: [docs/NATIVE_GAPS.md](docs/NATIVE_GAPS.md) (native gaps, debug switches), [docs/PLATFORM_PLAN.md](docs/PLATFORM_PLAN.md) (step-by-step porting log),
@@ -304,6 +305,14 @@ PNG alpha = the page's 0x8000 bit (no smoothing); the colour of every pixel is k
 On load each image is downscaled to 256 and compared with the source page; if it does not match (wrong number, corrupt file),
 the original stays, with `[texpack] … отклонён` (rejected) on stderr. Summary: `[texpack] загружено N страниц` (N pages loaded). Without `RE_TEXPACK`/`texpack` everything works as before.
 
+**Background loading (v2.39).** In the game an 8-bit (page, palette) pair is loaded on its first draw. Since v2.39 the PNG is read, decoded,
+checked and mip-mapped on background threads (`RE_TEXPACK_THREADS`, default 2) while the original texture is drawn; the finished texture is
+uploaded to GL on the main thread after the frame, within `texpack_upload_ms` / `RE_TEXPACK_UPLOAD_MS` per frame (default 2 ms, at least one texture).
+A new car therefore appears in its original colours for a few frames, then switches to HD, instead of stalling the frame (≈ 75 ms per two pairs
+with a warm disk cache, 300+ ms cold). `texpack_async = 0` / `RE_TEXPACK_ASYNC=0` — the previous synchronous loading; `RE_TEXPACK_PRELOAD=1` — load
+every pair the level lists while the level loads (longer load, nothing left to load in play; preloaded pairs never go through the background loader).
+Game logic does not depend on textures: the simulation is identical in all modes.
+
 **Interview stopwatch and mission clock digits (v2.36).** The garage interview stopwatch (level `iview`, 16-bit page 8, a 96×128 area:
 the dial with 5–55 tick marks, the case, the ring and the buttons) has been redrawn by a neural network from the original at 4× (`hud_hd/iview/p008.png`); files in
 `hud_hd/` keep their own alpha — a smooth silhouette, so the alpha test cuts a clean edge instead of 4×4 steps (if a file's alpha differs
@@ -531,6 +540,11 @@ Menus: arrow keys, Enter to select. Gamepad (the first SDL GameController): D-pa
 | `RE_PRESET`, `RE_MSAA`, `RE_FXAA`, `RE_ANISO`, `RE_FILTER`, `RE_RENDER_SCALE`, … | v2.16: graphics — see "Graphics" (override `driver.cfg`) |
 | `RE_TEXPACK=dir` | v2.17: HD texture pack — see "HD textures" (takes precedence over the `texpack` key in `driver.cfg`) |
 | `RE_TEXPACK_HUD=hud_hd\|0\|path` | v2.36: pack variant with the redrawn interview stopwatch and mission clock digits (takes precedence over `<pack>/hud.txt`; `0` — the previous upscale) |
+| `RE_TEXPACK_ASYNC=0\|1` | v2.39: HD pairs load in the background (`1`, default; the original texture is drawn until the HD one is ready) or synchronously on first draw (`0`, as before v2.39); takes precedence over `texpack_async` in `driver.cfg` |
+| `RE_TEXPACK_UPLOAD_MS=N` | v2.39: time budget per frame for uploading finished HD textures to GL, ms (default 2, at least one texture per frame; `0` — one texture per frame); takes precedence over `texpack_upload_ms` |
+| `RE_TEXPACK_THREADS=N` | v2.39: background HD loader threads, 1..8 (default 2) |
+| `RE_TEXPACK_PRELOAD=1` | v2.38: load all HD pairs listed for the level while it loads (longer level load, no loads in play); these pairs are loaded synchronously regardless of `RE_TEXPACK_ASYNC` |
+| `RE_PROFILE=N` | v2.38: frame profiler, every N frames — see docs/PERFORMANCE.md |
 | `RE_FONTDUMP=1` | v2.36, debugging (native only): logs once the glyph cells of fonts 0 and 1 for "0123456789:." (page, u, v, w, h) |
 | `RE_TEXLOG=file` | v2.18: statistics per (page, palette) pair: triangles and on-screen area — to order pack generation |
 | `RE_ARROWKEYS=0` | v2.14: don't add arrow keys/space to the driving keys |

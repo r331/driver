@@ -1,6 +1,8 @@
 /* Проверка перенесённых модулей в нативной сборке: ./driver --selftest */
 #include "../game/drawdist.h"
 #include "../platform/sdl/plat_gfx.h"
+#include "../platform/sdl/plat_texpack_async.h"
+#include <time.h>
 #include "../platform/sdl/plat_detail.h"
 #include "../game/uihandlers3.h"
 #include "../game/uihandlers4.h"
@@ -7765,6 +7767,13 @@ static int test_gfx(void) {
   CHECK(c.fbo == 1 && re_gfx_set(&c, "fbo", "off") == 0 && c.fbo == 0 && re_gfx_set(&c, "fbo", "auto") == 0 && c.fbo == 1 && re_gfx_set(&c, "fbo", "x") == -2);
   CHECK(re_gfx_preset(&c, "safe") == 0 && c.fbo == 0 && c.msaa == 0 && !strcmp(c.preset, "safe") && re_gfx_preset(&c, "original") == 0 && c.fbo == 1);
   CHECK(re_gfx_set(&c, "fullscreen", "exclusive") == 0 && c.fullscreen == 2 && re_gfx_set(&c, "fullscreen", "desktop") == 0 && c.fullscreen == 1 && re_gfx_set(&c, "fullscreen", "0") == 0 && c.fullscreen == 0);
+  /* v2.39: asynchronous HD pack — on by default with a 2 ms upload budget; presets keep both; clamp */
+  re_gfx_defaults(&c);
+  CHECK(c.texpack_async == 1 && c.texpack_upload_ms == 2.0);
+  CHECK(re_gfx_set(&c, "texpack_async", "off") == 0 && c.texpack_async == 0 && re_gfx_set(&c, "texpack_upload_ms", "5") == 0 && re_gfx_set(&c, "texpack_async", "x") == -2);
+  CHECK(re_gfx_preset(&c, "original") == 0 && c.texpack_async == 0 && c.texpack_upload_ms == 5.0);
+  CHECK(re_gfx_set(&c, "texpack_upload_ms", "-1") == 0); re_gfx_clamp(&c); CHECK(c.texpack_upload_ms == 2.0);
+  CHECK(re_gfx_set(&c, "texpack_upload_ms", "1000") == 0); re_gfx_clamp(&c); CHECK(c.texpack_upload_ms == 100.0);
   re_gfx_defaults(&c);
   CHECK(!strcmp(c.preset, "enhanced") && c.msaa == 4 && c.aniso == 16 && c.mipmaps && c.filter == RE_FILTER_TRILINEAR && !c.fxaa && c.render_scale == 1.0);
   const char *txt = "# driver.cfg\n[graphics]\npreset = original ; комментарий\nmsaa = 3\nfxaa = on\naniso=32\nfilter = trilinear\nrender_scale = 4\n"
@@ -7871,6 +7880,13 @@ static int test_texpack(void) {
 /* v2.18: 8-битные страницы в HD-паке — пара (страница, слот палитры) → pNNN_cKKKK.png; палитра — текущая g_01252b74 во время
    рисования; сверка с той же страницей в той же палитре (файл с чужой палитрой отклоняется), смена содержимого палитры;
    склейка пути игры (re_texpack_merge: альфа оригинала) и поиск каталога уровня без учёта регистра. Синтетика, без данных игры. */
+/* v2.39: asynchronous HD-pack loader test helpers */
+static int g_tpa_st[4], g_tpa_w[4], g_tpa_n;
+static void tpa_cb(re_tpa_result *r) {
+  if (r->tag < 4) { g_tpa_st[r->tag] = r->status; g_tpa_w[r->tag] = r->prep ? plat_tex_prep_width(r->prep) : 0; }
+  plat_tex_prep_free(r->prep); r->prep = NULL; g_tpa_n++;
+}
+static void tpa_sleep(void) { struct timespec ts = { 0, 2000000 }; nanosleep(&ts, NULL); }
 static int test_texpack8(void) {
   static uint8_t pa[256 * 256], pb[256 * 256];
   static uint32_t ref[256 * 256];
@@ -7908,6 +7924,21 @@ static int test_texpack8(void) {
   int w = 0, h = 0; uint32_t *ld = re_texpack_load8("texpack_test", "TPTEST", 210, 5, &w, &h);
   CHECK(ld && w == HW && !memcmp(ld, hd, (size_t)HW * HW * 4)); free(ld);
   CHECK(re_texpack_load8("texpack_test", "TPTEST", 211, 5, &w, &h) == NULL && re_texpack_load("texpack_test", "TPTEST", 210, &w, &h) == NULL);
+  { /* v2.39: asynchronous loader — worker threads load + check + prepare; results come back in re_tpa_pump (main thread) */
+    static uint32_t bad[256 * 256]; for (int i = 0; i < 256 * 256; i++) bad[i] = ref[i] ^ 0x00FFFFFFu;
+    double tol = 0; uint32_t *lt = re_texpack_load8_tol("texpack_test", "TPTEST", 210, 5, &w, &h, &tol);
+    CHECK(lt && w == HW && tol == RE_TEXPACK_MAX_ERR && !memcmp(lt, hd, (size_t)HW * HW * 4)); free(lt);
+    memset(g_tpa_st, -1, sizeof g_tpa_st); g_tpa_n = 0;
+    CHECK(re_tpa_request("texpack_test", "TPTEST", 210, 5, 0, ref, tpa_cb) == 1);   /* accepted */
+    CHECK(re_tpa_request("texpack_test", "TPTEST", 211, 5, 1, ref, tpa_cb) == 1);   /* no file */
+    CHECK(re_tpa_request("texpack_test", "TPTEST", 210, 5, 2, bad, tpa_cb) == 1);   /* does not match the page */
+    for (int i = 0; i < 3000 && g_tpa_n < 3; i++) { re_tpa_pump(); tpa_sleep(); }
+    CHECK(g_tpa_n == 3 && g_tpa_st[0] == RE_TPA_OK && g_tpa_w[0] == HW && g_tpa_st[1] == RE_TPA_MISSING && g_tpa_st[2] == RE_TPA_REJECTED);
+    CHECK(re_tpa_inflight() == 0);
+    CHECK(re_tpa_request("texpack_test", "TPTEST", 210, 5, 3, ref, tpa_cb) == 1);   /* cancelled (level change): never handed over */
+    re_tpa_cancel();
+    for (int i = 0; i < 300; i++) { re_tpa_pump(); tpa_sleep(); }
+    CHECK(g_tpa_n == 3 && g_tpa_st[3] == -1 && re_tpa_inflight() == 0); }
   { /* v2.27: оверлей неба — <пак>/sky.txt называет подкаталог, его файлы важнее основного пака; RE_TEXPACK_SKY=0 — выкл. */
     char od[256]; CHECK(re_texpack_overlay("texpack_test", od, sizeof od) == NULL);
     mkdir("texpack_test/sky_t", 0777); mkdir("texpack_test/sky_t/tptest", 0777);
