@@ -1,57 +1,30 @@
-Driver (1999) — нативная сборка для macOS (Apple Silicon, arm64)
+Driver — native macOS app for Apple Silicon (M1/M2/M3/M4), macOS 14 or later
 
-Файлы игры в сборку НЕ входят: нужна ваша копия игры (папка Data_Files с диска/установки).
+Personal DMG: dist/Driver-AppleSilicon.dmg
+Open the disk image, drag Driver.app onto Applications, eject the image, then open Driver.
+The personal installer includes original game data, HD textures, SDL runtimes, controller support,
+and damage vibration. No Homebrew, Python or Rosetta installation is needed on the receiving Mac.
 
-Куда положить Data_Files (игра ищет файл Data_Files/FSIN.DAT по порядку):
-  1) путь из параметра:            ./driver --data /путь/к/Data_Files
-  2) текущий каталог:              ./Data_Files
-  3) рядом с бинарником driver:    <каталог driver>/Data_Files
-  4) для Driver.app:               Driver.app/Contents/Resources/Data_Files
-                                   или рядом с приложением: <папка с Driver.app>/Data_Files
-Игра пишет в каталог данных (config.dat, debug.log, SAVES/, Scripts/, ReplayData/) — лучше отдельный каталог запуска
-с симлинками на файлы Data_Files и копиями Scripts и ReplayData (см. README.md, раздел «Данные игры»).
+This personal build is ad-hoc signed, not Apple-notarized. If macOS blocks it after opening,
+use System Settings > Privacy & Security > Open Anyway (https://support.apple.com/102445).
 
-Сборка из исходников:
-  brew install cmake sdl2                     # Homebrew ставит sdl2-compat (SDL2 API поверх SDL3)
-  cd re && ./build.sh native                  # -> re/build-native/driver (+ ctest)
-  cmake -S re -B re/build-app -DRE_MACOS_BUNDLE=ON && cmake --build re/build-app   # -> Driver.app
+Saves and settings: ~/Library/Application Support/Driver/
+  driver.cfg: graphics settings
+  GameData/: config.dat, SAVES, Scripts, ReplayData, and links to the installed assets
+Existing saves/settings are kept when replacing or moving Driver.app.
 
-Готовый Driver.app из GitHub Actions (артефакт driver-macos-arm64, Driver-macos-arm64.zip) подписан только ad-hoc:
-при первом запуске — правый клик → «Открыть», либо: xattr -dr com.apple.quarantine Driver.app
-В бинарнике re/build-native/driver SDL берётся из Homebrew; в Driver.app из CI вложены libSDL2-2.0.0.dylib (sdl2-compat) и libSDL3.0.dylib.
+Controls:
+  Menus: arrows / Enter / Esc; gamepad stick or D-pad, A confirms, B goes back.
+  Driving: arrows, Space handbrake; original keyboard bindings also work.
+  Gamepad: stick steering, RT throttle, LT brake/reverse, A/B handbrake,
+  X burnout, Y camera, stick click horn, Menu pause. Crashes trigger vibration.
+  Cmd+Enter: window/fullscreen. Cmd+Shift+Enter: toggle FBO. Cmd+Q: quit.
+  RE_RUMBLE=0 disables vibration. RE_GAMEPAD=0 disables native controller input.
 
-Управление (v2.14): езда — стрелки (↑ газ, ↓ тормоз/назад, ←/→ руль), пробел — ручник; оригинальные ' / Z X Enter тоже работают.
-Меню — стрелки, Enter, Esc. Клавиши по физическому положению: раскладка не важна.
-Экран (v2.14): по умолчанию полный экран в нативном разрешении (кадр 4:3 с полосами по бокам). Cmd+Enter — окно/полный экран.
-  RE_WINDOWED=1 — в окне, RE_RES=1440x1080 — размер окна, RE_FULLSCREEN=1 — полный экран. Cmd+Q — выход.
-Если клавиши не работают: RE_INPUTDBG=1 ./Driver.app/Contents/MacOS/Driver  → пришлите ~/Library/Logs/driver_input.log
+Build a personal installer (from the repository root):
+  python3 scripts/package_macos.py --data /path/to/Data_Files --texpack /path/to/driver-texpack
+  Optional: --profile /path/to/current/run/directory to seed settings and progress.
+  Full instructions and checks: docs/MACOS_DMG.md
 
-Интервью в гараже (Undercover, v2.25): Burnout — клавиша \ (обратная косая черта), ручник — Enter, тормоз — / или ↓;
-  газ и руль — как в езде (↑ или ', ←/→ или Z/X).
-
-Тёмный экран, хотя звук есть (v2.24):
-  1) запустите в окне:                RE_WINDOWED=1 ./Driver.app/Contents/MacOS/Driver
-  2) если тёмно и в окне — без FBO:     RE_WINDOWED=1 RE_FBO=0 ./Driver.app/Contents/MacOS/Driver
-     (или в driver.cfg: preset = safe — то же, что original, но без FBO; fullscreen = 0 — всегда окно)
-  3) подробный журнал:                 RE_GFXDBG=1 ./Driver.app/Contents/MacOS/Driver
-     и пришлите ~/Library/Logs/driver_gfx.log (пишется всегда, RE_GFXDBG=1 — подробнее; на Linux — ~/.config/driver/driver_gfx.log).
-  Игра сама проверяет первые кадры: если через FBO в окне пусто — переходит на прямой рендер и (если полный экран
-  не задан явно) в окно; в журнале это строки «ОТКАТ». Cmd+Shift+Enter — FBO вкл./выкл. на лету, Cmd+Enter — окно/полный экран.
-  Полный экран: RE_FULLSCREEN=desktop (по умолчанию, как раньше) или RE_FULLSCREEN=exclusive (смена режима дисплея).
-
-Статус: сборка, selftest и inputtest проверены в CI на macos-14 (arm64). v2.13 на Mac M1 (Роман): окно есть, управление не работало;
-v2.14 — исправления ввода и нативное разрешение, на реальном Mac ещё не проверено.
-
-Заезд маленьким прямоугольником 4:3 по центру окна, с чёрными полями (v2.26):
-  1) обновите до v2.26 и запустите как обычно (окно или полный экран) — 3D и HUD должны занимать всё окно;
-  2) если поля остались — пришлите ~/Library/Logs/driver_gfx.log: в нём строки «буфер окна WxH (окно WxH точек, плотность …)»
-     и «кадр игры 640x480 (Hor+ S=…) → WxH+X+Y в цели WxH» (при полях — пометка «ВНИМАНИЕ»), по ним видно, где теряется размер.
-  Разрешение из меню игры (Gfx Details / config.dat, напр. 1024x768) в native больше не уменьшает кадр: игра считает в 640x480,
-  а вывод идёт в полном разрешении окна (Retina — в пикселях). Вернуть как в оригинале: game_res = original в driver.cfg
-  (~/Library/Application Support/Driver/driver.cfg) или RE_GAME_RES=original.
-
-Небо (v2.27):
-  Тонкий косой шов в небе исправлен автоматически; вернуть как в оригинале — RE_SKYFIX=0.
-  HD-небо из пака: в паке (texpack) два варианта — sky_hd (перерисованное по оригиналу, по умолчанию) и sky_cc0
-  (настоящие панорамы неба Poly Haven, CC0). Чтобы выбрать sky_cc0, положите в каталог пака файл sky.txt со словом
-  sky_cc0 или запустите с RE_TEXPACK_SKY=sky_cc0 (RE_TEXPACK_SKY=0 — без варианта).
+A bare app built without packaged data still supports --data /path/to/Data_Files,
+or Data_Files inside Contents/Resources. That developer mode writes into the selected data folder.

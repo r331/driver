@@ -122,6 +122,8 @@ cmake -S . -B build-app -DCMAKE_BUILD_TYPE=Release -DRE_MACOS_BUNDLE=ON && cmake
 или рядом с `Driver.app` — подробно в [re/README_macOS.txt](re/README_macOS.txt). Готовый `Driver.app` из CI (артефакт `driver-macos-arm64`)
 подписан только ad-hoc: первый запуск — правый клик → «Открыть» или `xattr -dr com.apple.quarantine Driver.app`.
 
+**Installer for another Apple Silicon Mac:** `scripts/package_macos.py` builds a self-contained DMG with your original game data and optional HD textures. Install by dragging Driver.app to Applications; saves stay in Application Support. The local HD installer is `dist/Driver-AppleSilicon.dmg`. See [packaging and verification](docs/MACOS_DMG.md).
+
 **Что запускается в CI** (файлов игры там нет): `ctest -L nodata` — `driver --inputtest` (v2.14: цикл событий в главном потоке —
 `pthread_main_np`, событие клавиши через `SDL_PushEvent` → разбор событий игры → DIK, Cmd+Enter, биты езды стрелками, вписывание кадра)
 и `driver --selftest`, модульные проверки перенесённых функций

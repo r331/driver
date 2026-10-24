@@ -32,6 +32,11 @@ endif()
 set_target_properties(SDL2 SDL3-shared PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${driver_sdl_runtime}"
   RUNTIME_OUTPUT_DIRECTORY "${driver_sdl_runtime}")
+if(APPLE AND RE_MACOS_BUNDLE)
+  # Keep the developer's absolute build directory out of the shipped SDL loader.
+  set_target_properties(SDL2 SDL3-shared PROPERTIES
+    BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "@loader_path")
+endif()
 if(UNIX AND NOT APPLE)
   # v2.32: only $ORIGIN (no absolute build path). sdl2-compat dlopen()s
   # libSDL3.so.0, and glibc applies the caller's RUNPATH, so libSDL2 finds the

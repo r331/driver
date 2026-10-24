@@ -18,6 +18,10 @@ else()
   # GL-функции берутся через SDL_GL_GetProcAddress (platform/sdl/plat_render.c) — с libGL/OpenGL.framework не линкуемся.
   option(RE_MACOS_BUNDLE "macOS: собрать Driver.app (MACOSX_BUNDLE)" OFF)
   if(APPLE)
+    if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+      set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "Minimum supported macOS version" FORCE)
+    endif()
+    set(RE_MACOS_MIN_VERSION "${CMAKE_OSX_DEPLOYMENT_TARGET}")
     # v2.13: Homebrew SDL2 (/opt/homebrew на arm64, /usr/local на x86_64)
     foreach(p /opt/homebrew /usr/local)
       if(EXISTS ${p}/lib/cmake/SDL2 OR EXISTS ${p}/opt/sdl2)
@@ -51,25 +55,33 @@ else()
   list(APPEND NATIVE_SRC platform/native/diagnostics.c)
   # v2.34: x87 rounding of Game.exe (truncate after 005283e2 / 0052840c) for lrintf & co. in the ported code — game/fpucw.h
   set_source_files_properties(${GAME_SRC} PROPERTIES COMPILE_OPTIONS "-include;${CMAKE_CURRENT_SOURCE_DIR}/game/fpucw.h")
-  execute_process(COMMAND git rev-parse --short HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT_VARIABLE RE_BUILD_REV OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
-  if(NOT RE_BUILD_REV)
-    set(RE_BUILD_REV unknown)
-  endif()
-  execute_process(COMMAND git diff --quiet HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    RESULT_VARIABLE RE_BUILD_DIRTY OUTPUT_QUIET ERROR_QUIET)
-  if(RE_BUILD_DIRTY EQUAL 1)
-    string(APPEND RE_BUILD_REV "-dirty")
+  set(RE_BUILD_LABEL "" CACHE STRING "Override the diagnostics build revision for private packaging")
+  if(RE_BUILD_LABEL)
+    set(RE_BUILD_REV "${RE_BUILD_LABEL}")
+  else()
+    execute_process(COMMAND git rev-parse --short HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      OUTPUT_VARIABLE RE_BUILD_REV OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+    if(NOT RE_BUILD_REV)
+      set(RE_BUILD_REV unknown)
+    endif()
+    execute_process(COMMAND git diff --quiet HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      RESULT_VARIABLE RE_BUILD_DIRTY OUTPUT_QUIET ERROR_QUIET)
+    if(RE_BUILD_DIRTY EQUAL 1)
+      string(APPEND RE_BUILD_REV "-dirty")
+    endif()
   endif()
   set_source_files_properties(platform/native/diagnostics.c PROPERTIES COMPILE_DEFINITIONS "RE_BUILD_REV=\"${RE_BUILD_REV}\"")
 
   if(APPLE AND RE_MACOS_BUNDLE)
+    enable_language(OBJC)
+    list(APPEND NATIVE_SRC platform/native/bundle_data.m)
     add_executable(driver MACOSX_BUNDLE ${NATIVE_SRC})
     set_target_properties(driver PROPERTIES OUTPUT_NAME Driver
       MACOSX_BUNDLE_BUNDLE_NAME Driver MACOSX_BUNDLE_GUI_IDENTIFIER org.r331.driver
-      MACOSX_BUNDLE_SHORT_VERSION_STRING 2.16
+      MACOSX_BUNDLE_SHORT_VERSION_STRING 2.32.0
       MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Info.plist.in)   # v2.14: NSPrincipalClass, NSHighResolutionCapable
     target_compile_definitions(driver PRIVATE RE_MACOS_BUNDLE)
+    target_link_libraries(driver PRIVATE "-framework Foundation")
   else()
     add_executable(driver ${NATIVE_SRC})
   endif()
@@ -115,4 +127,12 @@ else()
   # v2.14: ввод — цикл событий в главном потоке, SDL_PushEvent → разбор событий игры → DIK (защёлка, стрелки, Cmd/Alt+Enter)
   add_test(NAME inputtest COMMAND driver --inputtest)
   set_tests_properties(inputtest PROPERTIES LABELS "nodata" ENVIRONMENT "SDL_AUDIODRIVER=dummy;SDL_VIDEODRIVER=dummy")
+  if(APPLE AND RE_MACOS_BUNDLE)
+    find_package(Python3 QUIET COMPONENTS Interpreter)
+    if(Python3_Interpreter_FOUND)
+      add_test(NAME bundletest COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/test_macos_bundle.py $<TARGET_BUNDLE_DIR:driver>)
+      set_tests_properties(bundletest PROPERTIES LABELS "nodata" TIMEOUT 90)
+    endif()
+  endif()
 endif()

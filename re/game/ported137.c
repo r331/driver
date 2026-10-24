@@ -282,6 +282,7 @@ int32_t P137_LoadMcd(const char *name, void *dst, int32_t skip_a, int32_t skip_b
 static const char *const p137_mcd[4] = { "WALK.MCD", "RUN.MCD", "DIVE.MCD", "SITTING.MCD" };   /* .data 00563714 */
 int32_t P137_MotionInit(void) {
   P124_DebugLog("\nAttempting to initialise motion capture data...");
+  P54_FreeTab4();
   P106_PartOn = 1;
   P73_CF56BC = P20_FindNameNoCase("PED1BASE");
   P73_D00214 = P20_FindNameNoCase("PED2BASE");
@@ -300,15 +301,15 @@ int32_t P137_MotionInit(void) {
   P100_PartRotB -= P73_D00214;
   P137_PedHeadA -= P100_PartModelA;
   P137_PedHeadB -= P100_PartModelB;
-  for (int i = 0; i < 4; i++) P54_Tab4[i] = NULL;
   for (int i = 0; i < 4; i++) {
     P54_Tab4[i] = P98_DebugMalloc(0x80002, "D:\\Driver\\Game\\motion_c.c", 0x101);
-    if (P54_Tab4[i] == NULL) { P106_PartOn = 0; return 0; }
+    if (P54_Tab4[i] == NULL) { P54_FreeTab4(); P106_PartOn = 0; return 0; }
     if (i == 0 && MenuOptBDFA58 != 0)
       P103_PathLen[0] = P137_LoadMcd("RUSSJUMP.MCD", P54_Tab4[0], P137_McdSkipA[0], P137_McdSkipB[0]);
     else
       P103_PathLen[i] = P137_LoadMcd(p137_mcd[i], P54_Tab4[i], P137_McdSkipA[i], P137_McdSkipB[i]);
     if (P103_PathLen[i] == 0) {
+      P54_FreeTab4();
       P106_PartOn = 0;
       P124_DebugLog("Unable to Load file!  Pedestrians have been disabled.");
       return 0;
@@ -379,7 +380,9 @@ int32_t P137_LoadTsd(const char *name) {
   P41_Arena = (uint32_t)(uintptr_t)base;
 #else
   p137_tsd = base;
-  P41_Arena = base != NULL ? re_ptr_register_dyn(base, (uint32_t)(arena + 0xffff)) : 0;   /* v2.04: вся арена (re_addr давал область 1 байт) */
+  /* P98_DebugMalloc already registered the entire allocation. Registering it
+     again changes its address and strands the original allocation record. */
+  P41_Arena = re_addr(base);
 #endif
   P41_Offset = (int32_t)((0x10000u - ((uint32_t)(uintptr_t)base & 0xffffu)) & 0xffffu);
   P54_MapAPtr = P98_DebugMalloc(names << 4, "D:\\Driver\\Game\\frontend\\frontend.c", 0x3c0);

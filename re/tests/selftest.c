@@ -30,6 +30,9 @@
 #include "../game/ported47.h"
 #include <stdlib.h>
 #include <sys/stat.h>
+#ifndef _WIN32
+#include <unistd.h>
+#endif
 #include "../game/ported21.h"
 #include "../game/ported22.h"
 #include "../game/ported23.h"
@@ -786,6 +789,24 @@ static int test_p27(void) {
   fclose(tf); free(src); free(dst);
   /* утечки: счётчики равны — ничего не делает */
   P27_MemAllocated = P27_MemFreed = 5; P27_MemLeakReport();
+  /* Leak log strings are registered 32-bit game addresses, not host pointers. */
+  {
+    p27_memtab_t saved; memcpy(saved, P27_MemTab, sizeof saved);
+    int allocated = P27_MemAllocated, freed = P27_MemFreed;
+    char *block = DebugMalloc(16, "p27", 1), *log = DebugMalloc(32, "p27", 2);
+    if (!block || !log) { DebugFree(block); DebugFree(log); return 1; }
+    strcpy(log, "synthetic leak log");
+    memset(P27_MemTab, 0, sizeof saved);
+    P27_MemTab[0] = re_addr(block); P27_MemTab[1] = 16; P27_MemTab[2] = re_addr(log);
+    P27_MemAllocated = 16; P27_MemFreed = 0;
+    P27_MemLeakReport();
+    const char *text, *title; plat_message_box_last(&text, &title);
+    if (!strstr(text, "synthetic leak log") || strcmp(title, "MEMORY FAULT") || P27_MemTab[0] || P27_MemTab[2]) f++;
+    /* CrtFree is an accounting stub in selftest; release the fixture here. */
+    re_ptr_unregister(block); re_ptr_unregister(log); DebugFree(block); DebugFree(log);
+    memcpy(P27_MemTab, saved, sizeof saved);
+    P27_MemAllocated = allocated; P27_MemFreed = freed;
+  }
   /* вмятины: имена текстур запрашиваются 66 раз, буфер 0x20000 выделяется */
   S_00D1192C = 3; P27_LoadDentTextures();
   if (D_00d17ec8 == NULL) f++;
@@ -1813,6 +1834,17 @@ static int test_p54(void) {
   /* 004f3c16 / 0051aacd / 0051aa5b: таблицы буферов */
   P54_Tab4[0] = DebugMalloc(16, "t", 1); P54_Tab4[2] = DebugMalloc(16, "t", 2); P54_Tab4[1] = NULL; P54_Tab4[3] = NULL;
   P54_FreeTab4(); CK(P54_Tab4[0] == NULL && P54_Tab4[2] == NULL);
+  { /* Motion buffers must leave both the allocation table and pointer registry. */
+    uint32_t addr[4]; int32_t freed = P27_MemFreed;
+    for (int i = 0; i < 4; i++) {
+      P54_Tab4[i] = P98_DebugMalloc(0x80002, "motion_c.c", 257);
+      addr[i] = re_addr(P54_Tab4[i]);
+    }
+    P54_FreeTab4();
+    for (int i = 0; i < 4; i++) CK(P54_Tab4[i] == NULL && re_ptr(addr[i]) == NULL);
+    CK(P27_MemFreed == freed + 4 * 0x80002);
+    P54_FreeTab4(); CK(P27_MemFreed == freed + 4 * 0x80002);
+  }
   P54_AllocRoadbits(); CK(P54_RoadId[0] == -1 && P54_RoadId[3] == -1 && P54_RoadA[3] != NULL && P54_RoadB[0] != NULL);
   P54_FreeRoadbits(); CK(P54_RoadA[0] == NULL && P54_RoadB[3] == NULL);
   P54_GridN = 4; P54_Cnt1E0 = 0x10;
@@ -1967,6 +1999,20 @@ static int test_p56(void) {
   /* 0040c165 */
   P41_Arena = 0; P54_MapAPtr = DebugMalloc(16, "t", 1); P54_MapA = 4; Q00B87E90 = 0; G6_00B87EFC = 3; P56_AA30 = 0;
   P56_ResetFrontend(); CK(P54_MapAPtr == NULL && P54_MapA == 0 && P56_AA30 == 0x3f000000u && G6_00B87EFC == 0);
+  /* A front-end TSD arena is not the level loader's cached RAM pointer.
+     Both allocations must also leave the tracking table and address registry. */
+  {
+    void *arena = P98_DebugMalloc(32, "p56", 1);
+    void *icons = P98_DebugMalloc(16, "p56", 2);
+    CK(arena != NULL && icons != NULL);
+    uint32_t arena_addr = re_addr(arena), icons_addr = re_addr(icons);
+    int freed = P27_MemFreed;
+    P41_Arena = arena_addr; P41_Offset = 32; P54_MapAPtr = icons; P54_MapA = 1;
+    P56_ResetFrontend();
+    CK(P41_Arena == 0 && P41_Offset == 0 && P54_MapAPtr == NULL && P54_MapA == 0);
+    CK(re_ptr(arena_addr) == NULL && re_ptr(icons_addr) == NULL && P27_MemFreed == freed + 48);
+    P56_ResetFrontend(); CK(P27_MemFreed == freed + 48);
+  }
   /* 004f5a57 */
   P56_Blk84[1] = 0xf1; P56_Blk84[2] = 0x32; P56_ChaseTick(); CK(P56_Blk84[2] == 0x33);
   P56_ChaseTick(); CK(P56_Blk84[2] == 0x33);
@@ -4100,6 +4146,42 @@ static int test_p98(void) {
   { uint8_t *n = (uint8_t *)DebugMalloc(0x24, "t", 1), *o = (uint8_t *)DebugMalloc(0x60, "t", 2), *base = (uint8_t *)DebugMalloc(8, "t", 3);   /* 004d0102 */
     memset(n, 0, 0x24); memset(o, 0, 0x60); re_wr_ptr(n + 0x1c, o); re_wr_ptr(o + 0x50, base);
     P15_SetListHead(n); P28_EventCount = 0; P98_ScriptFreeAll(); CK(P15_ListHead == NULL && P28_EventCount == 0); }
+  { /* compiler.c:641 event objects, command buffers and MULTIEVENT aliases
+       must retire their allocation records and log strings on every unload. */
+    uint8_t *saved_head = P15_ListHead; int32_t saved_count = P28_EventCount;
+    int32_t balance = P27_MemAllocated - P27_MemFreed, live = G2_00B2C3A4;
+    P28_EventCount = 0;
+    for (int cycle = 0; cycle < 2; cycle++) {
+      const int sizes[] = {0x24, 0x24, 0x60, 0x60, 0x60, 8, 12};
+      uint8_t *blocks[7]; uint32_t addresses[7], logs[7] = {0};
+      for (int i = 0; i < 7; i++) {
+        blocks[i] = P98_DebugMalloc(sizes[i], "D:\\Driver\\Game\\compiler.c", i >= 2 && i <= 4 ? 641 : 1219);
+        CK(blocks[i] != NULL); if (!blocks[i]) return 1;
+        addresses[i] = re_addr(blocks[i]);
+        for (int j = 0; j < 0x1000; j++)
+          if (P27_MemTab[j * 3] == addresses[i]) logs[i] = P27_MemTab[j * 3 + 2];
+        CK(logs[i] != 0);
+      }
+      re_wr_ptr(blocks[0] + 0x20, blocks[1]);
+      re_wr_ptr(blocks[0] + 0x1c, blocks[2]);
+      re_wr_ptr(blocks[2] + 0x58, blocks[3]);
+      re_wr_ptr(blocks[2] + 0x50, blocks[5]);
+      re_wr_ptr(blocks[3] + 0x50, blocks[6]);
+      /* A duplicate event borrows its original's command buffer. */
+      wr16t(blocks[1], 0x20);
+      re_wr_ptr(blocks[1] + 0x1c, blocks[4]);
+      re_wr_ptr(blocks[4] + 0x50, blocks[5]);
+      P15_SetListHead(blocks[0]); P98_ScriptFreeAll();
+      CK(P15_ListHead == NULL && G00D12408 == 0);
+      CK(P27_MemAllocated - P27_MemFreed == balance && G2_00B2C3A4 == live);
+      for (int i = 0; i < 7; i++) {
+        CK(re_ptr(addresses[i]) == NULL && re_ptr(logs[i]) == NULL);
+        for (int j = 0; j < 0x1000; j++) CK(P27_MemTab[j * 3] != addresses[i]);
+      }
+      int32_t freed = P27_MemFreed; P98_ScriptFreeAll(); CK(P27_MemFreed == freed);
+    }
+    P15_SetListHead(saved_head); P28_EventCount = saved_count;
+  }
   { P98_CreditsInit();   /* 004a9850 */
     CK(P98_Credits[0].y == 0x1e0 && P98_Credits[1].y == 0x1e0 + 74 && P98_Credits[2].y == 0x1e0 + 74 + 54 && P98_Faces[2].id == 0xffff && P98_FaceCur == 0);
     CK(strcmp((const char *)re_ptr(P98_FaceNames[0]), "MARTIN") == 0 && strcmp((const char *)re_ptr(P98_FaceNames[3]), "STEVEB") == 0);
@@ -4722,6 +4804,36 @@ static int test_p102(void) {
     G6_00B87EB0 = sv[9]; G6_00B87EAC = sv[10]; P99_Cars[0].pos[0] = sv[11]; P99_Cars[0].pos[2] = pz; P63_Scale = sc; P94_DirTab[0][0] = d0; P94_DirTab[0][1] = d1;
     P54_RoadA[0] = ra; P54_RoadB[0] = rb; memcpy(P75_Spawn, sp, 12); }
   { int32_t sn = P11_00b5a8e8; P11_00b5a8e8 = 0; CK(P102_RoadSide(0.0f, 0.0f) == -1); P11_00b5a8e8 = sn; }   /* 0051a750 */
+  { /* More than 105 prop marks used to overwrite 010ffb40 (the effect-list
+       head) in the scratch area beginning at 010fca00. Keep all B records. */
+    uint8_t scratch[128 * 0x78], obj[0x20] = {0};
+    memset(scratch, 0x5a, sizeof scratch);
+    re_ptr_register(0x010fca00u, scratch, sizeof scratch);
+    int32_t cursor = G01105D80, count = G01129580, bcursor = G01105D60, bcount = G010FFD04;
+    int32_t on = P52_Ones3, bon = P96_ObjBOn, mark = P13_00b201dc;
+    float cx = P44_CamX, cy = P44_CamY, cz = P44_CamZ;
+    p44_m9_t view; memcpy(view, P44_ViewMatT, sizeof view);
+    uint8_t *euler = P56_EulerTab;
+    float identity[16] = {1,0,0,0,1,0,0,0,1};
+    P56_EulerTab = (uint8_t *)identity;
+    memcpy(P44_ViewMatT, identity, sizeof view); P44_CamX = P44_CamY = P44_CamZ = 0;
+    float z = 1000; memcpy(obj + 0x10, &z, 4);
+    P52_Ones3 = P96_ObjBOn = 1; P13_00b201dc = 0;
+    G01105D80 = 0x010fca00; G01129580 = 0;
+    G01105D60 = (int32_t)re_addr(P95_ObjB); G010FFD04 = 0;
+    for (int i = 0; i < 128; i++) P102_ObjMark(obj, (float)i, 20, 30, 0x200);
+    uint32_t head; memcpy(&head, scratch + (0x010ffb40 - 0x010fca00), 4);
+    CK(head == 0x5a5a5a5au && G01129580 == 128 && G010FFD04 == 128);
+    for (int i = 0; i < 128; i++) {
+      float pos[3]; memcpy(pos, P95_ObjB + i * 0x78, sizeof pos);
+      CK(pos[0] == (float)i && pos[1] == 20 && pos[2] == 1020);
+    }
+    re_ptr_unregister(scratch); re_ptr_unregister(obj);
+    G01105D80 = cursor; G01129580 = count; G01105D60 = bcursor; G010FFD04 = bcount;
+    P52_Ones3 = on; P96_ObjBOn = bon; P13_00b201dc = G00B201DC = MenuVarB201DC = mark;
+    P56_EulerTab = euler; memcpy(P44_ViewMatT, view, sizeof view);
+    P44_CamX = cx; P44_CamY = cy; P44_CamZ = cz;
+  }
   { static uint8_t car[0x148]; float o[16]; memset(car, 0, sizeof car); memset(o, 0, sizeof o);   /* 005158cf */
     p96_rottab_t *rt = malloc(sizeof(p96_rottab_t)); memcpy(*rt, P96_RotTab, sizeof *rt); memset(P96_RotTab, 0, sizeof P96_RotTab);
     int32_t v = 1000; memcpy(car + 0xc8, &v, 4); v = 2000; memcpy(car + 0xd0, &v, 4);
@@ -5279,6 +5391,14 @@ static int test_p126(void) {
     CK(P58_Cnt4EFC03 == 2 && P58_Tab4EFC03 != NULL);
     if (P58_Tab4EFC03) { CK(P58_Tab4EFC03[0].a == 7 && P58_Tab4EFC03[0].c == 2 && ((int32_t *)P58_Tab4EFC03[0].p)[1] == 12);
       CK(P58_Tab4EFC03[1].a == 9 && P58_Tab4EFC03[1].c == 1 && ((int32_t *)P58_Tab4EFC03[1].p)[0] == 13); }
+    uint32_t table_addr = re_addr(P58_Tab4EFC03);
+    uint32_t list_addr[2] = { re_addr(P58_Tab4EFC03[0].p), re_addr(P58_Tab4EFC03[1].p) };
+    int32_t freed = P27_MemFreed;
+    P58_FreeRecs();
+    CK(P58_Tab4EFC03 == NULL && P58_Cnt4EFC03 == 0);
+    CK(P27_MemFreed == freed + 2 * (int32_t)sizeof(p58_rec_t) + 12);
+    CK(re_ptr(table_addr) == NULL && re_ptr(list_addr[0]) == NULL && re_ptr(list_addr[1]) == NULL);
+    P58_FreeRecs(); CK(P27_MemFreed == freed + 2 * (int32_t)sizeof(p58_rec_t) + 12);
     P58_Tab4EFC03 = t0; P58_Cnt4EFC03 = n0; remove(fn);
     P126_ReadMapPals("p126_missing.bin"); CK(P58_Tab4EFC03 == t0); }
   { uint8_t car[0x148]; memset(car, 0, sizeof car); car[0x78 + 8] = 1;
@@ -5550,6 +5670,56 @@ static int test_p137(void) {
   { CK(P137_LoadTsd("/tmp/re_p137_none.tsd") == 0);
     const char *fn = "/tmp/re_p137_bad.tsd"; FILE *o = fopen(fn, "wb"); fwrite("XSD 1234", 1, 8, o); fclose(o);
     CK(P137_LoadTsd(fn) == 0); remove(fn); }
+  { /* A valid one-page TSD, loaded and released twice like menu/game transitions. */
+    const char *fn = "/tmp/re_p137_owned.tsd"; FILE *o = fopen(fn, "wb");
+    uint8_t pixels[0x10000] = {0}; float ver = 1;
+    int16_t hdr[4] = {0, 0, 0x100, 1}; int32_t block[5] = {0x10014, 0x14, 0x14, 0, 0};
+    fwrite("TSD ", 1, 4, o); fwrite(&ver, 4, 1, o); fwrite(hdr, 2, 4, o);
+    fwrite(pixels, 1, 0x800, o); fwrite(block, 4, 5, o); fwrite(pixels, 1, sizeof pixels, o); fclose(o);
+    uint32_t arena = P41_Arena; int32_t offset = P41_Offset, names = P54_MapA, cd = Q00B87E90;
+    void *map = P54_MapAPtr; p65_tex_t tex = P65_Texs[0];
+    int32_t balance = P27_MemAllocated - P27_MemFreed;
+    Q00B87E90 = 0; P41_Arena = 0; P54_MapAPtr = NULL;
+    for (int cycle = 0; cycle < 2; cycle++) {
+      CK(P137_LoadTsd(fn) == 1);
+      uint32_t addr = P41_Arena; void *base = re_ptr(addr); int tracked = 0;
+      for (int i = 0; i < 0x1000; i++) if (P27_MemTab[i * 3] == addr) tracked++;
+      CK(base != NULL && tracked == 1 && re_ptr(addr + 0x1fffe) == (uint8_t *)base + 0x1fffe);
+      P56_ResetFrontend();
+      CK(P41_Arena == 0 && P54_MapAPtr == NULL && re_ptr(addr) == NULL);
+      CK(P27_MemAllocated - P27_MemFreed == balance);
+    }
+    P41_Arena = arena; P41_Offset = offset; P54_MapAPtr = map; P54_MapA = names;
+    P65_Texs[0] = tex; Q00B87E90 = cd; remove(fn);
+  }
+#ifndef _WIN32
+  { /* Reinitialisation and a missing second MCD must release partial loads. */
+    char cwd[4096], tmp[] = "/tmp/re_p137_motion_XXXXXX";
+    if (!getcwd(cwd, sizeof cwd) || !mkdtemp(tmp) || chdir(tmp)) return f + 1;
+    char *names = P20_Names; int32_t count = P20_Count, mode = D_00b87e30, cheat = MenuOptBDFA58;
+    p54_p4_t saved; memcpy(saved, P54_Tab4, sizeof saved); memset(P54_Tab4, 0, sizeof saved);
+    p137_i5_t skipa, skipb; memcpy(skipa, P137_McdSkipA, sizeof skipa); memcpy(skipb, P137_McdSkipB, sizeof skipb);
+    memset(P137_McdSkipA, 0, sizeof skipa); memset(P137_McdSkipB, 0, sizeof skipb);
+    char models[] = "PED1BASE\0PED2BASE\0PED3BASE\0PED1HEAD\0PED2HEAD\0PED3HEAD\0";
+    P20_Names = models; P20_Count = 6; D_00b87e30 = 0; MenuOptBDFA58 = 0;
+    const char *files[] = {"WALK.MCD", "RUN.MCD", "DIVE.MCD", "SITTING.MCD"};
+    for (int i = 0; i < 4; i++) {
+      FILE *o = fopen(files[i], "wb"); int32_t h[3] = {0, 0, 1}; float pos[3] = {0, 0, 1};
+      fwrite(h, 4, 3, o); fwrite(pos, 4, 3, o); fclose(o);
+    }
+    int32_t balance = P27_MemAllocated - P27_MemFreed;
+    CK(P137_MotionInit() == 1); CK(P137_MotionInit() == 1);
+    CK(P27_MemAllocated - P27_MemFreed == balance + 4 * 0x80002);
+    remove("RUN.MCD"); CK(P137_MotionInit() == 0 && P106_PartOn == 0);
+    for (int i = 0; i < 4; i++) CK(P54_Tab4[i] == NULL);
+    CK(P27_MemAllocated - P27_MemFreed == balance);
+    for (int i = 0; i < 4; i++) remove(files[i]);
+    P20_Names = names; P20_Count = count; D_00b87e30 = mode; MenuOptBDFA58 = cheat;
+    memcpy(P54_Tab4, saved, sizeof saved); memcpy(P137_McdSkipA, skipa, sizeof skipa); memcpy(P137_McdSkipB, skipb, sizeof skipb);
+    if (chdir(cwd)) return f + 1;
+    rmdir(tmp);
+  }
+#endif
   /* 004a1037: номер машины вне таблицы и режим камеры 8 без записи — выход без изменений */
   { uint8_t m = P59_Mode1137324; int32_t gn = P123_GlowN;
     P137_DrawCar(-1, -1); P137_DrawCar(99, -1);

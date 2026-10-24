@@ -9,6 +9,7 @@
 #include "smallfuncs.h"
 #include "engine.h"
 #include "crt.h"
+#include "reptr.h"
 #include "unported.h"
 #include <stdio.h>
 #include <string.h>
@@ -145,7 +146,8 @@ void P27_MemLeakReport(void) {
     if (e[2] == 0) {
       snprintf(msg, sizeof msg, "%d bytes of memory were not released from address $%x!\nThis is due to poor use of malloc / free - resolve immediately!", (int)e[1], (unsigned)e[0]);
     } else {
-      snprintf(msg, sizeof msg, "%d bytes of memory were not released from address $%x!\nThis is due to poor use of malloc / free - resolve immediately!\nMemory Log: %s", (int)e[1], (unsigned)e[0], (const char *)(uintptr_t)e[2]);
+      const char *log = (const char *)re_ptr(e[2]);
+      snprintf(msg, sizeof msg, "%d bytes of memory were not released from address $%x!\nThis is due to poor use of malloc / free - resolve immediately!\nMemory Log: %s", (int)e[1], (unsigned)e[0], log ? log : "unavailable");
       CrtFree_0052CB70(e[2]);
       e[2] = 0;
     }

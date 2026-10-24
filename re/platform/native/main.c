@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
+#ifdef RE_MACOS_BUNDLE
+#include "bundle_data.h"
+#endif
 void plat_dd_stub_enum(int n_dd, int n_dev, uint32_t fm);
 void plat_input_enable(int on);   /* v2.03: platform/sdl/plat_di.c */
 void plat_fs_mkdirs(int on);      /* v2.04: platform/sdl/plat_sys.c */
@@ -36,11 +39,11 @@ static int file_exists(const char *dir, const char *name) {
     FILE *f = fopen(p, "rb"); if (f) fclose(f); return f != NULL;
 }
 int main(int argc, char **argv) {
-    const char *data = "Data_Files"; int selftest = 0, frames = -1, idle = 0;
+    const char *data = "Data_Files"; int selftest = 0, frames = -1, idle = 0, explicit_data = 0;
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "--selftest")) selftest = 1;
         else if (!strcmp(argv[i], "--inputtest")) return re_input_test();
-        else if (!strcmp(argv[i], "--data") && i + 1 < argc) data = argv[++i];
+        else if (!strcmp(argv[i], "--data") && i + 1 < argc) { data = argv[++i]; explicit_data = 1; }
         else if (!strcmp(argv[i], "--idle")) idle = 1;
         else if (!strcmp(argv[i], "--frames") && i + 1 < argc) frames = atoi(argv[++i]);
     }
@@ -64,6 +67,20 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Не найдены данные игры: укажите папку Data_Files с вашего диска: --data <путь>\n");
         return 1;
     }
+#ifdef RE_MACOS_BUNDLE
+    if (!explicit_data) {
+        static char user_data[4096];
+        int prepared = re_bundle_prepare_data(data, user_data, sizeof user_data);
+        if (prepared < 0) {
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Driver",
+                "Could not create your game data in Application Support. Check free space and folder permissions.", NULL);
+            return 1;
+        }
+        if (prepared) data = user_data;
+    }
+#else
+    (void)explicit_data;
+#endif
     if (!idle) {
         if (chdir(data) != 0) { fprintf(stderr, "Не удалось перейти в %s\n", data); return 1; }
         re_diag_start();

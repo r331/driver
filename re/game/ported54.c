@@ -4,6 +4,7 @@
 #include "ported128.h"
 #include "ported54.h"
 #include "ported33.h"
+#include "ported98.h"
 #include <string.h>
 #ifdef RE_HOOK_BUILD
 #  define P54_STD __attribute__((stdcall))
@@ -217,14 +218,13 @@ void P54_ClearSwap(int32_t n) {
   }
 }
 
-/* P54_FreeTab4 — Game.exe 004f3c16.  Frees the four buffers of P54_Tab4 (TODO(RE): unsure what they hold). */
+/* P54_FreeTab4 — Game.exe 004f3c16. Free the tracked pedestrian animation buffers. */
 void P54_FreeTab4(void) {
   for (int i = 0; i < 4; i++) {
     if (P54_Tab4[i] != NULL) {
-      DebugFree(P54_Tab4[i]);
+      P98_DebugFree(P54_Tab4[i]);
       P54_Tab4[i] = NULL;
     }
-    P54_Tab4[i] = NULL;
   }
 }
 

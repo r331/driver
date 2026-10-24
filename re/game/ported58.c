@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include "menustate.h"
 #include "ported102.h"
+#include "ported98.h"
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
 #pragma push_macro("P58_MenuSel")
@@ -467,8 +468,10 @@ void P58_ItemsDraw(int32_t a) {
 void P58_FreeRecs(void) {
   Dev00424858();
   if (P58_Tab4EFC03 != NULL) {
-    for (int32_t i = 0; i < P58_Cnt4EFC03; i++) DebugFree(P58_Tab4EFC03[i].p);
-    DebugFree(P58_Tab4EFC03);
+    /* P126_ReadMapPals allocates through the tracked allocator. Retire its
+       records as well as the host memory before another level reuses it. */
+    for (int32_t i = 0; i < P58_Cnt4EFC03; i++) P98_DebugFree(P58_Tab4EFC03[i].p);
+    P98_DebugFree(P58_Tab4EFC03);
     P58_Tab4EFC03 = NULL; P58_Cnt4EFC03 = 0;
   }
 }

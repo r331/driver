@@ -162,6 +162,8 @@ int plat_window_open(const char *t,int w,int h,int fs){
         const char *xdg = getenv("XDG_CONFIG_HOME");
         if (xdg && *xdg) snprintf(ud, sizeof ud, "%s/driver", xdg); else if (home) snprintf(ud, sizeof ud, "%s/.config/driver", home);
 #endif
+        const char *profile_override = getenv("RE_USER_DATA_DIR");
+        if (profile_override && *profile_override) snprintf(ud, sizeof ud, "%s", profile_override);
         char *bp = SDL_GetBasePath();
         int errs = re_gfx_load(bp, ud, plat_gfx_err);
         if (bp) SDL_free(bp);
@@ -265,28 +267,37 @@ void plat_screensaver_set(int on){
     g_saver = on?1:0;
     if(SDL_WasInit(SDL_INIT_VIDEO)){ if(g_saver) SDL_EnableScreenSaver(); else SDL_DisableScreenSaver(); }
 }
-#if defined(__GLIBC__)
+#if defined(__GLIBC__) || defined(__APPLE__)
 #include <execinfo.h>
 #endif
 #include <signal.h>
-#if defined(__GLIBC__)
+#if defined(__GLIBC__) || defined(__APPLE__)
+#if defined(__APPLE__)
+#include <sys/ucontext.h>
+#else
 #include <ucontext.h>
+#endif
 #include <dlfcn.h>
 #endif
 /* v2.03: RE_CRASH_BT=1 — стек в stderr перед обработчиком игры (glibc backtrace; адреса — addr2line -f -e driver) */
 static void crash_sig(int sig, siginfo_t *si, void *uc){
     signal(sig,SIG_DFL);
-#if defined(__GLIBC__)
-    if (getenv("RE_CRASH_BT")) {
+#if defined(__GLIBC__) || defined(__APPLE__)
+    if (getenv("RE_CRASH_BT") || getenv("RE_DIAG")) {
         void *bt[48]; int n = backtrace(bt, 48); uintptr_t pc = 0, lr = 0;
         /* v2.10: PC/LR из контекста сигнала — backtrace из обработчика видит только сам обработчик */
-#if defined(__aarch64__)
+#if defined(__APPLE__) && defined(__aarch64__)
+        pc = (uintptr_t)((ucontext_t *)uc)->uc_mcontext->__ss.__pc;
+        lr = (uintptr_t)((ucontext_t *)uc)->uc_mcontext->__ss.__lr;
+#elif defined(__APPLE__) && defined(__x86_64__)
+        pc = (uintptr_t)((ucontext_t *)uc)->uc_mcontext->__ss.__rip;
+#elif defined(__aarch64__)
         pc = (uintptr_t)((ucontext_t *)uc)->uc_mcontext.pc; lr = (uintptr_t)((ucontext_t *)uc)->uc_mcontext.regs[30];
 #elif defined(__x86_64__)
         pc = (uintptr_t)((ucontext_t *)uc)->uc_mcontext.gregs[REG_RIP];
 #endif
         Dl_info di; uintptr_t base = dladdr((void *)crash_sig, &di) ? (uintptr_t)di.dli_fbase : 0;
-        fprintf(stderr, "[crash] сигнал %d, адрес %p, pc +0x%lx lr +0x%lx, стек:\n", sig, si ? si->si_addr : NULL,
+        plat_log("[crash] сигнал %d, адрес %p, pc +0x%lx lr +0x%lx, стек:\n", sig, si ? si->si_addr : NULL,
                 (unsigned long)(pc - base), (unsigned long)(lr - base));
         backtrace_symbols_fd(bt, n, 2);
     }

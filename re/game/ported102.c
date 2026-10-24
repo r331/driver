@@ -1544,9 +1544,16 @@ void P102_ObjMark(const uint8_t *obj, float x, float y, float z, int16_t kind) {
   int32_t sv = P13_00b201dc;
   if (P52_Ones3 != 0) {
     int32_t ang = rd32(obj + 0x18);
+#ifdef RE_HOOK_BUILD
     float *r = (float *)P95_ObjPtr((uint32_t)G01105D80);
-#ifndef RE_HOOK_BUILD
-    if (r == NULL || P56_EulerTab == NULL) return;
+#else
+    /* This record only stages the values copied by P96_AddObjB. The original
+       scratch area starts at 010fca00; record 105's z overwrites the depth-list
+       head at 010ffb40 when extended draw distance includes many marked props.
+       Keep every mark, without writing past that original scratch area. */
+    float scratch[0x78 / sizeof(float)] = {0};
+    float *r = scratch;
+    if (P56_EulerTab == NULL) return;
 #endif
     set_b201dc(1);
     r[0] = x; r[1] = y; r[2] = z;

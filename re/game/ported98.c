@@ -759,10 +759,6 @@ static void cam_set(float x, float y, float z) { P44_CamX = x; P44_CamY = y; P44
   P59_VX = x; P59_VY = y; P59_VZ = z;   /* в native это разные переменные-псевдонимы 00b1c270.. */
 #endif
 }
-/* освобождение блока игры: в native ещё и снять его адрес из реестра */
-/* dfree — local helper: DebugFree of a game block, also removing it from the native address registry. */
-static void dfree(void *p) { if (p == NULL) return; re_ptr_unregister(p); DebugFree(p); }
-
 /* ---- 004d8db4 / 004d8f30: DebugMalloc / DebugFree с таблицей выделений 00b203a0 {адрес, размер, адрес строки журнала} ---- */
 /* reg_block — local helper: registers a native allocation with re_ptr and returns its Game.exe-style address. */
 static uint32_t reg_block(void *p, uint32_t n) {
@@ -816,7 +812,9 @@ void P98_DebugFree(void *p) {
 
 /* ---- 004d0102: освободить список скрипта 00d12408 (узлы 0x24, объекты 0x60, база +0x50) и модели событий ---- */
 /* P98_ScriptFreeAll — Game.exe 004d0102.  Frees the script list 00d12408 (nodes 0x24, objects 0x60, base +0x50) and
-   the event models. */
+   the event models. Compiler nodes and commands use P98_DebugMalloc, so release
+   their allocation records and log strings as well as their native memory.
+   MULTIEVENT copies (flag 0x20) borrow the original event's command buffers. */
 void P98_ScriptFreeAll(void) {
   uint8_t *n = P15_ListHead;
   P15_SetListHead(NULL);
@@ -825,11 +823,11 @@ void P98_ScriptFreeAll(void) {
     uint8_t *o = link(n + 0x1c);
     while (o != NULL) {
       uint8_t *on = link(o + 0x58);
-      if ((rd16(n) & 0x20) == 0) { dfree(link(o + 0x50)); wr32(o + 0x50, 0); }
-      dfree(o);
+      if ((rd16(n) & 0x20) == 0) { P98_DebugFree(link(o + 0x50)); wr32(o + 0x50, 0); }
+      P98_DebugFree(o);
       o = on;
     }
-    dfree(n);
+    P98_DebugFree(n);
     n = next;
   }
   if (P28_EventCount != 0) {

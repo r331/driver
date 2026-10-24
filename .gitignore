@@ -9,7 +9,20 @@ debug.log
 driver_gfx.log
 render_test.png
 render_*.png
+/SAVES/
+/SAVES\\SCORES.HI
 
 # Python
 __pycache__/
 *.pyc
+
+# Local build and packaging artifacts
+/build-native/
+/build-macos-package/
+/dist/
+/work/
+/output/
+/.venv/
+/re/build-native/
+/re/build-app/
+.DS_Store

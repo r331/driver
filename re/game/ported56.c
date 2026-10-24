@@ -5,6 +5,8 @@
 #include "ported116.h"
 #include "ported14.h"
 #include "ported27.h"
+#include "ported98.h"
+#include "reptr.h"
 #include "ported51.h"
 #include "ported8.h"
 #include "crt.h"
@@ -433,8 +435,10 @@ void P56_LoopUpdate(void) {
 
 #ifdef RE_HOOK_BUILD
 #  define P56_ARENA() ((void *)(uintptr_t)P41_Arena)
+#  define P56_FREE(p) DebugFree(p)
 #else
-#  define P56_ARENA() ((void *)P41_RamPtr())
+#  define P56_ARENA() re_ptr(P41_Arena)
+#  define P56_FREE(p) P98_DebugFree(p)
 #endif
 /* 0040c165: сброс состояния при выходе из игры в меню: таймер, CD, звук, буферы страниц и карты. */
 /* P56_ResetFrontend — Game.exe 0040c165, cdecl.  Back to the front end: stop the timer, CD and sounds, free the texture arena and the icon map,
@@ -445,8 +449,10 @@ void P56_ResetFrontend(void) {
   P56_F7E58 = 0;
   if (Q00B87E90 != 0) { P25_CDStop(); P25_CDClose(); }
   P48_ResetAll();
-  if (P41_Arena != 0) { DebugFree(P56_ARENA()); P41_Arena = 0; P41_Offset = 0; }
-  if (P54_MapAPtr != 0) { DebugFree(P54_MapAPtr); P54_MapAPtr = 0; P54_MapA = 0; }
+  /* The front-end TSD and level loader own different allocations. Resolve
+     the current arena, and retire tracked allocations before freeing them. */
+  if (P41_Arena != 0) { P56_FREE(P56_ARENA()); P41_Arena = 0; P41_Offset = 0; }
+  if (P54_MapAPtr != 0) { P56_FREE(P54_MapAPtr); P54_MapAPtr = 0; P54_MapA = 0; }
   P56_AA30 = 0x3f000000u;
   P54_ClearSwap(4);
   P56_Fn406479();

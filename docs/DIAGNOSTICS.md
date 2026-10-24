@@ -135,6 +135,29 @@ The rebuilt native app passes selftest, inputtest, and bundletest. An in-game
 visual recheck was unavailable because this session denied graphics access.
 
 
+## LAX facade flicker (2026-10-20)
+
+The user reported repeated flicker on the LAX terminal buildings in
+`session-20261020-103302-51527/capture-01-frame-004753` and
+`session-20261020-111319-71415/capture-01-frame-000912`. Several attempts to
+change facade grouping, replace the original wall, clip mesh coverage, and
+remove generated backing grids did not resolve the user's hardware rendering
+symptom. Those broader experimental changes were reverted.
+
+At the user's request, only this building material type now uses flat HD
+walls: `LA_01` detail entries on pages 61 and 62 are skipped before loading their
+meshes. This excludes three generated facade/canopy entries from the current
+pack. The ordinary HD texture replacement path is unchanged. Other LA pages
+and identical page numbers in other cities retain their original 3D details.
+The texture pack itself is unchanged, so fetching it will not undo the fallback.
+
+The headless regression checks both excluded LA pages, case-insensitive level
+names, adjacent LA pages, and the same page numbers in other cities. Logs identify
+each excluded entry as `LAX terminal facade kept flat; HD texture retained`.
+Prior replay evidence is retained under `work/lax-repro/` and `work/lax-live/`;
+it is not evidence that the user's Metal-renderer flicker was fixed.
+
+
 ## macOS fullscreen presentation (2026-10-17)
 
 A fullscreen test with FBO enabled showed a black display even though the

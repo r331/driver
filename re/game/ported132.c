@@ -359,6 +359,15 @@ void P132_GameDraw(void) {
     if (P26_FxA != 0) G8_00D17B0C = 0;
     if (P14_00b87ee4 == 0) P133_CamUpdate(1);
 #ifndef RE_HOOK_BUILD
+    if (getenv("RE_POLE_REPRO")) {
+      static const float view[9] = { .814941406f,0,-.578369141f,-.111974299f,.980712891f,-.157775521f,.567214072f,.193603516f,.799223542f };
+      P44_CamX=33567.6523f; P44_CamY=-412.9375f; P44_CamZ=400999.469f;
+      memcpy(P44_ViewMat, view, sizeof view); P44_Transpose(P44_ViewMat,P44_ViewMatT); P59_AngB=3693;
+      P89_DrawMap(0);
+    }
+#endif
+
+#ifndef RE_HOOK_BUILD
     /* v2.19 draw_distance: на время 3D-вида дальняя плоскость (P11_01270c24 и её копия для отсечения полигонов Q01270C24) × m,
        таблица 1/z продолжается за 0xdbba; значения опции (сохранение в config, ползунок меню) не меняются — восстановление перед бликом солнца */
     float dd_far0 = P11_01270c24, dd_q0 = Q01270C24;
