@@ -84,8 +84,16 @@ static void w16(uint8_t *p, int16_t v) { memcpy(p, &v, 2); }
    alive: pos += vel, frame-- (reloaded with 10 when it was 0), life--. */
 /* Запись 0x24 байта: pos xyz @0, vel xyz @0x10, life i16 @0x20, frame i16 @0x22 */
 void P16_StepParticles(void) {
+  int32_t count = P16_ParticleCount;
+#ifndef RE_HOOK_BUILD
+  /* Never walk beyond the particle table if a legacy count is corrupt. */
+  if (count < 0 || count > 1024) {
+    P16_ParticleCount = 0;
+    return;
+  }
+#endif
   uint8_t *p = &P16_ParticleBase;
-  for (int n = P16_ParticleCount; n != 0; n--, p += PART_SIZE) {
+  for (int n = count; n != 0; n--, p += PART_SIZE) {
     if (rds16(p + PART_LIFE) > 0) {
       wrf(p + PART_POS, rdf(p + PART_POS) + rdf(p + PART_VEL));
       wrf(p + PART_POS + 4, rdf(p + PART_POS + 4) + rdf(p + PART_VEL + 4));

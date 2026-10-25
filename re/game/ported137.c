@@ -210,6 +210,11 @@ void P137_LevelEnd(void) {
   P137_FREE(P100_Mirror);
   P58_FreeList();
   P54_FreeTab4();
+#ifndef RE_HOOK_BUILD
+  P95_FreeObjBOverflow();
+  G010FFB40 = 0;
+  G010FFD04 = 0;
+#endif
   P98_ScriptFreeAll();
   FreeDirectorData();
   Reset004D600B();

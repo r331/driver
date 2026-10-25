@@ -567,6 +567,22 @@ static int test_ported15(void) {
 }
 static int test_ported16(void) {
   int f = 0;
+  { uint8_t saved[0x24], expected[0x24] = {0}; int32_t count = P16_ParticleCount;
+    uint8_t *p = &P16_ParticleBase;
+    memcpy(saved, p, sizeof saved);
+    float pos[3] = {1, 2, 3}, vel[3] = {4, 5, 6}, moved[3];
+    int16_t life = 2, frame = 0;
+    memcpy(expected, pos, sizeof pos); memcpy(expected + 0x10, vel, sizeof vel);
+    memcpy(expected + 0x20, &life, 2); memcpy(expected + 0x22, &frame, 2);
+    memcpy(p, expected, sizeof expected);
+    P16_ParticleCount = -1; P16_StepParticles();
+    if (P16_ParticleCount != 0 || memcmp(p, expected, sizeof expected) != 0) f++;
+    P16_ParticleCount = 1025; P16_StepParticles();
+    if (P16_ParticleCount != 0 || memcmp(p, expected, sizeof expected) != 0) f++;
+    P16_ParticleCount = 1; P16_StepParticles();
+    memcpy(moved, p, sizeof moved); memcpy(&life, p + 0x20, 2); memcpy(&frame, p + 0x22, 2);
+    if (moved[0] != 5 || moved[1] != 7 || moved[2] != 9 || life != 1 || frame != 10) f++;
+    memcpy(p, saved, sizeof saved); P16_ParticleCount = count; }
   P16_IdleMode = 0; P16_Level = 5; P16_IdleCounter = 9; P16_IdleTimer(); if (P16_IdleCounter != 0) f++;
   P16_Level = 0; P16_FlagA = P16_FlagB = P16_FlagC = P16_FlagD = 0; P16_IdleCounter = 300; P16_IdleTimer();
   if (P16_IdleMode != 0xff0 || P16_IdleArg2 != 0x5a) f++;
@@ -2044,9 +2060,14 @@ static int test_p56(void) {
   /* 004f3032 */
   { int16_t row[2 + 62]; memset(row, 0, sizeof row); row[3] = 4; P56_DrawRowRects(row, 1, 2); P56_DrawRowRects(NULL, 0, 0); }
   /* 005046f7 */
-  { uint8_t bmp[16]; for (int i = 0; i < 16; i++) bmp[i] = (uint8_t)(i + 1); memset(P56_Page, 0, 600);
+  { uint8_t slot[16], desc[28]; memcpy(slot, g_01145a60, sizeof slot); memcpy(desc, g_01146f20, sizeof desc);
+    int32_t active = D_00b1c0d4; D_00b1c0d4 = 0; g_01145a60[1] = 0;
+    uint8_t bmp[16]; for (int i = 0; i < 16; i++) bmp[i] = (uint8_t)(i + 1); memset(P56_Page, 0, 600);
     P56_BmpPage(0, bmp, 1, 1, 2, 2, 4); CK(P56_Page[0] == 6 && P56_Page[1] == 7 && P56_Page[256] == 10 && P56_Page[257] == 11 && P56_Page[2] == 0);
-    P56_BmpPage(0, NULL, 0, 0, 0, 0, 0); }
+    /* Upload descriptors contain game addresses, never truncated host pointers. */
+    CK(re_ptr(re_rd_addr(g_01145a60 + 4)) == P56_Page && re_ptr(re_rd_addr(g_01146f20 + 0x18)) == P56_Page);
+    P56_BmpPage(0, NULL, 0, 0, 0, 0, 0);
+    memcpy(g_01145a60, slot, sizeof slot); memcpy(g_01146f20, desc, sizeof desc); D_00b1c0d4 = active; }
   /* 00426c06 */
   { uint8_t *t = P56_AllocEulerTab(512); CK(t != NULL); if (t) { float m0, m8; memcpy(&m0, t, 4); memcpy(&m8, t + 0x40 * 8 - 0x40, 4); CK(m0 > 0.99f && m0 < 1.01f); (void)m8; DebugFree(t); } P56_EulerTab = NULL; }
   /* 0049ee5d */
@@ -4540,6 +4561,50 @@ static int test_p96(void) {
     CK(z == 20.0f && fl == 0x220002 && h == 0x85 && v == 8 && G01105D60 == 0x0110e500 + 0xf0 && G010FFD04 == 2);
     P13_00b201dc = 0; P96_AddObjB(pos, uv, 3, 4, 5, 0, 9, 10); CK(G010FFD04 == 2);
     G01105D60 = sp; G010FFD04 = sn; P96_ObjBOn = so; P13_00b201dc = sm; }
+  { /* More than 300 effects must not occupy the particle-count/icon globals.
+       Cross two overflow chunks, sort every record, then verify cleanup. */
+    p95_objsB_t saved; memcpy(saved, P95_ObjB, sizeof saved);
+    int32_t cursor = G01105D60, count = G010FFD04, head = G010FFB40;
+    int32_t on = P96_ObjBOn, mark = P13_00b201dc, dust = P96_DustN;
+    float near = P95_Near, pos[3] = {1, 2, 100}; int32_t uv[4] = {0};
+    G01105D60 = 0x0110e500; G010FFD04 = G010FFB40 = 0;
+    P96_ObjBOn = P13_00b201dc = 1; P95_Near = 50; P96_DustN = 7;
+    for (int i = 0; i < 600; i++) { pos[2] = 100.0f + i; P96_AddObjB(pos, uv, 0, 0, 0, 0, i, 0); }
+    CK(G010FFD04 == 600 && P96_DustN == 7);
+    uint32_t overflow = P95_ObjRef(P95_ObjBSlot(300));
+    CK(overflow >= 0x80000000u && P95_ObjBSlot(-1) == NULL);
+    P95_SortObjB();
+    int n = 0; uint32_t ref = (uint32_t)G010FFB40;
+    while (ref != 0 && n < 601) {
+      uint8_t *p = P95_ObjPtr(ref); CK(p != NULL);
+      if (p == NULL) break;
+      CK(ref < 0x011171a0u || ref >= 0x011237c0u);
+      int32_t id; memcpy(&id, p + 0x50, 4); CK(id >= 0 && id < 600);
+      memcpy(&ref, p + 0x74, 4); n++;
+    }
+    CK(n == 600 && ref == 0 && P96_DustN == 7);
+    { /* The car/sprite writer shares the same overflow storage. */
+      uint8_t src[0x1c] = {0}, *euler = P56_EulerTab;
+      float identity[16] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+      float view[9], cam[3] = {P44_CamX, P44_CamY, P44_CamZ}, *mat = P44_MatPtr;
+      int32_t fx = P26_FxA, enabled = P14_00b87e84, on2 = P101_ObjBOn2;
+      memcpy(view, P44_ViewMatT, sizeof view); memcpy(P44_ViewMatT, identity, sizeof view);
+      P56_EulerTab = (uint8_t *)identity; P44_CamX = P44_CamY = P44_CamZ = 0;
+      P26_FxA = 0; P14_00b87e84 = P101_ObjBOn2 = 1;
+      P101_AddObjB(src, 10, 20, 100, 6, 2, 128);
+      uint8_t *p = P95_ObjBSlot(600); float z; int32_t flags;
+      memcpy(&z, p + 8, 4); memcpy(&flags, p + 0x68, 4);
+      CK(G010FFD04 == 601 && z == 100 && flags == 0x40002 && P96_DustN == 7);
+      P56_EulerTab = euler; P44_MatPtr = mat; memcpy(P44_ViewMatT, view, sizeof view);
+      P44_CamX = cam[0]; P44_CamY = cam[1]; P44_CamZ = cam[2];
+      P26_FxA = fx; P14_00b87e84 = enabled; P101_ObjBOn2 = on2;
+    }
+    P95_FreeObjBOverflow(); CK(P95_ObjPtr(overflow) == NULL);
+    P95_FreeObjBOverflow();
+    memcpy(P95_ObjB, saved, sizeof saved);
+    G01105D60 = cursor; G010FFD04 = count; G010FFB40 = head;
+    P96_ObjBOn = on; P13_00b201dc = mark; P96_DustN = dust; P95_Near = near;
+  }
   { uint8_t part[0x80]; memset(part, 0, sizeof part); int32_t t = 4; memcpy(part + 0x1c, &t, 4); P96_PartRunA(part); P96_PartRunB(part); }   /* 00513cc7 */
   { uint32_t sa = P17_PtrA; int32_t sm = P29_Mode, sk = S_00B5A77C;   /* 0050e9ab: ожидание клавиши */
     P17_PtrA = 1; P29_Mode = 0; S_00B5A77C = 5; P96_ReplayScript(); CK(S_00B5A77C == 5);
@@ -4586,12 +4651,14 @@ static int test_p95(void) {
     CK(zc == 100.0f && (uint32_t)G010FFB40 == 0x010f5160u && P44_MatPtr == (float *)P44_ViewMatT);   /* вторая (z 20 < 50) вне списка */
     G010FFB40 = s0; P44_CamX = scx; P44_CamY = scy; P44_CamZ = scz; memcpy(P44_ViewMatT, smt, sizeof smt); }
   { int32_t r[4] = { 0, 0, 0, 0 }, sd = (int32_t)G010DE220; P95_InitDebris(); CK(G010DE220 == 1 && P95_DebPos[0] == 0x434d0000u && P95_DebPos[14] == 0xc3898000u && P95_DebRnd[3] < 0x800); (void)r; (void)sd; }
-  { float ss = P19_Scale; int32_t sopt = MenuOptBDFA54; P19_Scale = 1.0f; MenuOptBDFA54 = 0;   /* 00507de2 */
+  { float ss = P19_Scale, zoom = P11_0125f3e0; int32_t sopt = MenuOptBDFA54;
+    P19_Scale = 3.0f; P11_0125f3e0 = 1.0f; MenuOptBDFA54 = 0;   /* 00507de2 */
     int32_t src[8] = { 100, 0, 0, 0, 0, 0, 50, 0 }, dst[8]; float ofs[3] = { 10.0f, 0, 20.0f };
     P95_MapRotate(src, dst, 2, ofs, 0x400);   /* 90°: x' = x·cos − z·sin, z' = x·sin + z·cos */
     CK(dst[0] == 10 && dst[2] == 120 && dst[4] == -40 && dst[6] == 20);
     MenuOptBDFA54 = 1; P95_MapRotate(src, dst, 1, ofs, 0x400); CK(dst[0] == 110 && dst[2] == 20);
-    P19_Scale = ss; MenuOptBDFA54 = sopt; }
+    P11_0125f3e0 = 0.5f; P95_MapRotate(src, dst, 1, ofs, 0x400); CK(dst[0] == 60 && dst[2] == 20);
+    P19_Scale = ss; P11_0125f3e0 = zoom; MenuOptBDFA54 = sopt; }
   { uint16_t sang = P59_AngB; p44_m9_t sm, smt; memcpy(sm, P44_ViewMat, sizeof sm); memcpy(smt, P44_ViewMatT, sizeof smt);   /* 0049f418 */
     float q[5] = { 0, 0, 0, 0, 1.0f }; P95_CamFromQuat(q);
     CK(fabsf(P44_ViewMat[0] - 1.0f) < 1e-6f && fabsf(P44_ViewMatT[8] - 1.0f) < 1e-6f && P59_AngB == (uint16_t)P44_Atan2(0, 100000));
@@ -5424,6 +5491,18 @@ static int test_p126(void) {
 static int t131_n;
 static void P85_STD t131_rast(const p85_rv *a, const p85_rv *b, const p85_rv *c) { (void)b; (void)c; t131_n++; if (a->oow != 0.5f) t131_n += 100; }
 static void t131_dm(int32_t a) { (void)a; }
+static p85_rv t131_arrow[3];
+static int t131_arrow_tri, t131_arrow_lines;
+static float t131_arrow_line_xy[3][4];
+static void P85_STD t131_arrow_raster(const p85_rv *a, const p85_rv *b, const p85_rv *c) {
+  t131_arrow[0] = *a; t131_arrow[1] = *b; t131_arrow[2] = *c; t131_arrow_tri++;
+}
+static void t131_arrow_line(const float *a, const float *b) {
+  if (t131_arrow_lines < 3) {
+    float *p = t131_arrow_line_xy[t131_arrow_lines]; p[0] = a[0]; p[1] = a[1]; p[2] = b[0]; p[3] = b[1];
+  }
+  t131_arrow_lines++;
+}
 /* ported135 */
 static int t135_tri;
 static void P85_STD t135_raster(const p85_rv *a, const p85_rv *b, const p85_rv *c) { (void)a; (void)b; (void)c; t135_tri++; }
@@ -5836,6 +5915,35 @@ static int test_p132(void) {
 static int test_p131(void) {
   int f = 0;
 #define CK(c) do { if (!(c)) { f++; fprintf(stderr,"p131 fail line %d\n",__LINE__); } } while (0)
+  { /* Show Map must draw the target arrow without overrunning its point arrays.
+       The arrow tip follows the target at half zoom, independently of HUD scale. */
+    int32_t saved[] = {P57_ScrW, S_00C808A0, P94_MapW, P94_MapH, P94_MapX0, P94_MapY0,
+      P19_ScrW, P19_ScrH, D_00b87e30, P55_BDFA18, P131_BDFAA4, MenuOptBDFA54};
+    float zoom = P11_0125f3e0, scale = P19_Scale, div = P19_DivC;
+    int32_t px = P99_Cars[0].pos[0], pz = P99_Cars[0].pos[2];
+    uint8_t obj[sizeof P58_Objs[0]]; memcpy(obj, P58_Objs[0], sizeof obj);
+    p85_raster_fn raster = P85_RasterB; p95_line_fn line = P95_DrawLine;
+    p85_state_fn state = P85_StateFn; p85_blend_fn blend = P85_BlendFn;
+    int32_t dirty = P85_StateDirty; uint8_t bc = P85_BlendCur, bo = P69_BlendOn;
+    P57_ScrW = P94_MapW = P19_ScrW = 640; S_00C808A0 = P94_MapH = P19_ScrH = 480;
+    P94_MapX0 = P94_MapY0 = 0; D_00b87e30 = 2; MenuOptBDFA54 = P131_BDFAA4 = 0;
+    P11_0125f3e0 = 0.5f; P19_Scale = 3; P19_DivC = 2; P55_BDFA18 = 1;
+    P99_Cars[0].pos[0] = P99_Cars[0].pos[2] = 0;
+    int32_t target = 150000, zero = 0; memcpy(P58_Objs[0] + 0x14, &target, 4); memcpy(P58_Objs[0] + 0x1c, &zero, 4);
+    P85_RasterB = t131_arrow_raster; P95_DrawLine = t131_arrow_line; P85_StateFn = NULL; P85_BlendFn = NULL;
+    t131_arrow_tri = t131_arrow_lines = 0; P131_RadarArrow(0);
+    CK(t131_arrow_tri == 1 && t131_arrow_lines == 0);
+    CK(t131_arrow[0].x == 320 && t131_arrow[0].y == 247 && t131_arrow[1].x == 320 && t131_arrow[1].y == 232);
+    CK(t131_arrow[2].x == 370 && t131_arrow[2].y == 240 && t131_arrow[2].oow == 1);
+    P55_BDFA18 = 0; P131_RadarArrow(0);
+    CK(t131_arrow_lines == 3 && t131_arrow_tri == 1 && t131_arrow_line_xy[0][2] == 370 && t131_arrow_line_xy[0][3] == 240);
+    P131_RadarArrow(-1); P131_RadarArrow(10); CK(t131_arrow_lines == 3 && t131_arrow_tri == 1);
+    P57_ScrW = saved[0]; S_00C808A0 = saved[1]; P94_MapW = saved[2]; P94_MapH = saved[3]; P94_MapX0 = saved[4]; P94_MapY0 = saved[5];
+    P19_ScrW = saved[6]; P19_ScrH = saved[7]; D_00b87e30 = saved[8]; P55_BDFA18 = saved[9]; P131_BDFAA4 = saved[10]; MenuOptBDFA54 = saved[11];
+    P11_0125f3e0 = zoom; P19_Scale = scale; P19_DivC = div; P99_Cars[0].pos[0] = px; P99_Cars[0].pos[2] = pz;
+    memcpy(P58_Objs[0], obj, sizeof obj); P85_RasterB = raster; P95_DrawLine = line; P85_StateFn = state; P85_BlendFn = blend;
+    P85_StateDirty = dirty; P85_BlendCur = bc; P69_BlendOn = bo;
+  }
   /* 0041b7d1: с v1.77 цикл 00417b80 перенесён (P132_MenuLoop) и требует полного окружения меню — проверка снята */
   { char line[64]; char *sl = P65_Line;                             /* 004f621d: комментарий/пустая строка → 0 */
     strcpy(line, "// comment"); P65_Line = line; CK(P131_ScriptLine() == 0);

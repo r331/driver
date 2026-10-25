@@ -312,9 +312,12 @@ void P117_FullMap(void) {
   void *saved = NULL;
   int swap = (P100_Radar16 == 0);
 #ifndef RE_HOOK_BUILD
-  if (ti >= 16) swap = 0;   /* в native таблица страниц P65_Texs — 16 записей */
-#endif
+  /* The live slot contains the current radar pixels. The front-end page table
+     is a separate native object and may be stale or absent for this page. */
+  if (swap) saved = P65_TexPage((int32_t)ti);
+#else
   if (swap) { saved = P65_Texs[ti].p; P65_Texs[ti].p = (void *)&P56_Page[0]; }
+#endif
   P12_Fn00426580(0x17);
   int32_t nc = P57_ScrW >> 8, nr = S_00C808A0 >> 8;
   if ((P57_ScrW & 0xff) != 0) nc++;
@@ -338,7 +341,12 @@ void P117_FullMap(void) {
     }
   }
   if (P100_Radar16 == 0) {
-    if (swap) { P65_Texs[ti].p = saved; P12_Fn0048A46B((int32_t)ti, (int32_t)(uintptr_t)saved); }
+    if (swap) {
+#ifdef RE_HOOK_BUILD
+      P65_Texs[ti].p = saved;
+#endif
+      P12_Fn0048A46B((int32_t)ti, (int32_t)re_addr(saved));
+    }
   } else P100_RadarMap(1);
   P114_RadarMarks();
 }

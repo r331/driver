@@ -562,7 +562,7 @@ void P56_BmpPage(int32_t page, const uint8_t *bmp, int32_t x, int32_t y, int32_t
     s += stride - w;
     d += 0x100 - w;
   }
-  P12_Fn0048A46B(page, (int32_t)(uintptr_t)P56_Page);
+  P12_Fn0048A46B(page, (int32_t)re_addr(P56_Page));
 }
 
 /* 00426c06: таблица матриц поворота вокруг оси Y с шагом step (углы 0..4095), по 0x40 байт на матрицу. */

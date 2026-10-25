@@ -11,7 +11,7 @@
    (0x010f5160 + i·0x78 и т. д.), которые P95_ObjPtr переводит в указатель на родной массив (как таблица рекордов в v1.15). */
 
 #define P95_ObjA      GAME_VAR(p95_objsA_t, P95_ObjA, 0x010f5160)   /* 200 записей 0x78 (+0 x,y,z; +0x10 xyz в камере; +0x68 флаги) */
-#define P95_ObjB      GAME_VAR(p95_objsB_t, P95_ObjB, 0x0110e500)   /* записи 0x78, счётчик G010FFD04 (до 011237c0 — 722) */
+#define P95_ObjB      GAME_VAR(p95_objsB_t, P95_ObjB, 0x0110e500)   /* 300 records; native overflow via P95_ObjBSlot */
 #define P95_ObjC      GAME_VAR(p95_objsA_t, P95_ObjC, 0x011237c0)   /* 200 записей 0x78, счётчик G010FFA20 */
 #define P95_Near      GAME_VAR(float, P95_Near, 0x0054609c)         /* .rdata 50.0f — ближняя граница по z */
 #define P95_ChanState GAME_VAR(int32_t, P95_ChanState, 0x00d11978)
@@ -68,7 +68,7 @@
 #define P95_CrossTab  GAME_VAR(p95_i6_t, P95_CrossTab, 0x00573f50)  /* .data: (−2,−3) (2,3) (2,−3) */
 
 typedef uint8_t p95_objsA_t[200 * 0x78];
-typedef uint8_t p95_objsB_t[722 * 0x78];
+typedef uint8_t p95_objsB_t[300 * 0x78];
 typedef int32_t p95_chandef_t[11];
 typedef int32_t p95_chanvol_t[22];
 typedef uint32_t p95_u4_t[4];
@@ -262,6 +262,8 @@ extern p95_line_fn P95_DrawLine; extern p95_vtx_t P95_LineV0, P95_LineV1; extern
 
 uint8_t *P95_ObjPtr(uint32_t ref);           /* ссылка списка → запись (NULL для 0) */
 uint32_t P95_ObjRef(const uint8_t *rec);     /* запись → ссылка */
+uint8_t *P95_ObjBSlot(int32_t index);
+void P95_FreeObjBOverflow(void);
 
 void    P95_SndInit(uint8_t *tab);                               /* 004d2500 */
 void    P95_SndTrigger(uint8_t *tab, int32_t ch, int32_t vol);   /* 004d29e1: ch — байт */

@@ -761,7 +761,11 @@ void P101_AddObjB(const uint8_t *src, float x, float y, float z, int16_t kind, i
     P44_MatPtr = P44_ViewMatT;
     P44_Xform(v);
     if (P95_Near <= v[2] && P101_ObjBOn2 != 0) {
+#ifdef RE_HOOK_BUILD
       uint8_t *r = P95_ObjPtr((uint32_t)G01105D60);
+#else
+      uint8_t *r = P95_ObjBSlot(G010FFD04);
+#endif
       if (r != NULL) {
         wrf(r, v[0]); wrf(r + 4, v[1]); wrf(r + 8, v[2]); wrf(r + 0x18, v[2]);
         wr32(r + 0x68, 0x40002); wr32(r + 0x74, 0); wr32(r + 0x70, 0);

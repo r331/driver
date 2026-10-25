@@ -44,6 +44,7 @@
 #include "uihandlers4.h"
 #include "widgets.h"
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifndef RE_HOOK_BUILD /* gvar-img */
@@ -507,6 +508,51 @@ uint8_t *P95_ObjPtr(uint32_t ref) { return (uint8_t *)re_ptr(ref); }
 /* P95_ObjRef — Depth-list reference (Game.exe address) of a record. */
 uint32_t P95_ObjRef(const uint8_t *rec) { return re_addr(rec); }
 
+#ifndef RE_HOOK_BUILD
+/* The original 300 B records end at the particle-count global (011171a0).
+   Extended draw distances need more records without overwriting that global.
+   Chunks keep addresses stable while depth-list links refer to their records. */
+typedef struct p95_b_chunk {
+  struct p95_b_chunk *next;
+  uint8_t records[256][0x78];
+} p95_b_chunk_t;
+static p95_b_chunk_t *p95_b_overflow;
+#endif
+
+uint8_t *P95_ObjBSlot(int32_t index) {
+  if (index < 0) return NULL;
+#ifdef RE_HOOK_BUILD
+  return P95_ObjB + (size_t)index * 0x78;
+#else
+  if (index < 300) return P95_ObjB + (size_t)index * 0x78;
+  index -= 300;
+  p95_b_chunk_t **link = &p95_b_overflow;
+  for (int32_t chunk = index / 256; ; chunk--, link = &(*link)->next) {
+    if (*link == NULL) {
+      p95_b_chunk_t *p = calloc(1, sizeof *p);
+      if (p == NULL) return NULL;
+      if (re_ptr_register_dyn(p->records, sizeof p->records) == 0) {
+        free(p);
+        return NULL;
+      }
+      *link = p;
+    }
+    if (chunk == 0) return (*link)->records[index % 256];
+  }
+#endif
+}
+
+void P95_FreeObjBOverflow(void) {
+#ifndef RE_HOOK_BUILD
+  while (p95_b_overflow != NULL) {
+    p95_b_chunk_t *p = p95_b_overflow;
+    p95_b_overflow = p->next;
+    re_ptr_unregister(p->records);
+    free(p);
+  }
+#endif
+}
+
 /* вставка записи в список 010ffb40 по убыванию z (+zoff): после первого, у которого следующего нет или z не больше */
 /* Insert — Insert record p into the depth list 010ffb40 (links +0x70 prev, +0x74 next), sorted by
    decreasing float z at p + zoff. */
@@ -592,8 +638,15 @@ void P95_SortObjC(void) {
 }
 /* P95_SortObjB — Game.exe 004ba64d, cdecl.  Insert the objects of list B with z >= P95_Near into the depth list. */
 void P95_SortObjB(void) {
+#ifdef RE_HOOK_BUILD
   uint8_t *p = P95_ObjB;
   for (int32_t n = G010FFD04; n != 0; n--, p += 0x78) if (P95_Near <= rdf(p + 8)) Insert(p, 8);
+#else
+  for (int32_t i = 0; i < G010FFD04; i++) {
+    uint8_t *p = P95_ObjBSlot(i);
+    if (p != NULL && P95_Near <= rdf(p + 8)) Insert(p, 8);
+  }
+#endif
 }
 
 /* 004ba457: 200 записей; у отмеченных (флаг 2 в +0x68) — положение в системе камеры (+0x10), затем в список по z (+0x18) */
@@ -692,8 +745,8 @@ void P95_MapRotate(const int32_t *src, int32_t *dst, int32_t n, const float *ofs
     float x = (float)src[0], z = (float)src[2];
     dst[0] = ftol((double)x * cs + (double)z * -sn);
     dst[2] = ftol((double)x * sn + (double)z * cs);
-    dst[0] = ftol((double)(float)dst[0] * P19_Scale + ofs[0]);
-    dst[2] = ftol((double)(float)dst[2] * P19_Scale + ofs[2]);
+    dst[0] = ftol((double)(float)dst[0] * P11_0125f3e0 + ofs[0]);
+    dst[2] = ftol((double)(float)dst[2] * P11_0125f3e0 + ofs[2]);
   }
 }
 

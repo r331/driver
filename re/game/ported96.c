@@ -525,8 +525,12 @@ void P96_SpawnDust(const float *pos, int32_t n) {
 /* 004ad5d2: запись массива B по указателю 01105d60 (адрес Game.exe → P95_ObjPtr), счётчик G010FFD04 */
 void P96_AddObjB(const float *pos, const int32_t *uv, int16_t a, int16_t b, uint32_t flags, int32_t mark, int32_t c, int32_t d) {
   if (P96_ObjBOn == 0 || P13_00b201dc == 0) return;
+#ifdef RE_HOOK_BUILD
   uint8_t *r = P95_ObjPtr((uint32_t)G01105D60);
-  if (r == NULL) return;                                                    /* native: вне массива B */
+#else
+  uint8_t *r = P95_ObjBSlot(G010FFD04);
+#endif
+  if (r == NULL) return;
   wrf(r, 0, pos[0]); wrf(r, 4, pos[1]); wrf(r, 8, pos[2] - 10.0f);          /* .rdata 0054612c = 10.0 */
   for (int k = 0; k < 4; k++) wr32(r, 0x10 + 4 * k, uv[k]);
   wr32(r, 0x68, 0x20002); wr32(r, 0x74, 0); wr32(r, 0x70, 0);

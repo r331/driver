@@ -449,7 +449,7 @@ void P131_MissionObj(uint32_t m, const uint8_t *obj, int32_t mode) {
   P84_DrawModelIdx(m, (int32_t)ang, v, mode == 1 ? 0 : (mode == 2 ? 1 : 2));
 }
 
-/* ---- 00507925: стрелка на радаре к цели i (P58_Objs[i] +0x14/+0x1c) от игрока: длина min(dist / P19_Scale, 50),
+/* ---- 00507925: стрелка на радаре к цели i (P58_Objs[i] +0x14/+0x1c) от игрока: длина min(dist / P11_0125f3e0, 50),
    поворот P95_MapRotate вокруг игрока; в режиме карты (P55_BDFA18) или флаге 2 P131_BDFAA4 — треугольник 0xc0,
    иначе — три линии 0x80. Поля вершин кроме x, y, r, g, b, oow в оригинале не задаются (в native 0). ---- */
 #ifndef RE_HOOK_BUILD
@@ -468,32 +468,33 @@ void P131_RadarArrow(int32_t i) {
   if (i < 0 || i >= 10) return;
 #endif
   float one = (P55_BDFA18 != 0) ? 1.0f : 0.015625f;
-  float p1[2] = { (float)P99_Cars[0].pos[0], (float)P99_Cars[0].pos[2] };
-  float p2[2] = { (float)rd32(&P58_Objs[i][0x14]), (float)rd32(&P58_Objs[i][0x1c]) };
-  P57_ScreenToView(&p1[0], &p1[1]);
-  P57_ScreenToView(&p2[0], &p2[1]);
-  int32_t dx = (int32_t)(p2[0] - p1[0]), dz = (int32_t)(p2[1] - p1[1]);
+  /* MapRotate reads x/z at offsets 0/8 with a 16-byte point stride,
+     including its origin. Packed x/y pairs overwrite the caller's stack. */
+  float p1[4] = { (float)P99_Cars[0].pos[0], 0, (float)P99_Cars[0].pos[2], 0 };
+  float p2[4] = { (float)rd32(&P58_Objs[i][0x14]), 0, (float)rd32(&P58_Objs[i][0x1c]), 0 };
+  P57_ScreenToView(&p1[0], &p1[2]);
+  P57_ScreenToView(&p2[0], &p2[2]);
+  int32_t dx = (int32_t)(p2[0] - p1[0]), dz = (int32_t)(p2[2] - p1[2]);
   float dist = (float)sqrt((double)(dx * dx + dz * dz));
   int32_t ang = P44_Atan2(dz, dx) & 0xfff;
   if (D_00b87e30 == 1) ang = (ang + 0xc00) & 0xfff;
   else if (D_00b87e30 == 0 || D_00b87e30 == 2 || D_00b87e30 == 3) ang = (ang - 0x400) & 0xfff;
-  dist = dist / P19_Scale;
+  dist = dist / P11_0125f3e0;
   float d = dist;
   if (d > NEAR_Z) d = 50.0f;
-  int32_t pt[6];
-  pt[0] = (int32_t)(-15.0f * d / NEAR_Z); pt[1] = 0;     /* .rdata 00546a48 / 00546a08 */
-  pt[2] = (int32_t)(15.0f * d / NEAR_Z);  pt[3] = 0;
-  pt[4] = 0;
-  P11_00ba52d0 = (int32_t)lrintf(dist); pt[5] = P11_00ba52d0;
-  P95_MapRotate(pt, pt, 3, p1, ang);
+  int32_t pt[3][4] = {{0}};
+  pt[0][0] = (int32_t)(-15.0f * d / NEAR_Z);   /* .rdata 00546a48 / 00546a08 */
+  pt[1][0] = (int32_t)(15.0f * d / NEAR_Z);
+  P11_00ba52d0 = (int32_t)lrintf(dist); pt[2][2] = P11_00ba52d0;
+  P95_MapRotate(pt[0], pt[0], 3, p1, ang);
   if (P85_StateDirty != 0) { if (P85_StateFn) P85_StateFn(1, 0, 0, 2, 0); P85_StateDirty = 0; }
   int32_t tri = (P55_BDFA18 != 0 || (P131_BDFAA4 & 2) != 0);
   int32_t c = tri ? 0xc0 : 0x80;
   float cq = (float)(c / 4), cf = (float)c;
   p85_rv A, B, C;
-  vset(&A, (float)pt[0], (float)pt[1], cq, one, 0.0f, 0.0f);
-  vset(&B, (float)pt[2], (float)pt[3], cq, one, 0.0f, 0.0f);
-  vset(&C, (float)pt[4], (float)pt[5], cf, one, 0.0f, 0.0f);
+  vset(&A, (float)pt[0][0], (float)pt[0][2], cq, one, 0.0f, 0.0f);
+  vset(&B, (float)pt[1][0], (float)pt[1][2], cq, one, 0.0f, 0.0f);
+  vset(&C, (float)pt[2][0], (float)pt[2][2], cf, one, 0.0f, 0.0f);
   if (tri) {
     if (P85_BlendCur != 2) { if (P85_BlendFn) P85_BlendFn(0, 6, 4, 0); P85_BlendCur = 2; P69_BlendOn = 2; }
     raster(&A, &B, &C);
