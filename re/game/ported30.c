@@ -23,6 +23,10 @@ int32_t P30_ScreensaverSaved;
    004246f0), removes the crash handler, shows msg in an "ERROR" message box, writes the memory
    leak report, restores the saved screensaver setting and exits with code 0.  Does not return. */
 void P30_FatalError(const char *msg) {
+  RE_LOGE(sys, "ФАТАЛЬНАЯ ОШИБКА игры: %s", msg ? msg : "(null)");
+#ifndef RE_HOOK_BUILD
+  re_log_flush();
+#endif
   P25_TimersShutdown();
   Call004D3402();                       /* DirectInput/COM выключение */
   Ui004264A7();

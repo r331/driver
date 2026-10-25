@@ -54,6 +54,14 @@ void plat_tex_bind(int tex);
 void plat_tex_update(int tex, int w, int h, const uint32_t *rgba);   /* v2.01: перезагрузка картинки текстуры (SDL) */
 void plat_clear_rect(uint32_t rgb, int x, int y, int w, int h);       /* v2.01: заливка прямоугольника кадра (SDL) */
 void plat_tex_free(int tex);
+/* v2.39: CPU part of plat_tex_create (flags + mip chain) prepared on any thread without GL, uploaded later on the GL thread
+   (asynchronous HD texture pack, platform/sdl/plat_texpack_async.c).  prepare takes ownership of rgba; create_prepared
+   always frees p and returns the texture handle (0 on failure). */
+typedef struct plat_tex_prep plat_tex_prep;
+plat_tex_prep *plat_tex_prepare(int w, int h, uint32_t *rgba);
+int  plat_tex_create_prepared(plat_tex_prep *p);
+void plat_tex_prep_free(plat_tex_prep *p);
+int  plat_tex_prep_width(const plat_tex_prep *p);
 void plat_set_blend(int enable, int src, int dst);
 void plat_set_zbuffer(int test, int write);
 void plat_draw_tris(const plat_vertex *v, int count);
@@ -326,4 +334,6 @@ void   *plat_current_process(void);                                           /*
 void   *plat_load_accelerators(void *hinst, const char *name);                /* LoadAcceleratorsA; SDL — NULL (таблиц ускорителей нет) */
 void    plat_dd_stub_caps(uint32_t fail_mask, uint32_t caps2);                /* тесты (SDL): bit0 GetCaps, bit1 EnumTextureFormats, bit2 EnumZBuffer; dwCaps2 HAL */
 int     plat_win_moves(int32_t *last5);                                       /* тесты (SDL): число MoveWindow и последний x,y,w,h,repaint; hook — 0 */
+/* v2.37: RE_LOG — единый отладочный журнал (каналы/уровни, выкл. по умолчанию; в hook-сборке макросы пустые) */
+#include "plat_log.h"
 #endif

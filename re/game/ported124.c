@@ -224,8 +224,11 @@ int32_t P124_ReadBmp(const char *name, uint8_t *dst) {
 void P124_ShowBmp(const char *name, int32_t wait) {
   if (P117_ClipFn) P117_ClipFn(0, 0, P19_ScrW, P19_ScrH);
   uint8_t *buf = (uint8_t *)P98_DebugMalloc(0x12c000,   /* 640 * 480 * 4 */ "D:\\Driver\\Game\\frontend\\frontend.c", 0x1d5);
-  if (buf == NULL) return;
-  if (P124_ReadBmp(name, buf) != 0) {
+  if (buf == NULL) { RE_LOGE(mem, "P124_ShowBmp(%s): нет памяти под 640x480x4", name); return; }
+  RE_LOGD(load, "экран-картинка %s%s", name, wait ? " (ждёт клавишу)" : "");
+  int32_t rb = P124_ReadBmp(name, buf);
+  if (rb == 0) RE_LOGW(load, "P124_ShowBmp: картинка %s не прочитана", name);
+  if (rb != 0) {
     P105_BlitScaled(buf); P105_BlitScaled(buf); P105_BlitScaled(buf); P105_BlitScaled(buf);
     if (wait != 0) {
       while (P48_AnyKey() != 0) {}
@@ -315,6 +318,14 @@ int32_t P124_CarSelect(int32_t row) {
 /* P124_DebugLog — Game.exe 004bf2a0.  Appends msg + "\n" to debug.log; the first write of a run truncates an existing
    file ("wt"), later writes append (P124_LogSize = file size after the last write).  Off when P124_LogOn == 0. */
 void P124_DebugLog(const char *msg) {
+#ifndef RE_HOOK_BUILD
+  /* v2.37: копия строки debug.log игры в RE_LOG load (ошибки игры — warn); сам debug.log не меняется */
+  if (RE_LOG_ON(load, RE_LV_WARN) && msg != NULL && msg[0] != 0) {
+    int bad = strstr(msg, "ERROR") || strstr(msg, "Error") || strstr(msg, "error") || strstr(msg, "Can't") || strstr(msg, "Unable") || strstr(msg, "failed") || strstr(msg, "Failed") ||
+              strstr(msg, "Could not") || strstr(msg, "disabled") || strstr(msg, "FAILED");
+    if (bad) RE_LOGW(load, "debug.log: %s", msg); else RE_LOGI(load, "debug.log: %s", msg);
+  }
+#endif
   if (P124_LogOn == 0) return;
   void *f = g_fopen("debug.log", "r+t");
   if (f == NULL || P124_LogSize != 0) {

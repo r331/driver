@@ -16,7 +16,9 @@
    закрывается и при ошибке, индекс ключа 0..0x3e; деление на 0 в 004b9287 — 1; NULL-указатели функций пропускаются. */
 #include "aspect.h"
 #include "drawdist.h"
+#include "reprof.h"
 #include "../platform/plat.h"
+#include "missionstate.h"
 #include "ported150.h"
 #include "ported140.h"
 #include "ported142.h"
@@ -198,6 +200,7 @@ int32_t P132_MenuLoop(uint32_t tab) {
    The #ifndef RE_HOOK_BUILD blocks are native-only debug output (RE_MISSDBG, RE_END_EXIT,
    RE_AUTOCONT, RE_CHAIN) and do nothing unless those variables are set. */
 void P132_GameLogic(void) {
+  RP_BEGIN(RP_LOGIC); RP_COUNT(RC_LOGIC_TICKS, 1);
   P18_ClearFlag();
   P36_PollInput();
   if (P14_00b87ee4 == 0) {
@@ -213,6 +216,7 @@ void P132_GameLogic(void) {
     P96_ReplayScript();
     P115_SndUpdate();
     P12_Fn0050E963();
+    RP_END(RP_LOGIC);
     return;
   }
   int32_t hud1 = G6_00B87EA0 | P62_HudOff1;
@@ -230,6 +234,19 @@ void P132_GameLogic(void) {
   P66_Scene = 0x00cb8f20u;
   G6_00D0DDC0 = 0;   /* active-car list is rebuilt this tick (P142_CarsStep walks G6_00B2F30C[0..n)) */
 #ifndef RE_HOOK_BUILD
+  if (RE_LOG_ON(mission, RE_LV_INFO)) {   /* v2.37: RE_LOG mission — смены состояния 00c810c4 и причины 00c810e8 (только чтение) */
+    static int32_t lc4 = -1, le8 = -1;
+    if (P14_00c810c4 != lc4 || P14_00c810e8 != le8) {
+      int32_t c4 = P14_00c810c4, e8 = P14_00c810e8;
+      const char *st = c4 == MSTATE_NONE ? "нет цели" : c4 == MSTATE_OBJECTIVE ? "цель активна" : c4 == MSTATE_RACE ? "гонка" : c4 == MSTATE_FAILED ? "ПРОВАЛ" :
+                       c4 == MSTATE_OBJ_DONE ? "цель достигнута" : c4 == MSTATE_RACE_DONE ? "гонка завершена" : (c4 & MSTATE_PASSED_BIT) ? "миссия пройдена" : "значение не описано в missionstate.h";
+      const char *why = e8 == MREASON_NONE ? "" : e8 == MREASON_TIME_OUT ? ", причина: время вышло" : e8 == MREASON_FAILED ? ", причина: машина разбита/перевёрнута или провал по скрипту" :
+                        e8 == MREASON_LOST ? ", причина: цель потеряна" : e8 == MREASON_SEQUENCE ? ", причина: истекла последовательность" : ", причина: ?";
+      if (c4 == MSTATE_FAILED) RE_LOGW(mission, "миссия %d: состояние 0x%x (%s)%s, кадр игры %d", (int)P11_00b87e38, (unsigned)c4, st, why, (int)P62_Frame);
+      else RE_LOGI(mission, "миссия %d: состояние 0x%x (%s)%s, кадр игры %d", (int)P11_00b87e38, (unsigned)c4, st, why, (int)P62_Frame);
+      lc4 = c4; le8 = e8;
+    }
+  }
   { /* v2.29: RE_MISSDBG=1 — отсчёт конца миссии 00c81100 (каждые 25 кадров) и ожидание речи 004d6209 */
     static int dbg = -1; if (dbg < 0) dbg = getenv("RE_MISSDBG") != NULL;
     if (dbg && P14_00c81100 != 0 && (P14_00c81100 % 25) == 1)
@@ -247,6 +264,10 @@ void P132_GameLogic(void) {
 #ifndef RE_HOOK_BUILD
         { /* v2.29: RE_MISSDBG — итог миссии (00c810e8: 0 — успех, 2 — провал, 3 — цель потеряна (004f5012/004d4f5c)); RE_END_EXIT=N — выход через N кадров окна (снимок итога) */
           extern void plat_exit_after(int n); const char *e = getenv("RE_END_EXIT");
+          if (P14_00c810e8 == 0) RE_LOGI(mission, "ИТОГ миссии %d: УСПЕХ (состояние 0x%x), кадр игры %d", (int)P11_00b87e38, (unsigned)P14_00c810c4, (int)P62_Frame);
+          else RE_LOGW(mission, "ИТОГ миссии %d: ПРОВАЛ, причина %d (%s), кадр игры %d", (int)P11_00b87e38, (int)P14_00c810e8,
+                       P14_00c810e8 == MREASON_TIME_OUT ? "время вышло" : P14_00c810e8 == MREASON_FAILED ? "машина разбита / провал по скрипту" :
+                       P14_00c810e8 == MREASON_LOST ? "цель потеряна" : P14_00c810e8 == MREASON_SEQUENCE ? "последовательность" : "?", (int)P62_Frame);
           if (getenv("RE_MISSDBG")) fprintf(stderr, "[end] w=%d f=%d итог миссии: %s (e8=%d c4=%x)\n", plat_frame_no(), (int)P62_Frame,
                                             P14_00c810e8 == 0 ? "успех" : P14_00c810e8 == 3 ? "ПРОВАЛ (цель потеряна)" : "ПРОВАЛ", (int)P14_00c810e8, (unsigned)P14_00c810c4);
           /* v2.30: RE_AUTOCONT="кадр:клавиша,…" — после успеха нажать (кадры от итога; Continue → следующая подмиссия/мотель),
@@ -265,7 +286,7 @@ void P132_GameLogic(void) {
   if (P14_00b87ee4 == 0) P133_CamUpdate(0); else P99_CamScriptStep();
   P82_FrustumSetup3D();
   if (P12_00b87ef8 != 0) Inc0B1FFBC();
-  P89_DrawMap(0);
+  RP_BEGIN(RP_L_MAP); P89_DrawMap(0); RP_END(RP_L_MAP);
   if (P14_00b202d8 != 0) P103_Dawn();
   if (P14_00b202dc != 0) P103_Dusk();
   P127_FarDebris();
@@ -291,13 +312,13 @@ void P132_GameLogic(void) {
   if (live) {
     P109_InputTick();
     if ((G6_00B87EA0 | P62_HudOff1) == 0) {
-      P133_TrafficTick(); Update005012A3(); P112_ChaseTick(); P100_CarSounds(P97_D11980); P14_Fn0051BD9C();
+      RP_BEGIN(RP_L_TRAFFIC); P133_TrafficTick(); Update005012A3(); P112_ChaseTick(); P100_CarSounds(P97_D11980); P14_Fn0051BD9C(); RP_END(RP_L_TRAFFIC);
     } else Update005012A3();
   }
   P127_PlayerSkid(0);
   if ((G6_00B87EAC | G8_00B87EAC) != 0 || (P58_SB87EB0 | G6_00B87EB0 | G8_00B87EB0) != 0) P119_CarSkids(0x41);
   RE_DBG_SET(11, P100_RecKeys); RE_DBG_SET(12, P36_PadMode); RE_DBG_SET(13, P36_KeyCfg[6] | P36_KeyCfg[4] << 8 | P36_KeyCfg[5] << 16); RE_DBG_SET(14, (P14_00d118a8 | G2_00D118A8) * 1000 + hud1 * 10 + (P100_143720 != 0) + (P100_1426FC != 0) * 2 + (P75_E4 != 0) * 4);
-  if (live) { RE_DBG(10); P142_CarsStep(); } else P35_PadX = 0;
+  if (live) { RE_DBG(10); RP_BEGIN(RP_L_CARS); P142_CarsStep(); RP_END(RP_L_CARS); } else P35_PadX = 0;
   P16_IdleTimer();
   DrainStackC200F();
   CopyBDF984();
@@ -313,6 +334,7 @@ void P132_GameLogic(void) {
   P121_CamSounds();
   P115_SndUpdate();
   P12_Fn0050E963();
+  RP_END(RP_LOGIC);
 }
 
 /* ---- 004d4fc5 ---- */
@@ -334,12 +356,12 @@ static void grd40(int32_t v) { if (P98_GrD40) P98_GrD40(v); }
    transparent passes (grd40 0/2).  TODO(RE): unsure what FxD is in the original. */
 void P132_GameDraw(void) {
   char buf[256];
-  RE_DBG(1);
+  RE_DBG(1); RP_BEGIN(RP_DRAW);
 #ifndef RE_HOOK_BUILD
-  { static int k; if (getenv("RE_GSTAT") && (k++ % 100) == 0) fprintf(stderr, "[gdraw] cam %.0f %.0f %.0f angB %d mode %d car0 %d %d %d cell %d,%d N %d grid %dx%d vm %.2f %.2f %.2f far %.0f\n",
+  { static int k; if (RE_GETENV_ONCE("RE_GSTAT") && (k++ % 100) == 0) fprintf(stderr, "[gdraw] cam %.0f %.0f %.0f angB %d mode %d car0 %d %d %d cell %d,%d N %d grid %dx%d vm %.2f %.2f %.2f far %.0f\n",
       P44_CamX, P44_CamY, P44_CamZ, (int)(int16_t)P59_AngB, (int)P59_Mode1137324, (int)P99_Cars[0].pos[0], (int)P99_Cars[0].pos[1], (int)P99_Cars[0].pos[2],
       (int)P88_CellA.x, (int)P88_CellA.y, (int)P54_GridN, (int)P21_GridDiv, (int)P80_GridH, P44_ViewMat[0], P44_ViewMat[4], P44_ViewMat[8], P11_01270c24);
-    if (getenv("RE_GSTAT") && (k % 100) == 1 && G6_00D01268) { int N = P54_GridN, ne[4] = {0,0,0,0};
+    if (RE_GETENV_ONCE("RE_GSTAT") && (k % 100) == 1 && G6_00D01268) { int N = P54_GridN, ne[4] = {0,0,0,0};
       for (int sl = 0; sl < 4; sl++) for (int i = 0; i < N * N; i++) ne[sl] += ((int32_t *)G6_00D01268)[sl * N * N + i] != -1;
       fprintf(stderr, "[gdraw] lumps %d %d %d %d cellA %d pc %d heads %d %d %d %d\n", (int)P87_SlotLumpA[0], (int)P87_SlotLumpA[1], (int)P87_SlotLumpA[2], (int)P87_SlotLumpA[3],
         (int)P88_CellA.cell, (int)P88_CellA.pc, ne[0], ne[1], ne[2], ne[3]); } }
@@ -384,22 +406,21 @@ void P132_GameDraw(void) {
 #ifndef RE_HOOK_BUILD
     re_detail_frame_begin();   /* v2.31: детальные меши фасадов — только основной проход карты */
 #endif
-    P89_DrawMap(1);
+    RP_BEGIN(RP_D_MAP); P89_DrawMap(1); RP_END(RP_D_MAP);
 #ifndef RE_HOOK_BUILD
     re_detail_frame_end();
 #endif
     NoopFn004d1a89();
     P109_DropsDraw(0);
     Reset0042D2B0();
-    P137_DrawCar(S_00D11878, -1);
+    RP_BEGIN(RP_D_PLAYER); P137_DrawCar(S_00D11878, -1); RP_END(RP_D_PLAYER);
     if (P95_C818B8 != 0) P98_DrawMarker();
     if (P26_FxD != 0) grd40(0);
     P116_SkidsA();
     if ((G6_00B87EAC | G8_00B87EAC) != 0 || (P58_SB87EB0 | G6_00B87EB0 | G8_00B87EB0) != 0) P116_SkidsB();
     if (P26_FxD != 0) grd40(2);
-    P128_TrafficDraw();
-    P150_FlushTris();
-    P127_SpawnTick(1);
+    RP_BEGIN(RP_D_TRAFFIC); P128_TrafficDraw(); P150_FlushTris(); RP_END(RP_D_TRAFFIC);
+    RP_BEGIN(RP_D_FX); P127_SpawnTick(1);
     P133_EventModels();
     if (P98_MrkOff == 0) { P114_PartModels(); P98_IconFlush(); }
     P123_ObjShadows();
@@ -428,8 +449,10 @@ void P132_GameDraw(void) {
 #ifndef RE_HOOK_BUILD
     if (re_dd_on) { P11_01270c24 = dd_far0; Q01270C24 = dd_q0; re_dd_on = 0; re_oow_n = 0xdbba; }
 #endif
+    RP_END(RP_D_FX);
     if (P26_FxD == 0) P143_SunFlare();
     if (live) P121_ScriptHud();
+    RP_BEGIN(RP_D_HUD);
     if ((MenuVarB31F04 | P13_00b31f04 | G00B31F04) != 0) P133_MirrorDraw();
     if (P97_ScrObjOn != 0) {
       const uint8_t *o = (const uint8_t *)re_ptr(P132_BLK(0x00c812b8u));
@@ -440,11 +463,12 @@ void P132_GameDraw(void) {
     if (P14_00b87ee4 == 0) P119_Hud();
     if (P36_PadMode != 0) P96_ReplayTag();
     P66_DirSwitch();
+    RP_END(RP_D_HUD);
   }
   if (G6_00B5A778 != 0) P116_PauseMenu();
 #ifndef RE_HOOK_BUILD
   /* v2.10: RE_COPDBG=N — рейтинг Felony / активные копы / последнее нарушение раз в N кадров (те же переменные, что строка отладки) */
-  { static int k; const char *e = getenv("RE_COPDBG"); if (e && (k++ % (atoi(e) > 0 ? atoi(e) : 50)) == 0) {
+  { static int k; const char *e = RE_GETENV_ONCE("RE_COPDBG"); if (e && (k++ % (atoi(e) > 0 ? atoi(e) : 50)) == 0) {
       fprintf(stderr, "[cop] кадр %d felony %d cops %d sugg %d max %d last %d spd %d игрок %d %d\n", (int)P62_Frame, (int)G2_00D11A5C,
               (int)G0112B284, (int)P97_D9E0, (int)P62_Max, (int)P95_ChanLast, (int)P62_Spd, (int)P99_Cars[0].pos[0], (int)P99_Cars[0].pos[2]); }
       if (e && (k % (atoi(e) > 0 ? atoi(e) : 50)) == 1) for (int32_t q = 0; q < 8; q++) {   /* копы 0112da00: +0x32d — занят */
@@ -476,6 +500,7 @@ void P132_GameDraw(void) {
     if (P132_B87EC8 != 0) P126_ScreenShot();
     P67_CompactPool();
   }
+  RP_END(RP_DRAW);
   if (P14_00b87ee4 == 0) P47_GlideSwap(); else P114_CamFadeFrame();
   P26_FxD = fxd;
 }

@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <errno.h>
 #include <SDL.h>
 /* Таблица звуковых буферов + программный микшер (44100 Гц, стерео, S16). volume и pan — как в DirectSound:
    сотые доли дБ (0 = максимум, -10000 = тишина; pan -10000 лево .. +10000 право). 3D-звук — в plat_dsmix.c. */
@@ -23,9 +24,11 @@ int plat_snd_create(const void*p,int b,int r,int c,int bits){
   if(!p||b<=0) return 0;
   for(int i=1;i<SND_MAX;i++) if(!snds[i].pcm){
     snd_t*s=&snds[i]; memset(s,0,sizeof *s);
-    s->pcm=malloc((size_t)b); if(!s->pcm) return 0;
+    s->pcm=malloc((size_t)b); if(!s->pcm){ RE_LOGE(mem,"plat_snd_create: malloc(%d) — NULL, буфер звука не создан",b); return 0; }
     memcpy(s->pcm,p,(size_t)b); s->bytes=b; s->rate=r; s->ch=c; s->bits=bits; s->pitch=r;
+    RE_LOGT(audio,"буфер звука %d: %d байт, %d Гц, %d кан., %d бит",i,b,r,c,bits);
     return i; }
+  RE_LOGW(audio,"plat_snd_create: все %d слотов буферов заняты — звук (%d байт) не создан",SND_MAX-1,b);
   return 0; }
 /* Handle -> live buffer or NULL.  destroy/play/stop/set lock the audio device around the change. */
 static snd_t*S(int h){return (h>0&&h<SND_MAX&&snds[h].pcm)?&snds[h]:NULL;}
@@ -63,13 +66,17 @@ void plat_snd_mix(int16_t *out,int frames){
       if(s->pos>=(double)total){ if(s->loop) s->pos-=(double)total; else { s->playing=0; break; } } } }
   dsm_mix(out,frames); }
 /* SDL audio callback: len bytes = len / 4 stereo S16 frames. */
-static void SDLCALL audio_cb(void*u,Uint8*st,int len){ (void)u; plat_snd_mix((int16_t*)st,len/4); }
+static void SDLCALL audio_cb(void*u,Uint8*st,int len){ (void)u; RE_LOGT(audio,"колбэк SDL_audio: %d кадров (поток звука)",len/4); plat_snd_mix((int16_t*)st,len/4); }
 /* Opens the default SDL audio device (44100 Hz, S16, stereo, 1024-frame buffer) once; 1 on success. */
 static int plat_snd_open(void){
   if(g_dev) return 1;
-  if(SDL_InitSubSystem(SDL_INIT_AUDIO)<0) return 0;
+  if(SDL_InitSubSystem(SDL_INIT_AUDIO)<0){ RE_LOGW(audio,"SDL_InitSubSystem(AUDIO): %s",SDL_GetError()); return 0; }
   SDL_AudioSpec want; SDL_zero(want); want.freq=SND_OUT_RATE; want.format=AUDIO_S16SYS; want.channels=2; want.samples=1024; want.callback=audio_cb;
-  g_dev=SDL_OpenAudioDevice(NULL,0,&want,NULL,0); if(!g_dev) return 0;
+  g_dev=SDL_OpenAudioDevice(NULL,0,&want,NULL,0); if(!g_dev){ RE_LOGW(audio,"SDL_OpenAudioDevice (драйвер %s): %s",SDL_GetCurrentAudioDriver()?SDL_GetCurrentAudioDriver():"-",SDL_GetError()); return 0; }
+  if(RE_LOG_ON(audio,RE_LV_INFO)){ int n=SDL_GetNumAudioDevices(0); const char*d0=n>0?SDL_GetAudioDeviceName(0,0):NULL;
+    RE_LOGI(audio,"звук: SDL_audio драйвер %s, устройство по умолчанию (%d вых.%s%s), %d Гц S16 стерео, буфер %d кадров, id %u",
+            SDL_GetCurrentAudioDriver()?SDL_GetCurrentAudioDriver():"-",n,d0?", первое: ":"",d0?d0:"",want.freq,want.samples,(unsigned)g_dev);
+    for(int i=0;i<n&&i<16;i++) RE_LOGD(audio,"  выход %d: %s",i,SDL_GetAudioDeviceName(i,0)); }
   SDL_PauseAudioDevice(g_dev,0); return 1; }
 /* v2.09: игра — RE_WAV_OUT=файл.wav: микс пишется в WAV по виртуальным/реальным часам plat_time_ms (на каждом plat_flip),
    устройство SDL_audio не открывается; иначе — SDL_audio (если устройства нет — звук молча выключен). */
@@ -87,13 +94,14 @@ void plat_snd_open_game(void){
   if(g_snd_game) return;
   g_snd_game=1;
   const char *w=getenv("RE_WAV_OUT");
-  if(w&&*w){ g_wav=fopen(w,"wb"); if(g_wav){ uint8_t z[44]={0}; fwrite(z,1,44,g_wav); g_wav_on=1; g_wav_ms0=plat_time_ms(); atexit(wav_close);
+  if(w&&*w){ g_wav=fopen(w,"wb"); if(!g_wav) RE_LOGW(audio,"RE_WAV_OUT: fopen(%s): %s — звука не будет",w,strerror(errno)); else RE_LOGI(audio,"звук: запись микса в WAV %s (RE_WAV_OUT), устройство не открывается",w); if(g_wav){ uint8_t z[44]={0}; fwrite(z,1,44,g_wav); g_wav_on=1; g_wav_ms0=plat_time_ms(); atexit(wav_close);
       fprintf(stderr,"[snd] RE_WAV_OUT %s\n",w); } return; }
   if(!plat_snd_open()){
     /* v2.29: нет устройства — «пустое» устройство: микс по часам plat_time_ms на каждом plat_flip, без вывода. Иначе буферы
        DirectSound никогда не доигрывали (GetStatus — PLAYING навсегда), и игра вечно ждала конца речи (слот 0xf, 004d6209):
        после интервью не наступал MISSION COMPLETE. */
     fprintf(stderr,"[snd] SDL_audio: нет устройства (%s) — без звука (пустое устройство по часам игры)\n",SDL_GetError());
+    RE_LOGW(audio,"нет звукового устройства (%s) — пустое устройство по часам игры, без вывода",SDL_GetError());
     g_wav_ms0=plat_time_ms(); g_wav_on=1; }
 }
 /* Called per presented frame: mixes (and writes to the WAV, if any) as many frames as plat_time_ms advanced.
@@ -148,14 +156,17 @@ unsigned plat_timer_start(unsigned delay, unsigned flags, void (*cb)(unsigned)) 
     for (int i = 0; i < 64; i++) if (!g_vtt[i].on) {
       uint32_t now = plat_time_ms();
       g_vtt[i].cb = cb; g_vtt[i].flags = flags; g_vtt[i].delay = delay; g_vtt[i].due = now + delay; g_vtt[i].on = 1;
+      RE_LOGT(audio,"таймер (вирт. часы) %u: %u мс, %s",0x10000u+(unsigned)i,delay,(flags&1)?"периодический":"разовый");
       return 0x10000u + (unsigned)i;
     }
+    RE_LOGW(audio,"plat_timer_start: все 64 виртуальных таймера заняты — таймер %u мс не создан",delay);
     return 0;
   }
   TmrCtx *c = &g_tc[g_tcn++ & 63];
   c->cb = cb; c->flags = flags; c->id = 0;
   SDL_TimerID id = SDL_AddTimer(delay, tmr_cb, c);
   c->id = (unsigned)id;
+  if (!id) RE_LOGW(audio, "SDL_AddTimer(%u мс): %s", delay, SDL_GetError()); else RE_LOGT(audio, "таймер SDL %u: %u мс, %s", (unsigned)id, delay, (flags & 1) ? "периодический" : "разовый");
   return (unsigned)id;
 }
 /* timeKillEvent equivalent for both kinds of timer. */

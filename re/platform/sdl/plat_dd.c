@@ -8,6 +8,7 @@
    (selftest) every call is only recorded so tests can inspect the last call ("stub stats"). */
 #include "../plat.h"
 #include "plat_texpack.h"
+#include "../../game/reprof.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,10 +54,10 @@ static const uint32_t k_pf565[8] = { 0x20, 0x40, 0, 16, 0xf800, 0x7e0, 0x1f, 0 }
 static int g_tr_n;
 #define TR(...) do { if (trace_dd() && g_tr_n < 400) { g_tr_n++; fprintf(stderr, "[dd] " __VA_ARGS__); } } while (0)
 static int gs_alloc(dd_obj *o) {
-    if (o->w <= 0 || o->h <= 0 || o->w > 4096 || o->h > 4096) return 0;
+    if (o->w <= 0 || o->h <= 0 || o->w > 4096 || o->h > 4096) { RE_LOGW(render, "DirectDraw: поверхность %dx%d вне 1..4096 — без памяти пикселей", o->w, o->h); return 0; }
     o->bpp = (int32_t)o->pf[3]; if (o->bpp != 8 && o->bpp != 16 && o->bpp != 24 && o->bpp != 32) o->bpp = 16;
     o->pitch = ((o->w * o->bpp / 8) + 3) & ~3;
-    o->px = (uint8_t *)calloc((size_t)o->pitch * (size_t)o->h, 1); if (!o->px) return 0;
+    o->px = (uint8_t *)calloc((size_t)o->pitch * (size_t)o->h, 1); if (!o->px) { RE_LOGE(mem, "DirectDraw: calloc поверхности %dx%d (%d бит) — NULL", o->w, o->h, o->bpp); return 0; }
     o->addr = re_ptr_register_dyn(o->px, (uint32_t)(o->pitch * o->h));
     o->page8 = -1; o->dirty = 1; return 1;
 }
@@ -70,17 +71,26 @@ static uint32_t gs_raw(const dd_obj *o, const uint8_t *p) {
     case 24: return (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16;
     default: return (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24; }
 }
+/* v2.38 (performance): mask8 with the mask's shift found once per surface instead of per pixel and channel */
+typedef struct { uint32_t m, sh, mm; } mask_t;
+static mask_t mask_prep(uint32_t m) { mask_t r = { m, 0, 0 }; if (m) { while (!((m >> r.sh) & 1)) r.sh++; r.mm = m >> r.sh; } return r; }
+static inline uint8_t mask8p(uint32_t v, const mask_t *k) {   /* == mask8(v, k->m) */
+    if (!k->m) return 0;
+    uint32_t x = (v & k->m) >> k->sh;
+    return (uint8_t)(k->mm ? (x * 255u + k->mm / 2) / k->mm : 0);
+}
 /* RGBA (байты r,g,b,a в памяти), overlay: пиксель 0 — альфа 0 */
 static uint32_t *gs_to_rgba(const dd_obj *o, int overlay) {
-    uint32_t *out = (uint32_t *)malloc((size_t)o->w * (size_t)o->h * 4); if (!out) return NULL;
+    uint32_t *out = (uint32_t *)malloc((size_t)o->w * (size_t)o->h * 4); if (!out) { RE_LOGE(mem, "DirectDraw: malloc RGBA %dx%d — NULL, поверхность не загружена в GL", o->w, o->h); return NULL; }
     int alpha = (o->pf[1] & 1) && o->pf[7];
     const uint8_t *pal = o->pal ? o->pal->pal_rgba : NULL;
+    const mask_t kr = mask_prep(o->pf[4]), kg = mask_prep(o->pf[5]), kb = mask_prep(o->pf[6]), ka = mask_prep(o->pf[7]);
     for (int y = 0; y < o->h; y++) {
         const uint8_t *row = o->px + (size_t)y * o->pitch;
         for (int x = 0; x < o->w; x++) {
             uint32_t v = gs_raw(o, row + x * (o->bpp / 8)); uint8_t r, g, b, a;
             if (o->bpp == 8) { if (pal) { r = pal[v * 4]; g = pal[v * 4 + 1]; b = pal[v * 4 + 2]; } else r = g = b = (uint8_t)v; a = 255; }
-            else { r = mask8(v, o->pf[4]); g = mask8(v, o->pf[5]); b = mask8(v, o->pf[6]); a = alpha ? mask8(v, o->pf[7]) : 255; }
+            else { r = mask8p(v, &kr); g = mask8p(v, &kg); b = mask8p(v, &kb); a = alpha ? mask8p(v, &ka) : 255; }
             if (o->has_ck && v >= o->ck_lo && v <= o->ck_hi) a = 0;
             if (overlay) a = v ? 255 : 0;
             out[(size_t)y * o->w + x] = (uint32_t)r | (uint32_t)g << 8 | (uint32_t)b << 16 | (uint32_t)a << 24;
@@ -104,7 +114,12 @@ void plat_dd_attach_hd(void *v, uint32_t *rgba, int w, int page, int pal) {
 }
 void plat_dd_tag_page8(void *v, int page, uint64_t key) { dd_obj *o = (dd_obj *)v; if (!is_surf(v) || o->bpp != 8) return; o->page8 = page; o->page8_key = key; }
 void plat_dd_hd_stats(int *att, int *up, int *rej, int *pal8) { if (att) *att = g_hd_att; if (up) *up = g_hd_up; if (rej) *rej = g_hd_rej; if (pal8) *pal8 = g_pal8_bind; }
-static void gs_upload(dd_obj *o, int overlay) {
+static void gs_upload_(dd_obj *o, int overlay);
+static void gs_upload(dd_obj *o, int overlay) {   /* profiled wrapper (RE_PROFILE) */
+    if (!o->px || !o->dirty) return;
+    RP_BEGIN(RP_TEX_UPLOAD); RP_COUNT(RC_SURF_UPLOADS, 1); gs_upload_(o, overlay); RP_END(RP_TEX_UPLOAD);
+}
+static void gs_upload_(dd_obj *o, int overlay) {
     if (!o->px || !o->dirty) return;
     uint32_t *rgba = gs_to_rgba(o, overlay); if (!rgba) return;
     if (trace_dd()) { int nz = 0, pz = 0; for (int i = 0; i < o->pitch * o->h; i++) nz += o->px[i] != 0;
@@ -114,15 +129,16 @@ static void gs_upload(dd_obj *o, int overlay) {
         double e = 0;
         if (re_texpack_merge_ex(rgba, o->hd, o->hdw, o->hd_tol, o->hd_hud, &e)) {   /* v2.36: файл HUD — своя гладкая альфа */
             if (o->gltex) plat_tex_update(o->gltex, o->hdw, o->hdw, o->hd); else o->gltex = plat_tex_create(o->hdw, o->hdw, o->hd);
-            g_hd_up++; free(rgba); o->dirty = 0; return;
+            g_hd_up++; RE_LOGT(load, "HD-пак: страница %d (палитра %d) → GL %dx%d, ошибка сверки %.1f", o->hd_page, o->hd_pal, o->hdw, o->hdw, e); free(rgba); o->dirty = 0; return;
         }
         plat_log("[texpack] игра: HD страницы %d отклонён: не похож на загруженную страницу (ошибка %.1f)\n", o->hd_page, e);
+        RE_LOGW(load, "HD-пак: страница %d (палитра %d%s) отклонена при загрузке в GL — не похожа на страницу в памяти (ошибка %.1f > порога %.1f)", o->hd_page, o->hd_pal, o->hd_hud ? ", HUD" : "", e, o->hd_tol);
         free(o->hd); o->hd = NULL; g_hd_rej++;
     }
     if (o->gltex) plat_tex_update(o->gltex, o->w, o->h, rgba); else o->gltex = plat_tex_create(o->w, o->h, rgba);
-    if (getenv("RE_ATDBG")) { int a0 = 0, a255 = 0, nz = 0; for (int i = 0; i < o->w * o->h; i++) { unsigned a = rgba[i] >> 24; a0 += a == 0; a255 += a == 255; nz += (rgba[i] & 0xffffff) != 0; }
+    { static int atdbg = -1; if (atdbg < 0) atdbg = getenv("RE_ATDBG") != NULL; if (atdbg) { int a0 = 0, a255 = 0, nz = 0; for (int i = 0; i < o->w * o->h; i++) { unsigned a = rgba[i] >> 24; a0 += a == 0; a255 += a == 255; nz += (rgba[i] & 0xffffff) != 0; }
         fprintf(stderr, "[tex] gl %d %dx%d bpp %d pf %08x masks %08x %08x %08x %08x ck %d %x-%x a0 %d a255 %d nz %d\n", o->gltex, o->w, o->h, o->bpp, o->pf[1], o->pf[4], o->pf[5], o->pf[6], o->pf[7],
-            o->has_ck, o->ck_lo, o->ck_hi, a0, a255, nz); }
+            o->has_ck, o->ck_lo, o->ck_hi, a0, a255, nz); } }
     free(rgba); o->dirty = 0;
 }
 static dd_obj *g_gs_back, *g_gs_primary;
@@ -147,12 +163,13 @@ void *plat_dd_create_surface(void *dd, const void *desc) {
         if (o->caps & 0x200) { o->role = ROLE_PRIMARY; o->w = g_scr_w; o->h = g_scr_h; g_gs_primary = o; }
         else if (o->caps & 0x20000) o->role = ROLE_Z;
         if (o->role != ROLE_Z) gs_alloc(o);
+        RE_LOGT(render, "DirectDraw: поверхность %dx%d, %d бит, роль %d, caps 0x%x", o->w, o->h, o->bpp, o->role, o->caps);
         TR("create %p %dx%d bpp %d flags %x caps %x pf %x/%x masks %x %x %x %x role %d addr %08x\n", (void *)o, o->w, o->h, o->bpp,
            g_desc[1], o->caps, o->pf[1], o->pf[3], o->pf[4], o->pf[5], o->pf[6], o->pf[7], o->role, o->addr);
     }
     return o;
 }
-int32_t plat_dd_set_display_mode(void *dd, int w, int h, int bpp) { (void)bpp; if (dd && w > 0 && h > 0) { g_scr_w = w; g_scr_h = h; } return dd ? 0 : -1; }
+int32_t plat_dd_set_display_mode(void *dd, int w, int h, int bpp) { (void)bpp; if (dd && w > 0 && h > 0) { g_scr_w = w; g_scr_h = h; RE_LOGI(render, "игра: режим экрана %dx%d, %d бит (SetDisplayMode)", w, h, bpp); } return dd ? 0 : -1; }
 void *plat_dd_create_clipper(void *dd) { return dd ? mk(2) : NULL; }
 int32_t plat_dd_set_clipper(void *s, void *c) { if (!s || !c) return -1; ((dd_obj *)s)->clipper = 1; return 0; }
 int32_t plat_dd_attach_surface(void *s, void *a) { if (!s || !a) return -1; ((dd_obj *)s)->attached++; return 0; }
@@ -225,7 +242,7 @@ void plat_set_texture(int stage, void *tex) {
     TR("set_texture %p surf %p\n", tex, (void *)s);
     if (s && s->px && s->bpp == 8 && s->page8 >= 0 && !s->has_ck && g_pal8_prov && s->pal) {   /* v2.18: PAL8 со страницей — текстура пары из пака */
         int h = g_pal8_prov(s->page8, s->page8_key, s->pal->pal_rgba);
-        if (h > 0) { g_pal8_bind++; plat_tex_bind(h); return; }
+        if (h > 0) { g_pal8_bind++; RP_COUNT(RC_PAL8_BINDS, 1); plat_tex_bind(h); return; }
     }
     if (s && s->px) { gs_upload(s, 0); plat_tex_bind(s->gltex); } else plat_tex_bind(0); }
 void *plat_stub_last_texture(int *stage) { if (stage) *stage = g_tex_stage; return g_tex; }

@@ -121,16 +121,18 @@ int32_t P70_LoadReplay(int32_t slot) {
   char name[32];
   snprintf(name, sizeof name, "SAVES\\REPLAY%d.BIN", slot + 1);
   void *f = g_fopen(name, "rb");
-  if (f == NULL) return 0;
+  if (f == NULL) { RE_LOGW(save, "повтор: %s не открыт", name); return 0; }
   g_fread(P59_Hdr, 1, 8, f);
   g_fread(P59_Rep57B6B8, 1, 0x38, f);
   if (P70_ReadChunk(f, "REPLAYDATA\\USER\\$TEMP$.CFG", TAG_CFG) != 0 &&
       P70_ReadChunk(f, "REPLAYDATA\\USER\\$TEMP$.CAMS", TAG_CAMS) != 0 &&
       P70_ReadChunk(f, "REPLAYDATA\\USER\\$TEMP$.PADS", TAG_PADS) != 0) {
     g_fclose(f);
+    RE_LOGI(save, "повтор загружен: %s (слот %d)", name, (int)slot + 1);
     return 1;
   }
   g_fclose(f);
+  RE_LOGW(save, "повтор: %s повреждён — не все части CFG/CAMS/PADS", name);
   return 0;
 }
 

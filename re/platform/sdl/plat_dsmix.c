@@ -36,11 +36,13 @@ void plat_snd_lockdev(int on);
 void cda_mix(float *acc, int frames);   /* v2.22: plat_cdaudio.c */
 int dsm_is(const void *o) { return o && ((const dsm_buf *)o)->tag == DSM_TAG; }
 static dsm_buf *nb(int kind) {
-  dsm_buf *b = (dsm_buf *)calloc(1, sizeof *b); if (!b) return NULL;
+  dsm_buf *b = (dsm_buf *)calloc(1, sizeof *b); if (!b) { RE_LOGE(mem, "DirectSound: calloc буфера (вид %d) — NULL", kind); return NULL; }
   b->tag = DSM_TAG; b->kind = kind; b->live = 1;
+  int slot = -1;
   plat_snd_lockdev(1);
-  for (int i = 0; i < DSM_MAX; i++) if (!g_bufs[i]) { g_bufs[i] = b; break; }
+  for (int i = 0; i < DSM_MAX; i++) if (!g_bufs[i]) { g_bufs[i] = b; slot = i; break; }
   plat_snd_lockdev(0);
+  if (slot < 0) RE_LOGW(audio, "DirectSound: таблица микшера полна (%d) — буфер вида %d не будет звучать", DSM_MAX, kind);
   return b;
 }
 int32_t dsm_create_buffer(uint32_t fl, uint32_t bytes, const void *wfx, void **out) {
@@ -54,13 +56,14 @@ int32_t dsm_create_buffer(uint32_t fl, uint32_t bytes, const void *wfx, void **o
     if (b->rate < 100 || b->rate > 200000) b->rate = 22050;
     b->pcm = (dsm_pcm *)calloc(1, sizeof *b->pcm);
     if (b->pcm) { b->pcm->bytes = bytes; b->pcm->refs = 1; b->pcm->data = (uint8_t *)calloc(bytes ? bytes : 1, 1); }
-    if (!b->pcm || !b->pcm->data) return -1;
-  }
+    if (!b->pcm || !b->pcm->data) { RE_LOGE(mem, "DirectSound CreateSoundBuffer: нет памяти под %u байт PCM", bytes); return -1; }
+    RE_LOGT(audio, "DirectSound: вторичный буфер %p, %u байт, %d Гц, %d кан., %d бит", (void *)b, bytes, b->rate, b->ch, b->bits);
+  } else RE_LOGD(audio, "DirectSound: первичный буфер %p", (void *)b);
   return 0;
 }
 int32_t dsm_duplicate(void *src, void **out) {
   dsm_buf *s = (dsm_buf *)src; *out = NULL;
-  if (!dsm_is(s) || s->kind != K_SEC || !s->pcm) return -1;
+  if (!dsm_is(s) || s->kind != K_SEC || !s->pcm) { RE_LOGW(audio, "DirectSound DuplicateSoundBuffer: недопустимый исходный буфер %p", src); return -1; }
   dsm_buf *b = nb(K_SEC); if (!b) return -1;
   b->pcm = s->pcm; s->pcm->refs++; b->rate = s->rate; b->ch = s->ch; b->bits = s->bits;
   *out = b; return 0;
@@ -84,7 +87,7 @@ void dsm_release(void *o) {
 }
 int32_t dsm_lock(void *o, uint32_t bytes, void **p1, uint32_t *n1, void **p2, uint32_t *n2) {
   dsm_buf *b = (dsm_buf *)o;
-  if (b->kind != K_SEC || !b->pcm || bytes > b->pcm->bytes) return -1;
+  if (b->kind != K_SEC || !b->pcm || bytes > b->pcm->bytes) { RE_LOGW(audio, "DirectSound Lock: %u байт > размера буфера %u (вид %d)", bytes, b->pcm ? b->pcm->bytes : 0, b->kind); return -1; }
   *p1 = b->pcm->data; *n1 = bytes; *p2 = NULL; *n2 = 0; return 0;
 }
 static dsm_buf *sec(void *o) { dsm_buf *b = (dsm_buf *)o; return b->kind == K_SEC ? b : NULL; }
@@ -92,6 +95,7 @@ static dsm_buf *b3(void *o) { dsm_buf *b = (dsm_buf *)o; return b->kind == K_3D 
 int32_t dsm_play(void *o, uint32_t fl) {
   dsm_buf *b = sec(o); if (!b) return 0;      /* первичный — без действия */
   plat_snd_lockdev(1); b->playing = 1; b->loop = (fl & 1) != 0; plat_snd_lockdev(0);
+  RE_LOGT(audio, "DirectSound Play %p: %u байт, %d Гц, петля %d, громкость %d, 3D %d", (void *)b, b->pcm ? b->pcm->bytes : 0, b->rate, b->loop, b->vol, b->b3d ? b->b3d->mode3d : -1);
   if (getenv("RE_SND_LOG")) fprintf(stderr, "[ds] play %p pcm %u B %d Hz %dch %db loop %d vol %d freq %u 3d %d pos %.0f\n", (void *)b, b->pcm ? b->pcm->bytes : 0, b->rate, b->ch, b->bits,
       b->loop, b->vol, b->freq, b->b3d ? b->b3d->mode3d : -1, b->pos);
   return 0;

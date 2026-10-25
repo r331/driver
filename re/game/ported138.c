@@ -411,9 +411,10 @@ int32_t P138_LoadMission(int32_t n) {
     P77_LevelName = P138_LevBuf;
     P14_00c810c4 = 0; P14_00c810e8 = 0;
     int32_t i = P42_FindVar("EVENTSCRIPT");
-    if (i == -1) { P124_DebugLog("FAILED: Could not find variable for event script filename."); return 0; }
+    if (i == -1) { P124_DebugLog("FAILED: Could not find variable for event script filename."); RE_LOGE(mission, "нет переменной EVENTSCRIPT — уровень без миссии не инициализирован"); return 0; }
     P99_VarSetStr((uint8_t *)&P42_Vars[i], (city >= 0 && city < 7) ? k_des[city] : "");
     P124_DebugLog(">> LoadMission Complete - No Mission Required, Standard Level Initialised - Routine Terminated <<");
+    RE_LOGI(mission, "без миссии: свободная езда, город %d (%s)", (int)city, (city >= 0 && city < 7) ? k_lev[city] : "?");
     return 1;
   }
   snprintf(P65_Tok, sizeof(p65_tok_t), "Attempting to load: Scripts\\Missions\\Mission%d.dms", n);
@@ -424,12 +425,14 @@ int32_t P138_LoadMission(int32_t n) {
     P150_PlayFmv(G6_00BDF9C0, P125_C814E0, P125_C814E4);
     P97_ScrObjOn = 1;
     P124_DebugLog(">> LoadMission Complete - Routine Terminated <<");
+    RE_LOGI(mission, "миссия %d: скрипт Scripts\\Missions\\Mission%d.dms загружен (код %d), FMV %d", (int)n, (int)n, (int)res, (int)G6_00BDF9C0);
     return 1;
   }
-  if (res == 3) { P124_DebugLog("FAILED: CompileMissionScript - OutOfMemory"); return 0; }
+  if (res == 3) { P124_DebugLog("FAILED: CompileMissionScript - OutOfMemory"); RE_LOGE(mission, "миссия %d: компиляция скрипта — нет памяти", (int)n); return 0; }
   const char *err = P13_Fn004F8735(res);
   snprintf(P65_Tok, sizeof(p65_tok_t), "FAILED: CompileMissionScript - %s, Line: %d", err ? err : "(null)", P65_Ints[0x15]);
   P124_DebugLog(P65_Tok);
+  RE_LOGE(mission, "миссия %d: ошибка компиляции скрипта — %s, строка %d (код %d)", (int)n, err ? err : "(null)", (int)P65_Ints[0x15], (int)res);
   return 0;
 }
 
@@ -450,12 +453,14 @@ int32_t P138_ReplayCfg(const char *name) {
   if (f == NULL) {
     snprintf(path, sizeof path, "ReplayData\\Demo\\%s.CFG", name);
     f = g_fopen(path, "rb");
-    if (f == NULL) return 0;
+    if (f == NULL) { RE_LOGW(load, "повтор/демо: нет ReplayData\\User\\%s.CFG и ReplayData\\Demo\\%s.CFG", name, name); return 0; }
+    RE_LOGI(load, "конфигурация повтора (демо) %s", path);
     g_fread(P103_C54EE0, 1, 0x88, f);
     P109_C54B00 = P103_C54EE0[0x2a];
     g_fclose(f);
     P100_RecEnd = 1;
   } else {
+    RE_LOGI(load, "конфигурация повтора %s", path);
     g_fread(P103_C54EE0, 1, 0x88, f);
     P109_C54B00 = P103_C54EE0[0x2a];
     g_fclose(f);

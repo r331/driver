@@ -21,6 +21,8 @@ void re_texpack_compare(const uint32_t *hd, int w, int h, const uint16_t *page, 
    Пак: <dir>/<level>/pNNN_cKKKK.png, NNN — индекс страницы (как у 16-битных), KKKK — номер слота палитры (0..49, из файла уровня).
    Каталог уровня ищется как есть, строчными и ПРОПИСНЫМИ (игра пишет MIAMI_01, файл — miami_01.lev). */
 uint32_t *re_texpack_load8(const char *dir, const char *level, int idx, int pal, int *w, int *h);
+/* v2.39: то же для любого потока (асинхронная загрузка): порог сверки файла — в *tol, а не в re_texpack_last_tol() */
+uint32_t *re_texpack_load8_tol(const char *dir, const char *level, int idx, int pal, int *w, int *h, double *tol);
 /* индексы 256×256 + палитра (NULL — серый по индексу) → RGBA как plat_tex_create */
 void re_texpack_pal8_rgba(const uint8_t *idx, const uint8_t *pal, uint32_t *out);
 /* сверка HD-картинки с эталоном RGBA 256×256: средняя |ΔRGB| и доля расхождений альфы (>=128) */

@@ -8,6 +8,7 @@
    cells, the latter from a draw-only cache of non-resident tiles (dd_*). */
 /* Маска видимости клеток и главный обход клеток карты — восстановлено из Game.exe (004ef997, 004ef793, 004ee8f4). */
 #include "redbg.h"
+#include "reprof.h"
 #include "ported89.h"
 #include "aspect.h"
 #include "drawdist.h"
@@ -346,7 +347,7 @@ static void dd_extend(const uint8_t *um, int32_t R) {
     if (x < 0 || y < 0 || x >= P21_GridDiv || y >= P80_GridH) continue;
     if (dd_cell(x, y)) done++; else miss++;
   }
-  { static int k; if (getenv("RE_DDLOG") && (k++ % 100) == 0)
+  { static int k; if (RE_GETENV_ONCE("RE_DDLOG") && (k++ % 100) == 0)
       fprintf(stderr, "[dd] R %d far %.0f клеток %d нет блока %d разобрано блоков %d курс %.2f %.2f th %.1f°\n", (int)R, P11_01270c24, done, miss,
               (int)re_dd_loads, hx, hy, th * 57.29578); }
 }

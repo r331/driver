@@ -124,7 +124,9 @@ void *P77_OpenLevel(void) {
   p = native;
   snprintf(P77_CurLevelPath, sizeof P77_CurLevelPath, "%s", native);   /* v2.17: имя уровня для HD-пака текстур */
 #endif
-  return g_fopen(p, "rb");
+  void *f = g_fopen(p, "rb");
+  if (f != NULL) RE_LOGI(load, "файл уровня %s открыт", p); else RE_LOGE(load, "файл уровня %s не открыт", p);
+  return f;
 }
 
 /* 004ecade: файл = число блоков, затем блоки [тип][размер][данные]; (прочие типы пропускаются как в оригинале — без default). */
@@ -140,9 +142,12 @@ int32_t P77_LoadLevel(void) {
   P20_Names = NULL;
   if (f == NULL) return 0;
   P27_ReadChunked(&count, 4, 1, f);
+  RE_LOGD(load, "уровень: %d блоков", (int)count);
   for (int32_t i = 0; i < count; i++) {
     P27_ReadChunked(&kind, 4, 1, f);
     P27_ReadChunked(&size, 4, 1, f);
+    RE_LOGT(load, "уровень: блок %d тип 0x%x, %d байт", (int)i, (int)kind, (int)size);
+    if ((kind < 0 || kind == 3 || kind > 0x14)) RE_LOGW(load, "уровень: блок %d неизвестного типа 0x%x (%d байт) — не пропускается (как в оригинале)", (int)i, (int)kind, (int)size);
     switch (kind) {
     case 0:    P41_LoadTexPages(f); break;
     case 1:    P80_LoadModels(f); break;
@@ -174,6 +179,7 @@ int32_t P77_LoadLevel(void) {
   P77_Fn501C63();
   P77_Fn501770();
   Ui00426CAF();
+  RE_LOGI(load, "уровень загружен: %d блоков", (int)count);
   return 1;
 }
 
@@ -185,15 +191,17 @@ int32_t P77_LoadLevel(void) {
 int32_t P77_LoadBank(const char *name, uint16_t slot) {
   uint32_t line[32];
   int32_t n;
-  if (G6_00B91CF4 == 0) return 0;
+  if (G6_00B91CF4 == 0) { RE_LOGD(audio, "банк звуков %s пропущен — звук выключен", name); return 0; }
   n = G6_00B91D34;
   if (slot != 0) G6_00B91BC4[(slot >> 12) & 15] = G6_00B91D34;
   void *f = g_fopen(name, "r");
-  if (f == NULL) return 0;
+  if (f == NULL) { RE_LOGW(audio, "банк звуков %s не открыт", name); return 0; }
+  int32_t first = G6_00B91D34;
   while (P68_ReadWords(f, (uint8_t *)line) != -1) {
     if ((line[0] & 0xff) != 0x3b) { P77_Fn524BD8(line); n++; }
   }
   g_fclose(f);
+  RE_LOGI(audio, "банк звуков %s: звуков %d (с %d), слот 0x%x%s", name, (int)(G6_00B91D34 - first), (int)first, (unsigned)slot, G6_00B91D34 - n ? " — НЕ все строки разобраны" : "");
   return G6_00B91D34 - n;
 }
 

@@ -29,6 +29,7 @@
      трафика для объекта 0 (в оригинале чтение перед таблицей) — 0; тип модели вне 00d0cc60 (0x4000) — точки (0, 0, 0);
      деление на 0 в 004df024 (сумма квадратов/знаменатель) — 0. */
 #include "ported142.h"
+#include "reprof.h"
 #include "carfields.h"
 #include "fixmath.h"
 #include "cartab.h"
@@ -886,7 +887,7 @@ static void body_pt(const uint8_t *p, const int32_t *arm, int32_t *o) {   /* p: 
 void P142_CarsStep(void) {
   int32_t n = G6_00D0DDC0;
 #ifndef RE_HOOK_BUILD
-  { static int k; if (getenv("RE_CARDBG") && (k++ % atoi(getenv("RE_CARDBG"))) == 0) { uint8_t *c = (uint8_t *)&P99_Cars[0];
+  { static int k; if (RE_GETENV_ONCE("RE_CARDBG") && (k++ % atoi(RE_GETENV_ONCE("RE_CARDBG"))) == 0) { uint8_t *c = (uint8_t *)&P99_Cars[0];
     fprintf(stderr, "[car] n %d o0 %s 13c %d 110 %d pos %d %d %d p24 %d %d %d v %d %d %d f8 %d fc %d 104 %d 108 %d 10c %d o3 %d\n", n, (n > 0 && G6_00B2F30C[0] == c) ? "car0" : "?",
       rd16(c + 0x13c), rd32(c + 0x110), rd32(c + 0x18), rd32(c + 0x1c), rd32(c + 0x20), rd32(c + 0x24), rd32(c + 0x28), rd32(c + 0x2c), rd32(c + 0x40), rd32(c + 0x44), rd32(c + 0x48),
       rd32(c + 0xf8), rd32(c + 0xfc), rd32(c + 0x104), rd32(c + 0x108), rd32(c + 0x10c), c[3]); } }
@@ -914,7 +915,7 @@ void P142_CarsStep(void) {
     static int on = -1; static int32_t from = 0, delay = 150, seen[10], since[10];
     if (on < 0) { const char *e = getenv("RE_AUTOTARGET"); on = e != NULL; if (e) { from = atoi(e); const char *c = strchr(e, ':'); if (c) delay = atoi(c + 1); } }
     if (on && (int32_t)P62_Frame >= from && P99_Cars[0].pos[0] | P99_Cars[0].pos[2] &&
-        !(getenv("RE_AUTORAM") && (P58_SB87EB0 | G6_00B87EB0 | G6_00B87EAC) != 0)) {   /* v2.30: в погоне — RE_AUTORAM */
+        !(RE_GETENV_ONCE("RE_AUTORAM") && (P58_SB87EB0 | G6_00B87EB0 | G6_00B87EAC) != 0)) {   /* v2.30: в погоне — RE_AUTORAM */
       uint8_t *c = (uint8_t *)&P99_Cars[0];
       for (int i = 0; i < 10; i++) {
         const uint8_t *o = P58_Objs[i];

@@ -328,16 +328,19 @@ int32_t P57_Menu4123D0(void) {
 int32_t SaveDirector(const char *name) {
   void *f = g_fopen(name, "wb");
   if (f == 0) {
+    RE_LOGW(save, "режиссёр: %s не открыт на запись", name);
     DebugLog("SaveDirector: Unable to write director data file.  Please make sure target is not write protected.");
     return 0;
   }
   WriteDirectorData(f);
   g_fclose(f);
+  RE_LOGD(save, "режиссёр: данные записаны в %s", name);
   return 1;
 }
 int32_t LoadDirector(const char *name) {
   void *f = g_fopen(name, "rb");
   if (f == 0) {
+    RE_LOGW(save, "режиссёр: %s не открыт", name);
     DebugLog("LoadDirector: Unable to open director file, please make sure it exists.");
     return 0;
   }
@@ -363,10 +366,12 @@ void P57_LoadScores(void) {
   P57_Fn51C900();
   void *f = g_fopen("SAVES\\SCORES.HI", "rb");
   if (f != 0) { P57_Fn51CAA7(f); g_fclose(f); }
+  RE_LOGD(save, "рекорды SAVES\\SCORES.HI: %s", f != 0 ? "прочитаны" : "нет файла — по умолчанию");
 }
 void P57_SaveScores(void) {
   void *f = g_fopen("SAVES\\SCORES.HI", "wb");
   if (f != 0) { P57_Fn51CB98(f); g_fclose(f); }
+  if (f != 0) RE_LOGD(save, "рекорды SAVES\\SCORES.HI записаны"); else RE_LOGW(save, "рекорды: SAVES\\SCORES.HI не открыт на запись");
 }
 /* 00406b51: файл name открывается на чтение? */
 /* P57_FileExists — Game.exe 00406b51.  1 if name can be opened for reading. */
@@ -380,8 +385,8 @@ int32_t P57_FileExists(const char *name) {
    kept: on a failed write the file is left open (leaked), as in the original. */
 int32_t P57_WriteFile(const char *name, const void *buf, int32_t size) {
   void *f = g_fopen(name, "wb");
-  if (f == 0) return 0;
-  if (g_fwrite(buf, (size_t)size, 1, f) == 0) return 0;
+  if (f == 0) { RE_LOGW(save, "запись файла %s: не открыт", name); return 0; }
+  if (g_fwrite(buf, (size_t)size, 1, f) == 0) { RE_LOGW(save, "запись файла %s: ошибка записи %d байт (файл остаётся открытым, как в оригинале)", name, (int)size); return 0; }
   g_fclose(f);
   return 1;
 }

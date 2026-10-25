@@ -551,11 +551,13 @@ int32_t P151_WinMain(int32_t hinst, int32_t prev, int32_t cmd, int32_t show) {
   P30_ScreensaverSaved = plat_screensaver_get();
   plat_screensaver_set(0);
   if (P48_StartupSystems() == 0) {
+    RE_LOGE(sys, "WinMain: запуск подсистем (P48_StartupSystems) не удался — выход");
     Ui004264A7(); P69_FreeDevices(); P27_MemLeakReport();
     plat_cursor_set(cur);
     ResetDirector_00522306();
   } else {
     P30_CrashInstall();
+    RE_LOGI(game, "WinMain: подсистемы запущены, язык %d, режим %s", (int)P55_Lang, P55_B87EB8 == 0 ? (G6_00B87EEC == 0 ? "сразу игра" : "меню карты") : "фронтенд");
     if (P55_B87EB8 == 0) {
       if (G6_00B87EEC == 0) { G6_00B87E20 = 1; P136_GameLoop(0); }
       else P132_MenuLoop(0);
@@ -568,6 +570,7 @@ int32_t P151_WinMain(int32_t hinst, int32_t prev, int32_t cmd, int32_t show) {
       P140_Frontend(0);
     }
     Call00522323();
+    RE_LOGI(game, "WinMain: завершение, код выхода 0x%x", (unsigned)P100_B87E24);
     P25_TimersShutdown();
     plat_set_priority(0);                              /* 0x20 */
     P30_CrashRemove();
