@@ -1076,11 +1076,15 @@ void P98_LoadLang(const char *name, int32_t mission) {
   }
 }
 
-/* ---- 004cb4ff: цвет фонарей (типы 4 и 5) в первых 4 моделях ---- */
-/* P98_LampColor — Game.exe 004cb4ff.  Sets the colour of lamp records (types 4 and 5) in the first 4 models. */
+/* ---- 004cb4ff: tint all four sky models for weather, time of day and lightning ---- */
+/* The legacy name is retained; these are sky records, not streetlights.
+   Native model references are arena offsets: zero is the first sky quarter,
+   not a missing model. Game.exe updates all four models unconditionally. */
 void P98_LampColor(uint8_t r, uint8_t g, uint8_t b) {
+#ifndef RE_HOOK_BUILD
+  if (P79_MBASE == 0) return;
+#endif
   for (int32_t k = 0; k < 4; k++) {
-    if (P79_ModelTab[k] == 0) continue;
     uint8_t *m = (uint8_t *)P79_PTR(P79_ModelTab[k]);
     uint8_t *c = (uint8_t *)P79_PTR((uint32_t)rd32(m + 0x2c));
     for (uint32_t n = rd16(m + 0x16); n != 0; n--) {

@@ -139,12 +139,16 @@ int32_t MenuCounter5D577C;
 #pragma pop_macro("MenuCounter5D577C") /*gvi*/
 #pragma pop_macro("MenuCounter5D577C")
 #endif
-/* MenuFlag54A0BCSet — Game.exe 00408337 */
-void MenuFlag54A0BCSet(void) { MenuFlag54A0BC = 1; }
+/* Day/Night highlight callbacks. Game.exe writes only the state byte;
+   the next byte contains text flags and must survive selection/blinking. */
+/* MenuFlag54A0BCSet — Game.exe 00408337: highlight Day. */
+void MenuFlag54A0BCSet(void) { *(uint8_t *)&MenuFlag54A0BC = 1; }
 /* MenuFlag54A0BCClear — Game.exe 00408343 */
-void MenuFlag54A0BCClear(void) { MenuFlag54A0BC = 0; }
+void MenuFlag54A0BCClear(void) { *(uint8_t *)&MenuFlag54A0BC = 0; }
+/* MenuVar54A0CCSet — Game.exe 00408440: highlight Night. */
+void MenuVar54A0CCSet(void) { *(uint8_t *)&MenuVar54A0CC = 1; }
 /* MenuVar54A0CCClear — Game.exe 0040844c */
-void MenuVar54A0CCClear(void) { MenuVar54A0CC = 0; }
+void MenuVar54A0CCClear(void) { *(uint8_t *)&MenuVar54A0CC = 0; }
 /* MenuCounter5D577CInc — Game.exe 00408710 */
 void MenuCounter5D577CInc(void) { MenuCounter5D577C++; }
 /* SumBytes — Game.exe 0040682d: byte sum (replay name-block checksum, see P64_ReplayStart) */

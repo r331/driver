@@ -334,3 +334,42 @@ Columns: milliseconds since start (monotonic clock — not the game clock, so `R
 
 For a bug report: `RE_LOG=all:debug` (add `,render:trace` or `,input:trace` only when asked — trace writes per frame) and
 attach `driver.log` together with `driver_gfx.log`.
+
+
+## Sky brightness seam (2026-11-08)
+
+`session-20261108-192917-94254/capture-01-frame-001059` contains a vertical
+join between full-brightness and half-brightness night sky. Both sides use
+texture handle 15, but sky vertex colors change from `00ffffff` to `00808080`.
+
+`P98_LampColor` is the legacy name for the sky tint routine (Game.exe
+`004cb4ff`). Its native null-reference check skipped the first sky model:
+reference zero is a valid offset at the beginning of the model arena.
+Night, rain, dawn/dusk and lightning tints therefore updated only three
+quarters. The original executable updates all four. The port now requires
+a loaded arena and processes all four offsets, including zero.
+
+The regression checks triangle and quad color fields in all four quarters,
+several weather/lighting colors, preservation of every other arena byte,
+and a call without a loaded arena. It fails against the old implementation
+and passes with the fix. All three native tests pass. A CGL replay of the
+111 captured sky vertices through the native OpenGL renderer reproduces the
+join before the correction and removes it with the tint returned by the
+fixed routine. Evidence is in `work/sky-seam/sky-before.png` and
+`work/sky-seam/sky-after.png`; geometry, UVs and the HD texture are unchanged.
+
+
+## Day/Night menu highlight (2026-11-08)
+
+The front-end Day/Night table at `0054a0e8` names `00408440` as the Night
+highlight callback. This callback was absent from the native function table,
+so selection and blinking could clear Night but could not highlight it.
+The original callback writes byte value 1 to `0054a0cc`; it is now ported and
+registered in both the native table and the Windows hook installer.
+
+Day highlight/clear and Night clear also used 32-bit writes for byte fields.
+All four callbacks now match the executable's byte writes, preserving the
+adjacent text flags (initially `0x01`). The menu-engine regression uses the
+original callback addresses to exercise Day-to-Night navigation, blink off/on,
+returning to Day and Escape, while checking those adjacent bytes. All three
+native tests pass after rebuilding.

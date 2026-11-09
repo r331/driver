@@ -91,6 +91,7 @@ extern int32_t MenuFlag54A0BC, MenuVar54A0CC, MenuCounter5D577C;
 #endif
 void MenuFlag54A0BCSet(void);   /* 00408337 */
 void MenuFlag54A0BCClear(void); /* 00408343 */
+void MenuVar54A0CCSet(void);    /* 00408440 */
 void MenuVar54A0CCClear(void);  /* 0040844c */
 void MenuCounter5D577CInc(void);/* 00408710 */
 int32_t SumBytes(const uint8_t *data, int32_t count); /* 0040682d */

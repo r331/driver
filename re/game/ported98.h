@@ -351,7 +351,7 @@ void    P98_InitSplash(uint8_t *tab);                                /* 004cb857
 void    P98_ClearCarData(void);                                      /* 004c2042 */
 void    P98_CamSpline(int32_t t, const uint8_t *keys);               /* 0049ec01 */
 void    P98_LoadLang(const char *name, int32_t mission);             /* 0051763a */
-void    P98_LampColor(uint8_t r, uint8_t g, uint8_t b);              /* 004cb4ff */
+void    P98_LampColor(uint8_t r, uint8_t g, uint8_t b);              /* 004cb4ff: sky tint (legacy name) */
 void    P98_CamRecAdd(int8_t insert_at_end);                         /* 00519a45 */
 void    P98_DrawMarker(void);                                        /* 004ea346 */
 int32_t P98_CamClamp(int32_t *cam);                                  /* 004c32c1 */

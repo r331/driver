@@ -213,6 +213,7 @@ void re_install_all(void) {
     re_hook(0x00404f5f, (void*)MenuStateSetFour, "MenuStateSetFour");
     re_hook(0x00408337, (void*)MenuFlag54A0BCSet, "MenuFlag54A0BCSet");
     re_hook(0x00408343, (void*)MenuFlag54A0BCClear, "MenuFlag54A0BCClear");
+    re_hook(0x00408440, (void*)MenuVar54A0CCSet, "MenuVar54A0CCSet");
     re_hook(0x0040844c, (void*)MenuVar54A0CCClear, "MenuVar54A0CCClear");
     re_hook(0x00408710, (void*)MenuCounter5D577CInc, "MenuCounter5D577CInc");
     re_hook(0x0040682d, (void*)SumBytes, "SumBytes");

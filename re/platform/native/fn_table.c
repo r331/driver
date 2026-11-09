@@ -488,6 +488,7 @@ void MenuToggleOptBDFA58(void);
 void MenuTri0040E9B5(void);
 void MenuTri00419C8C(void);
 void MenuVar54A0CCClear(void);
+void MenuVar54A0CCSet(void);
 void MenuWhite004076E2(void);
 void MenuWhite00409CFA(void);
 void MenuWhite00415979(void);
@@ -2287,6 +2288,7 @@ const re_fnent_t re_fn_table[] = {
   { 0x00408337u, (re_fn_t)MenuFlag54A0BCSet },
   { 0x00408343u, (re_fn_t)MenuFlag54A0BCClear },
   { 0x0040834fu, (re_fn_t)P45_ModeA },
+  { 0x00408440u, (re_fn_t)MenuVar54A0CCSet },
   { 0x0040844cu, (re_fn_t)MenuVar54A0CCClear },
   { 0x00408458u, (re_fn_t)P45_ModeB },
   { 0x00408600u, (re_fn_t)P58_PlayDemo },
