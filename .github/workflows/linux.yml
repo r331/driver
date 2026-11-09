@@ -38,6 +38,7 @@ jobs:
           sudo apt-get install -y libsdl2-2.0-0
       - name: Configure/Build (RE_SDL3_COMPAT=ON)
         run: |
+          set -euo pipefail
           cmake -S re -B re/build-sdl3 -DCMAKE_BUILD_TYPE=Release -DRE_SDL3_COMPAT=ON 2>&1 | tee cfg.log
           grep -E "Joystick drivers|Video drivers|Audio drivers|SDL_LIBUDEV|SDL_HIDAPI " cfg.log || true
           cmake --build re/build-sdl3 -j4

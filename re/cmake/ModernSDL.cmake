@@ -1,6 +1,10 @@
 # SDL2 Classic lacks the Steam Controller (2026) HIDAPI driver. Use upstream's
 # SDL2-compatible API on SDL3, including the macOS 27 duplicate-device fix.
 include(FetchContent)
+# Use extraction-time timestamps without requiring CMake newer than 3.16.
+if(POLICY CMP0135)
+  cmake_policy(SET CMP0135 NEW)
+endif()
 if(APPLE)
   enable_language(OBJC)
 endif()
@@ -13,10 +17,15 @@ set(SDL_INSTALL OFF CACHE BOOL "" FORCE)
 set(SDL2COMPAT_TESTS OFF CACHE BOOL "" FORCE)
 set(SDL2COMPAT_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(driver_sdl3
-  URL https://github.com/libsdl-org/SDL/releases/download/release-3.4.18/SDL3-3.4.18.tar.gz
+  # Both upstream locations serve the same hash-pinned release archive.
+  URL
+    https://www.libsdl.org/release/SDL3-3.4.18.tar.gz
+    https://github.com/libsdl-org/SDL/releases/download/release-3.4.18/SDL3-3.4.18.tar.gz
   URL_HASH SHA256=9c75cf16330322c217dedd2e0609f1124f1b54b8633e763467b4684d0f4334a3)
 FetchContent_Declare(driver_sdl2compat
-  URL https://github.com/libsdl-org/sdl2-compat/archive/refs/tags/release-2.32.74.tar.gz
+  URL
+    https://codeload.github.com/libsdl-org/sdl2-compat/tar.gz/refs/tags/release-2.32.74
+    https://github.com/libsdl-org/sdl2-compat/archive/refs/tags/release-2.32.74.tar.gz
   URL_HASH SHA256=155b80cd7ef64e5b10af08eed60b6eab146ea785367ff67e0d8cc8acd511a889)
 FetchContent_MakeAvailable(driver_sdl3 driver_sdl2compat)
 
